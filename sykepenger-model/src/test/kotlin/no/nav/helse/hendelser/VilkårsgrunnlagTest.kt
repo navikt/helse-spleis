@@ -208,6 +208,8 @@ internal class VilkårsgrunnlagTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = listOf()
+            ferieperioder = listOf(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 }

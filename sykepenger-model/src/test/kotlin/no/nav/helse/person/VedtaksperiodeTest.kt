@@ -92,7 +92,9 @@ internal class VedtaksperiodeTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
     private fun sykmelding(

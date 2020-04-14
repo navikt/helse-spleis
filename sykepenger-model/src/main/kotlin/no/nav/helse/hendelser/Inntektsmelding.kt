@@ -22,7 +22,9 @@ class Inntektsmelding(
     internal val førsteFraværsdag: LocalDate,
     internal val beregnetInntekt: Double,
     arbeidsgiverperioder: List<Periode>,
-    ferieperioder: List<Periode>
+    ferieperioder: List<Periode>,
+    private val arbeidsforholdId: String?,
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
@@ -93,6 +95,12 @@ class Inntektsmelding(
         if (refusjon == null) aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
         else refusjon.valider(aktivitetslogg, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode")
+        if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID fra inntektsmeldingen er utfylt")
+        begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
+            aktivitetslogg.warn(
+                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s", it
+            )
+        }
         return aktivitetslogg
     }
 

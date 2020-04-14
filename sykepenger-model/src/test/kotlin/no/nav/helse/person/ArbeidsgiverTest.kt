@@ -25,7 +25,9 @@ internal class ArbeidsgiverTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 120.0,
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver(person, "12345678")

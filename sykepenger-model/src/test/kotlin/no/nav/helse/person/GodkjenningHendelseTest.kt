@@ -152,7 +152,9 @@ internal class GodkjenningHendelseTest {
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelse = this
         }

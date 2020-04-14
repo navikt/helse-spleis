@@ -259,7 +259,9 @@ internal class PersonTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 1000.0,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
     private fun sykmelding(

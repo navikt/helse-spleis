@@ -494,7 +494,9 @@ internal class SpeilBuilderTest {
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.00,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ) to InntektsmeldingDTO(
             id = hendelseId.toString(),
             beregnetInntekt = 31000.00,

@@ -266,6 +266,33 @@ internal class InntektsmeldingTest {
         assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
     }
 
+    @Test
+    internal fun `arbeidsgiverperiodeId i inntektsmelding gir warning`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 10.januar)),
+            arbeidsforholdId = "1234"
+        )
+        assertTrue(inntektsmelding.valider().hasWarnings())
+    }
+
+    @Test
+    internal fun `begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding gir warning`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 10.januar)),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
+        )
+        assertTrue(inntektsmelding.valider().hasWarnings())
+    }
+
+    @Test
+    internal fun `begrunnelseForReduksjonEllerIkkeUtbetalt som tom String i inntektsmelding gir ikke warning`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 10.januar)),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = ""
+        )
+        assertFalse(inntektsmelding.valider().hasWarnings())
+    }
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
@@ -273,7 +300,9 @@ internal class InntektsmeldingTest {
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 1.januar,
-        endringerIRefusjon: List<LocalDate> = emptyList()
+        endringerIRefusjon: List<LocalDate> = emptyList(),
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -284,7 +313,9 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder
+            ferieperioder = ferieperioder,
+            arbeidsforholdId = arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
         )
     }
 }

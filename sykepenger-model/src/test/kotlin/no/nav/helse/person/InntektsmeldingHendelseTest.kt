@@ -123,7 +123,9 @@ internal class InntektsmeldingHendelseTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = listOf(Periode(16.januar, 31.januar))
+            ferieperioder = listOf(Periode(16.januar, 31.januar)),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider().hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
@@ -145,7 +147,9 @@ internal class InntektsmeldingHendelseTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(

@@ -249,7 +249,9 @@ internal class JsonBuilderTest {
             førsteFraværsdag = fom,
             beregnetInntekt = 31000.00,
             arbeidsgiverperioder = perioder,
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
         internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(

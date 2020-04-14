@@ -38,6 +38,7 @@ internal class InntektsmeldingMessage(
         require("foersteFravaersdag", JsonNode::asLocalDate)
         interestedIn("refusjon.beloepPrMnd")
         interestedIn("refusjon.opphoersdato")
+        interestedIn("arbeidsforholdId", "begrunnelseForReduksjonEllerIkkeUtbetalt")
     }
 
     override val fødselsnummer get() = this["arbeidstakerFnr"].asText()
@@ -70,7 +71,9 @@ internal class InntektsmeldingMessage(
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
-        ferieperioder = ferieperioder
+        ferieperioder = ferieperioder,
+        arbeidsforholdId = this["arbeidsforholdId"].takeIf (JsonNode::isTextual)?.asText(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt = this["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf (JsonNode::isTextual)?.asText()
     )
 
     object Factory : MessageFactory<InntektsmeldingMessage> {

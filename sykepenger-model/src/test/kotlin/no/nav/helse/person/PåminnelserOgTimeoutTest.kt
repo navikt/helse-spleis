@@ -237,7 +237,9 @@ class PåminnelserOgTimeoutTest {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.0,
             arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
-            ferieperioder = emptyList()
+            ferieperioder = emptyList(),
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelse = this
         }

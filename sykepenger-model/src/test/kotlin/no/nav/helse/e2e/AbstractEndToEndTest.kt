@@ -208,7 +208,9 @@ internal abstract class AbstractEndToEndTest {
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder
+            ferieperioder = ferieperioder,
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelselogg = this
         }
