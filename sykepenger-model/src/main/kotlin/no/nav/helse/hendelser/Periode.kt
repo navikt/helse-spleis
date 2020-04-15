@@ -16,7 +16,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
     }
 
     internal fun overlapperMed(other: Periode) =
-        this.start in other || this.endInclusive in other || this in other || other in this
+        maxOf(this.start, other.start) <= minOf(this.endInclusive, other.endInclusive)
 
     internal fun etter(other: LocalDate) =
         other <= this.endInclusive

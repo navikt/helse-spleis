@@ -48,15 +48,17 @@ class Sykmelding(
     }
 
     private inner class Sykeperiode(
-        private val fom: LocalDate,
-        private val tom: LocalDate,
+        fom: LocalDate,
+        tom: LocalDate,
         private val sykdomsgrad: Int
     ) {
+        private val periode = Periode(fom, tom)
+
         internal fun sykdomstidslinje() =
-            Sykdomstidslinje.sykedager(fom, tom, sykdomsgrad.toDouble(), SykmeldingDagFactory)
+            Sykdomstidslinje.sykedager(periode, sykdomsgrad.toDouble(), SykmeldingDagFactory)
 
         internal fun ingenOverlappende(other: Sykeperiode) =
-            maxOf(this.fom, other.fom) > minOf(this.tom, other.tom)
+            !this.periode.overlapperMed(other.periode)
     }
 
     internal object SykmeldingDagFactory : DagFactory {
