@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -135,9 +136,7 @@ internal class SendtSøknadNavMessageTest {
     @Test
     internal fun `søknad med faktisk grad større enn 100 gir en gyldig sykdomsgrad`() {
         MessageProblems(validSendtSøknadMedFaktiskGradStørreEnn100).also {
-            val aktivitetslogg =
-                SendtSøknadNavMessage(validSendtSøknadMedFaktiskGradStørreEnn100, it).asSøknad().valider()
-            assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+            assertDoesNotThrow { assertFalse(SendtSøknadNavMessage(validSendtSøknadMedFaktiskGradStørreEnn100, it).asSøknad().hasErrors()) }
         }
     }
 

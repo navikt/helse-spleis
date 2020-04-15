@@ -30,6 +30,7 @@ class Søknad constructor(
 
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
+        perioder.onEach { it.sjekkUgyldig(aktivitetslogg) }
         sykdomsperiode = Periode.sykdomsperiode(perioder) ?: severe("Søknad inneholder ikke sykdomsperioder")
     }
 
@@ -91,6 +92,7 @@ class Søknad constructor(
 
         internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): Sykdomstidslinje
 
+        internal open fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {}
         internal open fun valider(søknad: Søknad) {}
 
         internal fun valider(søknad: Søknad, beskjed: String) {
@@ -112,9 +114,12 @@ class Søknad constructor(
             faktiskSykdomsgrad: Int? = null
         ) : Periode(fom, tom) {
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
+            override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {
+                if (grad > 100) aktivitetslogg.severe("Utregnet grad er over 100")
+                else if (grad < 0) aktivitetslogg.severe("Utregnet sykdomsgrad er et negativt tall")
+            }
 
             override fun valider(søknad: Søknad) {
-                if (grad < 0) søknad.error("Utregnet sykdomsgrad er < 0")
                 if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
