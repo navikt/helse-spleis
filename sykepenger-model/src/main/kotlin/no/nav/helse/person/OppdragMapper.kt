@@ -14,7 +14,7 @@ internal fun tilUtbetaltEvent(
     vedtaksperiodeId: UUID,
     utbetaling: Utbetaling,
     forbrukteSykedager: Int
-) = UtbetalingslinjerMapper(
+) = OppdragMapper(
     aktørId = aktørId,
     fødselsnummer = fødselsnummer,
     gruppeId = gruppeId,
@@ -23,7 +23,7 @@ internal fun tilUtbetaltEvent(
     forbrukteSykedager = forbrukteSykedager
 ).tilEvent()
 
-private class UtbetalingslinjerMapper(
+private class OppdragMapper(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val gruppeId: UUID,
@@ -53,26 +53,26 @@ private class UtbetalingslinjerMapper(
         opprettet = tidsstempel
     }
 
-    override fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {
+    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         utbetalingslinjeListe.clear()
     }
 
-    override fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {
+    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = linjer.referanse(),
+            utbetalingsreferanse = oppdrag.referanse(),
             utbetalingslinjer = utbetalingslinjeListe.toList()
         )
             .takeIf { it.utbetalingslinjer.isNotEmpty() }
             ?.also { utbetalingslinjerListe.add(it) }
     }
 
-    override fun preVisitPersonUtbetalingslinjer(linjer: Oppdrag) {
+    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
         utbetalingslinjeListe.clear()
     }
 
-    override fun postVisitPersonUtbetalingslinjer(linjer: Oppdrag) {
+    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = linjer.referanse(),
+            utbetalingsreferanse = oppdrag.referanse(),
             utbetalingslinjer = utbetalingslinjeListe.toList()
         )
             .takeIf { it.utbetalingslinjer.isNotEmpty() }
@@ -80,13 +80,14 @@ private class UtbetalingslinjerMapper(
     }
 
     override fun visitUtbetalingslinje(
-        utbetalingslinje: Utbetalingslinje,
+        linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
         dagsats: Int,
         grad: Double,
         delytelseId: Int,
-        refDelytelseId: Int?
+        refDelytelseId: Int?,
+        refFagsystemId: String?
     ) {
         utbetalingslinjeListe.add(
             PersonObserver.Utbetalingslinje(

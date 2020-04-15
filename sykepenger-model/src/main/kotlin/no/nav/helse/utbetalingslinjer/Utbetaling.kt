@@ -9,13 +9,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 // Understands related payment activities for an Arbeidsgiver
-internal class Utbetaling
-    private constructor(
-        private val utbetalingstidslinje: Utbetalingstidslinje,
-        private val arbeidsgiverOppdrag: Oppdrag,
-        private val personOppdrag: Oppdrag,
-        private val tidsstempel: LocalDateTime
-    ) {
+internal class Utbetaling private constructor(
+    private val utbetalingstidslinje: Utbetalingstidslinje,
+    private val arbeidsgiverOppdrag: Oppdrag,
+    private val personOppdrag: Oppdrag,
+    private val tidsstempel: LocalDateTime
+) {
 
     internal constructor(
         fødselsnummer: String,
@@ -67,12 +66,12 @@ internal class Utbetaling
     internal fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(this, tidsstempel)
         utbetalingstidslinje.accept(visitor)
-        visitor.preVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverOppdrag)
+        visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
-        visitor.postVisitArbeidsgiverUtbetalingslinjer(arbeidsgiverOppdrag)
-        visitor.preVisitPersonUtbetalingslinjer(personOppdrag)
+        visitor.postVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
+        visitor.preVisitPersonOppdrag(personOppdrag)
         personOppdrag.accept(visitor)
-        visitor.postVisitPersonUtbetalingslinjer(personOppdrag)
+        visitor.postVisitPersonOppdrag(personOppdrag)
         visitor.postVisitUtbetaling(this, tidsstempel)
     }
 

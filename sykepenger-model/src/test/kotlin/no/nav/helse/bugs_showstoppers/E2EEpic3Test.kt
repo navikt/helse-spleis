@@ -513,12 +513,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
 
         inspektør.also {
-            assertEquals(1, it.arbeidsgiverUtbetalingslinjer[0]?.size)
-            assertEquals(17.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.fom)
-            assertEquals(31.januar(2020), it.arbeidsgiverUtbetalingslinjer[0]?.first()?.tom)
-            assertEquals(1, it.arbeidsgiverUtbetalingslinjer[1]?.size)
-            assertEquals(17.januar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.fom)
-            assertEquals(28.februar(2020), it.arbeidsgiverUtbetalingslinjer[1]?.first()?.tom)
+            assertEquals(1, it.arbeidsgiverOppdrag[0]?.size)
+            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[0]?.first()?.fom)
+            assertEquals(31.januar(2020), it.arbeidsgiverOppdrag[0]?.first()?.tom)
+            assertEquals(1, it.arbeidsgiverOppdrag[1]?.size)
+            assertEquals(17.januar(2020), it.arbeidsgiverOppdrag[1]?.first()?.fom)
+            assertEquals(28.februar(2020), it.arbeidsgiverOppdrag[1]?.first()?.tom)
         }
     }
 
@@ -765,7 +765,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
-            assertEquals(it.arbeidsgiverUtbetalingslinjer[0].referanse(), it.arbeidsgiverUtbetalingslinjer[1].referanse())
+            assertEquals(it.arbeidsgiverOppdrag[0].referanse(), it.arbeidsgiverOppdrag[1].referanse())
         }
     }
 
@@ -798,8 +798,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(2, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
-            assertEquals(it.arbeidsgiverUtbetalingslinjer[0].referanse(), it.arbeidsgiverUtbetalingslinjer[1].referanse())
-            assertEquals(it.arbeidsgiverUtbetalingslinjer[1].referanse(), it.arbeidsgiverUtbetalingslinjer[2].referanse())
+            assertEquals(it.arbeidsgiverOppdrag[0].referanse(), it.arbeidsgiverOppdrag[1].referanse())
+            assertEquals(it.arbeidsgiverOppdrag[1].referanse(), it.arbeidsgiverOppdrag[2].referanse())
         }
     }
 }

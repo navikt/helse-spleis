@@ -29,7 +29,9 @@ internal class Oppdrag private constructor(
     )
 
     internal fun accept(visitor: UtbetalingVisitor) {
+        visitor.preVisitOppdrag(this)
         linjer.forEach { it.accept(visitor) }
+        visitor.postVisitOppdrag(this)
     }
 
     internal fun referanse() = fagsystemId
@@ -77,6 +79,7 @@ internal class Oppdrag private constructor(
 
     private fun ghosted(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.fagsystemId = tidligere.fagsystemId
+        nåværende.forEach { it.refFagsystemId = tidligere.fagsystemId }
         nåværende.endringskode = Endringskode.UEND
         linkTo = tidligere.last()
         nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }

@@ -115,27 +115,28 @@ internal interface InntekthistorikkVisitor {
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 }
 
-internal interface UtbetalingVisitor: UtbetalingsdagVisitor, UtbetalingslinjerVisitor {
+internal interface UtbetalingVisitor: UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
     fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
-    fun preVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {}
-    fun postVisitArbeidsgiverUtbetalingslinjer(linjer: Oppdrag) {}
-    fun preVisitPersonUtbetalingslinjer(linjer: Oppdrag) {}
-    fun postVisitPersonUtbetalingslinjer(linjer: Oppdrag) {}
+    fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
+    fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
+    fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
+    fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
 }
 
-internal interface UtbetalingslinjerVisitor {
-    fun preVisitUtbetalingslinjer(linjer: Oppdrag) {}
+internal interface OppdragVisitor {
+    fun preVisitOppdrag(oppdrag: Oppdrag) {}
     fun visitUtbetalingslinje(
-        utbetalingslinje: Utbetalingslinje,
+        linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
         dagsats: Int,
         grad: Double,
         delytelseId: Int,
-        refDelytelseId: Int?
+        refDelytelseId: Int?,
+        refFagsystemId: String?
     ) {}
-    fun postVisitUtbetalingslinjer(linjer: Oppdrag) {}
+    fun postVisitOppdrag(oppdrag: Oppdrag) {}
 }

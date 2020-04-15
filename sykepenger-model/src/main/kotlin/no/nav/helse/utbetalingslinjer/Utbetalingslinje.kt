@@ -19,12 +19,11 @@ internal class Utbetalingslinje internal constructor(
 ) {
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId)
+        visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId, refFagsystemId)
     }
 
     internal fun linkTo(other: Utbetalingslinje) {
         this.delytelseId = other.delytelseId + 1
-        this.refFagsystemId = other.refFagsystemId
         this.refDelytelseId = other.delytelseId
     }
 
