@@ -261,7 +261,7 @@ internal class Vedtaksperiode private constructor(
         if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
             dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
         }) {
-            vilkårsgrunnlag.warn("Feil i vilkårsgrunnlag i %s", tilstand.type)
+            vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
