@@ -35,8 +35,8 @@ class Inntektsmelding(
 
     init {
         this.arbeidsgiverperioder =
-            arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it.start, it.endInclusive) }
-        this.ferieperioder = ferieperioder.map { Ferieperiode(it.start, it.endInclusive) }
+            arbeidsgiverperioder.sortedBy { it.start }.map { Arbeidsgiverperiode(it) }
+        this.ferieperioder = ferieperioder.map { Ferieperiode(it) }
 
         val førsteFraværsdagtidslinje = førsteFraværsdag?.let { Sykdomstidslinje.egenmeldingsdager(it, it, InntektsmeldingDagFactory) }
 
@@ -103,7 +103,7 @@ class Inntektsmelding(
         return aktivitetslogg
     }
 
-    fun valider(periode: Periode): Aktivitetslogg {
+    internal fun valider(periode: Periode): Aktivitetslogg {
         refusjon?.valider(aktivitetslogg, periode)
         return aktivitetslogg
     }
@@ -137,12 +137,12 @@ class Inntektsmelding(
         private val endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
 
-        fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double): Aktivitetslogg {
+        internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double): Aktivitetslogg {
             if (beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
             return aktivitetslogg
         }
 
-        fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode): Aktivitetslogg {
+        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode): Aktivitetslogg {
             when {
                 opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
@@ -157,22 +157,21 @@ class Inntektsmelding(
             endringerIRefusjon.any { it in periode }
     }
 
-    sealed class InntektsmeldingPeriode(
-        internal val fom: LocalDate,
-        internal val tom: LocalDate
+    private sealed class InntektsmeldingPeriode(
+        protected val periode: Periode
     ) {
 
         internal abstract fun sykdomstidslinje(inntektsmelding: Inntektsmelding): Sykdomstidslinje
 
-        class Arbeidsgiverperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
+        class Arbeidsgiverperiode(periode: Periode) : InntektsmeldingPeriode(periode) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                Sykdomstidslinje.egenmeldingsdager(fom, tom, InntektsmeldingDagFactory)
+                Sykdomstidslinje.egenmeldingsdager(periode, InntektsmeldingDagFactory)
 
         }
 
-        class Ferieperiode(fom: LocalDate, tom: LocalDate) : InntektsmeldingPeriode(fom, tom) {
+        class Ferieperiode(periode: Periode) : InntektsmeldingPeriode(periode) {
             override fun sykdomstidslinje(inntektsmelding: Inntektsmelding) =
-                Sykdomstidslinje.ferie(fom, tom, InntektsmeldingDagFactory)
+                Sykdomstidslinje.ferie(periode, InntektsmeldingDagFactory)
         }
     }
 

@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -180,8 +181,14 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
         internal fun egenmeldingsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::egenmeldingsdag)
 
+        internal fun egenmeldingsdager(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::egenmeldingsdag)
+
         internal fun ferie(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ferie)
+
+        internal fun ferie(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::ferie)
 
         internal fun ubestemtdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ubestemtdag)
