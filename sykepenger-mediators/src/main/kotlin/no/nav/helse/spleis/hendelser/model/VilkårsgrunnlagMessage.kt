@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.hendelser.model
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -25,6 +27,11 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
     }
 
     internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
+        val (dagpenger, ugyldigeDagpengeperioder) = this["@løsning.${Dagpenger.name}"]
+            .map(::asDatePair)
+            .partition { it.first <= it.second }
+        val (arbeidsavklaringspenger, ugyldigeArbeidsavklaringspengeperioder) = this["@løsning.${Arbeidsavklaringspenger.name}"].map(::asDatePair)
+            .partition { it.first <= it.second }
         return Vilkårsgrunnlag(
             vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
             aktørId = this["aktørId"].asText(),
@@ -45,13 +52,19 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
                 }
             ),
             erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean(),
-            dagpenger = Vilkårsgrunnlag.Dagpenger(this["@løsning.${Dagpenger.name}"].map(::asPeriode)),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(this["@løsning.${Arbeidsavklaringspenger.name}"].map(::asPeriode))
-        )
+            dagpenger = Vilkårsgrunnlag.Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
+            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
+        ).also {
+            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
+        }
     }
 
     object Factory : MessageFactory<VilkårsgrunnlagMessage> {
         override fun createMessage(message: String, problems: MessageProblems) =
             VilkårsgrunnlagMessage(message, problems)
     }
+
+    private fun asDatePair(jsonNode: JsonNode) =
+        jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 }
