@@ -77,7 +77,7 @@ internal abstract class AbstractEndToEndTest {
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
 
-    protected fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false, sendtTilNav: LocalDate = perioder.last().tom) {
+    protected fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false, sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive) {
         person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder, sendtTilNav = sendtTilNav))
     }
 
@@ -168,7 +168,7 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean, sendtTilNav: LocalDate = perioder.last().tom): Søknad {
+    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean, sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

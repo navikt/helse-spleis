@@ -67,7 +67,7 @@ internal class SøknadTest {
 
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(16.januar, 10.januar))
+        søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(16.januar, 17.januar))
         assertTrue(søknad.valider().hasBehov())
     }
 
@@ -148,7 +148,7 @@ internal class SøknadTest {
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = perioder.lastOrNull()?.tom?.atStartOfDay() ?: LocalDateTime.now()
+            sendtTilNAV = Periode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 }

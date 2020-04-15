@@ -30,6 +30,16 @@ internal class PeriodeTest {
     }
 
     @Test
+    internal fun `er utenfor en annen periode`() {
+        val other = Periode(3.juli, 4.juli)
+        assertFalse(Periode(3.juli, 4.juli).utenfor(other))
+        assertTrue(Periode(2.juli, 4.juli).utenfor(other))
+        assertTrue(Periode(1.juli, 2.juli).utenfor(other))
+        assertTrue(Periode(3.juli, 5.juli).utenfor(other))
+        assertTrue(Periode(5.juli, 6.juli).utenfor(other))
+    }
+
+    @Test
     internal fun `fom kan være lik tom, men ikke før tom`() {
         assertDoesNotThrow { Periode(1.juli, 1.juli) }
         assertThrows<IllegalArgumentException> {

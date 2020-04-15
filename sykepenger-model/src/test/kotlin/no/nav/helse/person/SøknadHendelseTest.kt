@@ -142,7 +142,7 @@ internal class SøknadHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            sendtTilNAV = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
         )
 
     private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =

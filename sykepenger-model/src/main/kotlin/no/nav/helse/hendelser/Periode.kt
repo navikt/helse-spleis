@@ -21,6 +21,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
     internal fun etter(other: LocalDate) =
         other <= this.endInclusive
 
+    internal fun utenfor(other: Periode) =
+        start < other.start || endInclusive > other.endInclusive
+
     private operator fun contains(other: Periode) =
         this.start < other.endInclusive && this.endInclusive > other.start
 

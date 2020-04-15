@@ -279,7 +279,7 @@ internal class PersonTest {
         perioder: List<Søknad.Periode> = listOf(
             Søknad.Periode.Sykdom(16.september, 5.oktober, 100)
         ),
-        sendtTilNAV: LocalDateTime = perioder.last().tom.atStartOfDay()
+        sendtTilNAV: LocalDateTime = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),

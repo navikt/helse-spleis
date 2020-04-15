@@ -164,6 +164,9 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
         internal fun sykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, grad, factory, ::sykedag)
 
+        internal fun sykedager(periode: Periode, grad: Double, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, grad, factory, ::sykedag)
+
         internal fun sykedager(fra: LocalDate, til: LocalDate, avskjæringsdato: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje {
             require(!fra.isAfter(til)) { "fra må være før eller lik til" }
             return Sykdomstidslinje(fra.datesUntil(til.plusDays(1)).map {
@@ -172,8 +175,14 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
             }.toList())
         }
 
+        internal fun sykedager(periode: Periode, avskjæringsdato: LocalDate, grad: Double, factory: DagFactory) =
+            sykedager(periode.start, periode.endInclusive, avskjæringsdato, grad, factory)
+
         internal fun ikkeSykedager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::ikkeSykedag)
+
+        internal fun ikkeSykedager(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::ikkeSykedag)
 
         internal fun kunArbeidsgiverSykedager(fra: LocalDate, til: LocalDate, grad: Double, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, grad, factory, ::kunArbeidsgiverSykedag)
@@ -196,11 +205,20 @@ internal class Sykdomstidslinje internal constructor(private val dager: List<Dag
         internal fun permisjonsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::permisjonsdag)
 
+        internal fun permisjonsdager(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::permisjonsdag)
+
         internal fun studiedager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::studiedag)
 
+        internal fun studiedager(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::studiedag)
+
         internal fun utenlandsdager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::utenlandsdag)
+
+        internal fun utenlandsdager(periode: Periode, factory: DagFactory): Sykdomstidslinje =
+            dag(periode.start, periode.endInclusive, factory, ::utenlandsdag)
 
         internal fun implisitteDager(fra: LocalDate, til: LocalDate, factory: DagFactory): Sykdomstidslinje =
             dag(fra, til, factory, ::implisittDag)

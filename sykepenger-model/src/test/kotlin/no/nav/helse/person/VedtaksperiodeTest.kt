@@ -122,7 +122,7 @@ internal class VedtaksperiodeTest {
             orgnummer = organisasjonsnummer,
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = perioder.last().tom.atStartOfDay()
+            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(
