@@ -44,6 +44,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 9.februar), actual)
         assertEquals(original.referanse, actual.referanse)
         assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(original.referanse, actual[0].refFagsystemId)
     }
 
     @Test
@@ -193,8 +194,16 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     internal fun `potpourri 3`() {
-        val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50, 13.januar to 19.januar)
-        val new = linjer(1.januar to 5.januar, 6.januar to 19.januar grad 50, 20.januar to 26.januar)
+        val original = linjer(
+            1.januar to 5.januar,
+            6.januar to 12.januar grad 50,
+            13.januar to 19.januar
+        )
+        val new = linjer(
+            1.januar to 5.januar,
+            6.januar to 19.januar grad 50,
+            20.januar to 26.januar
+        )
         val actual = new forskjell original
         assertEquals(original.referanse, actual.referanse)
 

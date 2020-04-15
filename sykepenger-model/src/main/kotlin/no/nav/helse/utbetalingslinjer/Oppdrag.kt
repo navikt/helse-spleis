@@ -69,8 +69,7 @@ internal class Oppdrag private constructor(
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.first().linkTo(tidligere.last())
         zipWithNext().map { (a, b) -> b.linkTo(a) }
-        nåværende.fagsystemId = tidligere.fagsystemId
-        nåværende.endringskode = Endringskode.UEND
+        nåværende.kobleTil(tidligere)
     }
 
     private var tilstand: Tilstand = Identisk()
@@ -78,20 +77,29 @@ internal class Oppdrag private constructor(
     private lateinit var linkTo: Utbetalingslinje
 
     private fun ghosted(tidligere: Oppdrag) = this.also { nåværende ->
-        nåværende.fagsystemId = tidligere.fagsystemId
-        nåværende.forEach { it.refFagsystemId = tidligere.fagsystemId }
-        nåværende.endringskode = Endringskode.UEND
         linkTo = tidligere.last()
+        nåværende.kobleTil(tidligere)
         nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
-        if (nåværende.size <= tidligere.size) return@also
-        nåværende[tidligere.size].linkTo(linkTo)
-        nåværende
-            .subList(tidligere.size, nåværende.size)
+        nåværende.håndterResten(tidligere)
+    }
+
+    private fun håndterResten(tidligere: Oppdrag) {
+        if (this.size <= tidligere.size) return
+        this[tidligere.size].linkTo(linkTo)
+        this
+            .subList(tidligere.size, this.size)
             .zipWithNext()
             .map { (a, b) -> b.linkTo(a) }
     }
 
+    private fun kobleTil(tidligere: Oppdrag) {
+        this.fagsystemId = tidligere.fagsystemId
+        this.forEach { it.refFagsystemId = tidligere.fagsystemId }
+        this.endringskode = Endringskode.UEND
+    }
+
     private interface Tilstand {
+
         fun forskjell(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje
