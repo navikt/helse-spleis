@@ -275,6 +275,28 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.referanse, actual[0].refFagsystemId)
     }
 
+    @Test internal fun `ny er tom uten sisteArbeidsgiverdag`() {
+        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
+        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = null)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 12.januar grad 0 dagsats 0), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.OPPH, actual[0].linjetype)
+        assertEquals(original[1].id, actual[0].refId)
+        assertEquals(original[1].id + 1, actual[0].id)
+        assertEquals(original.referanse, actual[0].refFagsystemId)
+    }
+
+    @Test internal fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
+        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
+        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 1.februar)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(recalculated, actual)
+        assertNotEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.NY, actual.linjertype)
+    }
+
     private val Oppdrag.linjertype get() = this.get<Endringskode>("endringskode")
 
     private val Utbetalingslinje.linjetype get() = this.get<Endringskode>("endringskode")

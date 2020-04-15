@@ -62,6 +62,8 @@ internal class Oppdrag private constructor(
             this.isEmpty() &&
                 (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
                 deleteAll(tidligere)
+            this.isEmpty() && this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag > tidligere.sistedato ->
+                this
             this.førstedato > tidligere.sistedato ->
                 this
             this.førstedato < tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
