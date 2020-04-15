@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.JsonDagType
@@ -172,6 +173,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         tidsstempel: LocalDateTime
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
+
+    override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
+        currentState.visitDataForSimulering(dataForSimuleringResultat)
+    }
 
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -415,6 +420,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                 fullstendig = true
             } else {
                 vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto())
+            }
+        }
+
+        override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
+            dataForSimuleringResultat?.let {
+                vedtaksperiodeMap["dataForSimulering"] = it.mapTilSimuleringsdataDto()
             }
         }
 

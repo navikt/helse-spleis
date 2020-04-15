@@ -289,6 +289,28 @@ internal class SpeilBuilderTest {
 
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
+
+        vedtaksperiode.simuleringsdata?.let { simulering ->
+            assertNotNull(simulering.totalbeløp)
+            simulering.perioder.assertOnNonEmptyCollection { periode ->
+                assertNotNull(periode.fom)
+                assertNotNull(periode.tom)
+                periode.utbetalinger.assertOnNonEmptyCollection { utbetaling ->
+                    assertNotNull(utbetaling.utbetalesTilNavn)
+                    utbetaling.detaljer.assertOnNonEmptyCollection { detalj ->
+                        assertNotNull(detalj.beløp)
+                        assertNotNull(detalj.konto)
+                        assertNotNull(detalj.sats)
+                        assertTrue(detalj.klassekodeBeskrivelse.isNotEmpty())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
+        assertTrue(isNotEmpty())
+        forEach(func)
     }
 
     private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
@@ -573,7 +595,43 @@ internal class SpeilBuilderTest {
             orgnummer = orgnummer,
             simuleringOK = true,
             melding = "Hei Aron",
-            simuleringResultat = null
+            simuleringResultat = simuleringResultat()
+        )
+
+        private fun simuleringResultat() = Simulering.SimuleringResultat(
+            totalbeløp = 9999,
+            perioder = listOf(
+                Simulering.SimulertPeriode(
+                    Periode(1.januar(2020), 2.januar(2020)),
+                    utbetalinger = listOf(
+                        Simulering.SimulertUtbetaling(
+                            forfallsdato = 3.januar(2020),
+                            utbetalesTil = Simulering.Mottaker(id = orgnummer, navn = "Syk Nordmann"),
+                            feilkonto = true,
+                            detaljer = listOf(
+                                Simulering.Detaljer(
+                                    Periode(1.januar(2020), 2.januar(2020)),
+                                    konto = "12345678910og1112",
+                                    beløp = 9999,
+                                    tilbakeføring = false,
+                                    sats = Simulering.Sats(
+                                        sats = 1111,
+                                        antall = 9,
+                                        type = "DAGLIG"
+                                    ),
+                                    klassekode = Simulering.Klassekode(
+                                        kode = "SPREFAG-IOP",
+                                        beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
+                                    ),
+                                    refunderesOrgnummer = orgnummer,
+                                    uføregrad = 100,
+                                    utbetalingstype = "YTELSE"
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
 
         internal fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(

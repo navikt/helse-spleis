@@ -11,7 +11,7 @@ data class PersonDTO(
     val arbeidsgivere: List<ArbeidsgiverDTO>
 )
 
-data class AktivitetDTO (
+data class AktivitetDTO(
     val vedtaksperiodeId: UUID,
     val alvorlighetsgrad: String,
     val melding: String,
@@ -42,6 +42,7 @@ data class VedtaksperiodeDTO(
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,
     val dataForVilkårsvurdering: GrunnlagsdataDTO?,
+    val simuleringsdata: SimuleringsdataDTO?,
     val aktivitetslogg: List<AktivitetDTO>
 ) : VedtaksperiodeDTOBase
 
@@ -124,14 +125,47 @@ data class GrunnlagsdataDTO(
     val harOpptjening: Boolean
 )
 
+data class SimuleringsdataDTO(
+    val totalbeløp: Int,
+    val perioder: List<PeriodeDTO>
+) {
+    data class PeriodeDTO(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val utbetalinger: List<UtbetalingDTO>
+    )
+
+    data class UtbetalingDTO(
+        val utbetalesTilId: String,
+        val utbetalesTilNavn: String,
+        val forfall: LocalDate,
+        val feilkonto: Boolean,
+        val detaljer: List<DetaljerDTO>
+    )
+
+    data class DetaljerDTO(
+        val faktiskFom: LocalDate,
+        val faktiskTom: LocalDate,
+        val konto: String,
+        val beløp: Int,
+        val tilbakeføring: Boolean,
+        val sats: Int,
+        val typeSats: String,
+        val antallSats: Int,
+        val uføregrad: Int,
+        val klassekode: String,
+        val klassekodeBeskrivelse: String,
+        val utbetalingstype: String,
+        val refunderesOrgNr: String
+    )
+}
+
 enum class BegrunnelseDTO {
     SykepengedagerOppbrukt,
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
     MinimumSykdomsgrad
 }
-
-data class UtbetalingslinjeDTO(val fom: LocalDate, val tom: LocalDate, val dagsats: Int, val grad: Double)
 
 interface HendelseDTO {
     val id: String
@@ -142,7 +176,7 @@ data class InntektsmeldingDTO(
     override val id: String,
     val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
-) : HendelseDTO{
+) : HendelseDTO {
     override val type = "INNTEKTSMELDING"
 }
 

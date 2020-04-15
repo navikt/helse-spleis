@@ -3,9 +3,11 @@ package no.nav.helse.serde.api
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
@@ -93,7 +95,45 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Int,
         hendelser = hendelser,
         dataForVilkårsvurdering = dataForVilkårsvurdering,
+        simuleringsdata = this["dataForSimulering"] as? SimuleringsdataDTO,
         aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>
+    )
+}
+
+internal fun Simulering.SimuleringResultat.mapTilSimuleringsdataDto(): SimuleringsdataDTO {
+    return SimuleringsdataDTO(
+        totalbeløp = totalbeløp,
+        perioder = perioder.map { periode ->
+            PeriodeDTO(
+                fom = periode.periode.start,
+                tom = periode.periode.endInclusive,
+                utbetalinger = periode.utbetalinger.map { utbetaling ->
+                    UtbetalingDTO(
+                        utbetalesTilId = utbetaling.utbetalesTil.id,
+                        utbetalesTilNavn = utbetaling.utbetalesTil.navn,
+                        forfall = utbetaling.forfallsdato,
+                        detaljer = utbetaling.detaljer.map { detaljer ->
+                            DetaljerDTO(
+                                faktiskFom = detaljer.periode.start,
+                                faktiskTom = detaljer.periode.endInclusive,
+                                konto = detaljer.konto,
+                                beløp = detaljer.beløp,
+                                tilbakeføring = detaljer.tilbakeføring,
+                                sats = detaljer.sats.sats,
+                                typeSats = detaljer.sats.type,
+                                antallSats = detaljer.sats.antall,
+                                uføregrad = detaljer.uføregrad,
+                                klassekode = detaljer.klassekode.kode,
+                                klassekodeBeskrivelse = detaljer.klassekode.beskrivelse,
+                                utbetalingstype = detaljer.utbetalingstype,
+                                refunderesOrgNr = detaljer.refunderesOrgnummer
+                            )
+                        },
+                        feilkonto = utbetaling.feilkonto
+                    )
+                }
+            )
+        }
     )
 }
 
