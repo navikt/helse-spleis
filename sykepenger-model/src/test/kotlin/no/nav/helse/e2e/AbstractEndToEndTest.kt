@@ -1,6 +1,8 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.Aktivitetslogg
@@ -222,15 +224,22 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(
+            inntektsvurdering = Inntektsvurdering(
                 perioder = (1..12).map {
-                   YearMonth.of(2017, it) to inntekt
+                    YearMonth.of(2017, it) to inntekt
                 }.groupBy({ it.first }) { it.second }
             ),
             erEgenAnsatt = false,
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))),
-            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
+            opptjeningvurdering = Opptjeningvurdering(
+                listOf(
+                    Opptjeningvurdering.Arbeidsforhold(
+                        ORGNUMMER,
+                        1.januar(2017)
+                    )
+                )
+            ),
+            dagpenger = Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelselogg = this
         }

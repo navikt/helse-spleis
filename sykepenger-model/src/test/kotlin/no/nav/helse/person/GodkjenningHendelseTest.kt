@@ -165,13 +165,20 @@ internal class GodkjenningHendelseTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering((1..12)
+            inntektsvurdering = Inntektsvurdering((1..12)
                 .map { YearMonth.of(2018, it) to 31000.0 }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017)))),
-            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
+            opptjeningvurdering = Opptjeningvurdering(
+                listOf(
+                    Opptjeningvurdering.Arbeidsforhold(
+                        orgnummer,
+                        1.januar(2017)
+                    )
+                )
+            ),
+            dagpenger = Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }

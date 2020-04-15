@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.hendelser.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -37,14 +39,14 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
             aktørId = this["aktørId"].asText(),
             fødselsnummer = fødselsnummer,
             orgnummer = this["organisasjonsnummer"].asText(),
-            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(
+            inntektsvurdering = Inntektsvurdering(
                 perioder = this["@løsning.${Inntektsberegning.name}"].map {
                     it["årMåned"].asYearMonth() to it["inntektsliste"].map { it["beløp"].asDouble() }
                 }.associate { it }
             ),
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(
+            opptjeningvurdering = Opptjeningvurdering(
                 arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
-                    Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(
+                    Opptjeningvurdering.Arbeidsforhold(
                         orgnummer = it["orgnummer"].asText(),
                         fom = it["ansattSiden"].asLocalDate(),
                         tom = it["ansattTil"].asOptionalLocalDate()
@@ -52,8 +54,14 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
                 }
             ),
             erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean(),
-            dagpenger = Vilkårsgrunnlag.Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
+            dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
+            }),
+            arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(
+                arbeidsavklaringspenger.map { Periode(it.first, it.second) })
         ).also {
             if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")

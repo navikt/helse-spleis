@@ -40,7 +40,7 @@ internal class ArbeidsavklaringspengerTest {
 
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
-        val aap = Vilkårsgrunnlag.Arbeidsavklaringspenger(perioder.toList())
+        val aap = Arbeidsavklaringspenger(perioder.toList())
         return aap.valider(aktivitetslogg, førsteFraværsdag).hasErrors()
     }
 }

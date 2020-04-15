@@ -29,7 +29,7 @@ internal class InntektsvurderingTest {
         assertFalse(undersøke(inntektsvurdering, 750.00))
     }
 
-    private fun undersøke(inntektsvurdering: Vilkårsgrunnlag.Inntektsvurdering, beregnetInntekt: Double): Boolean {
+    private fun undersøke(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Double): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(aktivitetslogg, beregnetInntekt.toBigDecimal()).hasErrors()
     }
@@ -38,5 +38,5 @@ internal class InntektsvurderingTest {
         inntektsmåneder: Map<YearMonth, List<Double>> = (1..12).map {
             YearMonth.of(2017, it) to INNTEKT
         }.groupBy({ it.first }) { it.second }
-    ) = Vilkårsgrunnlag.Inntektsvurdering(inntektsmåneder)
+    ) = Inntektsvurdering(inntektsmåneder)
 }

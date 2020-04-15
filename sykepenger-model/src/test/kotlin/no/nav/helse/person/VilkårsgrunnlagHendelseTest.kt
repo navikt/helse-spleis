@@ -129,7 +129,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun ansattSidenStart2017() =
-        listOf(Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
+        listOf(Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Double): Map<YearMonth, List<Double>> {
@@ -148,7 +148,7 @@ internal class VilkårsgrunnlagHendelseTest {
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
         inntekter: Map<YearMonth, List<Double>>,
-        arbeidsforhold: List<Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold>
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -205,18 +205,18 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
         inntekter: Map<YearMonth, List<Double>>,
-        arbeidsforhold: List<Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold>
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering(inntekter),
+            inntektsvurdering = Inntektsvurdering(inntekter),
             erEgenAnsatt = egenAnsatt,
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(arbeidsforhold),
-            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+            dagpenger = Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }

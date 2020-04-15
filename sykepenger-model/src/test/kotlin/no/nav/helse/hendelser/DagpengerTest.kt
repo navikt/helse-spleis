@@ -40,7 +40,7 @@ class DagpengerTest {
 
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
-        val dagpenger = Vilkårsgrunnlag.Dagpenger(perioder.toList())
+        val dagpenger = Dagpenger(perioder.toList())
         return dagpenger.valider(aktivitetslogg, førsteFraværsdag).hasErrors()
     }
 }

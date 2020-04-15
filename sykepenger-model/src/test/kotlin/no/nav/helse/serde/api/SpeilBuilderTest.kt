@@ -530,18 +530,20 @@ internal class SpeilBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsvurdering = Vilkårsgrunnlag.Inntektsvurdering((1..12)
+            inntektsvurdering = Inntektsvurdering((1..12)
                 .map { YearMonth.of(2018, it) to 31000.0 }
                 .groupBy({ it.first }) { it.second }),
-            opptjeningvurdering = Vilkårsgrunnlag.Opptjeningvurdering(listOf(
-                Vilkårsgrunnlag.Opptjeningvurdering.Arbeidsforhold(
-                    orgnummer,
-                    1.januar(2017)
+            opptjeningvurdering = Opptjeningvurdering(
+                listOf(
+                    Opptjeningvurdering.Arbeidsforhold(
+                        orgnummer,
+                        1.januar(2017)
+                    )
                 )
-            )),
+            ),
             erEgenAnsatt = false,
-            dagpenger = Vilkårsgrunnlag.Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Vilkårsgrunnlag.Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )
 
         internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
