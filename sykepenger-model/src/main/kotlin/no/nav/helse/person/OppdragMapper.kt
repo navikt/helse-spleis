@@ -10,14 +10,14 @@ import java.util.*
 internal fun tilUtbetaltEvent(
     aktørId: String,
     fødselsnummer: String,
-    gruppeId: UUID,
+    førsteFraværsdag: LocalDate,
     vedtaksperiodeId: UUID,
     utbetaling: Utbetaling,
     forbrukteSykedager: Int
 ) = OppdragMapper(
     aktørId = aktørId,
     fødselsnummer = fødselsnummer,
-    gruppeId = gruppeId,
+    førsteFraværsdag = førsteFraværsdag,
     vedtaksperiodeId = vedtaksperiodeId,
     utbetaling = utbetaling,
     forbrukteSykedager = forbrukteSykedager
@@ -26,7 +26,7 @@ internal fun tilUtbetaltEvent(
 private class OppdragMapper(
     private val aktørId: String,
     private val fødselsnummer: String,
-    private val gruppeId: UUID,
+    private val førsteFraværsdag: LocalDate,
     private val vedtaksperiodeId: UUID,
     private val utbetaling: Utbetaling,
     private val forbrukteSykedager: Int
@@ -41,7 +41,7 @@ private class OppdragMapper(
         return PersonObserver.UtbetaltEvent(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            gruppeId = gruppeId,
+            førsteFraværsdag = førsteFraværsdag,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingslinjer = utbetalingslinjerListe.toList(),
             forbrukteSykedager = forbrukteSykedager,

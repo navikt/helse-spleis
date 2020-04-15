@@ -952,7 +952,7 @@ internal class Vedtaksperiode private constructor(
                 val event = tilUtbetaltEvent(
                     aktørId = vedtaksperiode.aktørId,
                     fødselsnummer = vedtaksperiode.fødselsnummer,
-                    gruppeId = vedtaksperiode.gruppeId,
+                    førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag),
                     vedtaksperiodeId = vedtaksperiode.id,
                     utbetaling = vedtaksperiode.utbetaling(),
                     forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager)

@@ -37,7 +37,7 @@ interface PersonObserver {
     data class UtbetaltEvent(
         val aktørId: String,
         val fødselsnummer: String,
-        val gruppeId: UUID,
+        val førsteFraværsdag: LocalDate,
         val vedtaksperiodeId: UUID,
         val utbetalingslinjer: List<Utbetalingslinjer>,
         val forbrukteSykedager: Int,

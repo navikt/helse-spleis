@@ -45,6 +45,7 @@ internal class TilUtbetalingHendelseTest {
         assertTilstand(TilstandType.AVSLUTTET)
 
         assertEquals(UNG_PERSON_FNR_2018, utbetaltEvent?.fødselsnummer)
+        assertEquals(førsteSykedag, utbetaltEvent?.førsteFraværsdag)
         assertEquals(1, utbetaltEvent?.utbetalingslinjer?.size)
         assertEquals(1, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.size)
         assertEquals(17.januar, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.get(0)?.fom)

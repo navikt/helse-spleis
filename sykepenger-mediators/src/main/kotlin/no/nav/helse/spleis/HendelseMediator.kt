@@ -150,7 +150,7 @@ internal class HendelseMediator(
 
             override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
                 publish("utbetalt", JsonMessage.newMessage(mapOf(
-                    "gruppeId" to event.gruppeId.toString(),
+                    "førsteFraværsdag" to event.førsteFraværsdag,
                     "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
                     "utbetaling" to event.utbetalingslinjer.map {
                         mapOf(
