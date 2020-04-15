@@ -8,23 +8,26 @@ import java.util.*
 internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
-    private val linjer: List<Utbetalingslinje>,
+    private val linjer: MutableList<Utbetalingslinje>,
     private var fagsystemId: String,
     private var endringskode: Endringskode,
+    private val sisteArbeidsgiverdag: LocalDate?,
     private val sjekksum: Int
-): List<Utbetalingslinje> by linjer {
+): MutableList<Utbetalingslinje> by linjer {
 
     internal constructor(
         mottaker: String,
         fagområde: Fagområde,
         linjer: List<Utbetalingslinje> = listOf(),
-        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
+        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
+        sisteArbeidsgiverdag: LocalDate?
     ): this(
         mottaker,
         fagområde,
-        linjer,
+        linjer.toMutableList(),
         fagsystemId,
         Endringskode.NY,
+        sisteArbeidsgiverdag,
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
 
@@ -43,9 +46,10 @@ internal class Oppdrag private constructor(
     internal fun removeUEND() = Oppdrag(
         mottaker,
         fagområde,
-        linjer.filter { it.erForskjell() },
+        linjer.filter { it.erForskjell() }.toMutableList(),
         fagsystemId,
         endringskode,
+        sisteArbeidsgiverdag,
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
 
@@ -53,17 +57,33 @@ internal class Oppdrag private constructor(
 
     infix fun forskjell(tidligere: Oppdrag): Oppdrag {
         return when {
-            this.isEmpty() ->
+            tidligere.isEmpty() ->
                 this
+            this.isEmpty() &&
+                (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
+                deleteAll(tidligere)
             this.førstedato > tidligere.sistedato ->
                 this
             this.førstedato < tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
                 appended(tidligere)
             this.førstedato == tidligere.førstedato && this.sistedato >= tidligere.sistedato ->
                 ghosted(tidligere)
+            this.førstedato > tidligere.førstedato ->
+                deleted(tidligere)
             else ->
                 throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
+    }
+
+    private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
+        nåværende.kobleTil(tidligere)
+        linjer.add(
+            tidligere.last().deletion(
+                tidligere.fagsystemId,
+                tidligere.first().fom,
+                tidligere.last().tom
+            )
+        )
     }
 
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
@@ -76,11 +96,34 @@ internal class Oppdrag private constructor(
 
     private lateinit var linkTo: Utbetalingslinje
 
-    private fun ghosted(tidligere: Oppdrag) = this.also { nåværende ->
-        linkTo = tidligere.last()
-        nåværende.kobleTil(tidligere)
-        nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
-        nåværende.håndterResten(tidligere)
+    private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =
+        this.also { nåværende ->
+            this.linkTo = linkTo
+            nåværende.kobleTil(tidligere)
+            nåværende.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
+            nåværende.håndterResten(tidligere)
+        }
+
+    private fun deleted(tidligere: Oppdrag): Oppdrag {
+        return this.also {
+            val deletionTom = this.first().fom.minusDays(1)
+            val deletion = tidligere.last().deletion( // Generate a deletion and link it
+                tidligere.fagsystemId,
+                tidligere.first().fom,
+                deletionTom
+            )
+            val revisedTidligere = Oppdrag(
+                tidligere.mottaker,
+                tidligere.fagområde,
+                tidligere.linjer.filter { it.fom > deletionTom }.toMutableList(), // Removed any periods from tidligere that overlap deletion
+                tidligere.fagsystemId,
+                tidligere.endringskode,
+                tidligere.sisteArbeidsgiverdag,
+                tidligere.sjekksum
+            )
+            it.ghosted(revisedTidligere, deletion) // run ghosted with deletion as LinkTo
+            it.add(0, deletion) // prepend ghosted with deletion
+        }
     }
 
     private fun håndterResten(tidligere: Oppdrag) {
@@ -99,7 +142,6 @@ internal class Oppdrag private constructor(
     }
 
     private interface Tilstand {
-
         fun forskjell(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje
@@ -132,4 +174,5 @@ internal class Oppdrag private constructor(
             linkTo = nåværende
         }
     }
+
 }

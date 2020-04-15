@@ -113,18 +113,19 @@ class SerialisertPerson(val json: String) {
 
     private fun konverterTilUtbetaling(data: UtbetalingData) = createUtbetaling(
         konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
-        konverterTilUtbetalingslinjer(data.arbeidsgiverOppdrag),
-        konverterTilUtbetalingslinjer(data.personOppdrag),
+        konverterTilOppdrag(data.arbeidsgiverOppdrag),
+        konverterTilOppdrag(data.personOppdrag),
         data.tidsstempel
     )
 
-    private fun konverterTilUtbetalingslinjer(data: OppdragData): Oppdrag {
+    private fun konverterTilOppdrag(data: OppdragData): Oppdrag {
         return createOppdrag(
             data.mottaker,
             Fagområde.valueOf(data.fagområde),
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.fagsystemId,
             Endringskode.valueOf(data.endringskode),
+            data.sisteArbeidsgiverdag,
             data.sjekksum
         )
     }
@@ -488,6 +489,7 @@ data class OppdragData(
     val linjer: List<UtbetalingslinjeData>,
     val fagsystemId: String,
     val endringskode: String,
+    val sisteArbeidsgiverdag: LocalDate?,
     val sjekksum: Int
 )
 

@@ -28,7 +28,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     internal fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
-        val original = Oppdrag(ORGNUMMER, SPREF, fagsystemId = FAGSYSTEMID)
+        val original = Oppdrag(ORGNUMMER, SPREF, fagsystemId = FAGSYSTEMID, sisteArbeidsgiverdag = 31.desember(2017))
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
@@ -220,6 +220,61 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[2].linjetype)
     }
 
+    @Test internal fun `slett nøyaktig en periode`() {
+        val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50)
+        val recalculated = linjer(6.januar to 12.januar grad 50)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 5.januar grad 0 dagsats 0, 6.januar to 12.januar grad 50), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.OPPH, actual[0].linjetype)
+        assertEquals(original[1].id, actual[0].refId)
+        assertEquals(Endringskode.UEND, actual[1].linjetype)
+        assertEquals(original[1].id, actual[1].id)
+        assertEquals(original[1].refId, actual[1].refId)
+    }
+
+    @Test internal fun `original andre periode samsvarer delvis med ny`() {
+        val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50)
+        val recalculated = linjer(6.januar to 19.januar grad 50)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 5.januar grad 0 dagsats 0, 6.januar to 19.januar grad 50), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.OPPH, actual[0].linjetype)
+        assertEquals(original[1].id, actual[0].refId)
+        assertEquals(Endringskode.ENDR, actual[1].linjetype)
+        assertEquals(original[1].id, actual[1].id)
+        assertEquals(original[1].refId, actual[1].refId)
+    }
+
+    @Test internal fun `perioden min starter midt i en original periode`() {
+        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
+        val recalculated = linjer(6.januar to 19.januar grad 50)
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 5.januar grad 0 dagsats 0, 6.januar to 19.januar grad 50), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.OPPH, actual[0].linjetype)
+        assertEquals(original[1].id, actual[0].refId)
+        assertEquals(Endringskode.NY, actual[1].linjetype)
+        assertEquals(actual[0].id, actual[1].refId)
+        assertEquals(actual[0].id + 1, actual[1].id)
+    }
+
+    @Test internal fun `ny er tom`() {
+        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
+        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 31.desember(2017))
+        val actual = recalculated forskjell original
+        assertUtbetalinger(linjer(1.januar to 12.januar grad 0 dagsats 0), actual)
+        assertEquals(original.referanse, actual.referanse)
+        assertEquals(Endringskode.UEND, actual.linjertype)
+        assertEquals(Endringskode.OPPH, actual[0].linjetype)
+        assertEquals(original[1].id, actual[0].refId)
+        assertEquals(original[1].id + 1, actual[0].id)
+        assertEquals(original.referanse, actual[0].refFagsystemId)
+    }
+
     private val Oppdrag.linjertype get() = this.get<Endringskode>("endringskode")
 
     private val Utbetalingslinje.linjetype get() = this.get<Endringskode>("endringskode")
@@ -241,12 +296,12 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     private fun linjer(vararg linjer: TestUtbetalingslinje) =
-        Oppdrag(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }).also {
+        Oppdrag(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }, sisteArbeidsgiverdag = 31.desember(2017)).also {
             it.zipWithNext { a, b -> b.linkTo(a) }
         }
 
     private fun linjer(vararg linjer: Utbetalingslinje) =
-        Oppdrag(ORGNUMMER, SPREF, linjer.toList()).also {
+        Oppdrag(ORGNUMMER, SPREF, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also {
             it.zipWithNext { a, b -> b.linkTo(a) }
         }
 

@@ -49,14 +49,14 @@ internal class UtbetalingTest {
     @Test
     fun `separate utbetalinger`() {
         val tidslinje = tidslinjeOf(
-            16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,
+            16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.AP, 2.HELG, 5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,
             startDato = 1.januar(2020)
         )
 
         beregnUtbetalinger(tidslinje)
 
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
-        val andre = opprettUtbetaling(tidslinje.subset(5.februar(2020), 10.februar(2020)), tidligere = første)
+        val andre = opprettUtbetaling(tidslinje, tidligere = første)
 
         val inspektør1 = OppdragInspektør(første.arbeidsgiverUtbetalingslinjer())
         val inspektør2 = OppdragInspektør(andre.arbeidsgiverUtbetalingslinjer())

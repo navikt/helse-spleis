@@ -68,10 +68,13 @@ internal class Utbetalingslinje internal constructor(
     }
 
     internal fun erForskjell() = endringskode != UEND
+
+    internal fun deletion(fagsystemId: String, fom: LocalDate, tom: LocalDate) =
+        Utbetalingslinje(fom, tom, 0, 0.0, fagsystemId, delytelseId + 1, delytelseId, OPPH)
 }
 
 internal enum class Endringskode {
-    NY, UEND, ENDR
+    NY, UEND, ENDR, OPPH
 }
 
 internal enum class Klassekode(internal val verdi: String) {

@@ -88,10 +88,11 @@ internal fun createOppdrag(
     linjer: List<Utbetalingslinje>,
     fagsystemId: String,
     endringskode: Endringskode,
+    sisteArbeidsgiverdag: LocalDate? = null,
     sjekksum: Int
 ) = Oppdrag::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(mottaker, fagområde, linjer, fagsystemId, endringskode, sjekksum)
+    .call(mottaker, fagområde, linjer, fagsystemId, endringskode, sisteArbeidsgiverdag, sjekksum)
 
 internal fun createUtbetalingslinje(
     fom: LocalDate,

@@ -24,23 +24,30 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
-        opprett(5.NAV, 2.HELG, 3.NAV)
+        opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
-        assertLinje(0, 1.januar, 10.januar, null)
+        assertLinje(0, 2.januar, 10.januar, null)
     }
 
     @Test
     internal fun `helg ved start og slutt i perioden utelates ikke`() {
-        opprett(2.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
+        opprett(1.AP, 1.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
 
         assertEquals(1, oppdrag.size)
-        assertLinje(0, 1.januar, 9.januar, null, sats = 1200, grad = 100.0)
+        assertLinje(0, 2.januar, 9.januar, null, sats = 1200, grad = 100.0)
     }
 
     @Test
     internal fun `kun helgedager`() {
-        opprett(2.HELG)
+        opprett(1.AP, 2.HELG)
+
+        assertEquals(0, oppdrag.size)
+    }
+
+    @Test
+    internal fun `kun arbeidsdag`() {
+        opprett(2.ARB)
 
         assertEquals(0, oppdrag.size)
     }

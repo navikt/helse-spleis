@@ -19,6 +19,7 @@ internal class OppdragBuilder(
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
     private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
+    private var sisteArbeidsgiverdag: LocalDate? = null
 
     init {
         tidslinje.kutt(sisteDato).reverse().accept(this)
@@ -28,7 +29,7 @@ internal class OppdragBuilder(
         arbeisdsgiverLinjer.removeAll { it.dagsats == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
-        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId)
+        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()
@@ -53,7 +54,8 @@ internal class OppdragBuilder(
     }
 
     override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
-        tilstand = Avsluttet()
+        sisteArbeidsgiverdag?.let { sisteArbeidsgiverdag = dag.dato }
+        tilstand = Avsluttet
     }
 
     override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
@@ -154,5 +156,5 @@ internal class OppdragBuilder(
         }
     }
 
-    private inner class Avsluttet : Tilstand {}
+    private object Avsluttet : Tilstand {}
 }
