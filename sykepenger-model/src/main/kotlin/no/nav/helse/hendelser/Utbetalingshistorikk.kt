@@ -212,13 +212,6 @@ class Utbetalingshistorikk(
         }
 
         class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(
-                graderingsliste: List<Graderingsperiode>,
-                aktivitetslogg: Aktivitetslogg
-            ): Utbetalingstidslinje {
-                aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
-            }
-
             override fun valider(aktivitetslogg: Aktivitetslogg) {
                 aktivitetslogg.warn(
                     "Det er en utbetalingsperiode som er lagt inn i Infotrygd uten at inntektsopplysninger er registrert.",

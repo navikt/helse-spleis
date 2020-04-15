@@ -118,7 +118,7 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Feiler selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
+    fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234),
             Utbetalingshistorikk.Periode.Ukjent(5.januar, 5.januar, 0)
@@ -130,9 +130,10 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            utbetalingshistorikk.utbetalingstidslinje(null)
-        }
+        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(null)
+        val inspektør = Inspektør().apply { tidslinje.accept(this) }
+        assertEquals(1.januar, inspektør.førsteDag)
+        assertEquals(10.januar, inspektør.sisteDag)
     }
 
     @Test

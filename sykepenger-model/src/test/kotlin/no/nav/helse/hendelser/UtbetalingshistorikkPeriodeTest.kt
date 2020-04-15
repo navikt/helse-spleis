@@ -187,11 +187,12 @@ class UtbetalingshistorikkPeriodeTest {
     }
 
     @Test
-    fun `Ukjent mappes til utbetalingstidslinje`() {
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar, 1234)
-                .toTidslinje(graderingsliste, aktivitetslogg)
-        }
+    fun `Ukjent mappes til tom utbetalingstidslinje`() {
+        val tidslinje = Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar, 1234)
+            .toTidslinje(graderingsliste, aktivitetslogg)
+        val inspektør = Inspektør().apply { tidslinje.accept(this) }
+        assertNull(inspektør.førsteDag)
+        assertNull(inspektør.sisteDag)
     }
 
     @Test
