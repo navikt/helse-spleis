@@ -15,7 +15,7 @@ import java.util.*
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
-    private val refusjon: Refusjon?,
+    private val refusjon: Refusjon,
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
@@ -91,8 +91,7 @@ class Inntektsmelding(
     }
 
     override fun valider(): Aktivitetslogg {
-        if (refusjon == null) aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-        else refusjon.valider(aktivitetslogg, beregnetInntekt)
+        refusjon.valider(aktivitetslogg, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode")
         if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID fra inntektsmeldingen er utfylt")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
@@ -104,7 +103,7 @@ class Inntektsmelding(
     }
 
     internal fun valider(periode: Periode): Aktivitetslogg {
-        refusjon?.valider(aktivitetslogg, periode)
+        refusjon.valider(aktivitetslogg, periode)
         return aktivitetslogg
     }
 
@@ -133,12 +132,15 @@ class Inntektsmelding(
 
     class Refusjon(
         private val opphørsdato: LocalDate?,
-        private val beløpPrMåned: Double,
+        private val beløpPrMåned: Double?,
         private val endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
 
         internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double): Aktivitetslogg {
-            if (beløpPrMåned != beregnetInntekt) aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+            when {
+                beløpPrMåned == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                beløpPrMåned != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+            }
             return aktivitetslogg
         }
 

@@ -40,13 +40,11 @@ internal class InntektsmeldingMessage(
 
     override val fødselsnummer get() = this["arbeidstakerFnr"].asText()
     private val refusjon
-        get() = this["refusjon.beloepPrMnd"].takeUnless (JsonNode::isMissingOrNull)?.let { beløpPerMåned ->
-            Inntektsmelding.Refusjon(
-                this["refusjon.opphoersdato"].asOptionalLocalDate(),
-                beløpPerMåned.asDouble(),
-                this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
-            )
-        }
+        get() = Inntektsmelding.Refusjon(
+            beløpPrMåned = this["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble(),
+            opphørsdato = this["refusjon.opphoersdato"].asOptionalLocalDate(),
+            endringerIRefusjon = this["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
+        )
     private val orgnummer get() = this["virksomhetsnummer"].asText()
     private val aktørId get() = this["arbeidstakerAktorId"].asText()
     private val mottattDato get() = this["mottattDato"].asLocalDateTime()
