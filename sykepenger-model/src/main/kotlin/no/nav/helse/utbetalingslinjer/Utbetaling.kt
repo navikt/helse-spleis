@@ -75,6 +75,13 @@ internal class Utbetaling private constructor(
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
+
+    internal fun kansellerUtbetaling() = Utbetaling(
+        utbetalingstidslinje,
+        arbeidsgiverOppdrag.emptied().forskjell(arbeidsgiverOppdrag),
+        personOppdrag.emptied().forskjell(personOppdrag),
+        LocalDateTime.now()
+    )
 }
 
 

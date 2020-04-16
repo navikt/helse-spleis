@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
@@ -18,8 +18,18 @@ internal class Utbetalingslinje internal constructor(
     private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig
 ) {
 
-    internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.visitUtbetalingslinje(this, fom, tom, dagsats, grad, delytelseId, refDelytelseId, refFagsystemId)
+    internal fun accept(visitor: OppdragVisitor) {
+        visitor.visitUtbetalingslinje(
+            this,
+            fom,
+            tom,
+            dagsats,
+            grad,
+            delytelseId,
+            refDelytelseId,
+            refFagsystemId,
+            endringskode
+        )
     }
 
     internal fun linkTo(other: Utbetalingslinje) {

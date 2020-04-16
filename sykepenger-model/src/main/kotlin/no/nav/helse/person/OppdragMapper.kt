@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -87,7 +88,8 @@ private class OppdragMapper(
         grad: Double,
         delytelseId: Int,
         refDelytelseId: Int?,
-        refFagsystemId: String?
+        refFagsystemId: String?,
+        endringskode: Endringskode
     ) {
         utbetalingslinjeListe.add(
             PersonObserver.Utbetalingslinje(

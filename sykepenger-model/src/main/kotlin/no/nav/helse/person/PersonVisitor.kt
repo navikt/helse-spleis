@@ -6,6 +6,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -136,7 +137,8 @@ internal interface OppdragVisitor {
         grad: Double,
         delytelseId: Int,
         refDelytelseId: Int?,
-        refFagsystemId: String?
+        refFagsystemId: String?,
+        endringskode: Endringskode
     ) {}
     fun postVisitOppdrag(oppdrag: Oppdrag) {}
 }

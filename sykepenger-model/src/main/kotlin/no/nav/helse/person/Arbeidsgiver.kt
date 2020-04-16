@@ -111,7 +111,10 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         utbetalinger.reversed().firstOrNull {
             it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId
-        } ?: hendelse.error("Avvis hvis vi ikke finner utbetalingsreferanse %s", hendelse.fagsystemId)
+        }
+            ?.kansellerUtbetaling()
+            ?.also { utbetalinger.add(it) }
+            ?: hendelse.error("Avvis hvis vi ikke finner utbetalingsreferanse %s", hendelse.fagsystemId)
     }
 
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)

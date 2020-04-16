@@ -3,11 +3,15 @@ package no.nav.helse.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
@@ -40,6 +44,50 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(2, it.arbeidsgiverOppdrag.size)
+            it.arbeidsgiverOppdrag[1]
+            TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
+                assertEquals(
+                    Utbetalingslinje(18.januar, 26.januar, 0, 0.0),
+                    oppdragInspektør.linjer[0]
+                )
+                assertEquals(Endringskode.OPPH, oppdragInspektør.endringskoder[0])
+                assertEquals(oppdragInspektør.fagsystemIder[0], oppdragInspektør.refFagsystemIder[0])
+            }
         }
+    }
+
+    private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
+        internal val oppdrag = mutableListOf<Oppdrag>()
+        internal val linjer = mutableListOf<Utbetalingslinje>()
+        internal val endringskoder = mutableListOf<Endringskode>()
+        internal val fagsystemIder = mutableListOf<String?>()
+        internal val refFagsystemIder = mutableListOf<String?>()
+
+        init {
+            oppdrag.accept(this)
+        }
+
+        override fun preVisitOppdrag(oppdrag: Oppdrag) {
+            this.oppdrag.add(oppdrag)
+            fagsystemIder.add(oppdrag.fagsystemId())
+        }
+
+        override fun visitUtbetalingslinje(
+            linje: Utbetalingslinje,
+            fom: LocalDate,
+            tom: LocalDate,
+            dagsats: Int,
+            grad: Double,
+            delytelseId: Int,
+            refDelytelseId: Int?,
+            refFagsystemId: String?,
+            endringskode: Endringskode
+        ) {
+            linjer.add(linje)
+            endringskoder.add(endringskode)
+            refFagsystemIder.add(refFagsystemId)
+        }
+
     }
 }

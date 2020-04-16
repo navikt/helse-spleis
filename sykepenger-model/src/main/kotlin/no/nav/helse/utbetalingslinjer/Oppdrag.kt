@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
@@ -31,7 +31,7 @@ internal class Oppdrag private constructor(
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
 
-    internal fun accept(visitor: UtbetalingVisitor) {
+    internal fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(this)
         linjer.forEach { it.accept(visitor) }
         visitor.postVisitOppdrag(this)
@@ -163,6 +163,14 @@ internal class Oppdrag private constructor(
         this.forEach { it.refFagsystemId = tidligere.fagsystemId }
         this.endringskode = Endringskode.UEND
     }
+
+    internal fun emptied(): Oppdrag =
+        Oppdrag(
+            mottaker = mottaker,
+            fagområde = fagområde,
+            fagsystemId = fagsystemId,
+            sisteArbeidsgiverdag = sisteArbeidsgiverdag
+        )
 
     private interface Tilstand {
         fun forskjell(

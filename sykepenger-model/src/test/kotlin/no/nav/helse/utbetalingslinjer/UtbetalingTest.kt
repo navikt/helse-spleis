@@ -139,7 +139,8 @@ internal class UtbetalingTest {
             grad: Double,
             delytelseId: Int,
             refDelytelseId: Int?,
-            refFagsystemId: String?
+            refFagsystemId: String?,
+            endringskode: Endringskode
         ) {
             linjeteller += 1
             delytelseIder.add(delytelseId)
