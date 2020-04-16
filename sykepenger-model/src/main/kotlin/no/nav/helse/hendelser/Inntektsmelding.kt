@@ -90,8 +90,8 @@ class Inntektsmelding(
         ))
     }
 
-    override fun valider(): Aktivitetslogg {
-        refusjon.valider(aktivitetslogg, beregnetInntekt)
+    override fun valider(periode: Periode): Aktivitetslogg {
+        refusjon.valider(aktivitetslogg, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode")
         if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID fra inntektsmeldingen er utfylt")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
@@ -99,11 +99,6 @@ class Inntektsmelding(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s", it
             )
         }
-        return aktivitetslogg
-    }
-
-    internal fun valider(periode: Periode): Aktivitetslogg {
-        refusjon.valider(aktivitetslogg, periode)
         return aktivitetslogg
     }
 
@@ -136,16 +131,10 @@ class Inntektsmelding(
         private val endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double): Aktivitetslogg {
+        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode, beregnetInntekt: Double): Aktivitetslogg {
             when {
                 beløpPrMåned == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 beløpPrMåned != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-            }
-            return aktivitetslogg
-        }
-
-        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode): Aktivitetslogg {
-            when {
                 opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")
             }

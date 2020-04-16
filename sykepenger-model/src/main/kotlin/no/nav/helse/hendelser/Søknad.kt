@@ -55,7 +55,7 @@ class Søknad constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(): Aktivitetslogg {
+    override fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
         return aktivitetslogg

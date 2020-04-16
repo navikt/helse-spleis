@@ -127,7 +127,7 @@ internal class InntektsmeldingHendelseTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
-        assertFalse(inntektsmelding.valider().hasErrors())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))

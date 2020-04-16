@@ -27,7 +27,7 @@ class Sykmelding(
         if (!ingenOverlappende()) severe("Sykeperioder overlapper")
     }
 
-    override fun valider() = aktivitetslogg  // No invalid possibilities if passed init block
+    override fun valider(periode: Periode) = aktivitetslogg  // No invalid possibilities if passed init block
 
     override fun melding(klassName: String) = "Sykmelding"
 

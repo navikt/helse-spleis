@@ -55,7 +55,7 @@ class SøknadArbeidsgiver constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(): Aktivitetslogg {
+    override fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         return aktivitetslogg
     }

@@ -177,7 +177,9 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, TilInfotrygd)
     }
 
-    private fun periode() = Periode(førsteDag(), sisteDag())
+    private fun periode() =
+        if (sykdomshistorikk.isEmpty()) Periode(LocalDate.MIN, LocalDate.MAX)
+        else Periode(førsteDag(), sisteDag())
 
     private fun førsteDag() = sykdomstidslinje().førsteDag()
 
@@ -186,7 +188,7 @@ internal class Vedtaksperiode private constructor(
     private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
-        if (hendelse.valider().hasErrors())
+        if (hendelse.valider(periode()).hasErrors())
             return tilstand(hendelse, TilInfotrygd)
         block()
     }

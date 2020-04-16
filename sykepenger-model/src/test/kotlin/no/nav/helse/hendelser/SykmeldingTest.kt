@@ -33,7 +33,7 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykdomsgrad under 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
-        assertFalse(sykmelding.valider().hasErrors())
+        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
     }
 
     @Test

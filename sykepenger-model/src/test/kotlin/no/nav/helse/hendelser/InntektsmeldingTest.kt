@@ -30,7 +30,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
-        assertTrue(inntektsmelding.valider().hasWarnings())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarnings())
         assertEquals(1.januar, tidslinje.førsteDag())
         assertEquals(1.januar, tidslinje.sisteDag())
     }
@@ -184,7 +184,7 @@ internal class InntektsmeldingTest {
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
             ), emptyList()
         )
-        inntektsmelding.valider()
+        inntektsmelding.valider(Periode(1.januar, 31.januar))
         assertFalse(inntektsmelding.hasErrors())
     }
 
@@ -194,7 +194,7 @@ internal class InntektsmeldingTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
             ferieperioder = listOf(Periode(3.januar, 4.januar))
         )
-        inntektsmelding.valider()
+        inntektsmelding.valider(Periode(1.januar, 31.januar))
         assertFalse(inntektsmelding.hasErrors())
 
         val tidslinje = inntektsmelding.sykdomstidslinje()
@@ -248,7 +248,7 @@ internal class InntektsmeldingTest {
             refusjonBeløp = 100000.00,
             beregnetInntekt = 10000.00
         )
-        assertTrue(inntektsmelding.valider().hasErrors())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
     }
 
     @Test
@@ -290,7 +290,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             arbeidsforholdId = "1234"
         )
-        assertTrue(inntektsmelding.valider().hasWarnings())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarnings())
     }
 
     @Test
@@ -299,7 +299,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
         )
-        assertTrue(inntektsmelding.valider().hasWarnings())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarnings())
     }
 
     @Test
@@ -308,7 +308,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.valider().hasWarnings())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarnings())
     }
 
     private fun inntektsmelding(
@@ -317,7 +317,7 @@ internal class InntektsmeldingTest {
         refusjonBeløp: Double = 1000.00,
         beregnetInntekt: Double = 1000.00,
         førsteFraværsdag: LocalDate? = 1.januar,
-        refusjonOpphørsdato: LocalDate = 1.januar,
+        refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<LocalDate> = emptyList(),
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null

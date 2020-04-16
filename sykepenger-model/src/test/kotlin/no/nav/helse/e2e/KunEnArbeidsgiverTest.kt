@@ -1388,6 +1388,20 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `forlengelsesperiode der refusjon opphører`() {
+        håndterSykmelding(Triple(13.mars(2020), 29.mars(2020), 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(13.mars(2020), 28.mars(2020))), førsteFraværsdag = 13.mars(2020), refusjon = Triple(31.mars(2020), INNTEKT, emptyList()))
+        håndterSykmelding(Triple(30.mars(2020), 14.april(2020), 100))
+        håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100))
+        håndterVilkårsgrunnlag( 0, INNTEKT)
+        håndterYtelser(0)
+        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100))
+        håndterYtelser(1)
+        assertTilstander(0, START,MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null, INNTEKT, listOf(14.januar)))
