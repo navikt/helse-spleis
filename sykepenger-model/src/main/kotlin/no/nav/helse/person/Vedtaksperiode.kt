@@ -172,6 +172,13 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndter(other: Vedtaksperiode, hendelse: Arbeidsgiver.AvsluttBehandling) {
+        if (this.periode().start > other.periode().start) {
+            kontekst(hendelse.hendelse)
+            tilstand.håndter(this, hendelse)
+        }
+    }
+
     internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
@@ -429,6 +436,14 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandling: GjenopptaBehandling
         ) {
             gjenopptaBehandling.hendelse.info("Tidligere periode ferdig behandlet")
+        }
+
+        fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            avsluttBehandling: Arbeidsgiver.AvsluttBehandling
+        ) {
+            avsluttBehandling.hendelse.info("Tidligere periode gikk til Infotrygd")
+            vedtaksperiode.tilstand(avsluttBehandling.hendelse, TilInfotrygd)
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -1008,8 +1023,8 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_INFOTRYGD
         override val timeout: Duration = Duration.ZERO
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk")
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+            hendelse.error("Sykdom for denne personen kan ikke behandles automatisk. Avslutter alle påfølgende perioder")
+            vedtaksperiode.arbeidsgiver.avsluttBehandling(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

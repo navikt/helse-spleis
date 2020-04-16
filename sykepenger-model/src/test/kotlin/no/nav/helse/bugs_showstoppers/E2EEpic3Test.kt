@@ -831,12 +831,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Periode(30.mars(2020), 30.mars(2020))
         ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
         håndterVilkårsgrunnlag(0, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
-        håndterYtelser(2)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, TIL_INFOTRYGD)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
-        assertTrue(inspektør.vilkårsgrunnlag(0).erEgenAnsatt)
-        assertTrue(inspektør.vilkårsgrunnlag(1).erEgenAnsatt)
-        assertTrue(inspektør.vilkårsgrunnlag(2).erEgenAnsatt)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 }

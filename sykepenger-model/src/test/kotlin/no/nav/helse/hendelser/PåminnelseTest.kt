@@ -26,7 +26,7 @@ internal class PåminnelseTest {
 
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
         assertTrue(aktivitetslogg.hasMessages(), aktivitetslogg.toString())
-        assertFalse(aktivitetslogg.hasWarnings(), aktivitetslogg.toString())
+        assertTrue(aktivitetslogg.hasErrors(), aktivitetslogg.toString())
     }
 
     @Test

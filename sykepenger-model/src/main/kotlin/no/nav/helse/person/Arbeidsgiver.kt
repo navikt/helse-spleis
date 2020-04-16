@@ -150,7 +150,12 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
+    internal fun avsluttBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        perioder.forEach { it.håndter(vedtaksperiode, AvsluttBehandling(hendelse)) }
+    }
+
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)
+    internal class AvsluttBehandling(internal val hendelse: ArbeidstakerHendelse)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
