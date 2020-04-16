@@ -308,6 +308,32 @@ internal class SpeilBuilderTest {
         }
     }
 
+    @Test
+    internal fun `Yes hello does this work?!`() {
+        val fom = 1.januar(2018)
+        val tom = 31.januar(2018)
+
+        val (person, hendelser) = person(fom = fom, tom = tom,
+        påfølgendePerioder = listOf(
+            1.februar(2018).rangeTo(28.februar(2018)),
+            1.mars(2018).rangeTo(31.mars(2018)),
+            1.april(2018).rangeTo(30.april(2018)),
+            1.mai(2018).rangeTo(31.mai(2018)),
+            1.juni(2018).rangeTo(30.juni(2018)),
+            1.juli(2018).rangeTo(31.juli(2018)),
+            1.august(2018).rangeTo(31.august(2018)),
+            1.september(2018).rangeTo(30.september(2018)),
+            1.oktober(2018).rangeTo(31.oktober(2018)),
+            1.november(2018).rangeTo(30.november(2018)),
+            1.desember(2018).rangeTo(31.desember(2018)),
+            1.januar(2019).rangeTo(31.januar(2019))
+        ))
+        person.aktivitetslogg.toString()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertEquals(0, vedtaksperiode.vilkår.sykepengedager.gjenståendeDager)
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -335,7 +361,8 @@ internal class SpeilBuilderTest {
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
-            søknadhendelseId: UUID = UUID.randomUUID()
+            søknadhendelseId: UUID = UUID.randomUUID(),
+            påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList()
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
@@ -362,6 +389,29 @@ internal class SpeilBuilderTest {
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+
+                    påfølgendePerioder.forEach { periode ->
+
+                        sykmelding(fom = periode.start, tom = periode.endInclusive).also { (sykmelding, sykmeldingDTO) ->
+                            håndter(sykmelding)
+                            add(sykmeldingDTO)
+                        }
+                        fangeVedtaksperiodeId()
+                        søknad(
+                            hendelseId = søknadhendelseId,
+                            fom = periode.start,
+                            tom = periode.endInclusive,
+                            sendtSøknad = periode.endInclusive.atStartOfDay()
+                        ).also { (søknad, søknadDTO) ->
+                            håndter(søknad)
+                            add(søknadDTO)
+                        }
+                        håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                    }
                 }
             }
 
@@ -509,7 +559,11 @@ internal class SpeilBuilderTest {
             fom: LocalDate
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
-            refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(
+                opphørsdato = null,
+                beløpPrMåned = 31000.00,
+                endringerIRefusjon = emptyList()
+            ),
             orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,

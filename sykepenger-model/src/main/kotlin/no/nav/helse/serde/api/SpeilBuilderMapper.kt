@@ -185,8 +185,11 @@ internal fun mapVilkår(
     val over67 = personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
     val maksdato = vedtaksperiodeMap["maksdato"] as LocalDate?
     val gjenståendeDager = maksdato?.let {
-        val dagerIgjen = sisteSykepengedagEllerSisteDagIPerioden.datesUntil(it).filter { d -> !d.erHelg() }.count()
-            .toInt(); if (dagerIgjen < 0) 0 else dagerIgjen
+        if (sisteSykepengedagEllerSisteDagIPerioden.isBefore(it)) {
+            sisteSykepengedagEllerSisteDagIPerioden.datesUntil(it).filter { d -> !d.erHelg() }.count().toInt()
+        } else {
+            0
+        }
     }
     val sykepengedager = SykepengedagerDTO(
         forbrukteSykedager = forbrukteSykedager,
@@ -214,7 +217,7 @@ internal fun mapVilkår(
             oppfylt = søknadsfristOppfylt(it)
         )
     }
-    val sykepengegrunnlag =førsteFraværsdag?.let {
+    val sykepengegrunnlag = førsteFraværsdag?.let {
         SykepengegrunnlagDTO(
             sykepengegrunnlag = beregnetMånedsinntekt?.times(12),
             grunnbeløp = `1G`.beløp(førsteFraværsdag).toInt(),
