@@ -379,6 +379,26 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(actual[2].id, actual[3].refId)
     }
 
+    @Test
+    internal fun `deletion all`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            6.januar to 12.januar grad 50,
+            13.januar to 19.januar,
+            20.januar to 31.januar
+        )
+        val new = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 31.desember(2017))
+        val actual = new forskjell original
+        assertUtbetalinger(linjer(1.januar to 31.januar grad 0 dagsats 0), actual)
+
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(Endringskode.UEND, actual.endringskode)
+
+        assertEquals(Endringskode.OPPH, actual[0].endringskode)
+        assertEquals(original[3].id + 1, actual[0].id)
+        assertEquals(original[3].id, actual[0].refId)
+    }
+
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 
     private val Utbetalingslinje.endringskode get() = this.get<Endringskode>("endringskode")
