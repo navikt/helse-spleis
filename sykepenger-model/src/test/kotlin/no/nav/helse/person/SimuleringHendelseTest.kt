@@ -38,6 +38,14 @@ internal class SimuleringHendelseTest {
     }
 
     @Test
+    fun `simulering med endret dagsats`() {
+        håndterYtelser()
+        person.håndter(simulering(dagsats = 500))
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertTrue(inspektør.personLogg.hasWarnings())
+    }
+
+    @Test
     fun `simulering er ikke OK`() {
         håndterYtelser()
         person.håndter(simulering(false))
@@ -153,7 +161,7 @@ internal class SimuleringHendelseTest {
             hendelse = this
         }
 
-    private fun simulering(simuleringOK: Boolean = true) =
+    private fun simulering(simuleringOK: Boolean = true, dagsats: Int = 1431) =
         Simulering(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
@@ -180,7 +188,7 @@ internal class SimuleringHendelseTest {
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(1431, 11, "DAGLIG"),
+                                        sats = Simulering.Sats(dagsats, 11, "DAGLIG"),
                                         refunderesOrgnummer = orgnummer
                                     )
                                 )
@@ -203,7 +211,7 @@ internal class SimuleringHendelseTest {
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(1431, 20, "DAGLIG"),
+                                        sats = Simulering.Sats(dagsats, 20, "DAGLIG"),
                                         refunderesOrgnummer = orgnummer
                                     )
                                 )

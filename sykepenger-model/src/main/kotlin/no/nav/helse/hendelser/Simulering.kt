@@ -26,8 +26,14 @@ class Simulering(
             oppdrag.totalbeløp() != simuleringResultat.totalbeløp -> {
                 warn("Simulering kom frem til et annet totalbeløp")
             }
-            simuleringResultat.perioder.any { simulertPeriode -> oppdrag.none { simulertPeriode.periode.overlapperMed(Periode(it.fom, it.tom)) } } -> {
+            oppdrag.map { Periode(it.fom, it.tom) }.any { oppdrag -> simuleringResultat.perioder.none { oppdrag.overlapperMed(it.periode) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
+            }
+            oppdrag.any { linje -> simuleringResultat.perioder.none {
+                if (!it.periode.overlapperMed(Periode(linje.fom, linje.tom))) false
+                else it.utbetalinger.flatMap { it.detaljer }.none { linje.totalbeløp() == it.beløp }
+            } } -> {
+                warn("Simulering har endret dagsats eller antall på én eller flere utbetalingslinjer")
             }
         }
     }
