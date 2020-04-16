@@ -26,7 +26,7 @@ internal abstract class AbstractEndToEndTest {
     protected companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
-        private const val ORGNUMMER = "987654321"
+        const val ORGNUMMER = "987654321"
         const val INNTEKT = 31000.00
     }
 
@@ -77,8 +77,18 @@ internal abstract class AbstractEndToEndTest {
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
 
-    protected fun håndterSøknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean = false, sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive) {
-        person.håndter(søknad(perioder = *perioder, harAndreInntektskilder = harAndreInntektskilder, sendtTilNav = sendtTilNav))
+    protected fun håndterSøknad(
+        vararg perioder: Søknad.Periode,
+        harAndreInntektskilder: Boolean = false,
+        sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive
+    ) {
+        person.håndter(
+            søknad(
+                perioder = *perioder,
+                harAndreInntektskilder = harAndreInntektskilder,
+                sendtTilNav = sendtTilNav
+            )
+        )
     }
 
     protected fun håndterSøknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode) {
@@ -113,10 +123,16 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
-    protected fun håndterVilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double) {
+    protected fun håndterVilkårsgrunnlag(
+        vedtaksperiodeIndex: Int, inntekt: Double,
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
+        ),
+        egenAnsatt: Boolean = false
+    ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, inntekt))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, inntekt, arbeidsforhold, egenAnsatt))
     }
 
     protected fun håndterSimulering(vedtaksperiodeIndex: Int) {
@@ -175,7 +191,11 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun søknad(vararg perioder: Søknad.Periode, harAndreInntektskilder: Boolean, sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive): Søknad {
+    private fun søknad(
+        vararg perioder: Søknad.Periode,
+        harAndreInntektskilder: Boolean,
+        sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive
+    ): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -226,7 +246,14 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun vilkårsgrunnlag(vedtaksperiodeIndex: Int, inntekt: Double): Vilkårsgrunnlag {
+    private fun vilkårsgrunnlag(
+        vedtaksperiodeIndex: Int,
+        inntekt: Double,
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
+        ),
+        egenAnsatt: Boolean = false
+    ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             aktørId = AKTØRID,
@@ -237,15 +264,8 @@ internal abstract class AbstractEndToEndTest {
                     YearMonth.of(2017, it) to inntekt
                 }.groupBy({ it.first }) { it.second }
             ),
-            erEgenAnsatt = false,
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Opptjeningvurdering.Arbeidsforhold(
-                        ORGNUMMER,
-                        1.januar(2017)
-                    )
-                )
-            ),
+            erEgenAnsatt = egenAnsatt,
+            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {

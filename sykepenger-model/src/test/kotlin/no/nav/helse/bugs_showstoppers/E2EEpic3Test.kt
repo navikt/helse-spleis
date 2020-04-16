@@ -802,4 +802,41 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(it.arbeidsgiverOppdrag[1].fagsystemId(), it.arbeidsgiverOppdrag[2].fagsystemId())
         }
     }
+
+    @Test
+    fun `forlengelsesperiode der refusjon opphører`() {
+        håndterSykmelding(Triple(13.mars(2020), 29.mars(2020), 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(13.mars(2020), 28.mars(2020))), førsteFraværsdag = 13.mars(2020), refusjon = Triple(31.mars(2020), INNTEKT, emptyList()))
+        håndterSykmelding(Triple(30.mars(2020), 14.april(2020), 100))
+        håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100))
+        håndterVilkårsgrunnlag( 0, INNTEKT)
+        håndterYtelser(0)
+        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100))
+        håndterYtelser(1)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVSLUTTET)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
+
+    @Test
+    fun `vilkårsgrunnlagfeil på kort arbeidsgiversøknad`() {
+        håndterSykmelding(Triple(2.mars(2020), 2.mars(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(2.mars(2020), 2.mars(2020), 100, 100))
+        håndterSykmelding(Triple(16.mars(2020), 29.mars(2020), 100))
+        håndterSykmelding(Triple(30.mars(2020), 15.april(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(16.mars(2020), 29.mars(2020), 100, 100))
+        håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100))
+        håndterInntektsmeldingMedValidering(0, listOf(
+            Periode(2.mars(2020), 2.mars(2020)),
+            Periode(16.mars(2020), 29.mars(2020)),
+            Periode(30.mars(2020), 30.mars(2020))
+        ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
+        håndterVilkårsgrunnlag(0, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
+        håndterYtelser(2)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertTrue(inspektør.vilkårsgrunnlag(0).erEgenAnsatt)
+        assertTrue(inspektør.vilkårsgrunnlag(1).erEgenAnsatt)
+        assertTrue(inspektør.vilkårsgrunnlag(2).erEgenAnsatt)
+    }
 }

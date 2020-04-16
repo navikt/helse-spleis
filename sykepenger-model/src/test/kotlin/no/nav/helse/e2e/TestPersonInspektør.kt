@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -21,6 +22,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
+    private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
@@ -115,6 +117,11 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
+        if (dataForVilkårsvurdering == null) return
+        vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
+    }
+
     private inner class Dagteller : SykdomstidslinjeVisitor {
         override fun visitSykedag(dag: Sykedag.Sykmelding) = inkrementer(
             Sykedag::class)
@@ -157,6 +164,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks] ?: fail {
         "Missing collection initialization"
     }
 
