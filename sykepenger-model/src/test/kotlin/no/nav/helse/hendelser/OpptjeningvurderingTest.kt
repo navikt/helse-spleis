@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -34,6 +35,18 @@ internal class OpptjeningvurderingTest {
     @Test
     internal fun `28 dager opptjening fører til OK opptjening`() {
         assertFalse(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017)))) {
+            assertEquals(28, it.opptjeningsdager(ORGNUMMER))
+            assertTrue(it.harOpptjening(ORGNUMMER))
+        })
+    }
+
+    @Test
+    internal fun `flere arbeidsforhold i samme bedrift`() {
+        assertFalse(undersøke(listOf(
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017)),
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 1.januar(2018)),
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2018), 1.september(2018))
+        )) {
             assertEquals(28, it.opptjeningsdager(ORGNUMMER))
             assertTrue(it.harOpptjening(ORGNUMMER))
         })

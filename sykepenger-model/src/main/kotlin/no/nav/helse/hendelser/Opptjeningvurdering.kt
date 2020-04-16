@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import java.lang.Integer.max
 import java.time.LocalDate
 
 class Opptjeningvurdering(
@@ -43,7 +44,12 @@ class Opptjeningvurdering(
                 map: MutableMap<String, Int>,
                 førsteFraværsdag: LocalDate
             ) {
-                liste.forEach { map[it.orgnummer] = it.opptjeningsdager(førsteFraværsdag) }
+                liste.forEach {
+                    map.compute(it.orgnummer) { _, opptjeningsdager ->
+                        val dager = it.opptjeningsdager(førsteFraværsdag)
+                        opptjeningsdager?.let { max(it, dager) } ?: dager
+                    }
+                }
             }
         }
     }
