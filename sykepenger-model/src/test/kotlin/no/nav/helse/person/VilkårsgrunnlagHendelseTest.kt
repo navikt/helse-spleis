@@ -177,7 +177,8 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = 31.januar.atStartOfDay()
+            sendtTilNAV = 31.januar.atStartOfDay(),
+            permittert = false
         ).apply {
             hendelse = this
         }

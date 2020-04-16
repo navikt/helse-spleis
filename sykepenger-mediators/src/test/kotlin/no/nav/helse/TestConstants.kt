@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.TestConstants.objectMapper
 import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.felles.*
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -67,7 +67,7 @@ internal object TestConstants {
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = status,
         aktorId = aktørId,
-        fnr = fødselsnummer,
+        fodselsnummer = SkjultVerdi(fødselsnummer),
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = arbeidsgiver,
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,

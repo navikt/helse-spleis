@@ -288,7 +288,8 @@ internal class PersonTest {
             orgnummer = organisasjonsnummer,
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = sendtTilNAV
+            sendtTilNAV = sendtTilNAV,
+            permittert = false
         )
 
 

@@ -7,7 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.SendtSøknadNavMessage
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.helse.testhelpers.januar
+import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -47,7 +48,7 @@ internal class SendtSøknadNavMessageTest {
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = status,
         aktorId = "aktørId",
-        fnr = "fødselsnummer",
+        fodselsnummer = SkjultVerdi("fødselsnummer"),
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = ArbeidsgiverDTO(navn = "arbeidsgiver", orgnummer = "orgnr"),
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
@@ -138,6 +139,14 @@ internal class SendtSøknadNavMessageTest {
         MessageProblems(validSendtSøknadMedFaktiskGradStørreEnn100).also {
             assertDoesNotThrow { assertFalse(SendtSøknadNavMessage(validSendtSøknadMedFaktiskGradStørreEnn100, it).asSøknad().hasErrors()) }
         }
+    }
+
+    @Test
+    internal fun `parser søknad med permitteringer`() {
+        assertValidSøknadMessage(validSøknad().copy(permitteringer = emptyList()).toJson())
+        assertValidSøknadMessage(validSøknad().copy(permitteringer = null).toJson())
+        assertValidSøknadMessage(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, 31.januar))).toJson())
+        assertValidSøknadMessage(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, null))).toJson())
     }
 
     private fun assertValidSøknadMessage(message: String) {

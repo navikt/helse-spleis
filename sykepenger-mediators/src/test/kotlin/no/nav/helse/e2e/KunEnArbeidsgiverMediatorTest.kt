@@ -4,8 +4,7 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.sykepengesoknad.dto.PeriodeDTO
-import no.nav.syfo.kafka.sykepengesoknad.dto.SoknadsperiodeDTO
+import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

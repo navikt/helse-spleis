@@ -221,7 +221,8 @@ internal class JsonBuilderTest {
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
             harAndreInntektskilder = false,
-            sendtTilNAV = sendtSøknad
+            sendtTilNAV = sendtSøknad,
+            permittert = false
         )
 
         internal fun søknadSendtTilArbeidsgiver(

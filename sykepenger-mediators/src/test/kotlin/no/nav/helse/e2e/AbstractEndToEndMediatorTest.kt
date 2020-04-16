@@ -20,7 +20,7 @@ import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.felles.*
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
@@ -109,7 +109,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             id = UUID.randomUUID().toString(),
             sykmeldingId = UUID.randomUUID().toString(),
             aktorId = AKTØRID,
-            fnr = UNG_PERSON_FNR_2018,
+            fodselsnummer = SkjultVerdi(UNG_PERSON_FNR_2018),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = ORGNUMMER),
             fom = perioder.minBy { it.fom!! }?.fom,
             tom = perioder.maxBy { it.tom!! }?.tom,
@@ -138,7 +138,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
             aktorId = AKTØRID,
-            fnr = UNG_PERSON_FNR_2018,
+            fodselsnummer = SkjultVerdi(UNG_PERSON_FNR_2018),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = ORGNUMMER),
             fom = perioder.minBy { it.fom!! }?.fom,
             tom = perioder.maxBy { it.tom!! }?.tom,

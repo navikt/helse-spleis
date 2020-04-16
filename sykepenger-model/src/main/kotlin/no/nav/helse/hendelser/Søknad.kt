@@ -18,7 +18,8 @@ class Søknad constructor(
     private val orgnummer: String,
     private val perioder: List<Periode>,
     private val harAndreInntektskilder: Boolean,
-    private val sendtTilNAV: LocalDateTime
+    private val sendtTilNAV: LocalDateTime,
+    private val permittert: Boolean
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykdomsperiode: no.nav.helse.hendelser.Periode
@@ -57,7 +58,8 @@ class Søknad constructor(
 
     override fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
-        if ( harAndreInntektskilder ) error("Søknaden inneholder andre inntektskilder")
+        if (harAndreInntektskilder) error("Søknaden inneholder andre inntektskilder")
+        if (permittert) warn("Søknaden inneholder permittering - se om det har innvirkning på saken før du utbetaler")
         return aktivitetslogg
     }
 

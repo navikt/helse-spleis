@@ -16,7 +16,7 @@ dependencies {
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
-    testImplementation("no.nav.syfo.kafka:sykepengesoknad:0b2a259676f7a78da70d65838851b05925d6de6f")
+    testImplementation("no.nav.syfo.kafka:felles:2020.04.16-12.30-92d9c5cc")
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
     testImplementation("io.mockk:mockk:$mockkVersion")
 }

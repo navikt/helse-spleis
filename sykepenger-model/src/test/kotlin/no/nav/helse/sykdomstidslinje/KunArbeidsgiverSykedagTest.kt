@@ -73,7 +73,8 @@ internal class KunArbeidsgiverSykedagTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(18.januar, 14.februar, 100)), // 10 sykedag januar & februar
             harAndreInntektskilder = false,
-            sendtTilNAV = sendtTilNAV.atStartOfDay()
+            sendtTilNAV = sendtTilNAV.atStartOfDay(),
+            permittert = false
         )
     }
 

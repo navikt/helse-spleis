@@ -189,7 +189,8 @@ internal class SøknadArbeidsgiverHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
+            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            permittert = false
         )
 
     private fun søknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode, orgnummer: String = "987654321") =

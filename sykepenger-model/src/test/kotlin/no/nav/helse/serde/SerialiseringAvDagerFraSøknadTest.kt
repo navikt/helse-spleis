@@ -105,7 +105,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Søknad.Periode.Utdanning(5.januar, 5.januar)
         ),
         harAndreInntektskilder = false,
-        sendtTilNAV = 5.januar.atStartOfDay()
+        sendtTilNAV = 5.januar.atStartOfDay(),
+        permittert = false
     )
 }
 

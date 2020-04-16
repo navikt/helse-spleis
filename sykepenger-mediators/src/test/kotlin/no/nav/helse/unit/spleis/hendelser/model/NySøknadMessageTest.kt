@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.spleis.hendelser.model.NySøknadMessage
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +26,7 @@ internal class NySøknadMessageTest {
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = SoknadsstatusDTO.NY,
         aktorId = "aktørId",
-        fnr = "fødselsnummer",
+        fodselsnummer = SkjultVerdi("fødselsnummer"),
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = ArbeidsgiverDTO(navn = "arbeidsgiver", orgnummer = "orgnr"),
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,

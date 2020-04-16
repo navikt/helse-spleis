@@ -100,7 +100,8 @@ internal class SykepengesøknadTidslinjeTest {
             orgnummer = "orgnr",
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
+            sendtTilNAV = Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            permittert = false
         )
 
     private fun sykmelding() = Sykmelding(

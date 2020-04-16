@@ -183,7 +183,8 @@ internal abstract class AbstractEndToEndTest {
             orgnummer = ORGNUMMER,
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = sendtTilNav.atStartOfDay()
+            sendtTilNAV = sendtTilNav.atStartOfDay(),
+            permittert = false
         ).apply {
             hendelselogg = this
         }

@@ -31,6 +31,7 @@ internal class SendtSøknadNavMessage(originalMessage: String, private val probl
         require("sendtNav", JsonNode::asLocalDateTime)
         interestedIn("arbeidGjenopptatt")
         interestedIn("andreInntektskilder")
+        interestedIn("permitteringer")
     }
 
     private val søknadTom get() = this["tom"].asLocalDate()
@@ -62,6 +63,8 @@ internal class SendtSøknadNavMessage(originalMessage: String, private val probl
             }
         } + (this["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
             ?: emptyList())
+    private val permittert get() = !(this["permitteringer"].takeUnless { it.isMissingOrNull() }?.isEmpty ?: true)
+
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this)
@@ -75,7 +78,8 @@ internal class SendtSøknadNavMessage(originalMessage: String, private val probl
             orgnummer = orgnummer,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder(),
-            sendtTilNAV = sendtNav
+            sendtTilNAV = sendtNav,
+            permittert = permittert
         )
     }
 

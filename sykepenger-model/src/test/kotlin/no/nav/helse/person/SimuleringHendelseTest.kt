@@ -115,7 +115,8 @@ internal class SimuleringHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100, null)),
             harAndreInntektskilder = false,
-            sendtTilNAV = sisteSykedag.atStartOfDay()
+            sendtTilNAV = sisteSykedag.atStartOfDay(),
+            permittert = false
         ).apply {
             hendelse = this
         }

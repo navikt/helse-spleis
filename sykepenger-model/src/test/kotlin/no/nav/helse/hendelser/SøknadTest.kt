@@ -141,7 +141,21 @@ internal class SøknadTest {
         assertFalse(søknad.hasErrors())
     }
 
-    private fun søknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false) {
+    @Test
+    internal fun `søknad uten permittering får ikke warning`() {
+        søknad(Sykdom(1.januar, 31.januar,  20, 20))
+        søknad.valider(EN_PERIODE)
+        assertFalse(søknad.hasWarnings())
+    }
+
+    @Test
+    internal fun `søknad med permittering får warning`() {
+        søknad(Sykdom(1.januar, 31.januar,  20, 20), permittert = true)
+        søknad.valider(EN_PERIODE)
+        assertTrue(søknad.hasWarnings())
+    }
+
+    private fun søknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -149,7 +163,8 @@ internal class SøknadTest {
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = Periode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now()
+            sendtTilNAV = Periode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
+            permittert = permittert
         )
     }
 }

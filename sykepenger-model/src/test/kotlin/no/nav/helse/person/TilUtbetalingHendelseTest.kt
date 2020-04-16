@@ -152,7 +152,8 @@ internal class TilUtbetalingHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
-            sendtTilNAV = sisteSykedag.atStartOfDay()
+            sendtTilNAV = sisteSykedag.atStartOfDay(),
+            permittert = false
         ).apply {
             hendelse = this
         }

@@ -15,7 +15,7 @@ import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.sykepengesoknad.dto.*
+import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -437,14 +437,14 @@ internal class HendelseMediatorTest {
         private fun sendSøknad(
             id: UUID = UUID.randomUUID(),
             aktørId: String = defaultAktørId,
-            fødselsnummer: String = defaultFødselsnummer,
+            fødselsnummer: String = "fødselsnummer",
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ) {
             val sendtSøknad = SykepengesoknadDTO(
                 status = SoknadsstatusDTO.SENDT,
                 id = id.toString(),
                 aktorId = aktørId,
-                fnr = fødselsnummer,
+                fodselsnummer = SkjultVerdi(fødselsnummer),
                 arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),
@@ -467,7 +467,7 @@ internal class HendelseMediatorTest {
         private fun sendNySøknad(
             id: UUID = UUID.randomUUID(),
             aktørId: String = defaultAktørId,
-            fødselsnummer: String = defaultFødselsnummer,
+            fødselsnummer: String = "fødselsnummer",
             organisasjonsnummer: String = defaultOrganisasjonsnummer
         ): SykepengesoknadDTO {
             val nySøknad = SykepengesoknadDTO(
@@ -475,7 +475,7 @@ internal class HendelseMediatorTest {
                 id = id.toString(),
                 sykmeldingId = UUID.randomUUID().toString(),
                 aktorId = aktørId,
-                fnr = fødselsnummer,
+                fodselsnummer = SkjultVerdi(fødselsnummer),
                 arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
                 fom = LocalDate.now(),
                 tom = LocalDate.now(),

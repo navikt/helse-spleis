@@ -194,7 +194,8 @@ internal class YtelserHendelseTest {
             orgnummer = ORGNR,
             perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
             harAndreInntektskilder = false,
-            sendtTilNAV = sisteSykedag.atStartOfDay()
+            sendtTilNAV = sisteSykedag.atStartOfDay(),
+            permittert = false
         )
 
     private fun inntektsmelding(
