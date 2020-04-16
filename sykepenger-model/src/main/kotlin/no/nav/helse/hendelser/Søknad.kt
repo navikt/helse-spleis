@@ -116,7 +116,7 @@ class Søknad constructor(
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
             override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {
                 if (grad > 100) aktivitetslogg.severe("Utregnet grad er over 100")
-                else if (grad < 0) aktivitetslogg.severe("Utregnet sykdomsgrad er et negativt tall")
+                if (grad < 0) aktivitetslogg.severe("Utregnet sykdomsgrad er et negativt tall")
             }
 
             override fun valider(søknad: Søknad) {
