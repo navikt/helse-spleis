@@ -38,7 +38,7 @@ internal class UtbetalingTest {
         val tidligere = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val utbetaling = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = tidligere)
 
-        val inspektør = OppdragInspektør(utbetaling.arbeidsgiverUtbetalingslinjer())
+        val inspektør = OppdragInspektør(utbetaling.arbeidsgiverOppdrag())
         assertEquals(2, inspektør.antallLinjer())
         assertNull(inspektør.refDelytelseId(0))
         assertNull(inspektør.refFagsystemId(0))
@@ -58,8 +58,8 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val andre = opprettUtbetaling(tidslinje, tidligere = første)
 
-        val inspektør1 = OppdragInspektør(første.arbeidsgiverUtbetalingslinjer())
-        val inspektør2 = OppdragInspektør(andre.arbeidsgiverUtbetalingslinjer())
+        val inspektør1 = OppdragInspektør(første.arbeidsgiverOppdrag())
+        val inspektør2 = OppdragInspektør(andre.arbeidsgiverOppdrag())
         assertEquals(1, inspektør1.antallLinjer())
         assertEquals(1, inspektør2.antallLinjer())
         assertNull(inspektør1.refDelytelseId(0))
@@ -83,7 +83,7 @@ internal class UtbetalingTest {
         val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
         val tredje = opprettUtbetaling(tidslinje.kutt(31.januar(2020)), tidligere = andre)
 
-        val inspektør = OppdragInspektør(tredje.arbeidsgiverUtbetalingslinjer())
+        val inspektør = OppdragInspektør(tredje.arbeidsgiverOppdrag())
         assertEquals(3, inspektør.antallLinjer())
         assertNull(inspektør.refDelytelseId(0))
         assertNull(inspektør.refFagsystemId(0))
@@ -95,8 +95,8 @@ internal class UtbetalingTest {
         assertEquals(inspektør.delytelseId(0), inspektør.refDelytelseId(1))
         assertEquals(inspektør.delytelseId(1), inspektør.refDelytelseId(2))
 
-        assertEquals(første.arbeidsgiverUtbetalingslinjer().referanse(), inspektør.refFagsystemId(1))
-        assertEquals(andre.arbeidsgiverUtbetalingslinjer().referanse(), inspektør.refFagsystemId(2))
+        assertEquals(første.arbeidsgiverOppdrag().fagsystemId(), inspektør.refFagsystemId(1))
+        assertEquals(andre.arbeidsgiverOppdrag().fagsystemId(), inspektør.refFagsystemId(2))
     }
 
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
@@ -128,7 +128,7 @@ internal class UtbetalingTest {
         }
 
         override fun preVisitOppdrag(oppdrag: Oppdrag) {
-            fagsystemIder.add(oppdrag.referanse())
+            fagsystemIder.add(oppdrag.fagsystemId())
         }
 
         override fun visitUtbetalingslinje(

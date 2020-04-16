@@ -59,7 +59,7 @@ private class OppdragMapper(
 
     override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = oppdrag.referanse(),
+            utbetalingsreferanse = oppdrag.fagsystemId(),
             utbetalingslinjer = utbetalingslinjeListe.toList()
         )
             .takeIf { it.utbetalingslinjer.isNotEmpty() }
@@ -72,7 +72,7 @@ private class OppdragMapper(
 
     override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
         PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = oppdrag.referanse(),
+            utbetalingsreferanse = oppdrag.fagsystemId(),
             utbetalingslinjer = utbetalingslinjeListe.toList()
         )
             .takeIf { it.utbetalingslinjer.isNotEmpty() }

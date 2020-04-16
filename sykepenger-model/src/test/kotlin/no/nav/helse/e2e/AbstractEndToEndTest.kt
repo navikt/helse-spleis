@@ -37,7 +37,7 @@ internal abstract class AbstractEndToEndTest {
     protected var forventetEndringTeller = 0
 
     @BeforeEach
-    internal fun setup() {
+    internal fun abstractSetup() {
         person = Person(UNG_PERSON_FNR_2018, AKTØRID)
         observatør = TestObservatør().also { person.addObserver(it) }
     }
@@ -142,6 +142,13 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) {
         person.håndter(utbetaling(vedtaksperiodeIndex, status))
+    }
+
+    protected fun håndterKansellerUtbetaling(
+        orgnummer: String = ORGNUMMER,
+        fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId()
+    ) {
+        person.håndter(KansellerUtbetaling(UNG_PERSON_FNR_2018, orgnummer, fagsystemId))
     }
 
     private fun utbetaling(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) =

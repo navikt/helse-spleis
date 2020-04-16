@@ -104,6 +104,15 @@ class Person private constructor(
         }
     }
 
+    fun håndter(hendelse: KansellerUtbetaling) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.orgnummer)?.håndter(hendelse) ?:
+            hendelse.error("Finner ikke arbeidsgiver")
+    }
+
+    private fun finnArbeidsgiver(hendelse: KansellerUtbetaling) =
+        arbeidsgivere.finn(hendelse.orgnummer)
+
     fun addObserver(observer: PersonObserver) {
         observers.add(observer)
     }

@@ -107,6 +107,13 @@ internal class Arbeidsgiver private constructor(
         return perioder.any { it.håndter(påminnelse) }
     }
 
+    internal fun håndter(hendelse: KansellerUtbetaling) {
+        hendelse.kontekst(this)
+        utbetalinger.reversed().firstOrNull {
+            it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId
+        } ?: hendelse.error("Avvis hvis vi ikke finner utbetalingsreferanse %s", hendelse.fagsystemId)
+    }
+
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =

@@ -765,7 +765,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
-            assertEquals(it.arbeidsgiverOppdrag[0].referanse(), it.arbeidsgiverOppdrag[1].referanse())
+            assertEquals(it.arbeidsgiverOppdrag[0].fagsystemId(), it.arbeidsgiverOppdrag[1].fagsystemId())
         }
     }
 
@@ -798,8 +798,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(2, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
-            assertEquals(it.arbeidsgiverOppdrag[0].referanse(), it.arbeidsgiverOppdrag[1].referanse())
-            assertEquals(it.arbeidsgiverOppdrag[1].referanse(), it.arbeidsgiverOppdrag[2].referanse())
+            assertEquals(it.arbeidsgiverOppdrag[0].fagsystemId(), it.arbeidsgiverOppdrag[1].fagsystemId())
+            assertEquals(it.arbeidsgiverOppdrag[1].fagsystemId(), it.arbeidsgiverOppdrag[2].fagsystemId())
         }
     }
 }

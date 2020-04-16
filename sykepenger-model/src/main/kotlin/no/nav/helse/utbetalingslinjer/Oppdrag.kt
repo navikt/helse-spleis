@@ -37,7 +37,7 @@ internal class Oppdrag private constructor(
         visitor.postVisitOppdrag(this)
     }
 
-    internal fun referanse() = fagsystemId
+    internal fun fagsystemId() = fagsystemId
 
     private val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 

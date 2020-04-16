@@ -87,8 +87,8 @@ internal enum class Klassekode(internal val verdi: String) {
 }
 
 internal enum class Fagområde(private val linjerStrategy: (Utbetaling) -> Oppdrag) {
-    SPREF(Utbetaling::arbeidsgiverUtbetalingslinjer),
-    SP(Utbetaling::personUtbetalingslinjer);
+    SPREF(Utbetaling::arbeidsgiverOppdrag),
+    SP(Utbetaling::personOppdrag);
 
     internal fun utbetalingslinjer(utbetaling: Utbetaling): Oppdrag =
         linjerStrategy(utbetaling)

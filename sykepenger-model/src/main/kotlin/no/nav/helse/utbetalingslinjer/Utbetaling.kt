@@ -30,9 +30,9 @@ internal class Utbetaling private constructor(
         LocalDateTime.now()
     )
 
-    internal fun arbeidsgiverUtbetalingslinjer() = arbeidsgiverOppdrag
+    internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
-    internal fun personUtbetalingslinjer() = personOppdrag
+    internal fun personOppdrag() = personOppdrag
 
     companion object {
 
