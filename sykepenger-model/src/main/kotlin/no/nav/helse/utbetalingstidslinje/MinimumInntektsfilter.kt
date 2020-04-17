@@ -39,10 +39,6 @@ internal class MinimumInntektsfilter (
         addInntekt(dag)
     }
 
-    override fun visitFridag(dag: Fridag) {
-        addInntekt(dag)
-    }
-
     private fun addInntekt(dag: Utbetalingstidslinje.Utbetalingsdag) {
         inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.inntekt) ?: dag.inntekt
     }

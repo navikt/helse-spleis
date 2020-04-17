@@ -12,13 +12,25 @@ internal class MinimumInntektsfilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
 
-    companion object {
+    private companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val PERSON_67_ÅR_FNR_2018 = "05015112345"
     }
 
     @BeforeEach internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    internal fun `sjekker ikke fridager`() {
+        val tidslinje = tidslinjeOf(1.FRI(inntekt = 0.0), 5.NAV)
+        MinimumInntektsfilter(
+            Alder(UNG_PERSON_FNR_2018),
+            listOf(tidslinje),
+            Periode(1.januar, 31.desember),
+            aktivitetslogg
+        ).filter()
+        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test internal fun `ung person som oppfyller minstelønnskravet får ingen avviste dager`() {

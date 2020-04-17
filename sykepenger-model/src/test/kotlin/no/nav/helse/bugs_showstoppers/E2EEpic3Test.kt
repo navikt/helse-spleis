@@ -835,4 +835,15 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING, TIL_INFOTRYGD)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
+
+    @Test
+    fun `periode som begynner på søndag skal ikke gi warning på krav om minimuminntekt`() {
+        håndterSykmelding(Triple(15.mars(2020), 8.april(2020), 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(16.mars(2020), 31.mars(2020))), førsteFraværsdag = 16.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
+        håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100))
+        håndterVilkårsgrunnlag( 0, INNTEKT)
+        håndterYtelser(0)
+        assertTrue(inspektør.personLogg.hasOnlyInfoAndNeeds())
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+    }
 }
