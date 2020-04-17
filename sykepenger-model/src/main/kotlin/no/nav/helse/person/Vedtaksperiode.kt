@@ -907,15 +907,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             manuellSaksbehandling: ManuellSaksbehandling
         ) {
-            if (!manuellSaksbehandling.utbetalingGodkjent()) return vedtaksperiode.tilstand(
+            if (manuellSaksbehandling.valider().hasErrors()) return vedtaksperiode.tilstand(
                 manuellSaksbehandling,
                 TilInfotrygd
-            ) {
-                manuellSaksbehandling.error(
-                    "Utbetaling markert som ikke godkjent av saksbehandler (%s)",
-                    manuellSaksbehandling.saksbehandler()
-                )
-            }
+            )
 
             vedtaksperiode.tilstand(
                 manuellSaksbehandling,

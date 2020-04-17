@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 
@@ -15,8 +16,12 @@ class ManuellSaksbehandling(
 
     internal fun vedtaksperiodeId() = vedtaksperiodeId
     internal fun saksbehandler() = saksbehandler
-    internal fun utbetalingGodkjent() = utbetalingGodkjent
     internal fun godkjenttidspunkt() = godkjenttidspunkt
+
+    internal fun valider(): Aktivitetslogg {
+        if (!utbetalingGodkjent) error("Utbetaling markert som ikke godkjent")
+        return aktivitetslogg
+    }
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
