@@ -259,7 +259,18 @@ internal class InntektsmeldingTest {
             refusjonOpphørsdato = 1.januar,
             endringerIRefusjon = listOf(16.januar)
         )
-        assertFalse(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
+        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
+    }
+
+    @Test
+    internal fun `refusjon opphører etter perioden`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 3.januar)),
+            emptyList(),
+            refusjonOpphørsdato = 11.januar,
+            endringerIRefusjon = listOf(16.januar)
+        )
+        assertTrue(inntektsmelding.valider(Periode(2.januar, 10.januar)).hasErrors())
     }
 
     @Test

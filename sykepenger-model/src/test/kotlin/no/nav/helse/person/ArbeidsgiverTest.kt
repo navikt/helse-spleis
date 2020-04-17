@@ -16,7 +16,7 @@ internal class ArbeidsgiverTest {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
-                opphørsdato = LocalDate.now(),
+                opphørsdato = null,
                 beløpPrMåned = 120.0
             ),
             orgnummer = "orgnr",

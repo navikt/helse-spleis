@@ -83,7 +83,7 @@ internal class VedtaksperiodeTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
-                opphørsdato = LocalDate.now(),
+                opphørsdato = null,
                 beløpPrMåned = 1000.0
             ),
             orgnummer = organisasjonsnummer,
