@@ -177,7 +177,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
             arbeidsforholdId = null,
             beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INNTEKT, LocalDate.now()),
+            refusjon = Refusjon(INNTEKT, null),
             endringIRefusjoner = emptyList(),
             opphoerAvNaturalytelser = emptyList(),
             gjenopptakelseNaturalytelser = emptyList(),
