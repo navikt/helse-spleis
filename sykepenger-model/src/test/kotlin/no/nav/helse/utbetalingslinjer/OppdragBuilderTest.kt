@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -15,11 +16,8 @@ internal class OppdragBuilderTest {
 
     private lateinit var oppdrag: Oppdrag
 
-    protected companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "42"
+    private companion object {
         private const val ORGNUMMER = "987654321"
-        const val INNTEKT = 31000.00
     }
 
     @Test
@@ -27,6 +25,7 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
+        assertEquals(7, oppdrag.dager().size)
         assertLinje(0, 2.januar, 10.januar, null)
     }
 
@@ -35,13 +34,15 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 1.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
 
         assertEquals(1, oppdrag.size)
+        assertEquals(6, oppdrag.dager().size)
         assertLinje(0, 2.januar, 9.januar, null, sats = 1200, grad = 100.0)
+        assertTrue(oppdrag.dager().all { it.second == 1200 })
     }
 
     @Test
     internal fun `kun helgedager`() {
         opprett(1.AP, 2.HELG)
-
+        assertEquals(0, oppdrag.dager().size)
         assertEquals(0, oppdrag.size)
     }
 

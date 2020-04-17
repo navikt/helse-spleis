@@ -1,8 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
+import kotlin.streams.toList
 
 class Simulering(
     internal val vedtaksperiodeId: String,
@@ -29,10 +31,7 @@ class Simulering(
             oppdrag.map { Periode(it.fom, it.tom) }.any { oppdrag -> simuleringResultat.perioder.none { oppdrag.overlapperMed(it.periode) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
             }
-            oppdrag.any { linje -> simuleringResultat.perioder.none {
-                if (!it.periode.overlapperMed(Periode(linje.fom, linje.tom))) false
-                else it.utbetalinger.flatMap { it.detaljer }.none { linje.totalbeløp() == it.beløp }
-            } } -> {
+            simuleringResultat.forskjell(oppdrag) -> {
                 warn("Simulering har endret dagsats eller antall på én eller flere utbetalingslinjer")
             }
         }
@@ -41,7 +40,25 @@ class Simulering(
     class SimuleringResultat(
         internal val totalbeløp: Int,
         internal val perioder: List<SimulertPeriode>
-    )
+    ) {
+        internal fun forskjell(oppdrag: Oppdrag): Boolean {
+            return oppdrag.dager().zip(dager(oppdrag.førstedato, oppdrag.sistedato)).any { (oppdrag, simulering) ->
+                oppdrag.first != simulering.first || oppdrag.second != simulering.second
+            }
+        }
+
+        private fun dager(fom: LocalDate, tom: LocalDate) = perioder.flatMap {
+            it.utbetalinger.flatMap {
+                it.detaljer.flatMap { detalj ->
+                    detalj.periode.start.datesUntil(detalj.periode.endInclusive.plusDays(1))
+                        .filter { it >= fom && it <= tom }
+                        .filter { !it.erHelg() }
+                        .map { it to detalj.sats.sats }
+                        .toList()
+                }
+            }
+        }
+    }
 
     class SimulertPeriode(
         internal val periode: Periode,

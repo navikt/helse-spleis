@@ -39,9 +39,9 @@ internal class Oppdrag private constructor(
 
     internal fun fagsystemId() = fagsystemId
 
-    private val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
+    internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 
-    private val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
+    internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 
     internal fun removeUEND() = Oppdrag(
         mottaker,
@@ -54,6 +54,7 @@ internal class Oppdrag private constructor(
     )
 
     internal fun totalbeløp() = this.sumBy { it.totalbeløp() }
+    internal fun dager() = this.flatMap { linje -> linje.dager().map { it to linje.dagsats } }
 
     infix fun forskjell(tidligere: Oppdrag): Oppdrag {
         return when {

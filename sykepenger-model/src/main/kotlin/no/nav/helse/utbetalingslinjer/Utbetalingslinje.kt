@@ -5,6 +5,7 @@ import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
 import java.time.LocalDate
+import kotlin.streams.toList
 
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
@@ -39,11 +40,12 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun totalbeløp() = dagsats * antallDager()
 
-    private fun antallDager() = fom
+    internal fun dager() = fom
         .datesUntil(tom.plusDays(1))
         .filter { !it.erHelg() }
-        .count()
-        .toInt()
+        .toList()
+
+    private fun antallDager() = dager().size
 
     override fun equals(other: Any?) = other is Utbetalingslinje && this.equals(other)
 

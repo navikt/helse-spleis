@@ -5,8 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -43,6 +42,7 @@ internal class SimuleringHendelseTest {
         person.håndter(simulering(dagsats = 500))
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
         assertTrue(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasOnlyInfoAndNeeds())
     }
 
     @Test
@@ -184,7 +184,7 @@ internal class SimuleringHendelseTest {
                                     Simulering.Detaljer(
                                         periode = Periode(17.januar, 31.januar),
                                         konto = "11111111111",
-                                        beløp = 15741,
+                                        beløp = dagsats * 11,
                                         klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
@@ -205,9 +205,9 @@ internal class SimuleringHendelseTest {
                                 feilkonto = false,
                                 detaljer = listOf(
                                     Simulering.Detaljer(
-                                        periode = Periode(17.januar, 31.januar),
+                                        periode = Periode(1.februar, 28.februar),
                                         konto = "11111111111",
-                                        beløp = 28620,
+                                        beløp = dagsats * 20,
                                         klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
