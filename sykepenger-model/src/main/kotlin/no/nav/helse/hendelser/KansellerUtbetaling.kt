@@ -7,7 +7,8 @@ class KansellerUtbetaling(
     fnr: String,
     internal val orgnummer: String,
     internal val fagsystemId: String,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    internal val saksbehandler: String,
+    internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : IAktivitetslogg by aktivitetslogg {
 
 }

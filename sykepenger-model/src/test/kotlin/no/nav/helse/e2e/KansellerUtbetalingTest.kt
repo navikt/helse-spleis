@@ -41,11 +41,12 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     @Test internal fun `kanseller siste utbetaling`() {
+        val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
-            it.arbeidsgiverOppdrag[1]
+            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
                 assertEquals(
                     Utbetalingslinje(18.januar, 26.januar, 0, 0.0),

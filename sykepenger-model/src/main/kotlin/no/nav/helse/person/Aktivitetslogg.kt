@@ -264,7 +264,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 internal fun utbetaling(
                     aktivitetslogg: IAktivitetslogg,
                     oppdrag: Oppdrag,
-                    maksdato: LocalDate?,
+                    maksdato: LocalDate? = null,
                     saksbehandler: String
                 ) {
                     aktivitetslogg.behov(

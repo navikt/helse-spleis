@@ -13,6 +13,8 @@ internal class UtbetalingslinjeForskjellTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "987654321"
         private const val FAGSYSTEMID = "FAGSYSTEMID"
+
+
     }
 
     @Test
@@ -27,7 +29,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     internal fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
-        val original = Oppdrag(ORGNUMMER, SPREF, fagsystemId = FAGSYSTEMID, sisteArbeidsgiverdag = 31.desember(2017))
+        val original = tomOppdrag()
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
@@ -263,7 +265,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test internal fun `ny er tom`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
-        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 31.desember(2017))
+        val recalculated = tomOppdrag()
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(1.januar to 12.januar grad 0 dagsats 0), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -276,7 +278,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test internal fun `ny er tom uten sisteArbeidsgiverdag`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
-        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = null)
+        val recalculated = tomOppdrag(null)
         val actual = recalculated forskjell original
         assertUtbetalinger(linjer(1.januar to 12.januar grad 0 dagsats 0), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -289,7 +291,7 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test internal fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
-        val recalculated = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 1.februar)
+        val recalculated = tomOppdrag(1.februar)
         val actual = recalculated forskjell original
         assertUtbetalinger(recalculated, actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
@@ -387,7 +389,7 @@ internal class UtbetalingslinjeForskjellTest {
             13.januar to 19.januar,
             20.januar to 31.januar
         )
-        val new = Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = 31.desember(2017))
+        val new = tomOppdrag()
         val actual = new forskjell original
         assertUtbetalinger(linjer(1.januar to 31.januar grad 0 dagsats 0), actual)
 
@@ -398,6 +400,9 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[3].id + 1, actual[0].id)
         assertEquals(original[3].id, actual[0].refId)
     }
+
+    private fun tomOppdrag(sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)) =
+        Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 

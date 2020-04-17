@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -113,7 +114,14 @@ internal class Arbeidsgiver private constructor(
             it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId
         }
             ?.kansellerUtbetaling()
-            ?.also { utbetalinger.add(it) }
+            ?.also {
+                utbetalinger.add(it)
+                Aktivitet.Behov.utbetaling(
+                    hendelse.aktivitetslogg,
+                    it.arbeidsgiverOppdrag(),
+                    saksbehandler = hendelse.saksbehandler
+                )
+            }
             ?: hendelse.error("Avvis hvis vi ikke finner utbetalingsreferanse %s", hendelse.fagsystemId)
     }
 
