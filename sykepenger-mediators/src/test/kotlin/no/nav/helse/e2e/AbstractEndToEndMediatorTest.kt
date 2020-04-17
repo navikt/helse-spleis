@@ -304,7 +304,11 @@ internal abstract class AbstractEndToEndMediatorTest {
                     .map {
                         mapOf(
                             "årMåned" to it.key,
-                            "inntektsliste" to it.value.map { mapOf("beløp" to it.second) }
+                            "inntektsliste" to it.value.map { mapOf(
+                                "beløp" to it.second,
+                                "inntektstype" to "LOENNSINNTEKT",
+                                "orgnummer" to ORGNUMMER
+                            ) }
                         )
                     },
                 "Opptjening" to opptjening.map {

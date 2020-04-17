@@ -17,9 +17,20 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 internal class VilkårsgrunnlagMessage(originalMessage: String, problems: MessageProblems) : BehovMessage(originalMessage, problems) {
     init {
         requireAll("@behov", Inntektsberegning, EgenAnsatt, Opptjening)
-        requireKey("@løsning.${Inntektsberegning.name}")
+        requireArray("@løsning.${Inntektsberegning.name}") {
+            require("årMåned", JsonNode::asYearMonth)
+            requireArray("inntektsliste") {
+                requireKey("beløp")
+                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
+                interestedIn("orgnummer")
+            }
+        }
         requireKey("@løsning.${EgenAnsatt.name}")
-        requireKey("@løsning.${Opptjening.name}")
+        requireArray("@løsning.${Opptjening.name}") {
+            requireKey("orgnummer")
+            require("ansattSiden", JsonNode::asLocalDate)
+            interestedIn("ansattTil") { it.asLocalDate() }
+        }
         requireKey("@løsning.${Dagpenger.name}")
         requireKey("@løsning.${Arbeidsavklaringspenger.name}")
     }
@@ -41,7 +52,9 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
             orgnummer = this["organisasjonsnummer"].asText(),
             inntektsvurdering = Inntektsvurdering(
                 perioder = this["@løsning.${Inntektsberegning.name}"].map {
-                    it["årMåned"].asYearMonth() to it["inntektsliste"].map { it["beløp"].asDouble() }
+                    it["årMåned"].asYearMonth() to it["inntektsliste"].map {
+                        it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble()
+                    }
                 }.associate { it }
             ),
             opptjeningvurdering = Opptjeningvurdering(

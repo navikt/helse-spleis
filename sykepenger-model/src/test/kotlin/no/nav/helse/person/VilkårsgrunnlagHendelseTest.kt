@@ -132,10 +132,9 @@ internal class VilkårsgrunnlagHendelseTest {
         listOf(Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Double): Map<YearMonth, List<Double>> {
-        return (1..12).map { YearMonth.of(2018, it) to beregnetInntekt }
+    private fun tolvMånederMedInntekt(beregnetInntekt: Double) =
+        (1..12).map { YearMonth.of(2018, it) to (ORGNR to beregnetInntekt) }
             .groupBy({ it.first }) { it.second }
-    }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {
         assertEquals(
@@ -147,7 +146,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Double = 1000.0,
-        inntekter: Map<YearMonth, List<Double>>,
+        inntekter: Map<YearMonth, List<Pair<String?, Double>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -205,7 +204,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: Map<YearMonth, List<Double>>,
+        inntekter: Map<YearMonth, List<Pair<String?, Double>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(

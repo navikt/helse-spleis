@@ -267,7 +267,7 @@ internal abstract class AbstractEndToEndTest {
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(
                 perioder = (1..12).map {
-                    YearMonth.of(2017, it) to inntekt
+                    YearMonth.of(2017, it) to (ORGNUMMER to inntekt)
                 }.groupBy({ it.first }) { it.second }
             ),
             erEgenAnsatt = egenAnsatt,

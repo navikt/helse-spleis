@@ -226,7 +226,7 @@ internal class YtelserHendelseTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
             inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to 31000.0 }
+                .map { YearMonth.of(2018, it) to (ORGNR to 31000.0) }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
             opptjeningvurdering = Opptjeningvurdering(

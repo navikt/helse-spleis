@@ -304,7 +304,11 @@ internal class HendelseMediatorTest {
                         mapOf(
                             "årMåned" to YearMonth.now().toString(),
                             "inntektsliste" to listOf(
-                                mapOf("beløp" to 1000.0)
+                                mapOf(
+                                    "beløp" to 1000.0,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to "123456789"
+                                )
                             )
                         )
                     ),

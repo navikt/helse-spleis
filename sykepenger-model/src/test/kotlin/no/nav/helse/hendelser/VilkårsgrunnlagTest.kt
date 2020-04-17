@@ -45,7 +45,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { YearMonth.of(2017, it) to 1250.0 }.groupBy({ it.first }) { it.second }
+            (1..12).map { YearMonth.of(2017, it) to (orgnummer to 1250.0) }.groupBy({ it.first }) { it.second }
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0.20, dataForVilkårsvurdering()?.avviksprosent)
@@ -156,8 +156,8 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: Map<YearMonth, List<Double>> = (1..12).map {
-            YearMonth.of(2017, it) to INNTEKT
+        inntektsmåneder: Map<YearMonth, List<Pair<String?, Double>>> = (1..12).map {
+            YearMonth.of(2017, it) to (orgnummer to INNTEKT)
         }.groupBy({ it.first }) { it.second },
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
             Opptjeningvurdering.Arbeidsforhold(
