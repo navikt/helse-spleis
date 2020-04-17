@@ -56,6 +56,10 @@ object HendelseProbe {
         tell("SøknadArbeidsgiver")
     }
 
+    fun onKansellerUtbetaling() {
+        tell("KansellerUtbetaling")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

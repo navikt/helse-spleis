@@ -50,6 +50,10 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         lagreMelding(Meldingstype.UTBETALING, message)
     }
 
+    override fun process(message: KansellerUtbetalingMessage) {
+        lagreMelding(Meldingstype.KANSELLER_UTBETALING, message)
+    }
+
     private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {
         using(sessionOf(dataSource)) { session ->
             session.run(
@@ -76,6 +80,7 @@ internal class HendelseRecorder(private val dataSource: DataSource): MessageProc
         VILKÅRSGRUNNLAG,
         MANUELL_SAKSBEHANDLING,
         UTBETALING,
-        SIMULERING
+        SIMULERING,
+        KANSELLER_UTBETALING
     }
 }

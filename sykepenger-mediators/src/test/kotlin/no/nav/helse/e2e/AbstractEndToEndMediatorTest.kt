@@ -129,7 +129,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         }.toString())
     }
 
-    protected fun sendSøknad(vedtaksperiodeIndeks: Int, perioder: List<SoknadsperiodeDTO>, egenmeldinger: List<PeriodeDTO> = emptyList()) {
+    protected fun sendSøknad(
+        vedtaksperiodeIndeks: Int,
+        perioder: List<SoknadsperiodeDTO>,
+        egenmeldinger: List<PeriodeDTO> = emptyList()
+    ) {
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
@@ -272,7 +276,18 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    protected fun sendVilkårsgrunnlag(vedtaksperiodeIndeks: Int, egenAnsatt: Boolean = false, inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT.toDouble() }, opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(Triple(ORGNUMMER, 1.januar(2010), null))) {
+    protected fun sendVilkårsgrunnlag(
+        vedtaksperiodeIndeks: Int,
+        egenAnsatt: Boolean = false,
+        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT.toDouble() },
+        opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(
+            Triple(
+                ORGNUMMER,
+                1.januar(2010),
+                null
+            )
+        )
+    ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
@@ -376,8 +391,28 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendKansellerUtbetaling() {
+        val fagsystemId = testRapid.inspektør.let {
+            it.melding(it.antall() - 1)["fagsystemId"]
+        }
+        val kansellerUtbetaling = mapOf<String, Any>(
+            "@id" to UUID.randomUUID().toString(),
+            "@opprettet" to LocalDateTime.now().toString(),
+            "@event_name" to "kanseller_utbetaling",
+            "aktørId" to AKTØRID,
+            "fødselsnummer" to UNG_PERSON_FNR_2018,
+            "organisasjonsnummer" to ORGNUMMER,
+            "fagsystemId" to fagsystemId,
+            "saksbehandler" to "Ola Nordmann"
+        )
+        testRapid.sendTestMessage(objectMapper.writeValueAsString(kansellerUtbetaling))
+    }
+
     protected fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
-        assertEquals(tilstand.toList(), testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)))
+        assertEquals(
+            tilstand.toList(),
+            testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
+        )
     }
 
     protected class TestRapid() : RapidsConnection() {
@@ -418,33 +453,39 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected class RapidInspektør(private val messages: List<Pair<String?, String>>) {
         private val jsonmeldinger = mutableMapOf<Int, JsonNode>()
-        private val vedtaksperiodeIder get() = mutableSetOf<UUID>().apply {
-            events("vedtaksperiode_endret") {
-                this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
+        private val vedtaksperiodeIder
+            get() = mutableSetOf<UUID>().apply {
+                events("vedtaksperiode_endret") {
+                    this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
+                }
             }
-        }
-        private val tilstander get() = mutableMapOf<UUID, MutableList<String>>().apply {
-            events("vedtaksperiode_endret") {
-                val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
-                this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
+        private val tilstander
+            get() = mutableMapOf<UUID, MutableList<String>>().apply {
+                events("vedtaksperiode_endret") {
+                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                    this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
+                }
             }
-        }
-        private val behov get() = mutableMapOf<UUID, MutableList<Pair<Behovtype, TilstandType>>>().apply {
-            events("behov") {
-                val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
-                val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
-                this.getOrPut(id) { mutableListOf() }.apply {
-                    it.path("@behov").onEach {
-                        add(valueOf(it.asText()) to tilstand)
+        private val behov
+            get() = mutableMapOf<UUID, MutableList<Pair<Behovtype, TilstandType>>>().apply {
+                events("behov") {
+                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                    val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
+                    this.getOrPut(id) { mutableListOf() }.apply {
+                        it.path("@behov").onEach {
+                            add(valueOf(it.asText()) to tilstand)
+                        }
                     }
                 }
             }
-        }
 
         private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)
             if (name == message.path("@event_name").asText()) onEach(message)
         }
+
+        internal fun behovtypeSisteMelding(behovtype: Behovtype) =
+            melding(antall() - 1)["@behov"][0].asText() == behovtype.toString()
 
         val vedtaksperiodeteller get() = vedtaksperiodeIder.size
 
@@ -453,7 +494,10 @@ internal abstract class AbstractEndToEndMediatorTest {
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
-        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) = behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
+        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) =
+            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+
+        fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behovtype) =
+            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
     }
 }

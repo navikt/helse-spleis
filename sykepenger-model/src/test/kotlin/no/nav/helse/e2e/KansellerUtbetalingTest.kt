@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -55,6 +56,13 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
                 assertEquals(Endringskode.OPPH, oppdragInspektør.endringskoder[0])
                 assertEquals(oppdragInspektør.fagsystemIder[0], oppdragInspektør.refFagsystemIder[0])
             }
+            it.personLogg.behov().last().also {
+                assertEquals(Behovtype.Utbetaling, it.type)
+                assertEquals("", it.detaljer()["maksdato"])
+                assertEquals("Ola Nordmann", it.detaljer()["saksbehandler"])
+                assertEquals("SPREF", it.detaljer()["fagområde"])
+            }
+
         }
     }
 

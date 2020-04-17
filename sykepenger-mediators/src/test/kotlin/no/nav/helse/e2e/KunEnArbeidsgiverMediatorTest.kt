@@ -1,11 +1,14 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.*
+import no.nav.syfo.kafka.felles.PeriodeDTO
+import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
@@ -29,6 +32,18 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling(0)
 
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
+    }
+
+    @Test
+    fun `kansellerutbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenHistorikk(0)
+        sendKansellerUtbetaling()
+
+        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Behovtype.Utbetaling))
     }
 
     @Test

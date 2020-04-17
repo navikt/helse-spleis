@@ -76,6 +76,13 @@ internal class HendelseProcessor(private val hendelseMediator: HendelseMediator)
         }
     }
 
+    override fun process(message: KansellerUtbetalingMessage) {
+        håndter(message, message.asKansellerUtbetaling()) { person, kansellerUtbetaling ->
+            HendelseProbe.onKansellerUtbetaling()
+            person.håndter(kansellerUtbetaling)
+        }
+    }
+
     private fun <Hendelse: ArbeidstakerHendelse> håndter(message: HendelseMessage, hendelse: Hendelse, handler: (Person, Hendelse) -> Unit) {
         hendelseMediator.person(message, hendelse).also {
             handler(it, hendelse)

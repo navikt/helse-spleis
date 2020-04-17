@@ -43,6 +43,7 @@ internal class HendelseMediator(
         parser.register(UtbetalingMessage.Factory)
         parser.register(PåminnelseMessage.Factory)
         parser.register(SimuleringMessage.Factory)
+        parser.register(KansellerUtbetalingMessage.Factory)
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {

@@ -164,7 +164,13 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId()
     ) {
-        person.håndter(KansellerUtbetaling(UNG_PERSON_FNR_2018, orgnummer, fagsystemId, "Ola Nordmann"))
+        person.håndter(KansellerUtbetaling(
+            AKTØRID,
+            UNG_PERSON_FNR_2018,
+            orgnummer,
+            fagsystemId,
+            "Ola Nordmann"
+        ))
     }
 
     private fun utbetaling(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) =

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class YtelserMessageTest {
+internal class YtelserMessageTest {
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
