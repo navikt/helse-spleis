@@ -8,6 +8,7 @@ import no.nav.helse.spleis.hendelser.MessageProcessor
 internal class KansellerUtbetalingMessage(originalMessage: String, private val problems: MessageProblems) :
     HendelseMessage(originalMessage, problems) {
     init {
+        requireValue("@event_name", "kanseller_utbetaling")
         requireKey("aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler")
     }
 

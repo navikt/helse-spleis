@@ -41,6 +41,7 @@ internal class KansellerUtbetalingMessageTest {
         "aktørId": "999",
         "fødselsnummer": "08127411111",
         "organisasjonsnummer": "orgnummer",
+        "fagsystemId": "ABCD1234",
         "saksbehandler": "Ola Nordmann"
     }
 """.trimIndent()
