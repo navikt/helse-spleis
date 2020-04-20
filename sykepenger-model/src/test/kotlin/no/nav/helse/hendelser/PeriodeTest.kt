@@ -1,13 +1,11 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Periode.Companion.etter
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.august
-import no.nav.helse.testhelpers.juli
-import no.nav.helse.testhelpers.juni
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class PeriodeTest {
     @Test
@@ -54,4 +52,25 @@ internal class PeriodeTest {
         assertTrue(listOf(Periode(1.juli, 2.juli)).etter(1.juli))
         assertTrue(listOf(Periode(1.juli, 2.juli)).etter(30.juni))
     }
+
+    @Test
+    internal fun `kan gjennomløpe tidslinjen`() {
+        val actual = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        assertSize(19, actual)
+    }
+
+    private fun assertSize(expected: Int, periode: Periode) {
+        var count = 0
+        periode.forEach { _ -> count++ }
+        assertEquals(expected, count)
+
+        count = 0
+        for (date: LocalDate in periode) {
+            count++
+        }
+        assertEquals(expected, count)
+    }
+
+    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
+
 }

@@ -33,6 +33,17 @@ internal class NySykdomstidslinje private constructor(
     internal fun subset(periode: Periode) =
         NySykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
 
+    /**
+     * Without padding of days
+     */
+    internal fun kutt(kuttDatoInclusive: LocalDate) =
+        when {
+            periode == null -> this
+            kuttDatoInclusive < periode.start -> NySykdomstidslinje()
+            kuttDatoInclusive > periode.endInclusive -> this
+            else -> subset(Periode(periode.start, kuttDatoInclusive))
+        }
+
     internal companion object {
 
         private fun periode1(dager: SortedMap<LocalDate, NyDag>) =
@@ -46,12 +57,12 @@ internal class NySykdomstidslinje private constructor(
     }
 
     override operator fun iterator() = object : Iterator<NyDag> {
-        private var currentDate: LocalDate? = periode?.start
+        private val periodeIterator = periode?.iterator()
 
-        override fun hasNext() = periode?.let { periode.endInclusive >= currentDate } ?: false
+        override fun hasNext() = periodeIterator?.hasNext() ?: false
 
         override fun next() =
-            currentDate?.let { this@NySykdomstidslinje[it.also { currentDate = it.plusDays(1) }] }
+            periodeIterator?.let { this@NySykdomstidslinje[it.next()] }
                 ?: throw NoSuchElementException()
     }
 }

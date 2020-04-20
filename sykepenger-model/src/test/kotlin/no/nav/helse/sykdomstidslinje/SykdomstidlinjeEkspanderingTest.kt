@@ -4,6 +4,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.NyDag.NyArbeidsdag
 import no.nav.helse.sykdomstidslinje.NyDag.NyUkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomstidlinjeEkspanderingTest.TestSykdomstidslinje
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -57,6 +59,14 @@ internal class SykdomstidlinjeEkspanderingTest {
         Periode(6.januar, 14.januar).also {
             assertEquals(it, original.subset(it).periode())
         }
+
+        Periode(1.februar, 14.februar).also {
+            original.subset(it).also { tidslinje ->
+                assertEquals(it, tidslinje.periode())
+                assertSize(14, tidslinje)
+                assertEquals(14, tidslinje.filterIsInstance<NyUkjentDag>().size)
+            }
+        }
     }
 
     @Test
@@ -65,6 +75,33 @@ internal class SykdomstidlinjeEkspanderingTest {
         assertSize(19, actual)
         assertSize(15, actual.subset(Periode(3.januar, 17.januar)))
         assertSize(9, actual.subset(Periode(6.januar, 14.januar)))
+        assertEquals(10, actual.filterIsInstance<NyArbeidsdag>().size)
+        assertEquals(9, actual.filterIsInstance<NyUkjentDag>().size)
+    }
+
+    @Test
+    internal fun `tidslinjen kan kuttes`() {
+        val original = (1.januar to 5.januar).merge(15.januar to 19.januar)
+
+        original.kutt(17.januar).also {
+            assertEquals(Periode(1.januar, 17.januar), it.periode())
+            assertSize(17, it)
+        }
+
+        original.kutt(10.januar).also {
+            assertEquals(Periode(1.januar, 10.januar), it.periode())
+            assertSize(10, it)
+        }
+
+        original.kutt(1.februar).also {
+            assertEquals(Periode(1.januar, 19.januar), it.periode())
+            assertSize(19, it)
+        }
+
+        original.kutt(1.desember(2017)).also {
+            assertNull(it.periode())
+            assertSize(0, it)
+        }
     }
 
     private fun assertSize(expected: Int, sykdomstidslinje: NySykdomstidslinje) {
