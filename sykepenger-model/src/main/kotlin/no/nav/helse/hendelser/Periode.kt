@@ -33,6 +33,14 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
         return start.format(formatter) + " til " + endInclusive.format(formatter)
     }
 
+    override fun equals(other: Any?) =
+        other is Periode && this.equals(other)
+
+    private fun equals(other: Periode) =
+        this.start == other.start && this.endInclusive == other.endInclusive
+
+    override fun hashCode() = start.hashCode() * 37 + endInclusive.hashCode()
+
     companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
