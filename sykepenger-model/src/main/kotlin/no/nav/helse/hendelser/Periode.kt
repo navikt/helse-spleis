@@ -40,6 +40,10 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate> {
         this.start == other.start && this.endInclusive == other.endInclusive
 
     override fun hashCode() = start.hashCode() * 37 + endInclusive.hashCode()
+    internal fun merge(annen: Periode?): Periode {
+        if (annen == null) return this
+        return Periode(minOf(this.start, annen.start), maxOf(this.endInclusive, annen.endInclusive))
+    }
 
     companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
