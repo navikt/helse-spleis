@@ -3,6 +3,7 @@ package no.nav.helse
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
+import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
@@ -16,15 +17,19 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val hendelseRecorder = HendelseRecorder(dataSource)
     private val personRepository = PersonPostgresRepository(dataSource)
     private val lagrePersonDao = LagrePersonDao(dataSource)
-
     private val rapidsConnection = RapidApplication.create(env)
+
+    private val hendelseMediator = HendelseMediator(
+        rapidsConnection = rapidsConnection,
+        personRepository = personRepository,
+        lagrePersonDao = lagrePersonDao
+    )
 
     init {
         rapidsConnection.register(this)
-        HendelseMediator(
+        MessageMediator(
             rapidsConnection = rapidsConnection,
-            personRepository = personRepository,
-            lagrePersonDao = lagrePersonDao,
+            hendelseMediator = hendelseMediator,
             hendelseRecorder = hendelseRecorder
         )
     }

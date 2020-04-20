@@ -8,21 +8,66 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(originalMessage: String, private val problems: MessageProblems) :
-    BehovMessage(originalMessage, problems) {
-    init {
-        requireAll("@behov", Sykepengehistorikk, Foreldrepenger)
-        requireKey("@løsning.${Foreldrepenger.name}")
-        requireKey("@løsning.${Sykepengehistorikk.name}")
-        interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
-        interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
+internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
+
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val aktørId = packet["aktørId"].asText()
+
+    private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
+        .takeIf(JsonNode::isObject)?.let(::asPeriode)
+    private val svangerskapsytelse = packet["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
+        .takeIf(JsonNode::isObject)?.let(::asPeriode)
+
+    private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
+        it.path("utbetalteSykeperioder")
+    }.mapNotNull { utbetaling ->
+        val fom = utbetaling["fom"].asOptionalLocalDate()
+        val tom = utbetaling["tom"].asOptionalLocalDate()
+        val dagsats = utbetaling["dagsats"].asInt()
+        if (fom == null || tom == null) {
+            return@mapNotNull Periode.Ugyldig(fom, tom, dagsats)
+        }
+        when (utbetaling["typeKode"].asText()) {
+            "0" -> Periode.Utbetaling(fom, tom, dagsats)
+            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats)
+            "2", "3" -> Periode.Etterbetaling(fom, tom, dagsats)
+            "4" -> Periode.KontertRegnskap(fom, tom, dagsats)
+            "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats)
+            "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats)
+            "7" -> Periode.Tilbakeført(fom, tom, dagsats)
+            "8" -> Periode.Konvertert(fom, tom, dagsats)
+            "9" -> Periode.Ferie(fom, tom, dagsats)
+            "O" -> Periode.Opphold(fom, tom, dagsats)
+            "S" -> Periode.Sanksjon(fom, tom, dagsats)
+            "" -> Periode.Ukjent(fom, tom, dagsats)
+            else -> null // filtered away in river validation
+        }
+    }
+
+    private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
+        it.path("inntektsopplysninger")
+    }.map { opplysning ->
+        Utbetalingshistorikk.Inntektsopplysning(
+            sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
+            inntektPerMåned = opplysning["inntekt"].asInt(),
+            orgnummer = opplysning["orgnummer"].asText()
+        )
+    }
+    private val graderingsliste = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
+        it.path("graderingsliste")
+    }.map {
+        Utbetalingshistorikk.Graderingsperiode(
+            it["fom"].asLocalDate(),
+            it["tom"].asLocalDate(),
+            it["grad"].asDouble()
+        )
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -32,74 +77,27 @@ internal class YtelserMessage(originalMessage: String, private val problems: Mes
     internal fun asYtelser(): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = this["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
-                .takeIf(JsonNode::isObject)?.let(::asPeriode),
-            svangerskapsytelse = this["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
-                .takeIf(JsonNode::isObject)?.let(::asPeriode),
+            foreldrepengeytelse = foreldrepenger,
+            svangerskapsytelse = svangerskapsytelse,
             aktivitetslogg = aktivitetslogg
         )
 
         val utbetalingshistorikk = Utbetalingshistorikk(
-            utbetalinger = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
-                it.path("utbetalteSykeperioder")
-            }.map { utbetaling ->
-                val fom = utbetaling["fom"].asOptionalLocalDate()
-                val tom = utbetaling["tom"].asOptionalLocalDate()
-                val dagsats = utbetaling["dagsats"].asInt()
-                if (fom == null || tom == null) {
-                    return@map Periode.Ugyldig(fom, tom, dagsats)
-                }
-                when (val typekode = utbetaling["typeKode"].asText()) {
-                    "0" -> Periode.Utbetaling(fom, tom, dagsats)
-                    "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats)
-                    "2", "3" -> Periode.Etterbetaling(fom, tom, dagsats)
-                    "4" -> Periode.KontertRegnskap(fom, tom, dagsats)
-                    "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats)
-                    "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats)
-                    "7" -> Periode.Tilbakeført(fom, tom, dagsats)
-                    "8" -> Periode.Konvertert(fom, tom, dagsats)
-                    "9" -> Periode.Ferie(fom, tom, dagsats)
-                    "O" -> Periode.Opphold(fom, tom, dagsats)
-                    "S" -> Periode.Sanksjon(fom, tom, dagsats)
-                    "" -> Periode.Ukjent(fom, tom, dagsats)
-                    else -> problems.severe("Fikk en ukjent typekode:$typekode")
-                }
-            },
-            inntektshistorikk = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
-                it.path("inntektsopplysninger")
-            }.map { opplysning ->
-                Utbetalingshistorikk.Inntektsopplysning(
-                    sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-                    inntektPerMåned = opplysning["inntekt"].asInt(),
-                    orgnummer = opplysning["orgnummer"].asText()
-                )
-            },
-            graderingsliste = this["@løsning.${Sykepengehistorikk.name}"].flatMap {
-                it.path("graderingsliste")
-            }.map {
-                Utbetalingshistorikk.Graderingsperiode(
-                    it["fom"].asLocalDate(),
-                    it["tom"].asLocalDate(),
-                    it["grad"].asDouble()
-                )
-            },
+            utbetalinger = utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            graderingsliste = graderingsliste,
             aktivitetslogg = aktivitetslogg
         )
 
         return Ytelser(
             meldingsreferanseId = this.id,
-            aktørId = this["aktørId"].asText(),
+            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = this["organisasjonsnummer"].asText(),
-            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
             aktivitetslogg = aktivitetslogg
         )
-    }
-
-    object Factory : MessageFactory<YtelserMessage> {
-        override fun createMessage(message: String, problems: MessageProblems) =
-            YtelserMessage(message, problems)
     }
 }

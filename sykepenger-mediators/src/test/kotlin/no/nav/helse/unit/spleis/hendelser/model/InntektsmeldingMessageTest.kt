@@ -5,14 +5,16 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.spleis.hendelser.model.InntektsmeldingMessage
+import io.mockk.ConstantAnswer
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.hendelser.Inntektsmeldinger
+import no.nav.helse.unit.spleis.hendelser.TestRapid
 import no.nav.inntektsmeldingkontrakt.*
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -73,41 +75,68 @@ internal class InntektsmeldingMessageTest {
     @Test
     internal fun `invalid messages`() {
         assertThrows(InvalidJson)
-        assertInvalidMessage(UnknownJson)
+        assertThrows(UnknownJson)
     }
 
     @Test
     internal fun `valid inntektsmelding`() {
-        assertValidInntektsmeldingMessage(ValidInntektsmeldingWithUnknownFieldsJson)
-        assertValidInntektsmeldingMessage(ValidInntektsmeldingJson)
-        assertValidInntektsmeldingMessage(ValidInntektsmeldingUtenRefusjon)
+        assertValidMessage(ValidInntektsmeldingWithUnknownFieldsJson)
+        assertValidMessage(ValidInntektsmeldingJson)
+        assertValidMessage(ValidInntektsmeldingUtenRefusjon)
     }
 
-    private fun assertValidInntektsmeldingMessage(message: String) {
-        val problems = MessageProblems(message)
-        InntektsmeldingMessage(message, problems)
-        assertFalse(problems.hasErrors()) { problems.toExtendedReport() }
+    private fun assertValidMessage(message: String) {
+        recognizedMessage = false
+        rapid.sendTestMessage(message)
+        assertTrue(recognizedMessage)
     }
 
     private fun assertInvalidMessage(message: String) {
-        val problems = MessageProblems(message)
-        InntektsmeldingMessage(message, problems)
-        assertTrue(problems.hasErrors()) { "was not supposes to recognize $message" }
+        riverError = false
+        rapid.sendTestMessage(message)
+        assertTrue(riverError)
     }
 
     private fun assertThrows(message: String) {
-        MessageProblems(message).also {
-            assertThrows<MessageProblems.MessageException> {
-                InntektsmeldingMessage(message, it)
-            }
-            assertTrue(it.hasErrors()) { "was not supposed to recognize $message" }
-        }
+        riverSevere = false
+        rapid.sendTestMessage(message)
+        assertTrue(riverSevere)
     }
 
-    private var recognizedInntektsmelding = false
+    private var riverError = false
+    private var riverSevere = false
+    private var recognizedMessage = false
     @BeforeEach
     fun reset() {
-        recognizedInntektsmelding = false
+        recognizedMessage = false
+        riverError = false
+        riverSevere = false
+        rapid.reset()
+    }
+
+    private val messageMediator = mockk<MessageMediator>()
+    private val rapid = TestRapid().apply {
+        Inntektsmeldinger(this, messageMediator)
+    }
+    init {
+        every {
+            messageMediator.onRecognizedMessage(any(), any())
+        } answers {
+            recognizedMessage = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverError(any(), any(), any())
+        } answers {
+            riverError = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverSevere(any(), any(), any())
+        } answers {
+            riverSevere = true
+            ConstantAnswer(Unit)
+        }
     }
 }
 

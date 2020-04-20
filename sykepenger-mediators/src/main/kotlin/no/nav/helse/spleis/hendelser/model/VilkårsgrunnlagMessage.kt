@@ -6,33 +6,52 @@ import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
-import no.nav.helse.spleis.hendelser.MessageFactory
 import no.nav.helse.spleis.hendelser.MessageProcessor
+import java.time.LocalDate
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
-internal class VilkårsgrunnlagMessage(originalMessage: String, problems: MessageProblems) : BehovMessage(originalMessage, problems) {
+internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packet) {
+
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val aktørId = packet["aktørId"].asText()
+    private val dagpenger: List<Pair<LocalDate, LocalDate>>
+    private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
+    private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
+    private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
+
+    private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
+    private val inntekter = packet["@løsning.${Inntektsberegning.name}"].map {
+        it["årMåned"].asYearMonth() to it["inntektsliste"].map {
+            it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble()
+        }
+    }.associate { it }
+    private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
+        Opptjeningvurdering.Arbeidsforhold(
+            orgnummer = it["orgnummer"].asText(),
+            fom = it["ansattSiden"].asLocalDate(),
+            tom = it["ansattTil"].asOptionalLocalDate()
+        )
+    }
+
     init {
-        requireAll("@behov", Inntektsberegning, EgenAnsatt, Opptjening)
-        requireArray("@løsning.${Inntektsberegning.name}") {
-            require("årMåned", JsonNode::asYearMonth)
-            requireArray("inntektsliste") {
-                requireKey("beløp")
-                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
-                interestedIn("orgnummer")
+        packet["@løsning.${Dagpenger.name}"]
+            .map(::asDatePair)
+            .partition { it.first <= it.second }
+            .also {
+                dagpenger = it.first
+                ugyldigeDagpengeperioder = it.second
             }
-        }
-        requireKey("@løsning.${EgenAnsatt.name}")
-        requireArray("@løsning.${Opptjening.name}") {
-            requireKey("orgnummer")
-            require("ansattSiden", JsonNode::asLocalDate)
-            interestedIn("ansattTil") { it.asLocalDate() }
-        }
-        requireKey("@løsning.${Dagpenger.name}")
-        requireKey("@løsning.${Arbeidsavklaringspenger.name}")
+        packet["@løsning.${Dagpenger.name}"].map(::asDatePair)
+            .partition { it.first <= it.second }
+            .also {
+                arbeidsavklaringspenger = it.first
+                ugyldigeArbeidsavklaringspengeperioder = it.second
+            }
     }
 
     override fun accept(processor: MessageProcessor) {
@@ -40,50 +59,29 @@ internal class VilkårsgrunnlagMessage(originalMessage: String, problems: Messag
     }
 
     internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
-        val (dagpenger, ugyldigeDagpengeperioder) = this["@løsning.${Dagpenger.name}"]
-            .map(::asDatePair)
-            .partition { it.first <= it.second }
-        val (arbeidsavklaringspenger, ugyldigeArbeidsavklaringspengeperioder) = this["@løsning.${Arbeidsavklaringspenger.name}"].map(::asDatePair)
-            .partition { it.first <= it.second }
         return Vilkårsgrunnlag(
-            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
-            aktørId = this["aktørId"].asText(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            orgnummer = this["organisasjonsnummer"].asText(),
+            orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(
-                perioder = this["@løsning.${Inntektsberegning.name}"].map {
-                    it["årMåned"].asYearMonth() to it["inntektsliste"].map {
-                        it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble()
-                    }
-                }.associate { it }
+                perioder = inntekter
             ),
             opptjeningvurdering = Opptjeningvurdering(
-                arbeidsforhold = this["@løsning.${Opptjening.name}"].map {
-                    Opptjeningvurdering.Arbeidsforhold(
-                        orgnummer = it["orgnummer"].asText(),
-                        fom = it["ansattSiden"].asLocalDate(),
-                        tom = it["ansattTil"].asOptionalLocalDate()
-                    )
-                }
+                arbeidsforhold = arbeidsforhold
             ),
-            erEgenAnsatt = this["@løsning.${EgenAnsatt.name}"].asBoolean(),
+            erEgenAnsatt = erEgenAnsatt,
             dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
                 Periode(
                     it.first,
                     it.second
                 )
             }),
-            arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(
-                arbeidsavklaringspenger.map { Periode(it.first, it.second) })
+            arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
         ).also {
             if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
         }
-    }
-
-    object Factory : MessageFactory<VilkårsgrunnlagMessage> {
-        override fun createMessage(message: String, problems: MessageProblems) =
-            VilkårsgrunnlagMessage(message, problems)
     }
 
     private fun asDatePair(jsonNode: JsonNode) =

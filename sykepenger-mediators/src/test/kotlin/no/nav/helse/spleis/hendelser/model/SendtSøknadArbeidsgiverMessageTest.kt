@@ -1,24 +1,64 @@
 package no.nav.helse.spleis.hendelser.model
 
-import no.nav.helse.rapids_rivers.MessageProblems
-import org.junit.jupiter.api.Assertions.assertFalse
+import io.mockk.ConstantAnswer
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.hendelser.SendtArbeidsgiverSøknader
+import no.nav.helse.unit.spleis.hendelser.TestRapid
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class SendtSøknadArbeidsgiverMessageTest {
 
     @Test
     fun `valid json`() {
-        MessageProblems(validJson).apply {
-            SendtSøknadArbeidsgiverMessage(validJson, this).also {
-                assertFalse(hasErrors()) { toExtendedReport() }
-            }
+        rapid.sendTestMessage(validJson)
+        assertTrue(recognizedMessage)
+    }
+
+    private var riverError = false
+    private var riverSevere = false
+    private var recognizedMessage = false
+    @BeforeEach
+    fun reset() {
+        recognizedMessage = false
+        riverError = false
+        riverSevere = false
+        rapid.reset()
+    }
+
+    private val messageMediator = mockk<MessageMediator>()
+    private val rapid = TestRapid().apply {
+        SendtArbeidsgiverSøknader(this, messageMediator)
+    }
+    init {
+        every {
+            messageMediator.onRecognizedMessage(any(), any())
+        } answers {
+            recognizedMessage = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverError(any(), any(), any())
+        } answers {
+            riverError = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverSevere(any(), any(), any())
+        } answers {
+            riverSevere = true
+            ConstantAnswer(Unit)
         }
     }
 
     private val validJson = """
 {
   "@event_name": "sendt_søknad_arbeidsgiver",
-  "@id": "id",
+  "@id": "${UUID.randomUUID()}",
   "@opprettet": "2020-01-01T00:00:00.000",
   "id": "id",
   "fnr": "fnr",

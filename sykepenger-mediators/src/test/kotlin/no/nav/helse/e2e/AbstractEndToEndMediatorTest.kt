@@ -14,6 +14,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
+import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
@@ -54,6 +55,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var messageMediator: MessageMediator
 
     @BeforeAll
     internal fun setupAll(@TempDir postgresPath: Path) {
@@ -68,7 +70,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
             personRepository = PersonPostgresRepository(dataSource),
-            lagrePersonDao = LagrePersonDao(dataSource),
+            lagrePersonDao = LagrePersonDao(dataSource)
+        )
+
+        messageMediator = MessageMediator(
+            rapidsConnection = testRapid,
+            hendelseMediator = hendelseMediator,
             hendelseRecorder = HendelseRecorder(dataSource)
         )
     }

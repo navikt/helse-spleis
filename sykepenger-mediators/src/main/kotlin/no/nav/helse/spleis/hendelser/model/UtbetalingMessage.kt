@@ -2,19 +2,17 @@ package no.nav.helse.spleis.hendelser.model
 
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.spleis.hendelser.MessageFactory
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.hendelser.UtbetalingHendelse as ModelUtbetaling
 
-internal class UtbetalingMessage(originalMessage: String, problems: MessageProblems) : BehovMessage(originalMessage, problems) {
-    init {
-        requireAll("@behov", Utbetaling)
-        requireKey("@løsning.${Utbetaling.name}")
-        requireAny("@løsning.${Utbetaling.name}.status", Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name))
-        requireKey("@løsning.${Utbetaling.name}.beskrivelse")
-        requireKey("fagsystemId")
-    }
+internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
+    private val aktørId = packet["aktørId"].asText()
+    private val fagsystemId = packet["fagsystemId"].asText()
+    private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
+    private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
 
     override fun accept(processor: MessageProcessor) {
         processor.process(this)
@@ -22,18 +20,13 @@ internal class UtbetalingMessage(originalMessage: String, problems: MessageProbl
 
     internal fun asUtbetaling(): ModelUtbetaling {
         return ModelUtbetaling(
-            vedtaksperiodeId = this["vedtaksperiodeId"].asText(),
-            aktørId = this["aktørId"].asText(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
-            orgnummer = this["organisasjonsnummer"].asText(),
-            utbetalingsreferanse = this["fagsystemId"].asText(),
-            status = enumValueOf(this["@løsning.${Utbetaling.name}.status"].asText()),
-            melding = this["@løsning.${Utbetaling.name}.beskrivelse"].asText()
+            orgnummer = organisasjonsnummer,
+            utbetalingsreferanse = fagsystemId,
+            status = status,
+            melding = beskrivelse
         )
-    }
-
-    object Factory : MessageFactory<UtbetalingMessage> {
-        override fun createMessage(message: String, problems: MessageProblems) =
-            UtbetalingMessage(message, problems)
     }
 }

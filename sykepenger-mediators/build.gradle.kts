@@ -7,7 +7,7 @@ val mockkVersion = "1.9.3"
 val mainClass = "no.nav.helse.AppKt"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.35001d7")
+    implementation("com.github.navikt:rapids-and-rivers:1.fa8a52f")
     implementation(project(":sykepenger-model"))
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")

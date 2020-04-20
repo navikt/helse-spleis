@@ -6,11 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.Person
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.db.PersonRepository
+import no.nav.helse.spleis.hendelser.model.*
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -26,7 +25,7 @@ import java.time.YearMonth
 import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
-internal class HendelseMediatorTest {
+internal class MessageMediatorTest {
 
     @Test
     internal fun `leser søknader`() {
@@ -79,7 +78,7 @@ internal class HendelseMediatorTest {
         lestUtbetaling = false
     }
 
-    private companion object : PersonRepository {
+    private companion object {
         private val defaultAktørId = UUID.randomUUID().toString()
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
@@ -124,71 +123,67 @@ internal class HendelseMediatorTest {
             override fun stop() {}
         }
 
-        override fun hentPerson(fødselsnummer: String): Person? {
-            return mockk<Person>(relaxed = true) {
+        private val hendelseMediator = mockk<HendelseMediator>(relaxed = true) {
+            every {
+                process(any<NySøknadMessage>())
+            } answers {
+                lestNySøknad = true
+            }
 
-                every {
-                    håndter(any<Sykmelding>())
-                } answers {
-                    lestNySøknad = true
-                }
+            every {
+                process(any<SendtSøknadNavMessage>())
+            } answers {
+                lestSendtSøknad = true
+            }
 
-                every {
-                    håndter(any<Søknad>())
-                } answers {
-                    lestSendtSøknad = true
-                }
+            every {
+                process(any<InntektsmeldingMessage>())
+            } answers {
+                lestInntektsmelding = true
+            }
 
-                every {
-                    håndter(any<Inntektsmelding>())
-                } answers {
-                    lestInntektsmelding = true
-                }
+            every {
+                process(any<YtelserMessage>())
+            } answers {
+                lestYtelser = true
+            }
 
-                every {
-                    håndter(any<Ytelser>())
-                } answers {
-                    lestYtelser = true
-                }
+            every {
+                process(any<PåminnelseMessage>())
+            } answers {
+                lestPåminnelse = true
+            }
 
-                every {
-                    håndter(any<Påminnelse>())
-                } answers {
-                    lestPåminnelse = true
-                }
+            every {
+                process(any<VilkårsgrunnlagMessage>())
+            } answers {
+                lestVilkårsgrunnlag = true
+            }
 
-                every {
-                    håndter(any<Vilkårsgrunnlag>())
-                } answers {
-                    lestVilkårsgrunnlag = true
-                }
+            every {
+                process(any<SimuleringMessage>())
+            } answers {
+                lestSimulering = true
+            }
 
-                every {
-                    håndter(any<Simulering>())
-                } answers {
-                    lestSimulering = true
-                }
+            every {
+                process(any<ManuellSaksbehandlingMessage>())
+            } answers {
+                lestManuellSaksbehandling = true
+            }
 
-                every {
-                    håndter(any<ManuellSaksbehandling>())
-                } answers {
-                    lestManuellSaksbehandling = true
-                }
-
-                every {
-                    håndter(any<UtbetalingHendelse>())
-                } answers {
-                    lestUtbetaling = true
-                }
+            every {
+                process(any<UtbetalingMessage>())
+            } answers {
+                lestUtbetaling = true
             }
         }
 
         init {
-            HendelseMediator(
+            MessageMediator(
                 rapidsConnection = testRapid,
-                personRepository = this,
-                lagrePersonDao = mockk(relaxed = true),
-                hendelseRecorder = mockk(relaxed = true)
+                hendelseRecorder = mockk(relaxed = true),
+                hendelseMediator = hendelseMediator
             )
         }
 

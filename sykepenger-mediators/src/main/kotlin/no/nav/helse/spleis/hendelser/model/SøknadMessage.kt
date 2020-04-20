@@ -1,23 +1,10 @@
 package no.nav.helse.spleis.hendelser.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.JsonMessage
 
 // Understands a JSON message representing a Søknad
-internal abstract class SøknadMessage(originalMessage: String, problems: MessageProblems) :
-    HendelseMessage(originalMessage, problems) {
+internal abstract class SøknadMessage(packet: JsonMessage) :
+    HendelseMessage(packet) {
 
-    init {
-        requireKey("fnr", "aktorId", "arbeidsgiver.orgnummer")
-        requireArray("soknadsperioder") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-            requireKey("sykmeldingsgrad")
-        }
-        require("opprettet", JsonNode::asLocalDateTime)
-    }
-
-    override val fødselsnummer: String get() = this["fnr"].asText()
+    override val fødselsnummer = packet["fnr"].asText()
 }

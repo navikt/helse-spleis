@@ -1,17 +1,17 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.*
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.toMap
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.hendelser.Parser
+import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import java.time.LocalDateTime
 import java.util.*
 
@@ -21,67 +21,100 @@ import java.util.*
 internal class HendelseMediator(
     rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
-    private val lagrePersonDao: LagrePersonDao,
-    private val hendelseRecorder: HendelseRecorder
-) : Parser.ParserDirector {
+    private val lagrePersonDao: LagrePersonDao
+
+) : MessageProcessor {
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val parser = Parser(this, rapidsConnection)
 
     private val personMediator = PersonMediator(rapidsConnection)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
-    private val messageProcessor = HendelseProcessor(this)
 
-    init {
-        parser.register(NySøknadMessage.Factory)
-        parser.register(SendtSøknadArbeidsgiverMessage.Factory)
-        parser.register(SendtSøknadNavMessage.Factory)
-        parser.register(InntektsmeldingMessage.Factory)
-        parser.register(YtelserMessage.Factory)
-        parser.register(VilkårsgrunnlagMessage.Factory)
-        parser.register(ManuellSaksbehandlingMessage.Factory)
-        parser.register(UtbetalingMessage.Factory)
-        parser.register(PåminnelseMessage.Factory)
-        parser.register(SimuleringMessage.Factory)
-        parser.register(KansellerUtbetalingMessage.Factory)
-    }
-
-    override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        withMDC(mapOf(
-            "melding_id" to message.id.toString(),
-            "melding_type" to (message::class.simpleName ?: "ukjent")
-        )) {
-            sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
-            try {
-                message.accept(hendelseRecorder)
-                message.accept(messageProcessor)
-            } catch (err: Aktivitetslogg.AktivitetException) {
-                withMDC(err.kontekst()) {
-                    sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                }
-            } catch (err: Exception) {
-                withMDC(mapOf(
-                    "melding_id" to message.id.toString(),
-                    "melding_type" to (message::class.simpleName ?: "ukjent")
-                )) {
-                    log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                    withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
-                        sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                    }
-                }
-            }
+    override fun process(message: NySøknadMessage) {
+        håndter(message, message.asSykmelding()) { person, sykmelding ->
+            HendelseProbe.onSykmelding()
+            person.håndter(sykmelding)
         }
     }
 
-    override fun onMessageException(exception: MessageProblems.MessageException) {
-        sikkerLogg.error("feil ved parsing av melding: {}", exception)
+    override fun process(message: SendtSøknadArbeidsgiverMessage) {
+        håndter(message, message.asSøknadArbeidsgiver()) { person, søknad ->
+            HendelseProbe.onSøknadArbeidsgiver()
+            person.håndter(søknad)
+        }
     }
 
-    override fun onUnrecognizedMessage(message: String, problems: List<Pair<String, MessageProblems>>) {
-        sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${problems.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+    override fun process(message: SendtSøknadNavMessage) {
+        håndter(message, message.asSøknad()) { person, søknad ->
+            HendelseProbe.onSøknadNav()
+            person.håndter(søknad)
+        }
     }
 
-    internal fun person(message: HendelseMessage, hendelse: ArbeidstakerHendelse): Person {
+    override fun process(message: InntektsmeldingMessage) {
+        håndter(message, message.asInntektsmelding()) { person, inntektsmelding ->
+            HendelseProbe.onInntektsmelding()
+            person.håndter(inntektsmelding)
+        }
+    }
+
+    override fun process(message: YtelserMessage) {
+        håndter(message, message.asYtelser()) { person, ytelser ->
+            HendelseProbe.onYtelser()
+            person.håndter(ytelser)
+        }
+    }
+
+    override fun process(message: VilkårsgrunnlagMessage) {
+        håndter(message, message.asVilkårsgrunnlag()) { person, vilkårsgrunnlag ->
+            HendelseProbe.onVilkårsgrunnlag()
+            person.håndter(vilkårsgrunnlag)
+        }
+    }
+
+    override fun process(message: SimuleringMessage) {
+        håndter(message, message.asSimulering()) { person, simulering ->
+            HendelseProbe.onSimulering()
+            person.håndter(simulering)
+        }
+    }
+
+    override fun process(message: ManuellSaksbehandlingMessage) {
+        håndter(message, message.asManuellSaksbehandling()) { person, manuellSaksbehandling ->
+            HendelseProbe.onManuellSaksbehandling()
+            person.håndter(manuellSaksbehandling)
+        }
+    }
+
+    override fun process(message: UtbetalingMessage) {
+        håndter(message, message.asUtbetaling()) { person, utbetaling ->
+            HendelseProbe.onUtbetaling()
+            person.håndter(utbetaling)
+        }
+    }
+
+    override fun process(message: PåminnelseMessage) {
+        håndter(message, message.asPåminnelse()) { person, påminnelse ->
+            HendelseProbe.onPåminnelse(påminnelse)
+            person.håndter(påminnelse)
+        }
+    }
+
+    override fun process(message: KansellerUtbetalingMessage) {
+        håndter(message, message.asKansellerUtbetaling()) { person, kansellerUtbetaling ->
+            HendelseProbe.onKansellerUtbetaling()
+            person.håndter(kansellerUtbetaling)
+        }
+    }
+
+    private fun <Hendelse: ArbeidstakerHendelse> håndter(message: HendelseMessage, hendelse: Hendelse, handler: (Person, Hendelse) -> Unit) {
+        person(message, hendelse).also {
+            handler(it, hendelse)
+            finalize(it, message, hendelse)
+        }
+    }
+
+    private fun person(message: HendelseMessage, hendelse: ArbeidstakerHendelse): Person {
         return (personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
             aktørId = hendelse.aktørId(),
             fødselsnummer = hendelse.fødselsnummer()
@@ -91,23 +124,13 @@ internal class HendelseMediator(
         }
     }
 
-    internal fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
+    private fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
         lagrePersonDao.lagrePerson(person, hendelse)
 
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
         behovMediator.håndter(message, hendelse)
-    }
-
-    private fun withMDC(context: Map<String, String>, block: () -> Unit) {
-        val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
-        try {
-            MDC.setContextMap(contextMap + context)
-            block()
-        } finally {
-            MDC.setContextMap(contextMap)
-        }
     }
 
     private class PersonMediator(private val rapidsConnection: RapidsConnection) {

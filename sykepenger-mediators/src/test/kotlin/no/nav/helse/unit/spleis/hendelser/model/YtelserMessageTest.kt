@@ -1,8 +1,13 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.spleis.hendelser.model.YtelserMessage
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import io.mockk.ConstantAnswer
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.hendelser.Ytelser
+import no.nav.helse.unit.spleis.hendelser.TestRapid
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -10,22 +15,63 @@ internal class YtelserMessageTest {
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-        assertDoesNotThrow { YtelserMessage(json, MessageProblems("{}")).asYtelser() }
+        rapid.sendTestMessage(json)
+        assertTrue(recognizedMessage)
     }
 
     @Test
     fun `håndterer ukjente perioder`() {
-        assertDoesNotThrow { YtelserMessage(ukjentPeriode, MessageProblems("{}")).asYtelser() }
+        rapid.sendTestMessage(ukjentPeriode)
+        assertTrue(recognizedMessage)
     }
 
     @Test
     fun `håndterer ugyldig periode`() {
-        assertDoesNotThrow { YtelserMessage(ugyldigPeriode, MessageProblems("{}")).asYtelser() }
+        rapid.sendTestMessage(ugyldigPeriode)
+        assertTrue(recognizedMessage)
+    }
+
+    private var riverError = false
+    private var riverSevere = false
+    private var recognizedMessage = false
+    @BeforeEach
+    fun reset() {
+        recognizedMessage = false
+        riverError = false
+        riverSevere = false
+        rapid.reset()
+    }
+
+    private val messageMediator = mockk<MessageMediator>()
+    private val rapid = TestRapid().apply {
+        Ytelser(this, messageMediator)
+    }
+    init {
+        every {
+            messageMediator.onRecognizedMessage(any(), any())
+        } answers {
+            recognizedMessage = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverError(any(), any(), any())
+        } answers {
+            riverError = true
+            ConstantAnswer(Unit)
+        }
+        every {
+            messageMediator.onRiverSevere(any(), any(), any())
+        } answers {
+            riverSevere = true
+            ConstantAnswer(Unit)
+        }
     }
 }
 
 private val json = """
     {
+      "@event_name": "behov",
+      "tilstand": "AVVENTER_HISTORIKK",
       "historikkFom": "2014-12-08",
       "historikkTom": "2019-12-08",
       "@behov": [
@@ -81,6 +127,8 @@ private val json = """
 
 private val ukjentPeriode = """
     {
+      "@event_name": "behov",
+      "tilstand": "AVVENTER_HISTORIKK",
       "historikkFom": "2015-12-08",
       "historikkTom": "2019-12-08",
       "@behov": [
@@ -148,6 +196,8 @@ private val ukjentPeriode = """
 
 private val ugyldigPeriode = """
     {
+      "@event_name": "behov",
+      "tilstand": "AVVENTER_HISTORIKK",
       "historikkFom": "2015-12-08",
       "historikkTom": "2019-12-08",
       "@behov": [
