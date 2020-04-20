@@ -180,7 +180,6 @@ internal class HendelseMediator(
             override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
                 publish("trenger_inntektsmelding", JsonMessage.newMessage(mapOf(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "opprettet" to event.opprettet,
                     "fom" to event.fom,
                     "tom" to event.tom
                 )))

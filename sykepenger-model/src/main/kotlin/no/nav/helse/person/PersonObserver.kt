@@ -62,9 +62,7 @@ interface PersonObserver {
         val organisasjonsnummer: String,
         val fom: LocalDate,
         val tom: LocalDate
-    ) {
-        val opprettet = LocalDateTime.now()
-    }
+    )
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
