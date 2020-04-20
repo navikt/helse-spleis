@@ -1,6 +1,5 @@
-package no.nav.helse.unit
+package no.nav.helse
 
-import no.nav.helse.DataSourceBuilder
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

@@ -1,4 +1,4 @@
-package no.nav.helse.unit.behov
+package no.nav.helse.behov
 
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg

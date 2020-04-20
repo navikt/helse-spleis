@@ -1,4 +1,4 @@
-package no.nav.helse.unit.spleis.hendelser
+package no.nav.helse.spleis.hendelser
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator

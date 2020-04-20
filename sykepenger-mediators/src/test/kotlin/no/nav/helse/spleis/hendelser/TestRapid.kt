@@ -1,4 +1,4 @@
-package no.nav.helse.unit.spleis.hendelser
+package no.nav.helse.spleis.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature

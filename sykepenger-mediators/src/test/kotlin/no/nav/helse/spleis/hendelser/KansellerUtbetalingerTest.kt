@@ -1,13 +1,11 @@
-package no.nav.helse.unit.spleis.hendelser.model
+package no.nav.helse.spleis.hendelser
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.hendelser.KansellerUtbetalinger
-import no.nav.helse.unit.spleis.hendelser.RiverTest
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class KansellerUtbetalingMessageTest : RiverTest() {
+internal class KansellerUtbetalingerTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         KansellerUtbetalinger(rapidsConnection, mediator)
     }

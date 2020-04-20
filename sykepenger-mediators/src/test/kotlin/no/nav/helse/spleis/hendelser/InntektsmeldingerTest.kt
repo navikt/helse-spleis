@@ -1,4 +1,4 @@
-package no.nav.helse.unit.spleis.hendelser.model
+package no.nav.helse.spleis.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -7,8 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.hendelser.Inntektsmeldinger
-import no.nav.helse.unit.spleis.hendelser.RiverTest
 import no.nav.inntektsmeldingkontrakt.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -17,7 +15,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
-internal class InntektsmeldingMessageTest : RiverTest() {
+internal class InntektsmeldingerTest : RiverTest() {
 
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
