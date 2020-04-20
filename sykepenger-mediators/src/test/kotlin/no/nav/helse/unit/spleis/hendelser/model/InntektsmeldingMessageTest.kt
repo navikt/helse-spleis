@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.hendelser.Inntektsmeldinger
-import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
-import no.nav.helse.unit.spleis.hendelser.TestRapid
+import no.nav.helse.unit.spleis.hendelser.RiverTest
 import no.nav.inntektsmeldingkontrakt.*
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -18,7 +17,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
-internal class InntektsmeldingMessageTest {
+internal class InntektsmeldingMessageTest : RiverTest() {
 
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
@@ -69,43 +68,21 @@ internal class InntektsmeldingMessageTest {
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
+    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+        Inntektsmeldinger(rapidsConnection, mediator)
+    }
+
     @Test
     internal fun `invalid messages`() {
-        assertThrows(InvalidJson)
-        assertThrows(UnknownJson)
+        assertSevere(InvalidJson)
+        assertSevere(UnknownJson)
     }
 
     @Test
     internal fun `valid inntektsmelding`() {
-        assertValidMessage(ValidInntektsmeldingWithUnknownFieldsJson)
-        assertValidMessage(ValidInntektsmeldingJson)
-        assertValidMessage(ValidInntektsmeldingUtenRefusjon)
-    }
-
-    private fun assertValidMessage(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.recognizedMessage)
-    }
-
-    private fun assertInvalidMessage(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.riverError)
-    }
-
-    private fun assertThrows(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.riverSevereError)
-    }
-
-    @BeforeEach
-    fun reset() {
-        messageMediator.reset()
-        rapid.reset()
-    }
-
-    private val messageMediator = TestMessageMediator()
-    private val rapid = TestRapid().apply {
-        Inntektsmeldinger(this, messageMediator)
+        assertNoErrors(ValidInntektsmeldingWithUnknownFieldsJson)
+        assertNoErrors(ValidInntektsmeldingJson)
+        assertNoErrors(ValidInntektsmeldingUtenRefusjon)
     }
 }
 

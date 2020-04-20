@@ -1,34 +1,25 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.hendelser.KansellerUtbetalinger
-import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
-import no.nav.helse.unit.spleis.hendelser.TestRapid
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import no.nav.helse.unit.spleis.hendelser.RiverTest
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class KansellerUtbetalingMessageTest {
-
-    @Test fun `Kan mappe om message til modell uten feil`() {
-        rapid.sendTestMessage(json)
-        assertTrue(messageMediator.recognizedMessage)
+internal class KansellerUtbetalingMessageTest : RiverTest() {
+    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+        KansellerUtbetalinger(rapidsConnection, mediator)
     }
 
-    @Test fun `Får problems når vi mangler påkrevde felt`() {
-        rapid.sendTestMessage(badJson)
-        assertTrue(messageMediator.riverSevereError)
+    @Test
+    fun `Kan mappe om message til modell uten feil`() {
+        assertNoErrors(json)
     }
 
-    @BeforeEach
-    fun reset() {
-        messageMediator.reset()
-        rapid.reset()
-    }
-
-    private val messageMediator = TestMessageMediator()
-    private val rapid = TestRapid().apply {
-        KansellerUtbetalinger(this, messageMediator)
+    @Test
+    fun `Får problems når vi mangler påkrevde felt`() {
+        assertSevere(badJson)
     }
 
     private val json = """

@@ -1,42 +1,30 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.hendelser.Ytelser
-import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
-import no.nav.helse.unit.spleis.hendelser.TestRapid
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import no.nav.helse.unit.spleis.hendelser.RiverTest
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class YtelserMessageTest {
+internal class YtelserMessageTest : RiverTest() {
+    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+        Ytelser(rapidsConnection, mediator)
+    }
 
     @Test
     fun `Kan mappe om message til modell uten feil`() {
-        rapid.sendTestMessage(json)
-        assertTrue(messageMediator.recognizedMessage)
+        assertNoErrors(json)
     }
 
     @Test
     fun `håndterer ukjente perioder`() {
-        rapid.sendTestMessage(ukjentPeriode)
-        assertTrue(messageMediator.recognizedMessage)
+        assertNoErrors(ukjentPeriode)
     }
 
     @Test
     fun `håndterer ugyldig periode`() {
-        rapid.sendTestMessage(ugyldigPeriode)
-        assertTrue(messageMediator.recognizedMessage)
-    }
-
-    @BeforeEach
-    fun reset() {
-        messageMediator.reset()
-        rapid.reset()
-    }
-
-    private val messageMediator = TestMessageMediator()
-    private val rapid = TestRapid().apply {
-        Ytelser(this, messageMediator)
+        assertNoErrors(ugyldigPeriode)
     }
 }
 

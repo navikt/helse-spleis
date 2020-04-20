@@ -5,19 +5,18 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.hendelser.SendtNavSøknader
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
-import no.nav.helse.unit.spleis.hendelser.TestRapid
+import no.nav.helse.unit.spleis.hendelser.RiverTest
 import no.nav.syfo.kafka.felles.*
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SendtSøknadNavMessageTest {
+internal class SendtSøknadNavMessageTest : RiverTest() {
 
     private val invalidJson = "foo"
     private val unknownJson = "{\"foo\": \"bar\"}"
@@ -97,66 +96,44 @@ internal class SendtSøknadNavMessageTest {
         )
     ).toJson()
 
+    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+        SendtNavSøknader(rapidsConnection, mediator)
+    }
+
     @Test
     internal fun `invalid messages`() {
-        assertThrows(invalidJson)
-        assertThrows(unknownJson)
-        assertThrows(validAvbruttSøknad)
+        assertSevere(invalidJson)
+        assertSevere(unknownJson)
+        assertSevere(validAvbruttSøknad)
     }
 
     @Test
     internal fun `ukjent fraværskode`() {
-        assertInvalidMessage(ukjentFraværskode)
+        assertErrors(ukjentFraværskode)
     }
 
     @Test
     internal fun `valid søknader`() {
-        assertValidMessage(validSendtSøknadWithUnknownFieldsJson)
-        assertValidMessage(validSendtSøknad)
+        assertNoErrors(validSendtSøknadWithUnknownFieldsJson)
+        assertNoErrors(validSendtSøknad)
     }
 
     @Test
     internal fun `søknad med utlandsopphold`() {
-        assertValidMessage(søknadMedUtlandsopphold)
+        assertNoErrors(søknadMedUtlandsopphold)
     }
 
     @Test
     internal fun `søknad med faktisk grad større enn 100 gir en gyldig sykdomsgrad`() {
-        assertValidMessage(validSendtSøknadMedFaktiskGradStørreEnn100)
+        assertNoErrors(validSendtSøknadMedFaktiskGradStørreEnn100)
     }
 
     @Test
     internal fun `parser søknad med permitteringer`() {
-        assertValidMessage(validSøknad().copy(permitteringer = emptyList()).toJson())
-        assertValidMessage(validSøknad().copy(permitteringer = null).toJson())
-        assertValidMessage(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, 31.januar))).toJson())
-        assertValidMessage(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, null))).toJson())
-    }
-
-    private fun assertValidMessage(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.recognizedMessage)
-    }
-
-    private fun assertInvalidMessage(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.riverError)
-    }
-
-    private fun assertThrows(message: String) {
-        rapid.sendTestMessage(message)
-        assertTrue(messageMediator.riverSevereError)
-    }
-
-    @BeforeEach
-    fun reset() {
-        messageMediator.reset()
-        rapid.reset()
-    }
-
-    private val messageMediator = TestMessageMediator()
-    private val rapid = TestRapid().apply {
-        SendtNavSøknader(this, messageMediator)
+        assertNoErrors(validSøknad().copy(permitteringer = emptyList()).toJson())
+        assertNoErrors(validSøknad().copy(permitteringer = null).toJson())
+        assertNoErrors(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, 31.januar))).toJson())
+        assertNoErrors(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, null))).toJson())
     }
 }
 
