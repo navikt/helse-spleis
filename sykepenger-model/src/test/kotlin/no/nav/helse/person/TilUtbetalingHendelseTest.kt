@@ -4,7 +4,7 @@ import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -24,7 +24,8 @@ internal class TilUtbetalingHendelseTest {
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
-    private var utbetaltEvent: PersonObserver.UtbetaltEvent? = null
+    private lateinit var utbetaltEvent: PersonObserver.UtbetaltEvent
+
     private val utbetalingObserver = object : PersonObserver {
         override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
             utbetaltEvent = event
@@ -35,7 +36,6 @@ internal class TilUtbetalingHendelseTest {
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
         person.addObserver(utbetalingObserver)
-        utbetaltEvent = null
     }
 
     @Test
@@ -44,14 +44,15 @@ internal class TilUtbetalingHendelseTest {
         person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
         assertTilstand(TilstandType.AVSLUTTET)
 
-        assertEquals(UNG_PERSON_FNR_2018, utbetaltEvent?.fødselsnummer)
-        assertEquals(førsteSykedag, utbetaltEvent?.førsteFraværsdag)
-        assertEquals(1, utbetaltEvent?.utbetalingslinjer?.size)
-        assertEquals(1, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.size)
-        assertEquals(17.januar, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.get(0)?.fom)
-        assertEquals(31.januar, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.get(0)?.tom)
-        assertEquals(1431, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.get(0)?.dagsats)
-        assertEquals(100.0, utbetaltEvent?.utbetalingslinjer?.get(0)?.utbetalingslinjer?.get(0)?.grad)
+        assertEquals(UNG_PERSON_FNR_2018, utbetaltEvent.fødselsnummer)
+        assertEquals(førsteSykedag, utbetaltEvent.førsteFraværsdag)
+
+        val utbetalingslinje = utbetaltEvent.utbetalingslinjer[0]
+        assertEquals(1, utbetaltEvent.utbetalingslinjer.size)
+        assertEquals(17.januar, utbetalingslinje.fom)
+        assertEquals(31.januar, utbetalingslinje.tom)
+        assertEquals(1431, utbetalingslinje.dagsats)
+        assertEquals(100.0, utbetalingslinje.grad)
     }
 
     @Test
@@ -59,7 +60,7 @@ internal class TilUtbetalingHendelseTest {
         håndterGodkjenning()
         person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AVVIST))
         assertTilstand(TilstandType.UTBETALING_FEILET)
-        assertNull(utbetaltEvent)
+        assertFalse(this::utbetaltEvent.isInitialized)
     }
 
     private fun assertTilstand(expectedTilstand: TilstandType) {

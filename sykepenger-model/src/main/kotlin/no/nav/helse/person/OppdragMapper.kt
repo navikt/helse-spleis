@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
@@ -33,8 +32,7 @@ private class OppdragMapper(
     private val forbrukteSykedager: Int
 ) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
-    private val utbetalingslinjeListe = mutableListOf<PersonObserver.Utbetalingslinje>()
-    private val utbetalingslinjerListe = mutableListOf<PersonObserver.Utbetalingslinjer>()
+    private val utbetalingslinjer = mutableListOf<PersonObserver.Utbetalingslinje>()
 
     internal fun tilEvent(): PersonObserver.UtbetaltEvent {
         utbetaling.accept(this)
@@ -44,7 +42,7 @@ private class OppdragMapper(
             fødselsnummer = fødselsnummer,
             førsteFraværsdag = førsteFraværsdag,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingslinjer = utbetalingslinjerListe.toList(),
+            utbetalingslinjer = utbetalingslinjer.toList(),
             forbrukteSykedager = forbrukteSykedager,
             opprettet = opprettet
         )
@@ -52,32 +50,6 @@ private class OppdragMapper(
 
     override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
         opprettet = tidsstempel
-    }
-
-    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        utbetalingslinjeListe.clear()
-    }
-
-    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = oppdrag.fagsystemId(),
-            utbetalingslinjer = utbetalingslinjeListe.toList()
-        )
-            .takeIf { it.utbetalingslinjer.isNotEmpty() }
-            ?.also { utbetalingslinjerListe.add(it) }
-    }
-
-    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
-        utbetalingslinjeListe.clear()
-    }
-
-    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
-        PersonObserver.Utbetalingslinjer(
-            utbetalingsreferanse = oppdrag.fagsystemId(),
-            utbetalingslinjer = utbetalingslinjeListe.toList()
-        )
-            .takeIf { it.utbetalingslinjer.isNotEmpty() }
-            ?.also { utbetalingslinjerListe.add(it) }
     }
 
     override fun visitUtbetalingslinje(
@@ -91,7 +63,7 @@ private class OppdragMapper(
         refFagsystemId: String?,
         endringskode: Endringskode
     ) {
-        utbetalingslinjeListe.add(
+        utbetalingslinjer.add(
             PersonObserver.Utbetalingslinje(
                 fom = fom,
                 tom = tom,

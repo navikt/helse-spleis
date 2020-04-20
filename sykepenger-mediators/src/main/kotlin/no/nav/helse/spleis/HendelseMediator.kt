@@ -153,17 +153,12 @@ internal class HendelseMediator(
                 publish("utbetalt", JsonMessage.newMessage(mapOf(
                     "førsteFraværsdag" to event.førsteFraværsdag,
                     "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
-                    "utbetaling" to event.utbetalingslinjer.map {
+                    "utbetalingslinjer" to event.utbetalingslinjer.map {
                         mapOf(
-                            "utbetalingsreferanse" to it.utbetalingsreferanse,
-                            "utbetalingslinjer" to it.utbetalingslinjer.map {
-                                mapOf(
-                                    "fom" to it.fom,
-                                    "tom" to it.tom,
-                                    "dagsats" to it.dagsats,
-                                    "grad" to it.grad
-                                )
-                            }
+                            "fom" to it.fom,
+                            "tom" to it.tom,
+                            "dagsats" to it.dagsats,
+                            "grad" to it.grad
                         )
                     },
                     "forbrukteSykedager" to event.forbrukteSykedager,

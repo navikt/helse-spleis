@@ -39,14 +39,9 @@ interface PersonObserver {
         val fødselsnummer: String,
         val førsteFraværsdag: LocalDate,
         val vedtaksperiodeId: UUID,
-        val utbetalingslinjer: List<Utbetalingslinjer>,
+        val utbetalingslinjer: List<Utbetalingslinje>,
         val forbrukteSykedager: Int,
         val opprettet: LocalDateTime
-    )
-
-    data class Utbetalingslinjer(
-        val utbetalingsreferanse: String,
-        val utbetalingslinjer: List<Utbetalingslinje>
     )
 
     data class Utbetalingslinje(
