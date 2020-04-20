@@ -6,7 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -25,11 +25,7 @@ internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(pac
     private val ferieperioder = packet["ferieperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf (JsonNode::isTextual)?.asText()
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
-
-    internal fun asInntektsmelding() = Inntektsmelding(
+    private val inntektsmelding = Inntektsmelding(
         meldingsreferanseId = this.id,
         refusjon = refusjon,
         orgnummer = orgnummer,
@@ -42,5 +38,9 @@ internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(pac
         arbeidsforholdId = arbeidsforholdId,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
     )
+
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, inntektsmelding)
+    }
 }
 

@@ -3,7 +3,7 @@ package no.nav.helse.spleis.hendelser.model
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Ny Søknad
 internal class NySøknadMessage(packet: JsonMessage) : SøknadMessage(packet) {
@@ -18,15 +18,15 @@ internal class NySøknadMessage(packet: JsonMessage) : SøknadMessage(packet) {
         )
     }
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
-
-    internal fun asSykmelding() = Sykmelding(
+    private val sykmelding = Sykmelding(
         meldingsreferanseId = this.id,
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder
     )
+
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, sykmelding)
+    }
 }

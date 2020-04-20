@@ -1,31 +1,20 @@
 package no.nav.helse.spleis.hendelser
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.*
-import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.hendelser.model.KansellerUtbetalingMessage
 
-internal class KansellerUtbetalinger(rapidsConnection: RapidsConnection, private val messageMediator: MessageMediator) :
-    River.PacketListener {
-    init {
-        River(rapidsConnection).apply {
-            validate {
-                it.demandValue("@event_name", "kanseller_utbetaling")
-                it.require("@opprettet", JsonNode::asLocalDateTime)
-                it.requireKey("@id", "aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler")
-            }
-        }.register(this)
+internal class KansellerUtbetalinger(
+    rapidsConnection: RapidsConnection,
+    messageMediator: IMessageMediator
+) : HendelseRiver(rapidsConnection, messageMediator) {
+    override val eventName = "kanseller_utbetaling"
+    override val riverName = "Kanseller utbetaling"
+
+    override fun validate(packet: JsonMessage) {
+        packet.requireKey("@id", "aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler")
     }
 
-    override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-        messageMediator.onRecognizedMessage(KansellerUtbetalingMessage(packet), context)
-    }
-
-    override fun onSevere(error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
-        messageMediator.onRiverSevere("Kanseller utbetaling", error, context)
-    }
-
-    override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-        messageMediator.onRiverError("Kanseller utbetaling", problems, context)
-    }
+    override fun createMessage(packet: JsonMessage) = KansellerUtbetalingMessage(packet)
 }

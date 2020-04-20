@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 import kotlin.math.max
 
 // Understands a JSON message representing a Søknad that is sent to NAV
@@ -45,20 +45,18 @@ internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(pack
     } + (packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
         ?: emptyList())
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val søknad = Søknad(
+        meldingsreferanseId = this.id,
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        perioder = perioder,
+        harAndreInntektskilder = harAndreInntektskilder,
+        sendtTilNAV = sendtNav,
+        permittert = permittert
+    )
 
-    internal fun asSøknad(): Søknad {
-        return Søknad(
-            meldingsreferanseId = this.id,
-            fnr = fødselsnummer,
-            aktørId = aktørId,
-            orgnummer = orgnummer,
-            perioder = perioder,
-            harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = sendtNav,
-            permittert = permittert
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, søknad)
     }
 }

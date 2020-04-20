@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.hendelser.model.*
@@ -123,60 +122,45 @@ internal class MessageMediatorTest {
             override fun stop() {}
         }
 
-        private val hendelseMediator = mockk<HendelseMediator>(relaxed = true) {
-            every {
-                process(any<NySøknadMessage>())
-            } answers {
+        private val hendelseMediator = object : IHendelseMediator {
+            override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
                 lestNySøknad = true
             }
 
-            every {
-                process(any<SendtSøknadNavMessage>())
-            } answers {
+            override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad) {
                 lestSendtSøknad = true
             }
 
-            every {
-                process(any<InntektsmeldingMessage>())
-            } answers {
+            override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding) {
                 lestInntektsmelding = true
             }
 
-            every {
-                process(any<YtelserMessage>())
-            } answers {
-                lestYtelser = true
-            }
-
-            every {
-                process(any<PåminnelseMessage>())
-            } answers {
+            override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse) {
                 lestPåminnelse = true
             }
 
-            every {
-                process(any<VilkårsgrunnlagMessage>())
-            } answers {
+            override fun behandle(message: YtelserMessage, ytelser: Ytelser) {
+                lestYtelser = true
+            }
+
+            override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag) {
                 lestVilkårsgrunnlag = true
             }
 
-            every {
-                process(any<SimuleringMessage>())
-            } answers {
-                lestSimulering = true
-            }
-
-            every {
-                process(any<ManuellSaksbehandlingMessage>())
-            } answers {
+            override fun behandle(message: ManuellSaksbehandlingMessage, manuellSaksbehandling: ManuellSaksbehandling) {
                 lestManuellSaksbehandling = true
             }
 
-            every {
-                process(any<UtbetalingMessage>())
-            } answers {
+            override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse) {
                 lestUtbetaling = true
             }
+
+            override fun behandle(message: SimuleringMessage, simulering: Simulering) {
+                lestSimulering = true
+            }
+
+            override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {}
+            override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {}
         }
 
         init {

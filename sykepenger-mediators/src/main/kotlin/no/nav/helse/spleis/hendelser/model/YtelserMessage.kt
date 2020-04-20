@@ -11,7 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing an Ytelserbehov
 internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -70,34 +70,32 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         )
     }
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val aktivitetslogg = Aktivitetslogg()
+    private val foreldrepermisjon = Foreldrepermisjon(
+        foreldrepengeytelse = foreldrepenger,
+        svangerskapsytelse = svangerskapsytelse,
+        aktivitetslogg = aktivitetslogg
+    )
 
-    internal fun asYtelser(): Ytelser {
-        val aktivitetslogg = Aktivitetslogg()
-        val foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepenger,
-            svangerskapsytelse = svangerskapsytelse,
-            aktivitetslogg = aktivitetslogg
-        )
+    private val utbetalingshistorikk = Utbetalingshistorikk(
+        utbetalinger = utbetalinger,
+        inntektshistorikk = inntektshistorikk,
+        graderingsliste = graderingsliste,
+        aktivitetslogg = aktivitetslogg
+    )
 
-        val utbetalingshistorikk = Utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            graderingsliste = graderingsliste,
-            aktivitetslogg = aktivitetslogg
-        )
+    private val ytelser = Ytelser(
+        meldingsreferanseId = this.id,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        utbetalingshistorikk = utbetalingshistorikk,
+        foreldrepermisjon = foreldrepermisjon,
+        aktivitetslogg = aktivitetslogg
+    )
 
-        return Ytelser(
-            meldingsreferanseId = this.id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingshistorikk = utbetalingshistorikk,
-            foreldrepermisjon = foreldrepermisjon,
-            aktivitetslogg = aktivitetslogg
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, ytelser)
     }
 }

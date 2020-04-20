@@ -7,7 +7,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -58,19 +58,17 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             )
         }
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val simulering = Simulering(
+        vedtaksperiodeId = vedtaksperiodeId,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        orgnummer = organisasjonsnummer,
+        simuleringOK = simuleringOK,
+        melding = melding,
+        simuleringResultat = simuleringResultat
+    )
 
-    fun asSimulering(): Simulering {
-        return Simulering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            orgnummer = organisasjonsnummer,
-            simuleringOK = simuleringOK,
-            melding = melding,
-            simuleringResultat = simuleringResultat
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, simulering)
     }
 }

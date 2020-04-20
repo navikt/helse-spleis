@@ -1,6 +1,6 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -9,7 +9,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.hendelser.MessageProcessor
 import no.nav.helse.spleis.hendelser.model.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -23,93 +22,93 @@ internal class HendelseMediator(
     private val personRepository: PersonRepository,
     private val lagrePersonDao: LagrePersonDao
 
-) : MessageProcessor {
+) : IHendelseMediator {
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     private val personMediator = PersonMediator(rapidsConnection)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
 
-    override fun process(message: NySøknadMessage) {
-        håndter(message, message.asSykmelding()) { person, sykmelding ->
+    override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
+        håndter(message, sykmelding) { person ->
             HendelseProbe.onSykmelding()
             person.håndter(sykmelding)
         }
     }
 
-    override fun process(message: SendtSøknadArbeidsgiverMessage) {
-        håndter(message, message.asSøknadArbeidsgiver()) { person, søknad ->
+    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {
+        håndter(message, søknad) { person ->
             HendelseProbe.onSøknadArbeidsgiver()
             person.håndter(søknad)
         }
     }
 
-    override fun process(message: SendtSøknadNavMessage) {
-        håndter(message, message.asSøknad()) { person, søknad ->
+    override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad) {
+        håndter(message, søknad) { person ->
             HendelseProbe.onSøknadNav()
             person.håndter(søknad)
         }
     }
 
-    override fun process(message: InntektsmeldingMessage) {
-        håndter(message, message.asInntektsmelding()) { person, inntektsmelding ->
+    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding) {
+        håndter(message, inntektsmelding) { person ->
             HendelseProbe.onInntektsmelding()
             person.håndter(inntektsmelding)
         }
     }
 
-    override fun process(message: YtelserMessage) {
-        håndter(message, message.asYtelser()) { person, ytelser ->
+    override fun behandle(message: YtelserMessage, ytelser: Ytelser) {
+        håndter(message, ytelser) { person ->
             HendelseProbe.onYtelser()
             person.håndter(ytelser)
         }
     }
 
-    override fun process(message: VilkårsgrunnlagMessage) {
-        håndter(message, message.asVilkårsgrunnlag()) { person, vilkårsgrunnlag ->
+    override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag) {
+        håndter(message, vilkårsgrunnlag) { person ->
             HendelseProbe.onVilkårsgrunnlag()
             person.håndter(vilkårsgrunnlag)
         }
     }
 
-    override fun process(message: SimuleringMessage) {
-        håndter(message, message.asSimulering()) { person, simulering ->
+    override fun behandle(message: SimuleringMessage, simulering: Simulering) {
+        håndter(message, simulering) { person ->
             HendelseProbe.onSimulering()
             person.håndter(simulering)
         }
     }
 
-    override fun process(message: ManuellSaksbehandlingMessage) {
-        håndter(message, message.asManuellSaksbehandling()) { person, manuellSaksbehandling ->
+    override fun behandle(message: ManuellSaksbehandlingMessage, manuellSaksbehandling: ManuellSaksbehandling) {
+        håndter(message, manuellSaksbehandling) { person ->
             HendelseProbe.onManuellSaksbehandling()
             person.håndter(manuellSaksbehandling)
         }
     }
 
-    override fun process(message: UtbetalingMessage) {
-        håndter(message, message.asUtbetaling()) { person, utbetaling ->
+    override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse) {
+        håndter(message, utbetaling) { person ->
             HendelseProbe.onUtbetaling()
             person.håndter(utbetaling)
         }
     }
 
-    override fun process(message: PåminnelseMessage) {
-        håndter(message, message.asPåminnelse()) { person, påminnelse ->
+    override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse) {
+        håndter(message, påminnelse) { person ->
             HendelseProbe.onPåminnelse(påminnelse)
             person.håndter(påminnelse)
         }
     }
 
-    override fun process(message: KansellerUtbetalingMessage) {
-        håndter(message, message.asKansellerUtbetaling()) { person, kansellerUtbetaling ->
+    override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {
+        håndter(message, kansellerUtbetaling) { person ->
             HendelseProbe.onKansellerUtbetaling()
             person.håndter(kansellerUtbetaling)
         }
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> håndter(message: HendelseMessage, hendelse: Hendelse, handler: (Person, Hendelse) -> Unit) {
+    private fun <Hendelse: ArbeidstakerHendelse> håndter(message: HendelseMessage, hendelse: Hendelse, handler: (Person) -> Unit) {
         person(message, hendelse).also {
-            handler(it, hendelse)
+            handler(it)
             finalize(it, message, hendelse)
         }
     }
@@ -224,3 +223,16 @@ internal class HendelseMediator(
     }
 }
 
+internal interface IHendelseMediator {
+    fun behandle(message: NySøknadMessage, sykmelding: Sykmelding)
+    fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver)
+    fun behandle(message: SendtSøknadNavMessage, søknad: Søknad)
+    fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding)
+    fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse)
+    fun behandle(message: YtelserMessage, ytelser: Ytelser)
+    fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag)
+    fun behandle(message: ManuellSaksbehandlingMessage, manuellSaksbehandling: ManuellSaksbehandling)
+    fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse)
+    fun behandle(message: SimuleringMessage, simulering: Simulering)
+    fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
+}

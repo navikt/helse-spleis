@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.hendelser.model
 
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.spleis.hendelser.MessageProcessor
-import no.nav.helse.hendelser.UtbetalingHendelse as ModelUtbetaling
+import no.nav.helse.spleis.IHendelseMediator
 
 internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -14,19 +14,17 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val utbetaling = UtbetalingHendelse(
+        vedtaksperiodeId = vedtaksperiodeId,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        orgnummer = organisasjonsnummer,
+        utbetalingsreferanse = fagsystemId,
+        status = status,
+        melding = beskrivelse
+    )
 
-    internal fun asUtbetaling(): ModelUtbetaling {
-        return ModelUtbetaling(
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            orgnummer = organisasjonsnummer,
-            utbetalingsreferanse = fagsystemId,
-            status = status,
-            melding = beskrivelse
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, utbetaling)
     }
 }

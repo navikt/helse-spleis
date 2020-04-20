@@ -1,10 +1,7 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
-import io.mockk.ConstantAnswer
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.hendelser.Ytelser
+import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
 import no.nav.helse.unit.spleis.hendelser.TestRapid
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -16,55 +13,30 @@ internal class YtelserMessageTest {
     @Test
     fun `Kan mappe om message til modell uten feil`() {
         rapid.sendTestMessage(json)
-        assertTrue(recognizedMessage)
+        assertTrue(messageMediator.recognizedMessage)
     }
 
     @Test
     fun `håndterer ukjente perioder`() {
         rapid.sendTestMessage(ukjentPeriode)
-        assertTrue(recognizedMessage)
+        assertTrue(messageMediator.recognizedMessage)
     }
 
     @Test
     fun `håndterer ugyldig periode`() {
         rapid.sendTestMessage(ugyldigPeriode)
-        assertTrue(recognizedMessage)
+        assertTrue(messageMediator.recognizedMessage)
     }
 
-    private var riverError = false
-    private var riverSevere = false
-    private var recognizedMessage = false
     @BeforeEach
     fun reset() {
-        recognizedMessage = false
-        riverError = false
-        riverSevere = false
+        messageMediator.reset()
         rapid.reset()
     }
 
-    private val messageMediator = mockk<MessageMediator>()
+    private val messageMediator = TestMessageMediator()
     private val rapid = TestRapid().apply {
         Ytelser(this, messageMediator)
-    }
-    init {
-        every {
-            messageMediator.onRecognizedMessage(any(), any())
-        } answers {
-            recognizedMessage = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverError(any(), any(), any())
-        } answers {
-            riverError = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverSevere(any(), any(), any())
-        } answers {
-            riverSevere = true
-            ConstantAnswer(Unit)
-        }
     }
 }
 

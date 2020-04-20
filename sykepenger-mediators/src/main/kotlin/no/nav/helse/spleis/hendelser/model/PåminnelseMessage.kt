@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Påminnelse
 internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -19,21 +19,19 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val påminnelse = Påminnelse(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        antallGangerPåminnet = antallGangerPåminnet,
+        tilstand = tilstand,
+        tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+        påminnelsestidspunkt = påminnelsestidspunkt,
+        nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
+    )
 
-    internal fun asPåminnelse(): Påminnelse {
-        return Påminnelse(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            antallGangerPåminnet = antallGangerPåminnet,
-            tilstand = tilstand,
-            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-            påminnelsestidspunkt = påminnelsestidspunkt,
-            nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, påminnelse)
     }
 }

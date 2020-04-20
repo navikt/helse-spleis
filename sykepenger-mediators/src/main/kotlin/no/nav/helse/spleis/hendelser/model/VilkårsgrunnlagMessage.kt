@@ -10,7 +10,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 import java.time.LocalDate
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
@@ -54,34 +54,32 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             }
     }
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
+    private val vilkårsgrunnlag = Vilkårsgrunnlag(
+        vedtaksperiodeId = vedtaksperiodeId,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        orgnummer = organisasjonsnummer,
+        inntektsvurdering = Inntektsvurdering(
+            perioder = inntekter
+        ),
+        opptjeningvurdering = Opptjeningvurdering(
+            arbeidsforhold = arbeidsforhold
+        ),
+        erEgenAnsatt = erEgenAnsatt,
+        dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
+            Periode(
+                it.first,
+                it.second
+            )
+        }),
+        arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
+    ).also {
+        if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
+        if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
     }
 
-    internal fun asVilkårsgrunnlag(): Vilkårsgrunnlag {
-        return Vilkårsgrunnlag(
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            orgnummer = organisasjonsnummer,
-            inntektsvurdering = Inntektsvurdering(
-                perioder = inntekter
-            ),
-            opptjeningvurdering = Opptjeningvurdering(
-                arbeidsforhold = arbeidsforhold
-            ),
-            erEgenAnsatt = erEgenAnsatt,
-            dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
-                Periode(
-                    it.first,
-                    it.second
-                )
-            }),
-            arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
-        ).also {
-            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
-            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
-        }
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, vilkårsgrunnlag)
     }
 
     private fun asDatePair(jsonNode: JsonNode) =

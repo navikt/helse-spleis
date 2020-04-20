@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Periode.Sykdom
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
 internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMessage(packet) {
@@ -20,17 +20,15 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
         )
     }
 
-    override fun accept(processor: MessageProcessor) {
-        processor.process(this)
-    }
+    private val søknad = SøknadArbeidsgiver(
+        meldingsreferanseId = this.id,
+        fnr = fødselsnummer,
+        aktørId = aktørId,
+        orgnummer = orgnummer,
+        perioder = perioder
+    )
 
-    internal fun asSøknadArbeidsgiver(): SøknadArbeidsgiver {
-        return SøknadArbeidsgiver(
-            meldingsreferanseId = this.id,
-            fnr = fødselsnummer,
-            aktørId = aktørId,
-            orgnummer = orgnummer,
-            perioder = perioder
-        )
+    override fun behandle(mediator: IHendelseMediator) {
+        mediator.behandle(this, søknad)
     }
 }

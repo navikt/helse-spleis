@@ -11,9 +11,9 @@ import org.slf4j.MDC
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
-    private val hendelseMediator: HendelseMediator,
+    private val hendelseMediator: IHendelseMediator,
     private val hendelseRecorder: HendelseRecorder
-) {
+) : IMessageMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(MessageMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -45,48 +45,44 @@ internal class MessageMediator(
         riverErrors.clear()
     }
 
-    fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
+    override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         messageRecognized = true
-        handleMessage(message, context)
-    }
-
-    fun afterRiverHandling(message: String) {
-        if (messageRecognized) return
-        if (riverErrors.isNotEmpty()) return sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-        sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${riverSevereErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-    }
-
-    fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext) {
-        riverErrors.add(riverName to problems)
-    }
-
-    fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
-        riverSevereErrors.add(riverName to error.problems)
-    }
-
-    private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         withMDC(mapOf(
             "melding_id" to message.id.toString(),
             "melding_type" to (message::class.simpleName ?: "ukjent")
         )) {
             sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
-            try {
-                message.accept(hendelseRecorder)
-                message.accept(hendelseMediator)
-            } catch (err: Aktivitetslogg.AktivitetException) {
-                withMDC(err.kontekst()) {
-                    sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                }
-            } catch (err: Exception) {
-                withMDC(mapOf(
-                    "melding_id" to message.id.toString(),
-                    "melding_type" to (message::class.simpleName ?: "ukjent")
-                )) {
-                    log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                    withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
-                        sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-                    }
-                }
+            handleMessage(message, context)
+        }
+    }
+
+    override fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        riverErrors.add(riverName to problems)
+    }
+
+    override fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
+        riverSevereErrors.add(riverName to error.problems)
+    }
+
+    fun afterRiverHandling(message: String) {
+        if (messageRecognized) return
+        if (riverErrors.isNotEmpty()) return sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        if (riverSevereErrors.isNotEmpty()) sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${riverSevereErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        sikkerLogg.error("meldingen ble ikke plukket opp av noen rivers:\n$message")
+    }
+
+    private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
+        try {
+            hendelseRecorder.lagreMelding(message)
+            message.behandle(hendelseMediator)
+        } catch (err: Aktivitetslogg.AktivitetException) {
+            withMDC(err.kontekst()) {
+                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            }
+        } catch (err: Exception) {
+            log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
+                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
             }
         }
     }
@@ -126,4 +122,10 @@ internal class MessageMediator(
         override fun start() = throw IllegalStateException()
         override fun stop() = throw IllegalStateException()
     }
+}
+
+internal interface IMessageMediator {
+    fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext)
+    fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext)
+    fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext)
 }

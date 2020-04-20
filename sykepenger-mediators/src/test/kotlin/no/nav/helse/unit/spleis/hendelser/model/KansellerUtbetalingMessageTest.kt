@@ -1,10 +1,7 @@
 package no.nav.helse.unit.spleis.hendelser.model
 
-import io.mockk.ConstantAnswer
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.hendelser.KansellerUtbetalinger
+import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
 import no.nav.helse.unit.spleis.hendelser.TestRapid
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -15,48 +12,23 @@ internal class KansellerUtbetalingMessageTest {
 
     @Test fun `Kan mappe om message til modell uten feil`() {
         rapid.sendTestMessage(json)
-        assertTrue(recognizedMessage)
+        assertTrue(messageMediator.recognizedMessage)
     }
 
     @Test fun `Får problems når vi mangler påkrevde felt`() {
         rapid.sendTestMessage(badJson)
-        assertTrue(riverSevere)
+        assertTrue(messageMediator.riverSevereError)
     }
 
-    private var riverError = false
-    private var riverSevere = false
-    private var recognizedMessage = false
     @BeforeEach
     fun reset() {
-        recognizedMessage = false
-        riverError = false
-        riverSevere = false
+        messageMediator.reset()
         rapid.reset()
     }
 
-    private val messageMediator = mockk<MessageMediator>()
+    private val messageMediator = TestMessageMediator()
     private val rapid = TestRapid().apply {
         KansellerUtbetalinger(this, messageMediator)
-    }
-    init {
-        every {
-            messageMediator.onRecognizedMessage(any(), any())
-        } answers {
-            recognizedMessage = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverError(any(), any(), any())
-        } answers {
-            riverError = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverSevere(any(), any(), any())
-        } answers {
-            riverSevere = true
-            ConstantAnswer(Unit)
-        }
     }
 
     private val json = """

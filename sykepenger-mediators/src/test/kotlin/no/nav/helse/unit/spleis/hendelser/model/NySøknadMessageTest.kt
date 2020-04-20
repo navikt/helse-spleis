@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.ConstantAnswer
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.hendelser.NyeSøknader
+import no.nav.helse.unit.spleis.hendelser.TestMessageMediator
 import no.nav.helse.unit.spleis.hendelser.TestRapid
 import no.nav.syfo.kafka.felles.*
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -73,57 +70,29 @@ internal class NySøknadMessageTest {
     }
 
     private fun assertValidMessage(message: String) {
-        recognizedMessage = false
         rapid.sendTestMessage(message)
-        assertTrue(recognizedMessage)
+        assertTrue(messageMediator.recognizedMessage)
     }
 
     private fun assertInvalidMessage(message: String) {
-        riverError = false
         rapid.sendTestMessage(message)
-        assertTrue(riverError)
+        assertTrue(messageMediator.riverError)
     }
 
     private fun assertThrows(message: String) {
-        riverSevere = false
         rapid.sendTestMessage(message)
-        assertTrue(riverSevere)
+        assertTrue(messageMediator.riverSevereError)
     }
 
-    private var riverError = false
-    private var riverSevere = false
-    private var recognizedMessage = false
     @BeforeEach
     fun reset() {
-        recognizedMessage = false
-        riverError = false
-        riverSevere = false
+        messageMediator.reset()
         rapid.reset()
     }
 
-    private val messageMediator = mockk<MessageMediator>()
+    private val messageMediator = TestMessageMediator()
     private val rapid = TestRapid().apply {
         NyeSøknader(this, messageMediator)
-    }
-    init {
-        every {
-            messageMediator.onRecognizedMessage(any(), any())
-        } answers {
-            recognizedMessage = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverError(any(), any(), any())
-        } answers {
-            riverError = true
-            ConstantAnswer(Unit)
-        }
-        every {
-            messageMediator.onRiverSevere(any(), any(), any())
-        } answers {
-            riverSevere = true
-            ConstantAnswer(Unit)
-        }
     }
 }
 

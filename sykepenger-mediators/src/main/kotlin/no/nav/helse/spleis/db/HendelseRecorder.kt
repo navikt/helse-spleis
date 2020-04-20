@@ -4,54 +4,34 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.spleis.PostgresProbe
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.db.HendelseRecorder.Meldingstype.*
 import no.nav.helse.spleis.hendelser.model.*
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
-internal class HendelseRecorder(private val dataSource: DataSource): MessageProcessor {
-
-    override fun process(message: NySøknadMessage) {
-        lagreMelding(Meldingstype.NY_SØKNAD, message)
+internal class HendelseRecorder(private val dataSource: DataSource) {
+    private companion object {
+        private val log = LoggerFactory.getLogger(HendelseRecorder::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun process(message: SendtSøknadArbeidsgiverMessage) {
-        lagreMelding(Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER, message)
-    }
+    fun lagreMelding(melding: HendelseMessage) {
+        val type = when (melding) {
+            is NySøknadMessage -> NY_SØKNAD
+            is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
+            is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
+            is InntektsmeldingMessage -> INNTEKTSMELDING
+            is PåminnelseMessage -> PÅMINNELSE
+            is YtelserMessage -> YTELSER
+            is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
+            is SimuleringMessage -> SIMULERING
+            is ManuellSaksbehandlingMessage -> MANUELL_SAKSBEHANDLING
+            is UtbetalingMessage -> UTBETALING
+            is KansellerUtbetalingMessage -> KANSELLER_UTBETALING
+            else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
+        }
 
-    override fun process(message: SendtSøknadNavMessage) {
-        lagreMelding(Meldingstype.SENDT_SØKNAD_NAV, message)
-    }
-
-    override fun process(message: InntektsmeldingMessage) {
-        lagreMelding(Meldingstype.INNTEKTSMELDING, message)
-    }
-
-    override fun process(message: PåminnelseMessage) {
-        lagreMelding(Meldingstype.PÅMINNELSE, message)
-    }
-
-    override fun process(message: YtelserMessage) {
-        lagreMelding(Meldingstype.YTELSER, message)
-    }
-
-    override fun process(message: VilkårsgrunnlagMessage) {
-        lagreMelding(Meldingstype.VILKÅRSGRUNNLAG, message)
-    }
-
-    override fun process(message: SimuleringMessage) {
-        lagreMelding(Meldingstype.SIMULERING, message)
-    }
-
-    override fun process(message: ManuellSaksbehandlingMessage) {
-        lagreMelding(Meldingstype.MANUELL_SAKSBEHANDLING, message)
-    }
-
-    override fun process(message: UtbetalingMessage) {
-        lagreMelding(Meldingstype.UTBETALING, message)
-    }
-
-    override fun process(message: KansellerUtbetalingMessage) {
-        lagreMelding(Meldingstype.KANSELLER_UTBETALING, message)
+        lagreMelding(type, melding)
     }
 
     private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {

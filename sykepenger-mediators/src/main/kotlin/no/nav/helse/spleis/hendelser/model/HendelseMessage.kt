@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spleis.hendelser.MessageProcessor
+import no.nav.helse.spleis.IHendelseMediator
 import java.util.*
 
 internal abstract class HendelseMessage(private val packet: JsonMessage) {
@@ -15,7 +15,7 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
 
     internal abstract val fødselsnummer: String
 
-    internal abstract fun accept(processor: MessageProcessor)
+    internal abstract fun behandle(mediator: IHendelseMediator)
 
     fun toJson() = packet.toJson()
 }
