@@ -72,6 +72,16 @@ internal class NySykdomstidslinje private constructor(
                     )
             )
 
+        internal fun arbeidsgiverdager(førsteDato: LocalDate, sisteDato: LocalDate, grad: Number = 100.0) =
+            NySykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, NyDag>(
+                            { it },
+                            { if (it.erHelg()) NyArbeidsgiverHelgedag(it) else NyArbeidsgiverdag(it, grad) })
+                    )
+            )
+
         internal fun feriedager(førsteDato: LocalDate, sisteDato: LocalDate) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))

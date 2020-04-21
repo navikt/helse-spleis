@@ -2,15 +2,11 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.SykdomstidlinjeEkspanderingTest.TestSykdomstidslinje
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
-internal class SykdomstidlinjeEkspanderingTest {
+internal class SimpleMergeTest {
     @Test
     internal fun `ekspanderer tom tidslinje`() {
         val actual = NySykdomstidslinje().merge(1.januar jobbTil 5.januar)
@@ -134,25 +130,4 @@ internal class SykdomstidlinjeEkspanderingTest {
         }
         assertEquals(expected, count)
     }
-
-    internal class TestSykdomstidslinje(
-        private val førsteDato: LocalDate,
-        private val sisteDato: LocalDate,
-        private val daggenerator: (LocalDate, LocalDate, Number) -> NySykdomstidslinje
-    ) {
-        private var grad: Double = 100.0
-
-        internal infix fun grad(grad: Number) = this.also { it.grad = grad.toDouble() }
-
-        internal fun asNySykdomstidslinje() = daggenerator(førsteDato, sisteDato, grad)
-        internal fun merge(annen: TestSykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
-        internal fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
-
-    }
-    private infix fun LocalDate.jobbTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.arbeidsdager(første, siste) }
-    private infix fun LocalDate.ferieTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.feriedager(første, siste) }
-    private infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::sykedager )
-
 }
-
-internal fun NySykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): NySykdomstidslinje = this.merge(testTidslinje.asNySykdomstidslinje())
