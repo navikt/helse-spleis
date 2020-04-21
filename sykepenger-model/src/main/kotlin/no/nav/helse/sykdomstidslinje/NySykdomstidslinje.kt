@@ -4,12 +4,15 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.NyDag.NyArbeidsdag
 import no.nav.helse.sykdomstidslinje.NyDag.NyUkjentDag
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors.toMap
 
 internal class NySykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, NyDag>,
-    private val periode: Periode? = periode1(dager)
+    private val periode: Periode? = periode1(dager),
+    private val id: UUID = UUID.randomUUID(),
+    private val tidsstempel: LocalDateTime = LocalDateTime.now()
 ) : Iterable<NyDag> {
 
     internal constructor(dager: Map<LocalDate, NyDag> = emptyMap()) : this(
