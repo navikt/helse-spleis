@@ -1,8 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.NyDag.NyArbeidsdag
-import no.nav.helse.sykdomstidslinje.NyDag.NyUkjentDag
+import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.SykdomstidlinjeEkspanderingTest.TestSykdomstidslinje
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -14,7 +13,7 @@ import java.time.LocalDate
 internal class SykdomstidlinjeEkspanderingTest {
     @Test
     internal fun `ekspanderer tom tidslinje`() {
-        val actual = NySykdomstidslinje().merge(1.januar to 5.januar)
+        val actual = NySykdomstidslinje().merge(1.januar jobbTil 5.januar)
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
         assertTrue(actual[3.januar] is NyArbeidsdag)
@@ -22,7 +21,7 @@ internal class SykdomstidlinjeEkspanderingTest {
 
     @Test
     internal fun `ekspanderer med tidslinje`() {
-        val actual = (1.januar to 5.januar).merge(NySykdomstidslinje())
+        val actual = (1.januar jobbTil 5.januar).merge(NySykdomstidslinje())
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
         assertTrue(actual[3.januar] is NyArbeidsdag)
@@ -37,7 +36,7 @@ internal class SykdomstidlinjeEkspanderingTest {
 
     @Test
     internal fun `legge sammen to perioder uten overlapp`() {
-        val actual = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        val actual = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
         assertEquals(Periode(1.januar, 19.januar), actual.periode())
         assertTrue(actual[3.januar] is NyArbeidsdag)
@@ -47,7 +46,7 @@ internal class SykdomstidlinjeEkspanderingTest {
 
     @Test
     internal fun `kan subsette en tidslinje`() {
-        val original = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
         Periode(3.januar, 17.januar).also {
             assertEquals(it, original.subset(it).periode())
         }
@@ -71,7 +70,7 @@ internal class SykdomstidlinjeEkspanderingTest {
 
     @Test
     internal fun `kan gjennomløpe tidslinjen`() {
-        val actual = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        val actual = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
         assertSize(19, actual)
         assertSize(15, actual.subset(Periode(3.januar, 17.januar)))
         assertSize(9, actual.subset(Periode(6.januar, 14.januar)))
@@ -81,7 +80,7 @@ internal class SykdomstidlinjeEkspanderingTest {
 
     @Test
     internal fun `tidslinjen kan kuttes`() {
-        val original = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
         original.kutt(17.januar).also {
             assertEquals(Periode(1.januar, 17.januar), it.periode())
@@ -104,6 +103,26 @@ internal class SykdomstidlinjeEkspanderingTest {
         }
     }
 
+    @Test
+    internal fun `kan merge arbeidsdager med feriedager`() {
+        val actual = (1.januar jobbTil 8.januar).merge(15.januar ferieTil 19.januar)
+        assertSize(19, actual)
+        assertEquals(6, actual.filterIsInstance<NyArbeidsdag>().size)
+        assertEquals(2, actual.filterIsInstance<NyFriskHelgedag>().size)
+        assertEquals(5, actual.filterIsInstance<NyFeriedag>().size)
+        assertEquals(6, actual.filterIsInstance<NyUkjentDag>().size)
+    }
+
+    @Test
+    internal fun `støtter sykedager`() {
+        val actual = (1.januar sykTil 8.januar grad 50).merge(15.januar ferieTil 19.januar)
+        assertSize(19, actual)
+        assertEquals(6, actual.filterIsInstance<NySykedag>().size)
+        assertEquals(2, actual.filterIsInstance<NySykHelgedag>().size)
+        assertEquals(5, actual.filterIsInstance<NyFeriedag>().size)
+        assertEquals(6, actual.filterIsInstance<NyUkjentDag>().size)
+    }
+
     private fun assertSize(expected: Int, sykdomstidslinje: NySykdomstidslinje) {
         var count = 0
         sykdomstidslinje.forEach { _ -> count++ }
@@ -116,14 +135,24 @@ internal class SykdomstidlinjeEkspanderingTest {
         assertEquals(expected, count)
     }
 
-    internal class TestSykdomstidslinje(private val førsteDato: LocalDate, private val sisteDato: LocalDate) {
-        internal fun asNySykdomstidslinje() = NySykdomstidslinje.arbeidsdager(førsteDato, sisteDato)
+    internal class TestSykdomstidslinje(
+        private val førsteDato: LocalDate,
+        private val sisteDato: LocalDate,
+        private val daggenerator: (LocalDate, LocalDate, Number) -> NySykdomstidslinje
+    ) {
+        private var grad: Double = 100.0
 
-        fun merge(annen: TestSykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
-        fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
+        internal infix fun grad(grad: Number) = this.also { it.grad = grad.toDouble() }
+
+        internal fun asNySykdomstidslinje() = daggenerator(førsteDato, sisteDato, grad)
+        internal fun merge(annen: TestSykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
+        internal fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
+
     }
+    private infix fun LocalDate.jobbTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.arbeidsdager(første, siste) }
+    private infix fun LocalDate.ferieTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.feriedager(første, siste) }
+    private infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::sykedager )
 
-    private infix fun LocalDate.to(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato)
 }
 
 internal fun NySykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): NySykdomstidslinje = this.merge(testTidslinje.asNySykdomstidslinje())

@@ -1,8 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.NyDag.NyArbeidsdag
-import no.nav.helse.sykdomstidslinje.NyDag.NyUkjentDag
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -55,7 +55,27 @@ internal class NySykdomstidslinje private constructor(
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { NyArbeidsdag(it) }))
+                    .collect(
+                        toMap<LocalDate, LocalDate, NyDag>(
+                            { it },
+                            { if (it.erHelg()) NyFriskHelgedag(it) else NyArbeidsdag(it) })
+                    )
+            )
+
+        internal fun sykedager(førsteDato: LocalDate, sisteDato: LocalDate, grad: Number = 100.0) =
+            NySykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, NyDag>(
+                            { it },
+                            { if (it.erHelg()) NySykHelgedag(it) else NySykedag(it, grad) })
+                    )
+            )
+
+        internal fun feriedager(førsteDato: LocalDate, sisteDato: LocalDate) =
+            NySykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { NyFeriedag(it) }))
             )
     }
 
