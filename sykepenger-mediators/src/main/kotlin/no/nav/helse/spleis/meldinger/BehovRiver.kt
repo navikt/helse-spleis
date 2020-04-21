@@ -20,10 +20,10 @@ internal abstract class BehovRiver(
     }
 
     private fun validateBehov(packet: JsonMessage) {
+        packet.demandValue("@final", true)
+        packet.demandAll("@behov", behov.map(Enum<*>::name))
         packet.requireKey("@løsning", "aktørId", "fødselsnummer",
             "organisasjonsnummer", "vedtaksperiodeId", "tilstand")
         packet.require("@besvart", JsonNode::asLocalDateTime)
-        packet.requireValue("@final", true)
-        packet.demandAll("@behov", behov.map(Enum<*>::name))
     }
 }
