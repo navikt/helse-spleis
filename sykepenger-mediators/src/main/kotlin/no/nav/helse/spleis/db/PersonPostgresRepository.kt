@@ -8,7 +8,7 @@ import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.PostgresProbe
 import javax.sql.DataSource
 
-class PersonPostgresRepository(private val dataSource: DataSource) : PersonRepository {
+internal class PersonPostgresRepository(private val dataSource: DataSource) : PersonRepository {
 
     override fun hentPerson(fødselsnummer: String) =
         hentPerson(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fødselsnummer))

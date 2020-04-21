@@ -124,7 +124,7 @@ internal class HendelseMediator(
     }
 
     private fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
-        lagrePersonDao.lagrePerson(person, hendelse)
+        lagrePersonDao.lagrePerson(message, person, hendelse)
 
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
