@@ -18,7 +18,13 @@ internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(pack
     private val sendtNav = packet["sendtNav"].asLocalDateTime()
     private val harAndreInntektskilder = packet["andreInntektskilder"].isArray && !packet["andreInntektskilder"].isEmpty
     private val permittert = packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false
-    private val perioder = packet["soknadsperioder"].map {
+    private val papirsykmeldinger = packet["papirsykmeldinger"].map {
+        Periode.Papirsykmelding(
+            fom = it.path("fom").asLocalDate(),
+            tom = it.path("tom").asLocalDate()
+        )
+    }
+    private val søknadsperioder = packet["soknadsperioder"].map {
         Periode.Sykdom(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
@@ -27,12 +33,14 @@ internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(pack
                 max(100 - it, 0)
             }
         )
-    } + packet["egenmeldinger"].map {
+    }
+    private val egenmeldinger = packet["egenmeldinger"].map {
         Periode.Egenmelding(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate()
         )
-    } + packet["fravar"].mapNotNull {
+    }
+    private val fraværsperioder = packet["fravar"].mapNotNull {
         val fraværstype = it["type"].asText()
         val fom = it.path("fom").asLocalDate()
         when (fraværstype) {
@@ -42,8 +50,9 @@ internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(pack
             "UTLANDSOPPHOLD" -> Periode.Utlandsopphold(fom, it.path("tom").asLocalDate())
             else -> null // is filtered away in SendtNavSøknader river
         }
-    } + (packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) }
-        ?: emptyList())
+    }
+    private val arbeidGjenopptatt = packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Periode.Arbeid(it, søknadTom)) } ?: emptyList()
+    private val perioder = søknadsperioder + papirsykmeldinger + egenmeldinger + fraværsperioder + arbeidGjenopptatt
 
     private val søknad = Søknad(
         meldingsreferanseId = this.id,

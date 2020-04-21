@@ -44,8 +44,15 @@ internal class SøknadTest {
     @Test
     internal fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(5.januar, 10.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasBehov())
+        assertTrue(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
+    }
+
+    @Test
+    internal fun `søknad med papirsykmelding`() {
+        søknad(Sykdom(1.januar,  10.januar, 100), Papirsykmelding(11.januar, 16.januar))
+        assertTrue(søknad.valider(EN_PERIODE).hasErrors())
+        assertEquals(16, søknad.sykdomstidslinje().length())
     }
 
     @Test
@@ -69,13 +76,13 @@ internal class SøknadTest {
     @Test
     internal fun `utdanning ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Utdanning(16.januar, 17.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasBehov())
+        assertTrue(søknad.valider(EN_PERIODE).hasErrors())
     }
 
     @Test
     internal fun `permisjon ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100), Permisjon(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasBehov())
+        assertTrue(søknad.valider(EN_PERIODE).hasErrors())
     }
 
     @Test

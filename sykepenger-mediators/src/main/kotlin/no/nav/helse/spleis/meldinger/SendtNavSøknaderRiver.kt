@@ -21,6 +21,10 @@ internal class SendtNavSøknaderRiver(
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
+        packet.requireArray("papirsykmeldinger") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
+        }
         packet.requireArray("fravar") {
             requireAny("type", listOf("UTDANNING_FULLTID", "UTDANNING_DELTID", "PERMISJON", "FERIE", "UTLANDSOPPHOLD"))
             require("fom", JsonNode::asLocalDate)

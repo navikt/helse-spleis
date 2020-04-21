@@ -36,7 +36,7 @@ class Søknad constructor(
     }
 
     override fun sykdomstidslinje() = perioder
-        .map{ it.sykdomstidslinje(avskjæringsdato() ?: sykdomsperiode.start) }
+        .map { it.sykdomstidslinje(avskjæringsdato() ?: sykdomsperiode.start) }
         .filter { it.førsteDag().isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) }
         .merge(søknadDagturnering)
 
@@ -127,6 +127,14 @@ class Søknad constructor(
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
                 Sykdomstidslinje.sykedager(periode, avskjæringsdato, grad, SøknadDagFactory)
+        }
+
+        class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+            override fun sykdomstidslinje(ignore: LocalDate) =
+                Sykdomstidslinje.sykedager(periode, Double.NaN, SøknadDagFactory)
+
+            override fun valider(søknad: Søknad) =
+                søknad.error("Søknaden inneholder en Papirsykmeldingsperiode")
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {

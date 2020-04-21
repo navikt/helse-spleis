@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -1360,6 +1361,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `søknad med papirsykmelding`() {
+        håndterSykmelding(Triple(21.januar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100), Søknad.Periode.Papirsykmelding(1.januar, 20.januar))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test

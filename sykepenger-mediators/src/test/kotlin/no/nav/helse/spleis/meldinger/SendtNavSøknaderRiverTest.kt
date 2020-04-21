@@ -58,6 +58,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         sendtArbeidsgiver = LocalDateTime.now(),
         egenmeldinger = listOf(PeriodeDTO(fom = LocalDate.now(), tom = LocalDate.now())),
         soknadsperioder = soknadsperioder,
+        papirsykmeldinger = emptyList(),
         fravar = fravar
     )
 
