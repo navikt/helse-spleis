@@ -162,6 +162,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srv-helse-ml",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "srvhelsesjekk",
                     "role": "CONSUMER"
                 },
