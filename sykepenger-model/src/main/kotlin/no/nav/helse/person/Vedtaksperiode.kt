@@ -142,6 +142,13 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, simulering)
     }
 
+    internal fun håndter(utbetaling: UtbetalingOverført) {
+        if (id.toString() != utbetaling.vedtaksperiodeId) return
+        kontekst(utbetaling)
+        tilstand.håndter(this, utbetaling)
+    }
+
+
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         if (id.toString() != utbetaling.vedtaksperiodeId) return
         kontekst(utbetaling)
@@ -425,6 +432,10 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             simulering.error("Forventet ikke simulering i %s", type.name)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
+            utbetaling.error("Forventet ikke utbetaling overført i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
@@ -939,6 +950,11 @@ internal class Vedtaksperiode private constructor(
                 requireNotNull(vedtaksperiode.maksdato),
                 vedtaksperiode.godkjentAv
             )
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
+            utbetaling.info("Utbetalingen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
+                "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {

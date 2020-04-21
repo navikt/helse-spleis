@@ -98,6 +98,11 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(simulering) }
     }
 
+    internal fun håndter(utbetaling: UtbetalingOverført) {
+        utbetaling.kontekst(this)
+        perioder.forEach { it.håndter(utbetaling) }
+    }
+
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
         perioder.forEach { it.håndter(utbetaling) }

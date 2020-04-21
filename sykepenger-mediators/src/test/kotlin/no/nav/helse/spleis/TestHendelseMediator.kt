@@ -23,6 +23,8 @@ internal class TestHendelseMediator() : IHendelseMediator {
         private set
     internal var lestManuellSaksbehandling = false
         private set
+    internal var lestUtbetalingOverført = false
+        private set
     internal var lestUtbetaling = false
         private set
     internal var lestKansellerUtbetaling = false
@@ -37,6 +39,7 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestYtelser = false
         lestVilkårsgrunnlag = false
         lestManuellSaksbehandling = false
+        lestUtbetalingOverført = false
         lestUtbetaling = false
         lestKansellerUtbetaling = false
     }
@@ -72,6 +75,10 @@ internal class TestHendelseMediator() : IHendelseMediator {
 
     override fun behandle(message: ManuellSaksbehandlingMessage, manuellSaksbehandling: ManuellSaksbehandling) {
         lestManuellSaksbehandling = true
+    }
+
+    override fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført) {
+        lestUtbetalingOverført = true
     }
 
     override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse) {
