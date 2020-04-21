@@ -170,8 +170,12 @@ internal class TestMessageFactory(
                         "ansattTil" to it.third
                     )
                 },
-                "Dagpenger" to emptyList<Any>(),
-                "Arbeidsavklaringspenger" to emptyList<Any>()
+                "Dagpenger" to mapOf(
+                    "vedtaksperioder" to emptyList<Any>()
+                ),
+                "Arbeidsavklaringspenger" to mapOf(
+                    "vedtaksperioder" to emptyList<Any>()
+                )
             )
         )
     }
