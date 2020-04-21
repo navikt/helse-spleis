@@ -5,10 +5,9 @@ import no.nav.helse.hendelser.Inntektsmelding.InntektsmeldingPeriode.Ferieperiod
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDate
 import java.util.*
@@ -32,6 +31,29 @@ class Inntektsmelding(
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
     private var sykdomstidslinje: Sykdomstidslinje
+
+    private val beste = { venstre: NyDag, høyre: NyDag ->
+        when {
+            venstre::class == høyre::class -> venstre
+            venstre is NyUkjentDag -> høyre
+            høyre is NyUkjentDag -> venstre
+            venstre is NyArbeidsgiverdag || venstre is NyArbeidsgiverHelgedag -> venstre
+            høyre is NyArbeidsgiverdag || høyre is NyArbeidsgiverHelgedag -> høyre
+            venstre is NySykedag -> venstre
+            høyre is NySykedag -> høyre
+            venstre is NyFeriedag && høyre is NyArbeidsdag -> venstre
+            høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
+            venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
+            høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
+            else -> venstre.problem()
+        }
+    }
+
+    private val nySykdomstidslinje: NySykdomstidslinje = (
+        arbeidsgivertidslinje(arbeidsgiverperioder)
+            + ferietidslinje(ferieperioder)
+            + nyFørsteFraværsdagtidslinje(førsteFraværsdag)
+        ).merge(beste)
 
     init {
         this.arbeidsgiverperioder =
@@ -64,7 +86,28 @@ class Inntektsmelding(
         }
     }
 
+    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<NySykdomstidslinje> =
+        arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste).let { tidslinje ->
+            mutableListOf(tidslinje)
+                .also { list ->
+                    tidslinje.periode()
+                        ?.also { periode ->
+                            list.add(NySykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive))
+                        }
+                }
+        }
+
+    private fun ferietidslinje(ferieperioder: List<Periode>): List<NySykdomstidslinje> =
+        ferieperioder.map { it.asFerietidslinje() }
+
+    private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<NySykdomstidslinje> =
+        listOf(førsteFraværsdag?.let { NySykdomstidslinje.sykedager(it, it) } ?: NySykdomstidslinje())
+
+    private fun Periode.asArbeidsgivertidslinje() = NySykdomstidslinje.arbeidsgiverdager(start, endInclusive)
+    private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive)
+
     override fun sykdomstidslinje() = sykdomstidslinje
+    internal fun nySykdomstidslinje() = nySykdomstidslinje
 
     override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }

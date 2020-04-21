@@ -1,6 +1,8 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.sykdomstidslinje.BesteStrategy
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
 
 internal class TestSykdomstidslinje(
@@ -23,3 +25,5 @@ internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje
 internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::arbeidsgiverdager )
 
 internal fun NySykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): NySykdomstidslinje = this.merge(testTidslinje.asNySykdomstidslinje())
+
+internal fun List<TestSykdomstidslinje>.merge(beste: BesteStrategy) = this.map { it.asNySykdomstidslinje() }.merge(beste)

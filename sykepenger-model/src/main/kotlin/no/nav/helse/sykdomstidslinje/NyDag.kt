@@ -13,6 +13,8 @@ internal sealed class NyDag(private val dato: LocalDate) {
     internal class NySykHelgedag(dato: LocalDate) : NyDag(dato)
     internal class ProblemDag(dato: LocalDate) : NyDag(dato)
 
+    internal fun problem(): NyDag = ProblemDag(dato)
+
     override fun equals(other: Any?) =
         other != null && this::class == other::class && this.equals(other as NyDag)
 

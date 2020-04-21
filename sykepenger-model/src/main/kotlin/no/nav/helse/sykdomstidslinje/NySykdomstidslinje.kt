@@ -10,7 +10,7 @@ import java.util.stream.Collectors.toMap
 
 internal class NySykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, NyDag>,
-    private val periode: Periode? = periode1(dager),
+    private val periode: Periode? = periode(dager),
     private val id: UUID = UUID.randomUUID(),
     private val tidsstempel: LocalDateTime = LocalDateTime.now()
 ) : Iterable<NyDag> {
@@ -49,7 +49,7 @@ internal class NySykdomstidslinje private constructor(
 
     internal companion object {
 
-        private fun periode1(dager: SortedMap<LocalDate, NyDag>) =
+        private fun periode(dager: SortedMap<LocalDate, NyDag>) =
             if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate) =
@@ -99,3 +99,7 @@ internal class NySykdomstidslinje private constructor(
                 ?: throw NoSuchElementException()
     }
 }
+
+internal fun List<NySykdomstidslinje>.merge(beste: BesteStrategy): NySykdomstidslinje =
+    if (this.isEmpty()) NySykdomstidslinje()
+    else reduce { result, tidslinje -> result.merge(tidslinje, beste) }
