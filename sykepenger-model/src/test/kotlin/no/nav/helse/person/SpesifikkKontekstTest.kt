@@ -12,4 +12,8 @@ internal class SpesifikkKontekstTest {
             "aktørId" to "2"
         )).melding())
     }
+    @Test
+    fun `to string uten kontekstMap`() {
+        assertEquals("Person", SpesifikkKontekst("Person", emptyMap()).melding())
+    }
 }

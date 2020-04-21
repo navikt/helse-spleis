@@ -129,7 +129,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         override fun toString() = tidsstempel + "\t" + melding + meldingerString()
 
         private fun meldingerString(): String {
-            return kontekster.joinToString(separator = " ") { "(${it.melding()})" }
+            return kontekster.joinToString(separator = "") { " (${it.melding()})" }
         }
 
         internal abstract fun accept(visitor: AktivitetsloggVisitor)
@@ -404,7 +404,7 @@ interface Aktivitetskontekst {
 
 class SpesifikkKontekst(internal val kontekstType: String, internal val kontekstMap: Map<String, String> = mapOf()) {
     internal fun melding() =
-        kontekstType + " " + kontekstMap.entries.joinToString(separator = " ") { "${it.key}: ${it.value}" }
+        kontekstType + kontekstMap.entries.joinToString(separator = "") { " ${it.key}: ${it.value}" }
 
     override fun equals(other: Any?) =
         this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap

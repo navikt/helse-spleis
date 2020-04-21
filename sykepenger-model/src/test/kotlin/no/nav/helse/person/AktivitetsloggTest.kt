@@ -18,6 +18,16 @@ internal class AktivitetsloggTest {
     }
 
     @Test
+    fun `toString av aktivitet`() {
+        val infomelding = "info message"
+        val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse1.kontekst(person)
+        hendelse1.info(infomelding)
+        val expected = "$infomelding (TestHendelse) (Person Person: Person 1)"
+        assertTrue(aktivitetslogg.toString().contains(expected)) { "Expected $aktivitetslogg to contain <$expected>" }
+    }
+
+    @Test
     internal fun `inneholder original melding`() {
         val infomelding = "info message"
         aktivitetslogg.info(infomelding)
