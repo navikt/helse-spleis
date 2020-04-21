@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.meldinger.model.*
+import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -29,52 +28,46 @@ internal class MessageMediatorTest {
     @Test
     internal fun `leser søknader`() {
         sendNySøknad()
-        assertTrue(lestNySøknad)
+        assertTrue(hendelseMediator.lestNySøknad)
 
         sendSøknad()
-        assertTrue(lestSendtSøknad)
+        assertTrue(hendelseMediator.lestSendtSøknad)
     }
 
     @Test
     internal fun `leser inntektsmeldinger`() {
         sendInnteksmelding()
-        assertTrue(lestInntektsmelding)
+        assertTrue(hendelseMediator.lestInntektsmelding)
     }
 
     @Test
     internal fun `leser påminnelser`() {
         sendNyPåminnelse()
-        assertTrue(lestPåminnelse)
+        assertTrue(hendelseMediator.lestPåminnelse)
     }
 
     @Test
     internal fun `leser behov`() {
         sendVilkårsgrunnlag()
-        assertTrue(lestVilkårsgrunnlag)
+        assertTrue(hendelseMediator.lestVilkårsgrunnlag)
 
         sendSimulering()
-        assertTrue(lestSimulering)
+        assertTrue(hendelseMediator.lestSimulering)
 
         sendYtelser()
-        assertTrue(lestYtelser)
+        assertTrue(hendelseMediator.lestYtelser)
 
         sendManuellSaksbehandling()
-        assertTrue(lestManuellSaksbehandling)
+        assertTrue(hendelseMediator.lestManuellSaksbehandling)
 
         sendUtbetaling()
-        assertTrue(lestUtbetaling)
+        assertTrue(hendelseMediator.lestUtbetaling)
     }
 
     @BeforeEach
     internal fun reset() {
-        lestNySøknad = false
-        lestSendtSøknad = false
-        lestInntektsmelding = false
-        lestPåminnelse = false
-        lestYtelser = false
-        lestVilkårsgrunnlag = false
-        lestManuellSaksbehandling = false
-        lestUtbetaling = false
+        testRapid.reset()
+        hendelseMediator.reset()
     }
 
     private companion object {
@@ -82,86 +75,8 @@ internal class MessageMediatorTest {
         private val defaultFødselsnummer = UUID.randomUUID().toString()
         private val defaultOrganisasjonsnummer = UUID.randomUUID().toString()
 
-        private var lestNySøknad = false
-        private var lestSendtSøknad = false
-        private var lestInntektsmelding = false
-        private var lestPåminnelse = false
-        private var lestYtelser = false
-        private var lestVilkårsgrunnlag = false
-        private var lestSimulering = false
-        private var lestManuellSaksbehandling = false
-        private var lestUtbetaling = false
-
-        private val testRapid = object : RapidsConnection() {
-            val messages = mutableListOf<Pair<String?, String>>()
-
-            private val context = object : MessageContext {
-                override fun send(message: String) {
-                    publish(message)
-                }
-
-                override fun send(key: String, message: String) {
-                    publish(key, message)
-                }
-            }
-
-            fun sendTestMessage(message: String) {
-                listeners.forEach { it.onMessage(message, context) }
-            }
-
-            override fun publish(message: String) {
-                messages.add(null to message)
-            }
-
-            override fun publish(key: String, message: String) {
-                messages.add(key to message)
-            }
-
-            override fun start() {}
-
-            override fun stop() {}
-        }
-
-        private val hendelseMediator = object : IHendelseMediator {
-            override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
-                lestNySøknad = true
-            }
-
-            override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad) {
-                lestSendtSøknad = true
-            }
-
-            override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding) {
-                lestInntektsmelding = true
-            }
-
-            override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse) {
-                lestPåminnelse = true
-            }
-
-            override fun behandle(message: YtelserMessage, ytelser: Ytelser) {
-                lestYtelser = true
-            }
-
-            override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag) {
-                lestVilkårsgrunnlag = true
-            }
-
-            override fun behandle(message: ManuellSaksbehandlingMessage, manuellSaksbehandling: ManuellSaksbehandling) {
-                lestManuellSaksbehandling = true
-            }
-
-            override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse) {
-                lestUtbetaling = true
-            }
-
-            override fun behandle(message: SimuleringMessage, simulering: Simulering) {
-                lestSimulering = true
-            }
-
-            override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {}
-            override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {}
-        }
+        private val testRapid = TestRapid()
+        private val hendelseMediator = TestHendelseMediator()
 
         init {
             MessageMediator(
