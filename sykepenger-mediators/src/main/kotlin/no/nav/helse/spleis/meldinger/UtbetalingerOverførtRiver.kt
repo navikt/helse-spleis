@@ -14,12 +14,12 @@ internal class UtbetalingerOverførtRiver(
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Utbetaling)
-    override val riverName = "Utbetaling"
+    override val riverName = "Utbetaling overført"
 
     override fun validate(packet: JsonMessage) {
         packet.demandValue("@løsning.${Utbetaling.name}.status", Oppdragstatus.OVERFØRT.name)
-        packet.requireKey("@løsning.${Utbetaling.name}.overføringstidspunkt")
-        packet.require("@løsning.${Utbetaling.name}.avstemmingsnøkkel", JsonNode::asLocalDateTime)
+        packet.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
+        packet.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingOverførtMessage(packet)
