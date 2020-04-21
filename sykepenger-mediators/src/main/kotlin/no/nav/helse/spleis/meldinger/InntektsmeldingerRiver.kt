@@ -34,7 +34,7 @@ internal class InntektsmeldingerRiver(
             require("endringsdato", JsonNode::asLocalDate)
         }
         packet.require("mottattDato", JsonNode::asLocalDateTime)
-        packet.require("foersteFravaersdag", JsonNode::asLocalDate)
+        packet.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         packet.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
         packet.interestedIn("refusjon.beloepPrMnd", "arbeidsforholdId", "begrunnelseForReduksjonEllerIkkeUtbetalt")
     }
