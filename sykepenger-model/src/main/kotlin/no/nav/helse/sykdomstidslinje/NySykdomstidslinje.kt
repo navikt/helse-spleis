@@ -21,12 +21,12 @@ internal class NySykdomstidslinje private constructor(
 
     internal fun periode() = periode
 
-    internal fun merge(annen: NySykdomstidslinje): NySykdomstidslinje {
-        val nySykdomstidlinje = mutableMapOf<LocalDate, NyDag>()
-        dager.toMap(nySykdomstidlinje)
-        nySykdomstidlinje.putAll(annen.dager)
+    internal fun merge(annen: NySykdomstidslinje, beste: BesteStrategy = NyDag.default): NySykdomstidslinje {
+        val dager = mutableMapOf<LocalDate, NyDag>()
+        this.dager.toMap(dager)
+        annen.dager.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
         return NySykdomstidslinje(
-            nySykdomstidlinje.toSortedMap(),
+            dager.toSortedMap(),
             this.periode?.merge(annen.periode) ?: annen.periode
         )
     }

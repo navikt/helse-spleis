@@ -20,6 +20,6 @@ internal class TestSykdomstidslinje(
 internal infix fun LocalDate.jobbTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.arbeidsdager(første, siste) }
 internal infix fun LocalDate.ferieTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.feriedager(første, siste) }
 internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::sykedager )
-internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::sykedager )
+internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, NySykdomstidslinje.Companion::arbeidsgiverdager )
 
 internal fun NySykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): NySykdomstidslinje = this.merge(testTidslinje.asNySykdomstidslinje())
