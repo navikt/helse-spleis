@@ -4,8 +4,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
-import no.nav.helse.spleis.hendelser.*
-import no.nav.helse.spleis.hendelser.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.*
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 
@@ -21,17 +21,17 @@ internal class MessageMediator(
 
     init {
         DelegatedRapid(rapidsConnection).also {
-            NyeSøknader(it, this)
-            SendtArbeidsgiverSøknader(it, this)
-            SendtNavSøknader(it, this)
-            Inntektsmeldinger(it, this)
-            Ytelser(it, this)
-            Vilkårsgrunnlag(it, this)
-            ManuelleSaksbehandlinger(it, this)
-            Utbetalinger(it, this)
-            Påminnelser(it, this)
-            Simuleringer(it, this)
-            KansellerUtbetalinger(it, this)
+            NyeSøknaderRiver(it, this)
+            SendtArbeidsgiverSøknaderRiver(it, this)
+            SendtNavSøknaderRiver(it, this)
+            InntektsmeldingerRiver(it, this)
+            YtelserRiver(it, this)
+            VilkårsgrunnlagRiver(it, this)
+            ManuelleSaksbehandlingerRiver(it, this)
+            UtbetalingerRiver(it, this)
+            PåminnelserRiver(it, this)
+            SimuleringerRiver(it, this)
+            KansellerUtbetalingerRiver(it, this)
         }
     }
 

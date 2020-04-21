@@ -4,7 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.hendelser.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.Logger
 import java.time.LocalDateTime
 import java.util.*

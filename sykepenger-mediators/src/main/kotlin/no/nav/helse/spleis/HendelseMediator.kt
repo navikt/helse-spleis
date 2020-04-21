@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.hendelser.model.*
+import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*

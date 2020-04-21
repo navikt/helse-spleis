@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.hendelser.model.*
+import no.nav.helse.spleis.meldinger.model.*
 import no.nav.helse.toJsonNode
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.Refusjon

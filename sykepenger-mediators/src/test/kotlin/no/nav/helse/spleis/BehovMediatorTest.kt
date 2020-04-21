@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.hendelser.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

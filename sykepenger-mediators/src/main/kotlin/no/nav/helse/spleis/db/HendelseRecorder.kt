@@ -5,7 +5,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRecorder.Meldingstype.*
-import no.nav.helse.spleis.hendelser.model.*
+import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
