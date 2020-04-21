@@ -67,8 +67,7 @@ internal class MessageMediator(
     fun afterRiverHandling(message: String) {
         if (messageRecognized) return
         if (riverErrors.isNotEmpty()) return sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-        if (riverSevereErrors.isNotEmpty()) sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${riverSevereErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-        sikkerLogg.error("meldingen ble ikke plukket opp av noen rivers:\n$message")
+        sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${riverSevereErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
     private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
