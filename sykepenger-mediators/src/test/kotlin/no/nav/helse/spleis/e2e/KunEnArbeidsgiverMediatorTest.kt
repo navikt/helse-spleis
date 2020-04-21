@@ -1,4 +1,4 @@
-package no.nav.helse.e2e
+package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.februar

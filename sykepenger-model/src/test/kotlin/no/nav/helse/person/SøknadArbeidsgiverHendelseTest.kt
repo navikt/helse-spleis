@@ -1,11 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Periode.Sykdom
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

@@ -7,6 +7,8 @@ internal class TestHendelseMediator() : IHendelseMediator {
 
     internal var lestNySøknad = false
         private set
+    internal var lestSendtSøknadArbeidsgiver = false
+        private set
     internal var lestSendtSøknad = false
         private set
     internal var lestInntektsmelding = false
@@ -23,9 +25,12 @@ internal class TestHendelseMediator() : IHendelseMediator {
         private set
     internal var lestUtbetaling = false
         private set
+    internal var lestKansellerUtbetaling = false
+        private set
 
     fun reset() {
         lestNySøknad = false
+        lestSendtSøknadArbeidsgiver = false
         lestSendtSøknad = false
         lestInntektsmelding = false
         lestPåminnelse = false
@@ -33,11 +38,16 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestVilkårsgrunnlag = false
         lestManuellSaksbehandling = false
         lestUtbetaling = false
+        lestKansellerUtbetaling = false
     }
 
 
     override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
         lestNySøknad = true
+    }
+
+    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {
+        lestSendtSøknadArbeidsgiver = true
     }
 
     override fun behandle(message: SendtSøknadNavMessage, søknad: Søknad) {
@@ -72,6 +82,7 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestSimulering = true
     }
 
-    override fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver) {}
-    override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {}
+    override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {
+        lestKansellerUtbetaling = true
+    }
 }

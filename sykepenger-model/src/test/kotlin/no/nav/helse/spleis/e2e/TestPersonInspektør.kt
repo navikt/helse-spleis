@@ -1,4 +1,4 @@
-package no.nav.helse.e2e
+package no.nav.helse.spleis.e2e
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes

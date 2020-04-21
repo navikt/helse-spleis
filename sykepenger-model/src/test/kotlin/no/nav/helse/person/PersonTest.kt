@@ -1,11 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.e2e.TestPersonInspektør
 import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
+import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.fredag
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.testhelpers.torsdag

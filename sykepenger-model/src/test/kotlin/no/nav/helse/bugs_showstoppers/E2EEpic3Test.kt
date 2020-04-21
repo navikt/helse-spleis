@@ -1,13 +1,13 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.e2e.AbstractEndToEndTest
-import no.nav.helse.e2e.TestTidslinjeInspektør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Periode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
 import no.nav.helse.testhelpers.*
