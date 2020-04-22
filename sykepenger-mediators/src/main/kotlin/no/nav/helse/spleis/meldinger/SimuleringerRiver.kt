@@ -20,8 +20,8 @@ internal class SimuleringerRiver(
                 packet.requireKey("@løsning.${Simulering.name}.simulering")
                 packet.interestedIn("@løsning.${Simulering.name}.feilmelding")
             } else {
-                packet.interestedIn("@løsning.${Simulering.name}.feilmelding")
-                packet.requireKey("@løsning.${Simulering.name}.simulering")
+                packet.interestedIn("@løsning.${Simulering.name}.simulering")
+                packet.requireKey("@løsning.${Simulering.name}.feilmelding")
             }
         }
     }
