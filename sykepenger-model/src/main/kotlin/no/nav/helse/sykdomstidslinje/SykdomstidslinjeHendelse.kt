@@ -10,6 +10,15 @@ import java.util.*
 abstract class SykdomstidslinjeHendelse(
     private val meldingsreferanseId: UUID
 ) : ArbeidstakerHendelse() {
+    internal val kilde: Hendelseskilde = Hendelseskilde(this.javaClass, meldingsreferanseId)
+
+    internal class Hendelseskilde(hendelse: Class<SykdomstidslinjeHendelse>, private val meldingsreferanseId: UUID) {
+        private val type: String = hendelse.canonicalName.split('.').last()
+        companion object {
+            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class.java, UUID.randomUUID())
+        }
+    }
+
     internal fun meldingsreferanseId() = meldingsreferanseId
 
     internal abstract fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje

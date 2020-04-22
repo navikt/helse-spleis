@@ -45,7 +45,7 @@ class Inntektsmelding(
             høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
             venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
             høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
-            else -> venstre.problem()
+            else -> høyre.problem()
         }
     }
 
@@ -92,7 +92,7 @@ class Inntektsmelding(
                 .also { list ->
                     tidslinje.periode()
                         ?.also { periode ->
-                            list.add(NySykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive))
+                            list.add(NySykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde))
                         }
                 }
         }
@@ -101,10 +101,10 @@ class Inntektsmelding(
         ferieperioder.map { it.asFerietidslinje() }
 
     private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<NySykdomstidslinje> =
-        listOf(førsteFraværsdag?.let { NySykdomstidslinje.sykedager(it, it) } ?: NySykdomstidslinje())
+        listOf(førsteFraværsdag?.let { NySykdomstidslinje.sykedager(it, it, kilde = kilde) } ?: NySykdomstidslinje())
 
-    private fun Periode.asArbeidsgivertidslinje() = NySykdomstidslinje.arbeidsgiverdager(start, endInclusive)
-    private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive)
+    private fun Periode.asArbeidsgivertidslinje() = NySykdomstidslinje.arbeidsgiverdager(start, endInclusive, kilde = kilde)
+    private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
     internal fun nySykdomstidslinje() = nySykdomstidslinje

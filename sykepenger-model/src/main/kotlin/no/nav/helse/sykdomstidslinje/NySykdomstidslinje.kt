@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,7 +35,7 @@ internal class NySykdomstidslinje private constructor(
         )
     }
 
-    operator fun get(dato: LocalDate): NyDag = dager[dato] ?: NyUkjentDag(dato)
+    operator fun get(dato: LocalDate): NyDag = dager[dato] ?: NyUkjentDag(dato, INGEN)
 
     internal fun subset(periode: Periode) =
         NySykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
@@ -65,40 +66,61 @@ internal class NySykdomstidslinje private constructor(
         private fun periode(dager: SortedMap<LocalDate, NyDag>) =
             if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
-        internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate) =
+        internal fun arbeidsdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NyFriskHelgedag(it) else NyArbeidsdag(it) })
+                            { if (it.erHelg()) NyFriskHelgedag(it, kilde) else NyArbeidsdag(it, kilde) })
                     )
             )
 
-        internal fun sykedager(førsteDato: LocalDate, sisteDato: LocalDate, grad: Number = 100.0) =
+        internal fun sykedager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Number = 100.0,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NySykHelgedag(it) else NySykedag(it, grad) })
+                            { if (it.erHelg()) NySykHelgedag(it, kilde) else NySykedag(it, grad, kilde) })
                     )
             )
 
-        internal fun arbeidsgiverdager(førsteDato: LocalDate, sisteDato: LocalDate, grad: Number = 100.0) =
+        internal fun arbeidsgiverdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Number = 100.0,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NyArbeidsgiverHelgedag(it) else NyArbeidsgiverdag(it, grad) })
+                            {
+                                if (it.erHelg()) NyArbeidsgiverHelgedag(it, kilde)
+                                else NyArbeidsgiverdag(it, grad, kilde)
+                            })
                     )
             )
 
-        internal fun feriedager(førsteDato: LocalDate, sisteDato: LocalDate) =
+        internal fun feriedager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { NyFeriedag(it) }))
+                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { NyFeriedag(it, kilde) }))
             )
     }
 
