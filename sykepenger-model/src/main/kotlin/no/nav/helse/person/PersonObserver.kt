@@ -30,9 +30,7 @@ interface PersonObserver {
         val aktivitetslogg: Aktivitetslogg,
         val timeout: Duration,
         val hendelser: Set<UUID>
-    ) {
-        val endringstidspunkt = LocalDateTime.now()
-    }
+    )
 
     data class UtbetaltEvent(
         val aktørId: String,

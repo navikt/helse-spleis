@@ -170,7 +170,6 @@ internal class HendelseMediator(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "gjeldendeTilstand" to event.gjeldendeTilstand,
                     "forrigeTilstand" to event.forrigeTilstand,
-                    "endringstidspunkt" to event.endringstidspunkt,
                     "aktivitetslogg" to event.aktivitetslogg.toMap(),
                     "timeout" to event.timeout.toSeconds(),
                     "hendelser" to event.hendelser
