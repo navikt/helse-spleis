@@ -146,7 +146,7 @@ internal class TestMessageFactory(
         opptjening: List<Triple<String, LocalDate, LocalDate?>>
     ): String {
         return lagBehovMedLøsning(
-            behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger"),
+            behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger", "Medlemskap"),
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             løsninger = mapOf(
@@ -175,7 +175,8 @@ internal class TestMessageFactory(
                 ),
                 "Arbeidsavklaringspenger" to mapOf(
                     "meldekortperioder" to emptyList<Any>()
-                )
+                ),
+                "Medlemskap" to emptyMap<String, Any>()
             )
         )
     }

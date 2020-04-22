@@ -13,7 +13,10 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(Inntektsberegning, EgenAnsatt, Opptjening, Dagpenger, Arbeidsavklaringspenger)
+    override val behov = listOf(
+        Inntektsberegning, EgenAnsatt, Opptjening,
+        Dagpenger, Arbeidsavklaringspenger, Medlemskap
+    )
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(packet: JsonMessage) {
@@ -25,6 +28,7 @@ internal class VilkårsgrunnlagRiver(
                 interestedIn("orgnummer")
             }
         }
+        packet.requireKey("@løsning.${Medlemskap.name}")
         packet.requireKey("@løsning.${EgenAnsatt.name}")
         packet.requireArray("@løsning.${Opptjening.name}") {
             requireKey("orgnummer")
