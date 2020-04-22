@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.contains
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.LocalDate
@@ -11,6 +12,7 @@ import java.util.stream.Collectors.toMap
 internal class NySykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, NyDag>,
     private val periode: Periode? = periode(dager),
+    private val låstePerioder: MutableList<Periode> = mutableListOf(),
     private val id: UUID = UUID.randomUUID(),
     private val tidsstempel: LocalDateTime = LocalDateTime.now()
 ) : Iterable<NyDag> {
@@ -24,10 +26,11 @@ internal class NySykdomstidslinje private constructor(
     internal fun merge(annen: NySykdomstidslinje, beste: BesteStrategy = NyDag.default): NySykdomstidslinje {
         val dager = mutableMapOf<LocalDate, NyDag>()
         this.dager.toMap(dager)
-        annen.dager.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
+        annen.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
         return NySykdomstidslinje(
             dager.toSortedMap(),
-            this.periode?.merge(annen.periode) ?: annen.periode
+            this.periode?.merge(annen.periode) ?: annen.periode,
+            this.låstePerioder
         )
     }
 
@@ -46,6 +49,16 @@ internal class NySykdomstidslinje private constructor(
             kuttDatoInclusive > periode.endInclusive -> this
             else -> subset(Periode(periode.start, kuttDatoInclusive))
         }
+
+    internal fun lås(periode: Periode) = this.also {
+        requireNotNull(this.periode)
+        require(periode in this.periode)
+        låstePerioder.add(periode)
+    }
+
+    internal fun låsOpp(periode: Periode) = this.also {
+        låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
+    }
 
     internal companion object {
 

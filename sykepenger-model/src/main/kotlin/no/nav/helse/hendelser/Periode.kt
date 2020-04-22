@@ -24,8 +24,8 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun utenfor(other: Periode) =
         start < other.start || endInclusive > other.endInclusive
 
-    private operator fun contains(other: Periode) =
-        this.start < other.endInclusive && this.endInclusive > other.start
+    internal operator fun contains(other: Periode) =
+        this.start <= other.start && this.endInclusive >= other.endInclusive
 
     internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in range }
 
@@ -60,3 +60,5 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         fun List<Periode>.etter(grense: LocalDate) = any { it.etter(grense)}
     }
 }
+
+internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }

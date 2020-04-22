@@ -1,5 +1,6 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.BesteStrategy
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -17,6 +18,8 @@ internal class TestSykdomstidslinje(
     internal fun asNySykdomstidslinje() = daggenerator(førsteDato, sisteDato, grad)
     internal fun merge(annen: TestSykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
     internal fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
+    internal fun lås(periode: Periode) = this.asNySykdomstidslinje().also { it.lås(periode) }
+    internal fun låsOpp(periode: Periode) = this.asNySykdomstidslinje().also { it.låsOpp(periode) }
 
 }
 internal infix fun LocalDate.jobbTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { første: LocalDate, siste: LocalDate, _ -> NySykdomstidslinje.arbeidsdager(første, siste) }
