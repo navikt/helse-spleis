@@ -114,11 +114,11 @@
                     "role": "CONSUMER"
                 },
                 {
-                    "member": "srvsparkelmedlemsk",
+                    "member": "srvsparkelmedlemskap",
                     "role": "PRODUCER"
                 },
                 {
-                    "member": "srvsparkelmedlemsk",
+                    "member": "srvsparkelmedlemskap",
                     "role": "CONSUMER"
                 },
                 {
