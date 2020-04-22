@@ -238,6 +238,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     ))
                 }
 
+                internal fun medlemskap(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+                    aktivitetslogg.behov(Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
+                        "medlemskapPeriodeFom" to fom.toString(),
+                        "medlemskapPeriodeTom" to tom.toString()
+                    ))
+                }
+
                 internal fun simulering(
                     aktivitetslogg: IAktivitetslogg,
                     oppdrag: Oppdrag,
@@ -294,7 +301,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Inntektsberegning,
                 Opptjening,
                 Dagpenger,
-                Arbeidsavklaringspenger
+                Arbeidsavklaringspenger,
+                Medlemskap
             }
         }
 

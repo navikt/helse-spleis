@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sykepengehistorikk
@@ -296,6 +297,7 @@ internal class Vedtaksperiode private constructor(
         opptjening(hendelse)
         dagpenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
         arbeidsavklaringspenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
+        medlemskap(hendelse, periode().start.minusYears(1), periode().endInclusive)
     }
 
     private fun trengerInntektsmelding() {
