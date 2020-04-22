@@ -6,6 +6,10 @@ import kotlin.math.roundToLong
 
 internal class Grad private constructor(private val brøkdel: Double): Comparable<Grad> {
 
+    init {
+        require(brøkdel in 0.0..100.0) { "Må være prosent mellom 0 og 100" }
+    }
+
     companion object {
         private const val EPSILON = 0.000001
         private const val SIKKER_BRØK = 1.0

@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class GradTest {
 
@@ -32,5 +33,11 @@ internal class GradTest {
         assertTrue(Grad.sykdom(25) > Grad.GRENSE)
         assertTrue(Grad.sykdom(20) == Grad.GRENSE)
         assertTrue(Grad.sykdom(15) < Grad.GRENSE)
+    }
+
+    @Test
+    internal fun `parameterskontroll av sykdomsgrad`() {
+        assertThrows<IllegalArgumentException> { Grad.sykdom(-0.001) }
+        assertThrows<IllegalArgumentException> { Grad.arbeidshelse(100.001) }
     }
 }
