@@ -38,7 +38,8 @@ internal class Grad private constructor(private val brøkdel: Double): Comparabl
     internal class LønnGrad(private val brøkdel: Double, private val beløp: Double) {
         companion object {
             internal fun samletGrad(lønnGrader: List<LønnGrad>): Grad {
-                return Grad(lønnGrader.first().brøkdel)
+                val total = lønnGrader.sumByDouble { it.beløp }
+                return Grad(lønnGrader.sumByDouble { it.brøkdel * it.beløp / total } )
             }
         }
 
