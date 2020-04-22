@@ -107,7 +107,7 @@ class Inntektsmelding(
     private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
-    internal fun nySykdomstidslinje() = nySykdomstidslinje
+    override fun nySykdomstidslinje() = nySykdomstidslinje
 
     override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }

@@ -25,6 +25,8 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
+    internal abstract fun nySykdomstidslinje(): NySykdomstidslinje
+
     internal abstract fun valider(periode: Periode): Aktivitetslogg
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)

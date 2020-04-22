@@ -56,6 +56,11 @@ internal sealed class NyDag(
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             if (venstre == høyre) venstre else ProblemDag(høyre.dato, høyre.kilde)
         }
+
+        internal val noOverlap: BesteStrategy = { venstre: NyDag, høyre: NyDag ->
+            require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
+            ProblemDag(høyre.dato, høyre.kilde)
+        }
     }
 }
 

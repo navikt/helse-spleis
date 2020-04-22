@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -47,6 +48,8 @@ class Søknad constructor(
             .also { trimLeft(tom) }
             ?: severe("Ugydlig subsetting av tidslinjen til søknad")
     }
+
+    override fun nySykdomstidslinje() = NySykdomstidslinje()
 
     internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 

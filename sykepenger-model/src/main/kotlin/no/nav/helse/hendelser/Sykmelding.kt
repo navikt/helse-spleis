@@ -1,10 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.dag.*
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDate
 import java.util.*
@@ -18,9 +17,18 @@ class Sykmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykeperioder: List<Sykeperiode>
+    private val nySykdomstidslinje: NySykdomstidslinje
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
+        nySykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
+            NySykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
+        }
+            .merge(noOverlap)
+            .also { tidslinje ->
+                if (tidslinje.any { it is NyDag.ProblemDag }) severe("Sykeperioder overlapper")
+            }
+
         this.sykeperioder = sykeperioder
             .sortedBy { (fom, _, _) -> fom }
             .map { (fom, tom, grad) -> Sykeperiode(fom, tom, grad) }
@@ -34,6 +42,8 @@ class Sykmelding(
     private fun ingenOverlappende() = sykeperioder.zipWithNext(Sykeperiode::ingenOverlappende).all { it }
 
     override fun sykdomstidslinje() = sykeperioder.map(Sykeperiode::sykdomstidslinje).merge(IdentiskDagTurnering)
+
+    override fun nySykdomstidslinje() = nySykdomstidslinje
 
     override fun sykdomstidslinje(tom: LocalDate) = sykdomstidslinje()
 
