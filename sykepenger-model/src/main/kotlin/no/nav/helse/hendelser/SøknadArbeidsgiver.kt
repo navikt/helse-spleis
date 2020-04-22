@@ -49,7 +49,7 @@ class SøknadArbeidsgiver constructor(
 
         return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
-            ?: severe("Ugydlig subsetting av tidslinjen til søknad")
+            ?: severe("Ugyldig subsetting av tidslinjen til søknad")
     }
 
     override fun nySykdomstidslinje() = NySykdomstidslinje()
