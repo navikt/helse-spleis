@@ -175,6 +175,7 @@ internal class VilkårsgrunnlagTest {
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
+        medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
         erEgenAnsatt = false,
         dagpenger = Dagpenger(dagpenger),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(

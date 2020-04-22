@@ -5,7 +5,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@Deprecated("inntektsvurdering, opptjeningvurdering og erEgenAnsatt sendes som tre parametre til modellen")
+@Deprecated("inntektsvurdering, opptjeningvurdering, medlemskapsvurdering og erEgenAnsatt sendes som tre parametre til modellen")
 class Vilkårsgrunnlag(
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
@@ -14,6 +14,7 @@ class Vilkårsgrunnlag(
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
     private val erEgenAnsatt: Boolean,
+    private val medlemskapsvurdering: Medlemskapsvurdering,
     private val dagpenger: Dagpenger,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger
 ) : ArbeidstakerHendelse() {
@@ -26,6 +27,7 @@ class Vilkårsgrunnlag(
     internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate): Aktivitetslogg {
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt)
         opptjeningvurdering.valider(aktivitetslogg, orgnummer, førsteFraværsdag)
+        medlemskapsvurdering.valider(aktivitetslogg)
         if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else info("er ikke egen ansatt")
         grunnlagsdata = Grunnlagsdata(

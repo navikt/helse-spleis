@@ -1,11 +1,10 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Opptjeningvurdering
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
@@ -38,6 +37,12 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         )
     }
 
+    private val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
+        "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
+        "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
+        else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+    }
+
     init {
         packet["@løsning.${Dagpenger.name}.meldekortperioder"]
             .map(::asDatePair)
@@ -64,6 +69,9 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         ),
         opptjeningvurdering = Opptjeningvurdering(
             arbeidsforhold = arbeidsforhold
+        ),
+        medlemskapsvurdering = Medlemskapsvurdering(
+            medlemskapstatus = medlemskapstatus
         ),
         erEgenAnsatt = erEgenAnsatt,
         dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {

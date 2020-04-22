@@ -35,7 +35,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `kansellerutbetaling`() {
+    fun `kanseller utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -47,7 +47,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    internal fun `overlapp i arbeidsgivertidslinjer`() {
+    fun `overlapp i arbeidsgivertidslinjer`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 7.januar(2020), tom = 13.januar(2020), sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 14.januar(2020), tom = 24.januar(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 14.januar(2020), tom = 24.januar(2020), sykmeldingsgrad = 100)), listOf(PeriodeDTO(6.januar(2020), 6.januar(2020))))

@@ -129,14 +129,15 @@ internal abstract class AbstractEndToEndTest {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
         ),
-        egenAnsatt: Boolean = false
+        egenAnsatt: Boolean = false,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Behovtype.Dagpenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Behovtype.Arbeidsavklaringspenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Medlemskap))
-        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, inntekt, arbeidsforhold, egenAnsatt))
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeIndex, inntekt, arbeidsforhold, egenAnsatt, medlemskapstatus))
     }
 
     protected fun håndterSimulering(vedtaksperiodeIndex: Int) {
@@ -262,7 +263,8 @@ internal abstract class AbstractEndToEndTest {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
         ),
-        egenAnsatt: Boolean = false
+        egenAnsatt: Boolean = false,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
@@ -275,6 +277,7 @@ internal abstract class AbstractEndToEndTest {
                 }.groupBy({ it.first }) { it.second }
             ),
             erEgenAnsatt = egenAnsatt,
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())

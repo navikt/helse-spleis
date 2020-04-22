@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -143,7 +144,8 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         egenAnsatt: Boolean = false,
         inntekter: List<Pair<YearMonth, Double>>,
-        opptjening: List<Triple<String, LocalDate, LocalDate?>>
+        opptjening: List<Triple<String, LocalDate, LocalDate?>>,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger", "Medlemskap"),
@@ -176,7 +178,15 @@ internal class TestMessageFactory(
                 "Arbeidsavklaringspenger" to mapOf(
                     "meldekortperioder" to emptyList<Any>()
                 ),
-                "Medlemskap" to emptyMap<String, Any>()
+                "Medlemskap" to mapOf<String, Any>(
+                    "resultat" to mapOf<String, Any>(
+                        "svar" to when (medlemskapstatus) {
+                            Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"
+                            Medlemskapsvurdering.Medlemskapstatus.Nei -> "NEI"
+                            else -> "UAVKLART"
+                        }
+                    )
+                )
             )
         )
     }

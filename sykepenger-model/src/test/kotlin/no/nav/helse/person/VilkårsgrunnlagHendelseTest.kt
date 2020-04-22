@@ -214,6 +214,7 @@ internal class VilkårsgrunnlagHendelseTest {
             orgnummer = ORGNR,
             inntektsvurdering = Inntektsvurdering(inntekter),
             erEgenAnsatt = egenAnsatt,
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())

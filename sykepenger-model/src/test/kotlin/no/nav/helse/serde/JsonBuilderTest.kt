@@ -272,6 +272,7 @@ internal class JsonBuilderTest {
                 )
             ),
             erEgenAnsatt = false,
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )

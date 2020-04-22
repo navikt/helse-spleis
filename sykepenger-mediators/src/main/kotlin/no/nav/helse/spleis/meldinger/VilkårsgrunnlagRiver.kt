@@ -28,7 +28,9 @@ internal class VilkårsgrunnlagRiver(
                 interestedIn("orgnummer")
             }
         }
-        packet.requireKey("@løsning.${Medlemskap.name}")
+        packet.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
+            require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
+        }
         packet.requireKey("@løsning.${EgenAnsatt.name}")
         packet.requireArray("@løsning.${Opptjening.name}") {
             requireKey("orgnummer")

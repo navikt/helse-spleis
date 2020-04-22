@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseMediator
@@ -158,19 +159,22 @@ internal abstract class AbstractEndToEndMediatorTest {
                 1.januar(2010),
                 null
             )
-        )
+        ),
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
     ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Inntektsberegning),
             egenAnsatt = egenAnsatt,
             inntekter = inntekter,
-            opptjening = opptjening
+            opptjening = opptjening,
+            medlemskapstatus = medlemskapstatus
         ))
     }
 

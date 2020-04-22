@@ -148,6 +148,7 @@ internal class SimuleringHendelseTest {
                 .map { YearMonth.of(2018, it) to (orgnummer to 31000.0) }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(

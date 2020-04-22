@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import io.mockk.mockk
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -45,7 +46,7 @@ internal class MessageMediatorTest {
 
     @Test
     internal fun `leser behov`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(UUID.randomUUID(), TilstandType.START, true, emptyList(), emptyList()))
+        testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(UUID.randomUUID(), TilstandType.START, true, emptyList(), emptyList(), Medlemskapsvurdering.Medlemskapstatus.Ja))
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)
 
         testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, true))
