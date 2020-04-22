@@ -80,9 +80,9 @@ internal class MessageMediator(
                 sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
             }
         } catch (err: Exception) {
-            log.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            log.error("alvorlig feil: ${err.message}", err)
             withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
-                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                sikkerLogg.error("alvorlig feil: ${err.message}", err)
             }
         }
     }
