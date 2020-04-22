@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -24,6 +25,7 @@ class SøknadArbeidsgiver constructor(
     private val fom: LocalDate
     private val tom: LocalDate
     private var forrigeTom: LocalDate? = null
+    private val nySykdomstidslinje: NySykdomstidslinje
 
     private companion object {
         private const val tidslinjegrense = 16L
@@ -33,6 +35,8 @@ class SøknadArbeidsgiver constructor(
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
         fom = perioder.minBy { it.fom }?.fom ?: severe("Søknad mangler fradato")
         tom = perioder.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato")
+
+        nySykdomstidslinje = perioder.map { it.nySykdomstidslinje(kilde) }.merge(noOverlap)
     }
 
     override fun sykdomstidslinje() = perioder
@@ -58,7 +62,7 @@ class SøknadArbeidsgiver constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
+    override fun valider(periode: Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         return aktivitetslogg
     }
@@ -82,12 +86,14 @@ class SøknadArbeidsgiver constructor(
             if (fom < søknad.fom || tom > søknad.tom) søknad.error(beskjed)
         }
 
-        fun valider(søknad: SøknadArbeidsgiver) {
+        internal fun valider(søknad: SøknadArbeidsgiver) {
             if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
         }
 
         internal fun sykdomstidslinje(avskjæringsdato: LocalDate) =
             Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
+
+        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
     }
 
     internal object SøknadDagFactory : DagFactory {
