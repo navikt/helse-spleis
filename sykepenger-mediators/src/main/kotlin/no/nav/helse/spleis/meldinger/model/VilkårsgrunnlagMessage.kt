@@ -39,14 +39,14 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     }
 
     init {
-        packet["@løsning.${Dagpenger.name}.vedtaksperioder"]
+        packet["@løsning.${Dagpenger.name}.meldekortperioder"]
             .map(::asDatePair)
             .partition { it.first <= it.second }
             .also {
                 dagpenger = it.first
                 ugyldigeDagpengeperioder = it.second
             }
-        packet["@løsning.${Arbeidsavklaringspenger.name}.vedtaksperioder"].map(::asDatePair)
+        packet["@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
             .partition { it.first <= it.second }
             .also {
                 arbeidsavklaringspenger = it.first

@@ -31,11 +31,11 @@ internal class VilkårsgrunnlagRiver(
             require("ansattSiden", JsonNode::asLocalDate)
             interestedIn("ansattTil") { it.asLocalDate() }
         }
-        packet.requireArray("@løsning.${Dagpenger.name}.vedtaksperioder") {
+        packet.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("@løsning.${Arbeidsavklaringspenger.name}.vedtaksperioder") {
+        packet.requireArray("@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }

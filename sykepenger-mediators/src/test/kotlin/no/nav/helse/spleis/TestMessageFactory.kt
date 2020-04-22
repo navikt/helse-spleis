@@ -171,10 +171,10 @@ internal class TestMessageFactory(
                     )
                 },
                 "Dagpenger" to mapOf(
-                    "vedtaksperioder" to emptyList<Any>()
+                    "meldekortperioder" to emptyList<Any>()
                 ),
                 "Arbeidsavklaringspenger" to mapOf(
-                    "vedtaksperioder" to emptyList<Any>()
+                    "meldekortperioder" to emptyList<Any>()
                 )
             )
         )
