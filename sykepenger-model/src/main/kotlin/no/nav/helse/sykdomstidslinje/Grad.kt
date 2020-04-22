@@ -32,4 +32,17 @@ internal class Grad private constructor(private val brøkdel: Double): Comparabl
     override fun toString(): String {
         return "${(brøkdel * 100).roundToInt()}%"
     }
+
+    internal fun lønn(beløp: Number) = LønnGrad(this.brøkdel, beløp.toDouble())
+
+    internal class LønnGrad(private val brøkdel: Double, private val beløp: Double) {
+        companion object {
+            internal fun samletGrad(lønnGrader: List<LønnGrad>): Grad {
+                return Grad(lønnGrader.first().brøkdel)
+            }
+        }
+
+    }
 }
+
+internal fun List<Grad.LønnGrad>.samletGrad() = Grad.LønnGrad.samletGrad(this)
