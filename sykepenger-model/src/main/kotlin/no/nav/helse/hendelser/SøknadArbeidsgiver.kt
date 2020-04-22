@@ -18,7 +18,7 @@ class SøknadArbeidsgiver constructor(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val perioder: List<Periode>
+    private val perioder: List<Søknadsperiode>
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val fom: LocalDate
@@ -36,7 +36,7 @@ class SøknadArbeidsgiver constructor(
     }
 
     override fun sykdomstidslinje() = perioder
-        .map{ it.sykdomstidslinje(fom) }
+        .map { it.sykdomstidslinje(fom) }
         .filter { it.førsteDag().isAfter(fom.minusDays(tidslinjegrense)) }
         .merge(søknadDagturnering)
 
@@ -69,31 +69,25 @@ class SøknadArbeidsgiver constructor(
 
     override fun melding(klassName: String) = "SøknadArbeidsgiver"
 
-    sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate) {
-
-        internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): Sykdomstidslinje
-
-        internal open fun valider(søknad: SøknadArbeidsgiver) {}
+    class Søknadsperiode(
+        internal val fom: LocalDate,
+        internal val tom: LocalDate,
+        private val gradFraSykmelding: Int,
+        faktiskGrad: Int? = null
+    ) {
+        private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
+        private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
 
         internal fun valider(søknad: SøknadArbeidsgiver, beskjed: String) {
             if (fom < søknad.fom || tom > søknad.tom) søknad.error(beskjed)
         }
 
-        class Sykdom(
-            fom: LocalDate,
-            tom: LocalDate,
-            private val gradFraSykmelding: Int,
-            faktiskGrad: Int? = null
-        ) : Periode(fom, tom) {
-            private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
-            private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
-            override fun valider(søknad: SøknadArbeidsgiver) {
-                if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
-            }
-
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-                Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
+        fun valider(søknad: SøknadArbeidsgiver) {
+            if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
         }
+
+        internal fun sykdomstidslinje(avskjæringsdato: LocalDate) =
+            Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
     }
 
     internal object SøknadDagFactory : DagFactory {

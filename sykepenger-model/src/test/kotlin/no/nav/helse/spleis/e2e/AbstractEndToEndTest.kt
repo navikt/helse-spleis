@@ -92,7 +92,7 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
-    protected fun håndterSøknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode) {
+    protected fun håndterSøknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Søknadsperiode) {
         person.håndter(søknadArbeidsgiver(perioder = *perioder))
     }
 
@@ -221,7 +221,7 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun søknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Periode): SøknadArbeidsgiver {
+    private fun søknadArbeidsgiver(vararg perioder: SøknadArbeidsgiver.Søknadsperiode): SøknadArbeidsgiver {
         return SøknadArbeidsgiver(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

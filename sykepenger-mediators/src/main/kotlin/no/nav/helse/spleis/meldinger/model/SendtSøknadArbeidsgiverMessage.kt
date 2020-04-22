@@ -2,7 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.SøknadArbeidsgiver.Periode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
@@ -12,7 +12,7 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
     private val aktørId = packet["aktorId"].asText()
     private val orgnummer = packet["arbeidsgiver.orgnummer"].asText()
     private val perioder = packet["soknadsperioder"].map {
-        Sykdom(
+        Søknadsperiode(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
             gradFraSykmelding = it.path("sykmeldingsgrad").asInt(),

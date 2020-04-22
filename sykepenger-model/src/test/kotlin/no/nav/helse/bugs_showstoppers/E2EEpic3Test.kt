@@ -527,7 +527,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `simulering av periode der tilstøtende ikke ble utbetalt`() {
         håndterSykmelding(Triple(28.januar(2020), 10.februar(2020), 100))
         håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(28.januar(2020), 10.februar(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.januar(2020), 10.februar(2020), 100))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
@@ -818,10 +818,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `vilkårsgrunnlagfeil på kort arbeidsgiversøknad`() {
         håndterSykmelding(Triple(2.mars(2020), 2.mars(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(2.mars(2020), 2.mars(2020), 100, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(2.mars(2020), 2.mars(2020), 100, 100))
         håndterSykmelding(Triple(16.mars(2020), 29.mars(2020), 100))
         håndterSykmelding(Triple(30.mars(2020), 15.april(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(16.mars(2020), 29.mars(2020), 100, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.mars(2020), 29.mars(2020), 100, 100))
         håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100))
         håndterInntektsmeldingMedValidering(0, listOf(
             Periode(2.mars(2020), 2.mars(2020)),

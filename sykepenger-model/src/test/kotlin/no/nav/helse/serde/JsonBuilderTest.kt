@@ -234,7 +234,7 @@ internal class JsonBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(SøknadArbeidsgiver.Periode.Sykdom(fom, tom, 100, 100))
+            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100, 100))
         )
 
         internal fun inntektsmelding(

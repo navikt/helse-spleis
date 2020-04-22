@@ -53,7 +53,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Triple(3.januar, 8.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  8.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  8.januar, 100))
         assertNoWarnings(inspektør)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
@@ -78,12 +78,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  5.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 5.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
 
         håndterSykmelding(Triple(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
 
         håndterSykmelding(Triple(11.januar, 22.januar, 100))
         håndterSøknad(Sykdom(11.januar,  22.januar, 100))
@@ -128,10 +128,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader til arbeidsgiver først`() {
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  5.januar, 100))
 
         håndterSykmelding(Triple(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
 
         håndterSykmelding(Triple(11.januar, 22.januar, 100))
         håndterSøknad(Sykdom(11.januar,  22.januar, 100))
@@ -176,10 +176,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Triple(3.januar, 4.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  4.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  4.januar, 100))
 
         håndterSykmelding(Triple(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
 
         håndterSykmelding(Triple(11.januar, 22.januar, 100))
         håndterSøknad(Sykdom(11.januar,  22.januar, 100))
@@ -226,7 +226,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar, 8.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoWarnings(inspektør)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(3.januar,  8.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  8.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
@@ -868,7 +868,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar, 7.januar, 100))
         håndterSykmelding(Triple(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Periode.Sykdom(8.januar,  23.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  23.februar, 100))
 
         inspektør.also {
             assertNoErrors(it)
