@@ -26,6 +26,7 @@ internal class HendelseRecorder(private val dataSource: DataSource) {
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
             is SimuleringMessage -> SIMULERING
             is ManuellSaksbehandlingMessage -> MANUELL_SAKSBEHANDLING
+            is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
             is UtbetalingMessage -> UTBETALING
             is KansellerUtbetalingMessage -> KANSELLER_UTBETALING
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
@@ -59,6 +60,7 @@ internal class HendelseRecorder(private val dataSource: DataSource) {
         YTELSER,
         VILKÅRSGRUNNLAG,
         MANUELL_SAKSBEHANDLING,
+        UTBETALING_OVERFØRT,
         UTBETALING,
         SIMULERING,
         KANSELLER_UTBETALING
