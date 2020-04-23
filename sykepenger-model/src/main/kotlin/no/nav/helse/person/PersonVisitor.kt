@@ -3,8 +3,12 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.sykdomstidslinje.Grad
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -106,6 +110,20 @@ internal interface SykdomstidslinjeVisitor {
     fun visitUbestemt(dag: Ubestemtdag) {}
     fun visitUtenlandsdag(dag: Utenlandsdag) {}
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+}
+
+internal interface NySykdomstidslinjeVisitor {
+    fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
+    fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NySykHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
 }
 
 internal interface InntekthistorikkVisitor {

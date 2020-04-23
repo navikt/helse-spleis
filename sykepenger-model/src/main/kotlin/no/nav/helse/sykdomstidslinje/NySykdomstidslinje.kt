@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
+import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.dag.erHelg
@@ -59,6 +60,12 @@ internal class NySykdomstidslinje private constructor(
 
     internal fun låsOpp(periode: Periode) = this.also {
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
+    }
+
+    internal fun accept(visitor: NySykdomstidslinjeVisitor) {
+        visitor.preVisitNySykdomstidslinje(this, id, tidsstempel)
+        periode?.forEach { this[it].accept(visitor) }
+        visitor.postVisitNySykdomstidslinje(this, id, tidsstempel)
     }
 
     internal companion object {
