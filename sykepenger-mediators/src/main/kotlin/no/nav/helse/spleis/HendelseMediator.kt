@@ -1,10 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.toMap
+import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.LagrePersonDao
@@ -28,6 +25,16 @@ internal class HendelseMediator(
 
     private val personMediator = PersonMediator(rapidsConnection)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
+
+    override fun behandle(message: HendelseMessage) {
+        try {
+            message.behandle(this)
+        } catch (err: Aktivitetslogg.AktivitetException) {
+            withMDC(err.kontekst()) {
+                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+            }
+        }
+    }
 
     override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
         håndter(message, sykmelding) { person ->
@@ -229,6 +236,7 @@ internal class HendelseMediator(
 }
 
 internal interface IHendelseMediator {
+    fun behandle(message: HendelseMessage)
     fun behandle(message: NySøknadMessage, sykmelding: Sykmelding)
     fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver)
     fun behandle(message: SendtSøknadNavMessage, søknad: Søknad)

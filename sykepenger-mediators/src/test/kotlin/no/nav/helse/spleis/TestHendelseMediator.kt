@@ -44,6 +44,9 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestKansellerUtbetaling = false
     }
 
+    override fun behandle(message: HendelseMessage) {
+        message.behandle(this)
+    }
 
     override fun behandle(message: NySøknadMessage, sykmelding: Sykmelding) {
         lestNySøknad = true

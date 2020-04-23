@@ -1,13 +1,11 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.meldinger.*
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
@@ -52,7 +50,7 @@ internal class MessageMediator(
             "melding_id" to message.id.toString(),
             "melding_type" to (message::class.simpleName ?: "ukjent")
         )) {
-            sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}", message.id, message.fødselsnummer, message::class.simpleName)
+            sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}:\n{}", message.id, message.fødselsnummer, message::class.simpleName, message.toJson())
             handleMessage(message, context)
         }
     }
@@ -74,26 +72,12 @@ internal class MessageMediator(
     private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         try {
             hendelseRecorder.lagreMelding(message)
-            message.behandle(hendelseMediator)
-        } catch (err: Aktivitetslogg.AktivitetException) {
-            withMDC(err.kontekst()) {
-                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
-            }
+            hendelseMediator.behandle(message)
         } catch (err: Exception) {
             log.error("alvorlig feil: ${err.message}", err)
             withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
                 sikkerLogg.error("alvorlig feil: ${err.message}", err)
             }
-        }
-    }
-
-    private fun withMDC(context: Map<String, String>, block: () -> Unit) {
-        val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
-        try {
-            MDC.setContextMap(contextMap + context)
-            block()
-        } finally {
-            MDC.setContextMap(contextMap)
         }
     }
 
