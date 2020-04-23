@@ -4,16 +4,24 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverlapMergeTest {
+    private lateinit var tidslinje: NySykdomstidslinje
+    private val inspektør get() = SykdomstidslinjeInspektør(tidslinje)
+
     @Test
     internal fun `overlap av samme type`() {
-        val actual = (1.januar jobbTil 12.januar).merge(7.januar jobbTil 19.januar)
+        tidslinje = (1.januar jobbTil 12.januar).merge(7.januar jobbTil 19.januar)
 
-        assertEquals(Periode(1.januar, 19.januar), actual.periode())
-        assertEquals(15, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(4, actual.filterIsInstance<NyDag.NyFriskHelgedag>().size)
+        assertEquals(Periode(1.januar, 19.januar), tidslinje.periode())
+        assertEquals(15, tidslinje.filterIsInstance<NyArbeidsdag>().size)
+        assertEquals(4, tidslinje.filterIsInstance<NyFriskHelgedag>().size)
+
+        inspektør.also {
+            assertTrue(it[1.januar] is NyArbeidsdag)
+        }
     }
 
     @Test
@@ -79,14 +87,18 @@ internal class OverlapMergeTest {
 
     @Test
     internal fun `første fraværsdag`() {
-        val actual = listOf(
-            1.januar sykTil 1.januar,
+        tidslinje = listOf(
+            1.januar sykTil 1.januar grad 50,
             5.januar ferieTil 8.januar
         ).merge(testBeste)
 
-        assertEquals(Periode(1.januar, 8.januar), actual.periode())
-        assertEquals(4, actual.filterIsInstance<NyFeriedag>().size)
-        assertEquals(1, actual.filterIsInstance<NySykedag>().size)
+        assertEquals(Periode(1.januar, 8.januar), tidslinje.periode())
+        assertEquals(4, tidslinje.filterIsInstance<NyFeriedag>().size)
+        assertEquals(1, tidslinje.filterIsInstance<NySykedag>().size)
+
+        inspektør.also {
+            assertEquals(Grad.sykdom(50), it.grader[1.januar])
+        }
     }
 
     private val testBeste = { venstre: NyDag, høyre: NyDag ->

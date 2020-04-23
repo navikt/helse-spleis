@@ -11,14 +11,15 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySykdomstidslinjeVisitor {
-    init {
-        tidslinje.accept(this)
-    }
     internal val dager = mutableMapOf<LocalDate, NyDag>()
     internal val kilder = mutableMapOf<LocalDate, Hendelseskilde>()
     internal val grader = mutableMapOf<LocalDate, Grad>()
     internal lateinit var id: UUID
     internal lateinit var tidsstempel: LocalDateTime
+
+    init {
+        tidslinje.accept(this)
+    }
 
     internal operator fun get(dato: LocalDate) = dager[dato]
         ?: throw IllegalArgumentException("No dag for ${dato}")
