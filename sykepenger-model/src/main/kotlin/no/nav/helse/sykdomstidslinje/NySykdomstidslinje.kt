@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.default
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.dag.erHelg
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -70,6 +71,26 @@ internal class NySykdomstidslinje private constructor(
         visitor.preVisitNySykdomstidslinje(this, id, tidsstempel)
         periode?.forEach { this[it].accept(visitor) }
         visitor.postVisitNySykdomstidslinje(this, id, tidsstempel)
+    }
+
+    override fun toString() = toShortString()
+
+    internal fun toShortString(): String {
+        return periode?.joinToString(separator = "") {
+            (if (it.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
+                when (this[it]::class) {
+                    NySykedag::class -> "S"
+                    NyArbeidsdag::class -> "A"
+                    NyUkjentDag::class -> "?"
+                    ProblemDag::class -> "X"
+                    NySykHelgedag::class -> "H"
+                    NyArbeidsgiverdag::class -> "U"
+                    NyFeriedag::class -> "F"
+                    NyFriskHelgedag::class -> "R"
+                    NyKunArbeidsgiverdag::class -> "K"
+                    else -> "*"
+                }
+        } ?: "Tom tidslinje"
     }
 
     internal companion object {
