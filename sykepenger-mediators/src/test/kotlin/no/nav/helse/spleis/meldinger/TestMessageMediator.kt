@@ -13,14 +13,10 @@ internal class TestMessageMediator : IMessageMediator {
     internal var riverError = false
         get() = field.also { reset() }
         private set
-    internal var riverSevereError = false
-        get() = field.also { reset() }
-        private set
 
     internal fun reset() {
         recognizedMessage = false
         riverError = false
-        riverSevereError = false
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
@@ -29,10 +25,6 @@ internal class TestMessageMediator : IMessageMediator {
 
     override fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext) {
         riverError = true
-    }
-
-    override fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
-        riverSevereError = true
     }
 }
 

@@ -17,7 +17,7 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
 
     @Test
     fun `Får problems når vi mangler påkrevde felt`() {
-        assertSevere(badJson)
+        assertIgnored(badJson)
     }
 
     private val json = """

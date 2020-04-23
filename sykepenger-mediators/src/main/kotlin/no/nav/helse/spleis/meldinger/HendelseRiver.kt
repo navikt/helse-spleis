@@ -35,10 +35,6 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             messageMediator.onRecognizedMessage(createMessage(packet), context)
         }
 
-        override fun onSevere(error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
-            messageMediator.onRiverSevere(riverName, error, context)
-        }
-
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
             messageMediator.onRiverError(riverName, problems, context)
         }

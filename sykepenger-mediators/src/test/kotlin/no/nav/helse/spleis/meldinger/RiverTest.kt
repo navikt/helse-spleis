@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 
@@ -30,8 +31,9 @@ internal abstract class RiverTest {
         assertTrue(messageMediator.riverError)
     }
 
-    protected fun assertSevere(message: String) {
+    protected fun assertIgnored(message: String) {
         rapid.sendTestMessage(message)
-        assertTrue(messageMediator.riverSevereError)
+        assertFalse(messageMediator.recognizedMessage)
+        assertFalse(messageMediator.riverError)
     }
 }

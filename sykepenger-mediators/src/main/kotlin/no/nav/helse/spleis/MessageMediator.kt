@@ -35,12 +35,10 @@ internal class MessageMediator(
     }
 
     private var messageRecognized = false
-    private val riverSevereErrors = mutableListOf<Pair<String, MessageProblems>>()
     private val riverErrors = mutableListOf<Pair<String, MessageProblems>>()
 
     fun beforeRiverHandling(message: String) {
         messageRecognized = false
-        riverSevereErrors.clear()
         riverErrors.clear()
     }
 
@@ -59,14 +57,9 @@ internal class MessageMediator(
         riverErrors.add(riverName to problems)
     }
 
-    override fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
-        riverSevereErrors.add(riverName to error.problems)
-    }
-
     fun afterRiverHandling(message: String) {
-        if (messageRecognized) return
-        if (riverErrors.isNotEmpty()) return sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-        sikkerLogg.debug("ukjent melding:\n\t$message\n\nProblemer:\n${riverSevereErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        if (messageRecognized || riverErrors.isEmpty()) return
+        sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
     private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
@@ -111,5 +104,4 @@ internal class MessageMediator(
 internal interface IMessageMediator {
     fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext)
     fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext)
-    fun onRiverSevere(riverName: String, error: MessageProblems.MessageException, context: RapidsConnection.MessageContext)
 }

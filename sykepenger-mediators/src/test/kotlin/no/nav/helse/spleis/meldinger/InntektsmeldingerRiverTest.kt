@@ -72,8 +72,8 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
 
     @Test
     internal fun `invalid messages`() {
-        assertSevere(InvalidJson)
-        assertSevere(UnknownJson)
+        assertIgnored(InvalidJson)
+        assertIgnored(UnknownJson)
     }
 
     @Test

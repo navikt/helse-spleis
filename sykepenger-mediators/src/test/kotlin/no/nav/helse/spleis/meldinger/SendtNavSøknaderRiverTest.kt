@@ -101,9 +101,9 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
 
     @Test
     internal fun `invalid messages`() {
-        assertSevere(invalidJson)
-        assertSevere(unknownJson)
-        assertSevere(validAvbruttSøknad)
+        assertIgnored(invalidJson)
+        assertIgnored(unknownJson)
+        assertIgnored(validAvbruttSøknad)
     }
 
     @Test
