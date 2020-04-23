@@ -524,7 +524,7 @@ internal class SpeilBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(fom, tom, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad,
             permittert = false

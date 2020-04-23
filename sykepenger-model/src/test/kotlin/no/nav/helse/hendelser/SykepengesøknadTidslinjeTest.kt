@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Uke
-import no.nav.helse.hendelser.Søknad.Periode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.sykdomstidslinje.dag.*
@@ -34,8 +34,8 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får egenmeldingsperiodene fra søknaden`() {
 
         val tidslinje = søknad(perioder = listOf(
-            Periode.Egenmelding(egenmeldingFom, egenmeldingTom),
-            Periode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100))
+            Søknadsperiode.Egenmelding(egenmeldingFom, egenmeldingTom),
+            Søknadsperiode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100))
         ).sykdomstidslinje(sykeperiodeTOM).merge(sykmelding().sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
         assertEquals(egenmeldingFom, tidslinje.førsteDag())
@@ -47,8 +47,8 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får ferien fra søknaden`() {
         val tidslinje = sykmelding().sykdomstidslinje(sykeperiodeTOM).merge(søknad(
             perioder = listOf(
-                Periode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100),
-                Periode.Ferie(ferieFom, ferieTom)
+                Søknadsperiode.Sykdom(sykeperiodeFOM,  sykeperiodeTOM, 100),
+                Søknadsperiode.Ferie(ferieFom, ferieTom)
             )
         ).sykdomstidslinje(sykeperiodeTOM), historiskDagturnering)
 
@@ -60,8 +60,8 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får permisjon fra soknaden`() {
         val tidslinje = søknad(
             perioder = listOf(
-                    Periode.Sykdom(1.mandag,  1.fredag, 100),
-                    Periode.Permisjon(1.torsdag, 1.fredag)
+                    Søknadsperiode.Sykdom(1.mandag,  1.fredag, 100),
+                    Søknadsperiode.Permisjon(1.torsdag, 1.fredag)
                 )
         ).also {
             it.toString()
@@ -75,8 +75,8 @@ internal class SykepengesøknadTidslinjeTest {
     fun `Tidslinjen får arbeidsdag resten av perioden hvis soknaden har arbeid gjenopptatt`() {
         val tidslinje = søknad(
             perioder = listOf(
-                Periode.Sykdom(1.mandag,  1.fredag, 100),
-                Periode.Arbeid(1.onsdag, Uke(10).fredag)
+                Søknadsperiode.Sykdom(1.mandag,  1.fredag, 100),
+                Søknadsperiode.Arbeid(1.onsdag, Uke(10).fredag)
             )
         ).also {
             it.toString()
@@ -92,7 +92,7 @@ internal class SykepengesøknadTidslinjeTest {
     private fun assertType(expected: KClass<*>, actual: Any?) =
         assertEquals(expected, actual?.let { it::class })
 
-    private fun søknad(perioder: List<Periode> = listOf(Periode.Sykdom(16.september,  5.oktober, 100))) =
+    private fun søknad(perioder: List<Søknadsperiode> = listOf(Søknadsperiode.Sykdom(16.september,  5.oktober, 100))) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
@@ -100,7 +100,7 @@ internal class SykepengesøknadTidslinjeTest {
             orgnummer = "orgnr",
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )
 

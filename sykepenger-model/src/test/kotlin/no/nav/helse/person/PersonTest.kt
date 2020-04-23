@@ -127,7 +127,7 @@ internal class PersonTest {
         assertFalse(inspektør.personLogg.hasErrors())
         søknad(
             perioder = listOf(
-                Søknad.Periode.Sykdom(
+                Søknad.Søknadsperiode.Sykdom(
                     fom = 10.juli,
                     tom = 30.juli,
                     gradFraSykmelding = 100,
@@ -276,10 +276,10 @@ internal class PersonTest {
     )
 
     private fun søknad(
-        perioder: List<Søknad.Periode> = listOf(
-            Søknad.Periode.Sykdom(16.september, 5.oktober, 100)
+        perioder: List<Søknad.Søknadsperiode> = listOf(
+            Søknad.Søknadsperiode.Sykdom(16.september, 5.oktober, 100)
         ),
-        sendtTilNAV: LocalDateTime = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
+        sendtTilNAV: LocalDateTime = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay()
     ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),

@@ -2,8 +2,8 @@ package no.nav.helse.bugs_showstoppers
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad.Periode.Egenmelding
-import no.nav.helse.hendelser.Søknad.Periode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*

@@ -17,13 +17,13 @@ class Søknad constructor(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    private val perioder: List<Periode>,
+    private val perioder: List<Søknadsperiode>,
     private val harAndreInntektskilder: Boolean,
     private val sendtTilNAV: LocalDateTime,
     private val permittert: Boolean
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
-    private val sykdomsperiode: no.nav.helse.hendelser.Periode
+    private val sykdomsperiode: Periode
     private var forrigeTom: LocalDate? = null
 
     private companion object {
@@ -33,7 +33,7 @@ class Søknad constructor(
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
         perioder.onEach { it.sjekkUgyldig(aktivitetslogg) }
-        sykdomsperiode = Periode.sykdomsperiode(perioder) ?: severe("Søknad inneholder ikke sykdomsperioder")
+        sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: severe("Søknad inneholder ikke sykdomsperioder")
     }
 
     override fun sykdomstidslinje() = perioder
@@ -59,7 +59,7 @@ class Søknad constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
+    override fun valider(periode: Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if (harAndreInntektskilder) error("Søknaden inneholder andre inntektskilder")
         if (permittert) warn("Søknaden inneholder permittering - se om det har innvirkning på saken før du utbetaler")
@@ -74,25 +74,24 @@ class Søknad constructor(
 
     private fun avskjæringsdato(): LocalDate? = sendtTilNAV.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1)
 
-    sealed class Periode(fom: LocalDate, tom: LocalDate) {
-        protected val periode = no.nav.helse.hendelser.Periode(fom, tom)
+    sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate) {
+        protected val periode = Periode(fom, tom)
 
         internal companion object {
-            fun sykdomsperiode(liste: List<Periode>) =
+            fun sykdomsperiode(liste: List<Søknadsperiode>) =
                 søknadsperiode(liste.filterIsInstance<Sykdom>())
 
-            fun søknadsperiode(liste: List<Periode>) =
+            fun søknadsperiode(liste: List<Søknadsperiode>) =
                 liste
-                    .map(Periode::periode)
+                    .map(Søknadsperiode::periode)
                     .takeIf(List<*>::isNotEmpty)
                     ?.let {
                         it.reduce { champion, challenger ->
-                            no.nav.helse.hendelser.Periode(
+                            Periode(
                                 fom = minOf(champion.start, challenger.start),
                                 tom = maxOf(champion.endInclusive, challenger.endInclusive))
                         }
                     }
-
         }
 
         internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): Sykdomstidslinje
@@ -104,7 +103,7 @@ class Søknad constructor(
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.error(beskjed)
         }
 
-        class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.ferie(periode, SøknadDagFactory)
 
@@ -117,7 +116,7 @@ class Søknad constructor(
             tom: LocalDate,
             private val gradFraSykmelding: Int,
             faktiskSykdomsgrad: Int? = null
-        ) : Periode(fom, tom) {
+        ) : Søknadsperiode(fom, tom) {
             private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
             override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {
                 if (grad > 100) aktivitetslogg.severe("Utregnet grad er over 100")
@@ -132,7 +131,7 @@ class Søknad constructor(
                 Sykdomstidslinje.sykedager(periode, avskjæringsdato, grad, SøknadDagFactory)
         }
 
-        class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.sykedager(periode, Double.NaN, SøknadDagFactory)
 
@@ -140,7 +139,7 @@ class Søknad constructor(
                 søknad.error("Søknaden inneholder en Papirsykmeldingsperiode")
         }
 
-        class Utdanning(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.studiedager(periode, SøknadDagFactory)
 
@@ -148,7 +147,7 @@ class Søknad constructor(
                 søknad.error("Søknaden inneholder en Utdanningsperiode")
         }
 
-        class Permisjon(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.permisjonsdager(periode, SøknadDagFactory)
 
@@ -156,7 +155,7 @@ class Søknad constructor(
                 søknad.error("Søknaden inneholder en Permisjonsperiode")
         }
 
-        class Egenmelding(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.egenmeldingsdager(periode, SøknadDagFactory)
 
@@ -166,7 +165,7 @@ class Søknad constructor(
             }
         }
 
-        class Arbeid(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
+        class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.ikkeSykedager(periode, SøknadDagFactory)
 
@@ -174,7 +173,7 @@ class Søknad constructor(
                 valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
         }
 
-        class Utlandsopphold(fom: LocalDate, tom: LocalDate): Periode(fom, tom) {
+        class Utlandsopphold(fom: LocalDate, tom: LocalDate): Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(ignore: LocalDate) =
                 Sykdomstidslinje.utenlandsdager(periode, SøknadDagFactory)
 

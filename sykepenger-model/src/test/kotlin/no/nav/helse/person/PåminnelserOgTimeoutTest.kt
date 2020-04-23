@@ -209,7 +209,7 @@ class PåminnelserOgTimeoutTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(1.januar,  20.januar, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(1.januar,  20.januar, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = 20.januar.atStartOfDay(),
             permittert = false

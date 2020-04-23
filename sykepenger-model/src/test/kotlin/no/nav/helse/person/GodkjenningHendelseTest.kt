@@ -135,7 +135,7 @@ internal class GodkjenningHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Periode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false

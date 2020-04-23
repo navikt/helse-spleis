@@ -57,4 +57,15 @@ internal class LåstePerioderTest {
         assertThrows<IllegalArgumentException> { (1.januar jobbTil 5.januar).låsOpp(Periode(2.januar, 4.januar)) }
     }
 
+    @Test
+    internal fun `låse opp overlappende låste dagperioder`() {
+        val initial = (1.januar jobbTil 25.januar).lås(Periode(2.januar, 11.januar)).lås(Periode(4.januar, 15.januar))
+            .merge(1.januar ferieTil 25.januar)
+
+        assertEquals(1 + 10, initial.filterIsInstance<ProblemDag>().size)
+
+        val actual = initial.låsOpp(Periode(2.januar, 11.januar)).merge(1.januar ferieTil 25.januar)
+        assertEquals(3 + 10, actual.filterIsInstance<ProblemDag>().size)
+    }
+
 }

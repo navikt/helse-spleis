@@ -70,7 +70,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterSøknadMedValidering(
         vedtaksperiodeIndex: Int,
-        vararg perioder: Søknad.Periode,
+        vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean = false
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
@@ -79,9 +79,9 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterSøknad(
-        vararg perioder: Søknad.Periode,
+        vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean = false,
-        sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive
+        sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
     ) {
         person.håndter(
             søknad(
@@ -203,9 +203,9 @@ internal abstract class AbstractEndToEndTest {
     }
 
     private fun søknad(
-        vararg perioder: Søknad.Periode,
+        vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean,
-        sendtTilNav: LocalDate = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive
+        sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
     ): Søknad {
         return Søknad(
             meldingsreferanseId = UUID.randomUUID(),

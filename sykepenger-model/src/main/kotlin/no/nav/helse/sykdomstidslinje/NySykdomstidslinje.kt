@@ -58,6 +58,9 @@ internal class NySykdomstidslinje private constructor(
         låstePerioder.add(periode)
     }
 
+    /**
+     * Støtter kun å låse opp de perioder som tidligere har blitt låst
+     */
     internal fun låsOpp(periode: Periode) = this.also {
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
@@ -99,6 +102,21 @@ internal class NySykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
                             { if (it.erHelg()) NySykHelgedag(it, kilde) else NySykedag(it, grad, kilde) })
+                    )
+            )
+
+        internal fun kunArbeidsgiverSykedager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Number = 100.0,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) =
+            NySykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, NyDag>(
+                            { it },
+                            { if (it.erHelg()) NyKunArbeidsgiverdag(it, grad, kilde) else NySykedag(it, grad, kilde) })
                     )
             )
 

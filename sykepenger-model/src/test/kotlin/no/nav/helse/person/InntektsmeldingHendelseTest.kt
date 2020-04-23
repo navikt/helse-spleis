@@ -57,7 +57,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `inntektsmelding etter søknad`() {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
-        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar,  20.januar, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -68,7 +68,7 @@ internal class InntektsmeldingHendelseTest {
     internal fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(søknad(Søknad.Periode.Sykdom(6.januar,  20.januar, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
@@ -160,7 +160,7 @@ internal class InntektsmeldingHendelseTest {
         sykeperioder = listOf(*sykeperioder)
     )
 
-    private fun søknad(vararg perioder: Søknad.Periode, orgnummer: String = ORGNR) =
+    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNR) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -168,7 +168,7 @@ internal class InntektsmeldingHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )
 }

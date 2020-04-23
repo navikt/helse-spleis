@@ -29,7 +29,7 @@ internal class VedtaksperiodeTest {
             vedtaksperiode.håndter(
                 søknad(
                     perioder = listOf(
-                        Søknad.Periode.Sykdom(
+                        Søknad.Søknadsperiode.Sykdom(
                             fom = 21.juli,
                             tom = 25.juli,
                             gradFraSykmelding = 100,
@@ -111,8 +111,8 @@ internal class VedtaksperiodeTest {
     )
 
     private fun søknad(
-        perioder: List<Søknad.Periode> = listOf(
-            Søknad.Periode.Sykdom(16.september, 5.oktober, 100)
+        perioder: List<Søknad.Søknadsperiode> = listOf(
+            Søknad.Søknadsperiode.Sykdom(16.september, 5.oktober, 100)
         )
     ) =
         Søknad(
@@ -122,7 +122,7 @@ internal class VedtaksperiodeTest {
             orgnummer = organisasjonsnummer,
             perioder = perioder,
             harAndreInntektskilder = false,
-            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )
 

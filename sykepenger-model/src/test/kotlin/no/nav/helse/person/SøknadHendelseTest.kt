@@ -2,8 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Periode
-import no.nav.helse.hendelser.Søknad.Periode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.desember
@@ -134,7 +134,7 @@ internal class SøknadHendelseTest {
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
     }
 
-    private fun søknad(vararg perioder: Periode, orgnummer: String = "987654321") =
+    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = "987654321") =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -142,7 +142,7 @@ internal class SøknadHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            sendtTilNAV = Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )
 

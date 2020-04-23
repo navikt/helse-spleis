@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Søknad.Periode
-import no.nav.helse.hendelser.Søknad.Periode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -162,7 +162,7 @@ internal class SøknadTest {
         assertTrue(søknad.hasWarnings())
     }
 
-    private fun søknad(vararg perioder: Periode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {
+    private fun søknad(vararg perioder: Søknadsperiode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -170,7 +170,7 @@ internal class SøknadTest {
             orgnummer = "987654321",
             perioder = listOf(*perioder),
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNAV = Periode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
+            sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert
         )
     }

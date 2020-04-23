@@ -70,7 +70,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
-        person.håndter(søknad(Søknad.Periode.Sykdom(1.januar, 5.januar, 100, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -81,7 +81,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     @Test
     internal fun `ignorer andre søknad til arbeidsgiver`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Søknad.Periode.Sykdom(1.januar, 5.januar, 100, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
@@ -150,7 +150,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
-        person.håndter(søknad(Søknad.Periode.Sykdom(1.januar, 5.januar, 100, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
@@ -181,7 +181,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
     }
 
-    private fun søknad(vararg perioder: Søknad.Periode, orgnummer: String = "987654321") =
+    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -189,7 +189,7 @@ internal class SøknadArbeidsgiverHendelseTest {
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
             harAndreInntektskilder = false,
-            sendtTilNAV = Søknad.Periode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
+            sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )
 

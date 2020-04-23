@@ -93,7 +93,7 @@ class SøknadArbeidsgiver constructor(
         internal fun sykdomstidslinje(avskjæringsdato: LocalDate) =
             Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
 
-        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
+        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, gradFraSykmelding, kilde)
     }
 
     internal object SøknadDagFactory : DagFactory {

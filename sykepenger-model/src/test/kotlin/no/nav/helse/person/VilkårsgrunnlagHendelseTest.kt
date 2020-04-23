@@ -88,7 +88,7 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
         person.håndter(sykmelding(perioder = listOf(Triple(8.januar, 31.januar, 100))))
-        person.håndter(søknad(perioder = listOf(Søknad.Periode.Sykdom(8.januar,  31.januar, 100))))
+        person.håndter(søknad(perioder = listOf(Søknad.Søknadsperiode.Sykdom(8.januar,  31.januar, 100))))
         person.håndter(inntektsmelding(beregnetInntekt = 30000.0, arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))))
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
 
@@ -168,7 +168,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun søknad(
-        perioder: List<Søknad.Periode> = listOf(Søknad.Periode.Sykdom(1.januar,  31.januar, 100))
+        perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(1.januar,  31.januar, 100))
     ) = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

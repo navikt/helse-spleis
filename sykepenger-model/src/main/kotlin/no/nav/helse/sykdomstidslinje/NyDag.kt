@@ -109,7 +109,50 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
+    internal class NyKunArbeidsgiverdag(
+        dato: LocalDate,
+        private val grad: Grad = Grad.sykdom(100),
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : NyDag(dato, kilde) {
+
+        internal constructor(
+            dato: LocalDate,
+            grad: Number = 100,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) : this(dato, Grad.sykdom(grad), kilde)
+
+        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+            visitor.visitDag(this, dato, grad, kilde)
+    }
+
     internal class NySykHelgedag(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : NyDag(dato, kilde) {
+
+        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+            visitor.visitDag(this, dato, kilde)
+    }
+
+    internal class NyPermisjonsdag(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : NyDag(dato, kilde) {
+
+        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+            visitor.visitDag(this, dato, kilde)
+    }
+
+    internal class NyStudiedag(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : NyDag(dato, kilde) {
+
+        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+            visitor.visitDag(this, dato, kilde)
+    }
+
+    internal class NyUtenlandsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {

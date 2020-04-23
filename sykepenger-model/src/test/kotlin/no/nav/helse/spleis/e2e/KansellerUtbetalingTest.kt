@@ -19,7 +19,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     @BeforeEach internal fun setup() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Søknad.Periode.Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(0, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)

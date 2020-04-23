@@ -97,12 +97,12 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(
-            Søknad.Periode.Sykdom(1.januar,  2.januar, 100),
-            Søknad.Periode.Egenmelding(2.januar, 2.januar),
-            Søknad.Periode.Arbeid(3.januar, 3.januar),
-            Søknad.Periode.Ferie(4.januar, 4.januar),
-            Søknad.Periode.Permisjon(5.januar, 5.januar),
-            Søknad.Periode.Utdanning(5.januar, 5.januar)
+            Søknad.Søknadsperiode.Sykdom(1.januar,  2.januar, 100),
+            Søknad.Søknadsperiode.Egenmelding(2.januar, 2.januar),
+            Søknad.Søknadsperiode.Arbeid(3.januar, 3.januar),
+            Søknad.Søknadsperiode.Ferie(4.januar, 4.januar),
+            Søknad.Søknadsperiode.Permisjon(5.januar, 5.januar),
+            Søknad.Søknadsperiode.Utdanning(5.januar, 5.januar)
         ),
         harAndreInntektskilder = false,
         sendtTilNAV = 5.januar.atStartOfDay(),
