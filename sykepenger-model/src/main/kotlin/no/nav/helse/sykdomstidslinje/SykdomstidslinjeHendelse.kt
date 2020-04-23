@@ -17,6 +17,8 @@ abstract class SykdomstidslinjeHendelse(
         companion object {
             internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class.java, UUID.randomUUID())
         }
+
+        override fun toString() = type
     }
 
     internal fun meldingsreferanseId() = meldingsreferanseId

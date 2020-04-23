@@ -198,11 +198,12 @@ internal class NySykdomstidslinje private constructor(
         internal fun problemdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+            melding: String
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { ProblemDag(it, kilde) }))
+                    .collect(toMap<LocalDate, LocalDate, NyDag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
     }
 

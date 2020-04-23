@@ -14,6 +14,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySyk
     internal val dager = mutableMapOf<LocalDate, NyDag>()
     internal val kilder = mutableMapOf<LocalDate, Hendelseskilde>()
     internal val grader = mutableMapOf<LocalDate, Grad>()
+    internal val problemdagmeldinger = mutableMapOf<LocalDate, String>()
     internal lateinit var id: UUID
     internal lateinit var tidsstempel: LocalDateTime
 
@@ -33,6 +34,11 @@ internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySyk
 
     private fun set(dag: NyDag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {
         grader[dato] = grad
+        set(dag, dato, kilde)
+    }
+
+    private fun set(dag: NyDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {
+        problemdagmeldinger[dato] = melding
         set(dag, dato, kilde)
     }
 
@@ -77,6 +83,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySyk
 //    override fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) =
 //        set(dag, dato, kilde)
 
-    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
+    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
+        set(dag, dato, kilde, melding)
 }

@@ -101,6 +101,16 @@ internal class OverlapMergeTest {
         }
     }
 
+    @Test
+    internal fun `problemdager med melding`() {
+        tidslinje = listOf(1.januar sykTil 10.januar, 5.januar sykTil 15.januar).merge(testBeste)
+
+        inspektør.also {
+            assertTrue(it.problemdagmeldinger[6.januar]?.contains("Kan ikke velge mellom") ?: false)
+            assertTrue(it.problemdagmeldinger[6.januar]?.contains("TestEvent") ?: false)
+        }
+    }
+
     private val testBeste = { venstre: NyDag, høyre: NyDag ->
         when {
             venstre is NyUkjentDag -> høyre
@@ -113,7 +123,7 @@ internal class OverlapMergeTest {
             høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
             venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
             høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
-            else -> venstre.problem()
+            else -> venstre.problem(høyre)
         }
     }
 }

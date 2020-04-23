@@ -126,7 +126,7 @@ internal interface NySykdomstidslinjeVisitor {
 //    fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
 //    fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}
 //    fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
     fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
 }
 

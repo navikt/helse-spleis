@@ -45,7 +45,7 @@ class Inntektsmelding(
             høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
             venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
             høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
-            else -> høyre.problem()
+            else -> høyre.problem(venstre)
         }
     }
 
