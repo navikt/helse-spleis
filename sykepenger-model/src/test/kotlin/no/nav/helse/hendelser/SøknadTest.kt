@@ -3,6 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -32,6 +34,8 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar,  10.januar, 100))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
+
+        assertEquals(10, søknad.nySykdomstidslinje().count())
     }
 
     @Test
@@ -39,6 +43,8 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar,  10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
+
+        assertEquals(10, søknad.nySykdomstidslinje().count())
     }
 
     @Test
@@ -46,6 +52,8 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(5.januar, 10.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(10, søknad.sykdomstidslinje().length())
+
+        assertEquals(10, søknad.nySykdomstidslinje().count())
     }
 
     @Test
@@ -53,6 +61,9 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar,  10.januar, 100), Papirsykmelding(11.januar, 16.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(16, søknad.sykdomstidslinje().length())
+
+        assertEquals(16, søknad.nySykdomstidslinje().count())
+        assertEquals(6, søknad.nySykdomstidslinje().filterIsInstance<ProblemDag>().size)
     }
 
     @Test
@@ -96,6 +107,11 @@ internal class SøknadTest {
         søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
         assertEquals(11, søknad.sykdomstidslinje().length())
+
+        assertEquals(11, søknad.nySykdomstidslinje().count())
+        assertEquals(6, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(2, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
+        assertEquals(2, søknad.nySykdomstidslinje().filterIsInstance<NyArbeidsgiverdag>().size)
     }
 
     @Test
@@ -103,6 +119,8 @@ internal class SøknadTest {
         søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors()) { aktivitetslogg.toString() }
         assertEquals(8, søknad.sykdomstidslinje().length())
+
+        assertEquals(8, søknad.nySykdomstidslinje().count())
     }
 
     @Test
@@ -175,3 +193,7 @@ internal class SøknadTest {
         )
     }
 }
+
+private val NySykdomstidslinje.size: Int
+    get() = this.periode()?.count() ?: 0
+
