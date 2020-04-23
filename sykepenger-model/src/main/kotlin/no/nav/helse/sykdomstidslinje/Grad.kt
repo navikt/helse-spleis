@@ -37,6 +37,8 @@ internal class Grad private constructor(private val brøkdel: Double): Comparabl
         return "${(brøkdel * 100).roundToInt()}%"
     }
 
+    internal fun toPercentage() = brøkdel * 100
+
     internal fun lønn(beløp: Number) = LønnGrad(this.brøkdel, beløp.toDouble())
 
     internal class LønnGrad(private val brøkdel: Double, private val beløp: Double) {

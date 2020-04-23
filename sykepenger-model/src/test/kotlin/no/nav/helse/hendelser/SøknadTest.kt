@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -193,7 +192,3 @@ internal class SøknadTest {
         )
     }
 }
-
-private val NySykdomstidslinje.size: Int
-    get() = this.periode()?.count() ?: 0
-

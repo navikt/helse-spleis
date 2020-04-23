@@ -102,7 +102,7 @@ internal class NySykdomstidslinje private constructor(
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NySykHelgedag(it, kilde) else NySykedag(it, grad, kilde) })
+                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else NySykedag(it, grad, kilde) })
                     )
             )
 
@@ -118,7 +118,7 @@ internal class NySykdomstidslinje private constructor(
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NySykHelgedag(it, kilde) else sykedag(it, avskjæringsdato, grad, kilde) })
+                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else sykedag(it, avskjæringsdato, grad, kilde) })
                     )
             )
 
@@ -156,7 +156,7 @@ internal class NySykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
                             {
-                                if (it.erHelg()) NyArbeidsgiverHelgedag(it, kilde)
+                                if (it.erHelg()) NyArbeidsgiverHelgedag(it, grad, kilde)
                                 else NyArbeidsgiverdag(it, grad, kilde)
                             })
                     )

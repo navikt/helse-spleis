@@ -1,8 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.sykdomstidslinje.Grad
+import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.math.RoundingMode
@@ -17,7 +21,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val sisteDag: LocalDate,
     private val inntekthistorikk: Inntekthistorikk,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : SykdomstidslinjeVisitor {
+) : SykdomstidslinjeVisitor, NySykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
     private var sykedagerIArbeidsgiverperiode = 0
@@ -52,6 +56,17 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = sykHelgedag(dag.dagen, dag.grad)
     override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = sykHelgedag(dag.dagen, dag.grad)
     override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = kunArbeidsgiverSykedag(dag.dagen)
+
+    override fun visitDag(dag: NyDag.NyUkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
+    override fun visitDag(dag: NyDag.NyArbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = arbeidsdag(dato)
+    override fun visitDag(dag: NyDag.NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = egenmeldingsdag(dato)
+    override fun visitDag(dag: NyDag.NyFeriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
+    override fun visitDag(dag: NyDag.NyFriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
+    override fun visitDag(dag: NyDag.NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykHelgedag(dato, grad.toPercentage())
+    override fun visitDag(dag: NyDag.NySykedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykedag(dato, grad.toPercentage())
+    override fun visitDag(dag: NyDag.NyKunArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = kunArbeidsgiverSykedag(dato)
+    override fun visitDag(dag: NyDag.NySykHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykHelgedag(dato, grad.toPercentage())
+    override fun visitDag(dag: NyDag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen")
 
     private fun kunArbeidsgiverSykedag(dagen: LocalDate) {
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {

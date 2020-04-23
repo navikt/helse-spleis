@@ -119,13 +119,13 @@ internal interface NySykdomstidslinjeVisitor {
     fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
     fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyKunArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NySykHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+//    fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+//    fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}
+//    fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
 }
