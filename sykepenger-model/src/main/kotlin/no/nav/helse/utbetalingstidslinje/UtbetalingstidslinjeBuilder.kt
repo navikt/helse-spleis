@@ -3,10 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Grad
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import java.math.RoundingMode
@@ -34,6 +31,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     internal fun result(): Utbetalingstidslinje {
         (sykdomstidslinje.kutt(sisteDag))?.accept(this)
+        return tidslinje
+    }
+
+    internal fun result(nySykdomstidslinje: NySykdomstidslinje): Utbetalingstidslinje {
+        (nySykdomstidslinje.kutt(sisteDag)).accept(this)
         return tidslinje
     }
 

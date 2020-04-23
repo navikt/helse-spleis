@@ -38,7 +38,8 @@ internal class NySykdomstidslinje private constructor(
         )
     }
 
-    operator fun get(dato: LocalDate): NyDag = dager[dato] ?: NyUkjentDag(dato, INGEN)
+    internal operator fun plus(other: NySykdomstidslinje) = this.merge(other)
+    internal operator fun get(dato: LocalDate): NyDag = dager[dato] ?: NyUkjentDag(dato, INGEN)
 
     internal fun subset(periode: Periode) =
         NySykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
@@ -85,6 +86,7 @@ internal class NySykdomstidslinje private constructor(
                     ProblemDag::class -> "X"
                     NySykHelgedag::class -> "H"
                     NyArbeidsgiverdag::class -> "U"
+                    NyArbeidsgiverHelgedag::class -> "G"
                     NyFeriedag::class -> "F"
                     NyFriskHelgedag::class -> "R"
                     NyKunArbeidsgiverdag::class -> "K"
@@ -161,7 +163,7 @@ internal class NySykdomstidslinje private constructor(
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NyKunArbeidsgiverdag(it, grad, kilde) else NySykedag(it, grad, kilde) })
+                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else NyKunArbeidsgiverdag(it, grad, kilde) })
                     )
             )
 
