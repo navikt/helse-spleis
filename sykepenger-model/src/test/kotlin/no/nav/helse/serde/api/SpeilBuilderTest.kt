@@ -65,8 +65,8 @@ internal class SpeilBuilderTest {
         assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje.last().type)
 
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
-        assertEquals(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykdomstidslinje.first().type)
-        assertEquals(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, sykdomstidslinje.last().type)
+        assertEquals(JsonDagType.FORELDET_SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals(JsonDagType.FORELDET_SYKEDAG, sykdomstidslinje.last().type)
     }
 
     @Test

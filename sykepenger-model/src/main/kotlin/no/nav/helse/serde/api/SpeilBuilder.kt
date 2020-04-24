@@ -633,7 +633,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitUtenlandsdag(dag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, dag)
 
         override fun visitForeldetSykedag(dag: ForeldetSykedag) =
-            leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, dag)
+            leggTilSykedag(JsonDagType.FORELDET_SYKEDAG, dag)
 
         private fun leggTilDag(jsonDagType: JsonDagType, dag: Dag) {
             sykdomstidslinjeListe.add(

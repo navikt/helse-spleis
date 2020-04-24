@@ -15,6 +15,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.JsonMigration
+import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
 import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -39,7 +40,9 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 
 class SerialisertPerson(val json: String) {
     internal companion object {
-        private val migrations = emptyList<JsonMigration>()
+        private val migrations = listOf<JsonMigration>(
+            V1EndreKunArbeidsgiverSykedagEnum()
+        )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
         fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)
@@ -222,7 +225,7 @@ class SerialisertPerson(val json: String) {
             JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING -> FriskHelgedag.Inntektsmelding(data.dagen)
             JsonDagType.FRISK_HELGEDAG_SØKNAD -> FriskHelgedag.Søknad(data.dagen)
             JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
-            JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG -> ForeldetSykedag(data.dagen, data.grad)
+            JsonDagType.FORELDET_SYKEDAG -> ForeldetSykedag(data.dagen, data.grad)
             JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
             JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
             JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
