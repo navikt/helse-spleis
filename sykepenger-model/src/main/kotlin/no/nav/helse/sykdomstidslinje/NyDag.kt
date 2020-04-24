@@ -119,7 +119,7 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NyKunArbeidsgiverdag(
+    internal class NyForeldetSykedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdom(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

@@ -189,7 +189,7 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = currentState.visitSykHelgedag(dag)
     override fun visitSykedag(dag: Sykedag.Sykmelding) = currentState.visitSykedag(dag)
     override fun visitSykedag(dag: Sykedag.Søknad) = currentState.visitSykedag(dag)
-    override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = currentState.visitKunArbeidsgiverSykedag(dag)
+    override fun visitForeldetSykedag(dag: ForeldetSykedag) = currentState.visitForeldetSykedag(dag)
     override fun visitUbestemt(dag: Ubestemtdag) = currentState.visitUbestemt(dag)
     override fun visitUtenlandsdag(dag: Utenlandsdag) = currentState.visitUtenlandsdag(dag)
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
@@ -504,7 +504,7 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, dag)
         override fun visitSykedag(dag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, dag)
         override fun visitSykedag(dag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, dag)
-        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, dag)
+        override fun visitForeldetSykedag(dag: ForeldetSykedag) = leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, dag)
         override fun visitUbestemt(dag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, dag)
         override fun visitUtenlandsdag(dag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, dag)
 

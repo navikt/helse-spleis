@@ -7,8 +7,9 @@ import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.DagFactory
-import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
+import no.nav.helse.sykdomstidslinje.dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
@@ -91,13 +92,14 @@ class SøknadArbeidsgiver constructor(
         }
 
         internal fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-            Sykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, grad, SøknadDagFactory)
+            Sykdomstidslinje.sykedager(fom, tom, avskjæringsdato, grad, SøknadDagFactory)
 
-        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.kunArbeidsgiverSykedager(fom, tom, gradFraSykmelding, kilde)
+        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
     }
 
     internal object SøknadDagFactory : DagFactory {
-        override fun kunArbeidsgiverSykedag(dato: LocalDate, grad: Double): KunArbeidsgiverSykedag = KunArbeidsgiverSykedag(dato, grad)
+        override fun foreldetSykedag(dato: LocalDate, grad: Double): ForeldetSykedag = ForeldetSykedag(dato, grad)
+        override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Søknad = Sykedag.Søknad(dato, grad)
         override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Søknad = SykHelgedag.Søknad(dato, grad)
     }
 }

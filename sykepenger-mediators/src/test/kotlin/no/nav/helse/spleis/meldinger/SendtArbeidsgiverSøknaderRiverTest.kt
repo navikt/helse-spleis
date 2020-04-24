@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -16,6 +17,7 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
         SendtArbeidsgiverSøknaderRiver(rapidsConnection, mediator)
     }
 
+    @Language("JSON")
     private val validJson = """
 {
   "@event_name": "sendt_søknad_arbeidsgiver",

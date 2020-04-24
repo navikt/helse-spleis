@@ -208,8 +208,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun visitSykedag(dag: Sykedag.Søknad) = currentState.visitSykedag(dag)
     override fun visitUbestemt(dag: Ubestemtdag) = currentState.visitUbestemt(dag)
     override fun visitUtenlandsdag(dag: Utenlandsdag) = currentState.visitUtenlandsdag(dag)
-    override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) =
-        currentState.visitKunArbeidsgiverSykedag(dag)
+    override fun visitForeldetSykedag(dag: ForeldetSykedag) =
+        currentState.visitForeldetSykedag(dag)
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = currentState.visitTilstand(tilstand)
 
@@ -632,7 +632,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitUbestemt(dag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, dag)
         override fun visitUtenlandsdag(dag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, dag)
 
-        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) =
+        override fun visitForeldetSykedag(dag: ForeldetSykedag) =
             leggTilSykedag(JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG, dag)
 
         private fun leggTilDag(jsonDagType: JsonDagType, dag: Dag) {

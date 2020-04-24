@@ -138,8 +138,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = inkrementer(
             SykHelgedag::class)
 
-        override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = inkrementer(
-            KunArbeidsgiverSykedag::class)
+        override fun visitForeldetSykedag(dag: ForeldetSykedag) = inkrementer(
+            ForeldetSykedag::class)
 
         override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = inkrementer(
             Arbeidsdag::class
@@ -171,9 +171,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         "Missing collection initialization"
     }
 
-    internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 
     internal fun tilstand(indeks: Int) = tilstander[indeks] ?: fail {
         "Missing collection initialization"

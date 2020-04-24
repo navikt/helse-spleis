@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.dag.KunArbeidsgiverSykedag
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.*
@@ -62,7 +61,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
@@ -95,9 +94,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(6, it.dagtelling[KunArbeidsgiverSykedag::class])
             assertEquals(4, it.dagtelling[SykHelgedag::class])
-            assertEquals(8, it.dagtelling[Sykedag::class])
+            assertEquals(14, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
             0,
@@ -144,9 +142,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(6, it.dagtelling[KunArbeidsgiverSykedag::class])
             assertEquals(4, it.dagtelling[SykHelgedag::class])
-            assertEquals(8, it.dagtelling[Sykedag::class])
+            assertEquals(14, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
             0,
@@ -192,9 +189,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(5, it.dagtelling[KunArbeidsgiverSykedag::class])
             assertEquals(4, it.dagtelling[SykHelgedag::class])
-            assertEquals(8, it.dagtelling[Sykedag::class])
+            assertEquals(13, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
             0,
@@ -233,7 +229,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(4, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
@@ -873,7 +869,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(35, it.dagtelling[KunArbeidsgiverSykedag::class])
+            assertEquals(38, it.dagtelling[Sykedag::class])
             assertEquals(14, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(

@@ -1,7 +1,6 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.dag.*
-import java.lang.IllegalArgumentException
 
 internal enum class Turneringsnøkkel {
     ImplisittDag,
@@ -35,7 +34,7 @@ internal enum class Turneringsnøkkel {
             is FriskHelgedag.Inntektsmelding -> Feriedag_IM
             is FriskHelgedag.Søknad -> Feriedag_SØ
             is no.nav.helse.sykdomstidslinje.dag.ImplisittDag -> ImplisittDag
-            is KunArbeidsgiverSykedag -> Kun_arbeidsgiverdag
+            is ForeldetSykedag -> Kun_arbeidsgiverdag
             is Permisjonsdag.Søknad -> Permisjonsdag_SØ
             is Permisjonsdag.Aareg -> Permisjonsdag_AAREG
             is no.nav.helse.sykdomstidslinje.dag.Studiedag -> Studiedag

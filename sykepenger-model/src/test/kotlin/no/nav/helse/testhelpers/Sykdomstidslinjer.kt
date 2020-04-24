@@ -72,7 +72,7 @@ internal val Int.U
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FO
-    get() = Sykdomstidslinje.kunArbeidsgiverSykedager(
+    get() = Sykdomstidslinje.foreldetSykedager(
         dagensDato, dagensDato.plusDays(this.toLong() - 1),
         100.0,
         Søknad.SøknadDagFactory
@@ -95,7 +95,7 @@ internal val Int.nU
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.nK
-    get() = NySykdomstidslinje.kunArbeidsgiverSykedager(
+    get() = NySykdomstidslinje.foreldetSykedag(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         100.0,

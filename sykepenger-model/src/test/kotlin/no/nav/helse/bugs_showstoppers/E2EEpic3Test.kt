@@ -818,10 +818,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `vilkårsgrunnlagfeil på kort arbeidsgiversøknad`() {
         håndterSykmelding(Triple(2.mars(2020), 2.mars(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(2.mars(2020), 2.mars(2020), 100, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(2.mars(2020), 2.mars(2020), 100))
         håndterSykmelding(Triple(16.mars(2020), 29.mars(2020), 100))
         håndterSykmelding(Triple(30.mars(2020), 15.april(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.mars(2020), 29.mars(2020), 100, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.mars(2020), 29.mars(2020), 100))
         håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100))
         håndterInntektsmeldingMedValidering(0, listOf(
             Periode(2.mars(2020), 2.mars(2020)),

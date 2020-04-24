@@ -57,7 +57,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = egenmeldingsdag(dag.dagen)
     override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = sykHelgedag(dag.dagen, dag.grad)
     override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = sykHelgedag(dag.dagen, dag.grad)
-    override fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) = kunArbeidsgiverSykedag(dag.dagen)
+    override fun visitForeldetSykedag(dag: ForeldetSykedag) = foreldetSykedag(dag.dagen, dag.grad)
 
     override fun visitDag(dag: NyDag.NyUkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
     override fun visitDag(dag: NyDag.NyArbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = arbeidsdag(dato)
@@ -66,11 +66,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitDag(dag: NyDag.NyFriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
     override fun visitDag(dag: NyDag.NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykHelgedag(dato, grad.toPercentage())
     override fun visitDag(dag: NyDag.NySykedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykedag(dato, grad.toPercentage())
-    override fun visitDag(dag: NyDag.NyKunArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = kunArbeidsgiverSykedag(dato)
+    override fun visitDag(dag: NyDag.NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = foreldetSykedag(dato, grad.toPercentage())
     override fun visitDag(dag: NyDag.NySykHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = sykHelgedag(dato, grad.toPercentage())
     override fun visitDag(dag: NyDag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
 
-    private fun kunArbeidsgiverSykedag(dagen: LocalDate) {
+    private fun foreldetSykedag(dagen: LocalDate, grad: Double) {
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
             state = UtbetalingSykedager
             tidslinje.addForeldetDag(dagen)

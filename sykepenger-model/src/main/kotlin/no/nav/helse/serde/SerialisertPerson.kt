@@ -222,7 +222,7 @@ class SerialisertPerson(val json: String) {
             JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING -> FriskHelgedag.Inntektsmelding(data.dagen)
             JsonDagType.FRISK_HELGEDAG_SØKNAD -> FriskHelgedag.Søknad(data.dagen)
             JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
-            JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG -> KunArbeidsgiverSykedag(data.dagen, data.grad)
+            JsonDagType.KUN_ARBEIDSGIVER_SYKEDAG -> ForeldetSykedag(data.dagen, data.grad)
             JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
             JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
             JsonDagType.STUDIEDAG -> Studiedag(data.dagen)

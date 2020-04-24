@@ -99,7 +99,7 @@ internal interface SykdomstidslinjeVisitor {
     fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) {}
     fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) {}
     fun visitImplisittDag(dag: ImplisittDag) {}
-    fun visitKunArbeidsgiverSykedag(dag: KunArbeidsgiverSykedag) {}
+    fun visitForeldetSykedag(dag: ForeldetSykedag) {}
     fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) {}
     fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) {}
     fun visitStudiedag(dag: Studiedag) {}
@@ -121,7 +121,7 @@ internal interface NySykdomstidslinjeVisitor {
     fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
     fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyKunArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
     fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
 //    fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
 //    fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}

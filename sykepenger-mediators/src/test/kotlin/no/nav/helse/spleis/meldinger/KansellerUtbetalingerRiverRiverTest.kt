@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -20,6 +21,7 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
         assertIgnored(badJson)
     }
 
+    @Language("JSON")
     private val json = """
     {
         "@id": "${UUID.randomUUID()}",
@@ -33,6 +35,7 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
     }
 """.trimIndent()
 
+    @Language("JSON")
     private val badJson = """
     {
         "@id": "${UUID.randomUUID()}",

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -26,8 +27,9 @@ internal class YtelserRiverTest : RiverTest() {
     }
 }
 
+@Language("JSON")
 private val json = """
-    {
+  {
       "@event_name": "behov",
       "tilstand": "AVVENTER_HISTORIKK",
       "historikkFom": "2014-12-08",
@@ -83,6 +85,7 @@ private val json = """
     }
 """.trimIndent()
 
+@Language("JSON")
 private val ukjentPeriode = """
     {
       "@event_name": "behov",
@@ -152,6 +155,7 @@ private val ukjentPeriode = """
     }
 """.trimIndent()
 
+@Language("JSON")
 private val ugyldigPeriode = """
     {
       "@event_name": "behov",

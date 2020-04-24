@@ -89,7 +89,7 @@ internal class NySykdomstidslinje private constructor(
                     NyArbeidsgiverHelgedag::class -> "G"
                     NyFeriedag::class -> "F"
                     NyFriskHelgedag::class -> "R"
-                    NyKunArbeidsgiverdag::class -> "K"
+                    NyForeldetSykedag::class -> "K"
                     else -> "*"
                 }
         } ?: "Tom tidslinje"
@@ -150,9 +150,9 @@ internal class NySykdomstidslinje private constructor(
             avskjæringsdato: LocalDate,
             grad: Number,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) = if (dato < avskjæringsdato) NyKunArbeidsgiverdag(dato, grad, kilde) else NySykedag(dato, grad, kilde)
+        ) = if (dato < avskjæringsdato) NyForeldetSykedag(dato, grad, kilde) else NySykedag(dato, grad, kilde)
 
-        internal fun kunArbeidsgiverSykedager(
+        internal fun foreldetSykedag(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Number = 100.0,
@@ -163,7 +163,7 @@ internal class NySykdomstidslinje private constructor(
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else NyKunArbeidsgiverdag(it, grad, kilde) })
+                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else NyForeldetSykedag(it, grad, kilde) })
                     )
             )
 

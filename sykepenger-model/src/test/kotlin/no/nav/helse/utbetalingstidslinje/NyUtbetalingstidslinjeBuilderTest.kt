@@ -348,13 +348,13 @@ internal class NyUtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `KunArbeidsgiverSykedag godkjennes som ArbeidsgverperiodeDag`() {
+    fun `ForeldetSykedag godkjennes som ArbeidsgverperiodeDag`() {
         (10.nK + 6.nS).utbetalingslinjer()
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
     }
 
     @Test
-    fun `KunArbeidsgiverSykedag blir ForeldetDag utenfor arbeidsgiverperioden`() {
+    fun `ForeldetSykedag blir ForeldetDag utenfor arbeidsgiverperioden`() {
         (20.nK).utbetalingslinjer()
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(3, inspektør.dagtelling[ForeldetDag::class])
