@@ -42,6 +42,7 @@ internal class JsonBuilderTest {
     @Test
     internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
+        assertEquals(TilstandType.AVSLUTTET, tilstand)
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
@@ -89,6 +90,7 @@ internal class JsonBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
+        private lateinit var tilstand: TilstandType
 
         internal fun person(
             fom: LocalDate = 1.januar,
@@ -98,7 +100,7 @@ internal class JsonBuilderTest {
         ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = fom, tom = tom))
-                fangeVedtaksperiodeId()
+                fangeVedtaksperiode()
                 håndter(
                     søknad(
                         hendelseId = søknadhendelseId,
@@ -113,6 +115,7 @@ internal class JsonBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                fangeVedtaksperiode()
             }
 
         internal fun ingenBetalingsperson(
@@ -121,7 +124,7 @@ internal class JsonBuilderTest {
         ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 9.januar))
-                fangeVedtaksperiodeId()
+                fangeVedtaksperiode()
                 håndter(
                     søknad(
                         fom = 1.januar,
@@ -145,7 +148,7 @@ internal class JsonBuilderTest {
         ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = fom, tom = tom))
-                fangeVedtaksperiodeId()
+                fangeVedtaksperiode()
                 håndter(
                     søknad(
                         hendelseId = søknadhendelseId,
@@ -154,7 +157,12 @@ internal class JsonBuilderTest {
                         sendtSøknad = sendtSøknad.atStartOfDay()
                     )
                 )
-                håndter(inntektsmelding(fom = fom, perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))))
+                håndter(
+                    inntektsmelding(
+                        fom = fom,
+                        perioder = listOf(Periode(fom, 4.januar), Periode(8.januar, 16.januar))
+                    )
+                )
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -167,7 +175,7 @@ internal class JsonBuilderTest {
         ): Person =
             Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 9.januar))
-                fangeVedtaksperiodeId()
+                fangeVedtaksperiode()
                 håndter(
                     søknadSendtTilArbeidsgiver(
                         hendelseId = søknadhendelseId,
@@ -177,7 +185,7 @@ internal class JsonBuilderTest {
                 )
                 håndter(sykmelding(fom = 10.januar, tom = 25.januar))
                 håndter(søknad(fom = 10.januar, tom = 25.januar))
-                fangeVedtaksperiodeId()
+                fangeVedtaksperiode()
                 håndter(inntektsmelding(fom = 16.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -185,7 +193,7 @@ internal class JsonBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
-        private fun Person.fangeVedtaksperiodeId() {
+        private fun Person.fangeVedtaksperiode() {
             accept(object : PersonVisitor {
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
@@ -193,6 +201,10 @@ internal class JsonBuilderTest {
                     gruppeId: UUID
                 ) {
                     vedtaksperiodeId = id.toString()
+                }
+
+                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+                    JsonBuilderTest.tilstand = tilstand.type
                 }
             })
         }
@@ -243,7 +255,7 @@ internal class JsonBuilderTest {
             perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15)))
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
-            refusjon = Inntektsmelding.Refusjon(1.juli, 31000.00, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 31000.00, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,

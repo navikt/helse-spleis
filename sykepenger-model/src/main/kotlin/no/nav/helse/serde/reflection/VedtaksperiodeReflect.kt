@@ -16,6 +16,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val fødselsnummer: String = vedtaksperiode["fødselsnummer"]
     private val organisasjonsnummer: String = vedtaksperiode["organisasjonsnummer"]
     private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
+    private val gjenståendeSykedager: Int? = vedtaksperiode["gjenståendeSykedager"]
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
@@ -82,6 +83,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "id" to id,
         "gruppeId" to gruppeId,
         "maksdato" to maksdato,
+        "gjenståendeSykedager" to gjenståendeSykedager,
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
@@ -94,6 +96,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "id" to id,
         "gruppeId" to gruppeId,
         "maksdato" to maksdato,
+        "gjenståendeSykedager" to gjenståendeSykedager,
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,

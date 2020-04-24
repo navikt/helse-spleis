@@ -30,6 +30,7 @@ internal class MaksimumSykepengedagerfilter(
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
 
     internal fun maksdato() = sisteBetalteDag?.let { teller.maksdato(it) }
+    internal fun gjenståendeSykedager() = sisteBetalteDag?.let { teller.gjenståendeSykedager(it) }
     internal fun forbrukteSykedager() = forbrukteSykedager
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, historiskTidslinje: Utbetalingstidslinje) {

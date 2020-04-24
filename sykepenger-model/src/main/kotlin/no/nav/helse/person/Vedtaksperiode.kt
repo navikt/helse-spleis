@@ -38,6 +38,7 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var maksdato: LocalDate?,
+    private var gjenståendeSykedager: Int?,
     private var forbrukteSykedager: Int?,
     private var godkjentAv: String,
     private var godkjenttidspunkt: LocalDateTime?,
@@ -68,6 +69,7 @@ internal class Vedtaksperiode private constructor(
         organisasjonsnummer = organisasjonsnummer,
         tilstand = tilstand,
         maksdato = null,
+        gjenståendeSykedager = null,
         forbrukteSykedager = null,
         godkjentAv = "Spleis",
         godkjenttidspunkt = null,
@@ -84,6 +86,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje.accept(visitor)
         visitor.visitTilstand(tilstand)
         visitor.visitMaksdato(maksdato)
+        visitor.visitGjenståendeSykedager(gjenståendeSykedager)
         visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
@@ -348,6 +351,7 @@ internal class Vedtaksperiode private constructor(
         ytelser: Ytelser
     ) {
         maksdato = engineForTimeline.maksdato()
+        gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&

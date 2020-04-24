@@ -5,6 +5,7 @@ internal interface ArbeidsgiverRegler {
     fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int): Boolean
     fun prosentLønn(): Double
     fun maksSykepengedager(): Int
+    fun maksSykepengedagerOver67(): Int
 
     companion object {
         internal object NormalArbeidstaker: ArbeidsgiverRegler {
@@ -15,6 +16,7 @@ internal interface ArbeidsgiverRegler {
 
             override fun prosentLønn() = 1.0
             override fun maksSykepengedager() = 248
+            override fun maksSykepengedagerOver67() = 60
         }
     }
 }

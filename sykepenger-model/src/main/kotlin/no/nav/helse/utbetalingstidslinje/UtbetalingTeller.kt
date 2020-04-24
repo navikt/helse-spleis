@@ -11,8 +11,6 @@ internal class UtbetalingTeller private constructor(
     private var betalteDager: Int,
     private var gammelpersonDager: Int
 ) {
-
-
     internal constructor(
         alder: Alder,
         arbeidsgiverRegler: ArbeidsgiverRegler
@@ -37,16 +35,26 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun påGrensen(dato: LocalDate): Boolean {
-        return betalteDager >= arbeidsgiverRegler.maksSykepengedager() || gammelpersonDager >= 60 || dato.plusDays(1) >= alder.øvreAldersgrense
+        return betalteDager >= arbeidsgiverRegler.maksSykepengedager()
+            || gammelpersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
+            || dato.plusDays(1) >= alder.øvreAldersgrense
     }
 
-    internal fun maksdato(sisteUtbetalingsdag: LocalDate): LocalDate {
+    internal fun maksdato(sisteUtbetalingsdag: LocalDate) =
+        beregnGjenståendeSykedager(sisteUtbetalingsdag).let { (_, maksdato) -> maksdato }
+
+    internal fun gjenståendeSykedager(sisteUtbetalingsdag: LocalDate) =
+        beregnGjenståendeSykedager(sisteUtbetalingsdag).let { (gjenståendeSykedager, _) -> gjenståendeSykedager }
+
+    private fun beregnGjenståendeSykedager(sisteUtbetalingsdag: LocalDate): Pair<Int, LocalDate> {
         val clone = UtbetalingTeller(fom, alder, arbeidsgiverRegler, betalteDager, gammelpersonDager)
         var result = sisteUtbetalingsdag
+        var teller = 0
         while (!clone.påGrensen(result)) {
             result = result.plusDays(if (result.dayOfWeek == DayOfWeek.FRIDAY) 3 else 1)
+            teller += 1
             clone.inkrementer(result)
         }
-        return result
+        return teller to result
     }
 }

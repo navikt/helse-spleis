@@ -13,6 +13,7 @@ import java.time.LocalDate
 internal class ArbeidsgiverUtbetalingerTest {
 
     private var maksdato: LocalDate? = null
+    private var gjenståendeSykedager: Int? = null
     private var forbrukteSykedager: Int? = 0
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -30,6 +31,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(12000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
+        assertEquals(238, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasMessages())
         assertFalse(aktivitetslogg.hasWarnings())
     }
@@ -44,6 +46,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(5, inspektør.avvistDagTeller)
         assertEquals(6000, inspektør.totalUtbetaling())
         assertEquals(19.desember, maksdato)
+        assertEquals(243, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -57,6 +60,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(2, inspektør.navHelgDagTeller)
         assertEquals(10805 + 6000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
+        assertEquals(238, gjenståendeSykedager)
         assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
     }
 
@@ -73,7 +77,8 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     internal fun `avgrenset betaling pga oppbrukte sykepengedager`() {
-        undersøke(PERSON_67_ÅR_FNR_2018,
+        undersøke(
+            PERSON_67_ÅR_FNR_2018,
             7.UTELATE,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
@@ -88,7 +93,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG
-            )
+        )
 
         assertEquals(91, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -96,13 +101,15 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(5, inspektør.avvistDagTeller)
         assertEquals(60 * 1200, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
 
     @Test
     internal fun `avgrenset betaling pga oppbrukte sykepengedager i tillegg til beløpsgrenser`() {
-        undersøke(PERSON_67_ÅR_FNR_2018,
+        undersøke(
+            PERSON_67_ÅR_FNR_2018,
             7.UTELATE,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
@@ -118,7 +125,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             5.NAV(3500.0), 2.HELG,
             5.NAV(3500.0), 2.HELG,
             5.NAV(1200.0), 2.HELG
-            )
+        )
 
         assertEquals(98, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -126,6 +133,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(10, inspektør.avvistDagTeller)
         assertEquals((50 * 1200) + (10 * 2161), inspektør.totalUtbetaling())
         assertEquals(6.april, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -136,13 +144,14 @@ internal class ArbeidsgiverUtbetalingerTest {
             PERSON_67_ÅR_FNR_2018,
             tidslinjeOf(35.UTELATE, 50.NAV),
             tidslinjeOf(7.UTELATE, 20.NAV)
-            )
+        )
 
         assertEquals(50, inspektør.size)
         assertEquals(40, inspektør.navDagTeller)
         assertEquals(10, inspektør.avvistDagTeller)
         assertEquals(40 * 1200, inspektør.totalUtbetaling())
         assertEquals(16.mars, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -151,6 +160,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
         undersøke(UNG_PERSON_FNR_2018, 16.AP, 3.NAV, 1.HELG)
         assertEquals(28.desember, maksdato) // 3 dager already paid, 245 left. So should be fredag!
+        assertEquals(245, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasMessages())
         assertFalse(aktivitetslogg.hasWarnings())
     }
@@ -159,6 +169,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
         undersøke(UNG_PERSON_FNR_2018, 2.ARB, 16.AP, 7.ARB, 1.NAV, 2.HELG, 5.NAV)
         assertEquals(8.januar(2019), maksdato)
+        assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
@@ -175,6 +186,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.NAV
         )
         assertEquals(31.desember, maksdato)
+        assertEquals(8, gjenståendeSykedager)
     }
 
     @Test
@@ -189,6 +201,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.NAV
         )
         assertEquals(1.januar(2019), maksdato)
+        assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
@@ -202,6 +215,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.NAV
         )
         assertEquals(2.januar(2019), maksdato)
+        assertEquals(244, gjenståendeSykedager)
     }
 
     @Test
@@ -214,6 +228,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             3.FRI
         )
         assertEquals(28.desember, maksdato)
+        assertEquals(245, gjenståendeSykedager)
     }
 
     @Test
@@ -227,6 +242,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.ARB
         )
         assertEquals(28.desember, maksdato)
+        assertEquals(245, gjenståendeSykedager)
     }
 
     @Test
@@ -236,6 +252,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             16.AP
         )
         assertEquals(28.desember, maksdato)
+        assertEquals(248, gjenståendeSykedager)
         assertEquals(0, forbrukteSykedager)
     }
 
@@ -251,6 +268,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             1.NAV
         )
         assertEquals(28.desember, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -265,6 +283,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             10.NAV
         )
         assertEquals(10.april, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
@@ -281,6 +300,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             20.NAV
         )
         assertEquals(28.desember, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -295,6 +315,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             400.NAV
         )
         assertEquals(31.januar, maksdato)
+        assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
     }
@@ -304,9 +325,11 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(fnr, tidslinje, tidslinjeOf())
     }
 
-    private fun undersøke(fnr: String,
-                          arbeidsgiverTidslinje: Utbetalingstidslinje,
-                          historiskTidslinje: Utbetalingstidslinje) {
+    private fun undersøke(
+        fnr: String,
+        arbeidsgiverTidslinje: Utbetalingstidslinje,
+        historiskTidslinje: Utbetalingstidslinje
+    ) {
         val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
@@ -321,6 +344,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         ).also {
             it.beregn()
             maksdato = it.maksdato()
+            gjenståendeSykedager = it.gjenståendeSykedager()
             forbrukteSykedager = it.forbrukteSykedager()
         }
         inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.nåværendeTidslinje())
