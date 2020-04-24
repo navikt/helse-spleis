@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.ManuellSaksbehandling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Manuell saksbehandling-behov
@@ -11,8 +12,8 @@ internal class ManuellSaksbehandlingMessage(packet: JsonMessage) : BehovMessage(
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val saksbehandler = packet["saksbehandlerIdent"].asText()
-    private val godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime()
+    private val saksbehandler = packet.saksbehandler()
+    private val godkjenttidspunkt = packet.godkjenttidspunkt()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
 
     private val manuellSaksbehandling = ManuellSaksbehandling(
@@ -29,3 +30,13 @@ internal class ManuellSaksbehandlingMessage(packet: JsonMessage) : BehovMessage(
         mediator.behandle(this, manuellSaksbehandling)
     }
 }
+
+private fun JsonMessage.saksbehandler() =
+    (this["@løsning"][Godkjenning.name]["saksbehandlerIdent"]?.takeUnless { it.isMissingOrNull() } ?:
+    this["saksbehandlerIdent"])
+        .asText()
+
+private fun JsonMessage.godkjenttidspunkt() =
+    (this["@løsning"][Godkjenning.name]["godkjenttidspunkt"]?.takeUnless { it.isMissingOrNull() } ?:
+    this["godkjenttidspunkt"])
+        .asLocalDateTime()

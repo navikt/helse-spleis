@@ -17,6 +17,22 @@ internal class ManuelleSaksbehandlingerRiver(
 
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
+        packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
+        packet.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
+    }
+
+    override fun createMessage(packet: JsonMessage) = ManuellSaksbehandlingMessage(packet)
+}
+
+internal class GammelManuelleSaksbehandlingerRiver(
+    rapidsConnection: RapidsConnection,
+    messageMediator: IMessageMediator
+) : BehovRiver(rapidsConnection, messageMediator) {
+    override val behov = listOf(Godkjenning)
+    override val riverName = "Manuell saksbehandling"
+
+    override fun validate(packet: JsonMessage) {
+        packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
         packet.requireKey("saksbehandlerIdent")
         packet.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
     }

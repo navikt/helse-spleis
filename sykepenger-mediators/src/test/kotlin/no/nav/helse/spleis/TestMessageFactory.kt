@@ -243,7 +243,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagManuellSaksbehandling(
+    fun lagGammelManuellSaksbehandling(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         utbetalingGodkjent: Boolean
@@ -259,6 +259,25 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Godkjenning" to mapOf(
                     "godkjent" to utbetalingGodkjent
+                )
+            )
+        )
+    }
+
+    fun lagManuellSaksbehandling(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        utbetalingGodkjent: Boolean
+    ): String {
+        return lagBehovMedLøsning(
+            behov = listOf("Godkjenning"),
+            tilstand = tilstand,
+            vedtaksperiodeId = vedtaksperiodeId,
+            løsninger = mapOf(
+                "Godkjenning" to mapOf(
+                    "godkjent" to utbetalingGodkjent,
+                    "saksbehandlerIdent" to "en_saksbehandler",
+                    "godkjenttidspunkt" to LocalDateTime.now()
                 )
             )
         )

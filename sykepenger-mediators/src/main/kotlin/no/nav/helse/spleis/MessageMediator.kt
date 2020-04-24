@@ -25,6 +25,7 @@ internal class MessageMediator(
             InntektsmeldingerRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
+            GammelManuelleSaksbehandlingerRiver(it, this)
             ManuelleSaksbehandlingerRiver(it, this)
             UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)
