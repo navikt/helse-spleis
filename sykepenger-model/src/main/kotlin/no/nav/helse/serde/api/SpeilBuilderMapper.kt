@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Inntekthistorikk
@@ -154,7 +155,12 @@ internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnla
     beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten,
     avviksprosent = grunnlagsdata.avviksprosent,
     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
-    harOpptjening = grunnlagsdata.harOpptjening
+    harOpptjening = grunnlagsdata.harOpptjening,
+    medlemskapstatus = when (grunnlagsdata.medlemskapstatus) {
+        Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
+        Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapstatusDTO.NEI
+        else -> MedlemskapstatusDTO.VET_IKKE
+    }
 )
 
 internal fun mapOpptjening(

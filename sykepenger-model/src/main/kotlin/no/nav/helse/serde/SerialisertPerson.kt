@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -13,9 +14,11 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
+import no.nav.helse.serde.migration.V2Medlemskapstatus
 import no.nav.helse.serde.migration.migrate
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -40,8 +43,9 @@ private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeDat
 
 class SerialisertPerson(val json: String) {
     internal companion object {
-        private val migrations = listOf<JsonMigration>(
-            V1EndreKunArbeidsgiverSykedagEnum()
+        private val migrations = listOf(
+            V1EndreKunArbeidsgiverSykedagEnum(),
+            V2Medlemskapstatus()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -288,7 +292,12 @@ class SerialisertPerson(val json: String) {
             beregnetÅrsinntektFraInntektskomponenten = data.beregnetÅrsinntektFraInntektskomponenten,
             avviksprosent = data.avviksprosent,
             harOpptjening = data.harOpptjening,
-            antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst
+            antallOpptjeningsdagerErMinst = data.antallOpptjeningsdagerErMinst,
+            medlemskapstatus = when (data.medlemskapstatus) {
+                JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+            }
         )
 
     private fun parseDataForSimulering(
@@ -426,7 +435,8 @@ internal data class PersonData(
                 val beregnetÅrsinntektFraInntektskomponenten: Double,
                 val avviksprosent: Double,
                 val harOpptjening: Boolean,
-                val antallOpptjeningsdagerErMinst: Int
+                val antallOpptjeningsdagerErMinst: Int,
+                val medlemskapstatus: JsonMedlemskapstatus
             )
 
             data class DataForSimuleringData(

@@ -35,7 +35,8 @@ class Vilkårsgrunnlag(
             beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
             avviksprosent = inntektsvurdering.avviksprosent(),
             antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
-            harOpptjening = opptjeningvurdering.harOpptjening(orgnummer)
+            harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),
+            medlemskapstatus = medlemskapsvurdering.medlemskapstatus
         )
         dagpenger.valider(aktivitetslogg, førsteFraværsdag)
         arbeidsavklaringspenger.valider(aktivitetslogg, førsteFraværsdag)
@@ -49,6 +50,7 @@ class Vilkårsgrunnlag(
         internal val beregnetÅrsinntektFraInntektskomponenten: Double,
         internal val avviksprosent: Double,
         internal val antallOpptjeningsdagerErMinst: Int,
-        internal val harOpptjening: Boolean
+        internal val harOpptjening: Boolean,
+        internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     )
 }

@@ -69,7 +69,12 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
             "beregnetÅrsinntektFraInntektskomponenten" to it.beregnetÅrsinntektFraInntektskomponenten,
             "avviksprosent" to it.avviksprosent,
             "antallOpptjeningsdagerErMinst" to it.antallOpptjeningsdagerErMinst,
-            "harOpptjening" to it.harOpptjening
+            "harOpptjening" to it.harOpptjening,
+            "medlemskapstatus" to when (it.medlemskapstatus) {
+                no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Ja -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.JA
+                no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Nei -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.NEI
+                else -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.VET_IKKE
+            }
         )
     }
 

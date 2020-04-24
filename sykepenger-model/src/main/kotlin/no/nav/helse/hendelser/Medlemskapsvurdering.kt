@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 
 class Medlemskapsvurdering(
-    private val medlemskapstatus: Medlemskapstatus
+    internal val medlemskapstatus: Medlemskapstatus
 ) {
     internal fun valider(aktivitetslogg: Aktivitetslogg): Aktivitetslogg {
         when (medlemskapstatus) {

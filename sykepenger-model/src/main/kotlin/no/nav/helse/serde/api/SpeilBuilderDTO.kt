@@ -117,12 +117,17 @@ enum class TypeDataDTO {
     ForeldetDag
 }
 
+enum class MedlemskapstatusDTO {
+    JA, NEI, VET_IKKE
+}
+
 data class GrunnlagsdataDTO(
     val erEgenAnsatt: Boolean,
     val beregnetÅrsinntektFraInntektskomponenten: Double,
     val avviksprosent: Double,
     val antallOpptjeningsdagerErMinst: Int,
-    val harOpptjening: Boolean
+    val harOpptjening: Boolean,
+    val medlemskapstatus: MedlemskapstatusDTO
 )
 
 data class SimuleringsdataDTO(
