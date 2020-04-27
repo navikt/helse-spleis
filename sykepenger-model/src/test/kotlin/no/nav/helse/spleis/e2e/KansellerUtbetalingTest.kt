@@ -91,7 +91,8 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             delytelseId: Int,
             refDelytelseId: Int?,
             refFagsystemId: String?,
-            endringskode: Endringskode
+            endringskode: Endringskode,
+            datoStatusFom: LocalDate?
         ) {
             linjer.add(linje)
             endringskoder.add(endringskode)

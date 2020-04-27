@@ -166,7 +166,8 @@ internal interface OppdragVisitor {
         delytelseId: Int,
         refDelytelseId: Int?,
         refFagsystemId: String?,
-        endringskode: Endringskode
+        endringskode: Endringskode,
+        datoStatusFom: LocalDate?
     ) {}
     fun postVisitOppdrag(oppdrag: Oppdrag) {}
 }

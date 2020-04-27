@@ -140,7 +140,8 @@ internal class UtbetalingTest {
             delytelseId: Int,
             refDelytelseId: Int?,
             refFagsystemId: String?,
-            endringskode: Endringskode
+            endringskode: Endringskode,
+            datoStatusFom: LocalDate?
         ) {
             linjeteller += 1
             delytelseIder.add(delytelseId)

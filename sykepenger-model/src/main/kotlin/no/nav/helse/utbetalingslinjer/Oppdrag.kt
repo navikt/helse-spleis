@@ -56,7 +56,8 @@ internal class Oppdrag private constructor(
     internal fun totalbeløp() = this.sumBy { it.totalbeløp() }
     internal fun dager() = this.flatMap { linje -> linje.dager().map { it to linje.dagsats } }
 
-    infix fun forskjell(tidligere: Oppdrag): Oppdrag {
+    infix fun forskjell(other: Oppdrag): Oppdrag {
+        val tidligere = other.copyWith(other.filter{ !it.erOpphør() })
         return when {
             tidligere.isEmpty() ->
                 this
@@ -67,12 +68,12 @@ internal class Oppdrag private constructor(
                 this
             this.førstedato > tidligere.sistedato ->
                 this
+            this.førstedato > tidligere.førstedato ->
+                deleted(tidligere)
             this.førstedato < tidligere.førstedato ->
                 appended(tidligere)
             this.førstedato == tidligere.førstedato ->
                 ghosted(tidligere)
-            this.førstedato > tidligere.førstedato ->
-                deleted(tidligere)
             else ->
                 throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
@@ -80,13 +81,7 @@ internal class Oppdrag private constructor(
 
     private fun deleteAll(tidligere: Oppdrag) = this.also { nåværende ->
         nåværende.kobleTil(tidligere)
-        linjer.add(
-            tidligere.last().deletion(
-                tidligere.fagsystemId,
-                tidligere.first().fom,
-                tidligere.last().tom
-            )
-        )
+        linjer.add(tidligere.last().deletion(tidligere.first().fom))
     }
 
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
@@ -113,25 +108,21 @@ internal class Oppdrag private constructor(
         return this.also { nåværende ->
             nåværende.kobleTil(tidligere)
             val deletion = nåværende.deletionLinje(tidligere)
-            val revisedTidligere = tidligere.copyAfter(nåværende.førstedato.minusDays(1))                // Remove any periods from tidligere that overlap deletion
-            nåværende.kopierLikeLinjer(revisedTidligere)
-            nåværende.håndterLengreNåværende(revisedTidligere)
-            nåværende.håndterLengreTidligere(tidligere)
+            nåværende.first().linkTo(deletion)
+            nåværende.zipWithNext { a, b -> b.linkTo(a) }
             nåværende.add(0, deletion)
         }
     }
 
     private fun deletionLinje(tidligere: Oppdrag) =
-        tidligere.last().deletion(
-            tidligere.fagsystemId,
-            tidligere.førstedato,
-            this.førstedato.minusDays(1)
-        ).also { linkTo = it }
+        tidligere.last().deletion(tidligere.førstedato)
 
-    private fun copyAfter(dato: LocalDate) = Oppdrag(
+    private fun copyAfter(dato: LocalDate) = copyWith(linjer.filter { it.fom > dato })
+
+    private fun copyWith(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
         fagområde,
-        linjer.filter { it.fom > dato }.toMutableList(),
+        linjer.toMutableList(),
         fagsystemId,
         endringskode,
         sisteArbeidsgiverdag,
@@ -153,7 +144,6 @@ internal class Oppdrag private constructor(
     private fun håndterLengreTidligere(tidligere: Oppdrag) {
         if (this.sistedato >= tidligere.sistedato) return
         this.add(this.last().deletion(
-            tidligere.fagsystemId,
             this.last().tom.plusDays(1),
             tidligere.last().tom
         ))
@@ -162,7 +152,7 @@ internal class Oppdrag private constructor(
     private fun kobleTil(tidligere: Oppdrag) {
         this.fagsystemId = tidligere.fagsystemId
         this.forEach { it.refFagsystemId = tidligere.fagsystemId }
-        this.endringskode = Endringskode.UEND
+        this.endringskode = Endringskode.ENDR
     }
 
     internal fun emptied(): Oppdrag =

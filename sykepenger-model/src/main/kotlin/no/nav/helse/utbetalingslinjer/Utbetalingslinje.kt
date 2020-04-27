@@ -16,6 +16,7 @@ internal class Utbetalingslinje internal constructor(
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,
+    private var datoStatusFom: LocalDate? = null,
     private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig
 ) {
 
@@ -29,7 +30,8 @@ internal class Utbetalingslinje internal constructor(
             delytelseId,
             refDelytelseId,
             refFagsystemId,
-            endringskode
+            endringskode,
+            datoStatusFom
         )
     }
 
@@ -81,8 +83,20 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun erForskjell() = endringskode != UEND
 
-    internal fun deletion(fagsystemId: String, fom: LocalDate, tom: LocalDate) =
-        Utbetalingslinje(fom, tom, 0, 0.0, fagsystemId, delytelseId + 1, delytelseId, OPPH)
+    internal fun deletion(datoStatusFom: LocalDate) =
+        Utbetalingslinje(
+            fom,
+            tom,
+            dagsats,
+            grad,
+            refFagsystemId,
+            delytelseId,
+            refDelytelseId,
+            ENDR,
+            datoStatusFom
+        )
+
+    internal fun erOpphør() = datoStatusFom != null
 }
 
 internal enum class Endringskode {
