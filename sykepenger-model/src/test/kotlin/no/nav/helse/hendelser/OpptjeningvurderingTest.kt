@@ -6,6 +6,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OpptjeningvurderingTest {
 
@@ -27,6 +28,14 @@ internal class OpptjeningvurderingTest {
     @Test
     internal fun `arbeidsforhold nyere enn første fraværsdag`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, FØRSTE_FRAVÆRSDAG.plusDays(1)))) {
+            assertEquals(0, it.opptjeningsdager(ORGNUMMER))
+            assertFalse(it.harOpptjening(ORGNUMMER))
+        })
+    }
+
+    @Test
+    internal fun `arbeidsforhold avsluttet før fraværsdag`() {
+        assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, LocalDate.MIN, FØRSTE_FRAVÆRSDAG.minusDays(1)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
         })
