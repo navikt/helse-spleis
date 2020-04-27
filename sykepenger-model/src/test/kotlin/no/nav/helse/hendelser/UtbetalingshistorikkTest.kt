@@ -4,11 +4,11 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class UtbetalingshistorikkTest {
@@ -135,7 +135,7 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
+    fun `Feiler ikke selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234),
             Utbetalingshistorikk.Periode.Ugyldig(5.januar, 5.januar)
@@ -147,9 +147,8 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            utbetalingshistorikk.utbetalingstidslinje(1.januar)
-        }
+        assertDoesNotThrow { utbetalingshistorikk.utbetalingstidslinje(1.januar) }
+        assertTrue(utbetalingshistorikk.valider(Periode(1.mars, 1.mars)).hasErrors())
     }
 
     @Test
