@@ -1,14 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.ManuellSaksbehandling
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 
-// Understands a JSON message representing a Manuell saksbehandling-behov
-internal class ManuellSaksbehandlingMessage(packet: JsonMessage) : BehovMessage(packet) {
+// Understands a JSON message representing a Godkjenning-behov
+internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -16,7 +16,7 @@ internal class ManuellSaksbehandlingMessage(packet: JsonMessage) : BehovMessage(
     private val godkjenttidspunkt = packet.godkjenttidspunkt()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
 
-    private val manuellSaksbehandling = ManuellSaksbehandling(
+    private val utbetalingsgodkjenning = Utbetalingsgodkjenning(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
@@ -27,7 +27,7 @@ internal class ManuellSaksbehandlingMessage(packet: JsonMessage) : BehovMessage(
     )
 
     override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, manuellSaksbehandling)
+        mediator.behandle(this, utbetalingsgodkjenning)
     }
 }
 

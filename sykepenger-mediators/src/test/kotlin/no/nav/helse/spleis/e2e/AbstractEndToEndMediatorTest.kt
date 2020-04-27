@@ -131,9 +131,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagPåminnelse(UUID.randomUUID(), TilstandType.START))
     }
 
-    protected fun sendManuellSaksbehandling(vedtaksperiodeIndeks: Int, godkjent: Boolean = true) {
+    protected fun sendUtbetalingsgodkjenning(vedtaksperiodeIndeks: Int, godkjent: Boolean = true) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
-        testRapid.sendTestMessage(meldingsfabrikk.lagGammelManuellSaksbehandling(
+        testRapid.sendTestMessage(meldingsfabrikk.lagGammelUtbetalingsgodkjenning(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning),
             utbetalingGodkjent = godkjent

@@ -55,8 +55,8 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagYtelser(UUID.randomUUID(), TilstandType.START))
         assertTrue(hendelseMediator.lestYtelser)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagManuellSaksbehandling(UUID.randomUUID(), TilstandType.START, true))
-        assertTrue(hendelseMediator.lestManuellSaksbehandling)
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingsgodkjenning(UUID.randomUUID(), TilstandType.START, true))
+        assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
 
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetaling(UUID.randomUUID(), TilstandType.START, true))
         assertTrue(hendelseMediator.lestUtbetaling)
@@ -64,8 +64,8 @@ internal class MessageMediatorTest {
 
     @Test
     internal fun `leser gammel løsning på godkjenning behov`(){
-        testRapid.sendTestMessage(meldingsfabrikk.lagGammelManuellSaksbehandling(UUID.randomUUID(), TilstandType.START, true))
-        assertTrue(hendelseMediator.lestManuellSaksbehandling)
+        testRapid.sendTestMessage(meldingsfabrikk.lagGammelUtbetalingsgodkjenning(UUID.randomUUID(), TilstandType.START, true))
+        assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
 
     @BeforeEach

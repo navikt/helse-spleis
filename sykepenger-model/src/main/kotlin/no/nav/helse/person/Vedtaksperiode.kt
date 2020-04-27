@@ -125,10 +125,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, ytelser)
     }
 
-    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
-        if (id.toString() != manuellSaksbehandling.vedtaksperiodeId()) return
-        kontekst(manuellSaksbehandling)
-        tilstand.håndter(person, arbeidsgiver, this, manuellSaksbehandling)
+    internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+        if (id.toString() != utbetalingsgodkjenning.vedtaksperiodeId()) return
+        kontekst(utbetalingsgodkjenning)
+        tilstand.håndter(person, arbeidsgiver, this, utbetalingsgodkjenning)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -423,9 +423,9 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandling: ManuellSaksbehandling
+            utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            manuellSaksbehandling.error("Forventet ikke svar på manuell behandling i %s", type.name)
+            utbetalingsgodkjenning.error("Forventet ikke utbetalingsgodkjenning i %s", type.name)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -918,20 +918,20 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            manuellSaksbehandling: ManuellSaksbehandling
+            utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            if (manuellSaksbehandling.valider().hasErrors()) return vedtaksperiode.tilstand(
-                manuellSaksbehandling,
+            if (utbetalingsgodkjenning.valider().hasErrors()) return vedtaksperiode.tilstand(
+                utbetalingsgodkjenning,
                 TilInfotrygd
             )
 
             vedtaksperiode.tilstand(
-                manuellSaksbehandling,
+                utbetalingsgodkjenning,
                 if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) Avsluttet else TilUtbetaling
             ) {
-                vedtaksperiode.godkjenttidspunkt = manuellSaksbehandling.godkjenttidspunkt()
-                vedtaksperiode.godkjentAv = manuellSaksbehandling.saksbehandler().also {
-                    manuellSaksbehandling.info(
+                vedtaksperiode.godkjenttidspunkt = utbetalingsgodkjenning.godkjenttidspunkt()
+                vedtaksperiode.godkjentAv = utbetalingsgodkjenning.saksbehandler().also {
+                    utbetalingsgodkjenning.info(
                         "Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
                     )
                 }

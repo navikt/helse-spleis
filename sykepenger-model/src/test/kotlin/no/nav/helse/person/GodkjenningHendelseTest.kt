@@ -31,7 +31,7 @@ internal class GodkjenningHendelseTest {
     fun `utbetaling er godkjent`() {
         håndterYtelser()
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
+        person.håndter(utbetalingsgodkjenning(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
@@ -39,7 +39,7 @@ internal class GodkjenningHendelseTest {
     fun `utbetaling ikke godkjent`() {
         håndterYtelser()
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(false))
+        person.håndter(utbetalingsgodkjenning(false))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -47,7 +47,7 @@ internal class GodkjenningHendelseTest {
     fun `hendelse etter til utbetaling`() {
         håndterYtelser()
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
+        person.håndter(utbetalingsgodkjenning(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
         person.håndter(ytelser())
         assertTilstand(TilstandType.TIL_UTBETALING)
@@ -58,8 +58,8 @@ internal class GodkjenningHendelseTest {
     fun `dobbelt svar fra saksbehandler`() {
         håndterYtelser()
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
-        person.håndter(manuellSaksbehandling(true))
+        person.håndter(utbetalingsgodkjenning(true))
+        person.håndter(utbetalingsgodkjenning(true))
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
@@ -78,7 +78,7 @@ internal class GodkjenningHendelseTest {
         person.håndter(ytelser())
     }
 
-    private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
+    private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,

@@ -162,7 +162,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling())
+        person.håndter(utbetalingsgodkjenning())
         assertEquals(1, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
         assertTilstand(TilstandType.TIL_UTBETALING)
@@ -195,7 +195,7 @@ class PåminnelserOgTimeoutTest {
         person.håndter(påminnelse(TilstandType.AVVENTER_SIMULERING))
         assertTilstand(TilstandType.AVVENTER_GODKJENNING)
 
-        person.håndter(manuellSaksbehandling())
+        person.håndter(utbetalingsgodkjenning())
         person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
         assertTilstand(TilstandType.TIL_UTBETALING)
 
@@ -348,7 +348,7 @@ class PåminnelserOgTimeoutTest {
         hendelse = this
     }
 
-    private fun manuellSaksbehandling() = ManuellSaksbehandling(
+    private fun utbetalingsgodkjenning() = Utbetalingsgodkjenning(
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,

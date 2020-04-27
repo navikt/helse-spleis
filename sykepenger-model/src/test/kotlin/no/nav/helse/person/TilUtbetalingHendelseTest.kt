@@ -77,7 +77,7 @@ internal class TilUtbetalingHendelseTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
         person.håndter(simulering())
-        person.håndter(manuellSaksbehandling(true))
+        person.håndter(utbetalingsgodkjenning(true))
     }
 
     private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus) =
@@ -93,7 +93,7 @@ internal class TilUtbetalingHendelseTest {
             hendelse = this
         }
 
-    private fun manuellSaksbehandling(godkjent: Boolean) = ManuellSaksbehandling(
+    private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,

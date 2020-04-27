@@ -83,9 +83,9 @@ internal class Arbeidsgiver private constructor(
         perioder.forEach { it.håndter(ytelser) }
     }
 
-    internal fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
-        manuellSaksbehandling.kontekst(this)
-        perioder.forEach { it.håndter(manuellSaksbehandling) }
+    internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+        utbetalingsgodkjenning.kontekst(this)
+        perioder.forEach { it.håndter(utbetalingsgodkjenning) }
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

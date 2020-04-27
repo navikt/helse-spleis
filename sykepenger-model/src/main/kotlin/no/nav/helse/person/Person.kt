@@ -39,9 +39,9 @@ class Person private constructor(
         finnArbeidsgiver(ytelser).håndter(ytelser)
     }
 
-    fun håndter(manuellSaksbehandling: ManuellSaksbehandling) {
-        registrer(manuellSaksbehandling, "Behandler manuell saksbehandling")
-        finnArbeidsgiver(manuellSaksbehandling).håndter(manuellSaksbehandling)
+    fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+        registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
+        finnArbeidsgiver(utbetalingsgodkjenning).håndter(utbetalingsgodkjenning)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

@@ -156,9 +156,9 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(påminnelse(vedtaksperiodeIndex, påminnetTilstand))
     }
 
-    protected fun håndterManuellSaksbehandling(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
+    protected fun håndterUtbetalingsgodkjenning(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
-        person.håndter(manuellSaksbehandling(vedtaksperiodeIndex, utbetalingGodkjent))
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeIndex, utbetalingGodkjent))
     }
 
     protected fun håndterUtbetalt(vedtaksperiodeIndex: Int, status: UtbetalingHendelse.Oppdragstatus) {
@@ -396,11 +396,11 @@ internal abstract class AbstractEndToEndTest {
             hendelselogg = this
         }
 
-    private fun manuellSaksbehandling(
+    private fun utbetalingsgodkjenning(
         vedtaksperiodeIndex: Int,
         utbetalingGodkjent: Boolean
-    ): ManuellSaksbehandling {
-        return ManuellSaksbehandling(
+    ): Utbetalingsgodkjenning {
+        return Utbetalingsgodkjenning(
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,

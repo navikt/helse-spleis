@@ -18,7 +18,7 @@ internal class OpptjeningvurderingTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @Test
-    internal fun `27 dager opptjening fører til manuell saksbehandling`() {
+    internal fun `27 dager opptjening gir ikke rett til opptjening`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 5.desember(2017)))) {
             assertEquals(27, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))

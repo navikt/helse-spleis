@@ -28,7 +28,7 @@ object HendelseProbe {
         tell("Utbetaling")
     }
 
-    fun onManuellSaksbehandling() {
+    fun onUtbetalingsgodkjenning() {
         tell("Godkjenning")
     }
 

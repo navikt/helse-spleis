@@ -243,7 +243,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagGammelManuellSaksbehandling(
+    fun lagGammelUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         utbetalingGodkjent: Boolean
@@ -264,7 +264,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagManuellSaksbehandling(
+    fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         utbetalingGodkjent: Boolean

@@ -28,7 +28,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelserUtenHistorikk(0)
         sendSimulering(0)
-        sendManuellSaksbehandling(0)
+        sendUtbetalingsgodkjenning(0)
         sendUtbetaling(0)
 
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")

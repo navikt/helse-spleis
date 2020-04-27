@@ -25,7 +25,7 @@ internal class HendelseRecorder(private val dataSource: DataSource) {
             is YtelserMessage -> YTELSER
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
             is SimuleringMessage -> SIMULERING
-            is ManuellSaksbehandlingMessage -> MANUELL_SAKSBEHANDLING
+            is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
             is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
             is UtbetalingMessage -> UTBETALING
             is KansellerUtbetalingMessage -> KANSELLER_UTBETALING
@@ -59,7 +59,7 @@ internal class HendelseRecorder(private val dataSource: DataSource) {
         PÅMINNELSE,
         YTELSER,
         VILKÅRSGRUNNLAG,
-        MANUELL_SAKSBEHANDLING,
+        UTBETALINGSGODKJENNING,
         UTBETALING_OVERFØRT,
         UTBETALING,
         SIMULERING,

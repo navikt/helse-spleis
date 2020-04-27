@@ -111,7 +111,7 @@ internal class JsonBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
@@ -133,7 +133,7 @@ internal class JsonBuilderTest {
                 håndter(inntektsmelding(fom = 1.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
@@ -158,7 +158,7 @@ internal class JsonBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
@@ -181,7 +181,7 @@ internal class JsonBuilderTest {
                 håndter(inntektsmelding(fom = 16.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
@@ -311,7 +311,7 @@ internal class JsonBuilderTest {
             )
         }
 
-        internal fun manuellSaksbehandling(vedtaksperiodeId: String) = ManuellSaksbehandling(
+        internal fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,

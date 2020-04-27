@@ -23,7 +23,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 

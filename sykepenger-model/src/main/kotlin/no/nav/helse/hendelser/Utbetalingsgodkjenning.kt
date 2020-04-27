@@ -4,7 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 
-class ManuellSaksbehandling(
+class Utbetalingsgodkjenning(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -26,5 +26,5 @@ class ManuellSaksbehandling(
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
-    override fun melding(klassName: String) = "Manuell Saksbehandling"
+    override fun melding(klassName: String) = "Utbetalingsgodkjenning"
 }

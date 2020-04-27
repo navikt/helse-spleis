@@ -6,14 +6,14 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.model.ManuellSaksbehandlingMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 
-internal class ManuelleSaksbehandlingerRiver(
+internal class UtbetalingsgodkjenningerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Godkjenning)
-    override val riverName = "Manuell saksbehandling"
+    override val riverName = "Utbetalingsgodkjenning"
 
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
@@ -21,15 +21,15 @@ internal class ManuelleSaksbehandlingerRiver(
         packet.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = ManuellSaksbehandlingMessage(packet)
+    override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(packet)
 }
 
-internal class GammelManuelleSaksbehandlingerRiver(
+internal class GammelUtbetalingsgodkjenningerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Godkjenning)
-    override val riverName = "Manuell saksbehandling"
+    override val riverName = "Gammel utbetalingsgodkjenning"
 
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
@@ -37,5 +37,5 @@ internal class GammelManuelleSaksbehandlingerRiver(
         packet.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = ManuellSaksbehandlingMessage(packet)
+    override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(packet)
 }

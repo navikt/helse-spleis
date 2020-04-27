@@ -108,7 +108,7 @@ internal class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
                 sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
@@ -125,7 +125,7 @@ internal class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
             }
         }
 
@@ -170,7 +170,7 @@ internal class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
                 sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
@@ -187,7 +187,7 @@ internal class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
             }
         }
 
@@ -387,7 +387,7 @@ internal class SpeilBuilderTest {
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
 
                     påfølgendePerioder.forEach { periode ->
@@ -409,7 +409,7 @@ internal class SpeilBuilderTest {
                         håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                        håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                     }
                 }
@@ -441,7 +441,7 @@ internal class SpeilBuilderTest {
                     }
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
@@ -480,7 +480,7 @@ internal class SpeilBuilderTest {
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(manuellSaksbehandling(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
@@ -636,7 +636,7 @@ internal class SpeilBuilderTest {
             )
         }
 
-        internal fun manuellSaksbehandling(vedtaksperiodeId: String) = ManuellSaksbehandling(
+        internal fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,

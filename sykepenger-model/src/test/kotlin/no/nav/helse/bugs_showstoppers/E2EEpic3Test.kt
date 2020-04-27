@@ -493,14 +493,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
-        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalingsgodkjenning(1, true)
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertNotNull(inspektør.maksdato(0))
@@ -553,7 +553,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterYtelser(1)   // No history
 
@@ -572,7 +572,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
@@ -757,12 +757,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterYtelser(1)
         håndterSimulering(1)
-        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalingsgodkjenning(1, true)
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
@@ -785,17 +785,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
         håndterSimulering(0)
-        håndterManuellSaksbehandling(0, true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterYtelser(1)
         håndterSimulering(1)
-        håndterManuellSaksbehandling(1, true)
+        håndterUtbetalingsgodkjenning(1, true)
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterYtelser(2)
         håndterSimulering(2)
-        håndterManuellSaksbehandling(2, true)
+        håndterUtbetalingsgodkjenning(2, true)
         håndterUtbetalt(2, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {

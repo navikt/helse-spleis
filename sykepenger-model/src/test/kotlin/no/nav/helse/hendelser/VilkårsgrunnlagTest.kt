@@ -56,7 +56,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `27 dager opptjening fører til manuell saksbehandling`() {
+    internal fun `27 dager opptjening fører til at vilkårsvurdering feiler`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
