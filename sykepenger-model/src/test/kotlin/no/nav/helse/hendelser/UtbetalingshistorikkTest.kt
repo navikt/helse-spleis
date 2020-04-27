@@ -2,8 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -35,7 +33,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(null)
+        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -49,7 +47,7 @@ class UtbetalingshistorikkTest {
     fun `Gammel ugyldig periode ignoreres ved bygging av utbetalingstidslinje`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar, 31.januar, 1234),
-            Utbetalingshistorikk.Periode.Ugyldig(1.januar(2017), 10.januar(2017), 1234)
+            Utbetalingshistorikk.Periode.Ugyldig(1.januar(2017), 10.januar(2017))
         )
         val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -82,7 +80,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(null)
+        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -96,8 +94,8 @@ class UtbetalingshistorikkTest {
     fun `Slår sammen reduksjonTilArbeidsgiver og reduksjonMedlem og ignorerer tilbakeført og sanksjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234),
-            Utbetalingshistorikk.Periode.Tilbakeført(5.januar, 20.januar, 0),
-            Utbetalingshistorikk.Periode.Sanksjon(15.januar, 25.januar, 0),
+            Utbetalingshistorikk.Periode.Tilbakeført(5.januar, 20.januar),
+            Utbetalingshistorikk.Periode.Sanksjon(15.januar, 25.januar),
             Utbetalingshistorikk.Periode.ReduksjonMedlem(20.januar, 31.januar, 623)
         )
         val utbetalingshistorikk = Utbetalingshistorikk(
@@ -107,7 +105,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(null)
+        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -121,7 +119,7 @@ class UtbetalingshistorikkTest {
     fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234),
-            Utbetalingshistorikk.Periode.Ukjent(5.januar, 5.januar, 0)
+            Utbetalingshistorikk.Periode.Ukjent(5.januar, 5.januar)
         )
         val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -130,7 +128,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(null)
+        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
         assertEquals(10.januar, inspektør.sisteDag)
@@ -140,7 +138,7 @@ class UtbetalingshistorikkTest {
     fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234),
-            Utbetalingshistorikk.Periode.Ugyldig(5.januar, 5.januar, 0)
+            Utbetalingshistorikk.Periode.Ugyldig(5.januar, 5.januar)
         )
         val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -150,7 +148,7 @@ class UtbetalingshistorikkTest {
         )
 
         assertThrows<Aktivitetslogg.AktivitetException> {
-            utbetalingshistorikk.utbetalingstidslinje(null)
+            utbetalingshistorikk.utbetalingstidslinje(1.januar)
         }
     }
 
@@ -163,7 +161,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.januar, 100.0))), 1.januar)
+        utbetalingshistorikk.valider(Periode(1.januar, 1.januar))
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
@@ -179,7 +177,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.januar, 100.0))), 1.januar)
+        utbetalingshistorikk.valider(Periode(1.januar, 1.januar))
         assertTrue(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
     }
 
@@ -195,8 +193,9 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(28.januar, 100.0))), 28.januar)
-        assertTrue(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+        utbetalingshistorikk.valider(Periode(28.januar, 28.januar))
+        assertTrue(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test
@@ -211,7 +210,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(29.januar, 100.0))), 29.januar)
+        utbetalingshistorikk.valider(Periode(29.januar, 29.januar))
         assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
     }
 
@@ -219,7 +218,7 @@ class UtbetalingshistorikkTest {
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234),
-            Utbetalingshistorikk.Periode.Ukjent(1.januar,10.januar, 0)
+            Utbetalingshistorikk.Periode.Ukjent(1.januar,10.januar)
         )
         val utbetalingshistorikk = Utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -228,7 +227,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.august, 100.0))), 1.august)
+        utbetalingshistorikk.valider(Periode(1.august, 1.august))
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 
@@ -244,7 +243,7 @@ class UtbetalingshistorikkTest {
             aktivitetslogg = aktivitetslogg
         )
 
-        utbetalingshistorikk.valider(Sykdomstidslinje(listOf(Sykedag.Søknad(1.august, 100.0))), 1.august)
+        utbetalingshistorikk.valider(Periode(1.august, 1.august))
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
     }
 

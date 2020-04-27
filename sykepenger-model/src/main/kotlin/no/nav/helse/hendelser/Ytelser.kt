@@ -4,8 +4,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import java.time.LocalDate
 import java.util.*
 
 @Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
@@ -23,8 +21,8 @@ class Ytelser(
 
     internal fun foreldrepenger() = foreldrepermisjon
 
-    internal fun valider(arbeidsgivertidslinje: Sykdomstidslinje, førsteFraværsdag: LocalDate? = null) =
-        utbetalingshistorikk.valider(arbeidsgivertidslinje, førsteFraværsdag)
+    internal fun valider(periode: Periode) =
+        utbetalingshistorikk.valider(periode)
 
     internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
         utbetalingshistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)

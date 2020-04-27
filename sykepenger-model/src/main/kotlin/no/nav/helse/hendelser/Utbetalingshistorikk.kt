@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -19,39 +18,18 @@ class Utbetalingshistorikk(
         private const val TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE = 26 * 7
     }
 
-    internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate?) = this.utbetalinger
-        .filtrerUtbetalinger(førsteFraværsdag)
-        .map { it.toTidslinje(graderingsliste, aktivitetslogg) }
+    internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate) = Periode.trim(this.utbetalinger, førsteFraværsdag)
+        .map { it.tidslinje(graderingsliste, aktivitetslogg) }
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun valider(arbeidsgivertidslinje: Sykdomstidslinje, førsteFraværsdag: LocalDate?): Aktivitetslogg {
-        utbetalinger.filtrerUtbetalinger(førsteFraværsdag)
-            .onEach { it.valider(aktivitetslogg) }
-            .maxBy { it.tom }
-            ?.tom
-            ?.also { sisteUtbetalteDag ->
-                val førsteDag = arbeidsgivertidslinje.førsteDag()
-                if (sisteUtbetalteDag >= førsteDag)
-                    aktivitetslogg.error("Hele eller deler av perioden til arbeidsgiver er utbetalt i Infotrygd")
-                else if (sisteUtbetalteDag >= førsteDag.minusDays(18))
-                    aktivitetslogg.error("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
-            }
+    internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
+        utbetalinger.onEach { it.valider(aktivitetslogg, periode) }
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         return aktivitetslogg
     }
 
     internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, inntekthistorikk) }
-    }
-
-    private fun List<Periode>.filtrerUtbetalinger(førsteFraværsdag: LocalDate?): List<Periode> {
-        if (førsteFraværsdag == null) return this
-        var forrigePeriodeFom: LocalDate = førsteFraværsdag
-        return sortedByDescending { it.tom }.filter { periode ->
-            (ChronoUnit.DAYS.between(periode.tom, forrigePeriodeFom) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
-                if (it && periode.fom < forrigePeriodeFom) forrigePeriodeFom = periode.fom
-            }
-        }
     }
 
     class Inntektsopplysning(
@@ -71,167 +49,88 @@ class Utbetalingshistorikk(
         }
     }
 
-    class Graderingsperiode(private val fom: LocalDate, private val tom: LocalDate, internal val grad: Double) {
-        internal fun datoIPeriode(dato: LocalDate) =
-            dato.isAfter(fom.minusDays(1)) && dato.isBefore(tom.plusDays(1))
+    class Graderingsperiode(fom: LocalDate, tom: LocalDate, internal val grad: Double) {
+        internal companion object {
+            fun gradForDag(liste: List<Graderingsperiode>, dag: LocalDate) = liste
+                .find { dag in it.periode }
+                ?.grad ?: Double.NaN
+        }
+
+        private val periode = no.nav.helse.hendelser.Periode(fom, tom)
     }
 
-    sealed class Periode(internal val fom: LocalDate, internal val tom: LocalDate, internal val dagsats: Int) {
-        internal open fun toTidslinje(
-            graderingsliste: List<Graderingsperiode>,
+    sealed class Periode(fom: LocalDate, tom: LocalDate, internal val dagsats: Int) {
+        internal companion object {
+            fun trim(liste: List<Periode>, dato: LocalDate): List<Periode> {
+                var forrigePeriodeFom: LocalDate = dato
+                return liste
+                    .sortedByDescending { it.periode.start }
+                    .filter { periode ->
+                        (ChronoUnit.DAYS.between(periode.periode.start, forrigePeriodeFom) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
+                            if (it && periode.periode.start < forrigePeriodeFom) forrigePeriodeFom = periode.periode.start
+                        }
+                    }
+            }
+        }
+
+        protected val periode = no.nav.helse.hendelser.Periode(fom, tom)
+
+        internal open fun tidslinje(
+            graderinger: List<Graderingsperiode>,
             aktivitetslogg: Aktivitetslogg
-        ) = Utbetalingstidslinje()
-
-        open fun valider(aktivitetslogg: Aktivitetslogg) {
-            if (fom > tom) aktivitetslogg.error(
-                "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                this::class.simpleName
-            )
+        ) = Utbetalingstidslinje().apply {
+            periode.forEach { dag(this, it, Graderingsperiode.gradForDag(graderinger, it)) }
         }
 
-        protected fun List<Graderingsperiode>.finnGradForUtbetalingsdag(dag: LocalDate) =
-            this.find { it.datoIPeriode(dag) }?.grad ?: Double.NaN
-
-        class RefusjonTilArbeidsgiver(
-            fom: LocalDate,
-            tom: LocalDate,
-            dagsats: Int
-        ) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
-                Utbetalingstidslinje().apply {
-                    fom.datesUntil(tom.plusDays(1)).forEach {
-                        if (it.erHelg()) this.addHelg(
-                            0.0,
-                            it,
-                            graderingsliste.finnGradForUtbetalingsdag(it)
-                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
-                    }
-                }
+        private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
+            if (dato.erHelg()) utbetalingstidslinje.addHelg(0.0, dato, grad)
+            else utbetalingstidslinje.addNAVdag(dagsats.toDouble(), dato, grad)
         }
 
-        class ReduksjonArbeidsgiverRefusjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
-                Utbetalingstidslinje().apply {
-                    fom.datesUntil(tom.plusDays(1)).forEach {
-                        if (it.erHelg()) this.addHelg(
-                            0.0,
-                            it,
-                            graderingsliste.finnGradForUtbetalingsdag(it)
-                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
-                    }
-                }
+        open fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
+            if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
+            if (periode.endInclusive >= other.start.minusDays(18)) aktivitetslogg.warn("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
         }
 
-        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
-                Utbetalingstidslinje().apply {
-                    fom.datesUntil(tom.plusDays(1)).forEach {
-                        if (it.erHelg()) this.addHelg(
-                            0.0,
-                            it,
-                            graderingsliste.finnGradForUtbetalingsdag(it)
-                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
-                    }
-                }
-        }
-
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
-                Utbetalingstidslinje().apply {
-                    fom.datesUntil(tom.plusDays(1)).forEach {
-                        if (it.erHelg()) this.addHelg(
-                            0.0,
-                            it,
-                            graderingsliste.finnGradForUtbetalingsdag(it)
-                        ) else this.addNAVdag(dagsats.toDouble(), it, graderingsliste.finnGradForUtbetalingsdag(it))
-                    }
-                }
-        }
+        class RefusjonTilArbeidsgiver(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class ReduksjonArbeidsgiverRefusjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats)
 
         class Ferie(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun toTidslinje(graderingsliste: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
-                Utbetalingstidslinje().apply {
-                    fom.datesUntil(tom.plusDays(1)).forEach {
-                        this.addFridag(dagsats.toDouble(), it)
-                    }
-                }
+            override fun tidslinje(graderinger: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje().apply { periode.forEach { addFridag(dagsats.toDouble(), it) } }
         }
 
-        class Etterbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
-        }
+        abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom, Int.MIN_VALUE) {
+            override fun tidslinje(graderinger: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg) =
+                Utbetalingstidslinje()
 
-        class KontertRegnskap(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {}
         }
-
-        class Tilbakeført(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
-        }
-
-        class Konvertert(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
-        }
-
-        class Opphold(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
-        }
-
-        class Sanksjon(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                if (fom > tom) aktivitetslogg.info(
-                    "Utbetalingsperioden %s fra Infotrygd har en FOM etter TOM",
-                    this::class.simpleName
-                )
-            }
-        }
-
-        class Ukjent(fom: LocalDate, tom: LocalDate, dagsats: Int) : Periode(fom, tom, dagsats) {
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
+        class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Tilbakeført(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Konvertert(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Opphold(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Sanksjon(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
+                if (periode.endInclusive < other.start.minusDays(18)) return
                 aktivitetslogg.warn(
                     "Det er en utbetalingsperiode som er lagt inn i Infotrygd uten at inntektsopplysninger er registrert.",
                     this::class.simpleName
                 )
             }
         }
-
-        class Ugyldig(fom: LocalDate?, tom: LocalDate?, dagsats: Int) :
-            Periode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX, dagsats) {
-            override fun toTidslinje(
-                graderingsliste: List<Graderingsperiode>,
-                aktivitetslogg: Aktivitetslogg
-            ): Utbetalingstidslinje {
+        class Ugyldig(fom: LocalDate?, tom: LocalDate?) : IgnorertPeriode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX) {
+            override fun tidslinje(graderinger: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg): Utbetalingstidslinje {
                 aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
             }
 
-            override fun valider(aktivitetslogg: Aktivitetslogg) {
-                aktivitetslogg.warn(
-                    "Det er en utbetalingsperiode i Infotrygd som mangler fom- eller tomdato",
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
+                aktivitetslogg.error(
+                    "Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato, eller fom er nyere enn tom)",
                     this::class.simpleName
                 )
             }

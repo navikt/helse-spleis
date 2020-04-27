@@ -350,7 +350,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
         håndterYtelser(0, Triple(1.desember(2017), 16.desember(2017), 15000))
         inspektør.also {
-            assertTrue(it.personLogg.hasErrors())
+            assertNoErrors(it)
+            assertTrue(it.personLogg.hasWarnings() && !it.personLogg.hasOnlyInfoAndNeeds())
             assertMessages(it)
             assertTrue(it.inntekter.isEmpty())
             assertNull(it.inntektshistorikk.inntekt(2.januar))
@@ -358,7 +359,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -654,33 +655,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `beregning av utbetaling ignorerer tidligere ugyldige perioder`() {
-        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Triple(1.januar, 2.januar, 15000)) // -> TIL_INFOTRYGD
-
-        håndterSykmelding(Triple(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)), 1.februar)
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-
-        assertNotNull(inspektør.maksdato(1))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
         )
     }
 

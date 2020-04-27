@@ -69,7 +69,7 @@ internal class YtelserHendelseTest {
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null, 0)))
+        håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null)))
         assertTilstand(TilstandType.TIL_INFOTRYGD)
     }
 
@@ -117,7 +117,7 @@ internal class YtelserHendelseTest {
         assertEquals(
             expectedTilstand,
             inspektør.sisteTilstand(0)
-        ) { "Forventet tilstand $expectedTilstand: ${inspektør.personLogg}" }
+        ) { "Forventet tilstand $expectedTilstand. Er i ${inspektør.sisteTilstand(0)}:\n${inspektør.personLogg}" }
     }
 
     private fun håndterYtelser(
@@ -143,7 +143,7 @@ internal class YtelserHendelseTest {
         person.håndter(søknad())
         person.håndter(
             ytelser(
-                utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null, 0)),
+                utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null)),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
             )

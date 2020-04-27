@@ -640,7 +640,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                         .also { vedtaksperiode.trengerInntektsmelding() }
                 }
-                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.periode().start) }
+                it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
                 it.onSuccess {
                     vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingFerdigGap)
                 }
@@ -815,7 +815,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             Validation(ytelser).also { it ->
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                it.valider { ValiderYtelser(arbeidsgiver.sykdomstidslinje(), ytelser, vedtaksperiode.førsteFraværsdag) }
+                it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
                 lateinit var engineForTimeline: ByggUtbetalingstidlinjer
@@ -832,7 +832,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.fødselsnummer,
                         vedtaksperiode.organisasjonsnummer,
                         Alder(vedtaksperiode.fødselsnummer),
-                        vedtaksperiode.førsteFraværsdag
+                        requireNotNull(vedtaksperiode.førsteFraværsdag)
                     ).also { engineForTimeline = it }
                 }
                 it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, ytelser) }

@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -39,11 +38,11 @@ internal interface Valideringssteg {
 }
 
 internal class ValiderYtelser(
-    private val arbeidsgivertidslinje: Sykdomstidslinje,
-    private val ytelser: Ytelser,
-    private val førsteFraværsdag: LocalDate?) : Valideringssteg {
+    private val periode: Periode,
+    private val ytelser: Ytelser
+) : Valideringssteg {
     override fun isValid(): Boolean {
-        return !ytelser.valider(arbeidsgivertidslinje, førsteFraværsdag).hasErrors()
+        return !ytelser.valider(periode).hasErrors()
     }
 }
 
@@ -70,7 +69,7 @@ internal class ByggUtbetalingstidlinjer(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val alder: Alder,
-    private val førsteFraværsdag: LocalDate?
+    private val førsteFraværsdag: LocalDate
 ) : Valideringssteg {
     private lateinit var engine: ArbeidsgiverUtbetalinger
     override fun isValid(): Boolean {
