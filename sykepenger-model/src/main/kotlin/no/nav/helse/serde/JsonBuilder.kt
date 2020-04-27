@@ -1,15 +1,19 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.NyJsonDagType.*
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -146,8 +150,31 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
 
+    override fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.preVisitHendelseSykdomstidslinje(tidslinje)
+
+    override fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.postVisitHendelseSykdomstidslinje(tidslinje)
+
+    override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.preVisitBeregnetSykdomstidslinje(tidslinje)
+
+    override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+        currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
+
     override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.preVisitSykdomstidslinje(tidslinje)
+
+    override fun preVisitNySykdomstidslinje(
+        tidslinje: NySykdomstidslinje,
+        låstePerioder: List<Periode>,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.preVisitNySykdomstidslinje(tidslinje, låstePerioder, id, tidsstempel)
+
+    override fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) =
+        currentState.postVisitNySykdomstidslinje(tidslinje, id, tidsstempel)
 
     override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.postVisitSykdomstidslinje(tidslinje)
@@ -192,6 +219,28 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitForeldetSykedag(dag: ForeldetSykedag) = currentState.visitForeldetSykedag(dag)
     override fun visitUbestemt(dag: Ubestemtdag) = currentState.visitUbestemt(dag)
     override fun visitUtenlandsdag(dag: Utenlandsdag) = currentState.visitUtenlandsdag(dag)
+
+    override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
+        currentState.visitDag(dag, dato, kilde, melding)
+
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
         currentState.visitTilstand(tilstand)
 
@@ -460,6 +509,18 @@ internal class JsonBuilder : PersonVisitor {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
+        override fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+            val sykdomstidslinje = mutableMapOf<String, Any>()
+            elementMap["nyHendelseSykdomstidslinje"] = sykdomstidslinje
+            pushState(NySykdomstidslinjeState(sykdomstidslinje))
+        }
+
+        override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+            val sykdomstidslinje = mutableMapOf<String, Any>()
+            elementMap["nyBeregnetSykdomstidslinje"] = sykdomstidslinje
+            pushState(NySykdomstidslinjeState(sykdomstidslinje))
+        }
+
         override fun postVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
             id: UUID,
@@ -535,4 +596,103 @@ internal class JsonBuilder : PersonVisitor {
             popState()
         }
     }
+
+    private inner class NySykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any>) : JsonState {
+
+        private val dager: MutableList<MutableMap<String, Any>> = mutableListOf()
+
+        override fun preVisitNySykdomstidslinje(
+            tidslinje: NySykdomstidslinje,
+            låstePerioder: List<Periode>,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
+            sykdomstidslinje["id"] = id
+            sykdomstidslinje["tidsstempel"] = tidsstempel
+            sykdomstidslinje["låstePerioder"] = låstePerioder.map {
+                mapOf("fom" to it.start, "tom" to it.endInclusive)
+            }
+        }
+
+        override fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {
+            sykdomstidslinje["dager"] = dager
+        }
+
+        override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde)
+
+        override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde)
+
+        override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde, grad)
+
+        override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde)
+
+        override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde)
+
+        override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde, grad)
+
+        override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde, grad)
+
+        override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde, grad)
+
+        override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+            leggTilDag(dag, dato, kilde, grad)
+
+        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
+            leggTilDag(dag, dato, kilde, melding = melding)
+
+        private fun leggTilDag(
+            dag: NyDag,
+            dato: LocalDate,
+            kilde: Hendelseskilde,
+            grad: Grad? = null,
+            melding: String? = null
+        ) {
+            dager.add(
+                mutableMapOf(
+                    "dato" to dato,
+                    "type" to dag.toJsonType(),
+                    "kilde" to kilde.toJson()
+                ).also { data ->
+                    grad?.let { data["grad"] = it.toPercentage() }
+                    melding?.let { data["melding"] = it }
+                }
+            )
+        }
+
+        override fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+            popState()
+        }
+
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+            popState()
+        }
+    }
+}
+
+private fun Hendelseskilde.toJson() = mapOf(
+    "type" to toString(), "id" to meldingsreferanseId()
+)
+
+private fun NyDag.toJsonType() = when (this) {
+    is NySykedag -> SYKEDAG
+    is NyUkjentDag -> UKJENT_DAG
+    is NyArbeidsdag -> ARBEIDSDAG
+    is NyArbeidsgiverdag -> ARBEIDSGIVERDAG
+    is NyFeriedag -> FERIEDAG
+    is NyFriskHelgedag -> FRISK_HELGEDAG
+    is NyArbeidsgiverHelgedag -> ARBEIDSGIVER_HELGEDAG
+    is NyForeldetSykedag -> FORELDET_SYKEDAG
+    is NySykHelgedag -> SYK_HELGEDAG
+    is NyPermisjonsdag -> PERMISJONSDAG
+    is NyStudiedag -> STUDIEDAG
+    is NyUtenlandsdag -> UTENLANDSDAG
+    is ProblemDag -> PROBLEMDAG
 }

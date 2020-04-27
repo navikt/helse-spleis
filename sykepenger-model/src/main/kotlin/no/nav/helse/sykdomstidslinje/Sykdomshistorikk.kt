@@ -48,7 +48,9 @@ internal class Sykdomshistorikk private constructor(
         private val hendelseId: UUID,
         private val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: Sykdomstidslinje,
-        private val beregnetSykdomstidslinje: Sykdomstidslinje
+        private val beregnetSykdomstidslinje: Sykdomstidslinje,
+        private val nyHendelseSykdomstidslinje: NySykdomstidslinje,
+        private val nyBeregnetSykdomstidslinje: NySykdomstidslinje
     ) {
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
@@ -58,6 +60,14 @@ internal class Sykdomshistorikk private constructor(
             visitor.preVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
             beregnetSykdomstidslinje.accept(visitor)
             visitor.postVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
+
+            visitor.preVisitHendelseSykdomstidslinje(nyHendelseSykdomstidslinje)
+            nyHendelseSykdomstidslinje.accept(visitor)
+            visitor.postVisitHendelseSykdomstidslinje(nyHendelseSykdomstidslinje)
+            visitor.preVisitBeregnetSykdomstidslinje(nyBeregnetSykdomstidslinje)
+            nyBeregnetSykdomstidslinje.accept(visitor)
+            visitor.postVisitBeregnetSykdomstidslinje(nyBeregnetSykdomstidslinje)
+
             visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
         }
 
@@ -78,7 +88,9 @@ internal class Sykdomshistorikk private constructor(
                     beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
-                    )
+                    ),
+                    nyHendelseSykdomstidslinje = hendelse.nySykdomstidslinje(),
+                    nyBeregnetSykdomstidslinje = hendelse.nySykdomstidslinje()
                 )
             }
         }

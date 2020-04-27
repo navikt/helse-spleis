@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -70,7 +71,7 @@ internal interface UtbetalingsdagVisitor {
     fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
-internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
+internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor, NySykdomstidslinjeVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
     fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
@@ -81,6 +82,10 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
+    fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
+    fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
+    fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
     fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
@@ -114,7 +119,7 @@ internal interface SykdomstidslinjeVisitor {
 }
 
 internal interface NySykdomstidslinjeVisitor {
-    fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
+    fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
     fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}

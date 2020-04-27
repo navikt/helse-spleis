@@ -3,11 +3,18 @@ package no.nav.helse.serde
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.serde.migration.JsonMigration
+import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
+import no.nav.helse.serde.migration.V2Medlemskapstatus
+import no.nav.helse.serde.migration.V3BeregnerGjenståendeSykedagerFraMaksdato
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
@@ -53,6 +60,57 @@ internal class JsonBuilderTest {
     }
 
     @Test
+    internal fun `støtter deserialisering av person uten ny sykdomstidslinje`() {
+        val person = person()
+        val personPre = objectMapper.writeValueAsString(person)
+        val jsonBuilder = JsonBuilder()
+        person.accept(jsonBuilder)
+        val json = objectMapper.readTree(jsonBuilder.toString()).also { personJsonNode ->
+            personJsonNode["arbeidsgivere"][0]["vedtaksperioder"][0]["sykdomshistorikk"].forEach { historikk ->
+                (historikk as ObjectNode).let { sykdomshistorikk ->
+                    sykdomshistorikk.remove("nyHendelseSykdomstidslinje")
+                    sykdomshistorikk.remove("nyBeregnetSykdomstidslinje")
+                }
+            }
+        }
+        JsonMigration.medSkjemaversjon(
+            listOf(
+                V1EndreKunArbeidsgiverSykedagEnum(),
+                V2Medlemskapstatus(),
+                V3BeregnerGjenståendeSykedagerFraMaksdato()
+            ), json
+        )
+        val serialisertPerson = SerialisertPerson(json.toString())
+        val personDeserialisert = serialisertPerson.deserialize()
+        val personPost = objectMapper.writeValueAsString(personDeserialisert)
+        assertEqualsUtenNyeUUIDer(personPre, personPost)
+    }
+
+    private fun assertEqualsUtenNyeUUIDer(personPre: String, personPost: String) {
+        val personPreUtenUUID = personPre.replace(Regex("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}"), "")
+        val personPreUtenTidsstempel = personPreUtenUUID.replace(Regex("T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{6}"), "")
+        val personPostUtenUUID = personPost.replace(Regex("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}"), "")
+        val personPostUtenTidsstempel = personPostUtenUUID.replace(Regex("T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{6}"), "")
+        val personPreStripped = personUtenLåstePerioder(personPreUtenTidsstempel)
+        val personPostStripped = personUtenLåstePerioder(personPostUtenTidsstempel)
+        assertEquals(personPreStripped, personPostStripped, personPreStripped)
+    }
+
+    private fun personUtenLåstePerioder(person: String): String {
+        return (objectMapper.readTree(person) as ObjectNode)
+            .path("arbeidsgivere")
+            .forEach {
+                it.path("vedtaksperioder")
+                    .forEach { vedtaksperiode ->
+                        (vedtaksperiode.path("sykdomshistorikk")["nyHendelseSykdomstidslinje"] as ObjectNode)
+                            .remove("låstePerioder");
+                        (vedtaksperiode.path("sykdomshistorikk")["nyBeregnetSykdomstidslinje"] as ObjectNode)
+                            .remove("låstePerioder")
+                    }
+            }.toString()
+    }
+
+    @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
         testSerialiseringAvPerson(person())
     }
@@ -91,6 +149,7 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
         private lateinit var tilstand: TilstandType
+        private lateinit var sykdomstidslinje: NySykdomstidslinje
 
         internal fun person(
             fom: LocalDate = 1.januar,
@@ -109,6 +168,8 @@ internal class JsonBuilderTest {
                         sendtSøknad = sendtSøknad.atStartOfDay()
                     )
                 )
+                fangeSykdomstidslinje()
+                sykdomstidslinje.lås(Periode(5.januar, 10.januar))
                 håndter(inntektsmelding(fom = fom))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -205,6 +266,19 @@ internal class JsonBuilderTest {
 
                 override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
                     JsonBuilderTest.tilstand = tilstand.type
+                }
+            })
+        }
+
+        private fun Person.fangeSykdomstidslinje() {
+            accept(object : PersonVisitor {
+                override fun preVisitNySykdomstidslinje(
+                    tidslinje: NySykdomstidslinje,
+                    låstePerioder: List<Periode>,
+                    id: UUID,
+                    tidsstempel: LocalDateTime
+                ) {
+                    sykdomstidslinje = tidslinje
                 }
             })
         }

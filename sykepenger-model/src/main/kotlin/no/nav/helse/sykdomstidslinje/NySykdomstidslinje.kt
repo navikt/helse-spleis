@@ -15,11 +15,17 @@ import java.util.stream.Collectors.toMap
 
 internal class NySykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, NyDag>,
-    private val periode: Periode? = periode(dager),
+    periode: Periode? = null,
     private val låstePerioder: MutableList<Periode> = mutableListOf(),
     private val id: UUID = UUID.randomUUID(),
     private val tidsstempel: LocalDateTime = LocalDateTime.now()
 ) : Iterable<NyDag> {
+
+    private val periode: Periode?
+
+    init {
+        this.periode = periode ?: periode(dager)
+    }
 
     internal constructor(dager: Map<LocalDate, NyDag> = emptyMap()) : this(
         dager.toSortedMap()
@@ -69,7 +75,7 @@ internal class NySykdomstidslinje private constructor(
     }
 
     internal fun accept(visitor: NySykdomstidslinjeVisitor) {
-        visitor.preVisitNySykdomstidslinje(this, id, tidsstempel)
+        visitor.preVisitNySykdomstidslinje(this, låstePerioder, id, tidsstempel)
         periode?.forEach { this[it].accept(visitor) }
         visitor.postVisitNySykdomstidslinje(this, id, tidsstempel)
     }

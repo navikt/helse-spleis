@@ -13,13 +13,17 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.NySykdomstidslinjeData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.NyDagData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
+import no.nav.helse.serde.mapping.NyJsonDagType
+import no.nav.helse.serde.mapping.NyJsonDagType.*
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -43,7 +47,8 @@ class SerialisertPerson(val json: String) {
         private val migrations = listOf(
             V1EndreKunArbeidsgiverSykedagEnum(),
             V2Medlemskapstatus(),
-            V3BeregnerGjenståendeSykedagerFraMaksdato()
+            V3BeregnerGjenståendeSykedagerFraMaksdato(),
+            V4LeggTilNySykdomstidslinje()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -215,6 +220,10 @@ class SerialisertPerson(val json: String) {
         tidslinjeData: SykdomstidslinjeData
     ): Sykdomstidslinje = Sykdomstidslinje(tidslinjeData.map(::parseDag))
 
+    private fun parseNySykdomstidslinje(
+        tidslinjeData: NySykdomstidslinjeData
+    ): NySykdomstidslinje = createSykdomstidslinje(tidslinjeData)
+
     private fun parseDag(
         data: ArbeidsgiverData.VedtaksperiodeData.DagData
     ): Dag {
@@ -348,7 +357,9 @@ class SerialisertPerson(val json: String) {
                 timestamp = sykdomshistorikkData.tidsstempel,
                 hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
                 beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
-                hendelseId = sykdomshistorikkData.hendelseId
+                hendelseId = sykdomshistorikkData.hendelseId,
+                nyHendelseSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyHendelseSykdomstidslinje),
+                nyBeregnetSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyBeregnetSykdomstidslinje)
             )
         })
     }
@@ -402,6 +413,36 @@ internal data class PersonData(
             val beløp: BigDecimal
         )
 
+        data class NySykdomstidslinjeData(
+            val dager: List<NyDagData>,
+            val periode: Periode?,
+            val låstePerioder: MutableList<Periode>? = mutableListOf(),
+            val id: UUID,
+            val tidsstempel: LocalDateTime
+        ) {
+            val dagerMap: SortedMap<LocalDate, NyDag>
+            init {
+                dagerMap = dager.map { it.dato to parseNyDag(it) }.toMap(sortedMapOf())
+            }
+            private fun parseNyDag(
+                data: NyDagData
+            ): NyDag = when (data.type) {
+                ARBEIDSDAG -> NyArbeidsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                ARBEIDSGIVERDAG -> NyArbeidsgiverdag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                ARBEIDSGIVER_HELGEDAG -> NyArbeidsgiverHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FERIEDAG -> NyFeriedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FRISK_HELGEDAG -> NyFriskHelgedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FORELDET_SYKEDAG -> NyForeldetSykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                PERMISJONSDAG -> NyPermisjonsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                PROBLEMDAG -> ProblemDag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id), data.melding!!)
+                STUDIEDAG -> NyStudiedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                SYKEDAG -> NySykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                SYK_HELGEDAG -> NySykHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                UTENLANDSDAG -> NyUtenlandsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                UKJENT_DAG -> NyUkjentDag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+            }
+        }
+
         data class VedtaksperiodeData(
             val id: UUID,
             val gruppeId: UUID,
@@ -423,11 +464,24 @@ internal data class PersonData(
                 val grad: Double
             )
 
+            data class NyDagData(
+                val dato: LocalDate,
+                val type: NyJsonDagType,
+                val kilde: KildeData,
+                val grad: Double,
+                val melding: String?
+            )
+            data class KildeData(
+                val type: String,
+                val id: UUID
+            )
             data class SykdomshistorikkData(
                 val tidsstempel: LocalDateTime,
                 val hendelseId: UUID,
                 val hendelseSykdomstidslinje: SykdomstidslinjeData,
-                val beregnetSykdomstidslinje: SykdomstidslinjeData
+                val beregnetSykdomstidslinje: SykdomstidslinjeData,
+                val nyHendelseSykdomstidslinje: NySykdomstidslinjeData,
+                val nyBeregnetSykdomstidslinje: NySykdomstidslinjeData
             )
 
             data class DataForVilkårsvurderingData(

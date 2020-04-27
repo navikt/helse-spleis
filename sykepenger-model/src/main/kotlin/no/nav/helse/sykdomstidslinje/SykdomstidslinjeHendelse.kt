@@ -12,13 +12,18 @@ abstract class SykdomstidslinjeHendelse(
 ) : ArbeidstakerHendelse() {
     internal val kilde: Hendelseskilde = Hendelseskilde(this.javaClass, meldingsreferanseId)
 
-    internal class Hendelseskilde(hendelse: Class<SykdomstidslinjeHendelse>, private val meldingsreferanseId: UUID) {
-        private val type: String = hendelse.canonicalName.split('.').last()
+    internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
+        internal constructor(
+            hendelse: Class<SykdomstidslinjeHendelse>,
+            meldingsreferanseId: UUID
+        ) : this(hendelse.canonicalName.split('.').last(), meldingsreferanseId)
+
         companion object {
             internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class.java, UUID.randomUUID())
         }
 
         override fun toString() = type
+        internal fun meldingsreferanseId() = meldingsreferanseId
     }
 
     internal fun meldingsreferanseId() = meldingsreferanseId

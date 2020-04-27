@@ -1,5 +1,6 @@
 package no.nav.helse.testhelpers
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Grad
 import no.nav.helse.sykdomstidslinje.NyDag
@@ -42,7 +43,12 @@ internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySyk
         set(dag, dato, kilde)
     }
 
-    override fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {
+    override fun preVisitNySykdomstidslinje(
+        tidslinje: NySykdomstidslinje,
+        låstePerioder: List<Periode>,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {
         this.id = id
         this.tidsstempel = tidsstempel
     }
