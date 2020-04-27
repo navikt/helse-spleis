@@ -32,7 +32,4 @@ object VedtaksperiodeProbe : PersonObserver {
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
         )
     }
-
-    private fun ArbeidstakerHendelse.hendelsetype() = this::class.simpleName ?: "UNKNOWN"
-
 }

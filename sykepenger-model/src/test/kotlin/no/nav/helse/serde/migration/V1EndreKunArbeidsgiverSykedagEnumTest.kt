@@ -99,12 +99,10 @@ private const val personJson = """
                 },
                 {
                   "dagen": "2020-01-02",
-                  "hendelseType": "Søknad",
                   "type": "SYK_HELGEDAG"
                 },
                 {
                   "dagen": "2020-01-03",
-                  "hendelseType": "Søknad",
                   "type": "SYK_HELGEDAG"
                 },
                 {
@@ -149,12 +147,10 @@ private const val personJson = """
                 },
                 {
                   "dagen": "2020-01-02",
-                  "hendelseType": "Søknad",
                   "type": "SYK_HELGEDAG"
                 },
                 {
                   "dagen": "2020-01-03",
-                  "hendelseType": "Søknad",
                   "type": "SYK_HELGEDAG"
                 },
                 {
