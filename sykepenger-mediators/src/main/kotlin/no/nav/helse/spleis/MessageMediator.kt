@@ -68,10 +68,14 @@ internal class MessageMediator(
             hendelseRecorder.lagreMelding(message)
             hendelseMediator.behandle(message)
         } catch (err: Exception) {
-            log.error("alvorlig feil: ${err.message}", err)
-            withMDC(mapOf("fødselsnummer" to message.fødselsnummer)) {
-                sikkerLogg.error("alvorlig feil: ${err.message}", err)
-            }
+            errorHandler(err, message)
+        }
+    }
+
+    private fun errorHandler(err: Exception, message: HendelseMessage? = null) {
+        log.error("alvorlig feil: ${err.message}", err)
+        withMDC(message?.let { mapOf("fødselsnummer" to message.fødselsnummer) } ?: emptyMap()) {
+            sikkerLogg.error("alvorlig feil: ${err.message}", err)
         }
     }
 
@@ -84,9 +88,13 @@ internal class MessageMediator(
         }
 
         override fun onMessage(message: String, context: MessageContext) {
-            beforeRiverHandling(message)
-            listeners.forEach { it.onMessage(message, context) }
-            afterRiverHandling(message)
+            try {
+                beforeRiverHandling(message)
+                listeners.forEach { it.onMessage(message, context) }
+                afterRiverHandling(message)
+            } catch (err: Exception) {
+                errorHandler(err)
+            }
         }
 
         override fun publish(message: String) {

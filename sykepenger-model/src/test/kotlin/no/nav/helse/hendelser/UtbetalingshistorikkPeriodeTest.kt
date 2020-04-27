@@ -12,6 +12,9 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class UtbetalingshistorikkPeriodeTest {
+    private companion object {
+        private val EN_PERIODE = Periode(1.mars, 1.mars)
+    }
     private val graderingsliste = listOf(Utbetalingshistorikk.Graderingsperiode(1.januar, 1.januar, 100.0))
     private lateinit var aktivitetslogg: Aktivitetslogg
 
@@ -21,9 +24,15 @@ class UtbetalingshistorikkPeriodeTest {
     }
 
     @Test
+    fun `ugyldig periode`() {
+        assertDoesNotThrow { Utbetalingshistorikk.Periode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE) }
+        assertTrue(aktivitetslogg.hasErrors())
+    }
+
+    @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 1.januar, 1234)
-        periode.valider(aktivitetslogg, Periode(1.mars, 1.mars))
+        periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje(graderingsliste, aktivitetslogg)
 
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
@@ -36,7 +45,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `ReduksjonArbeidsgiverRefusjon mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234)
-        periode.valider(aktivitetslogg, Periode(1.mars, 1.mars))
+        periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje(graderingsliste, aktivitetslogg)
 
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
@@ -49,7 +58,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `Utbetaling mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.Utbetaling(1.januar, 1.januar, 1234)
-        periode.valider(aktivitetslogg, Periode(1.mars, 1.mars))
+        periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje(graderingsliste, aktivitetslogg)
 
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
@@ -62,7 +71,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `ReduksjonMedlem mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.ReduksjonMedlem(1.januar, 1.januar, 1234)
-        periode.valider(aktivitetslogg, Periode(1.mars, 1.mars))
+        periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje(graderingsliste, aktivitetslogg)
 
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
@@ -75,7 +84,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `Ferie mappes til utbetalingstidslinje`() {
         val periode = Utbetalingshistorikk.Periode.Ferie(1.januar, 1.januar, 1234)
-        periode.valider(aktivitetslogg, Periode(1.mars, 1.mars))
+        periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje(graderingsliste, aktivitetslogg)
 
         assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }

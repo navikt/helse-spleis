@@ -123,16 +123,18 @@ class Utbetalingshistorikk(
                 )
             }
         }
-        class Ugyldig(fom: LocalDate?, tom: LocalDate?) : IgnorertPeriode(fom ?: LocalDate.MIN, tom ?: LocalDate.MAX) {
+        class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) : IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
             override fun tidslinje(graderinger: List<Graderingsperiode>, aktivitetslogg: Aktivitetslogg): Utbetalingstidslinje {
                 aktivitetslogg.severe("Kan ikke hente ut utbetalingslinjer for perioden %s", this::class.simpleName)
             }
 
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
-                aktivitetslogg.error(
-                    "Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato, eller fom er nyere enn tom)",
-                    this::class.simpleName
-                )
+                val tekst = when {
+                    fom == null || tom == null -> "mangler fom- eller tomdato"
+                    fom > tom -> "fom er nyere enn tom"
+                    else -> null
+                }
+                aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
             }
         }
     }
