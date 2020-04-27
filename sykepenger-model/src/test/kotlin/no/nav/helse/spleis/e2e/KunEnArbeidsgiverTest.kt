@@ -659,6 +659,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `forlengelse av infotrygd uten inntektsopplysninger`() {
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 23.februar, 100))
+        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()), inntektshistorikk = emptyList())
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `forlengelse av infotrygd`() {
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))

@@ -145,11 +145,17 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(simulering(vedtaksperiodeIndex))
     }
 
-    protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>) {
+    protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>, inntektshistorikk: List<Inntektsopplysning> = listOf(
+        Inntektsopplysning(
+            1.desember(2017),
+            INNTEKT.toInt(),
+            ORGNUMMER
+        )
+    )) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
-        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList()))
+        person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList(), inntektshistorikk))
     }
 
     protected fun håndterPåminnelse(vedtaksperiodeIndex: Int, påminnetTilstand: TilstandType) {

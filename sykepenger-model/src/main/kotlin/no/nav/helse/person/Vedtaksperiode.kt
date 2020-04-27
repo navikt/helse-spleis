@@ -274,9 +274,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
             ?: periode().start
-        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: return vilkårsgrunnlag.error("Finner ikke inntekt for perioden %s", førsteFraværsdag).also {
-            tilstand(vilkårsgrunnlag, TilInfotrygd)
-        }
+        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
         if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
             dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
         }) {
@@ -650,7 +648,9 @@ internal class Vedtaksperiode private constructor(
                         AvventerInntektsmeldingFerdigGap
                     } else {
                         vedtaksperiode.førsteFraværsdag = sistePeriode.start
-                        AvventerVilkårsprøvingGap
+                        if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
+                            ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
+                        } else AvventerVilkårsprøvingGap
                     }
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
