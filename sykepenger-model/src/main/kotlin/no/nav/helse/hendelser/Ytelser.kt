@@ -24,7 +24,7 @@ class Ytelser(
     internal fun valider(periode: Periode) =
         utbetalingshistorikk.valider(periode)
 
-    internal fun addInntekter(inntekthistorikk: Inntekthistorikk) {
+    internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         utbetalingshistorikk().addInntekter(this.meldingsreferanseId, inntekthistorikk)
     }
 

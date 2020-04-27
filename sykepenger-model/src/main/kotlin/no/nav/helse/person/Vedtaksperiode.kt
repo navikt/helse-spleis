@@ -17,6 +17,7 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -273,8 +274,9 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
             ?: periode().start
-        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag)
-            ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
+        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: return vilkårsgrunnlag.error("Finner ikke inntekt for perioden %s", førsteFraværsdag).also {
+            tilstand(vilkårsgrunnlag, TilInfotrygd)
+        }
         if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
             dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
         }) {
@@ -642,7 +644,15 @@ internal class Vedtaksperiode private constructor(
                 }
                 it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
                 it.onSuccess {
-                    vedtaksperiode.tilstand(ytelser, AvventerInntektsmeldingFerdigGap)
+                    arbeidsgiver.addInntekt(ytelser)
+                    val sistePeriode = ytelser.utbetalingshistorikk().utbetalingstidslinje(vedtaksperiode.periode().start).sisteSykepengeperiode()
+                    val nesteTilstand = if (sistePeriode == null || !sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) {
+                        AvventerInntektsmeldingFerdigGap
+                    } else {
+                        vedtaksperiode.førsteFraværsdag = sistePeriode.start
+                        AvventerVilkårsprøvingGap
+                    }
+                    vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
             }
         }

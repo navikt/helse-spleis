@@ -353,8 +353,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertTrue(it.personLogg.hasWarnings() && !it.personLogg.hasOnlyInfoAndNeeds())
             assertMessages(it)
-            assertTrue(it.inntekter.isEmpty())
-            assertNull(it.inntektshistorikk.inntekt(2.januar))
+            assertFalse(it.inntekter.isEmpty())
+            assertNotNull(it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -655,6 +655,27 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `forlengelse av infotrygd`() {
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 23.februar, 100))
+        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()))
+        håndterSimulering(0)
+
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
         )
     }
 
@@ -1344,7 +1365,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(0, Triple(18.januar, 20.januar, 15000)) // -> TIL_INFOTRYGD
+        håndterYtelser(0, Triple(18.januar, 21.januar, 15000)) // -> TIL_INFOTRYGD
 
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }

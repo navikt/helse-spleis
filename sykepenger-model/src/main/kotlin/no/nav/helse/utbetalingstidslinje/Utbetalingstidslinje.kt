@@ -110,7 +110,16 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun sisteSykepengedag() = utbetalingsdager.lastOrNull { it is NavDag }?.dato
 
-    internal fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
+    internal fun sisteSykepengeperiode(): Periode? {
+        val sisteDag = sisteSykepengedag() ?: return null
+        var førsteDag = sisteDag
+        for (challenger in kutt(sisteDag.minusDays(1)).reverse().utbetalingsdager) {
+            if (challenger is NavDag || challenger is NavHelgDag || challenger is ArbeidsgiverperiodeDag) førsteDag = challenger.dato else break
+        }
+        return Periode(førsteDag, sisteDag)
+    }
+
+    private fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
         return Utbetalingstidslinje(
             utbetalingsdager
                 .filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) }

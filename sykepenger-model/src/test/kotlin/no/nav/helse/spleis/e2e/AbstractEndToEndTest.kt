@@ -309,7 +309,7 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning> = listOf(
             Inntektsopplysning(
                 1.desember(2017),
-                INNTEKT.toInt() - 10000,
+                INNTEKT.toInt(),
                 ORGNUMMER
             )
         ),
