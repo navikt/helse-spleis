@@ -16,10 +16,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
-import no.nav.helse.serde.migration.JsonMigration
-import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
-import no.nav.helse.serde.migration.V2Medlemskapstatus
-import no.nav.helse.serde.migration.migrate
+import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -45,7 +42,8 @@ class SerialisertPerson(val json: String) {
     internal companion object {
         private val migrations = listOf(
             V1EndreKunArbeidsgiverSykedagEnum(),
-            V2Medlemskapstatus()
+            V2Medlemskapstatus(),
+            V3BeregnerGjenståendeSykedagerFraMaksdato()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
