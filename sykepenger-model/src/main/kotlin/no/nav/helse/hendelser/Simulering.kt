@@ -42,12 +42,12 @@ class Simulering(
         internal val perioder: List<SimulertPeriode>
     ) {
         internal fun forskjell(oppdrag: Oppdrag): Boolean {
-            return oppdrag.dager().zip(dager(oppdrag.førstedato, oppdrag.sistedato)).any { (oppdrag, simulering) ->
+            return oppdrag.dagSatser().zip(dagSatser(oppdrag.førstedato, oppdrag.sistedato)).any { (oppdrag, simulering) ->
                 oppdrag.first != simulering.first || oppdrag.second != simulering.second
             }
         }
 
-        private fun dager(fom: LocalDate, tom: LocalDate) = perioder.flatMap {
+        private fun dagSatser(fom: LocalDate, tom: LocalDate) = perioder.flatMap {
             it.utbetalinger.flatMap {
                 it.detaljer.flatMap { detalj ->
                     detalj.periode.start.datesUntil(detalj.periode.endInclusive.plusDays(1))

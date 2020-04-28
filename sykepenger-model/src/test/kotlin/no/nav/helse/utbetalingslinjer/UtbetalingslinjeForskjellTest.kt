@@ -19,7 +19,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `helt separate utbetalingslinjer`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(5.februar to 9.februar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
@@ -29,7 +29,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `tomme utbetalingslinjer fungerer som Null Object Utbetalingslinjer`() {
         val original = tomOppdrag()
         val recalculated = linjer(5.februar to 9.februar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
@@ -39,7 +39,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `fullstendig overskriv`() {
         val original = linjer(8.januar to 13.januar)
         val recalculated = linjer(1.januar to 9.februar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -53,7 +53,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `ny tom`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 13.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 13.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -65,7 +65,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `bare flere utbetalingslinjer`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 5.januar, 15.januar to 19.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -79,7 +79,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `grad endres`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 5.januar grad 80, 15.januar to 19.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -93,7 +93,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `dagsats endres`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(1.januar to 5.januar dagsats 1000, 15.januar to 19.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -107,7 +107,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `Tre perioder hvor grad endres i siste periode`() {
         val original = linjer(17.juni(2020) to 30.juni(2020))
         val new = linjer(17.juni(2020) to 31.juli(2020))
-        val intermediate = new forskjell original
+        val intermediate = new - original
         assertEquals(original.fagsystemId, intermediate.fagsystemId)
 
         val new2 = linjer(
@@ -115,7 +115,7 @@ internal class UtbetalingslinjeForskjellTest {
             1.august(2020) to 31.august(2020) grad 50
         )
 
-        val actual = new2 forskjell intermediate
+        val actual = new2 - intermediate
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(intermediate.fagsystemId, actual.fagsystemId)
@@ -142,7 +142,7 @@ internal class UtbetalingslinjeForskjellTest {
             18.januar to 19.januar grad 80,
             1.februar to 9.februar
         )
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -171,7 +171,7 @@ internal class UtbetalingslinjeForskjellTest {
             18.januar to 19.januar grad 80,
             1.februar to 9.februar
         )
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -188,7 +188,7 @@ internal class UtbetalingslinjeForskjellTest {
     internal fun `fom endres`() {
         val original = linjer(5.januar to 10.januar)
         val recalculated = linjer(1.januar to 10.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 10.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
@@ -209,7 +209,7 @@ internal class UtbetalingslinjeForskjellTest {
             6.januar to 19.januar grad 50,
             20.januar to 26.januar
         )
-        val actual = new forskjell original
+        val actual = new - original
         assertEquals(original.fagsystemId, actual.fagsystemId)
 
         assertEquals(original[0].id, actual[0].id)
@@ -228,7 +228,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `slett nøyaktig en periode`() {
         val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50)
         val recalculated = linjer(6.januar to 12.januar grad 50)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(
             linjer(
                 6.januar to 12.januar grad 50, // STATUS OPPH AND endringskode ENDR delytelse 2 ref 1 AND separate field with fom date (1.januar)
@@ -249,7 +249,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `original andre periode samsvarer delvis med ny`() {
         val original = linjer(1.januar to 5.januar, 6.januar to 12.januar grad 50)
         val recalculated = linjer(6.januar to 19.januar grad 50)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(
             6.januar to 12.januar grad 50,
             6.januar to 19.januar grad 50
@@ -268,7 +268,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `perioden min starter midt i en original periode`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
         val recalculated = linjer(6.januar to 19.januar grad 50)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(
             4.januar to 12.januar grad 50,
             6.januar to 19.januar grad 50
@@ -287,7 +287,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `ny er tom`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
         val recalculated = tomOppdrag()
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(
             linjer(4.januar to 12.januar grad 50),
             actual
@@ -304,7 +304,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `ny er tom uten sisteArbeidsgiverdag`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
         val recalculated = tomOppdrag(null)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(
             linjer(4.januar to 12.januar grad 50),
             actual
@@ -321,7 +321,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
         val recalculated = tomOppdrag(1.februar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
@@ -330,7 +330,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `originalen har hale å slette`() {
         val original = linjer(1.januar to 12.januar)
         val recalculated = linjer(1.januar to 5.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(
             1.januar to 12.januar,
             1.januar to 5.januar
@@ -355,7 +355,7 @@ internal class UtbetalingslinjeForskjellTest {
             1.januar to 5.januar,
             8.januar to 10.januar
         )
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
 
         assertUtbetalinger(linjer(
             1.januar to 5.januar,
@@ -380,7 +380,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test internal fun `slette fra hode og hale av originalen`() {
         val original = linjer(1.januar to 12.januar)
         val recalculated = linjer(3.januar to 9.januar)
-        val actual = recalculated forskjell original
+        val actual = recalculated - original
         assertUtbetalinger(linjer(
             1.januar to 12.januar,
             3.januar to 9.januar
@@ -410,7 +410,7 @@ internal class UtbetalingslinjeForskjellTest {
             6.januar to 19.januar grad 50,
             20.januar to 26.januar
         )
-        val actual = new forskjell original
+        val actual = new - original
         assertUtbetalinger(linjer(
             20.januar to 31.januar,
             6.januar to 19.januar grad 50,
@@ -443,7 +443,7 @@ internal class UtbetalingslinjeForskjellTest {
             20.januar to 31.januar
         )
         val new = tomOppdrag()
-        val actual = new forskjell original
+        val actual = new - original
         assertUtbetalinger(
             linjer(20.januar to 31.januar),
             actual

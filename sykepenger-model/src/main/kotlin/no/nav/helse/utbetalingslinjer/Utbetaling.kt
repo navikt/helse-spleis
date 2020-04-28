@@ -78,8 +78,8 @@ internal class Utbetaling private constructor(
 
     internal fun kansellerUtbetaling() = Utbetaling(
         utbetalingstidslinje,
-        arbeidsgiverOppdrag.emptied().forskjell(arbeidsgiverOppdrag),
-        personOppdrag.emptied().forskjell(personOppdrag),
+        arbeidsgiverOppdrag.emptied() - arbeidsgiverOppdrag,
+        personOppdrag.emptied() - personOppdrag,
         LocalDateTime.now()
     )
 }

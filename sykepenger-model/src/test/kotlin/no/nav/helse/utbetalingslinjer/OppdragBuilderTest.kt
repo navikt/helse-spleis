@@ -25,7 +25,7 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
-        assertEquals(7, oppdrag.dager().size)
+        assertEquals(7, oppdrag.dagSatser().size)
         assertLinje(0, 2.januar, 10.januar, null)
     }
 
@@ -34,15 +34,15 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 1.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
 
         assertEquals(1, oppdrag.size)
-        assertEquals(6, oppdrag.dager().size)
+        assertEquals(6, oppdrag.dagSatser().size)
         assertLinje(0, 2.januar, 9.januar, null, sats = 1200, grad = 100.0)
-        assertTrue(oppdrag.dager().all { it.second == 1200 })
+        assertTrue(oppdrag.dagSatser().all { it.second == 1200 })
     }
 
     @Test
     internal fun `kun helgedager`() {
         opprett(1.AP, 2.HELG)
-        assertEquals(0, oppdrag.dager().size)
+        assertEquals(0, oppdrag.dagSatser().size)
         assertEquals(0, oppdrag.size)
     }
 

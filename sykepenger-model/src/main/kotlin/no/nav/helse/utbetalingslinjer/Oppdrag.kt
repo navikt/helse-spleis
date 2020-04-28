@@ -54,7 +54,10 @@ internal class Oppdrag private constructor(
     )
 
     internal fun totalbeløp() = this.sumBy { it.totalbeløp() }
-    internal fun dager() = this.flatMap { linje -> linje.dager().map { it to linje.dagsats } }
+
+    internal fun dagSatser() = this.flatMap { linje -> linje.dager().map { it to linje.dagsats } }
+
+    internal operator fun minus(other: Oppdrag) = this.forskjell(other)
 
     infix fun forskjell(other: Oppdrag): Oppdrag {
         val tidligere = other.copyWith(other.filter{ !it.erOpphør() })
@@ -144,8 +147,7 @@ internal class Oppdrag private constructor(
     private fun håndterLengreTidligere(tidligere: Oppdrag) {
         if (this.sistedato >= tidligere.sistedato) return
         this.add(this.last().deletion(
-            this.last().tom.plusDays(1),
-            tidligere.last().tom
+            this.last().tom.plusDays(1)
         ))
     }
 
