@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -25,7 +24,7 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
-        assertEquals(7, oppdrag.dagSatser().size)
+        assertEquals(7, oppdrag.antallDager)
         assertLinje(0, 2.januar, 10.januar, null)
     }
 
@@ -34,15 +33,14 @@ internal class OppdragBuilderTest {
         opprett(1.AP, 1.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
 
         assertEquals(1, oppdrag.size)
-        assertEquals(6, oppdrag.dagSatser().size)
+        assertEquals(6, oppdrag.antallDager)
         assertLinje(0, 2.januar, 9.januar, null, sats = 1200, grad = 100.0)
-        assertTrue(oppdrag.dagSatser().all { it.second == 1200 })
     }
 
     @Test
     internal fun `kun helgedager`() {
         opprett(1.AP, 2.HELG)
-        assertEquals(0, oppdrag.dagSatser().size)
+        assertEquals(0, oppdrag.antallDager)
         assertEquals(0, oppdrag.size)
     }
 
@@ -189,4 +187,6 @@ internal class OppdragBuilderTest {
             sisteDato ?: tidslinje.sisteDato()
         ).result()
     }
+
+    private val Oppdrag.antallDager get() = this.sumBy { it.dager().size }
 }

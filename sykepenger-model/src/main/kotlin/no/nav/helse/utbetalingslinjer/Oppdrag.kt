@@ -1,9 +1,12 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.OppdragVisitor
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
+import kotlin.streams.toList
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -55,13 +58,28 @@ internal class Oppdrag private constructor(
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
-    internal fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.dagsats } }
-
-    internal operator fun minus(other: Oppdrag) = this.forskjell(other)
-
     private fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
-    infix fun forskjell(other: Oppdrag): Oppdrag {
+    internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
+        return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->
+            oppdrag.first != simulering.first || oppdrag.second != simulering.second
+        }
+    }
+
+    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.dagsats } }
+
+    private fun dagSatser(resultat: Simulering.SimuleringResultat, fom: LocalDate, tom: LocalDate) =
+        resultat.perioder.flatMap {
+            it.utbetalinger.flatMap {
+                it.detaljer.flatMap { detalj ->
+                    detalj.periode.start.datesUntil(detalj.periode.endInclusive.plusDays(1))
+                        .filter { it >= fom && it <= tom }
+                        .filter { !it.erHelg() }
+                        .map { it to detalj.sats.sats }
+                        .toList()
+                } } }
+
+    internal operator fun minus(other: Oppdrag): Oppdrag {
         val tidligere = other.copyWith(other.linjerUtenOpphør())
         return when {
             tidligere.isEmpty() ->

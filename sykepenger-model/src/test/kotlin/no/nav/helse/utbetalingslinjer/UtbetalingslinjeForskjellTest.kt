@@ -536,9 +536,7 @@ internal class UtbetalingslinjeForskjellTest {
             return this
         }
 
-        internal infix fun forskjell(other: TestUtbetalingslinje) = this forskjell other.asUtbetalingslinjer()
-
-        internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() forskjell other
+        internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() - other
 
         internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, dagsats, grad)
 
