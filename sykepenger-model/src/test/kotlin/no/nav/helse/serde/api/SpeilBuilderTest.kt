@@ -40,14 +40,7 @@ internal class SpeilBuilderTest {
         val (person, hendelser) = ingenBetalingsperson()
         val personDTO = serializePersonForSpeil(person, hendelser)
 
-        assertEquals(
-            1.januar,
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.first().dato
-        )
-        assertEquals(
-            9.januar,
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.last().dato
-        )
+        assertEquals(TilstandstypeDTO.IngenUtbetaling, (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand)
     }
 
     @Test
@@ -441,8 +434,6 @@ internal class SpeilBuilderTest {
                     }
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
 

@@ -356,7 +356,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&
             person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
-        ) return tilstand(ytelser, Avsluttet) {
+        ) return tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {
             ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
         }
         if (!utbetalingstidslinje.harUtbetalinger()) return tilstand(
@@ -750,7 +750,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetalingMedInntektsmelding)
         }
-
     }
 
     internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
