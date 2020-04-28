@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.serde.migration.V3BeregnerGjenståendeSykedagerFraMaksdato
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -36,9 +37,11 @@ interface PersonObserver {
         val aktørId: String,
         val fødselsnummer: String,
         val førsteFraværsdag: LocalDate,
+        val hendelser: Set<UUID>,
         val vedtaksperiodeId: UUID,
         val utbetalingslinjer: List<Utbetalingslinje>,
         val forbrukteSykedager: Int,
+        val gjenståendeSykedager: Int?,
         val opprettet: LocalDateTime
     )
 
@@ -46,7 +49,11 @@ interface PersonObserver {
         val fom: LocalDate,
         val tom: LocalDate,
         val dagsats: Int,
-        val grad: Double
+        val beløp: Int,
+        val grad: Double,
+        val enDelAvPeriode: Boolean,
+        val mottaker: String,
+        val konto: String
     )
 
     data class ManglendeInntektsmeldingEvent(

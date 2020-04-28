@@ -987,7 +987,10 @@ internal class Vedtaksperiode private constructor(
                     førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag),
                     vedtaksperiodeId = vedtaksperiode.id,
                     utbetaling = vedtaksperiode.utbetaling(),
-                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager)
+                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
+                    sykdomshistorikk = vedtaksperiode.sykdomshistorikk,
+                    periode = vedtaksperiode.periode(),
+                    orgnummer = vedtaksperiode.organisasjonsnummer
                 )
 
                 vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
