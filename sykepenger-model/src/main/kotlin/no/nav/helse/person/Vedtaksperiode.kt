@@ -981,8 +981,6 @@ internal class Vedtaksperiode private constructor(
                 utbetaling.info("OK fra Oppdragssystemet")
 
                 val event = tilUtbetaltEvent(
-                    aktørId = vedtaksperiode.aktørId,
-                    fødselsnummer = vedtaksperiode.fødselsnummer,
                     førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag),
                     vedtaksperiodeId = vedtaksperiode.id,
                     utbetaling = vedtaksperiode.utbetaling(),

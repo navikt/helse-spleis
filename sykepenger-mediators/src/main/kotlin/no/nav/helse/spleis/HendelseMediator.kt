@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.databind.node.NullNode
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -187,15 +188,21 @@ internal class HendelseMediator(
                 publish("utbetalt", JsonMessage.newMessage(mapOf(
                     "førsteFraværsdag" to event.førsteFraværsdag,
                     "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
+                    "hendelser" to event.hendelser,
                     "utbetalingslinjer" to event.utbetalingslinjer.map {
                         mapOf(
                             "fom" to it.fom,
                             "tom" to it.tom,
                             "dagsats" to it.dagsats,
-                            "grad" to it.grad
+                            "beløp" to it.beløp,
+                            "grad" to it.grad,
+                            "enDelAvPerioden" to it.enDelAvPeriode,
+                            "mottaker" to it.mottaker,
+                            "konto" to it.konto
                         )
                     },
                     "forbrukteSykedager" to event.forbrukteSykedager,
+                    "gjenståendeSykedager" to (event.gjenståendeSykedager ?: NullNode.instance),
                     "opprettet" to event.opprettet
                 )))
             }

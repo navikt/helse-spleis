@@ -44,7 +44,6 @@ internal class TilUtbetalingHendelseTest {
         person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
         assertTilstand(TilstandType.AVSLUTTET)
 
-        assertEquals(UNG_PERSON_FNR_2018, utbetaltEvent.fødselsnummer)
         assertEquals(førsteSykedag, utbetaltEvent.førsteFraværsdag)
 
         val utbetalingslinje = utbetaltEvent.utbetalingslinjer[0]

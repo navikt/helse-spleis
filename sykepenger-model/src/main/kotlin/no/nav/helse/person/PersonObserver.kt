@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.serde.migration.V3BeregnerGjenståendeSykedagerFraMaksdato
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,8 +33,6 @@ interface PersonObserver {
     )
 
     data class UtbetaltEvent(
-        val aktørId: String,
-        val fødselsnummer: String,
         val førsteFraværsdag: LocalDate,
         val hendelser: Set<UUID>,
         val vedtaksperiodeId: UUID,

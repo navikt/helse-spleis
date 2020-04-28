@@ -11,8 +11,6 @@ import java.util.*
 import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
-    aktørId: String,
-    fødselsnummer: String,
     orgnummer: String,
     førsteFraværsdag: LocalDate,
     vedtaksperiodeId: UUID,
@@ -21,8 +19,6 @@ internal fun tilUtbetaltEvent(
     periode: Periode,
     forbrukteSykedager: Int
 ) = UtbetaltEventBuilder(
-    aktørId = aktørId,
-    fødselsnummer = fødselsnummer,
     orgnummer = orgnummer,
     førsteFraværsdag = førsteFraværsdag,
     vedtaksperiodeId = vedtaksperiodeId,
@@ -33,8 +29,6 @@ internal fun tilUtbetaltEvent(
 ).build()
 
 private class UtbetaltEventBuilder(
-    private val aktørId: String,
-    private val fødselsnummer: String,
     private val orgnummer: String,
     private val førsteFraværsdag: LocalDate,
     private val vedtaksperiodeId: UUID,
@@ -53,8 +47,6 @@ private class UtbetaltEventBuilder(
         utbetaling.accept(this)
 
         return PersonObserver.UtbetaltEvent(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
             førsteFraværsdag = førsteFraværsdag,
             hendelser = hendelser.toSet(),
             vedtaksperiodeId = vedtaksperiodeId,
