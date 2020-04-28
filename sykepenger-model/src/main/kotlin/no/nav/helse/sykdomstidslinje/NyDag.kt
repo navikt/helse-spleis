@@ -24,6 +24,8 @@ internal sealed class NyDag(
         }
     }
 
+    internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
+
     internal fun problem(other: NyDag): NyDag = ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
 
     override fun equals(other: Any?) =

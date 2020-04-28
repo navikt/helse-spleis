@@ -6,24 +6,31 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDate
 import java.util.*
+import kotlin.reflect.KClass
+
+internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
     private val meldingsreferanseId: UUID
 ) : ArbeidstakerHendelse() {
-    internal val kilde: Hendelseskilde = Hendelseskilde(this.javaClass, meldingsreferanseId)
+    internal val kilde: Hendelseskilde = Hendelseskilde(this::class, meldingsreferanseId)
 
     internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
         internal constructor(
-            hendelse: Class<SykdomstidslinjeHendelse>,
+            hendelse: Melding,
             meldingsreferanseId: UUID
-        ) : this(hendelse.canonicalName.split('.').last(), meldingsreferanseId)
+        ) : this(kildenavn(hendelse), meldingsreferanseId)
 
         companion object {
-            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class.java, UUID.randomUUID())
+            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID())
+
+            private fun kildenavn(hendelse: Melding): String =
+                hendelse.simpleName ?: "Ukjent"
         }
 
         override fun toString() = type
         internal fun meldingsreferanseId() = meldingsreferanseId
+        internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
     }
 
     internal fun meldingsreferanseId() = meldingsreferanseId

@@ -4,6 +4,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -177,6 +181,30 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar, 31.januar,  20, 20), permittert = true)
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hasWarnings())
+    }
+
+    @Test
+    internal fun `søknadsturnering for nye dagtyper`() {
+        søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar,  100))
+
+        assertTrue(søknad.sykdomstidslinje()[1.januar] is Sykedag.Søknad)
+        assertTrue(søknad.sykdomstidslinje()[14.januar] is SykHelgedag.Søknad)
+        assertTrue(søknad.sykdomstidslinje()[15.januar] is Arbeidsdag.Søknad)
+        assertTrue(søknad.sykdomstidslinje()[21.januar] is FriskHelgedag.Søknad)
+        assertTrue(søknad.sykdomstidslinje()[31.januar] is Arbeidsdag.Søknad)
+
+        assertEquals(10, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(4, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
+        assertEquals(13, søknad.nySykdomstidslinje().filterIsInstance<NyArbeidsdag>().size)
+        assertEquals(4, søknad.nySykdomstidslinje().filterIsInstance<NyFriskHelgedag>().size)
+    }
+
+    @Test
+    fun `turnering mellom arbeidsgiverdager og sykedager`() {
+        søknad(Sykdom(1.januar, 31.januar,  100), Egenmelding(15.januar, 31.januar))
+
+        assertEquals(23, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(8, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {

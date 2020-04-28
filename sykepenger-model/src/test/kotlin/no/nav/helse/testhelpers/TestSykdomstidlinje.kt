@@ -1,12 +1,11 @@
 package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.BesteStrategy
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
-import java.util.*
 
 internal class TestSykdomstidslinje(
     private val førsteDato: LocalDate,
@@ -22,21 +21,6 @@ internal class TestSykdomstidslinje(
     internal fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
     internal fun lås(periode: Periode) = this.asNySykdomstidslinje().also { it.lås(periode) }
     internal fun låsOpp(periode: Periode) = this.asNySykdomstidslinje().also { it.låsOpp(periode) }
-
-    internal object TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "42"
-        private const val ORGNUMMER = "987654321"
-
-        override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
-        override fun sykdomstidslinje() = Sykdomstidslinje()
-        override fun nySykdomstidslinje() = NySykdomstidslinje()
-        override fun valider(periode: Periode) = Aktivitetslogg()
-        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
-        override fun aktørId() = AKTØRID
-        override fun fødselsnummer() = UNG_PERSON_FNR_2018
-        override fun organisasjonsnummer() = ORGNUMMER
-    }
 }
 
 internal infix fun LocalDate.jobbTil(sisteDato: LocalDate) =

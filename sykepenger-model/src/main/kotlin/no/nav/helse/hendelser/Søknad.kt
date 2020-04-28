@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.tournament.nySøknadDagturnering
 import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,7 +39,7 @@ class Søknad constructor(
         nySykdomstidslinje = perioder
             .map { it.nySykdomstidslinje(avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
-            .merge()
+            .merge(nySøknadDagturnering::beste)
     }
 
     override fun sykdomstidslinje() = perioder
