@@ -16,8 +16,8 @@ internal class Utbetalingslinje internal constructor(
     private var delytelseId: Int = 1,
     private var refDelytelseId: Int? = null,
     private var endringskode: Endringskode = NY,
-    private var datoStatusFom: LocalDate? = null,
-    private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig
+    private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
+    private var datoStatusFom: LocalDate? = null
 ) {
 
     internal fun accept(visitor: OppdragVisitor) {
@@ -85,15 +85,15 @@ internal class Utbetalingslinje internal constructor(
 
     internal fun deletion(datoStatusFom: LocalDate) =
         Utbetalingslinje(
-            fom,
-            tom,
-            dagsats,
-            grad,
-            refFagsystemId,
-            delytelseId,
-            refDelytelseId,
-            ENDR,
-            datoStatusFom
+            fom = fom,
+            tom = tom,
+            dagsats = dagsats,
+            grad = grad,
+            refFagsystemId = refFagsystemId,
+            delytelseId = delytelseId,
+            refDelytelseId = refDelytelseId,
+            endringskode = ENDR,
+            datoStatusFom = datoStatusFom
         )
 
     internal fun erOpphør() = datoStatusFom != null

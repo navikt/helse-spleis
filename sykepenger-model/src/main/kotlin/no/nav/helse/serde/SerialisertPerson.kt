@@ -289,7 +289,8 @@ class SerialisertPerson(val json: String) {
         data.delytelseId,
         data.refDelytelseId,
         Endringskode.valueOf(data.endringskode),
-        Klassekode.from(data.klassekode)
+        Klassekode.from(data.klassekode),
+        data.datoStatusFom
     )
 
     private fun parseDataForVilkårsvurdering(
@@ -569,7 +570,8 @@ data class UtbetalingslinjeData(
     val delytelseId: Int,
     val refDelytelseId: Int?,
     val endringskode: String,
-    val klassekode: String
+    val klassekode: String,
+    val datoStatusFom: LocalDate?
 )
 
 data class UtbetalingstidslinjeData(

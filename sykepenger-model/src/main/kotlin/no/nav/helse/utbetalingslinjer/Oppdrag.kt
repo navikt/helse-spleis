@@ -53,14 +53,16 @@ internal class Oppdrag private constructor(
         linjer.hashCode() * 67 + mottaker.hashCode()
     )
 
-    internal fun totalbeløp() = this.sumBy { it.totalbeløp() }
+    internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
-    internal fun dagSatser() = this.flatMap { linje -> linje.dager().map { it to linje.dagsats } }
+    internal fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.dagsats } }
 
     internal operator fun minus(other: Oppdrag) = this.forskjell(other)
 
+    private fun linjerUtenOpphør() = filter { !it.erOpphør() }
+
     infix fun forskjell(other: Oppdrag): Oppdrag {
-        val tidligere = other.copyWith(other.filter{ !it.erOpphør() })
+        val tidligere = other.copyWith(other.linjerUtenOpphør())
         return when {
             tidligere.isEmpty() ->
                 this

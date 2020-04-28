@@ -41,6 +41,48 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinje(0, "SPREFAG-IOP", "klassekode")
     }
 
+    @Test internal fun `Reflect mapper riktige verdierm med opphør`() {
+        val tidligereUtbetaling = Utbetaling(
+            UNG_PERSON_FNR_2018,
+            ORGNUMMER,
+            tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
+            4.januar,
+            Aktivitetslogg(),
+            null
+        )
+
+        map = UtbetalingReflect(Utbetaling(
+            UNG_PERSON_FNR_2018,
+            ORGNUMMER,
+            tidslinjeMedDagsats(tidslinjeOf(2.NAV)),
+            2.januar,
+            Aktivitetslogg(),
+            tidligereUtbetaling)
+        ).toMap()
+
+        assertUtbetalingslinjer(ORGNUMMER, "mottaker")
+        assertUtbetalingslinjer("SPREF", "fagområde")
+        assertUtbetalingslinjer("ENDR", "endringskode")
+        assertUtbetalingslinjer(-874558729, "sjekksum")
+        assertUtbetalingslinje(0, 1.januar.toString(), "fom")
+        assertUtbetalingslinje(0, 4.januar.toString(), "tom")
+        assertUtbetalingslinje(0, "OPPH", "statuskode")
+        assertUtbetalingslinje(0, 1.januar, "datoStatusFom")
+        assertUtbetalingslinje(0, 1, "delytelseId")
+        assertUtbetalingslinje(0, null, "refDelytelseId")
+        assertUtbetalingslinje(0, "ENDR", "endringskode")
+        assertUtbetalingslinje(0, "SPREFAG-IOP", "klassekode")
+
+        assertUtbetalingslinje(1, 1.januar.toString(), "fom")
+        assertUtbetalingslinje(1, 2.januar.toString(), "tom")
+        assertUtbetalingslinje(1, null, "statuskode")
+        assertUtbetalingslinje(1, null, "datoStatusFom")
+        assertUtbetalingslinje(1, 2, "delytelseId")
+        assertUtbetalingslinje(1, 1, "refDelytelseId")
+        assertUtbetalingslinje(1, "NY", "endringskode")
+        assertUtbetalingslinje(1, "SPREFAG-IOP", "klassekode")
+    }
+
     private fun assertUtbetalingslinje(index: Int, expected: Any?, key: String) {
         assertEquals(expected, ((map
             ["arbeidsgiverOppdrag"] as Map<String, String>)
