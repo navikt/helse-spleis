@@ -94,7 +94,8 @@ internal class Oppdrag private constructor(
         nåværende.håndterLengreTidligere(tidligere)
     }
 
-    private var tilstand: Tilstand = Identisk()
+    private lateinit var tilstand: Tilstand
+    private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
 
     private lateinit var linkTo: Utbetalingslinje
 
@@ -104,7 +105,7 @@ internal class Oppdrag private constructor(
             nåværende.kobleTil(tidligere)
             nåværende.kopierLikeLinjer(tidligere)
             nåværende.håndterLengreNåværende(tidligere)
-            nåværende.håndterLengreTidligere(tidligere)
+            deletion?.let { this.add(0, it) }
         }
 
     private fun deleted(tidligere: Oppdrag): Oppdrag {
@@ -132,8 +133,13 @@ internal class Oppdrag private constructor(
         sjekksum
     )
 
-    private fun kopierLikeLinjer(tidligere: Oppdrag) =
+    private var deletion: Utbetalingslinje? = null
+
+    private fun kopierLikeLinjer(tidligere: Oppdrag) {
+        tilstand = if(tidligere.sistedato > this.sistedato) Slett() else Identisk()
+        sisteLinjeITidligereOppdrag = tidligere.last()
         this.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
+    }
 
     private fun håndterLengreNåværende(tidligere: Oppdrag) {
         if (this.size <= tidligere.size) return
@@ -184,6 +190,18 @@ internal class Oppdrag private constructor(
                 return
             }
             nåværende.linkTo(linkTo)
+            linkTo = nåværende
+            tilstand = Ny()
+        }
+    }
+
+    private inner class Slett : Tilstand {
+        override fun forskjell(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje
+        ) {
+            if (nåværende.equals(tidligere)) return nåværende.ghostFrom(tidligere)
+            deletion = sisteLinjeITidligereOppdrag.deletion(tidligere.fom).also { nåværende.linkTo(it) }
             linkTo = nåværende
             tilstand = Ny()
         }

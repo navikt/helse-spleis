@@ -150,7 +150,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[1].endringskode)
         assertEquals(Endringskode.NY, actual[2].endringskode)
         assertEquals(Endringskode.NY, actual[3].endringskode)
-//        assertEquals(original[1].id, actual[1].id)      // picks up id from original
         assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
     }
@@ -179,7 +178,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[1].endringskode)
         assertEquals(Endringskode.NY, actual[2].endringskode)
         assertEquals(Endringskode.NY, actual[3].endringskode)
-//        assertEquals(original[1].id, actual[1].id)      // picks up id from original
         assertEquals(original[5].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
     }
@@ -231,8 +229,8 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(
             linjer(
-                6.januar to 12.januar grad 50, // STATUS OPPH AND endringskode ENDR delytelse 2 ref 1 AND separate field with fom date (1.januar)
-                6.januar to 12.januar grad 50) // endringskode NY delytelseId 3 ref 2
+                6.januar to 12.januar grad 50,
+                6.januar to 12.januar grad 50)
             , actual
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -358,23 +356,23 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
 
         assertUtbetalinger(linjer(
+            8.januar to 12.januar,
             1.januar to 5.januar,
-            8.januar to 12.januar, //ENDR and OPPH and specialDate 8.januar
             8.januar to 10.januar
         ), actual)
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(original[0].id, actual[0].id)
-        assertNull(actual[0].refId)
-        assertEquals(Endringskode.ENDR, actual[1].endringskode)
-        assertEquals(8.januar, actual[1].datoStatusFom)
-        assertEquals(original[1].id, actual[1].id)
-        assertEquals(original[1].refId, actual[1].refId)
+        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(original[1].id, actual[0].id)
+        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(8.januar, actual[0].datoStatusFom)
+        assertEquals(Endringskode.UEND, actual[1].endringskode)
+        assertEquals(original[0].id, actual[1].id)
+        assertNull(actual[1].refId)
         assertEquals(Endringskode.NY, actual[2].endringskode)
-        assertEquals(original[1].id + 1, actual[2].id)
-        assertEquals(original[1].id, actual[2].refId)
+        assertEquals(actual[0].id + 1, actual[2].id)
+        assertEquals(actual[0].id, actual[2].refId)
     }
 
     @Test internal fun `slette fra hode og hale av originalen`() {
