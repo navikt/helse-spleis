@@ -6,7 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.*
@@ -59,8 +59,8 @@ internal class SpeilBuilderTest {
         assertEquals(TypeDataDTO.ForeldetDag, utbetalingstidslinje.last().type)
 
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
-        assertEquals(JsonDagType.FORELDET_SYKEDAG, sykdomstidslinje.first().type)
-        assertEquals(JsonDagType.FORELDET_SYKEDAG, sykdomstidslinje.last().type)
+        assertEquals(SpeilDagtype.FORELDET_SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals(SpeilDagtype.FORELDET_SYKEDAG, sykdomstidslinje.last().type)
     }
 
     @Test
@@ -306,7 +306,8 @@ internal class SpeilBuilderTest {
 
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
         assertEquals(31, sykdomstidslinje.size)
-        assertEquals(JsonDagType.SYKEDAG_SØKNAD, sykdomstidslinje.first().type)
+        assertEquals(SpeilDagtype.SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals("Søknad", sykdomstidslinje.first().kilde?.type.toString())
         assertEquals(1.januar, sykdomstidslinje.first().dagen)
 
         assertEquals("en_saksbehandler_ident", vedtaksperiode.godkjentAv)

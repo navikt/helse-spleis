@@ -3,7 +3,10 @@ package no.nav.helse.serde.api
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
-import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.api.SykdomstidslinjedagDTO.KildeDTO
+import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.mapping.SpeilKildetype
+import no.nav.helse.serde.mapping.SpeilKildetype.*
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -640,59 +643,71 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         JsonState {
 
         override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) =
-            leggTilDag(JsonDagType.ARBEIDSDAG_INNTEKTSMELDING, dag)
+            leggTilDag(SpeilDagtype.ARBEIDSDAG, dag, Inntektsmelding)
 
-        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = leggTilDag(JsonDagType.ARBEIDSDAG_SØKNAD, dag)
+        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) =
+            leggTilDag(SpeilDagtype.ARBEIDSDAG, dag, Søknad)
 
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) =
-            leggTilDag(JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING, dag)
+            leggTilDag(SpeilDagtype.ARBEIDSGIVERDAG, dag, Inntektsmelding)
 
         override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) =
-            leggTilDag(JsonDagType.EGENMELDINGSDAG_SØKNAD, dag)
+            leggTilDag(SpeilDagtype.ARBEIDSGIVERDAG, dag, Søknad)
 
         override fun visitFeriedag(dag: Feriedag.Inntektsmelding) =
-            leggTilDag(JsonDagType.FERIEDAG_INNTEKTSMELDING, dag)
+            leggTilDag(SpeilDagtype.FERIEDAG, dag, Inntektsmelding)
 
-        override fun visitFeriedag(dag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, dag)
+        override fun visitFeriedag(dag: Feriedag.Søknad) =
+            leggTilDag(SpeilDagtype.FERIEDAG, dag, Søknad)
 
         override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) =
-            leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
+            leggTilDag(SpeilDagtype.FRISK_HELGEDAG, dag, Søknad)
 
         override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) =
-            leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
+            leggTilDag(SpeilDagtype.FRISK_HELGEDAG, dag, Inntektsmelding)
 
-        override fun visitImplisittDag(dag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, dag)
+        override fun visitImplisittDag(dag: ImplisittDag) =
+            leggTilDag(SpeilDagtype.IMPLISITT_DAG, dag)
 
         override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) =
-            leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, dag)
+            leggTilDag(SpeilDagtype.PERMISJONSDAG, dag, Søknad)
 
-        override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, dag)
+        override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) =
+            leggTilDag(SpeilDagtype.PERMISJONSDAG, dag)
 
-        override fun visitStudiedag(dag: Studiedag) = leggTilDag(JsonDagType.STUDIEDAG, dag)
+        override fun visitStudiedag(dag: Studiedag) =
+            leggTilDag(SpeilDagtype.STUDIEDAG, dag, Søknad)
+
         override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) =
-            leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, dag)
+            leggTilSykedag(SpeilDagtype.SYK_HELGEDAG, dag, Sykmelding)
 
         override fun visitSykHelgedag(dag: SykHelgedag.Søknad) =
-            leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, dag)
+            leggTilSykedag(SpeilDagtype.SYK_HELGEDAG, dag, Søknad)
 
-        override fun visitSykedag(dag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, dag)
+        override fun visitSykedag(dag: Sykedag.Sykmelding) =
+            leggTilSykedag(SpeilDagtype.SYKEDAG, dag, Sykmelding)
 
-        override fun visitSykedag(dag: Sykedag.Søknad) = leggTilSykedag(JsonDagType.SYKEDAG_SØKNAD, dag)
-        override fun visitUbestemt(dag: Ubestemtdag) = leggTilDag(JsonDagType.UBESTEMTDAG, dag)
-        override fun visitUtenlandsdag(dag: Utenlandsdag) = leggTilDag(JsonDagType.UTENLANDSDAG, dag)
+        override fun visitSykedag(dag: Sykedag.Søknad) =
+            leggTilSykedag(SpeilDagtype.SYKEDAG, dag, Søknad)
+
+        override fun visitUbestemt(dag: Ubestemtdag) =
+            leggTilDag(SpeilDagtype.UBESTEMTDAG, dag)
+
+        override fun visitUtenlandsdag(dag: Utenlandsdag) =
+            leggTilDag(SpeilDagtype.UTENLANDSDAG, dag, Søknad)
 
         override fun visitForeldetSykedag(dag: ForeldetSykedag) =
-            leggTilSykedag(JsonDagType.FORELDET_SYKEDAG, dag)
+            leggTilSykedag(SpeilDagtype.FORELDET_SYKEDAG, dag, Søknad)
 
-        private fun leggTilDag(jsonDagType: JsonDagType, dag: Dag) {
+        private fun leggTilDag(dagtype: SpeilDagtype, dag: Dag, kilde: SpeilKildetype? = null) {
             sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dag.dagen, jsonDagType)
+                SykdomstidslinjedagDTO(dag.dagen, dagtype, kilde?.let { KildeDTO(kilde) } )
             )
         }
 
-        private fun leggTilSykedag(jsonDagType: JsonDagType, dag: GradertDag) {
+        private fun leggTilSykedag(dagtype: SpeilDagtype, dag: GradertDag, kilde: SpeilKildetype? = null) {
             sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dag.dagen, jsonDagType, dag.grad)
+                SykdomstidslinjedagDTO(dag.dagen, dagtype, kilde?.let { KildeDTO(kilde) }, dag.grad )
             )
         }
 

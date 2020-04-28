@@ -9,8 +9,8 @@ enum class JsonDagType {
     FERIEDAG_SØKNAD,
     FRISK_HELGEDAG_INNTEKTSMELDING,
     FRISK_HELGEDAG_SØKNAD,
-    IMPLISITT_DAG,
     FORELDET_SYKEDAG,
+    IMPLISITT_DAG,
     PERMISJONSDAG_SØKNAD,
     PERMISJONSDAG_AAREG,
     STUDIEDAG,
@@ -38,16 +38,23 @@ enum class NyJsonDagType {
     UKJENT_DAG
 }
 
-enum class NySpeilJsonDagType {
+enum class SpeilDagtype {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
     FERIEDAG,
+    FORELDET_SYKEDAG,
     FRISK_HELGEDAG,
-    KUN_ARBEIDSGIVER_SYKEDAG,
+    IMPLISITT_DAG,
     PERMISJONSDAG,
     STUDIEDAG,
     SYKEDAG,
     SYK_HELGEDAG,
     UBESTEMTDAG,
     UTENLANDSDAG
+}
+
+enum class SpeilKildetype {
+    Inntektsmelding,
+    Søknad,
+    Sykmelding
 }

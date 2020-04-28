@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.mapping.SpeilKildetype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -83,9 +84,14 @@ interface VedtaksperiodeDTOBase {
 
 data class SykdomstidslinjedagDTO(
     val dagen: LocalDate,
-    val type: JsonDagType,
+    val type: SpeilDagtype,
+    val kilde: KildeDTO?,
     val grad: Double? = null
-)
+) {
+    data class KildeDTO(
+        val type: SpeilKildetype
+    )
+}
 
 interface UtbetalingstidslinjedagDTO {
     val type: TypeDataDTO
