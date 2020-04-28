@@ -344,7 +344,28 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[0].id, actual[1].refId)
     }
 
-    @Test internal fun `Test`() {
+    @Test internal fun `Sletting hvor alt blir sendt på nytt`() {
+        val original = linjer(1.januar to 12.januar)
+        val recalculated = linjer(1.januar to 5.januar, 7.januar to 10.januar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(
+            1.januar to 12.januar,
+            1.januar to 5.januar,
+            7.januar to 10.januar
+        ), actual)
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(1.januar, actual[0].datoStatusFom)
+        assertEquals(original[0].id, actual[0].id)
+        assertNull(actual[0].refId)
+        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertLink(actual[1], original[0])
+        assertEquals(Endringskode.NY, actual[2].endringskode)
+        assertLink(actual[2], actual[1])
+    }
+
+    @Test internal fun `Sletting med UEND`() {
         val original = linjer(
             1.januar to 5.januar,
             8.januar to 12.januar
@@ -492,6 +513,11 @@ internal class UtbetalingslinjeForskjellTest {
             oppdrag.zipWithNext { a, b -> b.linkTo(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }
+
+    private fun assertLink(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        assertEquals(tidligere.id + 1, nåværende.id)
+        assertEquals(tidligere.id, nåværende.refId)
+    }
 
     private inner class TestUtbetalingslinje(
         private val fom: LocalDate,

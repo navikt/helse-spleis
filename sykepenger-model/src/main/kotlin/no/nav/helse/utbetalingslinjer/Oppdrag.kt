@@ -88,10 +88,9 @@ internal class Oppdrag private constructor(
     }
 
     private fun appended(tidligere: Oppdrag) = this.also { nåværende ->
-        nåværende.first().linkTo(tidligere.last())
-        zipWithNext().map { (a, b) -> b.linkTo(a) }
         nåværende.kobleTil(tidligere)
-        nåværende.håndterLengreTidligere(tidligere)
+        nåværende.first().linkTo(tidligere.last())
+        nåværende.zipWithNext { a, b -> b.linkTo(a) }
     }
 
     private lateinit var tilstand: Tilstand
@@ -108,20 +107,14 @@ internal class Oppdrag private constructor(
             deletion?.let { this.add(0, it) }
         }
 
-    private fun deleted(tidligere: Oppdrag): Oppdrag {
-        return this.also { nåværende ->
-            nåværende.kobleTil(tidligere)
-            val deletion = nåværende.deletionLinje(tidligere)
-            nåværende.first().linkTo(deletion)
-            nåværende.zipWithNext { a, b -> b.linkTo(a) }
-            nåværende.add(0, deletion)
-        }
+    private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
+        val deletion = nåværende.deletionLinje(tidligere)
+        nåværende.appended(tidligere)
+        nåværende.add(0, deletion)
     }
 
     private fun deletionLinje(tidligere: Oppdrag) =
         tidligere.last().deletion(tidligere.førstedato)
-
-    private fun copyAfter(dato: LocalDate) = copyWith(linjer.filter { it.fom > dato })
 
     private fun copyWith(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
@@ -146,15 +139,7 @@ internal class Oppdrag private constructor(
         this[tidligere.size].linkTo(linkTo)
         this
             .subList(tidligere.size, this.size)
-            .zipWithNext()
-            .map { (a, b) -> b.linkTo(a) }
-    }
-
-    private fun håndterLengreTidligere(tidligere: Oppdrag) {
-        if (this.sistedato >= tidligere.sistedato) return
-        this.add(this.last().deletion(
-            this.last().tom.plusDays(1)
-        ))
+            .zipWithNext { a, b -> b.linkTo(a) }
     }
 
     private fun kobleTil(tidligere: Oppdrag) {
