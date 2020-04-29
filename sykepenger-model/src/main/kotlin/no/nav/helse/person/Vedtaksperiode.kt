@@ -869,7 +869,7 @@ internal class Vedtaksperiode private constructor(
 
         override val type: TilstandType = AVVENTER_SIMULERING
         override val timeout: Duration = Duration.ofHours(1)
-        private val åpningstider = LocalTime.of(6, 0)..LocalTime.of(21, 59, 59)
+        private val åpningstider = LocalTime.of(7, 0)..LocalTime.of(19, 59, 59)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(
