@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import kotlin.math.max
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
 internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMessage(packet) {
@@ -16,7 +17,9 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate(),
             gradFraSykmelding = it.path("sykmeldingsgrad").asInt(),
-            faktiskGrad = it.path("faktiskGrad").takeIf(JsonNode::isIntegralNumber)?.asInt()
+            faktiskGrad = it.path("faktiskGrad").takeIf(JsonNode::isIntegralNumber)?.asInt()?.let {
+                max(100 - it, 0)
+            }
         )
     }
 
