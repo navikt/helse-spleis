@@ -49,7 +49,7 @@ internal class Vedtaksperiode private constructor(
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
 ) : Aktivitetskontekst {
 
-    private val påminnelseThreshold = Integer.MAX_VALUE
+    private val påminnelseThreshold = 20
 
     internal constructor(
         person: Person,
