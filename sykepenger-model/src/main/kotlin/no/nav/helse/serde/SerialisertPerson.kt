@@ -49,7 +49,8 @@ class SerialisertPerson(val json: String) {
             V2Medlemskapstatus(),
             V3BeregnerGjenståendeSykedagerFraMaksdato(),
             V4LeggTilNySykdomstidslinje(),
-            V5BegrensGradTilMellom0Og100()
+            V5BegrensGradTilMellom0Og100(),
+            V6LeggTilNySykdomstidslinje()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

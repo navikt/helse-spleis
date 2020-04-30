@@ -9,8 +9,6 @@ internal class V5BegrensGradTilMellom0Og100Test {
     private val objectMapper = jacksonObjectMapper()
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
     private val beregnetTidslinjeKey = "beregnetSykdomstidslinje"
-    private val nyHendelsetidslinjeKey = "nyHendelseSykdomstidslinje"
-    private val nyBeregnetTidslinjeKey = "nyBeregnetSykdomstidslinje"
 
     @Test
     fun `endre grad -400 til 0`() {
@@ -26,8 +24,6 @@ internal class V5BegrensGradTilMellom0Og100Test {
                     .forEach { element ->
                         assertEquals(0.0, element[hendelsetidslinjeKey].first()["grad"].asDouble())
                         assertEquals(0.0, element[beregnetTidslinjeKey].first()["grad"].asDouble())
-                        assertEquals(0.0, element[nyHendelsetidslinjeKey]["dager"].first()["grad"].asDouble())
-                        assertEquals(0.0, element[nyBeregnetTidslinjeKey]["dager"].first()["grad"].asDouble())
                     }
             }
     }

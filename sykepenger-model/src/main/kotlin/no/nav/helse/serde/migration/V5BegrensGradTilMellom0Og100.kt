@@ -10,8 +10,6 @@ internal class V5BegrensGradTilMellom0Og100 : JsonMigration(version = 5) {
 
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
     private val beregnetTidslinjeKey = "beregnetSykdomstidslinje"
-    private val nyHendelsetidslinjeKey = "nyHendelseSykdomstidslinje"
-    private val nyBeregnetTidslinjeKey = "nyBeregnetSykdomstidslinje"
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
@@ -19,8 +17,6 @@ internal class V5BegrensGradTilMellom0Og100 : JsonMigration(version = 5) {
                 periode.path("sykdomshistorikk").forEach { historikkElement ->
                     historikkElement[hendelsetidslinjeKey].forEach(::begrensGrad)
                     historikkElement[beregnetTidslinjeKey].forEach(::begrensGrad)
-                    historikkElement[nyHendelsetidslinjeKey]["dager"].forEach(::begrensGrad)
-                    historikkElement[nyBeregnetTidslinjeKey]["dager"].forEach(::begrensGrad)
                 }
             }
         }

@@ -10,9 +10,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.serde.migration.JsonMigration
-import no.nav.helse.serde.migration.V1EndreKunArbeidsgiverSykedagEnum
-import no.nav.helse.serde.migration.V2Medlemskapstatus
-import no.nav.helse.serde.migration.V3BeregnerGjenståendeSykedagerFraMaksdato
+import no.nav.helse.serde.migration.V5BegrensGradTilMellom0Og100
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
@@ -61,7 +59,7 @@ internal class JsonBuilderTest {
     @Test
     internal fun `støtter deserialisering av person uten ny sykdomstidslinje`() {
         val person = person()
-        val personPre = objectMapper.writeValueAsString(person)
+        val initialPerson = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
         val json = objectMapper.readTree(jsonBuilder.toString()).also { personJsonNode ->
@@ -72,42 +70,43 @@ internal class JsonBuilderTest {
                 }
             }
         }
-        JsonMigration.medSkjemaversjon(
-            listOf(
-                V1EndreKunArbeidsgiverSykedagEnum(),
-                V2Medlemskapstatus(),
-                V3BeregnerGjenståendeSykedagerFraMaksdato()
-            ), json
-        )
+        JsonMigration.medSkjemaversjon(listOf(V5BegrensGradTilMellom0Og100()), json)
+
         val serialisertPerson = SerialisertPerson(json.toString())
         val personDeserialisert = serialisertPerson.deserialize()
-        val personPost = objectMapper.writeValueAsString(personDeserialisert)
-        assertEqualsUtenNyeUUIDer(personPre, personPost)
+        val migratedPerson = objectMapper.writeValueAsString(personDeserialisert)
+
+        assertEquals(
+            removeNotMigratedInfo(initialPerson),
+            removeNotMigratedInfo(migratedPerson),
+            "Migrated, serialized and deserialized person should match initial person"
+        )
     }
 
-    private fun assertEqualsUtenNyeUUIDer(personPre: String, personPost: String) {
-        val personPreUtenUUID = personPre.replace(Regex("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}"), "")
-        val personPreUtenTidsstempel = personPreUtenUUID.replace(Regex("T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{6}"), "")
-        val personPostUtenUUID = personPost.replace(Regex("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}"), "")
-        val personPostUtenTidsstempel = personPostUtenUUID.replace(Regex("T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{6}"), "")
-        val personPreStripped = personUtenLåstePerioder(personPreUtenTidsstempel)
-        val personPostStripped = personUtenLåstePerioder(personPostUtenTidsstempel)
-        assertEquals(personPreStripped, personPostStripped, personPreStripped)
-    }
+    private fun removeNotMigratedInfo(person: String) =
+        (objectMapper.readTree(person) as ObjectNode).let { personNode ->
+            personNode.path("arbeidsgivere").forEach { arbeidsgiver ->
+                arbeidsgiver.path("perioder").forEach { vedtaksperiode ->
+                    vedtaksperiode.path("sykdomshistorikk")["elementer"].forEach { sykdomshistorikkelement ->
+                        (sykdomshistorikkelement as ObjectNode).apply {
 
-    private fun personUtenLåstePerioder(person: String): String {
-        return (objectMapper.readTree(person) as ObjectNode)
-            .path("arbeidsgivere")
-            .forEach {
-                it.path("vedtaksperioder")
-                    .forEach { vedtaksperiode ->
-                        (vedtaksperiode.path("sykdomshistorikk")["nyHendelseSykdomstidslinje"] as ObjectNode)
-                            .remove("låstePerioder");
-                        (vedtaksperiode.path("sykdomshistorikk")["nyBeregnetSykdomstidslinje"] as ObjectNode)
-                            .remove("låstePerioder")
+                            // As new sykdomstidslinje does not yet calculate beregnetSykdomstidlinje, we cannot compare them
+                            remove("nyBeregnetSykdomstidslinje")
+
+                            (get("nyHendelseSykdomstidslinje") as ObjectNode).apply {
+                                remove("id") // not migrated
+                                replace("låstePerioder", arrayNode()) // not migrated
+                                put(
+                                    "tidsstempel",
+                                    get("tidsstempel").asText().replace(Regex("T.*"), "")
+                                ) // not migrated, timestamp will differ
+                            }
+                        }
                     }
-            }.toString()
-    }
+                }
+            }
+            objectMapper.writeValueAsString(personNode)
+        }
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {
