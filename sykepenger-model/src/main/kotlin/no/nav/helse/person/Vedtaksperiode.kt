@@ -654,7 +654,10 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.førsteFraværsdag = sistePeriode.start
                         if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
                             ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
-                        } else AvventerVilkårsprøvingGap
+                        } else {
+                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                            AvventerVilkårsprøvingGap
+                        }
                     }
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
