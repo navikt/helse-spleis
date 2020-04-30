@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.dag.Sykedag
@@ -312,7 +309,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Triple(1.desember(2017), 15.desember(2017), 15000))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 15.desember(2017), 15000))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -348,7 +345,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Triple(1.desember(2017), 16.desember(2017), 15000))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 16.desember(2017), 15000))
         inspektør.also {
             assertNoErrors(it)
             assertTrue(it.personLogg.hasWarnings() && !it.personLogg.hasOnlyInfoAndNeeds())
@@ -662,7 +659,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
-        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()), inntektshistorikk = emptyList())
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt()), inntektshistorikk = emptyList())
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
@@ -670,9 +667,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd`() {
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
-        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt()))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Triple(1.januar, 31.januar, INNTEKT.toInt()))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt()))
         håndterSimulering(0)
 
         assertTilstander(
@@ -1373,7 +1370,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(0, Triple(18.januar, 21.januar, 15000)) // -> TIL_INFOTRYGD
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000)) // -> TIL_INFOTRYGD
 
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }

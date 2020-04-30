@@ -24,6 +24,20 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `arbeidsgiverperioden er gjennomført`() {
+        2.S.utbetalingslinjer(arbeidsgiverperiodeGjennomført = true)
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `arbeidsgiverperioden er gjennomført, og perioden begynner i en helg`() {
+        resetSeed(6.januar)
+        4.S.utbetalingslinjer(arbeidsgiverperiodeGjennomført = true)
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
     fun `to dager blir betalt av arbeidsgiver`() {
         2.S.utbetalingslinjer()
         assertEquals(null, inspektør.dagtelling[NavDag::class])
@@ -453,12 +467,14 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun Sykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.sisteDag(),
-        inntektshistorikk: Inntekthistorikk = inntekthistorikk
+        inntektshistorikk: Inntekthistorikk = inntekthistorikk,
+        arbeidsgiverperiodeGjennomført: Boolean = false
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             sykdomstidslinje = this.kutt(sisteDag)!!,
             sisteDag = sisteDag,
-            inntekthistorikk = inntektshistorikk
+            inntekthistorikk = inntektshistorikk,
+            arbeidsgiverperiodeGjennomført = arbeidsgiverperiodeGjennomført
         ).result()
     }
 

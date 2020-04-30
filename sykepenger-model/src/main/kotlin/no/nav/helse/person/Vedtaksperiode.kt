@@ -833,11 +833,13 @@ internal class Vedtaksperiode private constructor(
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
                 lateinit var engineForTimeline: ByggUtbetalingstidlinjer
                 it.valider {
+                    val førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag) { "Mangler første fraværsdag" }
                     ByggUtbetalingstidlinjer(
                         mapOf(
                             arbeidsgiver to utbetalingstidslinje(
                                 arbeidsgiver,
-                                vedtaksperiode
+                                vedtaksperiode,
+                                ytelser
                             )
                         ),
                         vedtaksperiode.periode(),
@@ -845,7 +847,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.fødselsnummer,
                         vedtaksperiode.organisasjonsnummer,
                         Alder(vedtaksperiode.fødselsnummer),
-                        requireNotNull(vedtaksperiode.førsteFraværsdag)
+                        førsteFraværsdag
                     ).also { engineForTimeline = it }
                 }
                 it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, ytelser) }
@@ -854,12 +856,14 @@ internal class Vedtaksperiode private constructor(
 
         private fun utbetalingstidslinje(
             arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: Ytelser
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
+                arbeidsgiverperiodeGjennomført = ytelser.utbetalingshistorikk().arbeidsgiverperiodeGjennomført(vedtaksperiode.førsteDag()),
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result()
         }

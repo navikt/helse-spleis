@@ -1,11 +1,8 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
@@ -145,10 +142,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(
             0,
-            Triple(3.april(2019), 30.april(2019), 100),
-            Triple(18.mars(2018), 2.april(2018), 100),
-            Triple(29.november(2017), 3.desember(2017), 100),
-            Triple(13.november(2017), 28.november(2017), 100)
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100)
         )
         håndterSimulering(0)
         assertNotNull(inspektør.maksdato(0))
@@ -577,7 +574,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
-        håndterYtelser(1, Triple(17.januar(2020), 31.januar(2020), 1400))   // Duplicate processing
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400))   // Duplicate processing
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,

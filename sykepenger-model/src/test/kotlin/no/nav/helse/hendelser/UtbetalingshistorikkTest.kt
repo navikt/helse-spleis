@@ -21,6 +21,24 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
+    fun `arbeidsgiverperioden regnes som gjennomført når siste utbetalingsdag er tilstøtende`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            graderingsliste = graderingsliste,
+            aktivitetslogg = aktivitetslogg
+        )
+
+        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(6.januar))
+        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(7.januar))
+        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(8.januar))
+        assertFalse(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(9.januar))
+    }
+
+    @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234),

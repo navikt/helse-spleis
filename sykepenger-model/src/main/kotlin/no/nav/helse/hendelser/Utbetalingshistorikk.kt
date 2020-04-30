@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -21,6 +22,12 @@ class Utbetalingshistorikk(
     internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate) = Periode.trim(this.utbetalinger, førsteFraværsdag)
         .map { it.tidslinje(graderingsliste, aktivitetslogg) }
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+    internal fun arbeidsgiverperiodeGjennomført(førsteDag: LocalDate) =
+            utbetalingstidslinje(førsteDag)
+            .sisteSykepengedag()
+            ?.harTilstøtende(førsteDag) // checking for adjacency first; generalize more later
+            ?: false
 
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         utbetalinger.onEach { it.valider(aktivitetslogg, periode) }

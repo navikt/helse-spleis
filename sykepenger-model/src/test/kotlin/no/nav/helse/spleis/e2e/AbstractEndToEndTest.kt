@@ -145,7 +145,7 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(simulering(vedtaksperiodeIndex))
     }
 
-    protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Triple<LocalDate, LocalDate, Int>, inntektshistorikk: List<Inntektsopplysning> = listOf(
+    protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Utbetalingshistorikk.Periode, inntektshistorikk: List<Inntektsopplysning> = listOf(
         Inntektsopplysning(
             1.desember(2017),
             INNTEKT.toInt(),
@@ -311,7 +311,7 @@ internal abstract class AbstractEndToEndTest {
 
     private fun ytelser(
         vedtaksperiodeIndex: Int,
-        utbetalinger: List<Triple<LocalDate, LocalDate, Int>> = listOf(),
+        utbetalinger: List<Utbetalingshistorikk.Periode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = listOf(
             Inntektsopplysning(
                 1.desember(2017),
@@ -330,13 +330,7 @@ internal abstract class AbstractEndToEndTest {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
-                utbetalinger = utbetalinger.map {
-                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                        it.first,
-                        it.second,
-                        it.third
-                    )
-                },
+                utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 graderingsliste = emptyList(),
                 aktivitetslogg = aktivitetslogg
