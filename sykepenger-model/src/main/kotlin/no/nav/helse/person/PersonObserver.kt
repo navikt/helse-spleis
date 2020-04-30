@@ -33,25 +33,33 @@ interface PersonObserver {
     )
 
     data class UtbetaltEvent(
-        val førsteFraværsdag: LocalDate,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
         val hendelser: Set<UUID>,
-        val vedtaksperiodeId: UUID,
-        val utbetalingslinjer: List<Utbetalingslinje>,
-        val forbrukteSykedager: Int,
-        val gjenståendeSykedager: Int?,
-        val opprettet: LocalDateTime
-    )
-
-    data class Utbetalingslinje(
+        val oppdrag: List<Oppdrag>,
         val fom: LocalDate,
         val tom: LocalDate,
-        val dagsats: Int,
-        val beløp: Int,
-        val grad: Double,
-        val enDelAvPeriode: Boolean,
-        val mottaker: String,
-        val konto: String
-    )
+        val forbrukteSykedager: Int,
+        val gjenståendeSykedager: Int,
+        val opprettet: LocalDateTime
+    ) {
+        data class Oppdrag(
+            val mottaker: String,
+            val fagområde: String,
+            val fagsystemId: String,
+            val totalbeløp: Int,
+            val utbetalingslinjer: List<Utbetalingslinje>
+        ) {
+            data class Utbetalingslinje(
+                val fom: LocalDate,
+                val tom: LocalDate,
+                val dagsats: Int, //TODO: Missing in Utbetalingslinje
+                val beløp: Int,
+                val grad: Double
+            )
+        }
+    }
 
     data class ManglendeInntektsmeldingEvent(
         val vedtaksperiodeId: UUID,

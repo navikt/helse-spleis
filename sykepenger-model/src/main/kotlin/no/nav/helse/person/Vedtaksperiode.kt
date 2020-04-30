@@ -401,6 +401,21 @@ internal class Vedtaksperiode private constructor(
     private fun utbetaling() =
         arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
 
+    private fun sendUtbetaltEvent() {
+        person.vedtaksperiodeUtbetalt(
+            tilUtbetaltEvent(
+                aktørId = aktørId,
+                fødselnummer = fødselsnummer,
+                orgnummer = organisasjonsnummer,
+                utbetaling = utbetaling(),
+                forbrukteSykedager = requireNotNull(forbrukteSykedager),
+                gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
+                sykdomshistorikk = sykdomshistorikk,
+                periode = periode()
+            )
+        )
+    }
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -1085,18 +1100,6 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.tilstand(utbetaling, Avsluttet) {
                 utbetaling.info("OK fra Oppdragssystemet")
-
-                val event = tilUtbetaltEvent(
-                    førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag),
-                    vedtaksperiodeId = vedtaksperiode.id,
-                    utbetaling = vedtaksperiode.utbetaling(),
-                    forbrukteSykedager = requireNotNull(vedtaksperiode.forbrukteSykedager),
-                    sykdomshistorikk = vedtaksperiode.sykdomshistorikk,
-                    periode = vedtaksperiode.periode(),
-                    orgnummer = vedtaksperiode.organisasjonsnummer
-                )
-
-                vedtaksperiode.person.vedtaksperiodeUtbetalt(event)
             }
         }
 
@@ -1188,6 +1191,8 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.sendUtbetaltEvent()
+
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 

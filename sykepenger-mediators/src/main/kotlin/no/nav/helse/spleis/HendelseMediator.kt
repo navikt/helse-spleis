@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.node.NullNode
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -127,7 +126,11 @@ internal class HendelseMediator(
         }
     }
 
-    private fun <Hendelse: ArbeidstakerHendelse> håndter(message: HendelseMessage, hendelse: Hendelse, handler: (Person) -> Unit) {
+    private fun <Hendelse : ArbeidstakerHendelse> håndter(
+        message: HendelseMessage,
+        hendelse: Hendelse,
+        handler: (Person) -> Unit
+    ) {
         person(message, hendelse).also {
             handler(it)
             finalize(it, message, hendelse)
@@ -168,65 +171,92 @@ internal class HendelseMediator(
         private inner class Observatør(
             private val message: HendelseMessage,
             private val hendelse: ArbeidstakerHendelse
-        ): PersonObserver {
+        ) : PersonObserver {
             override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-                publish("vedtaksperiode_påminnet", JsonMessage.newMessage(mapOf(
-                    "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
-                    "tilstand" to påminnelse.tilstand(),
-                    "antallGangerPåminnet" to påminnelse.antallGangerPåminnet(),
-                    "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt(),
-                    "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt(),
-                    "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt()
-                )))
+                publish(
+                    "vedtaksperiode_påminnet", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
+                            "tilstand" to påminnelse.tilstand(),
+                            "antallGangerPåminnet" to påminnelse.antallGangerPåminnet(),
+                            "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt(),
+                            "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt(),
+                            "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt()
+                        )
+                    )
+                )
             }
 
             override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-                publish("vedtaksperiode_endret", JsonMessage.newMessage(mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "gjeldendeTilstand" to event.gjeldendeTilstand,
-                    "forrigeTilstand" to event.forrigeTilstand,
-                    "aktivitetslogg" to event.aktivitetslogg.toMap(),
-                    "vedtaksperiode_aktivitetslogg" to event.vedtaksperiodeaktivitetslogg.toMap(),
-                    "hendelser" to event.hendelser,
-                    "makstid" to event.makstid
-                )))
+                publish(
+                    "vedtaksperiode_endret", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "gjeldendeTilstand" to event.gjeldendeTilstand,
+                            "forrigeTilstand" to event.forrigeTilstand,
+                            "aktivitetslogg" to event.aktivitetslogg.toMap(),
+                            "vedtaksperiode_aktivitetslogg" to event.vedtaksperiodeaktivitetslogg.toMap(),
+                            "hendelser" to event.hendelser,
+                        "makstid" to event.makstid)
+                    )
+                )
             }
 
             override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-                publish("utbetalt", JsonMessage.newMessage(mapOf(
-                    "førsteFraværsdag" to event.førsteFraværsdag,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId.toString(),
-                    "hendelser" to event.hendelser,
-                    "utbetalingslinjer" to event.utbetalingslinjer.map {
+                publish(
+                    "utbetalt", JsonMessage.newMessage(
                         mapOf(
-                            "fom" to it.fom,
-                            "tom" to it.tom,
-                            "dagsats" to it.dagsats,
-                            "beløp" to it.beløp,
-                            "grad" to it.grad,
-                            "enDelAvPerioden" to it.enDelAvPeriode,
-                            "mottaker" to it.mottaker,
-                            "konto" to it.konto
+                            "aktørId" to event.aktørId,
+                            "fødselsnummer" to event.fødselsnummer,
+                            "organisasjonsnummer" to event.organisasjonsnummer,
+                            "hendelser" to event.hendelser,
+                            "oppdrag" to event.oppdrag.map { oppdrag ->
+                                mapOf(
+                                    "mottaker" to oppdrag.mottaker,
+                                    "fagområde" to oppdrag.fagområde,
+                                    "fagsystemId" to oppdrag.fagsystemId,
+                                    "totalbeløp" to oppdrag.totalbeløp,
+                                    "utbetalingslinjer" to oppdrag.utbetalingslinjer.map { linje ->
+                                        mapOf(
+                                            "fom" to linje.fom,
+                                            "tom" to linje.tom,
+                                            "dagsats" to linje.dagsats,
+                                            "beløp" to linje.beløp,
+                                            "grad" to linje.grad
+                                        )
+                                    }
+                                )
+                            },
+                            "fom" to event.fom,
+                            "tom" to event.tom,
+                            "forbrukteSykedager" to event.forbrukteSykedager,
+                            "gjenståendeSykedager" to event.gjenståendeSykedager,
+                            "opprettet" to event.opprettet
                         )
-                    },
-                    "forbrukteSykedager" to event.forbrukteSykedager,
-                    "gjenståendeSykedager" to (event.gjenståendeSykedager ?: NullNode.instance),
-                    "opprettet" to event.opprettet
-                )))
+                    )
+                )
             }
 
             override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-                publish("vedtaksperiode_ikke_funnet", JsonMessage.newMessage(mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
-                )))
+                publish(
+                    "vedtaksperiode_ikke_funnet", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
+                        )
+                    )
+                )
             }
 
             override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-                publish("trenger_inntektsmelding", JsonMessage.newMessage(mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "fom" to event.fom,
-                    "tom" to event.tom
-                )))
+                publish(
+                    "trenger_inntektsmelding", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "fom" to event.fom,
+                            "tom" to event.tom
+                        )
+                    )
+                )
             }
 
             private fun leggPåStandardfelter(event: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {

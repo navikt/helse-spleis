@@ -2,54 +2,64 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.DayOfWeek
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
+    aktørId: String,
+    fødselnummer: String,
     orgnummer: String,
-    førsteFraværsdag: LocalDate,
-    vedtaksperiodeId: UUID,
     sykdomshistorikk: Sykdomshistorikk,
     utbetaling: Utbetaling,
     periode: Periode,
-    forbrukteSykedager: Int
+    forbrukteSykedager: Int,
+    gjenståendeSykedager: Int
 ) = UtbetaltEventBuilder(
+    aktørId = aktørId,
+    fødselnummer = fødselnummer,
     orgnummer = orgnummer,
-    førsteFraværsdag = førsteFraværsdag,
-    vedtaksperiodeId = vedtaksperiodeId,
     sykdomshistorikk = sykdomshistorikk,
     utbetaling = utbetaling,
     periode = periode,
-    forbrukteSykedager = forbrukteSykedager
-).build()
+    forbrukteSykedager = forbrukteSykedager,
+    gjenståendeSykedager = gjenståendeSykedager
+).result()
 
 private class UtbetaltEventBuilder(
+    private val aktørId: String,
+    private val fødselnummer: String,
     private val orgnummer: String,
-    private val førsteFraværsdag: LocalDate,
-    private val vedtaksperiodeId: UUID,
-    private val sykdomshistorikk: Sykdomshistorikk,
-    private val utbetaling: Utbetaling,
+    sykdomshistorikk: Sykdomshistorikk,
+    utbetaling: Utbetaling,
     private val periode: Periode,
-    private val forbrukteSykedager: Int
+    private val forbrukteSykedager: Int,
+    private var gjenståendeSykedager: Int
 ) : ArbeidsgiverVisitor {
     private lateinit var opprettet: LocalDateTime
-    private var gjenståendeSykedager: Int? = null
     private val hendelser = mutableSetOf<UUID>()
-    private val utbetalingslinjer = mutableListOf<PersonObserver.Utbetalingslinje>()
+    private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Oppdrag>()
+    private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje>()
 
-    internal fun build(): PersonObserver.UtbetaltEvent {
+    init {
         sykdomshistorikk.accept(this)
         utbetaling.accept(this)
+    }
 
+    internal fun result(): PersonObserver.UtbetaltEvent {
         return PersonObserver.UtbetaltEvent(
-            førsteFraværsdag = førsteFraværsdag,
+            aktørId = aktørId,
+            fødselsnummer = fødselnummer,
+            organisasjonsnummer = orgnummer,
             hendelser = hendelser.toSet(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingslinjer = utbetalingslinjer.toList(),
+            oppdrag = oppdragListe.toList(),
+            fom = periode.start,
+            tom = periode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
             opprettet = opprettet
@@ -60,8 +70,60 @@ private class UtbetaltEventBuilder(
         opprettet = tidsstempel
     }
 
-    override fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {
-        this.gjenståendeSykedager = gjenståendeSykedager
+    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        utbetalingslinjer.clear()
+    }
+
+    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        oppdragListe.add(
+            PersonObserver.UtbetaltEvent.Oppdrag(
+                mottaker = orgnummer,
+                fagområde = "SPREF",
+                fagsystemId = oppdrag.fagsystemId(),
+                totalbeløp = oppdrag.totalbeløp(),
+                utbetalingslinjer = utbetalingslinjer.toList()
+            )
+        )
+    }
+
+    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+        utbetalingslinjer.clear()
+    }
+
+    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
+        oppdragListe.add(
+            PersonObserver.UtbetaltEvent.Oppdrag(
+                mottaker = fødselnummer,
+                fagområde = "SP",
+                fagsystemId = oppdrag.fagsystemId(),
+                totalbeløp = oppdrag.totalbeløp(),
+                utbetalingslinjer = utbetalingslinjer.toList()
+            )
+        )
+    }
+
+    override fun visitUtbetalingslinje(
+        linje: Utbetalingslinje,
+        fom: LocalDate,
+        tom: LocalDate,
+        dagsats: Int,
+        grad: Double,
+        delytelseId: Int,
+        refDelytelseId: Int?,
+        refFagsystemId: String?,
+        endringskode: Endringskode,
+        datoStatusFom: LocalDate?
+    ) {
+        if (linje.erOpphør()) return
+        utbetalingslinjer.add(
+            PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje(
+                fom = fom,
+                tom = tom,
+                dagsats = (dagsats / (grad / 100)).roundToInt(),
+                beløp = dagsats,
+                grad = grad
+            )
+        )
     }
 
     override fun preVisitSykdomshistorikkElement(
@@ -70,35 +132,5 @@ private class UtbetaltEventBuilder(
         tidsstempel: LocalDateTime
     ) {
         hendelser.add(id)
-    }
-
-    private fun PersonObserver.Utbetalingslinje.isAlmostEqualTo(
-        navDag: Utbetalingstidslinje.Utbetalingsdag.NavDag
-    ) =
-        (tom.plusDays(1) == navDag.dato || (tom.dayOfWeek == DayOfWeek.FRIDAY && tom.plusDays(3) == navDag.dato))
-            && grad == navDag.grad && dagsats == navDag.utbetaling && (enDelAvPeriode == navDag.dato in periode)
-
-
-    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
-        utbetalingslinjer.lastOrNull()
-            ?.takeIf { it.isAlmostEqualTo(dag) }
-            ?.also { linje ->
-                utbetalingslinjer.apply {
-                    remove(linje)
-                    add(linje.copy(tom = dag.dato))
-                }
-            }
-            ?: utbetalingslinjer.add(
-                PersonObserver.Utbetalingslinje(
-                    fom = dag.dato,
-                    tom = dag.dato,
-                    dagsats = dag.dagsats,
-                    beløp = dag.utbetaling,
-                    grad = dag.grad,
-                    enDelAvPeriode = dag.dato in periode,
-                    mottaker = orgnummer,
-                    konto = "SPREF"
-                )
-            )
     }
 }

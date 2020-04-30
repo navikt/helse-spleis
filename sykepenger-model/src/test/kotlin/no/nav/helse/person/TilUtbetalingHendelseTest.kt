@@ -4,9 +4,10 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -15,76 +16,138 @@ internal class TilUtbetalingHendelseTest {
     companion object {
         private const val aktørId = "aktørId"
         private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val orgnummer = "12345"
-        private val førsteSykedag = 1.januar
-        private val sisteSykedag = 31.januar
+        private const val ORGNUMMER = "12345"
+        private lateinit var førsteSykedag: LocalDate
+        private lateinit var sisteSykedag: LocalDate
     }
 
     private lateinit var person: Person
     private val inspektør get() = TestPersonInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
-    private lateinit var utbetaltEvent: PersonObserver.UtbetaltEvent
+    private val utbetaltEvents = mutableListOf<PersonObserver.UtbetaltEvent>()
 
     private val utbetalingObserver = object : PersonObserver {
         override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-            utbetaltEvent = event
+            utbetaltEvents.add(event)
         }
     }
 
     @BeforeEach
     internal fun opprettPerson() {
+        førsteSykedag = 1.januar
+        sisteSykedag = 31.januar
+        utbetaltEvents.clear()
         person = Person("12345", UNG_PERSON_FNR_2018)
         person.addObserver(utbetalingObserver)
     }
 
     @Test
     fun `utbetaling er godkjent`() {
-        håndterGodkjenning()
-        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
-        assertTilstand(TilstandType.AVSLUTTET)
+        håndterGodkjenning(0)
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
+        assertTilstand(TilstandType.AVSLUTTET, 0)
 
-        assertEquals(førsteSykedag, utbetaltEvent.førsteFraværsdag)
+        assertEquals(2, utbetaltEvents.first().oppdrag.size)
 
-        val utbetalingslinje = utbetaltEvent.utbetalingslinjer[0]
-        assertEquals(1, utbetaltEvent.utbetalingslinjer.size)
-        assertEquals(17.januar, utbetalingslinje.fom)
-        assertEquals(31.januar, utbetalingslinje.tom)
-        assertEquals(1431, utbetalingslinje.dagsats)
-        assertEquals(100.0, utbetalingslinje.grad)
+        PersonObserver.UtbetaltEvent.Oppdrag(
+            mottaker = ORGNUMMER,
+            fagområde = "SPREF",
+            fagsystemId = utbetaltEvents.first().oppdrag[0].fagsystemId,
+            totalbeløp = 11 * 1431,
+            utbetalingslinjer = listOf(
+                PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje(
+                    fom = 17.januar,
+                    tom = 31.januar,
+                    dagsats = 1431,
+                    beløp = 1431,
+                    grad = 100.0
+                )
+            )
+        ).also {
+            assertEquals(it, utbetaltEvents.first().oppdrag[0])
+        }
+
+        PersonObserver.UtbetaltEvent.Oppdrag(
+            mottaker = UNG_PERSON_FNR_2018,
+            fagområde = "SP",
+            fagsystemId = utbetaltEvents.first().oppdrag[1].fagsystemId,
+            totalbeløp = 0,
+            utbetalingslinjer = emptyList()
+        ).also {
+            assertEquals(it, utbetaltEvents.first().oppdrag[1])
+        }
     }
+
+//    @Test
+//    fun `utbetaling er godkjent med tidligere utbetalinger`() {
+//        håndterGodkjenning(0)
+//        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
+//        assertTilstand(TilstandType.AVSLUTTET, 0)
+//
+//        førsteSykedag = 1.mars
+//        sisteSykedag = 31.mars
+//        håndterGodkjenning(1)
+//        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 1))
+//        assertTilstand(TilstandType.AVSLUTTET, 1)
+//
+//        val utbetaltEvent0 = utbetaltEvents[0]
+//        assertEquals(1.januar, utbetaltEvent0.førsteFraværsdag)
+//        assertEquals(1, utbetaltEvent0.oppdrag.size)
+//        assertEquals(3, utbetaltEvent0.hendelser.size)
+//
+//        val utbetalingslinje00 = utbetaltEvent0.oppdrag[0]
+//        assertEquals(17.januar, utbetalingslinje00.fom)
+//        assertEquals(31.januar, utbetalingslinje00.tom)
+//        assertEquals(1431, utbetalingslinje00.dagsats)
+//        assertEquals(100.0, utbetalingslinje00.grad)
+//        assertTrue(utbetalingslinje00.enDelAvPeriode)
+//
+//
+//        val utbetaltEvent1 = utbetaltEvents[1]
+//        assertEquals(1.mars, utbetaltEvent1.førsteFraværsdag)
+//        assertEquals(1, utbetaltEvent1.oppdrag.size)
+//        assertEquals(3, utbetaltEvent1.hendelser.size)
+//
+//        val utbetalingslinje10 = utbetaltEvent1.oppdrag[0]
+//        assertEquals(19.mars, utbetalingslinje10.fom)
+//        assertEquals(30.mars, utbetalingslinje10.tom)
+//        assertEquals(1431, utbetalingslinje10.dagsats)
+//        assertEquals(100.0, utbetalingslinje10.grad)
+//        assertTrue(utbetalingslinje10.enDelAvPeriode)
+//    }
 
     @Test
     fun `utbetaling ikke godkjent`() {
-        håndterGodkjenning()
-        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AVVIST))
-        assertTilstand(TilstandType.UTBETALING_FEILET)
-        assertFalse(this::utbetaltEvent.isInitialized)
+        håndterGodkjenning(0)
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AVVIST, 0))
+        assertTilstand(TilstandType.UTBETALING_FEILET, 0)
+        assertTrue(utbetaltEvents.isEmpty())
     }
 
-    private fun assertTilstand(expectedTilstand: TilstandType) {
+    private fun assertTilstand(expectedTilstand: TilstandType, index: Int) {
         assertEquals(
             expectedTilstand,
-            inspektør.sisteTilstand(0)
+            inspektør.sisteTilstand(index)
         )
     }
 
-    private fun håndterGodkjenning() {
+    private fun håndterGodkjenning(index: Int) {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        person.håndter(vilkårsgrunnlag())
-        person.håndter(ytelser())
-        person.håndter(simulering())
-        person.håndter(utbetalingsgodkjenning(true))
+        person.håndter(vilkårsgrunnlag(index))
+        person.håndter(ytelser(index = index))
+        person.håndter(simulering(index))
+        person.håndter(utbetalingsgodkjenning(true, index))
     }
 
-    private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus) =
+    private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus, index: Int) =
         UtbetalingHendelse(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             utbetalingsreferanse = "ref",
             status = status,
             melding = "hei"
@@ -92,11 +155,11 @@ internal class TilUtbetalingHendelseTest {
             hendelse = this
         }
 
-    private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
+    private fun utbetalingsgodkjenning(godkjent: Boolean, index: Int) = Utbetalingsgodkjenning(
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now()
@@ -105,7 +168,7 @@ internal class TilUtbetalingHendelseTest {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
+        index: Int,
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -114,8 +177,8 @@ internal class TilUtbetalingHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
                 aktørId = aktørId,
                 fødselsnummer = UNG_PERSON_FNR_2018,
@@ -141,7 +204,7 @@ internal class TilUtbetalingHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
         ).apply {
             hendelse = this
@@ -152,7 +215,7 @@ internal class TilUtbetalingHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -165,7 +228,7 @@ internal class TilUtbetalingHendelseTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
             førsteFraværsdag = førsteSykedag,
@@ -178,21 +241,21 @@ internal class TilUtbetalingHendelseTest {
             hendelse = this
         }
 
-    private fun vilkårsgrunnlag() =
+    private fun vilkårsgrunnlag(index: Int) =
         Vilkårsgrunnlag(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0) }
+                .map { YearMonth.of(2018, it) to (ORGNUMMER to 31000.0) }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
-                        orgnummer,
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -203,12 +266,12 @@ internal class TilUtbetalingHendelseTest {
             hendelse = this
         }
 
-    private fun simulering() =
+    private fun simulering(index: Int) =
         Simulering(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             simuleringOK = true,
             melding = "",
             simuleringResultat = null
