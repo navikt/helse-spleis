@@ -20,10 +20,13 @@ internal class V3BeregnerGjenståendeSykedagerFraMaksdatoTest {
             json["arbeidsgivere"].flatMap { it["vedtaksperioder"] }.map { it["gjenståendeSykedager"] }[1]
         val gjenståendeSykedager3 =
             json["arbeidsgivere"].flatMap { it["vedtaksperioder"] }.map { it["gjenståendeSykedager"] }[2]
+        val gjenståendeSykedager4 =
+            json["arbeidsgivere"].flatMap { it["vedtaksperioder"] }.map { it["gjenståendeSykedager"] }[3]
 
         assertEquals(24, gjenståendeSykedager1.intValue())
         assertEquals(20, gjenståendeSykedager2.intValue())
         assertTrue(gjenståendeSykedager3.isNull)
+        assertTrue(gjenståendeSykedager4.isNull)
     }
 }
 
@@ -85,7 +88,7 @@ private const val personJson = """
                 "dato": "2020-01-12"
               },
               {
-                "type": "AvvistDag",
+                "type": "NavDag",
                 "dato": "2020-01-13"
               }
             ]
@@ -193,7 +196,17 @@ private const val personJson = """
                   "dagen": "2020-01-11",
                   "type": "SYK_HELGEDAG_SØKNAD",
                   "grad": 100.0
-                },
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "maksdato": null,
+          "forbrukteSykedager": 100,
+          "sykdomshistorikk": [
+            {
+              "beregnetSykdomstidslinje": [
                 {
                   "dagen": "2020-01-12",
                   "type": "SYK_HELGEDAG_SØKNAD",

@@ -16,20 +16,18 @@ internal class V3BeregnerGjenståendeSykedagerFraMaksdato : JsonMigration(versio
                     .filter { it["type"].textValue() == "NavDag" }
                     .map { it["dato"].textValue().let(LocalDate::parse) }
             arbeidsgiver["vedtaksperioder"].forEach { periode ->
-                periode as ObjectNode
-
-                val gjenståendeSykedager =
-                    periode["sykdomshistorikk"].first()["beregnetSykdomstidslinje"]
-                        .map { it["dagen"].textValue().let(LocalDate::parse) }
-                        .lastOrNull { it in utbetalingsdager }
-                        ?.let { sisteUtbetalingsdag ->
-                            val maksdato = periode["maksdato"].textValue().let(LocalDate::parse)
-
-                            (1..ChronoUnit.DAYS.between(sisteUtbetalingsdag, maksdato))
-                                .map { sisteUtbetalingsdag.plusDays(it) }
-                                .count { it.dayOfWeek !in arrayListOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
-                        }
-                periode.put("gjenståendeSykedager", gjenståendeSykedager)
+                val gjenståendeSykedager = periode
+                    .takeIf { it.path("maksdato").isTextual }
+                    ?.let { it["sykdomshistorikk"].first()["beregnetSykdomstidslinje"] }
+                    ?.map { it["dagen"].textValue().let(LocalDate::parse) }
+                    ?.lastOrNull { it in utbetalingsdager }
+                    ?.let { sisteUtbetalingsdag ->
+                        val maksdato = periode["maksdato"].textValue().let(LocalDate::parse)
+                        (1..ChronoUnit.DAYS.between(sisteUtbetalingsdag, maksdato))
+                            .map { sisteUtbetalingsdag.plusDays(it) }
+                            .count { it.dayOfWeek !in arrayListOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+                    }
+                (periode as ObjectNode).put("gjenståendeSykedager", gjenståendeSykedager)
             }
         }
     }
