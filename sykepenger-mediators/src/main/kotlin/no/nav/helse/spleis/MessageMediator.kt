@@ -44,13 +44,13 @@ internal class MessageMediator(
     }
 
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        messageRecognized = true
-        withMDC(mapOf(
-            "melding_id" to message.id.toString(),
-            "melding_type" to (message::class.simpleName ?: "ukjent")
-        )) {
+        try {
+            messageRecognized = true
             sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}:\n{}", message.id, message.fødselsnummer, message::class.simpleName, message.toJson())
-            handleMessage(message, context)
+            hendelseRecorder.lagreMelding(message)
+            hendelseMediator.behandle(message)
+        } catch (err: Exception) {
+            errorHandler(err, message)
         }
     }
 
@@ -61,15 +61,6 @@ internal class MessageMediator(
     fun afterRiverHandling(message: String) {
         if (messageRecognized || riverErrors.isEmpty()) return
         sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
-    }
-
-    private fun handleMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
-        try {
-            hendelseRecorder.lagreMelding(message)
-            hendelseMediator.behandle(message)
-        } catch (err: Exception) {
-            errorHandler(err, message)
-        }
     }
 
     private fun errorHandler(err: Exception, message: HendelseMessage? = null) {

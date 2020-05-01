@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.withMDC
 import java.util.*
 
 internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) {
@@ -32,7 +33,13 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            messageMediator.onRecognizedMessage(createMessage(packet), context)
+            withMDC(mapOf(
+                "river_name" to riverName,
+                "melding_type" to eventName,
+                "melding_id" to packet["@id"].asText()
+            )) {
+                messageMediator.onRecognizedMessage(createMessage(packet), context)
+            }
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
