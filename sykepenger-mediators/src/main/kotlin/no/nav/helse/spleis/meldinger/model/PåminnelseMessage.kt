@@ -19,7 +19,7 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
 
-    private val påminnelse = Påminnelse(
+    private val påminnelse get() = Påminnelse(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

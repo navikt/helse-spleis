@@ -25,7 +25,7 @@ internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(pac
     private val ferieperioder = packet["ferieperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf (JsonNode::isTextual)?.asText()
 
-    private val inntektsmelding = Inntektsmelding(
+    private val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = this.id,
         refusjon = refusjon,
         orgnummer = orgnummer,

@@ -14,7 +14,7 @@ internal class UtbetalingMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
 
-    private val utbetaling = UtbetalingHendelse(
+    private val utbetaling get() = UtbetalingHendelse(
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

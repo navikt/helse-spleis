@@ -50,6 +50,7 @@ internal class NyeSøknaderRiverTest : RiverTest() {
 
     private val ValidNySøknad = ValidSøknad.copy(status = SoknadsstatusDTO.NY).toJson()
     private val ValidAvbruttSøknad = ValidSøknad.copy(status = SoknadsstatusDTO.AVBRUTT).toJson()
+    private val ValidNySøknadUtenPerioder = ValidSøknad.copy(soknadsperioder = emptyList()).toJson()
     private val ValidNySøknadWithUnknownFieldsJson = ValidSøknad.copy(status = SoknadsstatusDTO.NY).asObjectNode()
         .put(UUID.randomUUID().toString(), "foobar").toJson()
 
@@ -68,6 +69,7 @@ internal class NyeSøknaderRiverTest : RiverTest() {
     internal fun `valid søknader`() {
         assertNoErrors(ValidNySøknadWithUnknownFieldsJson)
         assertNoErrors(ValidNySøknad)
+        assertNoErrors(ValidNySøknadUtenPerioder)
     }
 }
 

@@ -23,7 +23,7 @@ internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage) : SøknadMes
         )
     }
 
-    private val søknad = SøknadArbeidsgiver(
+    private val søknad get() = SøknadArbeidsgiver(
         meldingsreferanseId = this.id,
         fnr = fødselsnummer,
         aktørId = aktørId,

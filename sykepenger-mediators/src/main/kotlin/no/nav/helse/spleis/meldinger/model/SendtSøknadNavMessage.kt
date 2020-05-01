@@ -54,7 +54,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(pack
     private val arbeidGjenopptatt = packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Søknadsperiode.Arbeid(it, søknadTom)) } ?: emptyList()
     private val perioder = søknadsperioder + papirsykmeldinger + egenmeldinger + fraværsperioder + arbeidGjenopptatt
 
-    private val søknad = Søknad(
+    private val søknad get() = Søknad(
         meldingsreferanseId = this.id,
         fnr = fødselsnummer,
         aktørId = aktørId,

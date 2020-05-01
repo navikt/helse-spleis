@@ -82,7 +82,7 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         aktivitetslogg = aktivitetslogg
     )
 
-    private val ytelser = Ytelser(
+    private val ytelser get() = Ytelser(
         meldingsreferanseId = this.id,
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

@@ -59,7 +59,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             }
     }
 
-    private val vilkårsgrunnlag = Vilkårsgrunnlag(
+    private val vilkårsgrunnlag get() = Vilkårsgrunnlag(
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

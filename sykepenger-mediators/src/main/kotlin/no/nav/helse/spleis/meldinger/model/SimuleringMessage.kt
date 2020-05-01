@@ -58,7 +58,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             )
         }
 
-    private val simulering = Simulering(
+    private val simulering get() = Simulering(
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

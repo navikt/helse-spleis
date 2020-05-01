@@ -18,7 +18,7 @@ internal class NySøknadMessage(packet: JsonMessage) : SøknadMessage(packet) {
         )
     }
 
-    private val sykmelding = Sykmelding(
+    private val sykmelding get() = Sykmelding(
         meldingsreferanseId = this.id,
         fnr = fødselsnummer,
         aktørId = aktørId,

@@ -16,7 +16,7 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage
     private val godkjenttidspunkt = packet.godkjenttidspunkt()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
 
-    private val utbetalingsgodkjenning = Utbetalingsgodkjenning(
+    private val utbetalingsgodkjenning get() = Utbetalingsgodkjenning(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

@@ -11,7 +11,7 @@ internal class KansellerUtbetalingMessage(packet: JsonMessage) : HendelseMessage
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val fagsystemId = packet["fagsystemId"].asText()
     private val saksbehandler = packet["saksbehandler"].asText()
-    private val kansellerUtbetaling = KansellerUtbetaling(
+    private val kansellerUtbetaling get() = KansellerUtbetaling(
         aktørId,
         fødselsnummer,
         organisasjonsnummer,
