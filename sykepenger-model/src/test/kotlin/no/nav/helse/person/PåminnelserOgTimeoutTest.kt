@@ -49,7 +49,7 @@ class PåminnelserOgTimeoutTest {
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingArbeidsgiversøknad.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
         assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingGap.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerSimulering.timeout)
+        assertEquals(Duration.ofHours(4), Vedtaksperiode.AvventerSimulering.timeout)
         assertTrue(Duration.ofDays(3) <= Vedtaksperiode.AvventerGodkjenning.timeout) {
             "Timeout på avventer godjenning skal være minst tre dager"
         }
