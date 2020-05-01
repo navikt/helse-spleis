@@ -32,7 +32,7 @@ internal class HendelseMediator(
             message.behandle(this)
         } catch (err: Aktivitetslogg.AktivitetException) {
             withMDC(err.kontekst()) {
-                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}", err)
+                sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}\n\t${message.toJson()}", err)
             }
         }
     }

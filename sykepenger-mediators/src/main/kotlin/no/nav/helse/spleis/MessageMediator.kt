@@ -63,11 +63,13 @@ internal class MessageMediator(
         sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
     }
 
-    private fun errorHandler(err: Exception, message: HendelseMessage? = null) {
-        log.error("alvorlig feil: ${err.message}", err)
-        withMDC(message?.let { mapOf("fødselsnummer" to message.fødselsnummer) } ?: emptyMap()) {
-            sikkerLogg.error("alvorlig feil: ${err.message}", err)
-        }
+    private fun errorHandler(err: Exception, message: HendelseMessage) {
+        errorHandler(err, message.toJson(), mapOf("fødselsnummer" to message.fødselsnummer))
+    }
+
+    private fun errorHandler(err: Exception, message: String, context: Map<String, String> = emptyMap()) {
+        log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
+        withMDC(context) { sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err) }
     }
 
     private inner class DelegatedRapid(
@@ -84,7 +86,7 @@ internal class MessageMediator(
                 listeners.forEach { it.onMessage(message, context) }
                 afterRiverHandling(message)
             } catch (err: Exception) {
-                errorHandler(err)
+                errorHandler(err, message)
             }
         }
 
