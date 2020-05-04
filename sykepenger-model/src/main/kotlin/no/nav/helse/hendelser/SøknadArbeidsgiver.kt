@@ -62,7 +62,7 @@ class SøknadArbeidsgiver constructor(
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }
 
-    override fun nySykdomstidslinje() = NySykdomstidslinje()
+    override fun nySykdomstidslinje() = nySykdomstidslinje
 
     internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
