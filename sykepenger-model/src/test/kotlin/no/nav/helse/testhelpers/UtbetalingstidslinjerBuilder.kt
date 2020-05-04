@@ -22,8 +22,8 @@ internal val Int.NAV get() = this.NAV(1200.00)
 internal fun Int.NAV(inntekt: Double, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addNAVdag, inntekt, grad)
 internal val Int.ARB get() = this.ARB(1200.00)
 internal fun Int.ARB(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsdag, inntekt)
-internal val Int.FRI get() = this.FRI(1200.00)
-internal fun Int.FRI(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addFridag, inntekt)
+internal val Int.FRI get() = this.FRI()
+internal fun Int.FRI() = Utbetalingsdager(this, { _, dagen, grad -> addFridag(dagen, grad) })
 internal val Int.FOR get() = this.FOR(1200.00)
 internal fun Int.FOR(inntekt: Double) = Utbetalingsdager(this, Utbetalingstidslinje::addForeldetDag, inntekt)
 internal val Int.AVV get() = this.AVV(1200.00)
@@ -36,7 +36,6 @@ private fun Utbetalingstidslinje.addForeldetDag(inntekt: Double, dato: LocalDate
     this.addForeldetDag(dato)
 private fun Utbetalingstidslinje.addAvvistDag(inntekt: Double, dato: LocalDate, grad: Double) =
     this.addAvvistDag(inntekt, dato, grad, Begrunnelse.MinimumSykdomsgrad)
-
 internal data class Utbetalingsdager(
     val antallDager: Int,
     val addDagFun: Utbetalingstidslinje.(Double, LocalDate, Double) -> Unit,

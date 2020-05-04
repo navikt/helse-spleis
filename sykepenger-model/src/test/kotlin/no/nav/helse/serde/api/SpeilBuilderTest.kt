@@ -605,11 +605,11 @@ internal class SpeilBuilderTest {
                         Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),
                             tom = 31.januar.minusYears(1),
-                            dagsats = 31000
+                            dagsats = 31000,
+                            grad = 100
                         )
                     ),
                     inntektshistorikk = emptyList(),
-                    graderingsliste = emptyList(),
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(

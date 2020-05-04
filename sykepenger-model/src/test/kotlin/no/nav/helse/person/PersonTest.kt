@@ -185,7 +185,6 @@ internal class PersonTest {
                         utbetalingshistorikk = Utbetalingshistorikk(
                             utbetalinger = emptyList(),
                             inntektshistorikk = emptyList(),
-                            graderingsliste = emptyList(),
                             aktivitetslogg = Aktivitetslogg()
                         ),
                         foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),

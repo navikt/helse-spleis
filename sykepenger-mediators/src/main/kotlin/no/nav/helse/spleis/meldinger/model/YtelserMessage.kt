@@ -31,17 +31,18 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         val fom = utbetaling["fom"].asOptionalLocalDate()
         val tom = utbetaling["tom"].asOptionalLocalDate()
         val dagsats = utbetaling["dagsats"].asInt()
+        val grad = utbetaling["utbetalingsGrad"].asInt()
         if (fom == null || tom == null || fom > tom) Periode.Ugyldig(fom, tom)
         else when (utbetaling["typeKode"].asText()) {
-            "0" -> Periode.Utbetaling(fom, tom, dagsats)
-            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats)
+            "0" -> Periode.Utbetaling(fom, tom, dagsats, grad)
+            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats, grad)
             "2", "3" -> Periode.Etterbetaling(fom, tom)
             "4" -> Periode.KontertRegnskap(fom, tom)
-            "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats)
-            "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats)
+            "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats, grad)
+            "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats, grad)
             "7" -> Periode.Tilbakeført(fom, tom)
             "8" -> Periode.Konvertert(fom, tom)
-            "9" -> Periode.Ferie(fom, tom, dagsats)
+            "9" -> Periode.Ferie(fom, tom)
             "O" -> Periode.Opphold(fom, tom)
             "S" -> Periode.Sanksjon(fom, tom)
             "" -> Periode.Ukjent(fom, tom)
@@ -58,15 +59,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             orgnummer = opplysning["orgnummer"].asText()
         )
     }
-    private val graderingsliste = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
-        it.path("graderingsliste")
-    }.map {
-        Utbetalingshistorikk.Graderingsperiode(
-            it["fom"].asLocalDate(),
-            it["tom"].asLocalDate(),
-            it["grad"].asDouble()
-        )
-    }
 
     private val aktivitetslogg = Aktivitetslogg()
     private val foreldrepermisjon = Foreldrepermisjon(
@@ -78,7 +70,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val utbetalingshistorikk = Utbetalingshistorikk(
         utbetalinger = utbetalinger,
         inntektshistorikk = inntektshistorikk,
-        graderingsliste = graderingsliste,
         aktivitetslogg = aktivitetslogg
     )
 

@@ -296,11 +296,11 @@ class PåminnelserOgTimeoutTest {
                 Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     17.januar(2017),
                     20.januar(2017),
-                    1000
+                    1000,
+                    100
                 )
             ),
             inntektshistorikk = emptyList(),
-            graderingsliste = emptyList(),
             aktivitetslogg = Aktivitetslogg()
         ),
         foreldrepermisjon = Foreldrepermisjon(

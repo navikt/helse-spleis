@@ -55,7 +55,8 @@ internal class YtelserHendelseTest {
                 Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     sisteHistoriskeSykedag.minusDays(14),
                     sisteHistoriskeSykedag,
-                    1000
+                    1000,
+                    100
                 )
             )
         )
@@ -165,7 +166,6 @@ internal class YtelserHendelseTest {
             utbetalingshistorikk = Utbetalingshistorikk(
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
-                graderingsliste = emptyList(),
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(

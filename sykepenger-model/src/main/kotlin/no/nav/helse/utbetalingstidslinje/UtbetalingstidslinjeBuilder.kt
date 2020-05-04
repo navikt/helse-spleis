@@ -147,7 +147,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun håndterFridag(dagen: LocalDate) {
         fridager += 1
-        tidslinje.addFridag(nåværendeInntekt, dagen)
+        tidslinje.addFridag(dagen)
     }
 
     private fun håndterFriEgenmeldingsdag(dagen: LocalDate) {

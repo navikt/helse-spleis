@@ -23,7 +23,7 @@ internal class MinimumInntektsfilterTest {
 
     @Test
     internal fun `sjekker ikke fridager`() {
-        val tidslinje = tidslinjeOf(1.FRI(inntekt = 0.0), 5.NAV)
+        val tidslinje = tidslinjeOf(1.FRI, 5.NAV)
         MinimumInntektsfilter(
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje),

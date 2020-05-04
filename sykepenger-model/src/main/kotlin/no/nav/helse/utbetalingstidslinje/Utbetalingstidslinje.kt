@@ -49,8 +49,8 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.add(Arbeidsdag(inntekt, dagen))
     }
 
-    internal fun addFridag(inntekt: Double, dagen: LocalDate, grad: Double = Double.NaN) {
-        utbetalingsdager.add(Fridag(inntekt, dagen))
+    internal fun addFridag(dagen: LocalDate, grad: Double = Double.NaN) {
+        utbetalingsdager.add(Fridag(0.0, dagen))
     }
 
     internal fun addHelg(inntekt: Double, dagen: LocalDate, grad: Double) {
@@ -70,7 +70,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun addUkjentDag(dato: LocalDate) =
-        if (dato.erHelg()) addFridag(0.0, dato, 0.0) else addUkjentDag(0.0, dato, 0.0)
+        if (dato.erHelg()) addFridag(dato, 0.0) else addUkjentDag(0.0, dato, 0.0)
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.utbetalingsdager.isEmpty()) return this
