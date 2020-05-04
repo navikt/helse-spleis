@@ -279,10 +279,12 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
             ?: periode().start
-        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe("Finner ikke inntekt for perioden %s", førsteFraværsdag)
+        val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
+            "Finner ikke inntekt for perioden $førsteFraværsdag"
+        )
         if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
-            dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
-        }) {
+                dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
+            }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
@@ -638,18 +640,21 @@ internal class Vedtaksperiode private constructor(
                 it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
                 it.onSuccess {
                     arbeidsgiver.addInntekt(ytelser)
-                    val sistePeriode = ytelser.utbetalingshistorikk().utbetalingstidslinje(vedtaksperiode.periode().start).sisteSykepengeperiode()
-                    val nesteTilstand = if (sistePeriode == null || !sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) {
-                        AvventerInntektsmeldingFerdigGap
-                    } else {
-                        vedtaksperiode.førsteFraværsdag = sistePeriode.start
-                        if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
-                            ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
+                    val sistePeriode =
+                        ytelser.utbetalingshistorikk().utbetalingstidslinje(vedtaksperiode.periode().start)
+                            .sisteSykepengeperiode()
+                    val nesteTilstand =
+                        if (sistePeriode == null || !sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) {
+                            AvventerInntektsmeldingFerdigGap
                         } else {
-                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                            AvventerVilkårsprøvingGap
+                            vedtaksperiode.førsteFraværsdag = sistePeriode.start
+                            if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
+                                ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
+                            } else {
+                                ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                                AvventerVilkårsprøvingGap
+                            }
                         }
-                    }
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
             }
@@ -734,6 +739,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetalingMedInntektsmelding)
         }
@@ -816,7 +822,8 @@ internal class Vedtaksperiode private constructor(
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
                 lateinit var engineForTimeline: ByggUtbetalingstidlinjer
                 it.valider {
-                    val førsteFraværsdag = requireNotNull(vedtaksperiode.førsteFraværsdag) { "Mangler første fraværsdag" }
+                    val førsteFraværsdag =
+                        requireNotNull(vedtaksperiode.førsteFraværsdag) { "Mangler første fraværsdag" }
                     ByggUtbetalingstidlinjer(
                         mapOf(
                             arbeidsgiver to utbetalingstidslinje(
@@ -846,7 +853,8 @@ internal class Vedtaksperiode private constructor(
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
-                arbeidsgiverperiodeGjennomført = ytelser.utbetalingshistorikk().arbeidsgiverperiodeGjennomført(vedtaksperiode.førsteDag()),
+                arbeidsgiverperiodeGjennomført = ytelser.utbetalingshistorikk()
+                    .arbeidsgiverperiodeGjennomført(vedtaksperiode.førsteDag()),
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result()
         }
@@ -897,7 +905,12 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_GODKJENNING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            godkjenning(hendelse, periodeFom = vedtaksperiode.førsteDag(), periodeTom = vedtaksperiode.sisteDag())
+            godkjenning(
+                aktivitetslogg = hendelse,
+                periodeFom = vedtaksperiode.førsteDag(),
+                periodeTom = vedtaksperiode.sisteDag(),
+                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(this)
+            )
         }
 
         override fun håndter(
@@ -940,8 +953,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
-            utbetaling.info("Utbetalingen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
-                "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}")
+            utbetaling.info(
+                "Utbetalingen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
+                    "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}"
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {

@@ -225,24 +225,30 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 }
 
                 internal fun dagpenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
-                    aktivitetslogg.behov(Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
-                        "periodeFom" to fom.toString(),
-                        "periodeTom" to tom.toString()
-                    ))
+                    aktivitetslogg.behov(
+                        Behovtype.Dagpenger, "Trenger informasjon om dagpenger", mapOf(
+                            "periodeFom" to fom.toString(),
+                            "periodeTom" to tom.toString()
+                        )
+                    )
                 }
 
                 internal fun arbeidsavklaringspenger(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
-                    aktivitetslogg.behov(Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
-                        "periodeFom" to fom.toString(),
-                        "periodeTom" to tom.toString()
-                    ))
+                    aktivitetslogg.behov(
+                        Behovtype.Arbeidsavklaringspenger, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
+                            "periodeFom" to fom.toString(),
+                            "periodeTom" to tom.toString()
+                        )
+                    )
                 }
 
                 internal fun medlemskap(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
-                    aktivitetslogg.behov(Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
-                        "medlemskapPeriodeFom" to fom.toString(),
-                        "medlemskapPeriodeTom" to tom.toString()
-                    ))
+                    aktivitetslogg.behov(
+                        Behovtype.Medlemskap, "Trenger informasjon om medlemskap", mapOf(
+                            "medlemskapPeriodeFom" to fom.toString(),
+                            "medlemskapPeriodeTom" to tom.toString()
+                        )
+                    )
                 }
 
                 internal fun simulering(
@@ -261,11 +267,21 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
-                internal fun godkjenning(aktivitetslogg: IAktivitetslogg, periodeFom: LocalDate, periodeTom: LocalDate) {
-                    aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
-                        "periodeFom" to periodeFom.toString(),
-                        "periodeTom" to periodeTom.toString()
-                    ))
+                internal fun godkjenning(
+                    aktivitetslogg: IAktivitetslogg,
+                    periodeFom: LocalDate,
+                    periodeTom: LocalDate,
+                    vedtaksperiodeaktivitetslogg: Aktivitetslogg
+                ) {
+                    aktivitetslogg.behov(
+                        Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
+                            "periodeFom" to periodeFom.toString(),
+                            "periodeTom" to periodeTom.toString(),
+                            "warnings" to Aktivitetslogg().apply {
+                                aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
+                            }.toMap()
+                        )
+                    )
                 }
 
                 internal fun utbetaling(
