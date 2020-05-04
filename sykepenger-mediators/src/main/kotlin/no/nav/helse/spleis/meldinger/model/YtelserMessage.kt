@@ -56,7 +56,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         Utbetalingshistorikk.Inntektsopplysning(
             sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
             inntektPerMåned = opplysning["inntekt"].asInt(),
-            orgnummer = opplysning["orgnummer"].asText()
+            orgnummer = opplysning["orgnummer"].asText(),
+            refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean()
         )
     }
 

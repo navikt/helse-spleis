@@ -24,7 +24,7 @@ internal class YtelserRiver(
         packet.requireArray("@løsning.${Sykepengehistorikk.name}") {
             requireArray("inntektsopplysninger") {
                 require("sykepengerFom", JsonNode::asLocalDate)
-                requireKey("inntekt", "orgnummer")
+                requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
             }
             requireArray("utbetalteSykeperioder") {
                 interestedIn("fom") { it.asLocalDate() }

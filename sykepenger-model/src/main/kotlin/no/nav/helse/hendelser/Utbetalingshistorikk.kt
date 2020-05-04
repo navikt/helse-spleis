@@ -34,6 +34,7 @@ class Utbetalingshistorikk(
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         utbetalinger.onEach { it.valider(aktivitetslogg, periode) }
         Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg)
+        if (inntektshistorikk.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd")
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         return aktivitetslogg
     }
@@ -45,13 +46,15 @@ class Utbetalingshistorikk(
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Int,
-        private val orgnummer: String
+        private val orgnummer: String,
+        private val refusjonTilArbeidsgiver: Boolean
     ) {
 
         internal fun valider(aktivitetslogg: Aktivitetslogg) {
             if (orgnummer.isBlank()) {
                 aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             }
+            if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
         }
 
         internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {

@@ -19,6 +19,39 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
+    fun `direkteutbetaling til bruker støttes ikke ennå`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", false)
+            ),
+            aktivitetslogg = aktivitetslogg
+        )
+
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `flere inntektsopplysninger gir feil`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", true)
+            ),
+            aktivitetslogg = aktivitetslogg
+        )
+
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
     fun `arbeidsgiverperioden regnes som gjennomført når siste utbetalingsdag er tilstøtende`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)

@@ -60,7 +60,8 @@ private val json = """
                 "sykepengerFom": "2019-03-27",
                 "inntekt": 36000,
                 "orgnummer": "orgnummer",
-                "refusjonTom": null
+                "refusjonTom": null,
+                "refusjonTilArbeidsgiver": true
               }
             ],
             "utbetalteSykeperioder": [
@@ -118,7 +119,8 @@ private val ukjentPeriode = """
                 "sykepengerFom": "2019-03-27",
                 "inntekt": 36000,
                 "orgnummer": "orgnummer",
-                "refusjonTom": null
+                "refusjonTom": null,
+                "refusjonTilArbeidsgiver": true
               }
             ],
             "utbetalteSykeperioder": [
@@ -188,7 +190,8 @@ private val ugyldigPeriode = """
                 "sykepengerFom": "2019-03-27",
                 "inntekt": 36000,
                 "orgnummer": "orgnummer",
-                "refusjonTom": null
+                "refusjonTom": null,
+                "refusjonTilArbeidsgiver": true
               }
             ],
             "utbetalteSykeperioder": [

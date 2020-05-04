@@ -149,7 +149,8 @@ internal abstract class AbstractEndToEndTest {
         Inntektsopplysning(
             1.desember(2017),
             INNTEKT.toInt(),
-            ORGNUMMER
+            ORGNUMMER,
+            true
         )
     )) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
@@ -316,7 +317,8 @@ internal abstract class AbstractEndToEndTest {
             Inntektsopplysning(
                 1.desember(2017),
                 INNTEKT.toInt(),
-                ORGNUMMER
+                ORGNUMMER,
+                true
             )
         ),
         foreldrepenger: Periode? = null,
