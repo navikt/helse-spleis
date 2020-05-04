@@ -1,6 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.tournament.dagturnering
 import no.nav.helse.tournament.historiskDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,6 +18,8 @@ internal class Sykdomshistorikk private constructor(
     internal fun isEmpty() = elementer.isEmpty()
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
+
+    internal fun nySykdomstidslinje() = Element.nySykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(
@@ -41,6 +45,17 @@ internal class Sykdomshistorikk private constructor(
             hendelseSykdomstidslinje
         else
             sykdomstidslinje().merge(hendelseSykdomstidslinje, historiskDagturnering)
+        return tidslinje.also { it.valider(hendelse) }
+    }
+
+    private fun kalkulerBeregnetSykdomstidslinje(
+        hendelse: SykdomstidslinjeHendelse,
+        hendelseSykdomstidslinje: NySykdomstidslinje
+    ): NySykdomstidslinje {
+        val tidslinje = if (elementer.isEmpty())
+            hendelseSykdomstidslinje
+        else
+            nySykdomstidslinje().merge(hendelseSykdomstidslinje, dagturnering::beste)
         return tidslinje.also { it.valider(hendelse) }
     }
 
@@ -74,6 +89,8 @@ internal class Sykdomshistorikk private constructor(
         companion object {
             fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
+            fun nySykdomstidslinje(elementer: List<Element>) = elementer.first().nyBeregnetSykdomstidslinje
+
             fun opprett(
                 historikk: Sykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
@@ -81,6 +98,7 @@ internal class Sykdomshistorikk private constructor(
             ): Element {
                 if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
+                val nyHendelseSykdomstidslinje = hendelse.nySykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
@@ -89,8 +107,11 @@ internal class Sykdomshistorikk private constructor(
                         hendelse,
                         hendelseSykdomstidslinje
                     ),
-                    nyHendelseSykdomstidslinje = hendelse.nySykdomstidslinje(),
-                    nyBeregnetSykdomstidslinje = hendelse.nySykdomstidslinje()
+                    nyHendelseSykdomstidslinje = nyHendelseSykdomstidslinje,
+                    nyBeregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                        hendelse,
+                        nyHendelseSykdomstidslinje
+                    )
                 )
             }
         }

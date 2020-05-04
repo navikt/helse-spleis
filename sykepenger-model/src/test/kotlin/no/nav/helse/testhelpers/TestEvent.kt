@@ -17,6 +17,7 @@ internal object TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
         override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
         override fun sykdomstidslinje() = Sykdomstidslinje()
         override fun nySykdomstidslinje() = NySykdomstidslinje()
+        override fun nySykdomstidslinje(tom: LocalDate) = NySykdomstidslinje()
         override fun valider(periode: Periode) = Aktivitetslogg()
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
         override fun aktørId() = AKTØRID

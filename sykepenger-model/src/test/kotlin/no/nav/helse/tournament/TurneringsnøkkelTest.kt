@@ -90,6 +90,7 @@ internal class TurneringsnøkkelTest {
 
         override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = TODO()
         override fun sykdomstidslinje(): Sykdomstidslinje = TODO()
+        override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje = TODO()
         override fun nySykdomstidslinje(): NySykdomstidslinje = TODO()
         override fun valider(periode: Periode): Aktivitetslogg = TODO()
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()

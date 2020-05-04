@@ -2,10 +2,13 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.default
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -42,6 +45,29 @@ internal class NySykdomstidslinje private constructor(
             this.periode?.merge(annen.periode) ?: annen.periode,
             this.låstePerioder
         )
+    }
+
+    private class ProblemDagVisitor(internal val problemmeldinger: MutableList<String>): NySykdomstidslinjeVisitor {
+        override fun visitDag(
+            dag: ProblemDag,
+            dato: LocalDate,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+            melding: String
+        ) {
+            problemmeldinger.add(melding)
+        }
+    }
+
+    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+        val problemmeldinger = mutableListOf<String>()
+        val visitor = ProblemDagVisitor(problemmeldinger)
+        dager.values.filter { it::class == ProblemDag::class }
+            .forEach { it.accept(visitor) }
+
+        return problemmeldinger
+            .distinct()
+            .onEach { aktivitetslogg.error("Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s", it) }
+            .isEmpty()
     }
 
     internal operator fun plus(other: NySykdomstidslinje) = this.merge(other)

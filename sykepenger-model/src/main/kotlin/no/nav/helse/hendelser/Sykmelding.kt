@@ -45,6 +45,8 @@ class Sykmelding(
 
     override fun nySykdomstidslinje() = nySykdomstidslinje
 
+    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje = nySykdomstidslinje
+
     override fun sykdomstidslinje(tom: LocalDate) = sykdomstidslinje()
 
     override fun fødselsnummer() = fnr

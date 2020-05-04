@@ -27,6 +27,7 @@ class Søknad constructor(
     private val sykdomsperiode: Periode
     private val nySykdomstidslinje: NySykdomstidslinje
     private var forrigeTom: LocalDate? = null
+    private var nyForrigeTom: LocalDate? = null
 
     private companion object {
         private const val tidslinjegrense = 16L
@@ -53,6 +54,14 @@ class Søknad constructor(
         return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
             ?: severe("Ugyldig subsetting av tidslinjen til søknad")
+    }
+
+    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
+        require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+
+        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
+            .also { trimLeft(tom) }
+            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }
 
     override fun nySykdomstidslinje() = nySykdomstidslinje

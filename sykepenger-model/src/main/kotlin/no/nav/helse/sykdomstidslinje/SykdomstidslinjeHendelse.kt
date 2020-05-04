@@ -11,9 +11,10 @@ import kotlin.reflect.KClass
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
-    private val meldingsreferanseId: UUID
+    private val meldingsreferanseId: UUID,
+    melding: Melding? = null
 ) : ArbeidstakerHendelse() {
-    internal val kilde: Hendelseskilde = Hendelseskilde(this::class, meldingsreferanseId)
+    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId)
 
     internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
         internal constructor(
@@ -38,6 +39,8 @@ abstract class SykdomstidslinjeHendelse(
     internal abstract fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
+
+    internal abstract fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje
 
     internal abstract fun nySykdomstidslinje(): NySykdomstidslinje
 

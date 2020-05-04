@@ -30,6 +30,7 @@ class Inntektsmelding(
     private val arbeidsgiverperioder: List<Arbeidsgiverperiode>
     private val ferieperioder: List<Ferieperiode>
     private var forrigeTom: LocalDate? = null
+    private var nyForrigeTom: LocalDate? = null
     private var sykdomstidslinje: Sykdomstidslinje
 
     private val beste = { venstre: NyDag, høyre: NyDag ->
@@ -101,7 +102,7 @@ class Inntektsmelding(
         ferieperioder.map { it.asFerietidslinje() }
 
     private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<NySykdomstidslinje> =
-        listOf(førsteFraværsdag?.let { NySykdomstidslinje.sykedager(it, it, kilde = kilde) } ?: NySykdomstidslinje())
+        listOf(førsteFraværsdag?.let { NySykdomstidslinje.arbeidsgiverdager(it, it, kilde = kilde) } ?: NySykdomstidslinje())
 
     private fun Periode.asArbeidsgivertidslinje() = NySykdomstidslinje.arbeidsgiverdager(start, endInclusive, kilde = kilde)
     private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive, kilde)
@@ -120,6 +121,14 @@ class Inntektsmelding(
 
     internal fun trimLeft(dato: LocalDate) {
         forrigeTom = dato
+    }
+
+    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
+        require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+
+        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
+            .also { trimLeft(tom) }
+            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen") }
     }
 
     // Pad days prior to employer-paid days with assumed work days

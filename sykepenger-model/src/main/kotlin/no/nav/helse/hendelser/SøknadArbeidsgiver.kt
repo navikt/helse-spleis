@@ -21,11 +21,12 @@ class SøknadArbeidsgiver constructor(
     private val aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Søknadsperiode>
-) : SykdomstidslinjeHendelse(meldingsreferanseId) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, Søknad::class) {
 
     private val fom: LocalDate
     private val tom: LocalDate
     private var forrigeTom: LocalDate? = null
+    private var nyForrigeTom: LocalDate? = null
     private val nySykdomstidslinje: NySykdomstidslinje
 
     private companion object {
@@ -51,6 +52,14 @@ class SøknadArbeidsgiver constructor(
         return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
             .also { trimLeft(tom) }
             ?: severe("Ugyldig subsetting av tidslinjen til søknad")
+    }
+
+    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
+        require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+
+        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
+            .also { trimLeft(tom) }
+            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }
 
     override fun nySykdomstidslinje() = NySykdomstidslinje()
