@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.dagturnering
 import no.nav.helse.tournament.historiskDagturnering

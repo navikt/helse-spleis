@@ -107,7 +107,7 @@ internal class OverlapMergeTest {
 
         inspektør.also {
             assertTrue(it.problemdagmeldinger[6.januar]?.contains("Kan ikke velge mellom") ?: false)
-            assertTrue(it.problemdagmeldinger[6.januar]?.contains("TestEvent") ?: false)
+            assertTrue(it.problemdagmeldinger[6.januar]?.contains("TestHendelse") ?: false)
         }
     }
 

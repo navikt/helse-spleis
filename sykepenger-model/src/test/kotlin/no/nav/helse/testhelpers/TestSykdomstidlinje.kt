@@ -16,7 +16,7 @@ internal class TestSykdomstidslinje(
 
     internal infix fun grad(grad: Number) = this.also { it.grad = grad.toDouble() }
 
-    internal fun asNySykdomstidslinje() = daggenerator(førsteDato, sisteDato, grad, TestEvent.kilde)
+    internal fun asNySykdomstidslinje() = daggenerator(førsteDato, sisteDato, grad, TestEvent.testkilde)
     internal fun merge(annen: TestSykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
     internal fun merge(annen: NySykdomstidslinje) = this.asNySykdomstidslinje().merge(annen)
     internal fun lås(periode: Periode) = this.asNySykdomstidslinje().also { it.lås(periode) }

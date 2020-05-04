@@ -9,18 +9,34 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate
 import java.util.*
 
-internal object TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "42"
-        private const val ORGNUMMER = "987654321"
+internal sealed class TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+    private val UNG_PERSON_FNR_2018 = "12020052345"
+    private val AKTØRID = "42"
+    private val ORGNUMMER = "987654321"
 
-        override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
-        override fun sykdomstidslinje() = Sykdomstidslinje()
-        override fun nySykdomstidslinje() = NySykdomstidslinje()
-        override fun nySykdomstidslinje(tom: LocalDate) = NySykdomstidslinje()
-        override fun valider(periode: Periode) = Aktivitetslogg()
-        override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
-        override fun aktørId() = AKTØRID
-        override fun fødselsnummer() = UNG_PERSON_FNR_2018
-        override fun organisasjonsnummer() = ORGNUMMER
+    companion object {
+        val søknad = Søknad.kilde
+        val inntektsmelding = Inntektsmelding.kilde
+        val sykmelding = Sykmelding.kilde
+        val aareg = Aareg.kilde
+        val testkilde = TestHendelse.kilde
     }
+
+    // Objects impersonating real-life sources of sickness timeline days
+    object Inntektsmelding : TestEvent()
+
+    object Sykmelding : TestEvent()
+    object Søknad : TestEvent()
+    object Aareg : TestEvent() // Dette er ren spekulasjon omkring AAreg som kilde
+    object TestHendelse : TestEvent()
+
+    override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
+    override fun sykdomstidslinje() = Sykdomstidslinje()
+    override fun nySykdomstidslinje() = NySykdomstidslinje()
+    override fun nySykdomstidslinje(tom: LocalDate) = NySykdomstidslinje()
+    override fun valider(periode: Periode) = Aktivitetslogg()
+    override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
+    override fun aktørId() = AKTØRID
+    override fun fødselsnummer() = UNG_PERSON_FNR_2018
+    override fun organisasjonsnummer() = ORGNUMMER
+}
