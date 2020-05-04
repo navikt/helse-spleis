@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -28,40 +27,6 @@ class PåminnelserOgTimeoutTest {
     @BeforeEach
     internal fun opprettPerson() {
         person = Person("12345", UNG_PERSON_FNR_2018)
-    }
-
-    @Test
-    fun `timeoutverdier`() {
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.Start.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingFerdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingUferdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingFerdigForlengelse.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.MottattSykmeldingUferdigForlengelse.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknadUferdigForlengelse.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerSøknadFerdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingUferdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerUferdigForlengelse.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerUferdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
-        assertEquals(Duration.ofDays(30), Vedtaksperiode.AvventerInntektsmeldingFerdigGap.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingArbeidsgiversøknad.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerHistorikk.timeout)
-        assertEquals(Duration.ofHours(1), Vedtaksperiode.AvventerVilkårsprøvingGap.timeout)
-        assertEquals(Duration.ofHours(4), Vedtaksperiode.AvventerSimulering.timeout)
-        assertTrue(Duration.ofDays(3) <= Vedtaksperiode.AvventerGodkjenning.timeout) {
-            "Timeout på avventer godjenning skal være minst tre dager"
-        }
-        assertTrue(Duration.ofDays(5) >= Vedtaksperiode.AvventerGodkjenning.timeout) {
-            "Timeout på avventer godjenning skal være maksimalt fem dager"
-        }
-        assertEquals(Duration.ZERO, Vedtaksperiode.TilUtbetaling.timeout)
-        assertEquals(Duration.ZERO, Vedtaksperiode.TilInfotrygd.timeout)
-        assertEquals(Duration.ZERO, Vedtaksperiode.UtbetalingFeilet.timeout)
-        assertEquals(Duration.ZERO, Vedtaksperiode.Avsluttet.timeout)
-        assertEquals(Duration.ZERO, Vedtaksperiode.AvsluttetUtenUtbetaling.timeout)
-        assertEquals(Duration.ZERO, Vedtaksperiode.AvsluttetUtenUtbetalingMedInntektsmelding.timeout)
     }
 
     @Test

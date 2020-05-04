@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Påminnelse
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -28,7 +27,6 @@ interface PersonObserver {
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Aktivitetslogg,
-        val timeout: Duration,
         val hendelser: Set<UUID>
     )
 
