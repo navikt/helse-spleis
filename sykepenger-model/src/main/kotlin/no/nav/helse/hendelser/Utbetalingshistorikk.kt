@@ -79,7 +79,6 @@ class Utbetalingshistorikk(
 
         internal open fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
             if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
-            if (periode.endInclusive >= other.start.minusDays(18)) aktivitetslogg.warn("Har utbetalt periode i Infotrygd nærmere enn 18 dager fra første dag")
         }
 
         abstract class Utbetalingsperiode(fom: LocalDate, tom: LocalDate, internal val dagsats: Int, internal val grad: Int) : Periode(fom, tom) {

@@ -2,7 +2,9 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.august
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -198,8 +200,8 @@ class UtbetalingshistorikkTest {
         )
 
         utbetalingshistorikk.valider(Periode(28.januar, 28.januar))
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasOnlyInfoAndNeeds())
+        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test
@@ -214,7 +216,8 @@ class UtbetalingshistorikkTest {
         )
 
         utbetalingshistorikk.valider(Periode(29.januar, 29.januar))
-        assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test

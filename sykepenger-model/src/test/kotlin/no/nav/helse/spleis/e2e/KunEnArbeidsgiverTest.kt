@@ -348,7 +348,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 16.desember(2017), 15000, 100))
         inspektør.also {
             assertNoErrors(it)
-            assertTrue(it.personLogg.hasWarnings() && !it.personLogg.hasOnlyInfoAndNeeds())
+            assertTrue(it.personLogg.hasOnlyInfoAndNeeds())
             assertMessages(it)
             assertFalse(it.inntekter.isEmpty())
             assertNotNull(it.inntektshistorikk.inntekt(2.januar))
