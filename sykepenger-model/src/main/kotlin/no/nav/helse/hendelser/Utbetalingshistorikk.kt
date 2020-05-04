@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.math.roundToInt
 
 class Utbetalingshistorikk(
     utbetalinger: List<Periode>,
@@ -32,6 +33,7 @@ class Utbetalingshistorikk(
 
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         utbetalinger.onEach { it.valider(aktivitetslogg, periode) }
+        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg)
         inntektshistorikk.forEach { it.valider(aktivitetslogg) }
         return aktivitetslogg
     }
@@ -82,6 +84,7 @@ class Utbetalingshistorikk(
         }
 
         abstract class Utbetalingsperiode(fom: LocalDate, tom: LocalDate, internal val dagsats: Int, internal val grad: Int) : Periode(fom, tom) {
+            private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
             }
@@ -89,6 +92,19 @@ class Utbetalingshistorikk(
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
                 if (dato.erHelg()) utbetalingstidslinje.addHelg(0.0, dato, grad)
                 else utbetalingstidslinje.addNAVdag(dagsats.toDouble(), dato, grad)
+            }
+
+            internal companion object {
+                fun valider(liste: List<Periode>, aktivitetslogg: Aktivitetslogg): Aktivitetslogg {
+                    liste
+                        .filterIsInstance<Utbetalingsperiode>()
+                        .zipWithNext { left, right ->
+                            if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats) {
+                                aktivitetslogg.warn("Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode")
+                            }
+                        }
+                    return aktivitetslogg
+                }
             }
         }
 

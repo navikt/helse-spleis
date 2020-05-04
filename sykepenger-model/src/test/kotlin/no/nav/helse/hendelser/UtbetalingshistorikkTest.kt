@@ -2,14 +2,13 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.testhelpers.august
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 class UtbetalingshistorikkTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -34,6 +33,76 @@ class UtbetalingshistorikkTest {
         assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(7.januar))
         assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(8.januar))
         assertFalse(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(9.januar))
+    }
+
+    @Test
+    fun `lager warning når dagsats endrer seg i en sammenhengende periode`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 4321, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            aktivitetslogg = aktivitetslogg
+        )
+        utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
+            assertTrue(it.hasWarnings())
+            assertFalse(it.hasErrors())
+            assertFalse(it.hasOnlyInfoAndNeeds())
+        }
+    }
+
+    @Test
+    fun `lager ikke warning når dagsats endres pga gradering i en sammenhengende periode`() {
+        val gradering = .5
+        val dagsats = 2468
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, (dagsats*gradering).roundToInt(), (100*gradering).roundToInt()),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, dagsats, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            aktivitetslogg = aktivitetslogg
+        )
+        utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
+            assertTrue(it.hasOnlyInfoAndNeeds())
+        }
+    }
+
+    @Test
+    fun `lager ikke warning når dagsats og grad endrer seg i en sammenhengende periode`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 50),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 2345, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            aktivitetslogg = aktivitetslogg
+        )
+        utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
+            assertTrue(it.hasWarnings())
+            assertFalse(it.hasErrors())
+            assertFalse(it.hasOnlyInfoAndNeeds())
+        }
+    }
+
+    @Test
+    fun `lager ikke warning når dagsats ikke endrer seg i en sammenhengende periode`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 1234, 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            aktivitetslogg = aktivitetslogg
+        )
+        utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
+            assertTrue(it.hasOnlyInfoAndNeeds())
+        }
     }
 
     @Test
