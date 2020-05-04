@@ -37,14 +37,14 @@ interface PersonObserver {
         val fødselsnummer: String,
         val organisasjonsnummer: String,
         val hendelser: Set<UUID>,
-        val oppdrag: List<Oppdrag>,
+        val oppdrag: List<Utbetalt>,
         val fom: LocalDate,
         val tom: LocalDate,
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,
         val opprettet: LocalDateTime
     ) {
-        data class Oppdrag(
+        data class Utbetalt(
             val mottaker: String,
             val fagområde: String,
             val fagsystemId: String,
@@ -54,7 +54,7 @@ interface PersonObserver {
             data class Utbetalingslinje(
                 val fom: LocalDate,
                 val tom: LocalDate,
-                val dagsats: Int, //TODO: Missing in Utbetalingslinje
+                val dagsats: Int,
                 val beløp: Int,
                 val grad: Double
             )

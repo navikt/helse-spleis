@@ -9,7 +9,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
     aktørId: String,
@@ -43,8 +42,8 @@ private class UtbetaltEventBuilder(
 ) : ArbeidsgiverVisitor {
     private lateinit var opprettet: LocalDateTime
     private val hendelser = mutableSetOf<UUID>()
-    private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Oppdrag>()
-    private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje>()
+    private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt>()
+    private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje>()
 
     init {
         sykdomshistorikk.accept(this)
@@ -76,7 +75,7 @@ private class UtbetaltEventBuilder(
 
     override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
-            PersonObserver.UtbetaltEvent.Oppdrag(
+            PersonObserver.UtbetaltEvent.Utbetalt(
                 mottaker = orgnummer,
                 fagområde = "SPREF",
                 fagsystemId = oppdrag.fagsystemId(),
@@ -92,7 +91,7 @@ private class UtbetaltEventBuilder(
 
     override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
-            PersonObserver.UtbetaltEvent.Oppdrag(
+            PersonObserver.UtbetaltEvent.Utbetalt(
                 mottaker = fødselnummer,
                 fagområde = "SP",
                 fagsystemId = oppdrag.fagsystemId(),
@@ -107,6 +106,7 @@ private class UtbetaltEventBuilder(
         fom: LocalDate,
         tom: LocalDate,
         dagsats: Int,
+        lønn: Int,
         grad: Double,
         delytelseId: Int,
         refDelytelseId: Int?,
@@ -116,10 +116,10 @@ private class UtbetaltEventBuilder(
     ) {
         if (linje.erOpphør()) return
         utbetalingslinjer.add(
-            PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje(
+            PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                dagsats = (dagsats / (grad / 100)).roundToInt(),
+                dagsats = lønn,
                 beløp = dagsats,
                 grad = grad
             )

@@ -36,6 +36,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "fom" to utbetalingslinje.get<LocalDate>("fom").toString(),
         "tom" to utbetalingslinje.get<LocalDate>("tom").toString(),
         "dagsats" to utbetalingslinje["dagsats"],
+        "lønn" to utbetalingslinje["lønn"],
         "grad" to utbetalingslinje["grad"],
         "refFagsystemId" to utbetalingslinje["refFagsystemId"],
         "delytelseId" to utbetalingslinje["delytelseId"],

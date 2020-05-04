@@ -136,6 +136,7 @@ internal class UtbetalingTest {
             fom: LocalDate,
             tom: LocalDate,
             dagsats: Int,
+            lønn: Int,
             grad: Double,
             delytelseId: Int,
             refDelytelseId: Int?,

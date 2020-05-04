@@ -50,7 +50,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
                 assertEquals(
-                    Utbetalingslinje(18.januar, 26.januar, 1431, 100.0),
+                    Utbetalingslinje(18.januar, 26.januar, 1431, 1431, 100.0),
                     oppdragInspektør.linjer[0]
                 )
                 assertEquals(Endringskode.ENDR, oppdragInspektør.endringskoder[0])
@@ -87,6 +87,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             fom: LocalDate,
             tom: LocalDate,
             dagsats: Int,
+            lønn: Int,
             grad: Double,
             delytelseId: Int,
             refDelytelseId: Int?,

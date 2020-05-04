@@ -71,11 +71,11 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: NavDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.grad, fagsystemId))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.dagsats, dag.grad, fagsystemId))
     }
 
     private fun addLinje(dag: NavHelgDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, dag.grad, fagsystemId))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, 0, dag.grad, fagsystemId))
     }
 
     private interface Tilstand {
@@ -138,6 +138,7 @@ internal class OppdragBuilder(
 
         override fun betalingsdag(dag: NavDag) {
             linje.dagsats = dagStrategy(dag)
+            linje.lønn = dag.dagsats
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
         }

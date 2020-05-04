@@ -50,13 +50,13 @@ internal class TilUtbetalingHendelseTest {
 
         assertEquals(2, utbetaltEvents.first().oppdrag.size)
 
-        PersonObserver.UtbetaltEvent.Oppdrag(
+        PersonObserver.UtbetaltEvent.Utbetalt(
             mottaker = ORGNUMMER,
             fagområde = "SPREF",
             fagsystemId = utbetaltEvents.first().oppdrag[0].fagsystemId,
             totalbeløp = 11 * 1431,
             utbetalingslinjer = listOf(
-                PersonObserver.UtbetaltEvent.Oppdrag.Utbetalingslinje(
+                PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                     fom = 17.januar,
                     tom = 31.januar,
                     dagsats = 1431,
@@ -68,7 +68,7 @@ internal class TilUtbetalingHendelseTest {
             assertEquals(it, utbetaltEvents.first().oppdrag[0])
         }
 
-        PersonObserver.UtbetaltEvent.Oppdrag(
+        PersonObserver.UtbetaltEvent.Utbetalt(
             mottaker = UNG_PERSON_FNR_2018,
             fagområde = "SP",
             fagsystemId = utbetaltEvents.first().oppdrag[1].fagsystemId,
@@ -78,44 +78,6 @@ internal class TilUtbetalingHendelseTest {
             assertEquals(it, utbetaltEvents.first().oppdrag[1])
         }
     }
-
-//    @Test
-//    fun `utbetaling er godkjent med tidligere utbetalinger`() {
-//        håndterGodkjenning(0)
-//        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
-//        assertTilstand(TilstandType.AVSLUTTET, 0)
-//
-//        førsteSykedag = 1.mars
-//        sisteSykedag = 31.mars
-//        håndterGodkjenning(1)
-//        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 1))
-//        assertTilstand(TilstandType.AVSLUTTET, 1)
-//
-//        val utbetaltEvent0 = utbetaltEvents[0]
-//        assertEquals(1.januar, utbetaltEvent0.førsteFraværsdag)
-//        assertEquals(1, utbetaltEvent0.oppdrag.size)
-//        assertEquals(3, utbetaltEvent0.hendelser.size)
-//
-//        val utbetalingslinje00 = utbetaltEvent0.oppdrag[0]
-//        assertEquals(17.januar, utbetalingslinje00.fom)
-//        assertEquals(31.januar, utbetalingslinje00.tom)
-//        assertEquals(1431, utbetalingslinje00.dagsats)
-//        assertEquals(100.0, utbetalingslinje00.grad)
-//        assertTrue(utbetalingslinje00.enDelAvPeriode)
-//
-//
-//        val utbetaltEvent1 = utbetaltEvents[1]
-//        assertEquals(1.mars, utbetaltEvent1.førsteFraværsdag)
-//        assertEquals(1, utbetaltEvent1.oppdrag.size)
-//        assertEquals(3, utbetaltEvent1.hendelser.size)
-//
-//        val utbetalingslinje10 = utbetaltEvent1.oppdrag[0]
-//        assertEquals(19.mars, utbetalingslinje10.fom)
-//        assertEquals(30.mars, utbetalingslinje10.tom)
-//        assertEquals(1431, utbetalingslinje10.dagsats)
-//        assertEquals(100.0, utbetalingslinje10.grad)
-//        assertTrue(utbetalingslinje10.enDelAvPeriode)
-//    }
 
     @Test
     fun `utbetaling ikke godkjent`() {
