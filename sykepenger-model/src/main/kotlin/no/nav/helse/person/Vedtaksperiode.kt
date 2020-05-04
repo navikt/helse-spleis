@@ -909,7 +909,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.førsteDag(),
                 periodeTom = vedtaksperiode.sisteDag(),
-                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(this)
+                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode)
             )
         }
 
