@@ -13,7 +13,7 @@ internal interface NyDagturnering {
 }
 
 internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
-internal val nySøknadDagturnering: NyDagturnering = CsvDagturnering("/nyDagturneringSøknad.csv")
+internal val nySøknadDagturnering: NyDagturnering = CsvDagturnering("/dagturneringSøknad.csv")
 internal val historiskDagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
 private class CsvDagturnering(private val source: String) : Dagturnering, NyDagturnering {
