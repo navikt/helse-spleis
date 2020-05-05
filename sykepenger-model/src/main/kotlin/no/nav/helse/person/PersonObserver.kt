@@ -27,6 +27,7 @@ interface PersonObserver {
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Aktivitetslogg,
+        val vedtaksperiodeaktivitetslogg: Aktivitetslogg,
         val hendelser: Set<UUID>
     )
 

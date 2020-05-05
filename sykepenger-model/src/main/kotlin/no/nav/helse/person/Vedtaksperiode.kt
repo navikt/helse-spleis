@@ -236,7 +236,7 @@ internal class Vedtaksperiode private constructor(
         block()
 
         event.kontekst(tilstand)
-        emitVedtaksperiodeEndret(tilstand.type, event.aktivitetslogg, previousState.type)
+        emitVedtaksperiodeEndret(tilstand.type, event.aktivitetslogg, person.aktivitetslogg.logg(this), previousState.type)
         tilstand.entering(this, event)
     }
 
@@ -321,6 +321,7 @@ internal class Vedtaksperiode private constructor(
     private fun emitVedtaksperiodeEndret(
         currentState: TilstandType,
         hendelseaktivitetslogg: Aktivitetslogg,
+        vedtaksperiodeaktivitetslogg: Aktivitetslogg,
         previousState: TilstandType
     ) {
         val hendelser = mutableSetOf<UUID>()
@@ -341,6 +342,7 @@ internal class Vedtaksperiode private constructor(
             gjeldendeTilstand = currentState,
             forrigeTilstand = previousState,
             aktivitetslogg = hendelseaktivitetslogg,
+            vedtaksperiodeaktivitetslogg = vedtaksperiodeaktivitetslogg,
             hendelser = hendelser
         )
 
