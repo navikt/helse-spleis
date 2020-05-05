@@ -72,6 +72,7 @@ internal class Utbetalingslinje internal constructor(
     internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)
 
     internal fun utvidTom(tidligere: Utbetalingslinje) = copyWith(ENDR, tidligere)
+        .also { this.refDelytelseId = null }
 
     private fun copyWith(linjetype: Endringskode, tidligere: Utbetalingslinje) {
         this.refFagsystemId = tidligere.refFagsystemId
