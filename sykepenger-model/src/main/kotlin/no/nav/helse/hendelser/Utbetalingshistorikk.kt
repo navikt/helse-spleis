@@ -39,8 +39,8 @@ class Utbetalingshistorikk(
         return aktivitetslogg
     }
 
-    internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
-        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, inntekthistorikk) }
+    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
+        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntekthistorikk) }
     }
 
     class Inntektsopplysning(
@@ -57,7 +57,8 @@ class Utbetalingshistorikk(
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
         }
 
-        internal fun addInntekter(hendelseId: UUID, inntekthistorikk: Inntekthistorikk) {
+        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
+            if (organisasjonsnummer != orgnummer) return
             inntekthistorikk.add(sykepengerFom, hendelseId, inntektPerMåned.toBigDecimal())
         }
     }

@@ -144,7 +144,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun addInntekt(ytelser: Ytelser) {
-        ytelser.addInntekt(inntekthistorikk)
+        ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
     }
 
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
