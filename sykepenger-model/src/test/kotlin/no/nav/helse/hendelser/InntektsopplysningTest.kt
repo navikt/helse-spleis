@@ -27,13 +27,13 @@ internal class InntektsopplysningTest {
     @Test
     fun `legger til inntekter for samme arbeidsgiver`() {
         inntektsopplysning(DATO, ORGNR).addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNotNull(inntekthistorikk.inntekt(DATO))
+        assertNotNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
     }
 
     @Test
     fun `legger ikke til inntekter for annen arbeidsgiver`() {
         inntektsopplysning(DATO, "987654321").addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNull(inntekthistorikk.inntekt(DATO))
+        assertNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
     }
 
     private fun inntektsopplysning(dato: LocalDate, orgnr: String) =
