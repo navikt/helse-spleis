@@ -17,8 +17,11 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
     )
 
     internal fun beløp(dato: LocalDate) =
-        grunnbeløp.entries.sortedBy { it.key }.lastOrNull { dato.isAfter(it.key) }?.let { it.value * multiplier } ?:
-            throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
+        grunnbeløp.entries
+            .filter { dato >= it.key }
+            .maxBy { it.key }
+            ?.let { it.value * multiplier }
+            ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
 
     internal fun dagsats(dato: LocalDate) = beløp(dato) / 260.0
 
