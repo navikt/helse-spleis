@@ -49,7 +49,7 @@ internal class SimuleringHendelseTest {
     fun `simulering er ikke OK`() {
         håndterYtelser()
         person.håndter(simulering(false))
-        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        assertTilstand(TilstandType.TIL_INFOTRYGD)
         assertTrue(inspektør.personLogg.hasWarnings())
     }
 

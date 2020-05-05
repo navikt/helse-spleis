@@ -26,7 +26,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
@@ -863,14 +862,13 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSimulering : Vedtaksperiodetilstand {
 
         override val type: TilstandType = AVVENTER_SIMULERING
-        private val åpningstider = LocalTime.of(7, 0)..LocalTime.of(19, 59, 59)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(
                 hendelse,
                 AvventerGodkjenning
             ) {
-                hendelse.warn("Simulering har feilet")
+                hendelse.warn("Ingen simulering av utbetaling på grunn av manglende utbetalingsinformasjon, går til Avventer godkjenning")
             }
 
             trengerSimulering(vedtaksperiode, hendelse)
@@ -882,8 +880,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().removeUEND()).hasErrors()) {
-                if (utenforÅpningstid()) simulering.info("Simulering feilet, men Oppdragsystemet har stengt og simulering utsettes til Oppdragsystemet har åpnet")
-                return
+                return vedtaksperiode.tilstand(simulering, TilInfotrygd)
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
@@ -897,8 +894,6 @@ internal class Vedtaksperiode private constructor(
                 saksbehandler = vedtaksperiode.godkjentAv
             )
         }
-
-        private fun utenforÅpningstid() = LocalTime.now() !in åpningstider
     }
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
