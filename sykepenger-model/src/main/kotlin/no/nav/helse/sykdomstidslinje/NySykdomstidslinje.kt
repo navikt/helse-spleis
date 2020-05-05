@@ -7,8 +7,6 @@ import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.default
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.sykdomstidslinje.dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.dag.Ubestemtdag
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -47,7 +45,7 @@ internal class NySykdomstidslinje private constructor(
         )
     }
 
-    private class ProblemDagVisitor(internal val problemmeldinger: MutableList<String>): NySykdomstidslinjeVisitor {
+    private class ProblemDagVisitor(internal val problemmeldinger: MutableList<String>) : NySykdomstidslinjeVisitor {
         override fun visitDag(
             dag: ProblemDag,
             dato: LocalDate,
@@ -66,7 +64,12 @@ internal class NySykdomstidslinje private constructor(
 
         return problemmeldinger
             .distinct()
-            .onEach { aktivitetslogg.error("Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s", it) }
+            .onEach {
+                aktivitetslogg.error(
+                    "Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s",
+                    it
+                )
+            }
             .isEmpty()
     }
 
@@ -99,6 +102,33 @@ internal class NySykdomstidslinje private constructor(
     internal fun låsOpp(periode: Periode) = this.also {
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
+
+    internal fun førsteFraværsdag(): LocalDate? {
+        return førsteSykedagDagEtterSisteIkkeSykedag() ?: førsteSykedag()
+    }
+
+    /**
+     * Første fraværsdag i siste sammenhengende sykefravær i perioden
+     */
+    private fun førsteSykedagDagEtterSisteIkkeSykedag() =
+        fjernDagerEtterSisteSykedag().let { tidslinje ->
+            tidslinje.periode?.lastOrNull { this[it] is NyArbeidsdag || this[it] is NyFriskHelgedag || this[it] is NyUkjentDag }
+                ?.let { ikkeSykedag ->
+                    tidslinje.dager.entries.firstOrNull {
+                        it.key.isAfter(ikkeSykedag) && erEnSykedag(it.value)
+                    }?.key
+                }
+        }
+
+    private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
+
+    private fun fjernDagerEtterSisteSykedag(): NySykdomstidslinje = periode
+        ?.findLast { erEnSykedag(this[it]) }
+        ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: NySykdomstidslinje()
+
+
+    private fun erEnSykedag(it: NyDag) =
+        it is NySykedag || it is NySykHelgedag || it is NyArbeidsgiverdag || it is NyArbeidsgiverHelgedag || it is NyForeldetSykedag
 
     internal fun accept(visitor: NySykdomstidslinjeVisitor) {
         visitor.preVisitNySykdomstidslinje(this, låstePerioder, id, tidsstempel)
@@ -173,7 +203,14 @@ internal class NySykdomstidslinje private constructor(
                     .collect(
                         toMap<LocalDate, LocalDate, NyDag>(
                             { it },
-                            { if (it.erHelg()) NySykHelgedag(it, grad, kilde) else sykedag(it, avskjæringsdato, grad, kilde) })
+                            {
+                                if (it.erHelg()) NySykHelgedag(it, grad, kilde) else sykedag(
+                                    it,
+                                    avskjæringsdato,
+                                    grad,
+                                    kilde
+                                )
+                            })
                     )
             )
 

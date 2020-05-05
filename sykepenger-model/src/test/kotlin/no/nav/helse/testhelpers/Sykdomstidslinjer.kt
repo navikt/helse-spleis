@@ -4,11 +4,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate
 import java.util.*
+import java.util.stream.Collectors
 
 private var dagensDato = LocalDate.of(2018, 1, 1)
 
@@ -118,6 +120,30 @@ internal val Int.nF
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         TestHendelse.kilde
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.nEDU
+    get() = NySykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyStudiedag(it, TestHendelse.kilde) }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.nH
+    get() = NySykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NySykHelgedag(it, 100.0, TestHendelse.kilde) }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.nP
+    get() = NySykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyPermisjonsdag(it, TestHendelse.kilde) }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal val Int.nUT
+    get() = NySykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyUtenlandsdag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID()) {
