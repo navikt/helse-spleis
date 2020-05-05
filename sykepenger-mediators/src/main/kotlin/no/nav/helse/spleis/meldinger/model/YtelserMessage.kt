@@ -57,7 +57,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
             inntektPerMåned = opplysning["inntekt"].asInt(),
             orgnummer = opplysning["orgnummer"].asText(),
-            refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean()
+            refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
+            refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
         )
     }
 

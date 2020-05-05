@@ -1,9 +1,11 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import no.nav.helse.testhelpers.mars
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -15,12 +17,15 @@ internal class InntektsopplysningTest {
         private val HENDELSE = UUID.randomUUID()
         private const val ORGNR = "123456789"
         private val DATO = 1.januar
+        private val PERIODE = Periode(1.februar, 28.februar)
     }
 
+    private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var inntekthistorikk: Inntekthistorikk
 
     @BeforeEach
     fun setup() {
+        aktivitetslogg = Aktivitetslogg()
         inntekthistorikk = Inntekthistorikk()
     }
 
@@ -36,6 +41,24 @@ internal class InntektsopplysningTest {
         assertNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
     }
 
-    private fun inntektsopplysning(dato: LocalDate, orgnr: String) =
-        Utbetalingshistorikk.Inntektsopplysning(dato, 1000, orgnr, true)
+    @Test
+    fun `refusjon opphører før perioden`() {
+        inntektsopplysning(DATO, ORGNR, 1.januar).valider(aktivitetslogg, PERIODE)
+        assertTrue(aktivitetslogg.hasErrors())
+    }
+
+    @Test
+    fun `refusjon opphører i perioden`() {
+        inntektsopplysning(DATO, ORGNR, 15.februar).valider(aktivitetslogg, PERIODE)
+        assertTrue(aktivitetslogg.hasErrors())
+    }
+
+    @Test
+    fun `refusjon opphører etter perioden`() {
+        inntektsopplysning(DATO, ORGNR, 1.mars).valider(aktivitetslogg, PERIODE)
+        assertFalse(aktivitetslogg.hasErrors())
+    }
+
+    private fun inntektsopplysning(dato: LocalDate, orgnr: String, refusjonTom: LocalDate? = null) =
+        Utbetalingshistorikk.Inntektsopplysning(dato, 1000, orgnr, true, refusjonTom)
 }

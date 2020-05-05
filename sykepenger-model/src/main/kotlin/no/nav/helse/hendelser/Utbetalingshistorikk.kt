@@ -35,7 +35,7 @@ class Utbetalingshistorikk(
         utbetalinger.onEach { it.valider(aktivitetslogg, periode) }
         Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg)
         if (inntektshistorikk.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd")
-        inntektshistorikk.forEach { it.valider(aktivitetslogg) }
+        inntektshistorikk.forEach { it.valider(aktivitetslogg, periode) }
         return aktivitetslogg
     }
 
@@ -47,13 +47,13 @@ class Utbetalingshistorikk(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Int,
         private val orgnummer: String,
-        private val refusjonTilArbeidsgiver: Boolean
+        private val refusjonTilArbeidsgiver: Boolean,
+        private val refusjonTom: LocalDate? = null
     ) {
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg) {
-            if (orgnummer.isBlank()) {
-                aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
-            }
+        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
+            if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
+            if (refusjonTom != null && periode.etter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
         }
 
