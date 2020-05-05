@@ -72,13 +72,13 @@ data class SykdomstidslinjedagDTO(
 
 interface UtbetalingstidslinjedagDTO {
     val type: TypeDataDTO
-    val inntekt: Double
+    val inntekt: Int
     val dato: LocalDate
 }
 
 data class NavDagDTO(
     override val type: TypeDataDTO = TypeDataDTO.NavDag,
-    override val inntekt: Double,
+    override val inntekt: Int,
     override val dato: LocalDate,
     val utbetaling: Int,
     val grad: Double
@@ -86,7 +86,7 @@ data class NavDagDTO(
 
 data class AvvistDagDTO(
     override val type: TypeDataDTO = TypeDataDTO.AvvistDag,
-    override val inntekt: Double,
+    override val inntekt: Int,
     override val dato: LocalDate,
     val begrunnelse: BegrunnelseDTO,
     val grad: Double
@@ -94,13 +94,13 @@ data class AvvistDagDTO(
 
 data class UtbetalingsdagDTO(
     override val type: TypeDataDTO,
-    override val inntekt: Double,
+    override val inntekt: Int,
     override val dato: LocalDate
 ) : UtbetalingstidslinjedagDTO
 
 data class UtbetalingsdagMedGradDTO(
     override val type: TypeDataDTO,
-    override val inntekt: Double,
+    override val inntekt: Int,
     override val dato: LocalDate,
     val grad: Double
 ) : UtbetalingstidslinjedagDTO

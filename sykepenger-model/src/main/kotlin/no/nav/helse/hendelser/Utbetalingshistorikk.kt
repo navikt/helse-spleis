@@ -98,8 +98,8 @@ class Utbetalingshistorikk(
             }
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(0.0, dato, grad)
-                else utbetalingstidslinje.addNAVdag(dagsats.toDouble(), dato, grad)
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(0, dato, grad)
+                else utbetalingstidslinje.addNAVdag(dagsats, dato, grad)
             }
 
             internal companion object {

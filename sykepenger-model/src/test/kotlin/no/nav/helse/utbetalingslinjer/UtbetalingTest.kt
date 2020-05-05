@@ -29,7 +29,7 @@ internal class UtbetalingTest {
     @Test
     fun `setter refFagsystemId og refDelytelseId når en linje peker på en annen`() {
         val tidslinje = tidslinjeOf(
-            16.AP, 1.NAV, 2.HELG, 5.NAV(inntekt = 1200.0, grad = 50.0),
+            16.AP, 1.NAV, 2.HELG, 5.NAV(1200, 50.0),
             startDato = 1.januar(2020)
         )
 
@@ -73,7 +73,7 @@ internal class UtbetalingTest {
     @Test
     fun `tre utbetalinger`() {
         val tidslinje = tidslinjeOf(
-            16.AP, 1.NAV, 2.HELG, 5.NAV(inntekt = 1200.0, grad = 50.0), 2.HELG, 5.NAV,
+            16.AP, 1.NAV, 2.HELG, 5.NAV(1200, 50.0), 2.HELG, 5.NAV,
             startDato = 1.januar(2020)
         )
 

@@ -38,7 +38,7 @@ internal class NyUtbetalingstidslinjeBuilderTest {
         (16.nS + 4.nS).utbetalingslinjer()
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertInntekt(1430.8)
+        assertDagsats(1431)
     }
 
     @Test
@@ -365,19 +365,19 @@ internal class NyUtbetalingstidslinjeBuilderTest {
     fun `riktig inntekt for riktig dag`() {
         resetSeed(1.desember(2017))
         20.nS.utbetalingslinjer()
-        assertInntekt(1430.8)
+        assertDagsats(1431)
 
         resetSeed(8.januar)
         20.nS.utbetalingslinjer()
-        assertInntekt(1430.8)
+        assertDagsats(1431)
 
         resetSeed(8.januar)
         40.nS.utbetalingslinjer()
-        assertInntekt(1430.8)
+        assertDagsats(1431)
 
         resetSeed(1.februar)
         40.nS.utbetalingslinjer()
-        assertInntekt(1153.8)
+        assertDagsats(1154)
     }
 
     @Test
@@ -388,7 +388,7 @@ internal class NyUtbetalingstidslinjeBuilderTest {
             }
         )
         assertFalse(inspektør.navdager.first().grad.isNaN())
-        assertFalse(0.0 == inspektør.navdager.first().inntekt)
+        assertFalse(0 == inspektør.navdager.first().dagsats)
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
 
@@ -413,8 +413,8 @@ internal class NyUtbetalingstidslinjeBuilderTest {
         add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal())
     }
 
-    private fun assertInntekt(inntekt: Double) {
-        inspektør.navdager.forEach { assertEquals(inntekt, it.inntekt) }
+    private fun assertDagsats(dagsats: Int) {
+        inspektør.navdager.forEach { assertEquals(dagsats, it.dagsats) }
     }
 
     private fun NySykdomstidslinje.utbetalingslinjer(

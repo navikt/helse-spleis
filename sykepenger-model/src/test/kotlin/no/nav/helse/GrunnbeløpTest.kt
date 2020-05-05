@@ -4,14 +4,13 @@ import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.mai
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.math.roundToInt
 
 internal class GrunnbeløpTest {
 
     @Test
     fun dagsats() {
-        assertEquals(2304, Grunnbeløp.`6G`.dagsats(1.mai(2019)).roundToInt())
-        assertEquals(2236, Grunnbeløp.`6G`.dagsats(30.april(2019)).roundToInt())
+        assertEquals(2304, Grunnbeløp.`6G`.dagsats(1.mai(2019)))
+        assertEquals(2236, Grunnbeløp.`6G`.dagsats(30.april(2019)))
     }
 
     @Test

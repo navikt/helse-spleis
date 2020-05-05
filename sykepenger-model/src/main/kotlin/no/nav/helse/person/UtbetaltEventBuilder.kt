@@ -8,7 +8,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
     orgnummer: String,
@@ -93,8 +92,8 @@ private class UtbetaltEventBuilder(
                 PersonObserver.Utbetalingslinje(
                     fom = dag.dato,
                     tom = dag.dato,
-                    dagsats = requireNotNull(dag.inntekt.roundToInt()),
-                    beløp = requireNotNull(dag.utbetaling),
+                    dagsats = dag.dagsats,
+                    beløp = dag.utbetaling,
                     grad = dag.grad,
                     enDelAvPeriode = dag.dato in periode,
                     mottaker = orgnummer,

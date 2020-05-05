@@ -86,6 +86,22 @@ class UtbetalingshistorikkTest {
         }
     }
 
+    /*@Test
+    fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 30.april, Grunnbeløp.`6G`.dagsats(1.april), 100),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai, 31.mai, Grunnbeløp.`6G`.dagsats(1.mai), 100)
+        )
+        val utbetalingshistorikk = Utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = emptyList(),
+            aktivitetslogg = aktivitetslogg
+        )
+        utbetalingshistorikk.valider(Periode(1.juni, 30.juni)).also {
+            assertTrue(it.hasOnlyInfoAndNeeds())
+        }
+    }*/
+
     @Test
     fun `lager ikke warning når dagsats endres pga gradering i en sammenhengende periode`() {
         val gradering = .5

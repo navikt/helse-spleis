@@ -45,7 +45,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
     override fun visitNavDag(dag: NavDag) {
         navDagTeller += 1
         totalUtbetaling += dag.utbetaling
-        totalInntekt += dag.inntekt
+        totalInntekt += dag.dagsats
     }
     override fun visitNavHelgDag(dag: NavHelgDag) { navHelgDagTeller += 1 }
     override fun visitUkjentDag(dag: UkjentDag) { ukjentDagTeller += 1 }

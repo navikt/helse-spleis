@@ -46,7 +46,7 @@ internal class ReflectInstance private constructor(
     private val instance: Any
 ) {
     internal operator fun <R> get(property: String): R =
-        reflectClass[instance, property]
+        reflectClass.get(instance, property)
 
     private operator fun get(nestedClassName: String, property: String): List<ReflectInstance> {
         val nestedClass = reflectClass.getNestedClass(nestedClassName)

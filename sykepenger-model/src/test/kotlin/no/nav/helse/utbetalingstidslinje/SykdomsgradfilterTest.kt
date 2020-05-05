@@ -2,15 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
-import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class SykdomsgradfilterTest {
@@ -20,7 +13,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     internal fun `sykdomsgrad over 20%`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200.0, 50.0)))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 50.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -30,7 +23,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     internal fun `alle dager fom første dag med total sykdomsgrad under 20% skal avvises`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200.0, 19.0)))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -40,7 +33,7 @@ internal class SykdomsgradfilterTest {
 
     @Test
     internal fun `kun dager i perioden blir avvist ved for lav sykdomsgrad`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 10.NAV(1200.0, 19.0)))
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 10.NAV(1200, 19.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)

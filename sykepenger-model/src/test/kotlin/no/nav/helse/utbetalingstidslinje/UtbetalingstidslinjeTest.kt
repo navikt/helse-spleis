@@ -15,7 +15,7 @@ internal class UtbetalingstidslinjeTest {
     }
 
     @Test internal fun `avviste dager blir konvertert til Navdager med opprinnelig inntekt`() {
-        val tidslinje = tidslinjeOf(10.NAV(12.0), 5.NAV(1200.0))
+        val tidslinje = tidslinjeOf(10.NAV(12), 5.NAV(1200))
         MinimumInntektsfilter(
             UNG_PERSON_FNR_2018,
             listOf(tidslinje),

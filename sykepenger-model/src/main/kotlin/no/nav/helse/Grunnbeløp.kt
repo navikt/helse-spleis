@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = mapOf<LocalDate, Int>(
@@ -23,7 +24,7 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
             ?.let { it.value * multiplier }
             ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
 
-    internal fun dagsats(dato: LocalDate) = beløp(dato) / 260.0
+    internal fun dagsats(dato: LocalDate) = (beløp(dato) / 260.0).roundToInt()
 
     companion object {
         val `6G` = Grunnbeløp(6.0)

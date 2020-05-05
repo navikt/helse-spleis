@@ -50,7 +50,8 @@ class SerialisertPerson(val json: String) {
             V3BeregnerGjenståendeSykedagerFraMaksdato(),
             V4LeggTilNySykdomstidslinje(),
             V5BegrensGradTilMellom0Og100(),
-            V6LeggTilNySykdomstidslinje()
+            V6LeggTilNySykdomstidslinje(),
+            V7DagsatsSomHeltall()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -146,28 +147,28 @@ class SerialisertPerson(val json: String) {
         return createUtbetalingstidslinje(data.dager.map {
             when (it.type) {
                 UtbetalingstidslinjeData.TypeData.ArbeidsgiverperiodeDag -> {
-                    Utbetalingsdag.ArbeidsgiverperiodeDag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.ArbeidsgiverperiodeDag(dagsats = it.dagsats, dato = it.dato)
                 }
                 UtbetalingstidslinjeData.TypeData.NavDag -> {
                     createNavUtbetalingdag(
-                        inntekt = it.inntekt,
+                        inntekt = it.dagsats,
                         dato = it.dato,
                         utbetaling = it.utbetaling!!,
                         grad = it.grad!!
                     )
                 }
                 UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
-                    Utbetalingsdag.NavHelgDag(inntekt = it.inntekt, dato = it.dato, grad = it.grad!!)
+                    Utbetalingsdag.NavHelgDag(dagsats = it.dagsats, dato = it.dato, grad = it.grad!!)
                 }
                 UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
-                    Utbetalingsdag.Arbeidsdag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.Arbeidsdag(dagsats = it.dagsats, dato = it.dato)
                 }
                 UtbetalingstidslinjeData.TypeData.Fridag -> {
-                    Utbetalingsdag.Fridag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.Fridag(dagsats = it.dagsats, dato = it.dato)
                 }
                 UtbetalingstidslinjeData.TypeData.AvvistDag -> {
                     Utbetalingsdag.AvvistDag(
-                        inntekt = it.inntekt, dato = it.dato, begrunnelse = when (it.begrunnelse) {
+                        dagsats = it.dagsats, dato = it.dato, begrunnelse = when (it.begrunnelse) {
                             UtbetalingstidslinjeData.BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
                             UtbetalingstidslinjeData.BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
                             UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
@@ -177,10 +178,10 @@ class SerialisertPerson(val json: String) {
                     )
                 }
                 UtbetalingstidslinjeData.TypeData.UkjentDag -> {
-                    Utbetalingsdag.UkjentDag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.UkjentDag(dagsats = it.dagsats, dato = it.dato)
                 }
                 UtbetalingstidslinjeData.TypeData.ForeldetDag -> {
-                    Utbetalingsdag.ForeldetDag(inntekt = it.inntekt, dato = it.dato)
+                    Utbetalingsdag.ForeldetDag(dagsats = it.dagsats, dato = it.dato)
                 }
             }
         }
@@ -600,7 +601,7 @@ data class UtbetalingstidslinjeData(
     data class UtbetalingsdagData(
         val type: TypeData,
         val dato: LocalDate,
-        val inntekt: Double,
+        val dagsats: Int,
         val utbetaling: Int?,
         val begrunnelse: BegrunnelseData?,
         val grad: Double?

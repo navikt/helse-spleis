@@ -13,7 +13,7 @@ internal class MinimumInntektsfilter (
     private val aktivitetslogg: Aktivitetslogg
 ): UtbetalingsdagVisitor {
 
-    private var inntekter = mutableMapOf<LocalDate, Double>()
+    private var inntekter = mutableMapOf<LocalDate, Int>()
 
     internal fun filter() {
         tidslinjer.forEach { it.accept(this) }
@@ -40,7 +40,7 @@ internal class MinimumInntektsfilter (
     }
 
     private fun addInntekt(dag: Utbetalingstidslinje.Utbetalingsdag) {
-        inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.inntekt) ?: dag.inntekt
+        inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.dagsats) ?: dag.dagsats
     }
 
 }

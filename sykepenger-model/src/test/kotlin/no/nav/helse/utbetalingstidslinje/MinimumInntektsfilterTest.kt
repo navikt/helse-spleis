@@ -48,7 +48,7 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test internal fun `dager under minstelønnskravet blir avvist`() {
-        val tidslinje = tidslinjeOf(5.NAV(1200.0), 10.NAV(12.0))
+        val tidslinje = tidslinjeOf(5.NAV(1200), 10.NAV(12))
         MinimumInntektsfilter(Alder(
             UNG_PERSON_FNR_2018),
             listOf(tidslinje),
@@ -64,8 +64,8 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test internal fun `dager under minstelønnskravet blir avvist i flere tidslinjer`() {
-        val tidslinje1 = tidslinjeOf(5.NAV, 10.NAV(12.0))
-        val tidslinje2 = tidslinjeOf(5.UTELATE, 5.ARB, 10.NAV(12.0))
+        val tidslinje1 = tidslinjeOf(5.NAV, 10.NAV(12))
+        val tidslinje2 = tidslinjeOf(5.UTELATE, 5.ARB, 10.NAV(12))
         MinimumInntektsfilter(
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje1, tidslinje2),
@@ -86,8 +86,8 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test internal fun `total inntekt per dag avgjør minstelønnskravet`() {
-        val tidslinje1 = tidslinjeOf(10.NAV(150.0))
-        val tidslinje2 = tidslinjeOf(1.NAV(5.0), 9.NAV(150.0))
+        val tidslinje1 = tidslinjeOf(10.NAV(150))
+        val tidslinje2 = tidslinjeOf(1.NAV(5), 9.NAV(150))
         MinimumInntektsfilter(
             Alder(UNG_PERSON_FNR_2018),
             listOf(tidslinje1, tidslinje2),
@@ -107,9 +107,9 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test internal fun `total inntekt per dag avgjør minstelønnskravet for person som er 67 år`() {
-        val tidslinje1 = tidslinjeOf(10.NAV(150.0), 10.NAV(400.0))
+        val tidslinje1 = tidslinjeOf(10.NAV(150), 10.NAV(400))
         val tidslinje2 =
-            tidslinjeOf(1.NAV(5.0), 14.NAV(150.0), 5.NAV(400.0))
+            tidslinjeOf(1.NAV(5), 14.NAV(150), 5.NAV(400))
         MinimumInntektsfilter(
             Alder(PERSON_67_ÅR_FNR_2018),
             listOf(tidslinje1, tidslinje2),

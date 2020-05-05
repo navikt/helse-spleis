@@ -100,5 +100,5 @@ internal class UtbetalingReflectTest {
     }
 
     private fun tidslinjeMedDagsats(tidslinje: Utbetalingstidslinje) =
-        tidslinje.onEach { if (it is NavDag) it.utbetaling = it.inntekt.toInt()  }
+        tidslinje.onEach { if (it is NavDag) it.utbetaling = it.dagsats.toInt()  }
 }

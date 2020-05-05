@@ -4,13 +4,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.serde.migration.JsonMigration
-import no.nav.helse.serde.migration.V5BegrensGradTilMellom0Og100
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
@@ -55,58 +52,6 @@ internal class JsonBuilderTest {
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
         assertEquals(personPre, personPost, personPre.toString())
     }
-
-    @Test
-    internal fun `støtter deserialisering av person uten ny sykdomstidslinje`() {
-        val person = person()
-        val initialPerson = objectMapper.writeValueAsString(person)
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
-        val json = objectMapper.readTree(jsonBuilder.toString()).also { personJsonNode ->
-            personJsonNode["arbeidsgivere"][0]["vedtaksperioder"][0]["sykdomshistorikk"].forEach { historikk ->
-                (historikk as ObjectNode).let { sykdomshistorikk ->
-                    sykdomshistorikk.remove("nyHendelseSykdomstidslinje")
-                    sykdomshistorikk.remove("nyBeregnetSykdomstidslinje")
-                }
-            }
-        }
-        JsonMigration.medSkjemaversjon(listOf(V5BegrensGradTilMellom0Og100()), json)
-
-        val serialisertPerson = SerialisertPerson(json.toString())
-        val personDeserialisert = serialisertPerson.deserialize()
-        val migratedPerson = objectMapper.writeValueAsString(personDeserialisert)
-
-        assertEquals(
-            removeNotMigratedInfo(initialPerson),
-            removeNotMigratedInfo(migratedPerson),
-            "Migrated, serialized and deserialized person should match initial person"
-        )
-    }
-
-    private fun removeNotMigratedInfo(person: String) =
-        (objectMapper.readTree(person) as ObjectNode).let { personNode ->
-            personNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-                arbeidsgiver.path("perioder").forEach { vedtaksperiode ->
-                    vedtaksperiode.path("sykdomshistorikk")["elementer"].forEach { sykdomshistorikkelement ->
-                        (sykdomshistorikkelement as ObjectNode).apply {
-
-                            // As new sykdomstidslinje does not yet calculate beregnetSykdomstidlinje, we cannot compare them
-                            remove("nyBeregnetSykdomstidslinje")
-
-                            (get("nyHendelseSykdomstidslinje") as ObjectNode).apply {
-                                remove("id") // not migrated
-                                replace("låstePerioder", arrayNode()) // not migrated
-                                put(
-                                    "tidsstempel",
-                                    get("tidsstempel").asText().replace(Regex("T.*"), "")
-                                ) // not migrated, timestamp will differ
-                            }
-                        }
-                    }
-                }
-            }
-            objectMapper.writeValueAsString(personNode)
-        }
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person`() {

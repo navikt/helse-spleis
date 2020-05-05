@@ -38,7 +38,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     internal fun `avgrenset betaling pga minimum inntekt`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12.0), 2.HELG, 5.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
         assertEquals(5, inspektør.navDagTeller)
@@ -53,7 +53,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     internal fun `avgrenset betaling pga maksimum inntekt`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500.0), 2.HELG, 5.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
@@ -66,7 +66,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     internal fun `avgrenset betaling pga minimun sykdomsgrad`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200.0, 19.0), 2.HELG, 5.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.avvistDagTeller)
@@ -115,16 +115,16 @@ internal class ArbeidsgiverUtbetalingerTest {
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
-            5.NAV(12.0), 2.HELG,
+            5.NAV(12), 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
-            5.NAV(3500.0), 2.HELG,
-            5.NAV(3500.0), 2.HELG,
-            5.NAV(1200.0), 2.HELG
+            5.NAV(3500), 2.HELG,
+            5.NAV(3500), 2.HELG,
+            5.NAV(1200), 2.HELG
         )
 
         assertEquals(98, inspektør.size)

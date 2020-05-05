@@ -468,7 +468,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.Arbeidsdag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato
                 )
             )
@@ -478,7 +478,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ArbeidsgiverperiodeDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato
                 )
             )
@@ -488,7 +488,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato,
                     utbetaling = dag.utbetaling,
                     grad = dag.grad
@@ -501,7 +501,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagMedGradDTO(
                     type = TypeDataDTO.NavHelgDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato,
                     grad = dag.grad
                 )
@@ -512,7 +512,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = if (dag.dato.erHelg()) TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato
                 )
             )
@@ -522,7 +522,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.UkjentDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato
                 )
             )
@@ -532,7 +532,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 AvvistDagDTO(
                     type = TypeDataDTO.AvvistDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato,
                     begrunnelse = mapBegrunnelse(dag.begrunnelse),
                     grad = dag.grad
@@ -544,7 +544,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ForeldetDag,
-                    inntekt = dag.inntekt,
+                    inntekt = dag.dagsats,
                     dato = dag.dato
                 )
             )

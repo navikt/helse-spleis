@@ -149,7 +149,7 @@ internal fun createUtbetalingstidslinje(
     .call(utbetalingsdager)
 
 internal fun createNavUtbetalingdag(
-    inntekt: Double,
+    inntekt: Int,
     dato: LocalDate,
     utbetaling: Int,
     grad: Double

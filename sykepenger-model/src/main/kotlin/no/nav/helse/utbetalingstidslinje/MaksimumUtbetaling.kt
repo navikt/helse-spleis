@@ -29,9 +29,8 @@ internal class MaksimumUtbetaling(
     }
 
     override fun visitNavDag(dag: NavDag) {
-        require(!dag.inntekt.isNaN()) { "Inntekt for ${dag.dato} er NaN" }
         require(!dag.grad.isNaN()) { "Grad for ${dag.dato} er NaN" }
-        if (dag.dato in periode && dag.inntekt > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
-        dag.utbetaling = (minOf(dag.inntekt, `6G`.dagsats(dag.dato)).roundToInt() * (dag.grad / 100)).roundToInt() // TODO: Foreløpig ikke avklart om dette er riktig avrundingsstrategi
+        if (dag.dato in periode && dag.dagsats > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
+        dag.utbetaling = (minOf(dag.dagsats, `6G`.dagsats(dag.dato)) * (dag.grad / 100.0)).roundToInt()
     }
 }

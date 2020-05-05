@@ -30,7 +30,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `helg ved start og slutt i perioden utelates ikke`() {
-        opprett(1.AP, 1.HELG(1200.0), 5.NAV(1200.0), 2.HELG(1200.0))
+        opprett(1.AP, 1.HELG(1200), 5.NAV(1200), 2.HELG(1200))
 
         assertEquals(1, oppdrag.size)
         assertEquals(6, oppdrag.antallDager)
@@ -75,7 +75,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `grad endres i løpet av helgen`() {
-        opprett(5.NAV(1500.0), 1.HELG(1500.0), 1.HELG(1500.0, 80.0), 5.NAV(1500.0, 80.0))
+        opprett(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)
         assertLinje(0, 1.januar, 6.januar, null, sats = 1500, grad = 100.0)
@@ -100,7 +100,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `Endring i sats`() {
-        opprett(3.NAV(1200.0), 2.NAV(1500.0), 2.HELG, 2.NAV(1500.0))
+        opprett(3.NAV(1200), 2.NAV(1500), 2.HELG, 2.NAV(1500))
 
         assertEquals(2, oppdrag.size)
         assertLinje(0, 1.januar, 3.januar, null, sats = 1200)
@@ -109,7 +109,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `Endring i utbetaling pga grad`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 60.0), 2.HELG(1500.0, 60.0), 2.NAV(1500.0, 60.0))
+        opprett(3.NAV(1500, 100.0), 2.NAV(1500, 60.0), 2.HELG(1500, 60.0), 2.NAV(1500, 60.0))
 
         assertEquals(2, oppdrag.size)
         assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
@@ -118,7 +118,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1875.0, 80.0), 2.HELG(1500.0, 80.0), 2.NAV(1500.0, 80.0))
+        opprett(3.NAV(1500, 100.0), 2.NAV(1875, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
 
         assertEquals(3, oppdrag.size)
         assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0, delytelseId = 1)
@@ -136,7 +136,7 @@ internal class OppdragBuilderTest {
 
     @Test
     internal fun `Endring i sykdomsgrad`() {
-        opprett(3.NAV(1500.0, 100.0), 2.NAV(1500.0, 80.0), 2.HELG(1500.0, 80.0), 2.NAV(1500.0, 80.0))
+        opprett(3.NAV(1500, 100.0), 2.NAV(1500, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)
         assertLinje(0, 1.januar, 3.januar, null, sats = 1500, grad = 100.0)
@@ -158,8 +158,8 @@ internal class OppdragBuilderTest {
         assertEquals(grad, oppdrag[index].grad)
         assertEquals(sats, oppdrag[index].dagsats)
         assertEquals(delytelseId, oppdrag[index]["delytelseId"])
-        assertEquals(refDelytelseId, oppdrag[index]["refDelytelseId"] ?: null)
-        assertEquals(refFagsystemId, oppdrag[index].refFagsystemId ?: null)
+        assertEquals(refDelytelseId, oppdrag[index].get<Int?>("refDelytelseId"))
+        assertEquals(refFagsystemId, oppdrag[index].refFagsystemId)
     }
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
