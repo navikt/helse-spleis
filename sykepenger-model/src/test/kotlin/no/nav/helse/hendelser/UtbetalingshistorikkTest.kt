@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
@@ -86,7 +87,7 @@ class UtbetalingshistorikkTest {
         }
     }
 
-    /*@Test
+    @Test
     fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 30.april, Grunnbeløp.`6G`.dagsats(1.april), 100),
@@ -100,7 +101,7 @@ class UtbetalingshistorikkTest {
         utbetalingshistorikk.valider(Periode(1.juni, 30.juni)).also {
             assertTrue(it.hasOnlyInfoAndNeeds())
         }
-    }*/
+    }
 
     @Test
     fun `lager ikke warning når dagsats endres pga gradering i en sammenhengende periode`() {

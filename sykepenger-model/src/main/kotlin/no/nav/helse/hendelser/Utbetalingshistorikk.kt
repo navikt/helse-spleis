@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
@@ -93,6 +94,8 @@ class Utbetalingshistorikk(
 
         abstract class Utbetalingsperiode(fom: LocalDate, tom: LocalDate, internal val dagsats: Int, internal val grad: Int) : Periode(fom, tom) {
             private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
+            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == gradertSats
+
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
             }
@@ -107,7 +110,7 @@ class Utbetalingshistorikk(
                     liste
                         .filterIsInstance<Utbetalingsperiode>()
                         .zipWithNext { left, right ->
-                            if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats) {
+                            if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats) {
                                 aktivitetslogg.warn("Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode")
                             }
                         }
