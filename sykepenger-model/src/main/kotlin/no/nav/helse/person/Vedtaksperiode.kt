@@ -186,7 +186,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(other: Vedtaksperiode, hendelse: Arbeidsgiver.AvsluttBehandling) {
-        if (this.periode().start > other.periode().start) {
+        if (this.periode().overlapperMed(other.periode()) || other.periode().endInclusive.harTilstøtende(this.periode().start)) {
             kontekst(hendelse.hendelse)
             tilstand.håndter(this, hendelse)
         }
@@ -486,10 +486,6 @@ internal class Vedtaksperiode private constructor(
             if (tilstøtende != null) vedtaksperiode.gruppeId = tilstøtende.gruppeId
 
             return when {
-                forlengelse && tilstøtende?.tilstand == TilInfotrygd -> {
-                    sykmelding.error("Forlenger en vedtaksperiode som har gått til Infotrygd")
-                    TilInfotrygd
-                }
                 forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                 forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
                 !forlengelse && ferdig -> MottattSykmeldingFerdigGap
@@ -794,14 +790,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
-            if (tilstøtende != null) {
-                vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
-                if (tilstøtende.tilstand == TilInfotrygd) {
-                    hendelse.error("Tilstøtende vedtaksperiode er gått til Infotrygd")
-                    return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
-                }
-            }
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
@@ -820,6 +808,29 @@ internal class Vedtaksperiode private constructor(
                 it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
                 it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
+                it.valider {
+                    object : Valideringssteg {
+                        override fun isValid(): Boolean {
+                            val tilstøtende = arbeidsgiver.tilstøtende(vedtaksperiode) ?: return true
+                            if (tilstøtende.tilstand != TilInfotrygd) return true.also {
+                                vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
+                            }
+
+                            val sistePeriode = ytelser.utbetalingshistorikk()
+                                .utbetalingstidslinje(vedtaksperiode.førsteDag())
+                                .sisteSykepengeperiode() ?: return false
+
+                            if (!sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) return false
+                            if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag = sistePeriode.start
+
+                            arbeidsgiver.addInntekt(ytelser)
+                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                            return true
+                        }
+
+                        override fun feilmelding() = "Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda"
+                    }
+                }
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
                 lateinit var engineForTimeline: ByggUtbetalingstidlinjer
                 it.valider {

@@ -18,16 +18,6 @@ import org.junit.jupiter.api.Test
 internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
-    internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd`() {
-        håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterSykmelding(Triple(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(1, START, TIL_INFOTRYGD)
-    }
-
-    @Test
     internal fun `gradert sykmelding først`() {
         // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
         håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
@@ -799,17 +789,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(it.arbeidsgiverOppdrag[0].fagsystemId(), it.arbeidsgiverOppdrag[1].fagsystemId())
             assertEquals(it.arbeidsgiverOppdrag[1].fagsystemId(), it.arbeidsgiverOppdrag[2].fagsystemId())
         }
-    }
-
-    @Test
-    fun `forlengelsesperiode der refusjon opphører`() {
-        håndterSykmelding(Triple(13.mars(2020), 29.mars(2020), 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(13.mars(2020), 28.mars(2020))), førsteFraværsdag = 13.mars(2020), refusjon = Triple(31.mars(2020), INNTEKT, emptyList()))
-        håndterSykmelding(Triple(30.mars(2020), 14.april(2020), 100))
-        håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100))
-        håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(1, START, TIL_INFOTRYGD)
     }
 
     @Test
