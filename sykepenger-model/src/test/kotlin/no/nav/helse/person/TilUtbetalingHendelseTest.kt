@@ -61,7 +61,8 @@ internal class TilUtbetalingHendelseTest {
                     tom = 31.januar,
                     dagsats = 1431,
                     beløp = 1431,
-                    grad = 100.0
+                    grad = 100.0,
+                    sykedager = 11
                 )
             )
         ).also {

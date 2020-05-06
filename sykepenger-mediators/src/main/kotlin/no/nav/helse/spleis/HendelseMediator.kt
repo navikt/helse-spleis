@@ -210,19 +210,20 @@ internal class HendelseMediator(
                             "fødselsnummer" to event.fødselsnummer,
                             "organisasjonsnummer" to event.organisasjonsnummer,
                             "hendelser" to event.hendelser,
-                            "oppdrag" to event.oppdrag.map { oppdrag ->
+                            "utbetalt" to event.oppdrag.map { utbetalt ->
                                 mapOf(
-                                    "mottaker" to oppdrag.mottaker,
-                                    "fagområde" to oppdrag.fagområde,
-                                    "fagsystemId" to oppdrag.fagsystemId,
-                                    "totalbeløp" to oppdrag.totalbeløp,
-                                    "utbetalingslinjer" to oppdrag.utbetalingslinjer.map { linje ->
+                                    "mottaker" to utbetalt.mottaker,
+                                    "fagområde" to utbetalt.fagområde,
+                                    "fagsystemId" to utbetalt.fagsystemId,
+                                    "totalbeløp" to utbetalt.totalbeløp,
+                                    "utbetalingslinjer" to utbetalt.utbetalingslinjer.map { linje ->
                                         mapOf(
                                             "fom" to linje.fom,
                                             "tom" to linje.tom,
                                             "dagsats" to linje.dagsats,
                                             "beløp" to linje.beløp,
-                                            "grad" to linje.grad
+                                            "grad" to linje.grad,
+                                            "sykedager" to linje.sykedager
                                         )
                                     }
                                 )

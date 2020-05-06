@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -9,6 +10,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.streams.asSequence
 
 internal fun tilUtbetaltEvent(
     aktørId: String,
@@ -121,10 +123,14 @@ private class UtbetaltEventBuilder(
                 tom = tom,
                 dagsats = lønn,
                 beløp = dagsats,
-                grad = grad
+                grad = grad,
+                sykedager = sykedager(fom, tom)
             )
         )
     }
+
+    private fun sykedager(fom: LocalDate, tom: LocalDate) =
+        fom.datesUntil(tom.plusDays(1)).asSequence().filterNot { it.erHelg() }.count()
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
