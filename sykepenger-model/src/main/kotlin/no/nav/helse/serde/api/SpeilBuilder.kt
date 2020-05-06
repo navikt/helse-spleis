@@ -11,6 +11,8 @@ import no.nav.helse.serde.reflection.VedtaksperiodeReflect
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -70,8 +72,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
-    ) =
-        currentState.preVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
+    ) = currentState.preVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
 
     override fun postVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
@@ -132,6 +133,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         gruppeId: UUID
     ) {
         currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
+    }
+
+    override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+        currentState.postVisitUtbetalinger(utbetalinger)
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
@@ -294,10 +299,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
+        lateinit var utbetalinger: List<Utbetaling>
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         val fellesGrunnlagsdata = mutableMapOf<UUID, GrunnlagsdataDTO>()
         val fellesOpptjening = mutableMapOf<UUID, OpptjeningDTO>()
         var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
+
+
+        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+            this.utbetalinger = utbetalinger
+        }
 
         override fun preVisitPerioder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
@@ -314,15 +325,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         ) {
             pushState(
                 VedtaksperiodeState(
-                    vedtaksperiode,
-                    arbeidsgiver,
-                    vedtaksperiodeMap,
-                    fellesGrunnlagsdata,
-                    fellesOpptjening,
-                    vedtaksperioder,
-                    fødselsnummer,
-                    inntekter,
-                    aktivitetslogg
+                    vedtaksperiode = vedtaksperiode,
+                    arbeidsgiver = arbeidsgiver,
+                    vedtaksperiodeMap = vedtaksperiodeMap,
+                    fellesGrunnlagsdata = fellesGrunnlagsdata,
+                    fellesOpptjening = fellesOpptjening,
+                    vedtaksperioder = vedtaksperioder,
+                    fødselsnummer = fødselsnummer,
+                    inntekter = inntekter,
+                    utbetalinger = utbetalinger,
+                    aktivitetslogg = aktivitetslogg
                 )
             )
         }
@@ -363,12 +375,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val fødselsnummer: String,
         private val inntekter: List<Inntekthistorikk.Inntekt>,
+        private val utbetalinger: List<Utbetaling>,
         aktivitetslogg: List<AktivitetDTO>
     ) : JsonState {
         private var fullstendig = false
         private val vedtaksperiodehendelser = mutableListOf<HendelseDTO>()
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
-        private var utbetalinger = mutableListOf<Int>()
+        private val totalbeløpakkumulator = mutableListOf<Int>()
+        private val vedtaksperiode = vedtaksperiode
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
@@ -382,7 +396,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["aktivitetslogg"] =
                 aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }
         }
-
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             pushState(SykdomshistorikkState(vedtaksperiodehendelser, beregnetSykdomstidslinje))
@@ -404,12 +417,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
             førsteSykepengedag = tidslinje.førsteSykepengedag()
             sisteSykepengedag = tidslinje.sisteSykepengedag()
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinje, utbetalinger))
+            pushState(UtbetalingstidslinjeState(utbetalingstidslinje, totalbeløpakkumulator))
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
             vedtaksperiodeMap["tilstand"] =
-                mapTilstander(tilstand = tilstand.type, utbetalt = (utbetalinger.sum() > 0))
+                mapTilstander(tilstand = tilstand.type, utbetalt = (totalbeløpakkumulator.sum() > 0))
             if (tilstand.type in listOf(
                     TilstandType.AVSLUTTET,
                     TilstandType.AVVENTER_GODKJENNING,
@@ -434,14 +447,17 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             gruppeId: UUID
         ) {
-            vedtaksperiodeMap["totalbeløpArbeidstaker"] = utbetalinger.sum()
+            vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
+            vedtaksperiodeMap["utbetalinger"] = byggUtbetalingerForPeriode()
             if (fullstendig) {
-                vedtaksperioder.add(vedtaksperiodeMap.mapTilVedtaksperiodeDto(
-                fødselsnummer,
-                inntekter,
-                førsteSykepengedag,
-                sisteSykepengedag
-            ))
+                vedtaksperioder.add(
+                    vedtaksperiodeMap.mapTilVedtaksperiodeDto(
+                        fødselsnummer,
+                        inntekter,
+                        førsteSykepengedag,
+                        sisteSykepengedag
+                    )
+                )
             }
             samleFellesdata(gruppeId)
             popState()
@@ -457,6 +473,35 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dataForVilkårsvurdering?.let { fellesGrunnlagsdata.putIfAbsent(gruppeId, it) }
             opptjening?.let { fellesOpptjening.putIfAbsent(gruppeId, it) }
         }
+
+        private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
+            UtbetalingerDTO(
+                utbetalinger.byggUtbetaling(
+                    vedtaksperiode.arbeidsgiverFagsystemId(),
+                    Utbetaling::arbeidsgiverOppdrag
+                ),
+                utbetalinger.byggUtbetaling(
+                    vedtaksperiode.personFagsystemId(),
+                    Utbetaling::personOppdrag
+                )
+            )
+
+        private fun List<Utbetaling>.byggUtbetaling(fagsystemId: String?, oppdragStrategy: (Utbetaling) -> Oppdrag) =
+            fagsystemId?.let {
+                val linjer = this.filter { utbetaling ->
+                    oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
+                }.flatMap { utbetaling ->
+                    oppdragStrategy(utbetaling).map { linje ->
+                        UtbetalingerDTO.UtbetalingslinjeDTO(
+                            fom = linje.fom,
+                            tom = linje.tom,
+                            dagsats = linje.dagsats,
+                            grad = linje.grad
+                        )
+                    }
+                }
+                UtbetalingerDTO.UtbetalingDTO(linjer, it)
+            }
     }
 
     private inner class UtbetalingstidslinjeState(
@@ -610,13 +655,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun visitFeriedag(dag: Feriedag.Søknad) = leggTilDag(JsonDagType.FERIEDAG_SØKNAD, dag)
 
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
+        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) =
+            leggTilDag(JsonDagType.FRISK_HELGEDAG_SØKNAD, dag)
+
         override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) =
             leggTilDag(JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING, dag)
 
         override fun visitImplisittDag(dag: ImplisittDag) = leggTilDag(JsonDagType.IMPLISITT_DAG, dag)
 
-        override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) = leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, dag)
+        override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) =
+            leggTilDag(JsonDagType.PERMISJONSDAG_SØKNAD, dag)
 
         override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = leggTilDag(JsonDagType.PERMISJONSDAG_AAREG, dag)
 
@@ -624,7 +672,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) =
             leggTilSykedag(JsonDagType.SYK_HELGEDAG_SYKMELDING, dag)
 
-        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, dag)
+        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) =
+            leggTilSykedag(JsonDagType.SYK_HELGEDAG_SØKNAD, dag)
 
         override fun visitSykedag(dag: Sykedag.Sykmelding) = leggTilSykedag(JsonDagType.SYKEDAG_SYKMELDING, dag)
 

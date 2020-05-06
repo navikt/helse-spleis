@@ -8,6 +8,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -140,6 +141,62 @@ internal class SpeilBuilderTest {
     }
 
     @Test
+    fun `Utbetalinger blir lagt riktig på hver vedtaksperiode`() {
+        var vedtaksperiodeIder: Set<String>
+
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.januar, tom = 31.januar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
+
+                sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 1.februar, tom = 14.februar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                fangeUtbetalinger()
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            }
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
+        val utbetalinger = vedtaksperioder[1].utbetalinger
+
+        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
+        assertEquals(utbetalingsliste[1].personOppdrag().fagsystemId(), utbetalinger.personUtbetaling!!.fagsystemId)
+        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().førstedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom)
+        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer[1].tom)
+    }
+
+    @Test
     fun `passer på at alle vedtak får fellesdata for sykefraværet`() {
         var vedtaksperiodeIder: Set<String>
 
@@ -232,6 +289,12 @@ internal class SpeilBuilderTest {
         assertEquals(31.januar, vedtaksperiode.tom)
         assertEquals(TilstandstypeDTO.Utbetalt, vedtaksperiode.tilstand)
         assertTrue(vedtaksperiode.fullstendig)
+
+        val utbetalinger = vedtaksperiode.utbetalinger
+        assertEquals(utbetalingsliste.first().arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
+        assertEquals(utbetalingsliste.first().personOppdrag().fagsystemId(), utbetalinger.personUtbetaling!!.fagsystemId)
+        assertEquals(utbetalingsliste.first().arbeidsgiverOppdrag().førstedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom)
+        assertEquals(utbetalingsliste.first().arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom)
 
         val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
         assertEquals(31, utbetalingstidslinje.size)
@@ -349,6 +412,7 @@ internal class SpeilBuilderTest {
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
+        private lateinit var utbetalingsliste: List<Utbetaling>
 
         internal fun person(
             fom: LocalDate = 1.januar,
@@ -379,6 +443,7 @@ internal class SpeilBuilderTest {
                     }
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
@@ -401,6 +466,7 @@ internal class SpeilBuilderTest {
                         }
                         håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                        fangeUtbetalinger()
                         håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
@@ -484,6 +550,14 @@ internal class SpeilBuilderTest {
                     gruppeId: UUID
                 ) {
                     vedtaksperiodeId = id.toString()
+                }
+            })
+        }
+
+        private fun Person.fangeUtbetalinger() {
+            accept(object: PersonVisitor {
+                override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+                    utbetalingsliste = utbetalinger
                 }
             })
         }

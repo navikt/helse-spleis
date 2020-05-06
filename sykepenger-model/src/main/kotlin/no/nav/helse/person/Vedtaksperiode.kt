@@ -47,7 +47,9 @@ internal class Vedtaksperiode private constructor(
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
-    private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
+    private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
+    private var personFagsystemId: String?,
+    private var arbeidsgiverFagsystemId: String?
 ) : Aktivitetskontekst {
 
     private val påminnelseThreshold = 20
@@ -78,8 +80,13 @@ internal class Vedtaksperiode private constructor(
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
         sykdomshistorikk = Sykdomshistorikk(),
-        utbetalingstidslinje = Utbetalingstidslinje()
+        utbetalingstidslinje = Utbetalingstidslinje(),
+        personFagsystemId = null,
+        arbeidsgiverFagsystemId = null
     )
+
+    internal fun arbeidsgiverFagsystemId() = arbeidsgiverFagsystemId
+    internal fun personFagsystemId() = personFagsystemId
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id, gruppeId)
@@ -357,6 +364,8 @@ internal class Vedtaksperiode private constructor(
         gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
+        personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
+        arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&
             person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
         ) return tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {
@@ -852,7 +861,9 @@ internal class Vedtaksperiode private constructor(
                         førsteFraværsdag
                     ).also { engineForTimeline = it }
                 }
-                it.onSuccess { vedtaksperiode.høstingsresultater(engineForTimeline, ytelser) }
+                it.onSuccess {
+                    vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
+                }
             }
         }
 

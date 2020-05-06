@@ -33,6 +33,7 @@ data class VedtaksperiodeDTO(
     override val fullstendig: Boolean = true,
     val utbetalingsreferanse: String?,
     val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    val utbetalinger: UtbetalingerDTO,
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val godkjentAv: String?,
     val godkjenttidspunkt: LocalDateTime?,
@@ -45,6 +46,22 @@ data class VedtaksperiodeDTO(
     val simuleringsdata: SimuleringsdataDTO?,
     val aktivitetslogg: List<AktivitetDTO>
 ) : VedtaksperiodeDTOBase
+
+data class UtbetalingerDTO(
+    val arbeidsgiverUtbetaling: UtbetalingDTO?,
+    val personUtbetaling: UtbetalingDTO?
+) {
+    data class UtbetalingDTO(
+        val linjer: List<UtbetalingslinjeDTO>,
+        val fagsystemId: String
+    )
+    data class UtbetalingslinjeDTO(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagsats: Int,
+        val grad: Double
+    )
+}
 
 data class UfullstendigVedtaksperiodeDTO(
     override val id: UUID,

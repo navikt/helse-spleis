@@ -97,7 +97,8 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         hendelser = hendelser,
         dataForVilkårsvurdering = dataForVilkårsvurdering,
         simuleringsdata = this["dataForSimulering"] as? SimuleringsdataDTO,
-        aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>
+        aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>,
+        utbetalinger = this["utbetalinger"] as UtbetalingerDTO
     )
 }
 
