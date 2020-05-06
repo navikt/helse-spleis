@@ -215,7 +215,9 @@ class SerialisertPerson(val json: String) {
             dataForSimulering = data.dataForSimulering?.let(::parseDataForSimulering),
             dataForVilkårsvurdering = data.dataForVilkårsvurdering?.let(::parseDataForVilkårsvurdering),
             sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
-            utbetalingstidslinje = konverterTilUtbetalingstidslinje(data.utbetalingstidslinje)
+            utbetalingstidslinje = konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
+            personFagsystemId = data.personFagsystemId,
+            arbeidsgiverFagsystemId = data.arbeidsgiverFagsystemId
         )
     }
 
@@ -460,7 +462,9 @@ internal data class PersonData(
             val dataForSimulering: DataForSimuleringData?,
             val sykdomshistorikk: List<SykdomshistorikkData>,
             val tilstand: TilstandType,
-            val utbetalingstidslinje: UtbetalingstidslinjeData
+            val utbetalingstidslinje: UtbetalingstidslinjeData,
+            val personFagsystemId: String?,
+            val arbeidsgiverFagsystemId: String?
         ) {
             data class DagData(
                 val dagen: LocalDate,

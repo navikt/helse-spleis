@@ -12,15 +12,14 @@ import java.util.*
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal val id: UUID = vedtaksperiode["id"]
     private val gruppeId: UUID = vedtaksperiode["gruppeId"]
-    private val aktørId: String = vedtaksperiode["aktørId"]
-    private val fødselsnummer: String = vedtaksperiode["fødselsnummer"]
-    private val organisasjonsnummer: String = vedtaksperiode["organisasjonsnummer"]
     private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
     private val gjenståendeSykedager: Int? = vedtaksperiode["gjenståendeSykedager"]
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
+    private val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
+    private val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
@@ -89,7 +88,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjenttidspunkt" to godkjenttidspunkt,
         "førsteFraværsdag" to førsteFraværsdag,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
-        "dataForSimulering" to dataForSimulering
+        "dataForSimulering" to dataForSimulering,
+        "personFagsystemId" to personFagsystemId,
+        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId
     )
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(

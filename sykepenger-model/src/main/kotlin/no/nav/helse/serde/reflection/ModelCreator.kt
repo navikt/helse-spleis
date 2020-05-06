@@ -53,7 +53,9 @@ internal fun createVedtaksperiode(
     dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     dataForSimulering: Simulering.SimuleringResultat?,
     sykdomshistorikk: Sykdomshistorikk,
-    utbetalingstidslinje: Utbetalingstidslinje?
+    utbetalingstidslinje: Utbetalingstidslinje?,
+    personFagsystemId: String?,
+    arbeidsgiverFagsystemId: String?
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
@@ -74,7 +76,9 @@ internal fun createVedtaksperiode(
         dataForVilkårsvurdering,
         dataForSimulering,
         sykdomshistorikk,
-        utbetalingstidslinje
+        utbetalingstidslinje,
+        personFagsystemId,
+        arbeidsgiverFagsystemId
     )
 
 internal fun createUtbetaling(
