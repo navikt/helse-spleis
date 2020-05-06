@@ -13,6 +13,7 @@ import no.nav.helse.spleis.db.HendelseRecorder
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.spleis.meldinger.TestRapid
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.PeriodeDTO
@@ -178,12 +179,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         ))
     }
 
-    protected fun sendSimulering(vedtaksperiodeIndeks: Int, simuleringOK: Boolean = true) {
+    protected fun sendSimulering(vedtaksperiodeIndeks: Int, status: SimuleringMessage.Simuleringstatus) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering))
         testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-            simuleringOK = simuleringOK
+            status = status
         ))
     }
 

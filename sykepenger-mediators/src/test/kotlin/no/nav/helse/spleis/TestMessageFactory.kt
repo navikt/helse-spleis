@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.felles.*
 import java.time.LocalDate
@@ -191,16 +192,16 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagSimulering(vedtaksperiodeId: UUID, tilstand: TilstandType, simuleringOK: Boolean): String {
+    fun lagSimulering(vedtaksperiodeId: UUID, tilstand: TilstandType, status: SimuleringMessage.Simuleringstatus): String {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             løsninger = mapOf(
                 "Simulering" to mapOf(
-                    "status" to if (simuleringOK) "OK" else "FEIL",
-                    "feilmelding" to if (simuleringOK) "" else "FEIL I SIMULERING",
-                    "simulering" to if (!simuleringOK) null else mapOf(
+                    "status" to status.name,
+                    "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) "" else "FEIL I SIMULERING",
+                    "simulering" to if (status != SimuleringMessage.Simuleringstatus.OK) null else mapOf(
                         "gjelderId" to fødselsnummer,
                         "gjelderNavn" to "Korona",
                         "datoBeregnet" to "2020-01-01",

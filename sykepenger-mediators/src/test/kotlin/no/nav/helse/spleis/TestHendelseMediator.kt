@@ -38,6 +38,7 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestPåminnelse = false
         lestYtelser = false
         lestVilkårsgrunnlag = false
+        lestSimulering = false
         lestUtbetalingsgodkjenning = false
         lestUtbetalingOverført = false
         lestUtbetaling = false

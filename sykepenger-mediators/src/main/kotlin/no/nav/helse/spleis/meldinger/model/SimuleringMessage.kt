@@ -14,7 +14,11 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val simuleringOK = packet["@løsning.${Behovtype.Simulering.name}.status"].asText() == "OK"
+    private val status = packet["@løsning.${Behovtype.Simulering.name}.status"].asText().let {
+        try { Simuleringstatus.valueOf(it) }
+        catch (err: IllegalArgumentException) { Simuleringstatus.UKJENT }
+    }
+    private val simuleringOK = status == Simuleringstatus.OK
     private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText()
     private val simuleringResultat = packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
         ?.let {
@@ -69,6 +73,11 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     )
 
     override fun behandle(mediator: IHendelseMediator) {
+        if (status == Simuleringstatus.OPPDRAG_UR_ER_STENGT) return // dont send message into the model if Oppdrag/UR is closed for biz.
         mediator.behandle(this, simulering)
+    }
+
+    internal enum class Simuleringstatus {
+        OK, FEIL, OPPDRAG_UR_ER_STENGT, UKJENT
     }
 }

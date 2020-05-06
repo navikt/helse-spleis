@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -27,7 +28,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenHistorikk(0)
-        sendSimulering(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling(0)
 
