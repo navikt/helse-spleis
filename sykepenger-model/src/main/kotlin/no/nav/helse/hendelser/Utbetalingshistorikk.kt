@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
@@ -12,15 +13,23 @@ import java.util.*
 import kotlin.math.roundToInt
 
 class Utbetalingshistorikk(
+    private val aktørId: String,
+    private val fødselsnummer: String,
+    private val organisasjonsnummer: String,
+    internal val vedtaksperiodeId: String,
     utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
-    private val aktivitetslogg: Aktivitetslogg
-) {
+    aktivitetslogg: Aktivitetslogg
+) : ArbeidstakerHendelse(aktivitetslogg) {
     private companion object {
         private const val TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE = 26 * 7
     }
 
     private val utbetalinger = Periode.sorter(utbetalinger)
+
+    override fun aktørId() = aktørId
+    override fun fødselsnummer() = fødselsnummer
+    override fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun utbetalingstidslinje(førsteFraværsdag: LocalDate) = Periode.trim(this.utbetalinger, førsteFraværsdag)
         .map { it.tidslinje() }

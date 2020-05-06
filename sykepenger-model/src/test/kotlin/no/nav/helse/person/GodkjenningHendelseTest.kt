@@ -103,6 +103,10 @@ internal class GodkjenningHendelseTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
+                aktørId = "aktørId",
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = orgnummer,
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it

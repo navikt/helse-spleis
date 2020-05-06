@@ -183,6 +183,10 @@ internal class PersonTest {
                         organisasjonsnummer = organisasjonsnummer,
                         vedtaksperiodeId = UUID.randomUUID().toString(),
                         utbetalingshistorikk = Utbetalingshistorikk(
+                            aktørId = aktørId,
+                            fødselsnummer = fødselsnummer,
+                            organisasjonsnummer = organisasjonsnummer,
+                            vedtaksperiodeId = UUID.randomUUID().toString(),
                             utbetalinger = emptyList(),
                             inntektshistorikk = emptyList(),
                             aktivitetslogg = Aktivitetslogg()

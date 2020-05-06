@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -18,6 +19,7 @@ class PåminnelserOgTimeoutTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "1234"
+        private val nå = LocalDate.now()
     }
 
     private lateinit var person: Person
@@ -37,6 +39,15 @@ class PåminnelserOgTimeoutTest {
     }
 
     @Test
+    fun `påminnelse i mottatt sykmelding innenfor makstid`() {
+        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
+        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertEquals(1, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+    }
+
+    @Test
     fun `påminnelse i mottatt søknad`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -47,6 +58,18 @@ class PåminnelserOgTimeoutTest {
         assertEquals(2, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+    }
+
+    @Test
+    fun `påminnelse i mottatt søknad innenfor makstid`() {
+        person.håndter(sykmelding(Triple(nå.minusDays(60), nå.minusDays(31), 100)))
+        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100)))
+        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1)
+        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1))
+        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1)
+        assertEquals(1, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(1), Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -115,8 +138,8 @@ class PåminnelserOgTimeoutTest {
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Godkjenning })
         person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
-        assertEquals(0, hendelse.behov().size)
+        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(1, hendelse.behov().size)
     }
 
     @Test
@@ -168,13 +191,13 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
-    private fun søknad() =
+    private fun søknad(vararg perioder: Søknad.Søknadsperiode = arrayOf(Søknad.Søknadsperiode.Sykdom(1.januar,  20.januar, 100))) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(1.januar,  20.januar, 100)),
+            perioder = perioder.toList(),
             harAndreInntektskilder = false,
             sendtTilNAV = 20.januar.atStartOfDay(),
             permittert = false
@@ -182,18 +205,18 @@ class PåminnelserOgTimeoutTest {
             hendelse = this
         }
 
-    private fun sykmelding() =
+    private fun sykmelding(vararg perioder: Triple<LocalDate, LocalDate, Int> = arrayOf(Triple(1.januar, 20.januar, 100))) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(Triple(1.januar, 20.januar, 100))
+            sykeperioder = perioder.toList()
         ).apply {
             hendelse = this
         }
 
-    private fun inntektsmelding() =
+    private fun inntektsmelding(vararg arbeidsgiverperiode: Periode = arrayOf(Periode(1.januar, 1.januar.plusDays(15))), førsteFraværsdag: LocalDate = 1.januar) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
@@ -202,7 +225,7 @@ class PåminnelserOgTimeoutTest {
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 31000.0,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 1.januar.plusDays(15))),
+            arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
@@ -292,6 +315,10 @@ class PåminnelserOgTimeoutTest {
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         utbetalingshistorikk = Utbetalingshistorikk(
+            aktørId = "aktørId",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             utbetalinger = listOf(
                 Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                     17.januar(2017),
@@ -325,11 +352,11 @@ class PåminnelserOgTimeoutTest {
         hendelse = this
     }
 
-    private fun påminnelse(tilstandType: TilstandType) = Påminnelse(
+    private fun påminnelse(tilstandType: TilstandType, indeks: Int = 0) = Påminnelse(
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+        vedtaksperiodeId = inspektør.vedtaksperiodeId(indeks).toString(),
         tilstand = tilstandType,
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
@@ -339,10 +366,10 @@ class PåminnelserOgTimeoutTest {
         hendelse = this
     }
 
-    private fun assertTilstand(expectedTilstand: TilstandType) {
+    private fun assertTilstand(expectedTilstand: TilstandType, indeks: Int = 0) {
         assertEquals(
             expectedTilstand,
-            inspektør.sisteTilstand(0)
+            inspektør.sisteTilstand(indeks)
         )
     }
 }

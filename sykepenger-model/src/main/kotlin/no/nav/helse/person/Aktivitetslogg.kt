@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
@@ -183,15 +184,14 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     return aktiviteter.filterIsInstance<Behov>()
                 }
 
-                internal fun sykepengehistorikk(
+                internal fun utbetalingshistorikk(
                     aktivitetslogg: IAktivitetslogg,
-                    historikkFom: LocalDate,
-                    historikkTom: LocalDate
+                    periode: Periode
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Sykepengehistorikk, "Trenger sykepengehistorikk fra Infotrygd", mapOf(
-                            "historikkFom" to historikkFom.toString(),
-                            "historikkTom" to historikkTom.toString()
+                            "historikkFom" to periode.start.toString(),
+                            "historikkTom" to periode.endInclusive.toString()
                         )
                     )
                 }

@@ -70,6 +70,10 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     )
 
     private val utbetalingshistorikk = Utbetalingshistorikk(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
         utbetalinger = utbetalinger,
         inntektshistorikk = inntektshistorikk,
         aktivitetslogg = aktivitetslogg

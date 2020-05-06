@@ -34,6 +34,11 @@ class Person private constructor(
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
 
+    fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+        registrer(utbetalingshistorikk, "Behandler historiske utbetalinger")
+        finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk)
+    }
+
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         finnArbeidsgiver(ytelser).håndter(ytelser)

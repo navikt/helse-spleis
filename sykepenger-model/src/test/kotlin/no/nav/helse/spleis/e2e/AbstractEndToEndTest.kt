@@ -332,6 +332,10 @@ internal abstract class AbstractEndToEndTest {
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 aktivitetslogg = aktivitetslogg

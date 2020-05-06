@@ -180,7 +180,8 @@ internal class HendelseMediator(
                     "forrigeTilstand" to event.forrigeTilstand,
                     "aktivitetslogg" to event.aktivitetslogg.toMap(),
                     "vedtaksperiode_aktivitetslogg" to event.vedtaksperiodeaktivitetslogg.toMap(),
-                    "hendelser" to event.hendelser
+                    "hendelser" to event.hendelser,
+                    "makstid" to event.makstid
                 )))
             }
 

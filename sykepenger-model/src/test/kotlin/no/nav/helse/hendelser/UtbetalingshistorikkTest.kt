@@ -9,9 +9,17 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 import kotlin.math.roundToInt
 
 class UtbetalingshistorikkTest {
+    private companion object {
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val AKTØRID = "42"
+        private const val ORGNUMMER = "987654321"
+        private val VEDTAKSPERIODEID = UUID.randomUUID().toString()
+    }
+
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -19,17 +27,19 @@ class UtbetalingshistorikkTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
+    private fun utbetalingshistorikk(utbetalinger: List<Utbetalingshistorikk.Periode>, inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning>) =
+        Utbetalingshistorikk(AKTØRID, UNG_PERSON_FNR_2018, ORGNUMMER, VEDTAKSPERIODEID, utbetalinger, inntektshistorikk, aktivitetslogg)
+
     @Test
     fun `direkteutbetaling til bruker støttes ikke ennå`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", false)
-            ),
-            aktivitetslogg = aktivitetslogg
+            )
         )
 
         assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
@@ -40,13 +50,12 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234, "123456789", true),
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", true)
-            ),
-            aktivitetslogg = aktivitetslogg
+            )
         )
 
         assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
@@ -57,10 +66,9 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(6.januar))
@@ -75,10 +83,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 4321, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
             assertTrue(it.hasWarnings())
@@ -93,10 +100,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 30.april, Grunnbeløp.`6G`.dagsats(1.april), 100),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai, 31.mai, Grunnbeløp.`6G`.dagsats(1.mai), 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.juni, 30.juni)).also {
             assertTrue(it.hasOnlyInfoAndNeeds())
@@ -111,10 +117,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, (dagsats*gradering).roundToInt(), (100*gradering).roundToInt()),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, dagsats, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
             assertTrue(it.hasOnlyInfoAndNeeds())
@@ -127,10 +132,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 50),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 2345, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
             assertTrue(it.hasWarnings())
@@ -145,10 +149,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april)).also {
             assertTrue(it.hasOnlyInfoAndNeeds())
@@ -161,10 +164,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
@@ -183,10 +185,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar, 31.januar, 1234, 100),
             Utbetalingshistorikk.Periode.Ugyldig(1.januar(2017), 10.januar(2017))
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
@@ -206,10 +207,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.Ferie(5.januar, 20.januar),
             Utbetalingshistorikk.Periode.Utbetaling(15.januar, 25.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
@@ -230,10 +230,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.Sanksjon(15.januar, 25.januar),
             Utbetalingshistorikk.Periode.ReduksjonMedlem(20.januar, 31.januar, 623, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
@@ -252,10 +251,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234, 100),
             Utbetalingshistorikk.Periode.Ukjent(5.januar, 5.januar)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
@@ -270,10 +268,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234, 100),
             Utbetalingshistorikk.Periode.Ugyldig(5.januar, 5.januar)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         assertDoesNotThrow { utbetalingshistorikk.utbetalingstidslinje(1.januar) }
@@ -282,10 +279,9 @@ class UtbetalingshistorikkTest {
 
     @Test
     fun `Validerer ok hvis det ikke finnes noen utbetalinger fra Infotrygd`() {
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = emptyList(),
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(1.januar, 1.januar))
@@ -297,10 +293,9 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(1.januar, 1.januar))
@@ -312,10 +307,9 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(28.januar, 28.januar))
@@ -328,10 +322,9 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(29.januar, 29.januar))
@@ -345,10 +338,9 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100),
             Utbetalingshistorikk.Periode.Ukjent(1.januar,10.januar)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(1.august, 1.august))
@@ -360,10 +352,9 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100)
         )
-        val utbetalingshistorikk = Utbetalingshistorikk(
+        val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList(),
-            aktivitetslogg = aktivitetslogg
+            inntektshistorikk = emptyList()
         )
 
         utbetalingshistorikk.valider(Periode(1.august, 1.august))

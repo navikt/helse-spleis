@@ -28,7 +28,8 @@ interface PersonObserver {
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Aktivitetslogg,
         val vedtaksperiodeaktivitetslogg: Aktivitetslogg,
-        val hendelser: Set<UUID>
+        val hendelser: Set<UUID>,
+        val makstid: LocalDateTime
     )
 
     data class UtbetaltEvent(

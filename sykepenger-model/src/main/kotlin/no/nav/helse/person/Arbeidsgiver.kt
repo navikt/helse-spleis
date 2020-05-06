@@ -78,6 +78,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+        utbetalingshistorikk.kontekst(this)
+        perioder.forEach { it.håndter(utbetalingshistorikk) }
+    }
+
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
         perioder.forEach { it.håndter(ytelser) }

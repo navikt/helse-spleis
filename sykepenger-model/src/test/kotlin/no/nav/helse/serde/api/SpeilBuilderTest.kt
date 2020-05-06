@@ -675,6 +675,10 @@ internal class SpeilBuilderTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
+                    aktørId = aktørId,
+                    fødselsnummer = fnr,
+                    organisasjonsnummer = orgnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
                     utbetalinger = listOf(
                         Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),
