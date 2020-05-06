@@ -26,7 +26,12 @@ internal class V7DagsatsSomHeltall : JsonMigration(version = 7) {
 
     private fun migrerUtbetalingstidslinje(utbetalingstidslinje: JsonNode) {
         utbetalingstidslinje.path("dager").forEach { dag ->
-            (dag as ObjectNode).put("dagsats", dag.path("inntekt").asDouble().roundToInt())
+            (dag as ObjectNode).put("dagsats", dag
+                .path("inntekt")
+                .asDouble()
+                .takeUnless(Double::isNaN)
+                ?.roundToInt()
+                ?: 0)
         }
     }
 }

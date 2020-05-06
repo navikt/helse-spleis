@@ -28,7 +28,7 @@ internal class V7DagsatsSomHeltallTest {
             .path("dager")[0]
             .path("dagsats")
             .intValue())
-        assertEquals(999, json
+        assertEquals(0, json
             .path("arbeidsgivere")[0]
             .path("vedtaksperioder")[0]
             .path("utbetalingstidslinje")
@@ -39,7 +39,7 @@ internal class V7DagsatsSomHeltallTest {
 }
 
 @Language("JSON")
-private const val personJson = """
+private val personJson = """
 {
   "arbeidsgivere": [
     {
@@ -68,7 +68,7 @@ private const val personJson = """
           "utbetalingstidslinje": {
             "dager": [
               {
-                "inntekt": "999.4"
+                "inntekt": "${Double.NaN}"
               }
             ]
           }
