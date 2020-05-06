@@ -60,6 +60,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[0].id, actual[0].id)
         assertNull(actual[0].refId)
+        assertNull(actual[0].refFagsystemId)
     }
 
     @Test
@@ -147,16 +148,20 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(Endringskode.ENDR, actual[1].endringskode)
-        assertEquals(Endringskode.NY, actual[2].endringskode)
-        assertEquals(Endringskode.NY, actual[3].endringskode)
-        assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
-        assertEquals(actual[2].id + 1, actual[3].id)
 
+        assertEquals(Endringskode.UEND, actual[0].endringskode)
         assertNull(actual[0].refId)
+
+        assertEquals(Endringskode.ENDR, actual[1].endringskode)
         assertNull(actual[1].refId)
+        assertNull(actual[1].refFagsystemId)
+
+        assertEquals(Endringskode.NY, actual[2].endringskode)
+        assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(original[2].id, actual[2].refId)
+
+        assertEquals(Endringskode.NY, actual[3].endringskode)
+        assertEquals(actual[2].id + 1, actual[3].id)
         assertEquals(actual[2].id, actual[3].refId)
     }
 
