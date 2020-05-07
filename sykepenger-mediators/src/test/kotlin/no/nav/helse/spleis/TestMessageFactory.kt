@@ -128,6 +128,17 @@ internal class TestMessageFactory(
         return nyHendelse("inntektsmelding", inntektsmelding.toMap())
     }
 
+    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
+        return lagBehovMedLøsning(
+            vedtaksperiodeId = vedtaksperiodeId,
+            tilstand = tilstand,
+            behov = listOf("Sykepengehistorikk"),
+            løsninger = mapOf(
+                "Sykepengehistorikk" to emptyList<Any>()
+            )
+        )
+    }
+
     fun lagYtelser(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,

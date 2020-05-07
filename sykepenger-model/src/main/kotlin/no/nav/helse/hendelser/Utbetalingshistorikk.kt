@@ -19,7 +19,7 @@ class Utbetalingshistorikk(
     internal val vedtaksperiodeId: String,
     utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
-    aktivitetslogg: Aktivitetslogg
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(aktivitetslogg) {
     private companion object {
         private const val TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE = 26 * 7

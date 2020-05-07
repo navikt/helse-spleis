@@ -145,6 +145,17 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(simulering(vedtaksperiodeIndex))
     }
 
+    protected fun håndterUtbetalingshistorikk(vedtaksperiodeIndex: Int, vararg utbetalinger: Utbetalingshistorikk.Periode, inntektshistorikk: List<Inntektsopplysning> = listOf(
+        Inntektsopplysning(
+            1.desember(2017),
+            INNTEKT.toInt(),
+            ORGNUMMER,
+            true
+        )
+    )) {
+        person.håndter(utbetalingshistorikk(vedtaksperiodeIndex, utbetalinger.toList(), inntektshistorikk))
+    }
+
     protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Utbetalingshistorikk.Periode, inntektshistorikk: List<Inntektsopplysning> = listOf(
         Inntektsopplysning(
             1.desember(2017),
@@ -308,6 +319,30 @@ internal abstract class AbstractEndToEndTest {
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now()
         )
+    }
+
+    private fun utbetalingshistorikk(
+        vedtaksperiodeIndex: Int,
+        utbetalinger: List<Utbetalingshistorikk.Periode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning> = listOf(
+            Inntektsopplysning(
+                1.desember(2017),
+                INNTEKT.toInt(),
+                ORGNUMMER,
+                true
+            )
+        )
+    ): Utbetalingshistorikk {
+        return Utbetalingshistorikk(
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            utbetalinger = utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        ).apply {
+            hendelselogg = this
+        }
     }
 
     private fun ytelser(

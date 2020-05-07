@@ -20,6 +20,10 @@ object HendelseProbe {
         tell("Påminnelse")
     }
 
+    fun onUtbetalingshistorikk() {
+        tell("Utbetalingshistorikk")
+    }
+
     fun onYtelser() {
         tell("Ytelser")
     }

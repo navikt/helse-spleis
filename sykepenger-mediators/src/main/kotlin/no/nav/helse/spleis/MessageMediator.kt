@@ -23,6 +23,7 @@ internal class MessageMediator(
             SendtArbeidsgiverSøknaderRiver(it, this)
             SendtNavSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
+            UtbetalingshistorikkRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
             GammelUtbetalingsgodkjenningerRiver(it, this)

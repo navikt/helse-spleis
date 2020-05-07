@@ -25,60 +25,14 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val svangerskapsytelse = packet["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
         .takeIf(JsonNode::isObject)?.let(::asPeriode)
 
-    private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
-        it.path("utbetalteSykeperioder")
-    }.mapNotNull { utbetaling ->
-        val fom = utbetaling["fom"].asOptionalLocalDate()
-        val tom = utbetaling["tom"].asOptionalLocalDate()
-        val dagsats = utbetaling["dagsats"].asInt()
-        val grad = utbetaling["utbetalingsGrad"].asInt()
-        if (fom == null || tom == null || fom > tom) Periode.Ugyldig(fom, tom)
-        else when (utbetaling["typeKode"].asText()) {
-            "0" -> Periode.Utbetaling(fom, tom, dagsats, grad)
-            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats, grad)
-            "2", "3" -> Periode.Etterbetaling(fom, tom)
-            "4" -> Periode.KontertRegnskap(fom, tom)
-            "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats, grad)
-            "6" -> Periode.ReduksjonArbeidsgiverRefusjon(fom, tom, dagsats, grad)
-            "7" -> Periode.Tilbakeført(fom, tom)
-            "8" -> Periode.Konvertert(fom, tom)
-            "9" -> Periode.Ferie(fom, tom)
-            "O" -> Periode.Opphold(fom, tom)
-            "S" -> Periode.Sanksjon(fom, tom)
-            "" -> Periode.Ukjent(fom, tom)
-            else -> null // filtered away in river validation
-        }
-    }
-
-    private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
-        it.path("inntektsopplysninger")
-    }.map { opplysning ->
-        Utbetalingshistorikk.Inntektsopplysning(
-            sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-            inntektPerMåned = opplysning["inntekt"].asInt(),
-            orgnummer = opplysning["orgnummer"].asText(),
-            refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
-            refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
-        )
-    }
-
     private val aktivitetslogg = Aktivitetslogg()
     private val foreldrepermisjon = Foreldrepermisjon(
         foreldrepengeytelse = foreldrepenger,
         svangerskapsytelse = svangerskapsytelse,
         aktivitetslogg = aktivitetslogg
     )
-
-    private val utbetalingshistorikk = Utbetalingshistorikk(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        utbetalinger = utbetalinger,
-        inntektshistorikk = inntektshistorikk,
-        aktivitetslogg = aktivitetslogg
-    )
-
+    private val utbetalingshistorikk = UtbetalingshistorikkMessage(packet)
+        .utbetalingshistorikk(aktivitetslogg)
     private val ytelser get() = Ytelser(
         meldingsreferanseId = this.id,
         aktørId = aktørId,
