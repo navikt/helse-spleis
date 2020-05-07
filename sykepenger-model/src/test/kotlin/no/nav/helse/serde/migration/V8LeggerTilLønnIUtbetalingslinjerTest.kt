@@ -5,14 +5,14 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V6LeggerTilLønnIUtbetalingslinjerTest {
+internal class V8LeggerTilLønnIUtbetalingslinjerTest {
     private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `setter lønn basert på dagsats og grad`() {
         val json = objectMapper.readTree(personJson)
         listOf(
-            V6LeggerTilLønnIUtbetalingslinjer()
+            V8LeggerTilLønnIUtbetalingslinjer()
         ).migrate(json)
         val migratedJson = objectMapper.readTree(json.toString())
 
