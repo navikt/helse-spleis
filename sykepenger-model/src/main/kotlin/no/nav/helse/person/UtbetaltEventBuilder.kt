@@ -10,7 +10,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.streams.asSequence
 
 internal fun tilUtbetaltEvent(
     aktørId: String,
@@ -124,13 +123,10 @@ private class UtbetaltEventBuilder(
                 dagsats = lønn,
                 beløp = dagsats,
                 grad = grad,
-                sykedager = sykedager(fom, tom)
+                sykedager = linje.filterNot { it.erHelg() }.count()
             )
         )
     }
-
-    private fun sykedager(fom: LocalDate, tom: LocalDate) =
-        fom.datesUntil(tom.plusDays(1)).asSequence().filterNot { it.erHelg() }.count()
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,

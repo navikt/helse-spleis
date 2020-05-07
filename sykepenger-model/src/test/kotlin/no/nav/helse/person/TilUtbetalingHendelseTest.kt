@@ -145,8 +145,8 @@ internal class TilUtbetalingHendelseTest {
             utbetalingshistorikk = Utbetalingshistorikk(
                 aktørId = aktørId,
                 fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it
