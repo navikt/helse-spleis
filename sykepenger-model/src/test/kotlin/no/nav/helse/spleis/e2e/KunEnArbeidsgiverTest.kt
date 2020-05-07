@@ -1111,6 +1111,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -1120,7 +1121,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 
     @Test

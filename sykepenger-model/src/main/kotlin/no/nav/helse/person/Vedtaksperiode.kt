@@ -504,7 +504,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             avsluttBehandling: Arbeidsgiver.AvsluttBehandling
         ) {
-            avsluttBehandling.hendelse.info("Tidligere periode gikk til Infotrygd")
+            avsluttBehandling.hendelse.error("Avslutter perioden fordi tilstøtende gikk til Infotrygd")
             vedtaksperiode.tilstand(avsluttBehandling.hendelse, TilInfotrygd)
         }
 
@@ -542,6 +542,8 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
@@ -555,6 +557,8 @@ internal class Vedtaksperiode private constructor(
 
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
@@ -584,6 +588,8 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_GAP
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
+
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
@@ -604,6 +610,8 @@ internal class Vedtaksperiode private constructor(
 
     internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
@@ -1213,7 +1221,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.error("Sykdom for denne personen kan ikke behandles automatisk. Avslutter alle påfølgende perioder")
+            hendelse.error("Sykdom for denne personen kan ikke behandles automatisk.")
             vedtaksperiode.arbeidsgiver.avsluttBehandling(vedtaksperiode, hendelse)
         }
 

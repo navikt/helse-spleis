@@ -15,7 +15,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     internal fun `forlenger vedtaksperiode som har gått til infotrygd`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP) // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100)) // <-- TIL_INFOTRYGD
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
 
@@ -27,7 +27,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd, der utbetaling ikke er gjort`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)  // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100))  // <-- TIL_INFOTRYGD
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
         håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000, 100))
@@ -50,24 +50,39 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også`() {
+    fun `når en periode går Til Infotrygd avsluttes ikke påfølgende, tilstøtende perioder som bare har mottatt sykmelding`() {
         håndterSykmelding(Triple(1.januar, 31.januar, 100))
         håndterSykmelding(Triple(1.februar, 28.februar, 100))
         håndterSykmelding(Triple(14.mars, 31.mars, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)  // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100))  // <-- TIL_INFOTRYGD
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+    }
+
+    @Test
+    fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også`() {
+        håndterSykmelding(Triple(1.januar, 31.januar, 100))
+        håndterSykmelding(Triple(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterSykmelding(Triple(14.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(14.mars, 31.mars, 100))
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100))  // <-- TIL_INFOTRYGD
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
     @Test
     fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også (out of order)`() {
         håndterSykmelding(Triple(14.mars, 31.mars, 100))
         håndterSykmelding(Triple(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(14.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterSykmelding(Triple(1.januar, 31.januar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)  // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100))  // <-- TIL_INFOTRYGD
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
     }
 }
