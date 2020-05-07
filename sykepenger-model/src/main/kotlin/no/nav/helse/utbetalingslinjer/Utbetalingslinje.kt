@@ -114,7 +114,7 @@ internal class Utbetalingslinje internal constructor(
 }
 
 internal enum class Endringskode {
-    NY, UEND, ENDR, OPPH
+    NY, UEND, ENDR
 }
 
 internal enum class Klassekode(internal val verdi: String) {
