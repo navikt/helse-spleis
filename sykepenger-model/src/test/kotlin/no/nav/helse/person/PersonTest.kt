@@ -61,19 +61,6 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `påminnelse blir delegert til perioden`() {
-        testPerson.also {
-            it.håndter(sykmelding())
-            it.håndter(påminnelse(tilstandType = MOTTATT_SYKMELDING_FERDIG_GAP))
-        }
-
-        assertPersonEndret()
-        assertVedtaksperiodeEndret()
-        assertVedtaksperiodetilstand(TIL_INFOTRYGD)
-        assertFalse(testObserver.vedtaksperiodeIkkeFunnet)
-    }
-
-    @Test
     internal fun `påminnelse for periode som ikke finnes`() {
         val påminnelse = påminnelse(
             vedtaksperiodeId = UUID.randomUUID(),

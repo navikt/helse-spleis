@@ -423,10 +423,8 @@ internal class Vedtaksperiode private constructor(
         fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(30)
-            .atStartOfDay()
 
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
             return SpesifikkKontekst(
@@ -644,10 +642,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje()
@@ -731,10 +727,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigGap)
@@ -763,10 +757,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
@@ -795,10 +787,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
@@ -844,10 +834,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerUferdigGap)
@@ -865,10 +853,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = vedtaksperiode
-            .sisteDag()
+        ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(15)
-            .atStartOfDay()
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)

@@ -12,22 +12,12 @@ internal class PåminnelseTest {
 
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
-        private val aktørId = "aktørId"
-        private val fødselsnummer = "fødselsnummer"
-        private val orgnummer = "orgnummer"
+        private const val aktørId = "aktørId"
+        private const val fødselsnummer = "fødselsnummer"
+        private const val orgnummer = "orgnummer"
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @Test
-    fun `info ved påminnelse for nåværende tilstand`() {
-        val tilstand = Vedtaksperiode.MottattSykmeldingFerdigGap
-        val vedtaksperiode = vedtaksperiode()
-
-        assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertTrue(aktivitetslogg.hasMessages(), aktivitetslogg.toString())
-        assertTrue(aktivitetslogg.hasErrors(), aktivitetslogg.toString())
-    }
 
     @Test
     fun `info ved påminnelse for annen tilstand`() {

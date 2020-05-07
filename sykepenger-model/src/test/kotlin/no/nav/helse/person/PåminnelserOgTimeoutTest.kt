@@ -32,13 +32,6 @@ class PåminnelserOgTimeoutTest {
     }
 
     @Test
-    fun `påminnelse i mottatt sykmelding`() {
-        person.håndter(sykmelding())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `påminnelse i mottatt sykmelding innenfor makstid`() {
         person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
         person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
@@ -74,11 +67,11 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i mottatt inntektsmelding`() {
-        person.håndter(sykmelding())
-        person.håndter(inntektsmelding())
+        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(inntektsmelding(Periode(nå.minusDays(30), nå.minusDays(14))))
         person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP))
-        assertEquals(0, hendelse.behov().size)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(1, hendelse.behov().size)
+        assertTilstand(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP)
     }
 
     @Test
