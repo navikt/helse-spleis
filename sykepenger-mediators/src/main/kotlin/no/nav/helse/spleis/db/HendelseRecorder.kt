@@ -29,6 +29,7 @@ internal class HendelseRecorder(private val dataSource: DataSource) {
             is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
             is UtbetalingMessage -> UTBETALING
             is KansellerUtbetalingMessage -> KANSELLER_UTBETALING
+            is UtbetalingshistorikkMessage -> return // ignore UtbetalingshistorikkMessage
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
         }
 
