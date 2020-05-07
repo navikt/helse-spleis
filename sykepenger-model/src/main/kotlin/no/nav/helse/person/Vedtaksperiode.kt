@@ -458,7 +458,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode()).hasErrors()) return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode()).hasErrors()) return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd) {
+                utbetalingshistorikk.error("Avdekket overlapp med utbetalt periode i Infotrygd")
+            }
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket for overlapp; fant ingenting.")
         }
 
