@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
@@ -35,6 +36,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
+    private val arbeidsgiverutbetalinger = mutableMapOf<Int, List<Utbetaling>>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
@@ -106,6 +108,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         personNettoBeløp: Int
     ) {
         inVedtaksperiode = false
+    }
+
+    override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+        arbeidsgiverutbetalinger[arbeidsgiverindeks] = utbetalinger
     }
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
@@ -216,6 +222,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun arbeidsgiverutbetalinger(indeks: Int) = arbeidsgiverutbetalinger[indeks] ?: fail {
         "Missing collection initialization"
     }
 

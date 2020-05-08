@@ -179,8 +179,12 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(ytelser(vedtaksperiodeIndex, utbetalinger.toList(), inntektshistorikk))
     }
 
-    protected fun håndterPåminnelse(vedtaksperiodeIndex: Int, påminnetTilstand: TilstandType) {
-        person.håndter(påminnelse(vedtaksperiodeIndex, påminnetTilstand))
+    protected fun håndterPåminnelse(
+        vedtaksperiodeIndex: Int,
+        påminnetTilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
+    ) {
+        person.håndter(påminnelse(vedtaksperiodeIndex, påminnetTilstand, tilstandsendringstidspunkt))
     }
 
     protected fun håndterUtbetalingsgodkjenning(vedtaksperiodeIndex: Int, utbetalingGodkjent: Boolean) {
@@ -315,7 +319,8 @@ internal abstract class AbstractEndToEndTest {
 
     private fun påminnelse(
         vedtaksperiodeIndex: Int,
-        påminnetTilstand: TilstandType
+        påminnetTilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime
     ): Påminnelse {
         return Påminnelse(
             aktørId = AKTØRID,
@@ -324,7 +329,7 @@ internal abstract class AbstractEndToEndTest {
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
             antallGangerPåminnet = 0,
             tilstand = påminnetTilstand,
-            tilstandsendringstidspunkt = LocalDateTime.now(),
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now()
         )
