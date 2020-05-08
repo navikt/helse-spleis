@@ -86,7 +86,7 @@ internal class JsonBuilderTest {
         assertDeepEquals(person, result)
     }
 
-    companion object {
+    private companion object {
         private const val aktørId = "12345"
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"

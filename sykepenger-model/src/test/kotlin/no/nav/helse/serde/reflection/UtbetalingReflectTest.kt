@@ -12,22 +12,24 @@ import org.junit.jupiter.api.Test
 
 internal class UtbetalingReflectTest {
 
-    protected companion object {
+    private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "987654321"
     }
 
     private lateinit var map: MutableMap<String, Any?>
 
-    @Test internal fun `Reflect mapper riktige verdier`() {
-        map = UtbetalingReflect(Utbetaling(
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
-            4.januar,
-            Aktivitetslogg(),
-            null
-        )
+    @Test
+    internal fun `Reflect mapper riktige verdier`() {
+        map = UtbetalingReflect(
+            Utbetaling(
+                UNG_PERSON_FNR_2018,
+                ORGNUMMER,
+                tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
+                4.januar,
+                Aktivitetslogg(),
+                null
+            )
         ).toMap()
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
         assertUtbetalingslinjer("SPREF", "fagområde")
@@ -41,7 +43,8 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinje(0, "SPREFAG-IOP", "klassekode")
     }
 
-    @Test internal fun `Reflect mapper riktige verdierm med opphør`() {
+    @Test
+    internal fun `Reflect mapper riktige verdierm med opphør`() {
         val tidligereUtbetaling = Utbetaling(
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
@@ -51,13 +54,15 @@ internal class UtbetalingReflectTest {
             null
         )
 
-        map = UtbetalingReflect(Utbetaling(
-            UNG_PERSON_FNR_2018,
-            ORGNUMMER,
-            tidslinjeMedDagsats(tidslinjeOf(2.NAV)),
-            2.januar,
-            Aktivitetslogg(),
-            tidligereUtbetaling)
+        map = UtbetalingReflect(
+            Utbetaling(
+                UNG_PERSON_FNR_2018,
+                ORGNUMMER,
+                tidslinjeMedDagsats(tidslinjeOf(2.NAV)),
+                2.januar,
+                Aktivitetslogg(),
+                tidligereUtbetaling
+            )
         ).toMap()
 
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
@@ -84,21 +89,24 @@ internal class UtbetalingReflectTest {
     }
 
     private fun assertUtbetalingslinje(index: Int, expected: Any?, key: String) {
-        assertEquals(expected, ((map
-            ["arbeidsgiverOppdrag"] as Map<String, String>)
-            ["linjer"] as List<Map<String, String>>)
-            [index]
-            [key]
+        assertEquals(
+            expected, ((map
+                ["arbeidsgiverOppdrag"] as Map<String, String>)
+                ["linjer"] as List<Map<String, String>>)
+                [index]
+                [key]
         )
     }
 
     private fun assertUtbetalingslinjer(expected: Any?, key: String) {
-        assertEquals(expected, ((map
-            ["arbeidsgiverOppdrag"] as Map<String, String>)
-            [key]
-        ))
+        assertEquals(
+            expected, ((map
+                ["arbeidsgiverOppdrag"] as Map<String, String>)
+                [key]
+                )
+        )
     }
 
     private fun tidslinjeMedDagsats(tidslinje: Utbetalingstidslinje) =
-        tidslinje.onEach { if (it is NavDag) it.utbetaling = it.dagsats.toInt()  }
+        tidslinje.onEach { if (it is NavDag) it.utbetaling = it.dagsats.toInt() }
 }

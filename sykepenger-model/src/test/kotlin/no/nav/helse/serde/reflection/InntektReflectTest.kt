@@ -7,17 +7,10 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class InntektReflectTest {
-    val hendelseId = UUID.randomUUID()
-    @Test
-    internal fun `kontroller at alle felter er gjort rede for`() {
-        assertMembers<Inntekthistorikk.Inntekt, InntektReflect>(
-            skalMappes = listOf("fom", "hendelseId", "beløp")
-        )
-    }
+    private val hendelseId = UUID.randomUUID()
 
     @Test
-    @Suppress("UNCHECKED_CAST")
-    internal fun `mapper Inntekt til map`() {
+    fun `mapper Inntekt til map`() {
         val map = InntektReflect(inntekt).toMap()
 
         assertEquals(3, map.size)
