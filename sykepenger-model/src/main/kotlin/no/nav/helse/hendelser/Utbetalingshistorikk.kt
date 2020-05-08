@@ -42,10 +42,8 @@ class Utbetalingshistorikk(
             ?: false
 
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
-        utbetalinger.onEach { it.valider(aktivitetslogg, periode) }
-        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg)
-        if (inntektshistorikk.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd")
-        inntektshistorikk.forEach { it.valider(aktivitetslogg, periode) }
+        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
+        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
         return aktivitetslogg
     }
 
@@ -60,6 +58,18 @@ class Utbetalingshistorikk(
         private val refusjonTilArbeidsgiver: Boolean,
         private val refusjonTom: LocalDate? = null
     ) {
+
+        internal companion object {
+            fun valider(liste: List<Inntektsopplysning>, aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
+                liste
+                    .filter { it.sykepengerFom >= periode.start.minusMonths(12) }
+                    .distinctBy { it.orgnummer }
+                    .onEach { it.valider(aktivitetslogg, periode) }
+                    .also {
+                        if (it.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd innen 12 måneder fra perioden")
+                    }
+            }
+        }
 
         internal fun valider(aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
@@ -115,8 +125,9 @@ class Utbetalingshistorikk(
             }
 
             internal companion object {
-                fun valider(liste: List<Periode>, aktivitetslogg: Aktivitetslogg): Aktivitetslogg {
+                fun valider(liste: List<Periode>, aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
                     liste
+                        .onEach { it.valider(aktivitetslogg, periode) }
                         .filterIsInstance<Utbetalingsperiode>()
                         .zipWithNext { left, right ->
                             if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats) {

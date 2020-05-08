@@ -46,7 +46,23 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `flere inntektsopplysninger gir feil`() {
+    fun `flere inntektsopplysninger på ulike orgnr gir feil`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "987654321", true)
+            )
+        )
+
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `flere inntektsopplysninger på samme orgnr er ok`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
         )
@@ -58,7 +74,23 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `flere inntektsopplysninger gir ikke feil dersom de er gamle`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100)
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = utbetalinger,
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 1234, "987654321", true)
+            )
+        )
+
+        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
     }
 
     @Test
