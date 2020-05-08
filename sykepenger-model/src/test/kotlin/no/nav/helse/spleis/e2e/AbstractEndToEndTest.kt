@@ -12,7 +12,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.reflection.orgnummer
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -389,9 +388,9 @@ internal abstract class AbstractEndToEndTest {
     private fun simulering(vedtaksperiodeIndex: Int, simuleringOK: Boolean = true) =
         no.nav.helse.hendelser.Simulering(
             vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
-            aktørId = "aktørId",
+            aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = SimuleringResultat(
@@ -403,7 +402,7 @@ internal abstract class AbstractEndToEndTest {
                             SimulertUtbetaling(
                                 forfallsdato = 21.januar,
                                 utbetalesTil = Mottaker(
-                                    id = orgnummer,
+                                    id = ORGNUMMER,
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
@@ -417,14 +416,14 @@ internal abstract class AbstractEndToEndTest {
                                             beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
-                                        utbetalingstype = "YTELSE",
+                                        utbetalingstype = "YTEL",
                                         tilbakeføring = false,
                                         sats = Sats(
                                             sats = 1000,
                                             antall = 2,
-                                            type = "DAGLIG"
+                                            type = "DAG"
                                         ),
-                                        refunderesOrgnummer = orgnummer
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )

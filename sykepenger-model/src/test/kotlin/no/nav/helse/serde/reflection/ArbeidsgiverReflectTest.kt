@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverReflectTest {
+    private companion object {
+        private const val FØDSELSNUMMER = "fnr"
+        private const val AKTØR = "aktørId"
+        private const val ORGNR = "orgnr"
+    }
+
     @Test
     internal fun `kontroller at alle felter er gjort rede for`() {
         assertMembers<Arbeidsgiver, ArbeidsgiverReflect>(
@@ -23,10 +29,9 @@ internal class ArbeidsgiverReflectTest {
     @Suppress("UNCHECKED_CAST")
     internal fun `mapper Arbeidsgiver til map`() {
         val map = ArbeidsgiverReflect(arbeidsgiver).toMap()
-
         assertEquals(2 , map.size)
-        assertEquals(orgnummer, map["organisasjonsnummer"])
+        assertEquals(ORGNR, map["organisasjonsnummer"])
     }
 
-    internal val arbeidsgiver = Arbeidsgiver(Person("1", "2"), orgnummer)
+    internal val arbeidsgiver = Arbeidsgiver(Person(AKTØR, FØDSELSNUMMER), ORGNR)
 }

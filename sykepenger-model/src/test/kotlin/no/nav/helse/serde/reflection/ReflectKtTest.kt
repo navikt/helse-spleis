@@ -7,11 +7,6 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.memberProperties
 
-internal const val aktørId = "12345"
-internal const val fnr = "12020052345"
-internal const val orgnummer = "987654321"
-internal const val vedtaksperiodeId = "1"
-
 internal inline fun <reified T : Any, reified U : Any> assertMembers(
     subClasses: Pair<String, String>? = null,
     skalMappes: List<String> = emptyList(),
