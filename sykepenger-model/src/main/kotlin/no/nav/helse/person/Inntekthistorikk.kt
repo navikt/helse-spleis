@@ -25,28 +25,31 @@ internal class Inntekthistorikk {
         inntekter.sort()
     }
 
-    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato) ?:
-        inntekter.firstOrNull()?.beløp
+    internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
 
     internal class Inntekt(
         private val fom: LocalDate,
-        internal val hendelseId: UUID,
-        internal val beløp: BigDecimal
+        private val hendelseId: UUID,
+        private val beløp: BigDecimal
     ) : Comparable<Inntekt> {
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
-                inntekter.lastOrNull { it.fom <= dato }?.beløp
+                (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
         }
 
         internal fun fom() = fom
 
         fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntekt(this)
+            visitor.visitInntekt(this, hendelseId)
         }
 
         override fun compareTo(other: Inntekt) = this.fom.compareTo(other.fom)
 
         override fun hashCode() = fom.hashCode() * 37 + beløp.hashCode()
+        override fun equals(other: Any?) =
+            other is Inntekt
+                && other.fom == this.fom
+                && other.beløp == this.beløp
     }
 
 }

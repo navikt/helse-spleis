@@ -100,7 +100,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         this.inntektshistorikk = inntekthistorikk
     }
 
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
+    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
         inntekter.getOrPut(arbeidsgiverindeks) { mutableListOf() }.add(inntekt)
     }
 

@@ -139,7 +139,7 @@ internal interface NySykdomstidslinjeVisitor {
 internal interface InntekthistorikkVisitor {
     fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 //    fun preVisitTidslinjer() {}
-    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {}
+    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {}
 //    fun postVisitTidslinjer() {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 }

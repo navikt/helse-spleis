@@ -184,8 +184,7 @@ internal fun mapVilkår(
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
-    val beregnetMånedsinntekt = (førsteFraværsdag?.let { Inntekthistorikk.Inntekt.inntekt(inntekter, it) }
-        ?: inntekter.firstOrNull()?.beløp)?.toDouble()
+    val beregnetMånedsinntekt = Inntekthistorikk.Inntekt.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = SpleisAlder(fødselsnummer)
     val forbrukteSykedager = vedtaksperiodeMap["forbrukteSykedager"] as Int?

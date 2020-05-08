@@ -92,8 +92,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
-        currentState.visitInntekt(inntekt)
+    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
+        currentState.visitInntekt(inntekt, id)
     }
 
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
@@ -317,7 +317,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
         }
 
-        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt) {
+        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
             inntekter.add(inntekt)
         }
 
