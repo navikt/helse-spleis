@@ -8,6 +8,7 @@ import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
@@ -22,6 +23,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertEquals(3.januar, inspektør.førsteFraværsdag(1)) {
+            "Første fraværsdag settes til den første utbetalte dagen fordi " +
+                "vi ikke er i stand til å regne den ut selv ennå. " +
+                "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"
+        }
     }
 
     @Test
@@ -58,6 +64,27 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+    }
+
+    @Test
+    fun `avdekker tilstøtende periode i Infotrygd`() {
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100))
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
+        assertEquals(3.januar, inspektør.førsteFraværsdag(0)) {
+            "Første fraværsdag settes til den første utbetalte dagen fordi " +
+                "vi ikke er i stand til å regne den ut selv ennå. " +
+                "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"
+        }
+    }
+
+    @Test
+    fun `avdekker tilstøtende periode i Infotrygd uten at vi har Inntektsopplysninger`() {
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknad(Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100), inntektshistorikk = emptyList())
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
     @Test
