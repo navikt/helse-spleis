@@ -75,7 +75,9 @@ internal class Utbetalingslinje internal constructor(
         return fom.hashCode() * 37 +
             tom.hashCode() * 17 +
             dagsats.hashCode() * 41 +
-            grad.hashCode()
+            grad.hashCode() * 61 +
+            endringskode.name.hashCode() * 59 +
+            datoStatusFom.hashCode() * 23
     }
 
     internal fun ghostFrom(tidligere: Utbetalingslinje) = copyWith(UEND, tidligere)

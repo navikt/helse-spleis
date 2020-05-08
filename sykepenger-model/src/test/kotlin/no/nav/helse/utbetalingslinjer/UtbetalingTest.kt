@@ -99,6 +99,40 @@ internal class UtbetalingTest {
         assertEquals(andre.arbeidsgiverOppdrag().fagsystemId(), inspektør.refFagsystemId(2))
     }
 
+    @Test
+    fun `Checksum identisk for to like oppdrag`() {
+        val tidslinje = tidslinjeOf(
+            16.AP, 5.NAV, startDato = 1.januar(2020)
+        )
+
+        beregnUtbetalinger(tidslinje)
+
+        val første = opprettUtbetaling(tidslinje)
+        val andre = opprettUtbetaling(tidslinje)
+
+        val førsteInspektør = OppdragInspektør(første.arbeidsgiverOppdrag())
+        val andreInspektør = OppdragInspektør(andre.arbeidsgiverOppdrag())
+
+        assertEquals(førsteInspektør.sjekksum(), andreInspektør.sjekksum())
+    }
+
+    @Test
+    fun `Checksum ulik for to nesten like oppdrag`() {
+        val tidslinje = tidslinjeOf(
+            16.AP, 5.NAV, startDato = 1.januar(2020)
+        )
+
+        beregnUtbetalinger(tidslinje)
+
+        val første = opprettUtbetaling(tidslinje)
+        val andre = opprettUtbetaling(tidslinje.kutt(20.januar(2020)))
+
+        val førsteInspektør = OppdragInspektør(første.arbeidsgiverOppdrag())
+        val andreInspektør = OppdragInspektør(andre.arbeidsgiverOppdrag())
+
+        assertNotEquals(førsteInspektør.sjekksum(), andreInspektør.sjekksum())
+    }
+
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
         MaksimumUtbetaling(
             Sykdomsgrader(listOf(*tidslinjer)),
@@ -122,6 +156,7 @@ internal class UtbetalingTest {
         private val delytelseIder = mutableListOf<Int>()
         private val refDelytelseIder = mutableListOf<Int?>()
         private val refFagsystemIder = mutableListOf<String?>()
+        private var sjekksum: Int = 0
 
         init {
             oppdrag.accept(this)
@@ -129,6 +164,10 @@ internal class UtbetalingTest {
 
         override fun preVisitOppdrag(oppdrag: Oppdrag) {
             fagsystemIder.add(oppdrag.fagsystemId())
+        }
+
+        override fun postVisitOppdrag(oppdrag: Oppdrag) {
+            sjekksum = oppdrag.sjekksum()
         }
 
         override fun visitUtbetalingslinje(
@@ -155,5 +194,6 @@ internal class UtbetalingTest {
         internal fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
         internal fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
         internal fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)
+        internal fun sjekksum() = sjekksum
     }
 }

@@ -42,6 +42,8 @@ internal class Oppdrag private constructor(
 
     internal fun fagsystemId() = fagsystemId
 
+    internal fun sjekksum() = sjekksum
+
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 
     internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
