@@ -59,14 +59,16 @@ class Søknad constructor(
     override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
         require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
-            .also { trimLeft(tom) }
+        return (nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom))
+            .also { nyTrimLeft(tom) }
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }
 
     override fun nySykdomstidslinje() = nySykdomstidslinje
 
     internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
+
+    internal fun nyTrimLeft(dato: LocalDate) { nyForrigeTom = dato }
 
     override fun fødselsnummer() = fnr
 

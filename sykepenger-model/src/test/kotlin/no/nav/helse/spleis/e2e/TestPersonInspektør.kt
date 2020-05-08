@@ -4,11 +4,14 @@ import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
+import no.nav.helse.sykdomstidslinje.NyDag
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Grad
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
@@ -18,7 +21,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-    private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
+    private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
@@ -27,7 +30,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
-    internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
+    internal val dagtelling = mutableMapOf<KClass<out NyDag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
@@ -122,42 +125,23 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
     }
 
-    private inner class Dagteller : SykdomstidslinjeVisitor {
-        override fun visitSykedag(dag: Sykedag.Sykmelding) = inkrementer(
-            Sykedag::class)
-        override fun visitSykedag(dag: Sykedag.Søknad) = inkrementer(
-            Sykedag::class)
+    private inner class Dagteller : NySykdomstidslinjeVisitor {
+        override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = inkrementer(dag)
 
-        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = inkrementer(
-            Egenmeldingsdag::class)
-        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = inkrementer(
-            Egenmeldingsdag::class)
-
-        override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = inkrementer(
-            SykHelgedag::class)
-        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = inkrementer(
-            SykHelgedag::class)
-
-        override fun visitForeldetSykedag(dag: ForeldetSykedag) = inkrementer(
-            ForeldetSykedag::class)
-
-        override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = inkrementer(
-            Arbeidsdag::class
-        )
-        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = inkrementer(
-            Arbeidsdag::class
-        )
-
-        override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = inkrementer(Feriedag::class)
-        override fun visitFeriedag(dag: Feriedag.Søknad) = inkrementer(Feriedag::class)
-
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = inkrementer(FriskHelgedag::class)
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = inkrementer(FriskHelgedag::class)
-
-        private fun inkrementer(klasse: KClass<out Dag>) {
-            dagtelling.compute(klasse) { _, value ->
-                1 + (value ?: 0)
-            }
+        private fun inkrementer(klasse: NyDag) {
+            dagtelling.compute(klasse::class) { _, value -> 1 + (value ?: 0) }
         }
     }
 

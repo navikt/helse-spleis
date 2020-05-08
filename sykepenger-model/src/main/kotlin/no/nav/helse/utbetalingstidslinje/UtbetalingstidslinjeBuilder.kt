@@ -5,9 +5,8 @@ import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Grad
 import java.math.MathContext
@@ -19,7 +18,6 @@ import java.time.LocalDate
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
-    private val sykdomstidslinje: Sykdomstidslinje,
     private val sisteDag: LocalDate,
     private val inntekthistorikk: Inntekthistorikk,
     arbeidsgiverperiodeGjennomført: Boolean = false,
@@ -35,37 +33,15 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private val tidslinje = Utbetalingstidslinje()
 
-    internal fun result(): Utbetalingstidslinje {
-        (sykdomstidslinje.kutt(sisteDag))?.accept(this)
-        return tidslinje
-    }
-
     internal fun result(nySykdomstidslinje: NySykdomstidslinje): Utbetalingstidslinje {
-        (nySykdomstidslinje.kutt(sisteDag)).accept(this)
+        nySykdomstidslinje.kutt(sisteDag).accept(this)
         return tidslinje
     }
-
-    override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) = fridag(dag.dagen)
-    override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = fridag(dag.dagen)
-    override fun visitStudiedag(dag: Studiedag) = implisittDag(dag.dagen)
-    override fun visitUbestemt(dag: Ubestemtdag) = implisittDag(dag.dagen)
-    override fun visitUtenlandsdag(dag: Utenlandsdag) = implisittDag(dag.dagen)
-    override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = arbeidsdag(dag.dagen)
-    override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = arbeidsdag(dag.dagen)
-    override fun visitImplisittDag(dag: ImplisittDag) = implisittDag(dag.dagen)
-    override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = fridag(dag.dagen)
-    override fun visitFeriedag(dag: Feriedag.Søknad) = fridag(dag.dagen)
-    override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = fridag(dag.dagen)
-    override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = fridag(dag.dagen)
-    override fun visitSykedag(dag: Sykedag.Sykmelding) = sykedag(dag.dagen, dag.grad)
-    override fun visitSykedag(dag: Sykedag.Søknad) = sykedag(dag.dagen, dag.grad)
-    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = egenmeldingsdag(dag.dagen)
-    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = egenmeldingsdag(dag.dagen)
-    override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = sykHelgedag(dag.dagen, dag.grad)
-    override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = sykHelgedag(dag.dagen, dag.grad)
-    override fun visitForeldetSykedag(dag: ForeldetSykedag) = foreldetSykedag(dag.dagen, dag.grad)
 
     override fun visitDag(dag: NyDag.NyUkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
+    override fun visitDag(dag: NyDag.NyStudiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
+    override fun visitDag(dag: NyDag.NyPermisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
+    override fun visitDag(dag: NyDag.NyUtenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
     override fun visitDag(dag: NyDag.NyArbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = arbeidsdag(dato)
     override fun visitDag(dag: NyDag.NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = egenmeldingsdag(dato)
     override fun visitDag(dag: NyDag.NyFeriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
@@ -435,7 +411,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         }
     }
 
-    private object UtbetalingOpphold : UtbetalingstidslinjeBuilder.UtbetalingState {
+    private object UtbetalingOpphold : UtbetalingState {
         override fun sykedagerEtterArbeidsgiverperioden(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, grad: Double) {
             splitter.håndterNAVdag(dagen, grad)
             splitter.state(UtbetalingSykedager)

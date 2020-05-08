@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -422,7 +421,6 @@ internal class NyUtbetalingstidslinjeBuilderTest {
         inntektshistorikk: Inntekthistorikk = inntekthistorikk
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
-            sykdomstidslinje = Sykdomstidslinje(),
             sisteDag = sisteDag,
             inntekthistorikk = inntektshistorikk
         ).result(this)

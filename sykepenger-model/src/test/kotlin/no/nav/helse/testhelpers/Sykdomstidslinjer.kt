@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NyDag
+import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -125,25 +126,25 @@ internal val Int.nF
 internal val Int.nEDU
     get() = NySykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyStudiedag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap({ it }, { NyStudiedag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.nH
     get() = NySykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NySykHelgedag(it, 100.0, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NySykHelgedag(it, 100.0, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.nP
     get() = NySykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyPermisjonsdag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyPermisjonsdag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.nUT
     get() = NySykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyDag.NyUtenlandsdag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, NyDag>({ it }, { NyUtenlandsdag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID()) {

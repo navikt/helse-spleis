@@ -6,8 +6,11 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.default
+import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,15 +35,39 @@ internal class NySykdomstidslinje private constructor(
         dager.toSortedMap()
     )
 
-    internal fun periode() = periode
+    private constructor(dager: List<Pair<LocalDate, NyDag>>) : this(
+        dager.fold(mutableMapOf<LocalDate, NyDag>()) { acc, (date, dag) ->
+            acc.apply { put(date, dag) }
+        }
+    )
 
-    internal fun merge(annen: NySykdomstidslinje, beste: BesteStrategy = default): NySykdomstidslinje {
+
+    internal fun length() = count() // Added to limit number of changes when removing old sykdomstidlinje
+    internal fun periode() = periode
+    internal fun førsteDag() = periode!!.start
+    internal fun sisteDag() = periode!!.endInclusive
+
+    internal fun overlapperMed(other: NySykdomstidslinje) =
+        when {
+            this.count() == 0 && other.count() == 0 -> true
+            this.count() == 0 || other.count() == 0 -> false
+            else -> this.overlapp(other)
+        }
+
+    private fun overlapp(other: NySykdomstidslinje): Boolean {
+        requireNotNull(periode, { "Kan ikke undersøke overlapping med tom sykdomstidslinje"})
+        requireNotNull(other.periode, { "Kan ikke undersøke overlapping med tom sykdomstidslinje"})
+
+        return periode.overlapperMed(other.periode)
+    }
+
+    internal fun merge(other: NySykdomstidslinje, beste: BesteStrategy = default): NySykdomstidslinje {
         val dager = mutableMapOf<LocalDate, NyDag>()
         this.dager.toMap(dager)
-        annen.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
+        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
         return NySykdomstidslinje(
             dager.toSortedMap(),
-            this.periode?.merge(annen.periode) ?: annen.periode,
+            this.periode?.merge(other.periode) ?: other.periode,
             this.låstePerioder
         )
     }
@@ -49,7 +76,7 @@ internal class NySykdomstidslinje private constructor(
         override fun visitDag(
             dag: ProblemDag,
             dato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+            kilde: Hendelseskilde,
             melding: String
         ) {
             problemmeldinger.add(melding)
@@ -75,6 +102,8 @@ internal class NySykdomstidslinje private constructor(
 
     internal operator fun plus(other: NySykdomstidslinje) = this.merge(other)
     internal operator fun get(dato: LocalDate): NyDag = dager[dato] ?: NyUkjentDag(dato, INGEN)
+
+    internal fun harTilstøtende(other: NySykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
 
     internal fun subset(periode: Periode) =
         NySykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
@@ -162,25 +191,19 @@ internal class NySykdomstidslinje private constructor(
         private fun periode(dager: SortedMap<LocalDate, NyDag>) =
             if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
-        internal fun arbeidsdager(
-            førsteDato: LocalDate,
-            sisteDato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) =
+        internal fun arbeidsdager(periode: Periode?, kilde: Hendelseskilde) =
             NySykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, NyDag>(
-                            { it },
-                            { if (it.erHelg()) NyFriskHelgedag(it, kilde) else NyArbeidsdag(it, kilde) })
-                    )
+                periode?.map { it to if (it.erHelg()) NyFriskHelgedag(it, kilde) else NyArbeidsdag(it, kilde) } ?: emptyList<Pair<LocalDate, NyDag>>()
             )
+
+        internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
+            arbeidsdager(Periode(førsteDato, sisteDato), kilde)
 
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Number = 100.0,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
@@ -196,7 +219,7 @@ internal class NySykdomstidslinje private constructor(
             sisteDato: LocalDate,
             avskjæringsdato: LocalDate,
             grad: Number = 100.0,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
@@ -218,14 +241,14 @@ internal class NySykdomstidslinje private constructor(
             dato: LocalDate,
             avskjæringsdato: LocalDate,
             grad: Number,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = if (dato < avskjæringsdato) NyForeldetSykedag(dato, grad, kilde) else NySykedag(dato, grad, kilde)
 
         internal fun foreldetSykedag(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Number = 100.0,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
@@ -240,7 +263,7 @@ internal class NySykdomstidslinje private constructor(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             grad: Number = 100.0,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
@@ -257,7 +280,7 @@ internal class NySykdomstidslinje private constructor(
         internal fun feriedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) =
             NySykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
@@ -267,7 +290,7 @@ internal class NySykdomstidslinje private constructor(
         internal fun problemdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+            kilde: Hendelseskilde,
             melding: String
         ) =
             NySykdomstidslinje(
@@ -285,8 +308,16 @@ internal class NySykdomstidslinje private constructor(
             periodeIterator?.let { this@NySykdomstidslinje[it.next()] }
                 ?: throw NoSuchElementException()
     }
+
+    fun starterFør(other: NySykdomstidslinje): Boolean {
+        requireNotNull(periode)
+        requireNotNull(other.periode)
+        return periode.start < other.periode.start
+    }
 }
 
 internal fun List<NySykdomstidslinje>.merge(beste: BesteStrategy = default): NySykdomstidslinje =
     if (this.isEmpty()) NySykdomstidslinje()
     else reduce { result, tidslinje -> result.merge(tidslinje, beste) }
+
+internal fun List<NySykdomstidslinje>.join() = merge(noOverlap)

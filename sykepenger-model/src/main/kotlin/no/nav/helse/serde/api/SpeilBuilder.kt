@@ -1,22 +1,24 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.SykdomstidslinjedagDTO.KildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
-import no.nav.helse.serde.mapping.SpeilKildetype.*
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.VedtaksperiodeReflect
+import no.nav.helse.sykdomstidslinje.NyDag
+import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.dag.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Grad
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -40,17 +42,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     internal fun toJson() = rootState.toJson()
 
-    private fun pushState(state: JsonState) {
-        currentState.leaving()
-        stack.push(state)
-        currentState.entering()
-    }
-
-    private fun popState() {
-        currentState.leaving()
-        stack.pop()
-        currentState.entering()
-    }
+    private fun pushState(state: JsonState) { stack.push(state) }
+    private fun popState() { stack.pop() }
 
     override fun preVisitPerson(
         person: Person,
@@ -157,23 +150,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
-    override fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.preVisitHendelseSykdomstidslinje(tidslinje)
-
-    override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.postVisitHendelseSykdomstidslinje(tidslinje)
-
-    override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
+    override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
         currentState.preVisitBeregnetSykdomstidslinje(tidslinje)
 
-    override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
+    override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
         currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
-
-    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.preVisitSykdomstidslinje(tidslinje)
-
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.postVisitSykdomstidslinje(tidslinje)
 
     override fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
@@ -186,45 +167,26 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.visitDataForSimulering(dataForSimuleringResultat)
     }
 
-    override fun postVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        gruppeId: UUID
-    ) =
+    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) =
         currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
-    override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) = currentState.visitArbeidsdag(dag)
-    override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) = currentState.visitArbeidsdag(dag)
-    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) = currentState.visitEgenmeldingsdag(dag)
-
-    override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) = currentState.visitEgenmeldingsdag(dag)
-
-    override fun visitFeriedag(dag: Feriedag.Inntektsmelding) = currentState.visitFeriedag(dag)
-    override fun visitFeriedag(dag: Feriedag.Søknad) = currentState.visitFeriedag(dag)
-
-    override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) = currentState.visitFriskHelgedag(dag)
-    override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) = currentState.visitFriskHelgedag(dag)
-
-    override fun visitImplisittDag(dag: ImplisittDag) = currentState.visitImplisittDag(dag)
-    override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) = currentState.visitPermisjonsdag(dag)
-
-    override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) = currentState.visitPermisjonsdag(dag)
-    override fun visitStudiedag(dag: Studiedag) = currentState.visitStudiedag(dag)
-    override fun visitSykHelgedag(dag: SykHelgedag.Søknad) = currentState.visitSykHelgedag(dag)
-    override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) = currentState.visitSykHelgedag(dag)
-    override fun visitSykedag(dag: Sykedag.Sykmelding) = currentState.visitSykedag(dag)
-    override fun visitSykedag(dag: Sykedag.Søknad) = currentState.visitSykedag(dag)
-    override fun visitUbestemt(dag: Ubestemtdag) = currentState.visitUbestemt(dag)
-    override fun visitUtenlandsdag(dag: Utenlandsdag) = currentState.visitUtenlandsdag(dag)
-    override fun visitForeldetSykedag(dag: ForeldetSykedag) =
-        currentState.visitForeldetSykedag(dag)
+    override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
+    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) = currentState.visitDag(dag, dato, kilde, melding)
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = currentState.visitTilstand(tilstand)
 
-    private interface JsonState : PersonVisitor {
-        fun entering() {}
-        fun leaving() {}
-    }
+    private interface JsonState : PersonVisitor {}
 
     private inner class Root : JsonState {
         private val personMap = mutableMapOf<String, Any?>()
@@ -616,7 +578,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
 
-        override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
@@ -631,87 +593,58 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             popState()
         }
-
-        override fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-
-        override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     }
 
     private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
         JsonState {
 
-        override fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) =
-            leggTilDag(SpeilDagtype.ARBEIDSDAG, dag, Inntektsmelding)
+        override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) = leggTilDag(dag, dato, kilde)
 
-        override fun visitArbeidsdag(dag: Arbeidsdag.Søknad) =
-            leggTilDag(SpeilDagtype.ARBEIDSDAG, dag, Søknad)
-
-        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) =
-            leggTilDag(SpeilDagtype.ARBEIDSGIVERDAG, dag, Inntektsmelding)
-
-        override fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) =
-            leggTilDag(SpeilDagtype.ARBEIDSGIVERDAG, dag, Søknad)
-
-        override fun visitFeriedag(dag: Feriedag.Inntektsmelding) =
-            leggTilDag(SpeilDagtype.FERIEDAG, dag, Inntektsmelding)
-
-        override fun visitFeriedag(dag: Feriedag.Søknad) =
-            leggTilDag(SpeilDagtype.FERIEDAG, dag, Søknad)
-
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) =
-            leggTilDag(SpeilDagtype.FRISK_HELGEDAG, dag, Søknad)
-
-        override fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) =
-            leggTilDag(SpeilDagtype.FRISK_HELGEDAG, dag, Inntektsmelding)
-
-        override fun visitImplisittDag(dag: ImplisittDag) =
-            leggTilDag(SpeilDagtype.IMPLISITT_DAG, dag)
-
-        override fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) =
-            leggTilDag(SpeilDagtype.PERMISJONSDAG, dag, Søknad)
-
-        override fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) =
-            leggTilDag(SpeilDagtype.PERMISJONSDAG, dag)
-
-        override fun visitStudiedag(dag: Studiedag) =
-            leggTilDag(SpeilDagtype.STUDIEDAG, dag, Søknad)
-
-        override fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) =
-            leggTilSykedag(SpeilDagtype.SYK_HELGEDAG, dag, Sykmelding)
-
-        override fun visitSykHelgedag(dag: SykHelgedag.Søknad) =
-            leggTilSykedag(SpeilDagtype.SYK_HELGEDAG, dag, Søknad)
-
-        override fun visitSykedag(dag: Sykedag.Sykmelding) =
-            leggTilSykedag(SpeilDagtype.SYKEDAG, dag, Sykmelding)
-
-        override fun visitSykedag(dag: Sykedag.Søknad) =
-            leggTilSykedag(SpeilDagtype.SYKEDAG, dag, Søknad)
-
-        override fun visitUbestemt(dag: Ubestemtdag) =
-            leggTilDag(SpeilDagtype.UBESTEMTDAG, dag)
-
-        override fun visitUtenlandsdag(dag: Utenlandsdag) =
-            leggTilDag(SpeilDagtype.UTENLANDSDAG, dag, Søknad)
-
-        override fun visitForeldetSykedag(dag: ForeldetSykedag) =
-            leggTilSykedag(SpeilDagtype.FORELDET_SYKEDAG, dag, Søknad)
-
-        private fun leggTilDag(dagtype: SpeilDagtype, dag: Dag, kilde: SpeilKildetype? = null) {
+        private fun leggTilDag(
+            dag: NyDag,
+            dato: LocalDate,
+            kilde: Hendelseskilde? = null,
+            grad: Grad? = null
+        ) {
             sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dag.dagen, dagtype, kilde?.let { KildeDTO(kilde) } )
+                SykdomstidslinjedagDTO(dato, dag.toSpeilDagtype(), kilde?.run { KildeDTO(toSpeilKildetype()) }, grad?.toPercentage())
             )
         }
 
-        private fun leggTilSykedag(dagtype: SpeilDagtype, dag: GradertDag, kilde: SpeilKildetype? = null) {
-            sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dag.dagen, dagtype, kilde?.let { KildeDTO(kilde) }, dag.grad )
-            )
+        private fun NyDag.toSpeilDagtype() = when (this) {
+            is NySykedag -> SpeilDagtype.SYKEDAG
+            is NyArbeidsdag -> SpeilDagtype.ARBEIDSDAG
+            is NyArbeidsgiverdag, is NyArbeidsgiverHelgedag -> SpeilDagtype.ARBEIDSGIVERDAG
+            is NyFeriedag -> SpeilDagtype.FERIEDAG
+            is NyFriskHelgedag -> SpeilDagtype.FRISK_HELGEDAG
+            is NyForeldetSykedag -> SpeilDagtype.FORELDET_SYKEDAG
+            is NySykHelgedag -> SpeilDagtype.SYK_HELGEDAG
+            is NyPermisjonsdag -> SpeilDagtype.PERMISJONSDAG
+            is NyStudiedag -> SpeilDagtype.STUDIEDAG
+            is NyUtenlandsdag -> SpeilDagtype.UTENLANDSDAG
+            is NyUkjentDag, is ProblemDag -> SpeilDagtype.UBESTEMTDAG
         }
 
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        private fun Hendelseskilde.toSpeilKildetype() = when {
+            erAvType(Inntektsmelding::class) -> SpeilKildetype.Inntektsmelding
+            erAvType(Søknad::class) -> SpeilKildetype.Søknad
+            erAvType(Sykmelding::class) -> SpeilKildetype.Sykmelding
+            else -> throw IllegalArgumentException()
+        }
+
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
             popState()
         }
     }

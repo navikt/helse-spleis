@@ -50,7 +50,7 @@ class Inntektsmelding(
         }
     }
 
-    private val nySykdomstidslinje: NySykdomstidslinje = (
+    private var nySykdomstidslinje: NySykdomstidslinje = (
         arbeidsgivertidslinje(arbeidsgiverperioder)
             + ferietidslinje(ferieperioder)
             + nyFørsteFraværsdagtidslinje(førsteFraværsdag)
@@ -87,16 +87,11 @@ class Inntektsmelding(
         }
     }
 
-    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<NySykdomstidslinje> =
-        arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste).let { tidslinje ->
-            mutableListOf(tidslinje)
-                .also { list ->
-                    tidslinje.periode()
-                        ?.also { periode ->
-                            list.add(NySykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde))
-                        }
-                }
-        }
+    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<NySykdomstidslinje> {
+        val arbeidsgiverdager = arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste)
+
+        return listOfNotNull(arbeidsgiverdager, NySykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde))
+    }
 
     private fun ferietidslinje(ferieperioder: List<Periode>): List<NySykdomstidslinje> =
         ferieperioder.map { it.asFerietidslinje() }
@@ -123,11 +118,13 @@ class Inntektsmelding(
         forrigeTom = dato
     }
 
+    internal fun nyTrimLeft(dato: LocalDate) { nyForrigeTom = dato }
+
     override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
         require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
-            .also { trimLeft(tom) }
+        return (nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom))
+            .also { nyTrimLeft(tom) }
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen") }
     }
 
@@ -140,6 +137,17 @@ class Inntektsmelding(
             sykdomstidslinje.førsteDag().minusDays(1),
             InntektsmeldingDagFactory
         ))
+    }
+
+    // Pad days prior to employer-paid days with assumed work days
+    override fun nyPadLeft(dato: LocalDate) {
+        if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
+        if (dato >= nySykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
+        nySykdomstidslinje += NySykdomstidslinje.Companion.arbeidsdager(
+            dato,
+            nySykdomstidslinje.førsteDag().minusDays(1),
+            this.kilde
+        )
     }
 
     override fun valider(periode: Periode): Aktivitetslogg {

@@ -107,10 +107,10 @@ internal class NyTestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.nySykdomstidslinje()
+        sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty()) {
-            this.sykdomshistorikk.nySykdomstidslinje().accept(Dagteller())
+            this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
         }
     }
 

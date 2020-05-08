@@ -52,4 +52,5 @@ abstract class SykdomstidslinjeHendelse(
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 
     internal open fun padLeft(dato: LocalDate) {}
+    internal open fun nyPadLeft(dato: LocalDate) {}
 }

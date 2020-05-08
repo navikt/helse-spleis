@@ -123,6 +123,8 @@ internal class Vedtaksperiode private constructor(
         valider(søknad) { tilstand.håndter(this, søknad) }
     }
 
+    override fun toString() = "${this.periode().start} - ${this.periode().endInclusive}"
+
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
@@ -229,7 +231,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
         sykdomshistorikk.isEmpty() ||
-            this.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
+            this.sykdomstidslinje().overlapperMed(hendelse.nySykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -440,6 +442,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
+            søknad.nyTrimLeft(vedtaksperiode.periode().endInclusive)
             søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn.")
         }
 
@@ -450,6 +453,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
+            inntektsmelding.nyTrimLeft(vedtaksperiode.periode().endInclusive)
             inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn.")
         }
 
@@ -648,11 +652,10 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (søknad.sykdomstidslinje().førsteDag() < vedtaksperiode.sykdomshistorikk.sykdomstidslinje()
-                    .førsteDag()
-            ) {
+            if (søknad.nySykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje())) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
                 søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
+                søknad.nyTrimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")
@@ -975,13 +978,12 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
-                sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
                 arbeidsgiverperiodeGjennomført = ytelser.utbetalingshistorikk()
                     .arbeidsgiverperiodeGjennomført(vedtaksperiode.førsteDag()),
                 arbeidsgiverRegler = NormalArbeidstaker
-            ).result()
+            ).result(arbeidsgiver.sykdomstidslinje())
         }
     }
 
