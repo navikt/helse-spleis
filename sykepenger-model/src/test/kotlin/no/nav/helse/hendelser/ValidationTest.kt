@@ -65,16 +65,10 @@ internal class ValidationTest {
 
     private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(aktivitetslogg) {
 
-        override fun aktørId(): String {
-            fail("Uventet kall")
-        }
+        override fun aktørId() = "aktørId"
 
-        override fun fødselsnummer(): String {
-            fail("Uventet kall")
-        }
+        override fun fødselsnummer() = "fnr"
 
-        override fun organisasjonsnummer(): String {
-            fail("Uventet kall")
-        }
+        override fun organisasjonsnummer() = "orgnr"
     }
 }

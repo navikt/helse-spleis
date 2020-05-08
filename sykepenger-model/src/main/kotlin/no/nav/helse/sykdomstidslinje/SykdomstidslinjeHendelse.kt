@@ -35,6 +35,9 @@ abstract class SykdomstidslinjeHendelse(
     }
 
     internal fun meldingsreferanseId() = meldingsreferanseId
+    override fun kontekst() = mapOf(
+        "id" to "$meldingsreferanseId"
+    )
 
     internal abstract fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje
 

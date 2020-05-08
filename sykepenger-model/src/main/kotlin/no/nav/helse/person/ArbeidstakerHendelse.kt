@@ -14,10 +14,15 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return this.javaClass.canonicalName.split('.').last().let {
-            SpesifikkKontekst(it)
+            SpesifikkKontekst(it, mapOf(
+                "aktørId" to aktørId(),
+                "fødselsnummer" to fødselsnummer(),
+                "organisasjonsnummer" to organisasjonsnummer()
+            ) + kontekst())
         }
     }
 
+    protected open fun kontekst(): Map<String, String> = emptyMap()
     internal open fun melding(klassName: String) = klassName
 
     fun toLogString() = aktivitetslogg.toString()
