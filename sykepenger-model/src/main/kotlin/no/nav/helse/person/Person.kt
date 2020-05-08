@@ -154,7 +154,7 @@ class Person private constructor(
         hendelse.organisasjonsnummer().let { orgnr ->
             arbeidsgivere.finnEllerOpprett(orgnr) {
                 hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
-                arbeidsgiver(orgnr)
+                Arbeidsgiver(this, orgnr)
             }
         }
 
@@ -172,6 +172,4 @@ class Person private constructor(
             newValue
         }
 
-    private fun arbeidsgiver(organisasjonsnummer: String) =
-        Arbeidsgiver(this, organisasjonsnummer)
 }
