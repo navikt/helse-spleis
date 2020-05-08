@@ -58,7 +58,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             }
             it.personLogg.behov().last().also {
                 assertEquals(Behovtype.Utbetaling, it.type)
-                assertEquals("", it.detaljer()["maksdato"])
+                assertEquals(null, it.detaljer()["maksdato"])
                 assertEquals("Ola Nordmann", it.detaljer()["saksbehandler"])
                 assertEquals("SPREF", it.detaljer()["fagområde"])
             }

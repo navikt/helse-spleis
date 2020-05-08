@@ -293,11 +293,10 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg.behov(
                         Behovtype.Utbetaling,
                         "Trenger å sende utbetaling til Oppdrag",
-                        mutableMapOf(
-                            "maksdato" to (maksdato?.toString() ?: ""),
-                            "saksbehandler" to saksbehandler
-                        ) + OppdragReflect(oppdrag).toMap()
-                    )
+                        OppdragReflect(oppdrag).toMap().apply {
+                            put("saksbehandler", saksbehandler)
+                            maksdato?.let { put("maksdato", maksdato.toString()) }
+                        })
                 }
             }
 
