@@ -97,7 +97,7 @@ internal class OverlapMergeTest {
         assertEquals(1, tidslinje.filterIsInstance<NySykedag>().size)
 
         inspektør.also {
-            assertEquals(Grad.sykdom(50), it.grader[1.januar])
+            assertEquals(Grad.sykdomsgrad(50), it.grader[1.januar])
         }
     }
 

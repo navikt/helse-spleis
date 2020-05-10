@@ -8,11 +8,11 @@ internal class Grad private constructor(private val prosentdel: Prosentdel) :
 {
 
     companion object {
-        internal val GRENSE = sykdom(20.0)
+        internal val GRENSE = sykdomsgrad(20.0)
 
-        internal fun sykdom(prosentdel: Number) = Grad(Prosentdel(prosentdel))
+        internal fun sykdomsgrad(prosentdel: Number) = Grad(Prosentdel(prosentdel))
 
-        internal fun arbeidshelse(prosentdel: Number) = !sykdom(prosentdel)
+        internal fun arbeidshelse(prosentdel: Number) = Grad(!Prosentdel(prosentdel))
     }
 
     override fun equals(other: Any?) = other is Grad && this.equals(other)
@@ -20,8 +20,6 @@ internal class Grad private constructor(private val prosentdel: Prosentdel) :
     private fun equals(other: Grad) = this.prosentdel == other.prosentdel
 
     override fun hashCode() = prosentdel.hashCode()
-
-    internal operator fun not() = Grad(!prosentdel)
 
     override fun compareTo(other: Grad) = this.prosentdel.compareTo(other.prosentdel)
 
