@@ -1,7 +1,4 @@
-package no.nav.helse.sykdomstidslinje
-
-import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.vektlagtGjennomsnitt
+package no.nav.helse.økonomi
 
 internal class Grad private constructor(private val prosentdel: Prosentdel) :
     Comparable<Grad>

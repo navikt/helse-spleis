@@ -1,7 +1,5 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.sykdomstidslinje.Grad
-import no.nav.helse.sykdomstidslinje.samletGrad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

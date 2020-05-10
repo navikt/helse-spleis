@@ -3,9 +3,13 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Grad
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.LocalDate

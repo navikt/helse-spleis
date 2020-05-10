@@ -2,11 +2,11 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.NySykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Grad
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.økonomi.Grad
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

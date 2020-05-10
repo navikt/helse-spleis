@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Grad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

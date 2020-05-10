@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.økonomi.Grad
 import java.time.LocalDate
 
 internal typealias BesteStrategy = (NyDag, NyDag) -> NyDag
