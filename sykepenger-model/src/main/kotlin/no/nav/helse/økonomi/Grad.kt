@@ -10,6 +10,10 @@ internal class Grad private constructor(private val prosentdel: Prosentdel) :
         internal fun sykdomsgrad(prosentdel: Number) = Grad(Prosentdel(prosentdel))
 
         internal fun arbeidshelse(prosentdel: Number) = Grad(!Prosentdel(prosentdel))
+
+        internal fun vektlagtGjennomsnitt(beløp: List<Pair<Grad, Double>>): Grad {
+            return Grad(Prosentdel.vektlagtGjennomsnitt(beløp.map { it.first.prosentdel to it.second }))
+        }
     }
 
     override fun equals(other: Any?) = other is Grad && this.equals(other)
@@ -22,17 +26,5 @@ internal class Grad private constructor(private val prosentdel: Prosentdel) :
 
     override fun toString() = prosentdel.toString()
 
-    internal fun toPercentage() = prosentdel.toDoublePercentage()
-
-    internal fun lønn(beløp: Number) = LønnGrad(prosentdel, beløp.toDouble())
-
-    internal class LønnGrad(private val prosentdel: Prosentdel, private val beløp: Double) {
-        companion object {
-            internal fun samletGrad(lønnGrader: List<LønnGrad>) =
-                Grad(lønnGrader.map { it.prosentdel to it.beløp }.vektlagtGjennomsnitt())
-        }
-
-    }
+    internal fun toPercentage() = prosentdel.toDouble()
 }
-
-internal fun List<Grad.LønnGrad>.samletGrad() = Grad.LønnGrad.samletGrad(this)

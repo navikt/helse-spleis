@@ -8,16 +8,16 @@ internal class SamletSykdomsgradTest {
     @Test internal fun singelsykegrad() {
         assertEquals(
             Grad.sykdomsgrad(75), listOf(
-                Grad.sykdomsgrad(75).lønn(1200)).samletGrad())
+                Økonomi.lønn(1200, Grad.sykdomsgrad(75))).samletGrad())
     }
 
     @Test internal fun `to arbeidsgivere`() {
         assertEquals(
             Grad.sykdomsgrad(38),
             listOf(
-                Grad.sykdomsgrad(50).lønn(1200), Grad.sykdomsgrad(
-                    20
-                ).lønn(800)).samletGrad()
+                Økonomi.lønn(1200, Grad.sykdomsgrad(50)),
+                Økonomi.lønn(800, Grad.sykdomsgrad(20))
+            ).samletGrad()
         )
     }
 
@@ -25,9 +25,9 @@ internal class SamletSykdomsgradTest {
         assertEquals(
             Grad.sykdomsgrad(49),
             listOf(
-                Grad.sykdomsgrad(50).lønn(1200),
-                Grad.sykdomsgrad(20).lønn(800),
-                Grad.sykdomsgrad(60).lønn(2000)
+                Økonomi.lønn(1200, Grad.sykdomsgrad(50)),
+                Økonomi.lønn(800, Grad.sykdomsgrad(20)),
+                Økonomi.lønn(2000, Grad.sykdomsgrad(60))
             ).samletGrad()
         )
     }

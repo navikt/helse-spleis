@@ -39,9 +39,7 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
         return "${(brøkdel * 100).roundToInt()}%"
     }
 
-    internal fun toDoublePercentage() = brøkdel * 100.0
+    internal fun toDouble() = brøkdel * 100.0
 
-    internal fun toIntPercentage() = toDoublePercentage().roundToInt()
+    internal fun roundToInt() = toDouble().roundToInt()
 }
-
-internal fun List<Pair<Prosentdel, Double>>.vektlagtGjennomsnitt() = Prosentdel.vektlagtGjennomsnitt(this)
