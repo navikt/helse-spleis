@@ -1,52 +1,40 @@
 package no.nav.helse.sykdomstidslinje
 
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.vektlagtGjennomsnitt
 
-internal class Grad private constructor(private val brøkdel: Double): Comparable<Grad> {
-
-    init {
-        require(brøkdel in 0.0..100.0) { "Må være prosent mellom 0 og 100" }
-    }
+internal class Grad private constructor(private val prosentdel: Prosentdel) :
+    Comparable<Grad>
+{
 
     companion object {
-        private const val EPSILON = 0.000001
-        private const val SIKKER_BRØK = 1.0
         internal val GRENSE = sykdom(20.0)
 
-        internal fun sykdom(prosentdel: Number) = Grad(prosentdel.toDouble() / 100.0)
+        internal fun sykdom(prosentdel: Number) = Grad(Prosentdel(prosentdel))
 
         internal fun arbeidshelse(prosentdel: Number) = !sykdom(prosentdel)
     }
 
     override fun equals(other: Any?) = other is Grad && this.equals(other)
 
-    private fun equals(other: Grad) =
-        (this.brøkdel - other.brøkdel).absoluteValue < EPSILON
+    private fun equals(other: Grad) = this.prosentdel == other.prosentdel
 
-    override fun hashCode() = (brøkdel / EPSILON).roundToLong().hashCode()
+    override fun hashCode() = prosentdel.hashCode()
 
-    internal operator fun not() = Grad(SIKKER_BRØK - brøkdel)
+    internal operator fun not() = Grad(!prosentdel)
 
-    override fun compareTo(other: Grad) =
-        if (this.equals(other)) 0
-        else this.brøkdel.compareTo(other.brøkdel)
+    override fun compareTo(other: Grad) = this.prosentdel.compareTo(other.prosentdel)
 
-    override fun toString(): String {
-        return "${(brøkdel * 100).roundToInt()}%"
-    }
+    override fun toString() = prosentdel.toString()
 
-    internal fun toPercentage() = brøkdel * 100
+    internal fun toPercentage() = prosentdel.toDoublePercentage()
 
-    internal fun lønn(beløp: Number) = LønnGrad(this.brøkdel, beløp.toDouble())
+    internal fun lønn(beløp: Number) = LønnGrad(prosentdel, beløp.toDouble())
 
-    internal class LønnGrad(private val brøkdel: Double, private val beløp: Double) {
+    internal class LønnGrad(private val prosentdel: Prosentdel, private val beløp: Double) {
         companion object {
-            internal fun samletGrad(lønnGrader: List<LønnGrad>): Grad {
-                val total = lønnGrader.sumByDouble { it.beløp }
-                return Grad(lønnGrader.sumByDouble { it.brøkdel * it.beløp / total } )
-            }
+            internal fun samletGrad(lønnGrader: List<LønnGrad>) =
+                Grad(lønnGrader.map { it.prosentdel to it.beløp }.vektlagtGjennomsnitt())
         }
 
     }

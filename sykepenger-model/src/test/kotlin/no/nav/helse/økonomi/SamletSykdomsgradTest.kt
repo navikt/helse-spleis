@@ -1,18 +1,25 @@
-package no.nav.helse.sykdomstidslinje
+package no.nav.helse.økonomi
 
+import no.nav.helse.sykdomstidslinje.Grad
+import no.nav.helse.sykdomstidslinje.samletGrad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SamletSykdomsgradTest {
 
     @Test internal fun singelsykegrad() {
-        assertEquals(Grad.sykdom(75), listOf(Grad.sykdom(75).lønn(1200)).samletGrad())
+        assertEquals(
+            Grad.sykdom(75), listOf(
+                Grad.sykdom(75).lønn(1200)).samletGrad())
     }
 
     @Test internal fun `to arbeidsgivere`() {
         assertEquals(
             Grad.sykdom(38),
-            listOf(Grad.sykdom(50).lønn(1200), Grad.sykdom(20).lønn(800)).samletGrad()
+            listOf(
+                Grad.sykdom(50).lønn(1200), Grad.sykdom(
+                    20
+                ).lønn(800)).samletGrad()
         )
     }
 
