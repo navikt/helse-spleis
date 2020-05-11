@@ -9,7 +9,7 @@ import no.nav.helse.testhelpers.TestEvent.Companion.søknad
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class CsvDagturneringTest {
+internal class DagturneringTest {
 
     @Test
     internal fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {

@@ -2,18 +2,14 @@ package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.Dag
 
-internal interface Dagturnering {
-    fun beste(venstre: Dag, høyre: Dag): Dag
-}
+internal val søknadDagturnering = Dagturnering("/dagturneringSøknad.csv")
+internal val dagturnering = Dagturnering("/dagturnering.csv")
 
-internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
-internal val dagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
-
-private class CsvDagturnering(private val source: String) : Dagturnering {
+internal class Dagturnering(private val source: String) {
 
     private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
 
-    override fun beste(venstre: Dag, høyre: Dag): Dag {
+    fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = Turneringsnøkkel.fraDag(venstre)
         val rightKey = Turneringsnøkkel.fraDag(høyre)
 

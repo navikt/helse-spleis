@@ -112,7 +112,7 @@ internal class OverlapMergeTest {
         }
     }
 
-    private val testBeste = { venstre: Dag, høyre: Dag ->
+    private val testBeste: BesteStrategy = { venstre: Dag, høyre: Dag ->
         when {
             venstre is UkjentDag -> høyre
             høyre is UkjentDag -> venstre
