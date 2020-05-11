@@ -210,6 +210,10 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvspregosys",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
