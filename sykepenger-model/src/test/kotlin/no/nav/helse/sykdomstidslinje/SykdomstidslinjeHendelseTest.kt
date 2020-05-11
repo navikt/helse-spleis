@@ -30,8 +30,6 @@ internal class SykdomstidslinjeHendelseTest {
         override fun aktørId() = AKTØR
         override fun fødselsnummer() = FØDSELSNUMMER
         override fun organisasjonsnummer() = ORGNR
-        override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = TODO("not implemented")
-        override fun sykdomstidslinje(): Sykdomstidslinje = TODO("not implemented")
         override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje = TODO("not implemented")
         override fun nySykdomstidslinje(): NySykdomstidslinje = TODO("not implemented")
         override fun valider(periode: Periode): Aktivitetslogg = TODO("not implemented")

@@ -9,8 +9,6 @@ import no.nav.helse.sykdomstidslinje.NyDag.Companion.default
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime

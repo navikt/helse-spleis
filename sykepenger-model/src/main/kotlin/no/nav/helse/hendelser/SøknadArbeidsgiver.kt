@@ -4,14 +4,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.DagFactory
-import no.nav.helse.sykdomstidslinje.dag.ForeldetSykedag
-import no.nav.helse.sykdomstidslinje.dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.dag.Sykedag
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.util.*
 
@@ -29,29 +23,12 @@ class SøknadArbeidsgiver constructor(
     private var nyForrigeTom: LocalDate? = null
     private val nySykdomstidslinje: NySykdomstidslinje
 
-    private companion object {
-        private const val tidslinjegrense = 16L
-    }
-
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
         fom = perioder.minBy { it.fom }?.fom ?: severe("Søknad mangler fradato")
         tom = perioder.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato")
 
         nySykdomstidslinje = perioder.map { it.nySykdomstidslinje(kilde) }.merge(noOverlap)
-    }
-
-    override fun sykdomstidslinje() = perioder
-        .map { it.sykdomstidslinje(fom) }
-        .filter { it.førsteDag().isAfter(fom.minusDays(tidslinjegrense)) }
-        .merge(søknadDagturnering)
-
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
-            .also { trimLeft(tom) }
-            ?: severe("Ugyldig subsetting av tidslinjen til søknad")
     }
 
     override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
@@ -100,15 +77,6 @@ class SøknadArbeidsgiver constructor(
             if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
         }
 
-        internal fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-            Sykdomstidslinje.sykedager(fom, tom, avskjæringsdato, grad, SøknadDagFactory)
-
         internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
-    }
-
-    internal object SøknadDagFactory : DagFactory {
-        override fun foreldetSykedag(dato: LocalDate, grad: Double): ForeldetSykedag = ForeldetSykedag(dato, grad)
-        override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Søknad = Sykedag.Søknad(dato, grad)
-        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Søknad = SykHelgedag.Søknad(dato, grad)
     }
 }

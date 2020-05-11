@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.NySykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Grad
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 internal typealias BesteStrategy = (NyDag, NyDag) -> NyDag
@@ -193,3 +194,13 @@ internal sealed class NyDag(
 
 }
 
+private val helgedager = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
+
+internal fun LocalDate.harTilstøtende(other: LocalDate) =
+    when (this.dayOfWeek) {
+        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY -> this.plusDays(1) == other
+        DayOfWeek.FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
+        DayOfWeek.SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+        else -> false
+    }

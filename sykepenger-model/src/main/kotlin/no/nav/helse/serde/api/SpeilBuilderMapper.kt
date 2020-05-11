@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
-import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime

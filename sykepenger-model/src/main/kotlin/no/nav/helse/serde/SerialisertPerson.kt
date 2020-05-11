@@ -15,16 +15,17 @@ import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.NySykdomstidslinjeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.NyDagData
-import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.mapping.NyJsonDagType
 import no.nav.helse.serde.mapping.NyJsonDagType.*
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.*
+import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.dag.*
+import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -40,8 +41,6 @@ internal val serdeObjectMapper = jacksonObjectMapper()
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-private typealias SykdomstidslinjeData = List<ArbeidsgiverData.VedtaksperiodeData.DagData>
-
 class SerialisertPerson(val json: String) {
     internal companion object {
         private val migrations = listOf(
@@ -51,7 +50,9 @@ class SerialisertPerson(val json: String) {
             V4LeggTilNySykdomstidslinje(),
             V5BegrensGradTilMellom0Og100(),
             V6LeggTilNySykdomstidslinje(),
-            V7DagsatsSomHeltall()
+            V7DagsatsSomHeltall(),
+            V8LeggerTilLønnIUtbetalingslinjer(),
+            V9FjernerGamleSykdomstidslinjer()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -220,39 +221,9 @@ class SerialisertPerson(val json: String) {
         )
     }
 
-    private fun parseSykdomstidslinje(
-        tidslinjeData: SykdomstidslinjeData
-    ): Sykdomstidslinje = Sykdomstidslinje(tidslinjeData.map(::parseDag))
-
     private fun parseNySykdomstidslinje(
         tidslinjeData: NySykdomstidslinjeData
     ): NySykdomstidslinje = createSykdomstidslinje(tidslinjeData)
-
-    private fun parseDag(
-        data: ArbeidsgiverData.VedtaksperiodeData.DagData
-    ): Dag {
-        return when (data.type) {
-            JsonDagType.ARBEIDSDAG_INNTEKTSMELDING -> Arbeidsdag.Inntektsmelding(data.dagen)
-            JsonDagType.ARBEIDSDAG_SØKNAD -> Arbeidsdag.Søknad(data.dagen)
-            JsonDagType.EGENMELDINGSDAG_INNTEKTSMELDING -> Egenmeldingsdag.Inntektsmelding(data.dagen)
-            JsonDagType.EGENMELDINGSDAG_SØKNAD -> Egenmeldingsdag.Søknad(data.dagen)
-            JsonDagType.FERIEDAG_INNTEKTSMELDING -> Feriedag.Inntektsmelding(data.dagen)
-            JsonDagType.FERIEDAG_SØKNAD -> Feriedag.Søknad(data.dagen)
-            JsonDagType.FRISK_HELGEDAG_INNTEKTSMELDING -> FriskHelgedag.Inntektsmelding(data.dagen)
-            JsonDagType.FRISK_HELGEDAG_SØKNAD -> FriskHelgedag.Søknad(data.dagen)
-            JsonDagType.IMPLISITT_DAG -> ImplisittDag(data.dagen)
-            JsonDagType.FORELDET_SYKEDAG -> ForeldetSykedag(data.dagen, data.grad)
-            JsonDagType.PERMISJONSDAG_SØKNAD -> Permisjonsdag.Søknad(data.dagen)
-            JsonDagType.PERMISJONSDAG_AAREG -> Permisjonsdag.Aareg(data.dagen)
-            JsonDagType.STUDIEDAG -> Studiedag(data.dagen)
-            JsonDagType.SYKEDAG_SYKMELDING -> Sykedag.Sykmelding(data.dagen, data.grad)
-            JsonDagType.SYKEDAG_SØKNAD -> Sykedag.Søknad(data.dagen, data.grad)
-            JsonDagType.SYK_HELGEDAG_SYKMELDING -> SykHelgedag.Sykmelding(data.dagen, data.grad)
-            JsonDagType.SYK_HELGEDAG_SØKNAD -> SykHelgedag.Søknad(data.dagen, data.grad)
-            JsonDagType.UBESTEMTDAG -> Ubestemtdag(data.dagen)
-            JsonDagType.UTENLANDSDAG -> Utenlandsdag(data.dagen)
-        }
-    }
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
         TilstandType.AVVENTER_HISTORIKK -> AvventerHistorikk
@@ -361,8 +332,6 @@ class SerialisertPerson(val json: String) {
         return createSykdomshistorikk(data.map { sykdomshistorikkData ->
             createSykdomshistorikkElement(
                 timestamp = sykdomshistorikkData.tidsstempel,
-                hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
-                beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje),
                 hendelseId = sykdomshistorikkData.hendelseId,
                 nyHendelseSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyHendelseSykdomstidslinje),
                 nyBeregnetSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyBeregnetSykdomstidslinje)
@@ -466,12 +435,6 @@ internal data class PersonData(
             val personFagsystemId: String?,
             val arbeidsgiverFagsystemId: String?
         ) {
-            data class DagData(
-                val dagen: LocalDate,
-                val type: JsonDagType,
-                val grad: Double
-            )
-
             data class NyDagData(
                 val dato: LocalDate,
                 val type: NyJsonDagType,
@@ -486,8 +449,6 @@ internal data class PersonData(
             data class SykdomshistorikkData(
                 val tidsstempel: LocalDateTime,
                 val hendelseId: UUID,
-                val hendelseSykdomstidslinje: SykdomstidslinjeData,
-                val beregnetSykdomstidslinje: SykdomstidslinjeData,
                 val nyHendelseSykdomstidslinje: NySykdomstidslinjeData,
                 val nyBeregnetSykdomstidslinje: NySykdomstidslinjeData
             )

@@ -28,8 +28,6 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
-        assertEquals(16, sykmelding.sykdomstidslinje().length())
-
         assertEquals(8 + 3, sykmelding.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
         assertEquals(4, sykmelding.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
         assertEquals(1, sykmelding.nySykdomstidslinje().filterIsInstance<NyUkjentDag>().size)

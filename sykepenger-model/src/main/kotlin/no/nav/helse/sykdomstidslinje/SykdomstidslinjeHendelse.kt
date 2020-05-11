@@ -39,10 +39,6 @@ abstract class SykdomstidslinjeHendelse(
         "id" to "$meldingsreferanseId"
     )
 
-    internal abstract fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje
-
-    internal abstract fun sykdomstidslinje(): Sykdomstidslinje
-
     internal abstract fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje
 
     internal abstract fun nySykdomstidslinje(): NySykdomstidslinje
@@ -51,6 +47,5 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 
-    internal open fun padLeft(dato: LocalDate) {}
     internal open fun nyPadLeft(dato: LocalDate) {}
 }

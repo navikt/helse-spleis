@@ -2,11 +2,10 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.NySykdomstidslinjeVisitor
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Grad
 import java.math.MathContext
@@ -22,7 +21,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val inntekthistorikk: Inntekthistorikk,
     arbeidsgiverperiodeGjennomført: Boolean = false,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : SykdomstidslinjeVisitor, NySykdomstidslinjeVisitor {
+) : NySykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
     private var sykedagerIArbeidsgiverperiode = if (arbeidsgiverperiodeGjennomført) 16 else 0

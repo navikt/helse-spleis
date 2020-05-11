@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.OppdragVisitor
-import no.nav.helse.sykdomstidslinje.dag.erHelg
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*

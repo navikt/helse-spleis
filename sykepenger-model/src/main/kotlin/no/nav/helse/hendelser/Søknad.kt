@@ -3,12 +3,9 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.nySøknadDagturnering
-import no.nav.helse.tournament.søknadDagturnering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -26,7 +23,6 @@ class Søknad constructor(
 
     private val sykdomsperiode: Periode
     private val nySykdomstidslinje: NySykdomstidslinje
-    private var forrigeTom: LocalDate? = null
     private var nyForrigeTom: LocalDate? = null
 
     private companion object {
@@ -43,19 +39,6 @@ class Søknad constructor(
             .merge(nySøknadDagturnering::beste)
     }
 
-    override fun sykdomstidslinje() = perioder
-        .map { it.sykdomstidslinje(avskjæringsdato()) }
-        .filter { it.førsteDag().isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) }
-        .merge(søknadDagturnering)
-
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return sykdomstidslinje().subset(forrigeTom?.plusDays(1), tom)
-            .also { trimLeft(tom) }
-            ?: severe("Ugyldig subsetting av tidslinjen til søknad")
-    }
-
     override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
         require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
@@ -65,8 +48,6 @@ class Søknad constructor(
     }
 
     override fun nySykdomstidslinje() = nySykdomstidslinje
-
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
     internal fun nyTrimLeft(dato: LocalDate) { nyForrigeTom = dato }
 
@@ -111,7 +92,6 @@ class Søknad constructor(
                     }
         }
 
-        internal abstract fun sykdomstidslinje(avskjæringsdato: LocalDate): Sykdomstidslinje
         internal open fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde): NySykdomstidslinje =
             NySykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Dagtype støttes ikke av systemet")
 
@@ -123,9 +103,6 @@ class Søknad constructor(
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.ferie(periode, SøknadDagFactory)
-
             override fun valider(søknad: Søknad) =
                 valider(søknad, "Søknaden inneholder Feriedager utenfor sykdomsvindu")
 
@@ -149,17 +126,11 @@ class Søknad constructor(
                 if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
-            override fun sykdomstidslinje(avskjæringsdato: LocalDate) =
-                Sykdomstidslinje.sykedager(periode, avskjæringsdato, grad, SøknadDagFactory)
-
             override fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 NySykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, grad, kilde)
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.sykedager(periode, Double.NaN, SøknadDagFactory)
-
             override fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 NySykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Papirdager ikke støttet")
 
@@ -168,9 +139,6 @@ class Søknad constructor(
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.studiedager(periode, SøknadDagFactory)
-
             override fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 NySykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Utdanningsdager ikke støttet")
 
@@ -179,9 +147,6 @@ class Søknad constructor(
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.permisjonsdager(periode, SøknadDagFactory)
-
             override fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 NySykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Permisjonsdager ikke støttet")
 
@@ -190,9 +155,6 @@ class Søknad constructor(
         }
 
         class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.egenmeldingsdager(periode, SøknadDagFactory)
-
             override fun valider(søknad: Søknad) {
                 if (periode.start < søknad.sykdomsperiode.start.minusDays(tidslinjegrense)) søknad.info("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
                 if (periode.endInclusive > søknad.sykdomsperiode.endInclusive) søknad.warn("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden")
@@ -203,9 +165,6 @@ class Søknad constructor(
         }
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.ikkeSykedager(periode, SøknadDagFactory)
-
             override fun valider(søknad: Søknad) =
                 valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
 
@@ -214,9 +173,6 @@ class Søknad constructor(
         }
 
         class Utlandsopphold(fom: LocalDate, tom: LocalDate): Søknadsperiode(fom, tom) {
-            override fun sykdomstidslinje(ignore: LocalDate) =
-                Sykdomstidslinje.utenlandsdager(periode, SøknadDagFactory)
-
             override fun nySykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 NySykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Utenlandsdager ikke støttet")
 
@@ -224,19 +180,5 @@ class Søknad constructor(
                 søknad.error("Søknaden inneholder utenlandsopphold")
             }
         }
-    }
-
-    internal object SøknadDagFactory : DagFactory {
-        override fun arbeidsdag(dato: LocalDate): Arbeidsdag = Arbeidsdag.Søknad(dato)
-        override fun egenmeldingsdag(dato: LocalDate): Egenmeldingsdag = Egenmeldingsdag.Søknad(dato)
-        override fun feriedag(dato: LocalDate): Feriedag = Feriedag.Søknad(dato)
-        override fun permisjonsdag(dato: LocalDate): Permisjonsdag = Permisjonsdag.Søknad(dato)
-        override fun studiedag(dato: LocalDate): Studiedag = Studiedag(dato)
-        override fun sykedag(dato: LocalDate, grad: Double): Sykedag.Søknad = Sykedag.Søknad(dato, grad)
-        override fun foreldetSykedag(dato: LocalDate, grad: Double): ForeldetSykedag = ForeldetSykedag(dato, grad)
-        override fun sykHelgedag(dato: LocalDate, grad: Double): SykHelgedag.Søknad = SykHelgedag.Søknad(dato, grad)
-        override fun friskHelgedag(dato: LocalDate): FriskHelgedag = FriskHelgedag.Søknad(dato)
-        override fun utenlandsdag(dato: LocalDate): Utenlandsdag = Utenlandsdag(dato)
-
     }
 }

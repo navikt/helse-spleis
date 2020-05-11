@@ -4,8 +4,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.dag.erHelg
-import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
+import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

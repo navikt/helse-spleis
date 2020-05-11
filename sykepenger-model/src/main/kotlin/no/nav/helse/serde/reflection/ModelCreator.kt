@@ -6,7 +6,6 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.NySykdomstidslinjeData
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -137,14 +136,12 @@ internal fun createSykdomstidslinje(
 
 internal fun createSykdomshistorikkElement(
     timestamp: LocalDateTime,
-    hendelseSykdomstidslinje: Sykdomstidslinje,
-    beregnetSykdomstidslinje: Sykdomstidslinje,
     nyHendelseSykdomstidslinje: NySykdomstidslinje,
     nyBeregnetSykdomstidslinje: NySykdomstidslinje,
     hendelseId: UUID
 ) = Sykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(hendelseId, timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje, nyHendelseSykdomstidslinje, nyBeregnetSykdomstidslinje)
+    .call(hendelseId, timestamp, nyHendelseSykdomstidslinje, nyBeregnetSykdomstidslinje)
 
 internal fun createUtbetalingstidslinje(
     utbetalingsdager: MutableList<Utbetalingstidslinje.Utbetalingsdag>

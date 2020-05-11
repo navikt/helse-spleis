@@ -17,7 +17,7 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.dag.harTilstøtende
+import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -441,7 +441,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            søknad.trimLeft(vedtaksperiode.periode().endInclusive)
             søknad.nyTrimLeft(vedtaksperiode.periode().endInclusive)
             søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn.")
         }
@@ -452,7 +451,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
             inntektsmelding.nyTrimLeft(vedtaksperiode.periode().endInclusive)
             inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn.")
         }
@@ -654,7 +652,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.nySykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje())) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
-                søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
                 søknad.nyTrimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)

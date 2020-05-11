@@ -7,9 +7,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.sykdomstidslinje.dag.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -71,17 +69,13 @@ internal interface UtbetalingsdagVisitor {
     fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
-internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor, NySykdomstidslinjeVisitor {
+internal interface SykdomshistorikkVisitor : NySykdomstidslinjeVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
     fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
         tidsstempel: LocalDateTime
     ) {}
-    fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
     fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
     fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
@@ -92,30 +86,6 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor, NySykdomst
         tidsstempel: LocalDateTime
     ) {}
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-}
-
-internal interface SykdomstidslinjeVisitor {
-    fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun visitArbeidsdag(dag: Arbeidsdag.Inntektsmelding) {}
-    fun visitArbeidsdag(dag: Arbeidsdag.Søknad) {}
-    fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Inntektsmelding) {}
-    fun visitEgenmeldingsdag(dag: Egenmeldingsdag.Søknad) {}
-    fun visitFeriedag(dag: Feriedag.Inntektsmelding) {}
-    fun visitFeriedag(dag: Feriedag.Søknad) {}
-    fun visitFriskHelgedag(dag: FriskHelgedag.Inntektsmelding) {}
-    fun visitFriskHelgedag(dag: FriskHelgedag.Søknad) {}
-    fun visitImplisittDag(dag: ImplisittDag) {}
-    fun visitForeldetSykedag(dag: ForeldetSykedag) {}
-    fun visitPermisjonsdag(dag: Permisjonsdag.Søknad) {}
-    fun visitPermisjonsdag(dag: Permisjonsdag.Aareg) {}
-    fun visitStudiedag(dag: Studiedag) {}
-    fun visitSykHelgedag(dag: SykHelgedag.Sykmelding) {}
-    fun visitSykHelgedag(dag: SykHelgedag.Søknad) {}
-    fun visitSykedag(dag: Sykedag.Sykmelding) {}
-    fun visitSykedag(dag: Sykedag.Søknad) {}
-    fun visitUbestemt(dag: Ubestemtdag) {}
-    fun visitUtenlandsdag(dag: Utenlandsdag) {}
-    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
 }
 
 internal interface NySykdomstidslinjeVisitor {
