@@ -39,6 +39,7 @@ internal class ØkonomiTest {
             .lønn(1200, Grad.sykdomsgrad(80))
             .betalte(100.prosentdel).apply {
                 assertEquals(960, this.arbeidsgiverutbetaling())
+                assertEquals(0, this.personUtbetaling())
                 this.toMap().apply {
                         assertEquals(1200.0, this["lønn"])
                         assertEquals(960, this["arbeidsgiverutbetaling"])
@@ -51,6 +52,15 @@ internal class ØkonomiTest {
                         assertEquals(0, this["personutbetaling"])
                         assertEquals(80, this["grad"])
                     }
+            }
+    }
+
+    @Test internal fun `arbeidsgiver og person splittes tilsvarer totalt`() {
+        Økonomi
+            .lønn(999, Grad.sykdomsgrad(100))
+            .betalte(50.prosentdel).apply {
+                assertEquals(500, this.arbeidsgiverutbetaling())
+                assertEquals(499, this.personUtbetaling())
             }
     }
 }
