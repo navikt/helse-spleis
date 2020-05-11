@@ -51,8 +51,7 @@ private const val personJson = """
             ],
             "fagsystemId": "7YKKTYCKPNAJJKTTBADQXUC7ZA",
             "endringskode": "NY",
-            "sisteArbeidsgiverdag": null,
-            "sjekksum": -873851477
+            "sisteArbeidsgiverdag": null
           }
         }
       ]

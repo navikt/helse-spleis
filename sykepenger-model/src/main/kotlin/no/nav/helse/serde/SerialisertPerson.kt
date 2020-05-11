@@ -138,8 +138,7 @@ class SerialisertPerson(val json: String) {
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.fagsystemId,
             Endringskode.valueOf(data.endringskode),
-            data.sisteArbeidsgiverdag,
-            data.sjekksum
+            data.sisteArbeidsgiverdag
         )
     }
 
@@ -565,8 +564,7 @@ data class OppdragData(
     val linjer: List<UtbetalingslinjeData>,
     val fagsystemId: String,
     val endringskode: String,
-    val sisteArbeidsgiverdag: LocalDate?,
-    val sjekksum: Int
+    val sisteArbeidsgiverdag: LocalDate?
 )
 
 data class UtbetalingslinjeData(

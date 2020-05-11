@@ -7,15 +7,13 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
 import kotlin.streams.toList
-
 internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
     private val linjer: MutableList<Utbetalingslinje>,
     private var fagsystemId: String,
     private var endringskode: Endringskode,
-    private val sisteArbeidsgiverdag: LocalDate?,
-    private val sjekksum: Int
+    private val sisteArbeidsgiverdag: LocalDate?
 ): MutableList<Utbetalingslinje> by linjer {
 
     internal constructor(
@@ -30,8 +28,7 @@ internal class Oppdrag private constructor(
         linjer.toMutableList(),
         fagsystemId,
         Endringskode.NY,
-        sisteArbeidsgiverdag,
-        linjer.hashCode() * 67 + mottaker.hashCode()
+        sisteArbeidsgiverdag
     )
 
     internal fun accept(visitor: OppdragVisitor) {
@@ -41,8 +38,6 @@ internal class Oppdrag private constructor(
     }
 
     internal fun fagsystemId() = fagsystemId
-
-    internal fun sjekksum() = sjekksum
 
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
 
@@ -54,8 +49,7 @@ internal class Oppdrag private constructor(
         linjer.filter { it.erForskjell() }.toMutableList(),
         fagsystemId,
         endringskode,
-        sisteArbeidsgiverdag,
-        linjer.hashCode() * 67 + mottaker.hashCode()
+        sisteArbeidsgiverdag
     )
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
@@ -144,8 +138,7 @@ internal class Oppdrag private constructor(
         linjer.toMutableList(),
         fagsystemId,
         endringskode,
-        sisteArbeidsgiverdag,
-        sjekksum
+        sisteArbeidsgiverdag
     )
 
     private var deletion: Utbetalingslinje? = null
@@ -224,3 +217,4 @@ internal class Oppdrag private constructor(
         }
     }
 }
+
