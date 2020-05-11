@@ -27,4 +27,8 @@ internal class Grad private constructor(private val prosentdel: Prosentdel) :
     override fun toString() = prosentdel.toString()
 
     internal fun toPercentage() = prosentdel.toDouble()
+
+    internal fun roundToInt() = prosentdel.roundToInt()
+
+    internal fun ratio() = prosentdel.ratio()
 }

@@ -39,6 +39,8 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
         return "${(brøkdel * 100).roundToInt()}%"
     }
 
+    internal fun ratio() = brøkdel
+
     internal fun toDouble() = brøkdel * 100.0
 
     internal fun roundToInt() = toDouble().roundToInt()
