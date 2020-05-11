@@ -249,7 +249,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
+        assertEquals(null, actual[0].refFagsystemId)
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
@@ -267,7 +268,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual.endringskode)
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
@@ -286,7 +287,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual.endringskode)
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
@@ -305,9 +306,9 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual.endringskode)
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
-        assertEquals(original.fagsystemId, actual[0].refFagsystemId)
+        assertEquals(null, actual[0].refFagsystemId)
     }
 
     @Test internal fun `ny er tom uten sisteArbeidsgiverdag`() {
@@ -322,9 +323,9 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual.endringskode)
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
-        assertEquals(original.fagsystemId, actual[0].refFagsystemId)
+        assertEquals(null, actual[0].refFagsystemId)
     }
 
     @Test internal fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
@@ -397,7 +398,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual.endringskode)
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
-        assertEquals(original[1].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
         assertEquals(8.januar, actual[0].datoStatusFom)
         assertEquals(Endringskode.UEND, actual[1].endringskode)
         assertEquals(original[0].id, actual[1].id)
@@ -453,7 +454,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[3].id, actual[0].id)
-        assertEquals(original[3].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
 
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[3].id + 1, actual[1].id)
@@ -485,7 +486,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[3].id, actual[0].id)
-        assertEquals(original[3].refId, actual[0].refId)
+        assertEquals(null, actual[0].refId)
     }
 
     @Test

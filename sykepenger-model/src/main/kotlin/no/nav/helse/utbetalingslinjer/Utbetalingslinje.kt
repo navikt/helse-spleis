@@ -105,9 +105,9 @@ internal class Utbetalingslinje internal constructor(
             dagsats = dagsats,
             lønn = lønn,
             grad = grad,
-            refFagsystemId = refFagsystemId,
+            refFagsystemId = null,
             delytelseId = delytelseId,
-            refDelytelseId = refDelytelseId,
+            refDelytelseId = null,
             endringskode = ENDR,
             datoStatusFom = datoStatusFom
         )
