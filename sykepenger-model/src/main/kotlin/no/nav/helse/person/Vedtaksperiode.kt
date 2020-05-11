@@ -231,7 +231,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
         sykdomshistorikk.isEmpty() ||
-            this.sykdomstidslinje().overlapperMed(hendelse.nySykdomstidslinje())
+            this.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -441,7 +441,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            søknad.nyTrimLeft(vedtaksperiode.periode().endInclusive)
+            søknad.trimLeft(vedtaksperiode.periode().endInclusive)
             søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn.")
         }
 
@@ -451,7 +451,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            inntektsmelding.nyTrimLeft(vedtaksperiode.periode().endInclusive)
+            inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
             inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn.")
         }
 
@@ -650,9 +650,9 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (søknad.nySykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje())) {
+            if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje())) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
-                søknad.nyTrimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
+                søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")

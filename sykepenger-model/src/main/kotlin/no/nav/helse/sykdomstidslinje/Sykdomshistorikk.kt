@@ -15,7 +15,7 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun isEmpty() = elementer.isEmpty()
 
-    internal fun sykdomstidslinje() = Element.nySykdomstidslinje(elementer)
+    internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
         elementer.add(
@@ -35,8 +35,8 @@ internal class Sykdomshistorikk private constructor(
 
     private fun kalkulerBeregnetSykdomstidslinje(
         hendelse: SykdomstidslinjeHendelse,
-        hendelseSykdomstidslinje: NySykdomstidslinje
-    ): NySykdomstidslinje {
+        hendelseSykdomstidslinje: Sykdomstidslinje
+    ): Sykdomstidslinje {
         val tidslinje = if (elementer.isEmpty())
             hendelseSykdomstidslinje
         else
@@ -47,39 +47,39 @@ internal class Sykdomshistorikk private constructor(
     internal class Element private constructor(
         private val hendelseId: UUID,
         private val tidsstempel: LocalDateTime,
-        private val nyHendelseSykdomstidslinje: NySykdomstidslinje,
-        private val nyBeregnetSykdomstidslinje: NySykdomstidslinje
+        private val hendelseSykdomstidslinje: Sykdomstidslinje,
+        private val beregnetSykdomstidslinje: Sykdomstidslinje
     ) {
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
-            visitor.preVisitHendelseSykdomstidslinje(nyHendelseSykdomstidslinje)
-            nyHendelseSykdomstidslinje.accept(visitor)
-            visitor.postVisitHendelseSykdomstidslinje(nyHendelseSykdomstidslinje)
-            visitor.preVisitBeregnetSykdomstidslinje(nyBeregnetSykdomstidslinje)
-            nyBeregnetSykdomstidslinje.accept(visitor)
-            visitor.postVisitBeregnetSykdomstidslinje(nyBeregnetSykdomstidslinje)
+            visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
+            hendelseSykdomstidslinje.accept(visitor)
+            visitor.postVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
+            visitor.preVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
+            beregnetSykdomstidslinje.accept(visitor)
+            visitor.postVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
 
             visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
         }
 
         companion object {
 
-            fun nySykdomstidslinje(elementer: List<Element>) = elementer.first().nyBeregnetSykdomstidslinje
+            fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
             fun opprett(
                 historikk: Sykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
                 tom: LocalDate
             ): Element {
-                if (!historikk.isEmpty()) hendelse.nyPadLeft(historikk.sykdomstidslinje().førsteDag())
-                val nyHendelseSykdomstidslinje = hendelse.nySykdomstidslinje(tom)
+                if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
-                    nyHendelseSykdomstidslinje = nyHendelseSykdomstidslinje,
-                    nyBeregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                    beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
                         hendelse,
-                        nyHendelseSykdomstidslinje
+                        hendelseSykdomstidslinje
                     )
                 )
             }

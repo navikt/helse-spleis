@@ -5,7 +5,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
@@ -26,7 +26,7 @@ class Inntektsmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
-    private var nyForrigeTom: LocalDate? = null
+    private var forrigeTom: LocalDate? = null
 
     private val beste = { venstre: NyDag, høyre: NyDag ->
         when {
@@ -45,7 +45,7 @@ class Inntektsmelding(
         }
     }
 
-    private var nySykdomstidslinje: NySykdomstidslinje = (
+    private var sykdomstidslinje: Sykdomstidslinje = (
         arbeidsgivertidslinje(arbeidsgiverperioder)
             + ferietidslinje(ferieperioder)
             + nyFørsteFraværsdagtidslinje(førsteFraværsdag)
@@ -55,40 +55,40 @@ class Inntektsmelding(
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
 
-    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<NySykdomstidslinje> {
+    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<Sykdomstidslinje> {
         val arbeidsgiverdager = arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste)
 
-        return listOfNotNull(arbeidsgiverdager, NySykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde))
+        return listOfNotNull(arbeidsgiverdager, Sykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde))
     }
 
-    private fun ferietidslinje(ferieperioder: List<Periode>): List<NySykdomstidslinje> =
+    private fun ferietidslinje(ferieperioder: List<Periode>): List<Sykdomstidslinje> =
         ferieperioder.map { it.asFerietidslinje() }
 
-    private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<NySykdomstidslinje> =
-        listOf(førsteFraværsdag?.let { NySykdomstidslinje.arbeidsgiverdager(it, it, kilde = kilde) } ?: NySykdomstidslinje())
+    private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<Sykdomstidslinje> =
+        listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, kilde = kilde) } ?: Sykdomstidslinje())
 
-    private fun Periode.asArbeidsgivertidslinje() = NySykdomstidslinje.arbeidsgiverdager(start, endInclusive, kilde = kilde)
-    private fun Periode.asFerietidslinje() = NySykdomstidslinje.feriedager(start, endInclusive, kilde)
+    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, kilde = kilde)
+    private fun Periode.asFerietidslinje() = Sykdomstidslinje.feriedager(start, endInclusive, kilde)
 
-    override fun nySykdomstidslinje() = nySykdomstidslinje
+    override fun sykdomstidslinje() = sykdomstidslinje
 
-    internal fun nyTrimLeft(dato: LocalDate) { nyForrigeTom = dato }
+    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
-    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
-        require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
+        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return (nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom))
-            .also { nyTrimLeft(tom) }
+        return (forrigeTom?.let { sykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje.kutt(tom))
+            .also { trimLeft(tom) }
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen") }
     }
 
     // Pad days prior to employer-paid days with assumed work days
-    override fun nyPadLeft(dato: LocalDate) {
+    override fun padLeft(dato: LocalDate) {
         if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
-        if (dato >= nySykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
-        nySykdomstidslinje += NySykdomstidslinje.Companion.arbeidsdager(
+        if (dato >= sykdomstidslinje.førsteDag()) return  // No need to pad if sykdomstidslinje early enough
+        sykdomstidslinje += Sykdomstidslinje.arbeidsdager(
             dato,
-            nySykdomstidslinje.førsteDag().minusDays(1),
+            sykdomstidslinje.førsteDag().minusDays(1),
             this.kilde
         )
     }

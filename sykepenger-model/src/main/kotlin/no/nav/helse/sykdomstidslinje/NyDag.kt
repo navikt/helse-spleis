@@ -1,6 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Grad
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -37,14 +37,14 @@ internal sealed class NyDag(
 
     override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
 
-    internal open fun accept(visitor: NySykdomstidslinjeVisitor) {}
+    internal open fun accept(visitor: SykdomstidslinjeVisitor) {}
 
     internal class NyUkjentDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -53,7 +53,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -69,7 +69,7 @@ internal sealed class NyDag(
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) : this(dato, Grad.sykdomsgrad(grad), kilde)
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, grad, kilde)
     }
 
@@ -78,7 +78,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -87,7 +87,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -103,7 +103,7 @@ internal sealed class NyDag(
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) : this(dato, Grad.sykdomsgrad(grad), kilde)
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, grad, kilde)
     }
 
@@ -119,7 +119,7 @@ internal sealed class NyDag(
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) : this(dato, Grad.sykdomsgrad(grad), kilde)
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, grad, kilde)
     }
 
@@ -135,7 +135,7 @@ internal sealed class NyDag(
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) : this(dato, Grad.sykdomsgrad(grad), kilde)
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, grad, kilde)
     }
 
@@ -151,7 +151,7 @@ internal sealed class NyDag(
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) : this(dato, Grad.sykdomsgrad(grad), kilde)
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, grad, kilde)
     }
 
@@ -160,7 +160,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -169,7 +169,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -178,7 +178,7 @@ internal sealed class NyDag(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
@@ -188,7 +188,7 @@ internal sealed class NyDag(
         private val melding: String
     ) : NyDag(dato, kilde) {
 
-        override fun accept(visitor: NySykdomstidslinjeVisitor) =
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde, melding)
     }
 

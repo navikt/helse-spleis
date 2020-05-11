@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.tournament.Turneringsnøkkel.*
@@ -62,8 +62,8 @@ internal class TurneringsnøkkelTest {
         object Søknad : TestHendelse()
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
-        override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje = TODO()
-        override fun nySykdomstidslinje(): NySykdomstidslinje = TODO()
+        override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = TODO()
+        override fun sykdomstidslinje(): Sykdomstidslinje = TODO()
         override fun valider(periode: Periode): Aktivitetslogg = TODO()
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()
         override fun aktørId(): String = TODO()

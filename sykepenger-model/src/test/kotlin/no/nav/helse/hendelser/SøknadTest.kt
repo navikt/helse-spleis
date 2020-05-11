@@ -32,29 +32,29 @@ internal class SøknadTest {
     internal fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar,  10.januar, 100))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
-        assertEquals(10, søknad.nySykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     internal fun `søknad med ferie`() {
         søknad(Sykdom(1.januar,  10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
-        assertEquals(10, søknad.nySykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     internal fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(5.januar, 10.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrors())
-        assertEquals(10, søknad.nySykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     internal fun `søknad med papirsykmelding`() {
         søknad(Sykdom(1.januar,  10.januar, 100), Papirsykmelding(11.januar, 16.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrors())
-        assertEquals(16, søknad.nySykdomstidslinje().count())
-        assertEquals(6, søknad.nySykdomstidslinje().filterIsInstance<ProblemDag>().size)
+        assertEquals(16, søknad.sykdomstidslinje().count())
+        assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
     }
 
     @Test
@@ -97,17 +97,17 @@ internal class SøknadTest {
     internal fun `egenmelding ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(2.januar, 3.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors())
-        assertEquals(11, søknad.nySykdomstidslinje().count())
-        assertEquals(6, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
-        assertEquals(2, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
-        assertEquals(2, søknad.nySykdomstidslinje().filterIsInstance<NyArbeidsgiverdag>().size)
+        assertEquals(11, søknad.sykdomstidslinje().count())
+        assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
+        assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<NyArbeidsgiverdag>().size)
     }
 
     @Test
     internal fun `egenmelding ligger langt utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
         assertFalse(søknad.valider(EN_PERIODE).hasErrors()) { aktivitetslogg.toString() }
-        assertEquals(8, søknad.nySykdomstidslinje().count())
+        assertEquals(8, søknad.sykdomstidslinje().count())
     }
 
     @Test
@@ -171,18 +171,18 @@ internal class SøknadTest {
     internal fun `søknadsturnering for nye dagtyper`() {
         søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar,  100))
 
-        assertEquals(10, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
-        assertEquals(4, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
-        assertEquals(13, søknad.nySykdomstidslinje().filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(4, søknad.nySykdomstidslinje().filterIsInstance<NyFriskHelgedag>().size)
+        assertEquals(10, søknad.sykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
+        assertEquals(13, søknad.sykdomstidslinje().filterIsInstance<NyArbeidsdag>().size)
+        assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<NyFriskHelgedag>().size)
     }
 
     @Test
     fun `turnering mellom arbeidsgiverdager og sykedager`() {
         søknad(Sykdom(1.januar, 31.januar,  100), Egenmelding(15.januar, 31.januar))
 
-        assertEquals(23, søknad.nySykdomstidslinje().filterIsInstance<NySykedag>().size)
-        assertEquals(8, søknad.nySykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
+        assertEquals(23, søknad.sykdomstidslinje().filterIsInstance<NySykedag>().size)
+        assertEquals(8, søknad.sykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {

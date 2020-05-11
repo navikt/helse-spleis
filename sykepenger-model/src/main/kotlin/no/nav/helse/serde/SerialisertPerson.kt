@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.NySykdomstidslinjeData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.NyDagData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.mapping.NyJsonDagType
@@ -23,8 +23,8 @@ import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -52,7 +52,8 @@ class SerialisertPerson(val json: String) {
             V6LeggTilNySykdomstidslinje(),
             V7DagsatsSomHeltall(),
             V8LeggerTilLønnIUtbetalingslinjer(),
-            V9FjernerGamleSykdomstidslinjer()
+            V9FjernerGamleSykdomstidslinjer(),
+            V10EndreNavnPåSykdomstidslinjer()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -221,9 +222,9 @@ class SerialisertPerson(val json: String) {
         )
     }
 
-    private fun parseNySykdomstidslinje(
-        tidslinjeData: NySykdomstidslinjeData
-    ): NySykdomstidslinje = createSykdomstidslinje(tidslinjeData)
+    private fun parseSykdomstidslinje(
+        tidslinjeData: SykdomstidslinjeData
+    ): Sykdomstidslinje = createSykdomstidslinje(tidslinjeData)
 
     private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
         TilstandType.AVVENTER_HISTORIKK -> AvventerHistorikk
@@ -333,8 +334,8 @@ class SerialisertPerson(val json: String) {
             createSykdomshistorikkElement(
                 timestamp = sykdomshistorikkData.tidsstempel,
                 hendelseId = sykdomshistorikkData.hendelseId,
-                nyHendelseSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyHendelseSykdomstidslinje),
-                nyBeregnetSykdomstidslinje = parseNySykdomstidslinje(sykdomshistorikkData.nyBeregnetSykdomstidslinje)
+                hendelseSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.hendelseSykdomstidslinje),
+                beregnetSykdomstidslinje = parseSykdomstidslinje(sykdomshistorikkData.beregnetSykdomstidslinje)
             )
         })
     }
@@ -388,7 +389,7 @@ internal data class PersonData(
             val beløp: BigDecimal
         )
 
-        data class NySykdomstidslinjeData(
+        data class SykdomstidslinjeData(
             val dager: List<NyDagData>,
             val periode: Periode?,
             val låstePerioder: MutableList<Periode>? = mutableListOf(),
@@ -449,8 +450,8 @@ internal data class PersonData(
             data class SykdomshistorikkData(
                 val tidsstempel: LocalDateTime,
                 val hendelseId: UUID,
-                val nyHendelseSykdomstidslinje: NySykdomstidslinjeData,
-                val nyBeregnetSykdomstidslinje: NySykdomstidslinjeData
+                val hendelseSykdomstidslinje: SykdomstidslinjeData,
+                val beregnetSykdomstidslinje: SykdomstidslinjeData
             )
 
             data class DataForVilkårsvurderingData(

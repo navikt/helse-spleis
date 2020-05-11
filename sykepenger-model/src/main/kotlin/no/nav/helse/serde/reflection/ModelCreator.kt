@@ -3,9 +3,9 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.NySykdomstidslinjeData
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -123,8 +123,8 @@ internal fun createSykdomshistorikk(
     .call(elementer)
 
 internal fun createSykdomstidslinje(
-    tidslinje: NySykdomstidslinjeData
-) = NySykdomstidslinje::class.primaryConstructor!!
+    tidslinje: SykdomstidslinjeData
+) = Sykdomstidslinje::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         tidslinje.dagerMap,
@@ -136,12 +136,12 @@ internal fun createSykdomstidslinje(
 
 internal fun createSykdomshistorikkElement(
     timestamp: LocalDateTime,
-    nyHendelseSykdomstidslinje: NySykdomstidslinje,
-    nyBeregnetSykdomstidslinje: NySykdomstidslinje,
+    hendelseSykdomstidslinje: Sykdomstidslinje,
+    beregnetSykdomstidslinje: Sykdomstidslinje,
     hendelseId: UUID
 ) = Sykdomshistorikk.Element::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(hendelseId, timestamp, nyHendelseSykdomstidslinje, nyBeregnetSykdomstidslinje)
+    .call(hendelseId, timestamp, hendelseSykdomstidslinje, beregnetSykdomstidslinje)
 
 internal fun createUtbetalingstidslinje(
     utbetalingsdager: MutableList<Utbetalingstidslinje.Utbetalingsdag>

@@ -11,8 +11,8 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.VedtaksperiodeReflect
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -150,10 +150,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
     }
 
-    override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+    override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.preVisitBeregnetSykdomstidslinje(tidslinje)
 
-    override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) =
+    override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
 
     override fun postVisitSykdomshistorikkElement(
@@ -578,7 +578,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
 
-        override fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+        override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
         }
 
@@ -644,7 +644,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             else -> SpeilKildetype.Ukjent
         }
 
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             popState()
         }
     }

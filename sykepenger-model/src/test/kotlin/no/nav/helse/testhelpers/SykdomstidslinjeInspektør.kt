@@ -1,17 +1,17 @@
 package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Grad
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySykdomstidslinjeVisitor {
+internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
     internal val dager = mutableMapOf<LocalDate, NyDag>()
     internal val kilder = mutableMapOf<LocalDate, Hendelseskilde>()
     internal val grader = mutableMapOf<LocalDate, Grad>()
@@ -43,8 +43,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: NySykdomstidslinje) : NySyk
         set(dag, dato, kilde)
     }
 
-    override fun preVisitNySykdomstidslinje(
-        tidslinje: NySykdomstidslinje,
+    override fun preVisitSykdomstidslinje(
+        tidslinje: Sykdomstidslinje,
         låstePerioder: List<Periode>,
         id: UUID,
         tidsstempel: LocalDateTime

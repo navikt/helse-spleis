@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
@@ -20,26 +20,25 @@ class SøknadArbeidsgiver constructor(
     private val fom: LocalDate
     private val tom: LocalDate
     private var forrigeTom: LocalDate? = null
-    private var nyForrigeTom: LocalDate? = null
-    private val nySykdomstidslinje: NySykdomstidslinje
+    private val sykdomstidslinje: Sykdomstidslinje
 
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
         fom = perioder.minBy { it.fom }?.fom ?: severe("Søknad mangler fradato")
         tom = perioder.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato")
 
-        nySykdomstidslinje = perioder.map { it.nySykdomstidslinje(kilde) }.merge(noOverlap)
+        sykdomstidslinje = perioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
     }
 
-    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje {
-        require(nyForrigeTom == null || (nyForrigeTom != null && tom > nyForrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
+        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
-        return nyForrigeTom?.let { nySykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: nySykdomstidslinje.kutt(tom)
+        return forrigeTom?.let { sykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje.kutt(tom)
             .also { trimLeft(tom) }
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }
 
-    override fun nySykdomstidslinje() = nySykdomstidslinje
+    override fun sykdomstidslinje() = sykdomstidslinje
 
     internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
@@ -77,6 +76,6 @@ class SøknadArbeidsgiver constructor(
             if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
         }
 
-        internal fun nySykdomstidslinje(kilde: Hendelseskilde) = NySykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
+        internal fun sykdomstidslinje(kilde: Hendelseskilde) = Sykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
     }
 }

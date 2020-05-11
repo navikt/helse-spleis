@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
@@ -17,12 +17,12 @@ class Sykmelding(
     sykeperioder: List<Triple<LocalDate, LocalDate, Int>>
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
-    private val nySykdomstidslinje: NySykdomstidslinje
+    private val sykdomstidslinje: Sykdomstidslinje
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
-        nySykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
-            NySykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
+        sykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
+            Sykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
         }
             .merge(noOverlap)
             .also { tidslinje ->
@@ -34,9 +34,9 @@ class Sykmelding(
 
     override fun melding(klassName: String) = "Sykmelding"
 
-    override fun nySykdomstidslinje() = nySykdomstidslinje
+    override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun nySykdomstidslinje(tom: LocalDate): NySykdomstidslinje = nySykdomstidslinje
+    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = sykdomstidslinje
 
     override fun fødselsnummer() = fnr
 

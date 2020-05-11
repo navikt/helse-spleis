@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 internal class SimpleMergeTest {
     @Test
     internal fun `ekspanderer tom tidslinje`() {
-        val actual = NySykdomstidslinje().merge(1.januar jobbTil 5.januar)
+        val actual = Sykdomstidslinje().merge(1.januar jobbTil 5.januar)
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
         assertTrue(actual[3.januar] is NyArbeidsdag)
@@ -17,7 +17,7 @@ internal class SimpleMergeTest {
 
     @Test
     internal fun `ekspanderer med tidslinje`() {
-        val actual = (1.januar jobbTil 5.januar).merge(NySykdomstidslinje())
+        val actual = (1.januar jobbTil 5.januar).merge(Sykdomstidslinje())
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
         assertTrue(actual[3.januar] is NyArbeidsdag)
@@ -25,7 +25,7 @@ internal class SimpleMergeTest {
 
     @Test
     internal fun `ekspanderer tom tidslinje med tom tidslinje`() {
-        val actual = NySykdomstidslinje().merge(NySykdomstidslinje())
+        val actual = Sykdomstidslinje().merge(Sykdomstidslinje())
 
         assertNull(actual.periode())
     }
@@ -119,7 +119,7 @@ internal class SimpleMergeTest {
         assertEquals(6, actual.filterIsInstance<NyUkjentDag>().size)
     }
 
-    private fun assertSize(expected: Int, sykdomstidslinje: NySykdomstidslinje) {
+    private fun assertSize(expected: Int, sykdomstidslinje: Sykdomstidslinje) {
         var count = 0
         sykdomstidslinje.forEach { _ -> count++ }
         assertEquals(expected, count)

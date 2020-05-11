@@ -1,7 +1,7 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.sykmelding
@@ -13,8 +13,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
-        val sykmeldingSykedag = NySykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
-        val søknadArbeidsdag = NySykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, søknad)
+        val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
+        val søknadArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, søknad)
 
         val tidslinje = sykmeldingSykedag.merge(søknadArbeidsdag, dagturnering::beste)
 
@@ -26,8 +26,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
-        val søknadSykedager = NySykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.0, søknad)
-        val søknadArbeidsdager = NySykdomstidslinje.arbeidsdager(1.torsdag, 1.fredag, søknad)
+        val søknadSykedager = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.0, søknad)
+        val søknadArbeidsdager = Sykdomstidslinje.arbeidsdager(1.torsdag, 1.fredag, søknad)
 
         val tidslinje = søknadSykedager.merge(søknadArbeidsdager, dagturnering::beste)
         assertTrue(
@@ -42,8 +42,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `sykedag fra arbeidsgiver taper mot syk helgedag fra sykmeldingen`() {
-        val sykmeldingSykHelgedag = NySykdomstidslinje.sykedager(1.søndag, 1.søndag, 100.0, sykmelding)
-        val inntektsmeldingArbeidsgiverdag = NySykdomstidslinje.arbeidsgiverdager(1.søndag, 1.søndag, 100.0, inntektsmelding)
+        val sykmeldingSykHelgedag = Sykdomstidslinje.sykedager(1.søndag, 1.søndag, 100.0, sykmelding)
+        val inntektsmeldingArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.søndag, 1.søndag, 100.0, inntektsmelding)
 
         val tidslinje = inntektsmeldingArbeidsgiverdag.merge(sykmeldingSykHelgedag, dagturnering::beste)
 
@@ -52,8 +52,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `arbeidsdag fra inntektsmelding vinner over egenmelding fra søknad`() {
-        val søknadArbeidsgiverdag = NySykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.0, søknad)
-        val inntektsmeldingArbeidsdag = NySykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
+        val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.0, søknad)
+        val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
         val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
 
@@ -62,8 +62,8 @@ internal class CsvDagturneringTest {
 
     @Test
     internal fun `arbeidsdag fra inntektsmelding vinner over sykedag fra sykmelding`() {
-        val sykmeldingSykedag = NySykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
-        val inntektsmeldingArbeidsdag = NySykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
+        val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
+        val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
         val tidslinje = sykmeldingSykedag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
 

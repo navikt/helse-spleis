@@ -5,8 +5,8 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -69,17 +69,17 @@ internal interface UtbetalingsdagVisitor {
     fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
 }
 
-internal interface SykdomshistorikkVisitor : NySykdomstidslinjeVisitor {
+internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
     fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
         tidsstempel: LocalDateTime
     ) {}
-    fun preVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
-    fun postVisitHendelseSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
-    fun preVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
-    fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {}
+    fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
@@ -88,8 +88,8 @@ internal interface SykdomshistorikkVisitor : NySykdomstidslinjeVisitor {
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
 }
 
-internal interface NySykdomstidslinjeVisitor {
-    fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
+internal interface SykdomstidslinjeVisitor {
+    fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
     fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
@@ -103,7 +103,7 @@ internal interface NySykdomstidslinjeVisitor {
     fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
-    fun postVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
+    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
 }
 
 internal interface InntekthistorikkVisitor {

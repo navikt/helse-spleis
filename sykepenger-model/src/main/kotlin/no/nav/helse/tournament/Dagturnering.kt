@@ -2,14 +2,14 @@ package no.nav.helse.tournament
 
 import no.nav.helse.sykdomstidslinje.NyDag
 
-internal interface NyDagturnering {
+internal interface Dagturnering {
     fun beste(venstre: NyDag, høyre: NyDag): NyDag
 }
 
-internal val nySøknadDagturnering: NyDagturnering = CsvDagturnering("/dagturneringSøknad.csv")
-internal val dagturnering: NyDagturnering = CsvDagturnering("/dagturnering.csv")
+internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
+internal val dagturnering: Dagturnering = CsvDagturnering("/dagturnering.csv")
 
-private class CsvDagturnering(private val source: String) : NyDagturnering {
+private class CsvDagturnering(private val source: String) : Dagturnering {
 
     private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
 

@@ -6,8 +6,8 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.NyDag
 import no.nav.helse.sykdomstidslinje.NyDag.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -21,7 +21,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
-    private val sykdomstidslinjer = mutableMapOf<Int, NySykdomstidslinje>()
+    private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
@@ -125,7 +125,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
     }
 
-    private inner class Dagteller : NySykdomstidslinjeVisitor {
+    private inner class Dagteller : SykdomstidslinjeVisitor {
         override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)

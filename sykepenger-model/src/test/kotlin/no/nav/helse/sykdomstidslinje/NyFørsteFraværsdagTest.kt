@@ -140,9 +140,9 @@ internal class NyFørsteFraværsdagTest {
         inntektsmelding: Inntektsmelding
     ) {
         val tidslinje = listOf(
-            sykmelding.nySykdomstidslinje(),
-            søknad.nySykdomstidslinje(),
-            inntektsmelding.nySykdomstidslinje()
+            sykmelding.sykdomstidslinje(),
+            søknad.sykdomstidslinje(),
+            inntektsmelding.sykdomstidslinje()
         ).merge(dagturnering::beste)
 
         val førsteFraværsdag = tidslinje.førsteFraværsdag()
@@ -208,21 +208,21 @@ internal class NyFørsteFraværsdagTest {
 
         private fun assertDagenErUtgangspunktForBeregning(
             dagen: NyDag,
-            sykdomstidslinje: NySykdomstidslinje
+            sykdomstidslinje: Sykdomstidslinje
         ) {
             val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()?.let { sykdomstidslinje[it] }
             assertEquals(dagen, førsteFraværsdag) { "Forventet $dagen, men fikk $førsteFraværsdag.\nTidslinjen:\n$sykdomstidslinje"}
         }
 
-        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: NySykdomstidslinje) {
+        private fun assertFørsteDagErUtgangspunktForBeregning(sykdomstidslinje: Sykdomstidslinje) {
             val førsteDag = sykdomstidslinje.periode()?.start
             assertNotNull(førsteDag)
             assertEquals(førsteDag, sykdomstidslinje.førsteFraværsdag())
         }
 
         private fun assertFørsteDagErUtgangspunktForBeregning(
-            perioden: NySykdomstidslinje,
-            sykdomstidslinje: NySykdomstidslinje
+            perioden: Sykdomstidslinje,
+            sykdomstidslinje: Sykdomstidslinje
         ) {
             val førsteDag = perioden.periode()?.start
             assertNotNull(førsteDag)

@@ -1,6 +1,6 @@
 package no.nav.helse
 
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.dagturnering
@@ -14,28 +14,28 @@ internal val lørdag = fredag.plusDays(1)
 internal val søndag = lørdag.plusDays(1)
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2).merge(dagturnering::beste).test(periode1, periode2)
 }
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    periode3: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    periode3: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2, periode3).merge(dagturnering::beste).test(periode1, periode2, periode3)
 }
 
 internal fun perioder(
-    periode1: NySykdomstidslinje,
-    periode2: NySykdomstidslinje,
-    periode3: NySykdomstidslinje,
-    periode4: NySykdomstidslinje,
-    test: NySykdomstidslinje.(NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje, NySykdomstidslinje) -> Unit
+    periode1: Sykdomstidslinje,
+    periode2: Sykdomstidslinje,
+    periode3: Sykdomstidslinje,
+    periode4: Sykdomstidslinje,
+    test: Sykdomstidslinje.(Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje, Sykdomstidslinje) -> Unit
 ) {
     listOf(periode1, periode2, periode3, periode4).merge(dagturnering::beste)
         .test(periode1, periode2, periode3, periode4)

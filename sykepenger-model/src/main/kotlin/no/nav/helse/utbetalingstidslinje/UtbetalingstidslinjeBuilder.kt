@@ -1,9 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -21,7 +21,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val inntekthistorikk: Inntekthistorikk,
     arbeidsgiverperiodeGjennomført: Boolean = false,
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
-) : NySykdomstidslinjeVisitor {
+) : SykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
     private var sykedagerIArbeidsgiverperiode = if (arbeidsgiverperiodeGjennomført) 16 else 0
@@ -32,8 +32,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private val tidslinje = Utbetalingstidslinje()
 
-    internal fun result(nySykdomstidslinje: NySykdomstidslinje): Utbetalingstidslinje {
-        nySykdomstidslinje.kutt(sisteDag).accept(this)
+    internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
+        sykdomstidslinje.kutt(sisteDag).accept(this)
         return tidslinje
     }
 

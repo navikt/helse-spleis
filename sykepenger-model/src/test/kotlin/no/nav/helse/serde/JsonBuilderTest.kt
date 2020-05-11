@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.sykdomstidslinje.NySykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
@@ -92,7 +92,7 @@ internal class JsonBuilderTest {
         private const val orgnummer = "987654321"
         private lateinit var vedtaksperiodeId: String
         private lateinit var tilstand: TilstandType
-        private lateinit var sykdomstidslinje: NySykdomstidslinje
+        private lateinit var sykdomstidslinje: Sykdomstidslinje
 
         internal fun person(
             fom: LocalDate = 1.januar,
@@ -215,8 +215,8 @@ internal class JsonBuilderTest {
 
         private fun Person.fangeSykdomstidslinje() {
             accept(object : PersonVisitor {
-                override fun preVisitNySykdomstidslinje(
-                    tidslinje: NySykdomstidslinje,
+                override fun preVisitSykdomstidslinje(
+                    tidslinje: Sykdomstidslinje,
                     låstePerioder: List<Periode>,
                     id: UUID,
                     tidsstempel: LocalDateTime

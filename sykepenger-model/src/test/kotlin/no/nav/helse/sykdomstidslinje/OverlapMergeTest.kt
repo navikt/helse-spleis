@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverlapMergeTest {
-    private lateinit var tidslinje: NySykdomstidslinje
+    private lateinit var tidslinje: Sykdomstidslinje
     private val inspektør get() = SykdomstidslinjeInspektør(tidslinje)
 
     @Test

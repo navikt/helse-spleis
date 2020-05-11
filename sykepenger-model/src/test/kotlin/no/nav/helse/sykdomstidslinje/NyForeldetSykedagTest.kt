@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.person.NySykdomstidslinjeVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.NyDag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Grad
@@ -95,15 +95,15 @@ internal class NyForeldetSykedagTest {
         return TestInspektør(søknad)
     }
 
-    private class TestInspektør(søknad: SykdomstidslinjeHendelse) : NySykdomstidslinjeVisitor {
+    private class TestInspektør(søknad: SykdomstidslinjeHendelse) : SykdomstidslinjeVisitor {
         internal var dagerTeller = 0
         internal val dagstypeTeller = mutableMapOf<KClass<out NyDag>, Int>()
 
         init {
-            søknad.nySykdomstidslinje().accept(this)
+            søknad.sykdomstidslinje().accept(this)
         }
 
-        override fun preVisitNySykdomstidslinje(tidslinje: NySykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {
             dagerTeller = 0
         }
 
