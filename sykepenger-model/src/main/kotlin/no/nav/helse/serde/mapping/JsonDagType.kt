@@ -56,5 +56,6 @@ enum class SpeilDagtype {
 enum class SpeilKildetype {
     Inntektsmelding,
     Søknad,
-    Sykmelding
+    Sykmelding,
+    Ukjent
 }

@@ -625,7 +625,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private fun NyDag.toSpeilDagtype() = when (this) {
             is NySykedag -> SpeilDagtype.SYKEDAG
-            is NyArbeidsdag -> SpeilDagtype.ARBEIDSDAG
+            is NyArbeidsdag, is NyUkjentDag -> SpeilDagtype.ARBEIDSDAG
             is NyArbeidsgiverdag, is NyArbeidsgiverHelgedag -> SpeilDagtype.ARBEIDSGIVERDAG
             is NyFeriedag -> SpeilDagtype.FERIEDAG
             is NyFriskHelgedag -> SpeilDagtype.FRISK_HELGEDAG
@@ -634,14 +634,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             is NyPermisjonsdag -> SpeilDagtype.PERMISJONSDAG
             is NyStudiedag -> SpeilDagtype.STUDIEDAG
             is NyUtenlandsdag -> SpeilDagtype.UTENLANDSDAG
-            is NyUkjentDag, is ProblemDag -> SpeilDagtype.UBESTEMTDAG
+            is ProblemDag -> SpeilDagtype.UBESTEMTDAG
         }
 
         private fun Hendelseskilde.toSpeilKildetype() = when {
             erAvType(Inntektsmelding::class) -> SpeilKildetype.Inntektsmelding
             erAvType(Søknad::class) -> SpeilKildetype.Søknad
             erAvType(Sykmelding::class) -> SpeilKildetype.Sykmelding
-            else -> throw IllegalArgumentException()
+            else -> SpeilKildetype.Ukjent
         }
 
         override fun postVisitBeregnetSykdomstidslinje(tidslinje: NySykdomstidslinje) {
