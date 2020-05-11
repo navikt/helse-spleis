@@ -50,7 +50,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if(perioder.map { it.håndter(sykmelding)}.none { it } ) {
+        if (perioder.map { it.håndter(sykmelding) }.none { it }) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             Vedtaksperiode.sorter(perioder)
@@ -59,21 +59,21 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        if(perioder.map { it.håndter(søknad)}.none { it } ) {
+        if (perioder.map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         søknad.kontekst(this)
-        if(perioder.map { it.håndter(søknad)}.none { it } ) {
+        if (perioder.map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        if(perioder.map { it.håndter(inntektsmelding)}.none { it } ) {
+        if (perioder.map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
     }
@@ -118,21 +118,27 @@ internal class Arbeidsgiver private constructor(
         return perioder.any { it.håndter(påminnelse) }
     }
 
-    internal fun håndter(hendelse: KansellerUtbetaling) {
-        hendelse.kontekst(this)
+    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
+        // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
+        kansellerUtbetaling.kontekst(this)
         utbetalinger.reversed().firstOrNull {
-            it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId
+            it.arbeidsgiverOppdrag().fagsystemId() == kansellerUtbetaling.fagsystemId
         }
             ?.kansellerUtbetaling()
             ?.also {
                 utbetalinger.add(it)
                 Aktivitet.Behov.utbetaling(
-                    hendelse.aktivitetslogg,
+                    kansellerUtbetaling.aktivitetslogg,
                     it.arbeidsgiverOppdrag(),
-                    saksbehandler = hendelse.saksbehandler
+                    saksbehandler = kansellerUtbetaling.saksbehandler
                 )
             }
-            ?: hendelse.error("Avvis hvis vi ikke finner utbetalingsreferanse %s", hendelse.fagsystemId)
+            ?: kansellerUtbetaling.error(
+                "Avvis hvis vi ikke finner utbetalingsreferanse %s",
+                kansellerUtbetaling.fagsystemId
+            )
+        perioder.filter { it.arbeidsgiverFagsystemId() == kansellerUtbetaling.fagsystemId }
+            .forEach { it.invaliderPeriode(kansellerUtbetaling) }
     }
 
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)

@@ -199,7 +199,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendKansellerUtbetaling() {
         val fagsystemId = testRapid.inspektør.let {
-            it.melding(it.antall() - 1)["fagsystemId"]
+            it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"]
         }.asText()
         testRapid.sendTestMessage(meldingsfabrikk.lagKansellerUtbetaling(fagsystemId))
     }
