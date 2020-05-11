@@ -3,8 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
@@ -28,19 +28,19 @@ class Inntektsmelding(
     private var beingQualified = false
     private var forrigeTom: LocalDate? = null
 
-    private val beste = { venstre: NyDag, høyre: NyDag ->
+    private val beste = { venstre: Dag, høyre: Dag ->
         when {
             venstre::class == høyre::class -> venstre
-            venstre is NyUkjentDag -> høyre
-            høyre is NyUkjentDag -> venstre
-            venstre is NyArbeidsgiverdag || venstre is NyArbeidsgiverHelgedag -> venstre
-            høyre is NyArbeidsgiverdag || høyre is NyArbeidsgiverHelgedag -> høyre
-            venstre is NySykedag -> venstre
-            høyre is NySykedag -> høyre
-            venstre is NyFeriedag && høyre is NyArbeidsdag -> venstre
-            høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
-            venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
-            høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
+            venstre is UkjentDag -> høyre
+            høyre is UkjentDag -> venstre
+            venstre is Arbeidsgiverdag || venstre is ArbeidsgiverHelgedag -> venstre
+            høyre is Arbeidsgiverdag || høyre is ArbeidsgiverHelgedag -> høyre
+            venstre is Sykedag -> venstre
+            høyre is Sykedag -> høyre
+            venstre is Feriedag && høyre is Arbeidsdag -> venstre
+            høyre is Feriedag && venstre is Arbeidsdag -> høyre
+            venstre is Feriedag && høyre is FriskHelgedag -> venstre
+            høyre is Feriedag && venstre is FriskHelgedag -> høyre
             else -> høyre.problem(venstre)
         }
     }

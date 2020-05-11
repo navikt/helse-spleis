@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -90,18 +90,18 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
 
 internal interface SykdomstidslinjeVisitor {
     fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
-    fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyPermisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyStudiedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: NyUtenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
 }

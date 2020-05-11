@@ -1,6 +1,6 @@
 package no.nav.helse.serde.mapping
 
-enum class JsonDagType {
+enum class JsonDagTypePreV10 {
     ARBEIDSDAG_INNTEKTSMELDING,
     ARBEIDSDAG_SØKNAD,
     EGENMELDINGSDAG_INNTEKTSMELDING,
@@ -22,7 +22,7 @@ enum class JsonDagType {
     UTENLANDSDAG
 }
 
-enum class NyJsonDagType {
+enum class JsonDagType {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
     ARBEIDSGIVER_HELGEDAG,

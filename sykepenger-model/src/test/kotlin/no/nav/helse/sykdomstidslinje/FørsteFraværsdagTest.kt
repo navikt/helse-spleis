@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class NyFørsteFraværsdagTest {
+internal class FørsteFraværsdagTest {
 
     @Test
     internal fun `førsteFraværsdag er null for ugyldige situasjoner`() {
@@ -207,7 +207,7 @@ internal class NyFørsteFraværsdagTest {
         private const val INNTEKT = 31000.00
 
         private fun assertDagenErUtgangspunktForBeregning(
-            dagen: NyDag,
+            dagen: Dag,
             sykdomstidslinje: Sykdomstidslinje
         ) {
             val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()?.let { sykdomstidslinje[it] }

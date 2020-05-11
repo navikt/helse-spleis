@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.serde.mapping.JsonDagType.*
-import no.nav.helse.serde.mapping.NyJsonDagType
+import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.JsonDagTypePreV10.*
 import java.util.*
 
 internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
@@ -130,23 +130,23 @@ internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
 
     private fun konverterDagtype(dagType: String) = when (valueOf(dagType)) {
         ARBEIDSDAG_INNTEKTSMELDING,
-        ARBEIDSDAG_SØKNAD -> NyJsonDagType.ARBEIDSDAG
+        ARBEIDSDAG_SØKNAD -> JsonDagType.ARBEIDSDAG
         EGENMELDINGSDAG_INNTEKTSMELDING,
-        EGENMELDINGSDAG_SØKNAD -> NyJsonDagType.ARBEIDSGIVERDAG
+        EGENMELDINGSDAG_SØKNAD -> JsonDagType.ARBEIDSGIVERDAG
         FERIEDAG_INNTEKTSMELDING,
-        FERIEDAG_SØKNAD -> NyJsonDagType.FERIEDAG
+        FERIEDAG_SØKNAD -> JsonDagType.FERIEDAG
         FRISK_HELGEDAG_INNTEKTSMELDING,
-        FRISK_HELGEDAG_SØKNAD -> NyJsonDagType.FRISK_HELGEDAG
-        IMPLISITT_DAG -> NyJsonDagType.UKJENT_DAG
-        FORELDET_SYKEDAG -> NyJsonDagType.FORELDET_SYKEDAG
+        FRISK_HELGEDAG_SØKNAD -> JsonDagType.FRISK_HELGEDAG
+        IMPLISITT_DAG -> JsonDagType.UKJENT_DAG
+        FORELDET_SYKEDAG -> JsonDagType.FORELDET_SYKEDAG
         PERMISJONSDAG_SØKNAD,
-        PERMISJONSDAG_AAREG -> NyJsonDagType.PERMISJONSDAG
-        STUDIEDAG -> NyJsonDagType.STUDIEDAG
+        PERMISJONSDAG_AAREG -> JsonDagType.PERMISJONSDAG
+        STUDIEDAG -> JsonDagType.STUDIEDAG
         SYKEDAG_SYKMELDING,
-        SYKEDAG_SØKNAD -> NyJsonDagType.SYKEDAG
+        SYKEDAG_SØKNAD -> JsonDagType.SYKEDAG
         SYK_HELGEDAG_SYKMELDING,
-        SYK_HELGEDAG_SØKNAD -> NyJsonDagType.SYK_HELGEDAG
-        UBESTEMTDAG -> NyJsonDagType.PROBLEMDAG
-        UTENLANDSDAG -> NyJsonDagType.UTENLANDSDAG
+        SYK_HELGEDAG_SØKNAD -> JsonDagType.SYK_HELGEDAG
+        UBESTEMTDAG -> JsonDagType.PROBLEMDAG
+        UTENLANDSDAG -> JsonDagType.UTENLANDSDAG
     }
 }

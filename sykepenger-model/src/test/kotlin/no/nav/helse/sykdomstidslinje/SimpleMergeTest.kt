@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,7 +12,7 @@ internal class SimpleMergeTest {
         val actual = Sykdomstidslinje().merge(1.januar jobbTil 5.januar)
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
-        assertTrue(actual[3.januar] is NyArbeidsdag)
+        assertTrue(actual[3.januar] is Arbeidsdag)
     }
 
     @Test
@@ -20,7 +20,7 @@ internal class SimpleMergeTest {
         val actual = (1.januar jobbTil 5.januar).merge(Sykdomstidslinje())
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
-        assertTrue(actual[3.januar] is NyArbeidsdag)
+        assertTrue(actual[3.januar] is Arbeidsdag)
     }
 
     @Test
@@ -35,9 +35,9 @@ internal class SimpleMergeTest {
         val actual = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
         assertEquals(Periode(1.januar, 19.januar), actual.periode())
-        assertTrue(actual[3.januar] is NyArbeidsdag)
-        assertTrue(actual[17.januar] is NyArbeidsdag)
-        assertTrue(actual[10.januar] is NyUkjentDag)
+        assertTrue(actual[3.januar] is Arbeidsdag)
+        assertTrue(actual[17.januar] is Arbeidsdag)
+        assertTrue(actual[10.januar] is UkjentDag)
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class SimpleMergeTest {
             original.subset(it).also { tidslinje ->
                 assertEquals(it, tidslinje.periode())
                 assertSize(14, tidslinje)
-                assertEquals(14, tidslinje.filterIsInstance<NyUkjentDag>().size)
+                assertEquals(14, tidslinje.filterIsInstance<UkjentDag>().size)
             }
         }
     }
@@ -70,8 +70,8 @@ internal class SimpleMergeTest {
         assertSize(19, actual)
         assertSize(15, actual.subset(Periode(3.januar, 17.januar)))
         assertSize(9, actual.subset(Periode(6.januar, 14.januar)))
-        assertEquals(10, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(9, actual.filterIsInstance<NyUkjentDag>().size)
+        assertEquals(10, actual.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(9, actual.filterIsInstance<UkjentDag>().size)
     }
 
     @Test
@@ -103,20 +103,20 @@ internal class SimpleMergeTest {
     internal fun `kan merge arbeidsdager med feriedager`() {
         val actual = (1.januar jobbTil 8.januar).merge(15.januar ferieTil 19.januar)
         assertSize(19, actual)
-        assertEquals(6, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(2, actual.filterIsInstance<NyFriskHelgedag>().size)
-        assertEquals(5, actual.filterIsInstance<NyFeriedag>().size)
-        assertEquals(6, actual.filterIsInstance<NyUkjentDag>().size)
+        assertEquals(6, actual.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(2, actual.filterIsInstance<FriskHelgedag>().size)
+        assertEquals(5, actual.filterIsInstance<Feriedag>().size)
+        assertEquals(6, actual.filterIsInstance<UkjentDag>().size)
     }
 
     @Test
     internal fun `støtter sykedager`() {
         val actual = (1.januar sykTil 8.januar grad 50).merge(15.januar ferieTil 19.januar)
         assertSize(19, actual)
-        assertEquals(6, actual.filterIsInstance<NySykedag>().size)
-        assertEquals(2, actual.filterIsInstance<NySykHelgedag>().size)
-        assertEquals(5, actual.filterIsInstance<NyFeriedag>().size)
-        assertEquals(6, actual.filterIsInstance<NyUkjentDag>().size)
+        assertEquals(6, actual.filterIsInstance<Sykedag>().size)
+        assertEquals(2, actual.filterIsInstance<SykHelgedag>().size)
+        assertEquals(5, actual.filterIsInstance<Feriedag>().size)
+        assertEquals(6, actual.filterIsInstance<UkjentDag>().size)
     }
 
     private fun assertSize(expected: Int, sykdomstidslinje: Sykdomstidslinje) {
@@ -125,7 +125,7 @@ internal class SimpleMergeTest {
         assertEquals(expected, count)
 
         count = 0
-        for (dag: NyDag in sykdomstidslinje) {
+        for (dag: Dag in sykdomstidslinje) {
              count++
         }
         assertEquals(expected, count)

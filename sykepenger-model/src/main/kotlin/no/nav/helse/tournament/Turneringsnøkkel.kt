@@ -3,8 +3,8 @@ package no.nav.helse.tournament
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.*
 
 internal enum class Turneringsnøkkel {
     Arbeidsdag_SØ,
@@ -28,28 +28,28 @@ internal enum class Turneringsnøkkel {
     UbestemtDag;
 
     companion object {
-        fun fraDag(dag: NyDag) = when {
-            dag is NyArbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
-            dag is NyArbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
-            dag is NyArbeidsgiverdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
-            dag is NyArbeidsgiverdag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
-            dag is NyArbeidsgiverHelgedag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
-            dag is NyArbeidsgiverHelgedag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
-            dag is NyFeriedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
-            dag is NyFeriedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
-            dag is NyFriskHelgedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
-            dag is NyFriskHelgedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
-            dag is NyForeldetSykedag -> ForeldetSykedag
-            dag is NyPermisjonsdag && dag.kommerFra(Søknad::class) -> Permisjonsdag_SØ
-            dag is NyPermisjonsdag -> Permisjonsdag_AAREG
+        fun fraDag(dag: Dag) = when {
+            dag is Arbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
+            dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
+            dag is Arbeidsgiverdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
+            dag is Arbeidsgiverdag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
+            dag is ArbeidsgiverHelgedag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
+            dag is ArbeidsgiverHelgedag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
+            dag is Feriedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
+            dag is Feriedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
+            dag is FriskHelgedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
+            dag is FriskHelgedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
+            dag is Dag.ForeldetSykedag -> ForeldetSykedag
+            dag is Permisjonsdag && dag.kommerFra(Søknad::class) -> Permisjonsdag_SØ
+            dag is Permisjonsdag -> Permisjonsdag_AAREG
             dag is ProblemDag -> UbestemtDag
-            dag is NyStudiedag -> Studiedag
-            dag is NySykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
-            dag is NySykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
-            dag is NySykHelgedag && dag.kommerFra(Sykmelding::class) -> SykHelgedag_SM
-            dag is NySykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
-            dag is NyUkjentDag -> UkjentDag
-            dag is NyUtenlandsdag -> Utenlandsdag
+            dag is Dag.Studiedag -> Studiedag
+            dag is Sykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
+            dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
+            dag is SykHelgedag && dag.kommerFra(Sykmelding::class) -> SykHelgedag_SM
+            dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
+            dag is Dag.UkjentDag -> UkjentDag
+            dag is Dag.Utenlandsdag -> Utenlandsdag
             else -> throw IllegalArgumentException("Ingen turneringsnøkkel definert for ${dag::class.simpleName}")
         }
     }

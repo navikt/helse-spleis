@@ -1,7 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Grad
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,11 +17,11 @@ internal class OverlapMergeTest {
         tidslinje = (1.januar jobbTil 12.januar).merge(7.januar jobbTil 19.januar)
 
         assertEquals(Periode(1.januar, 19.januar), tidslinje.periode())
-        assertEquals(15, tidslinje.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(4, tidslinje.filterIsInstance<NyFriskHelgedag>().size)
+        assertEquals(15, tidslinje.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(4, tidslinje.filterIsInstance<FriskHelgedag>().size)
 
         inspektør.also {
-            assertTrue(it[1.januar] is NyArbeidsdag)
+            assertTrue(it[1.januar] is Arbeidsdag)
         }
     }
 
@@ -31,9 +31,9 @@ internal class OverlapMergeTest {
             (1.januar ferieTil 12.januar).merge(7.januar betalingTil 19.januar).merge(17.januar ferieTil 26.januar)
 
         assertEquals(Periode(1.januar, 26.januar), actual.periode())
-        assertEquals(6 + 7, actual.filterIsInstance<NyFeriedag>().size)
-        assertEquals(2, actual.filterIsInstance<NyArbeidsgiverHelgedag>().size)
-        assertEquals(2, actual.filterIsInstance<NyArbeidsgiverdag>().size)
+        assertEquals(6 + 7, actual.filterIsInstance<Feriedag>().size)
+        assertEquals(2, actual.filterIsInstance<ArbeidsgiverHelgedag>().size)
+        assertEquals(2, actual.filterIsInstance<Arbeidsgiverdag>().size)
         assertEquals(9, actual.filterIsInstance<ProblemDag>().size)
     }
 
@@ -46,10 +46,10 @@ internal class OverlapMergeTest {
         ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
-        assertEquals(3 + 4, actual.filterIsInstance<NyArbeidsgiverdag>().size)
-        assertEquals(1, actual.filterIsInstance<NyArbeidsgiverHelgedag>().size)
-        assertEquals(1 + 1 + 1 + 3, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(3, actual.filterIsInstance<NyFriskHelgedag>().size)
+        assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
+        assertEquals(1, actual.filterIsInstance<ArbeidsgiverHelgedag>().size)
+        assertEquals(1 + 1 + 1 + 3, actual.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(3, actual.filterIsInstance<FriskHelgedag>().size)
     }
 
     @Test
@@ -62,11 +62,11 @@ internal class OverlapMergeTest {
         ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
-        assertEquals(3 + 4, actual.filterIsInstance<NyArbeidsgiverdag>().size)
-        assertEquals(1, actual.filterIsInstance<NyArbeidsgiverHelgedag>().size)
-        assertEquals(1 + 1 + 3, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(3, actual.filterIsInstance<NyFriskHelgedag>().size)
-        assertEquals(1, actual.filterIsInstance<NyFeriedag>().size)
+        assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
+        assertEquals(1, actual.filterIsInstance<ArbeidsgiverHelgedag>().size)
+        assertEquals(1 + 1 + 3, actual.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(3, actual.filterIsInstance<FriskHelgedag>().size)
+        assertEquals(1, actual.filterIsInstance<Feriedag>().size)
     }
 
     @Test
@@ -79,11 +79,11 @@ internal class OverlapMergeTest {
         ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
-        assertEquals(3 + 4, actual.filterIsInstance<NyArbeidsgiverdag>().size)
-        assertEquals(1, actual.filterIsInstance<NyArbeidsgiverHelgedag>().size)
-        assertEquals(1 + 1 + 3, actual.filterIsInstance<NyArbeidsdag>().size)
-        assertEquals(2, actual.filterIsInstance<NyFriskHelgedag>().size)
-        assertEquals(2, actual.filterIsInstance<NyFeriedag>().size)
+        assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
+        assertEquals(1, actual.filterIsInstance<ArbeidsgiverHelgedag>().size)
+        assertEquals(1 + 1 + 3, actual.filterIsInstance<Arbeidsdag>().size)
+        assertEquals(2, actual.filterIsInstance<FriskHelgedag>().size)
+        assertEquals(2, actual.filterIsInstance<Feriedag>().size)
     }
 
     @Test
@@ -94,8 +94,8 @@ internal class OverlapMergeTest {
         ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 8.januar), tidslinje.periode())
-        assertEquals(4, tidslinje.filterIsInstance<NyFeriedag>().size)
-        assertEquals(1, tidslinje.filterIsInstance<NySykedag>().size)
+        assertEquals(4, tidslinje.filterIsInstance<Feriedag>().size)
+        assertEquals(1, tidslinje.filterIsInstance<Sykedag>().size)
 
         inspektør.also {
             assertEquals(Grad.sykdomsgrad(50), it.grader[1.januar])
@@ -112,18 +112,18 @@ internal class OverlapMergeTest {
         }
     }
 
-    private val testBeste = { venstre: NyDag, høyre: NyDag ->
+    private val testBeste = { venstre: Dag, høyre: Dag ->
         when {
-            venstre is NyUkjentDag -> høyre
-            høyre is NyUkjentDag -> venstre
-            venstre is NyArbeidsgiverdag || venstre is NyArbeidsgiverHelgedag -> venstre
-            høyre is NyArbeidsgiverdag || høyre is NyArbeidsgiverHelgedag -> høyre
-            venstre is NySykedag -> venstre
-            høyre is NySykedag -> høyre
-            venstre is NyFeriedag && høyre is NyArbeidsdag -> venstre
-            høyre is NyFeriedag && venstre is NyArbeidsdag -> høyre
-            venstre is NyFeriedag && høyre is NyFriskHelgedag -> venstre
-            høyre is NyFeriedag && venstre is NyFriskHelgedag -> høyre
+            venstre is UkjentDag -> høyre
+            høyre is UkjentDag -> venstre
+            venstre is Arbeidsgiverdag || venstre is ArbeidsgiverHelgedag -> venstre
+            høyre is Arbeidsgiverdag || høyre is ArbeidsgiverHelgedag -> høyre
+            venstre is Sykedag -> venstre
+            høyre is Sykedag -> høyre
+            venstre is Feriedag && høyre is Arbeidsdag -> venstre
+            høyre is Feriedag && venstre is Arbeidsdag -> høyre
+            venstre is Feriedag && høyre is FriskHelgedag -> venstre
+            høyre is Feriedag && venstre is FriskHelgedag -> høyre
             else -> venstre.problem(høyre)
         }
     }

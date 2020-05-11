@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class NyUtbetalingstidslinjeBuilderTest {
+internal class UtbetalingstidslinjeBuilderTest {
     private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)

@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -28,9 +28,9 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
-        assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<NySykedag>().size)
-        assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<NySykHelgedag>().size)
-        assertEquals(1, sykmelding.sykdomstidslinje().filterIsInstance<NyUkjentDag>().size)
+        assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
+        assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
+        assertEquals(1, sykmelding.sykdomstidslinje().filterIsInstance<UkjentDag>().size)
     }
 
     @Test

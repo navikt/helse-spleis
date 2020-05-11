@@ -1,6 +1,6 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
@@ -19,7 +19,7 @@ internal class CsvDagturneringTest {
         val tidslinje = sykmeldingSykedag.merge(søknadArbeidsdag, dagturnering::beste)
 
         assertTrue(
-            tidslinje[1.mandag] is NyArbeidsdag,
+            tidslinje[1.mandag] is Arbeidsdag,
             "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
         )
     }
@@ -31,11 +31,11 @@ internal class CsvDagturneringTest {
 
         val tidslinje = søknadSykedager.merge(søknadArbeidsdager, dagturnering::beste)
         assertTrue(
-            tidslinje[1.onsdag] is NySykedag,
+            tidslinje[1.onsdag] is Sykedag,
             "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
         )
         assertTrue(
-            tidslinje[1.torsdag] is NyArbeidsdag,
+            tidslinje[1.torsdag] is Arbeidsdag,
             "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
         )
     }
@@ -47,7 +47,7 @@ internal class CsvDagturneringTest {
 
         val tidslinje = inntektsmeldingArbeidsgiverdag.merge(sykmeldingSykHelgedag, dagturnering::beste)
 
-        assertTrue(tidslinje[1.søndag] is NySykHelgedag)
+        assertTrue(tidslinje[1.søndag] is SykHelgedag)
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class CsvDagturneringTest {
 
         val tidslinje = søknadArbeidsgiverdag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
 
-        assertTrue(tidslinje[1.mandag] is NyArbeidsdag)
+        assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class CsvDagturneringTest {
 
         val tidslinje = sykmeldingSykedag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
 
-        assertTrue(tidslinje[1.mandag] is NyArbeidsdag)
+        assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
 }
 

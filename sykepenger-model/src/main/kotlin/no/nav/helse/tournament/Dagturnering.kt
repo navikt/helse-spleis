@@ -1,9 +1,9 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.sykdomstidslinje.NyDag
+import no.nav.helse.sykdomstidslinje.Dag
 
 internal interface Dagturnering {
-    fun beste(venstre: NyDag, høyre: NyDag): NyDag
+    fun beste(venstre: Dag, høyre: Dag): Dag
 }
 
 internal val søknadDagturnering: Dagturnering = CsvDagturnering("/dagturneringSøknad.csv")
@@ -13,7 +13,7 @@ private class CsvDagturnering(private val source: String) : Dagturnering {
 
     private val strategies: Map<Turneringsnøkkel, Map<Turneringsnøkkel, Strategy>> = readStrategies()
 
-    override fun beste(venstre: NyDag, høyre: NyDag): NyDag {
+    override fun beste(venstre: Dag, høyre: Dag): Dag {
         val leftKey = Turneringsnøkkel.fraDag(venstre)
         val rightKey = Turneringsnøkkel.fraDag(høyre)
 
@@ -55,34 +55,34 @@ private class CsvDagturnering(private val source: String) : Dagturnering {
 }
 
 internal sealed class Strategy {
-    abstract fun decide(row: NyDag, column: NyDag): NyDag
-    abstract fun decideInverse(row: NyDag, column: NyDag): NyDag
+    abstract fun decide(row: Dag, column: Dag): Dag
+    abstract fun decideInverse(row: Dag, column: Dag): Dag
 }
 
 internal object Undecided : Strategy() {
-    override fun decide(row: NyDag, column: NyDag): NyDag = row.problem(column)
-    override fun decideInverse(row: NyDag, column: NyDag) = column.problem(row)
+    override fun decide(row: Dag, column: Dag): Dag = row.problem(column)
+    override fun decideInverse(row: Dag, column: Dag) = column.problem(row)
 }
 
 internal object Row : Strategy() {
-    override fun decide(row: NyDag, column: NyDag): NyDag = row
-    override fun decideInverse(row: NyDag, column: NyDag) = column
+    override fun decide(row: Dag, column: Dag): Dag = row
+    override fun decideInverse(row: Dag, column: Dag) = column
 }
 
 internal object Column : Strategy() {
-    override fun decide(row: NyDag, column: NyDag): NyDag = column
-    override fun decideInverse(row: NyDag, column: NyDag) = row
+    override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = row
 }
 
 internal object Latest : Strategy() {
-    override fun decide(row: NyDag, column: NyDag): NyDag = column
-    override fun decideInverse(row: NyDag, column: NyDag) = column
+    override fun decide(row: Dag, column: Dag): Dag = column
+    override fun decideInverse(row: Dag, column: Dag) = column
 }
 
 internal object Impossible : Strategy() {
-    override fun decide(row: NyDag, column: NyDag): NyDag =
+    override fun decide(row: Dag, column: Dag): Dag =
         throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
 
-    override fun decideInverse(row: NyDag, column: NyDag) =
+    override fun decideInverse(row: Dag, column: Dag) =
         throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
 }

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
-import no.nav.helse.serde.mapping.NyJsonDagType.*
+import no.nav.helse.serde.mapping.JsonDagType.*
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -176,23 +176,23 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
 
-    override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
+    override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
+    override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) =
+    override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
+    override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, grad, kilde)
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
@@ -495,38 +495,38 @@ internal class JsonBuilder : PersonVisitor {
             sykdomstidslinje["dager"] = dager
         }
 
-        override fun visitDag(dag: NyUkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
+        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
 
-        override fun visitDag(dag: NyArbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
 
-        override fun visitDag(dag: NyArbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        override fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde, grad)
 
-        override fun visitDag(dag: NyFeriedag, dato: LocalDate, kilde: Hendelseskilde) =
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
 
-        override fun visitDag(dag: NyFriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
 
-        override fun visitDag(dag: NyArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        override fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde, grad)
 
-        override fun visitDag(dag: NySykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        override fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde, grad)
 
-        override fun visitDag(dag: NyForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        override fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde, grad)
 
-        override fun visitDag(dag: NySykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+        override fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde, grad)
 
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
             leggTilDag(dag, dato, kilde, melding = melding)
 
         private fun leggTilDag(
-            dag: NyDag,
+            dag: Dag,
             dato: LocalDate,
             kilde: Hendelseskilde,
             grad: Grad? = null,
@@ -558,18 +558,18 @@ private fun Hendelseskilde.toJson() = mapOf(
     "type" to toString(), "id" to meldingsreferanseId()
 )
 
-private fun NyDag.toJsonType() = when (this) {
-    is NySykedag -> SYKEDAG
-    is NyUkjentDag -> UKJENT_DAG
-    is NyArbeidsdag -> ARBEIDSDAG
-    is NyArbeidsgiverdag -> ARBEIDSGIVERDAG
-    is NyFeriedag -> FERIEDAG
-    is NyFriskHelgedag -> FRISK_HELGEDAG
-    is NyArbeidsgiverHelgedag -> ARBEIDSGIVER_HELGEDAG
-    is NyForeldetSykedag -> FORELDET_SYKEDAG
-    is NySykHelgedag -> SYK_HELGEDAG
-    is NyPermisjonsdag -> PERMISJONSDAG
-    is NyStudiedag -> STUDIEDAG
-    is NyUtenlandsdag -> UTENLANDSDAG
+private fun Dag.toJsonType() = when (this) {
+    is Sykedag -> SYKEDAG
+    is UkjentDag -> UKJENT_DAG
+    is Arbeidsdag -> ARBEIDSDAG
+    is Arbeidsgiverdag -> ARBEIDSGIVERDAG
+    is Feriedag -> FERIEDAG
+    is FriskHelgedag -> FRISK_HELGEDAG
+    is ArbeidsgiverHelgedag -> ARBEIDSGIVER_HELGEDAG
+    is ForeldetSykedag -> FORELDET_SYKEDAG
+    is SykHelgedag -> SYK_HELGEDAG
+    is Permisjonsdag -> PERMISJONSDAG
+    is Studiedag -> STUDIEDAG
+    is Utenlandsdag -> UTENLANDSDAG
     is ProblemDag -> PROBLEMDAG
 }

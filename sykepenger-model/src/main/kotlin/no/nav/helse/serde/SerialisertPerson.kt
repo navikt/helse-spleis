@@ -14,15 +14,15 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.NyDagData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
+import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.mapping.JsonDagType.*
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.serde.mapping.NyJsonDagType
-import no.nav.helse.serde.mapping.NyJsonDagType.*
 import no.nav.helse.serde.mapping.konverterTilAktivitetslogg
 import no.nav.helse.serde.migration.*
 import no.nav.helse.serde.reflection.*
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NyDag.*
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -390,32 +390,32 @@ internal data class PersonData(
         )
 
         data class SykdomstidslinjeData(
-            val dager: List<NyDagData>,
+            val dager: List<DagData>,
             val periode: Periode?,
             val låstePerioder: MutableList<Periode>? = mutableListOf(),
             val id: UUID,
             val tidsstempel: LocalDateTime
         ) {
-            val dagerMap: SortedMap<LocalDate, NyDag>
+            val dagerMap: SortedMap<LocalDate, Dag>
             init {
-                dagerMap = dager.map { it.dato to parseNyDag(it) }.toMap(sortedMapOf())
+                dagerMap = dager.map { it.dato to parseDag(it) }.toMap(sortedMapOf())
             }
-            private fun parseNyDag(
-                data: NyDagData
-            ): NyDag = when (data.type) {
-                ARBEIDSDAG -> NyArbeidsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                ARBEIDSGIVERDAG -> NyArbeidsgiverdag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                ARBEIDSGIVER_HELGEDAG -> NyArbeidsgiverHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                FERIEDAG -> NyFeriedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                FRISK_HELGEDAG -> NyFriskHelgedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                FORELDET_SYKEDAG -> NyForeldetSykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                PERMISJONSDAG -> NyPermisjonsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+            private fun parseDag(
+                data: DagData
+            ): Dag = when (data.type) {
+                ARBEIDSDAG -> Arbeidsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                ARBEIDSGIVERDAG -> Arbeidsgiverdag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                ARBEIDSGIVER_HELGEDAG -> ArbeidsgiverHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FERIEDAG -> Feriedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FRISK_HELGEDAG -> FriskHelgedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                FORELDET_SYKEDAG -> ForeldetSykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                PERMISJONSDAG -> Permisjonsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
                 PROBLEMDAG -> ProblemDag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id), data.melding!!)
-                STUDIEDAG -> NyStudiedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                SYKEDAG -> NySykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                SYK_HELGEDAG -> NySykHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                UTENLANDSDAG -> NyUtenlandsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
-                UKJENT_DAG -> NyUkjentDag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                STUDIEDAG -> Studiedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                SYKEDAG -> Sykedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                SYK_HELGEDAG -> SykHelgedag(data.dato, data.grad, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                UTENLANDSDAG -> Utenlandsdag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
+                UKJENT_DAG -> UkjentDag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
             }
         }
 
@@ -436,9 +436,9 @@ internal data class PersonData(
             val personFagsystemId: String?,
             val arbeidsgiverFagsystemId: String?
         ) {
-            data class NyDagData(
+            data class DagData(
                 val dato: LocalDate,
-                val type: NyJsonDagType,
+                val type: JsonDagType,
                 val kilde: KildeData,
                 val grad: Double,
                 val melding: String?

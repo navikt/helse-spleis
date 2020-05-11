@@ -6,16 +6,16 @@ import no.nav.helse.tournament.dagturnering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class NyBesteDagTest {
+internal class BesteDagTest {
 
     companion object {
-        private val ukjentDag get() = NyDag.NyUkjentDag(2.mandag, TestEvent.søknad)
-        private val arbeidsdagFraSøknad get() = NyDag.NyArbeidsdag(2.mandag, TestEvent.søknad)
-        private val ferieFraInntektsmelding get() = NyDag.NyFeriedag(2.mandag, TestEvent.inntektsmelding)
-        private val arbeidsgiverdagFraInntektsmelding get() = NyDag.NyArbeidsgiverdag(2.mandag, 100.0, TestEvent.inntektsmelding)
-        private val ferieFraSøknad get() = NyDag.NyFeriedag(2.mandag, TestEvent.søknad)
-        private val sykedagFraSøknad get() = NyDag.NySykedag(2.mandag, 100.0, TestEvent.søknad)
-        private val utenlandsFraSøknad get() = NyDag.NyUtenlandsdag(2.mandag, TestEvent.søknad)
+        private val ukjentDag get() = Dag.UkjentDag(2.mandag, TestEvent.søknad)
+        private val arbeidsdagFraSøknad get() = Dag.Arbeidsdag(2.mandag, TestEvent.søknad)
+        private val ferieFraInntektsmelding get() = Dag.Feriedag(2.mandag, TestEvent.inntektsmelding)
+        private val arbeidsgiverdagFraInntektsmelding get() = Dag.Arbeidsgiverdag(2.mandag, 100.0, TestEvent.inntektsmelding)
+        private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
+        private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, 100.0, TestEvent.søknad)
+        private val utenlandsFraSøknad get() = Dag.Utenlandsdag(2.mandag, TestEvent.søknad)
     }
 
     @Test
@@ -61,26 +61,26 @@ internal class NyBesteDagTest {
     }
 
     private fun assertWinner(
-        dag1: NyDag,
-        dag2: NyDag,
-        expectedWinner: NyDag
+        dag1: Dag,
+        dag2: Dag,
+        expectedWinner: Dag
     ) {
         val winner = dagturnering.beste(dag1, dag2)
         assertEquals(expectedWinner, winner)
     }
 
     private fun assertWinnerBidirectional(
-        dag1: NyDag,
-        dag2: NyDag,
-        expectedWinner: NyDag
+        dag1: Dag,
+        dag2: Dag,
+        expectedWinner: Dag
     ) {
         assertWinner(dag1, dag2, expectedWinner)
         assertWinner(dag2, dag1, expectedWinner)
     }
 
     private fun assertProblemDagBidirectional(
-        dag1: NyDag,
-        dag2: NyDag
+        dag1: Dag,
+        dag2: Dag
     ) {
         assertWinner(dag1, dag2, dag1.problem(dag2))
         assertWinner(dag2, dag1, dag2.problem(dag1))

@@ -42,9 +42,9 @@ internal class SykdomstidslinjeTest {
     }
 
 
-    private val konfliktsky = {venstre: NyDag, høyre: NyDag -> when {
-                venstre is NyDag.NyUkjentDag -> høyre
-                høyre is NyDag.NyUkjentDag -> venstre
+    private val konfliktsky = { venstre: Dag, høyre: Dag -> when {
+                venstre is Dag.UkjentDag -> høyre
+                høyre is Dag.UkjentDag -> venstre
                 else -> venstre.problem(høyre)
             }
         }

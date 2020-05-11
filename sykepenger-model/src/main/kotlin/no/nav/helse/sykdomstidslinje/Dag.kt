@@ -5,22 +5,22 @@ import no.nav.helse.økonomi.Grad
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal typealias BesteStrategy = (NyDag, NyDag) -> NyDag
+internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
-internal sealed class NyDag(
+internal sealed class Dag(
     protected val dato: LocalDate,
     protected val kilde: SykdomstidslinjeHendelse.Hendelseskilde
 ) {
     private fun name() = javaClass.canonicalName.split('.').last()
 
     companion object {
-        internal val default: BesteStrategy = { venstre: NyDag, høyre: NyDag ->
+        internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             if (venstre == høyre) venstre else ProblemDag(høyre.dato, høyre.kilde,
                 "Kan ikke velge mellom ${venstre.name()} fra ${venstre.kilde} og ${høyre.name()} fra ${høyre.kilde}.")
         }
 
-        internal val noOverlap: BesteStrategy = { venstre: NyDag, høyre: NyDag ->
+        internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             ProblemDag(høyre.dato, høyre.kilde, "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})")
         }
@@ -28,40 +28,40 @@ internal sealed class NyDag(
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
 
-    internal fun problem(other: NyDag): NyDag = ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
+    internal fun problem(other: Dag): Dag = ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
 
     override fun equals(other: Any?) =
-        other != null && this::class == other::class && this.equals(other as NyDag)
+        other != null && this::class == other::class && this.equals(other as Dag)
 
-    protected open fun equals(other: NyDag) = this.dato == other.dato
+    protected open fun equals(other: Dag) = this.dato == other.dato
 
     override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
 
     internal open fun accept(visitor: SykdomstidslinjeVisitor) {}
 
-    internal class NyUkjentDag(
+    internal class UkjentDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyArbeidsdag(
+    internal class Arbeidsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyArbeidsgiverdag(
+    internal class Arbeidsgiverdag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         internal constructor(
             dato: LocalDate,
@@ -73,29 +73,29 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NyFeriedag(
+    internal class Feriedag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyFriskHelgedag(
+    internal class FriskHelgedag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyArbeidsgiverHelgedag(
+    internal class ArbeidsgiverHelgedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         internal constructor(
             dato: LocalDate,
@@ -107,11 +107,11 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NySykedag(
+    internal class Sykedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         internal constructor(
             dato: LocalDate,
@@ -123,11 +123,11 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NyForeldetSykedag(
+    internal class ForeldetSykedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         internal constructor(
             dato: LocalDate,
@@ -139,11 +139,11 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NySykHelgedag(
+    internal class SykHelgedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         internal constructor(
             dato: LocalDate,
@@ -155,28 +155,28 @@ internal sealed class NyDag(
             visitor.visitDag(this, dato, grad, kilde)
     }
 
-    internal class NyPermisjonsdag(
+    internal class Permisjonsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyStudiedag(
+    internal class Studiedag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class NyUtenlandsdag(
+    internal class Utenlandsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
@@ -186,7 +186,7 @@ internal sealed class NyDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
         private val melding: String
-    ) : NyDag(dato, kilde) {
+    ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde, melding)

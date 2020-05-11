@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.NyDag
-import no.nav.helse.sykdomstidslinje.NyDag.Companion.noOverlap
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
@@ -26,7 +26,7 @@ class Sykmelding(
         }
             .merge(noOverlap)
             .also { tidslinje ->
-                if (tidslinje.any { it is NyDag.ProblemDag }) severe("Sykeperioder overlapper")
+                if (tidslinje.any { it is Dag.ProblemDag }) severe("Sykeperioder overlapper")
             }
     }
 

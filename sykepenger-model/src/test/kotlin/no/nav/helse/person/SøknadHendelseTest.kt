@@ -38,7 +38,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(5, inspektør.sykdomstidslinje(0).count())
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(5, inspektør.sykdomstidslinje(0).count())
     }
 
     @Test
@@ -74,7 +74,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(9, inspektør.sykdomstidslinje(0).length()) { inspektør.sykdomstidslinje(0).toString() }
+        assertEquals(9, inspektør.sykdomstidslinje(0).count()) { inspektør.sykdomstidslinje(0).toString() }
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).length())
+        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
         assertEquals(5, inspektør.sykdomstidslinje(1).length())
     }
@@ -127,8 +127,8 @@ internal class SøknadHendelseTest {
     internal fun `to forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         person.håndter(
-                søknad(Sykdom(1.januar,  5.januar, 100), orgnummer = "orgnummer2")
-            )
+            søknad(Sykdom(1.januar,  5.januar, 100), orgnummer = "orgnummer2")
+        )
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
