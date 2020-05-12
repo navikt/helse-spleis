@@ -41,7 +41,7 @@ internal class Vedtaksperiode private constructor(
     private var maksdato: LocalDate?,
     private var gjenståendeSykedager: Int?,
     private var forbrukteSykedager: Int?,
-    private var godkjentAv: String,
+    private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
@@ -72,7 +72,7 @@ internal class Vedtaksperiode private constructor(
         maksdato = null,
         gjenståendeSykedager = null,
         forbrukteSykedager = null,
-        godkjentAv = "Spleis",
+        godkjentAv = null,
         godkjenttidspunkt = null,
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
@@ -1021,7 +1021,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = hendelse,
                 oppdrag = Fagområde.SPREF.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
-                saksbehandler = vedtaksperiode.godkjentAv
+                saksbehandler = "Spleis"
             )
         }
     }
@@ -1077,7 +1077,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
                 requireNotNull(vedtaksperiode.maksdato),
-                vedtaksperiode.godkjentAv
+                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet"}
             )
         }
 
