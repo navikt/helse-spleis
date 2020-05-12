@@ -3,6 +3,7 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
@@ -20,6 +21,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     private val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
+    private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
@@ -90,7 +92,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "personFagsystemId" to personFagsystemId,
-        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId
+        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
@@ -102,6 +105,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "førsteFraværsdag" to førsteFraværsdag,
-        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.toDouble() }
+        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.toDouble() },
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 }

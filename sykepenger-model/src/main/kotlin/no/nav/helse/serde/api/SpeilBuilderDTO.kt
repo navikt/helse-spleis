@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
 import java.time.LocalDate
@@ -45,7 +46,8 @@ data class VedtaksperiodeDTO(
     val hendelser: List<HendelseDTO>,
     val dataForVilkårsvurdering: GrunnlagsdataDTO?,
     val simuleringsdata: SimuleringsdataDTO?,
-    val aktivitetslogg: List<AktivitetDTO>
+    val aktivitetslogg: List<AktivitetDTO>,
+    val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
 ) : VedtaksperiodeDTOBase
 
 data class UtbetalingerDTO(

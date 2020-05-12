@@ -54,7 +54,8 @@ internal fun createVedtaksperiode(
     sykdomshistorikk: Sykdomshistorikk,
     utbetalingstidslinje: Utbetalingstidslinje?,
     personFagsystemId: String?,
-    arbeidsgiverFagsystemId: String?
+    arbeidsgiverFagsystemId: String?,
+    forlengelseFraInfotrygd: ForlengelseFraInfotrygd
 ) = Vedtaksperiode::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
@@ -77,7 +78,8 @@ internal fun createVedtaksperiode(
         sykdomshistorikk,
         utbetalingstidslinje,
         personFagsystemId,
-        arbeidsgiverFagsystemId
+        arbeidsgiverFagsystemId,
+        forlengelseFraInfotrygd
     )
 
 internal fun createUtbetaling(

@@ -49,7 +49,8 @@ internal class Vedtaksperiode private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
-    private var arbeidsgiverFagsystemId: String?
+    private var arbeidsgiverFagsystemId: String?,
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 ) : Aktivitetskontekst {
 
     internal constructor(
@@ -533,7 +534,10 @@ internal class Vedtaksperiode private constructor(
             val forlengelse = tilstøtende != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
-            if (tilstøtende != null) vedtaksperiode.gruppeId = tilstøtende.gruppeId
+            if (tilstøtende != null) {
+                vedtaksperiode.forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
+                vedtaksperiode.gruppeId = tilstøtende.gruppeId
+            }
 
             return when {
                 forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
@@ -710,9 +714,11 @@ internal class Vedtaksperiode private constructor(
                             .sisteSykepengeperiode()
                     val nesteTilstand =
                         if (sistePeriode == null || !sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) {
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
                             AvventerInntektsmeldingFerdigGap
                         } else {
                             vedtaksperiode.førsteFraværsdag = sistePeriode.start
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
                             if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
                                 ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
                             } else {
@@ -1242,4 +1248,10 @@ internal class Vedtaksperiode private constructor(
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
     }
+}
+
+enum class ForlengelseFraInfotrygd {
+    IKKE_ETTERSPURT,
+    JA,
+    NEI
 }

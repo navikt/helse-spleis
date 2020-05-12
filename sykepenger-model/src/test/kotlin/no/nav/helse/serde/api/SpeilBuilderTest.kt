@@ -23,7 +23,7 @@ internal class SpeilBuilderTest {
     private val fnr = "12020052345"
 
     @Test
-    internal fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
+    fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(
