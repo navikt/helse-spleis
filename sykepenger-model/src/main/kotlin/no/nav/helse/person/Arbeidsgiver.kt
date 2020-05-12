@@ -126,19 +126,20 @@ internal class Arbeidsgiver private constructor(
         }
             ?.kansellerUtbetaling()
             ?.also {
+                kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
                 utbetalinger.add(it)
                 Aktivitet.Behov.utbetaling(
                     kansellerUtbetaling.aktivitetslogg,
                     it.arbeidsgiverOppdrag(),
                     saksbehandler = kansellerUtbetaling.saksbehandler
                 )
+                perioder.filter { periode -> periode.arbeidsgiverFagsystemId() == kansellerUtbetaling.fagsystemId }
+                    .forEach { periode -> periode.annullerPeriode(kansellerUtbetaling) }
             }
             ?: kansellerUtbetaling.error(
-                "Avvis hvis vi ikke finner utbetalingsreferanse %s",
+                "Avvis hvis vi ikke finner fagsystemId %s",
                 kansellerUtbetaling.fagsystemId
             )
-        perioder.filter { it.arbeidsgiverFagsystemId() == kansellerUtbetaling.fagsystemId }
-            .forEach { it.invaliderPeriode(kansellerUtbetaling) }
     }
 
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)

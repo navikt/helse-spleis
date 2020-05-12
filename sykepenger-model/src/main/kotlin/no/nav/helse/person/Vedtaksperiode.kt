@@ -208,6 +208,11 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, TilInfotrygd)
     }
 
+    internal fun annullerPeriode(hendelse: ArbeidstakerHendelse) {
+        hendelse.info("Invaliderer vedtaksperiode: %s på grunn av annullering", this.id.toString())
+        tilstand(hendelse, TilInfotrygd)
+    }
+
     private fun periode() =
         if (sykdomshistorikk.isEmpty()) Periode(LocalDate.MIN, LocalDate.MAX)
         else Periode(førsteDag(), sisteDag())
@@ -506,12 +511,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             avsluttBehandling: Arbeidsgiver.AvsluttBehandling
         ) {
-            avsluttBehandling.hendelse.error("Avslutter perioden fordi tilstøtende gikk til Infotrygd")
+            avsluttBehandling.hendelse.warn("Avslutter perioden fordi tilstøtende gikk til Infotrygd")
             vedtaksperiode.tilstand(avsluttBehandling.hendelse, TilInfotrygd)
         }
 
-        fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        }
+        fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
 
         fun leaving(aktivitetslogg: IAktivitetslogg) {}
     }
@@ -1208,7 +1212,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.error("Sykdom for denne personen kan ikke behandles automatisk.")
+            hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             vedtaksperiode.arbeidsgiver.avsluttBehandling(vedtaksperiode, hendelse)
         }
 

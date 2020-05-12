@@ -193,7 +193,7 @@ internal class SpeilBuilderTest {
         assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
         assertEquals(utbetalingsliste[1].personOppdrag().fagsystemId(), utbetalinger.personUtbetaling!!.fagsystemId)
         assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().førstedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom)
-        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer[1].tom)
+        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom)
     }
 
     @Test

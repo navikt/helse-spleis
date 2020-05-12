@@ -452,11 +452,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
 
         private fun List<Utbetaling>.byggUtbetaling(fagsystemId: String?, oppdragStrategy: (Utbetaling) -> Oppdrag) =
-            fagsystemId?.let {
-                val linjer = this.filter { utbetaling ->
+            fagsystemId?.let { fagsystemId ->
+                this.lastOrNull() { utbetaling ->
                     oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
-                }.flatMap { utbetaling ->
-                    oppdragStrategy(utbetaling).map { linje ->
+                }?.let { utbetaling ->
+                    val linjer = oppdragStrategy(utbetaling).linjerUtenOpphør().map { linje ->
                         UtbetalingerDTO.UtbetalingslinjeDTO(
                             fom = linje.fom,
                             tom = linje.tom,
@@ -464,8 +464,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                             grad = linje.grad
                         )
                     }
+                    UtbetalingerDTO.UtbetalingDTO(linjer, fagsystemId)
                 }
-                UtbetalingerDTO.UtbetalingDTO(linjer, it)
             }
     }
 

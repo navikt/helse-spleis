@@ -54,7 +54,7 @@ internal class Oppdrag private constructor(
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
-    private fun linjerUtenOpphør() = filter { !it.erOpphør() }
+    internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
     internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
         return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->

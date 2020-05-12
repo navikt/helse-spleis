@@ -42,7 +42,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
-            assertTrue(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
@@ -65,11 +65,14 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
     @Test
     fun `En enkel periode som blir annullert blir også invalidert`() {
+        val behovTeller = inspektør.personLogg.behov().size
         inspektør.also {
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
         }
         håndterKansellerUtbetaling()
         inspektør.also {
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
         }
     }
@@ -81,8 +84,11 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(1))
         }
+        val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(1))
         }
@@ -97,8 +103,11 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(1))
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(2))
         }
+        val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
         inspektør.also {
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(1))
             assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(2))
