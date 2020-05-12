@@ -332,7 +332,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     }
 
     private inner class VedtaksperiodeState(
-        vedtaksperiode: Vedtaksperiode,
+        private val vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val fellesGrunnlagsdata: MutableMap<UUID, GrunnlagsdataDTO>,
@@ -347,7 +347,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperiodehendelser = mutableListOf<HendelseDTO>()
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
-        private val vedtaksperiode = vedtaksperiode
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
@@ -359,7 +358,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] =
-                aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }
+                aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }.distinctBy { it.melding }
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

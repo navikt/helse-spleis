@@ -366,7 +366,7 @@ internal class SpeilBuilderTest {
     }
 
     @Test
-    internal fun `Yes hello does this work?!`() {
+    fun `Yes hello does this work?!`() {
         val fom = 1.januar(2018)
         val tom = 31.januar(2018)
 
@@ -389,6 +389,16 @@ internal class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(0, vedtaksperiode.vilkår.sykepengedager.gjenståendeDager)
+    }
+
+    @Test
+    fun `Sender unike advarsler per periode`() {
+        val (person, hendelser) = personMedToAdvarsler(fom = 1.januar(2018), tom = 31.januar(2018))
+
+        person.aktivitetslogg.toString()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertEquals(vedtaksperiode.aktivitetslogg.distinctBy { it.melding }, vedtaksperiode.aktivitetslogg)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
@@ -472,6 +482,41 @@ internal class SpeilBuilderTest {
                         håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                         håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                     }
+                }
+            }
+        internal fun personMedToAdvarsler(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        håndter(søknad)
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    fangeUtbetalinger()
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
 
