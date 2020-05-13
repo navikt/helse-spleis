@@ -45,3 +45,5 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
 
     internal fun roundToInt() = toDouble().roundToInt()
 }
+
+internal val Number.prosent get() = Prosentdel(this)

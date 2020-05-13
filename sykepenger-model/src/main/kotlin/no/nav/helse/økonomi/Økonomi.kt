@@ -3,64 +3,72 @@ package no.nav.helse.økonomi
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
-import kotlin.math.roundToInt
 
-internal class Økonomi private constructor(private val lønn: Double, private val grad: Grad) {
-
-    init {
-        require(lønn >= 0) { "lønn kan ikke være negativ" }
-        require(lønn !in listOf(
-            POSITIVE_INFINITY,
-            NEGATIVE_INFINITY,
-            NaN
-        )) { "lønn må være gyldig positivt nummer" }
-    }
+internal class Økonomi private constructor(
+    private val grad: Prosentdel,
+    private val arbeidsgiverBetalingProsent: Prosentdel,
+    private var lønn: Double? = null,
+    private var tilstand: Tilstand = Tilstand.KunGrad()
+) {
 
     companion object {
+        private val GRENSE = 20.prosent
 
-        internal fun lønn(beløp: Number, grad: Grad) = Økonomi(beløp.toDouble(), grad)
+        internal fun sykdomsgrad(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
+            Økonomi(grad, arbeidsgiverBetalingProsent)
 
-        internal fun samletGrad(økonomier: List<Økonomi>) =
-            Grad.vektlagtGjennomsnitt(økonomier.map { it.grad to it.lønn })
+        internal fun arbeidshelse(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
+            Økonomi(!grad, arbeidsgiverBetalingProsent)
+
+        internal fun samletGrad(økonomiList: List<Økonomi>) =
+            Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad to it.lønn() })
     }
 
-    internal fun toMap(): Map<String, Number> =
-        mapOf(
-            "grad" to grad.toPercentage(),
-            "lønn" to lønn
-        )
+    internal fun erUnderGrensen() = grad.compareTo(GRENSE) < 0
 
-    internal fun toIntMap(): Map<String, Number> =
-        mapOf(
-            "grad" to grad.roundToInt(),
-            "lønn" to lønn.roundToInt()
-        )
-
-    internal fun betalte(prosentdel: Prosentdel): Utbetalinger {
-        return Utbetalinger(prosentdel)
+    internal fun lønn(beløp: Number): Økonomi {
+        beløp.toDouble().also {
+            require(it >= 0) { "lønn kan ikke være negativ" }
+            require(it !in listOf(
+                POSITIVE_INFINITY,
+                NEGATIVE_INFINITY,
+                NaN
+            )) { "lønn må være gyldig positivt nummer" }
+            tilstand.lønn(this, it)
+        }
+        return this
     }
 
-    internal inner class Utbetalinger(prosentdel: Prosentdel) {
-        private val totalUtbetaling = lønn * grad.ratio()
-        private val arbeidsgiverutbetaling = (totalUtbetaling * prosentdel.ratio()).roundToInt()
+    internal fun toMap(): Map<String, Any> = tilstand.toMap(this)
 
-        internal fun arbeidsgiverutbetaling() = arbeidsgiverutbetaling
+    private fun lønn() = lønn ?: throw IllegalStateException("Lønn er ikke satt ennå")
 
-        internal fun personUtbetaling() = totalUtbetaling.roundToInt() - arbeidsgiverutbetaling
+    private abstract sealed class Tilstand {
+        internal open fun lønn(økonomi: Økonomi, beløp: Double) {
+            throw IllegalStateException("Forsøk å stille lønn igjen")
+        }
 
-        internal fun toMap(): Map<String, Number> =
-            this@Økonomi.toMap() + mapOf(
-                "arbeidsgiverutbetaling" to arbeidsgiverutbetaling(),
-                "personutbetaling" to personUtbetaling()
+        internal open fun toMap(økonomi: Økonomi): Map<String, Any> = mapOf(
+            "grad" to økonomi.grad.toDouble(),
+            "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.toDouble()
+        )
+
+        internal class KunGrad: Tilstand() {
+
+            override fun lønn(økonomi: Økonomi, beløp: Double) {
+                økonomi.lønn = beløp
+                økonomi.tilstand = HaLønn()
+            }
+        }
+
+        internal class HaLønn: Tilstand() {
+
+            override fun toMap(økonomi: Økonomi) = super.toMap(økonomi) + mapOf(
+                "lønn" to økonomi.lønn()
             )
+        }
 
-        internal fun toIntMap(): Map<String, Number> =
-            this@Økonomi.toIntMap() + mapOf(
-                "arbeidsgiverutbetaling" to arbeidsgiverutbetaling(),
-                "personutbetaling" to personUtbetaling()
-            )
     }
 }
 
-internal fun List<Økonomi>.samletGrad() = Økonomi.samletGrad(this)
-
+internal fun List<Økonomi>.samletGrad(): Prosentdel = Økonomi.samletGrad(this)
