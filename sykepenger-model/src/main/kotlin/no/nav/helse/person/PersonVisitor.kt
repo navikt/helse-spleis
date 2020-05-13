@@ -34,8 +34,10 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     ) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
-    fun preVisitPerioder() {}
-    fun postVisitPerioder() {}
+    fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
+    fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
+    fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {}
+    fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {}
     fun postVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

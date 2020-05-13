@@ -108,9 +108,9 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
             assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(1))
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(2))
+            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(2))
+            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
         }
     }
 

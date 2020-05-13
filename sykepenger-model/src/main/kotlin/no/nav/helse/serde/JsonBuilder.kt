@@ -121,7 +121,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.postVisitUtbetalingstidslinje(tidslinje)
 
-    override fun preVisitPerioder() = currentState.preVisitPerioder()
+    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitPerioder(vedtaksperioder)
+    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitPerioder(vedtaksperioder)
+    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitForkastedePerioder(vedtaksperioder)
+    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitForkastedePerioder(vedtaksperioder)
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -330,8 +333,20 @@ internal class JsonBuilder : PersonVisitor {
 
         private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitPerioder() {
-            arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
+        override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            this.vedtaksperioder.clear()
+        }
+
+        override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
+        }
+
+        override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            this.vedtaksperioder.clear()
+        }
+
+        override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            arbeidsgiverMap["forkastede"] = this.vedtaksperioder.toList()
         }
 
         override fun preVisitVedtaksperiode(

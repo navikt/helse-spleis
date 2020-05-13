@@ -99,6 +99,7 @@ class SerialisertPerson(val json: String) {
     ): Arbeidsgiver {
         val inntekthistorikk = Inntekthistorikk()
         val vedtaksperioder = mutableListOf<Vedtaksperiode>()
+        val forkastede = mutableListOf<Vedtaksperiode>()
 
         data.inntekter.forEach { inntektData ->
             inntekthistorikk.add(
@@ -114,10 +115,21 @@ class SerialisertPerson(val json: String) {
             id = data.id,
             inntekthistorikk = inntekthistorikk,
             perioder = vedtaksperioder,
+            forkastede = forkastede,
             utbetalinger = data.utbetalinger.map(::konverterTilUtbetaling).toMutableList()
         )
 
         vedtaksperioder.addAll(data.vedtaksperioder.map {
+            parseVedtaksperiode(
+                person,
+                arbeidsgiver,
+                personData,
+                data,
+                it
+            )
+        })
+
+        forkastede.addAll(data.forkastede.map {
             parseVedtaksperiode(
                 person,
                 arbeidsgiver,
@@ -390,6 +402,7 @@ internal data class PersonData(
         val id: UUID,
         val inntekter: List<InntektData>,
         val vedtaksperioder: List<VedtaksperiodeData>,
+        val forkastede: List<VedtaksperiodeData>,
         val utbetalinger: List<UtbetalingData>
     ) {
         data class InntektData(

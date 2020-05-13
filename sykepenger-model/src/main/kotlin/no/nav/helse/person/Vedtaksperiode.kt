@@ -1280,6 +1280,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
+            vedtaksperiode.arbeidsgiver.forkast(vedtaksperiode)
             vedtaksperiode.arbeidsgiver.avsluttBehandling(vedtaksperiode, hendelse)
         }
 

@@ -13,6 +13,7 @@ internal class Arbeidsgiver private constructor(
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
     private val perioder: MutableList<Vedtaksperiode>,
+    private val forkastede: MutableList<Vedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
 
@@ -24,6 +25,7 @@ internal class Arbeidsgiver private constructor(
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
         perioder = mutableListOf(),
+        forkastede = mutableListOf(),
         utbetalinger = mutableListOf()
     )
 
@@ -33,9 +35,12 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
-        visitor.preVisitPerioder()
+        visitor.preVisitPerioder(perioder)
         perioder.forEach { it.accept(visitor) }
-        visitor.postVisitPerioder()
+        visitor.postVisitPerioder(perioder)
+        visitor.preVisitForkastedePerioder(forkastede)
+        forkastede.forEach { it.accept(visitor) }
+        visitor.postVisitForkastedePerioder(forkastede)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
@@ -50,7 +55,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if (perioder.map { it.håndter(sykmelding) }.none { it }) {
+        if (perioder.toList().map { it.håndter(sykmelding) }.none { it }) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             Vedtaksperiode.sorter(perioder)
@@ -59,63 +64,63 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        if (perioder.map { it.håndter(søknad) }.none { it }) {
+        if (perioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         søknad.kontekst(this)
-        if (perioder.map { it.håndter(søknad) }.none { it }) {
+        if (perioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        if (perioder.map { it.håndter(inntektsmelding) }.none { it }) {
+        if (perioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
-        perioder.forEach { it.håndter(utbetalingshistorikk) }
+        perioder.toList().forEach { it.håndter(utbetalingshistorikk) }
     }
 
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
-        perioder.forEach { it.håndter(ytelser) }
+        perioder.toList().forEach { it.håndter(ytelser) }
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
-        perioder.forEach { it.håndter(utbetalingsgodkjenning) }
+        perioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
-        perioder.forEach { it.håndter(vilkårsgrunnlag) }
+        perioder.toList().forEach { it.håndter(vilkårsgrunnlag) }
     }
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
-        perioder.forEach { it.håndter(simulering) }
+        perioder.toList().forEach { it.håndter(simulering) }
     }
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
-        perioder.forEach { it.håndter(utbetaling) }
+        perioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
-        perioder.forEach { it.håndter(utbetaling) }
+        perioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return perioder.any { it.håndter(påminnelse) }
+        return perioder.toList().any { it.håndter(påminnelse) }
     }
 
     internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
@@ -148,7 +153,11 @@ internal class Arbeidsgiver private constructor(
         inntekthistorikk.inntekt(dato)
 
     internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse) {
-        perioder.forEach { it.invaliderPeriode(hendelse) }
+        perioder.toList().forEach { it.invaliderPeriode(hendelse) }
+    }
+
+    internal fun forkast(vedtaksperiode: Vedtaksperiode) {
+        if (perioder.remove(vedtaksperiode)) forkastede.add(vedtaksperiode)
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
@@ -179,11 +188,11 @@ internal class Arbeidsgiver private constructor(
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(perioder, vedtaksperiode)
 
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-        perioder.forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
+        perioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
     internal fun avsluttBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-        perioder.forEach { it.håndter(vedtaksperiode, AvsluttBehandling(hendelse)) }
+        perioder.toList().forEach { it.håndter(vedtaksperiode, AvsluttBehandling(hendelse)) }
     }
 
     internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)

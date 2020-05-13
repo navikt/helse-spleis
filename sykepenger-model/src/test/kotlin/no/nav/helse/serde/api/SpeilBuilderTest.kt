@@ -258,7 +258,7 @@ internal class SpeilBuilderTest {
                     add(sykmeldingDTO)
                 }
 
-                var sisteVedtaksperiodeId = collectVedtaksperiodeIder().last()
+                var sisteVedtaksperiodeId = collectVedtaksperiodeIder().first()
                 søknad(hendelseId = UUID.randomUUID(), fom = fom1Periode, tom = tom1Periode, sendtSøknad = 1.april.atStartOfDay())
                     .also { (søknad, søknadDTO) ->
                         håndter(søknad)
@@ -277,8 +277,14 @@ internal class SpeilBuilderTest {
                     håndter(søknad)
                     add(søknadDTO)
                 }
-                sisteVedtaksperiodeId = collectVedtaksperiodeIder().last()
+                sisteVedtaksperiodeId = collectVedtaksperiodeIder().first()
 
+                håndter(ytelser(
+                    vedtaksperiodeId = sisteVedtaksperiodeId,
+                    inntektshistorikk = inntektshistorikk,
+                    fom = førsteFraværsdagInfotrygd,
+                    tom = tom1Periode
+                ))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = sisteVedtaksperiodeId))
                 håndter(ytelser(
                     vedtaksperiodeId = sisteVedtaksperiodeId,

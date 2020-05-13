@@ -122,7 +122,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
         currentState.postVisitUtbetalingstidslinje(tidslinje)
 
-    override fun preVisitPerioder() = currentState.preVisitPerioder()
+    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitPerioder(vedtaksperioder)
+    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitPerioder(vedtaksperioder)
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -308,8 +309,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             this.utbetalinger = utbetalinger
         }
 
-        override fun preVisitPerioder() {
-            arbeidsgiverMap["vedtaksperioder"] = vedtaksperioder
+        override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            this.vedtaksperioder.clear()
+        }
+
+        override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
         }
 
         override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
