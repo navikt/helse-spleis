@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -67,42 +68,46 @@ internal class GradØkonomiTest {  // bare arbeidsgiver betalte
         }
     }
 
-//    @Test internal fun toIntMap() {
-//        Økonomi.lønn(1200.4, Grad.sykdomsgrad(79.5)).toIntMap().apply {
-//            assertEquals(1200, this["lønn"])
-//            assertEquals(80, this["grad"])
-//        }
-//    }
-//
-//    @Test internal fun `arbeidsgiver bare utbetaling`() {
-//        Økonomi
-//            .lønn(1200, Grad.sykdomsgrad(80))
-//            .betalte(100.prosentdel).apply {
-//                assertEquals(960, this.arbeidsgiverutbetaling())
-//                assertEquals(0, this.personUtbetaling())
-//                this.toMap().apply {
-//                        assertEquals(1200.0, this["lønn"])
-//                        assertEquals(960, this["arbeidsgiverutbetaling"])
-//                        assertEquals(0, this["personutbetaling"])
-//                        assertEquals(80.0, this["grad"])
-//                    }
-//                this.toIntMap().apply {
-//                        assertEquals(1200, this["lønn"])
-//                        assertEquals(960, this["arbeidsgiverutbetaling"])
-//                        assertEquals(0, this["personutbetaling"])
-//                        assertEquals(80, this["grad"])
-//                    }
-//            }
-//    }
-//
-//    @Test internal fun `arbeidsgiver og person splittes tilsvarer totalt`() {
-//        Økonomi
-//            .lønn(999, Grad.sykdomsgrad(100))
-//            .betalte(50.prosentdel).apply {
-//                assertEquals(500, this.arbeidsgiverutbetaling())
-//                assertEquals(499, this.personUtbetaling())
-//            }
-//    }
+    @Test internal fun `toIntMap med lønn`() {
+        79.5.prosent.sykdomsgrad.lønn(1200.4).toIntMap().apply {
+            assertEquals(80, this["grad"])
+            assertEquals(100, this["arbeidsgiverBetalingProsent"])
+            assertEquals(1200, this["lønn"])
+        }
+    }
+
+    @Test internal fun `Beregn utbetaling når mindre enn 6G`() {
+        80.prosent.sykdomsgrad.lønn(1200).also {
+            listOf(it).betale(1.januar)
+            it.toMap().apply {
+                assertEquals(80.0, this["grad"])
+                assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
+                assertEquals(1200.0, this["lønn"])
+                assertEquals(960, this["arbeidsgiversutbetaling"])
+                assertEquals(0, this["personUtbetaling"])
+            }
+            it.toIntMap().apply {
+                assertEquals(80, this["grad"])
+                assertEquals(100, this["arbeidsgiverBetalingProsent"])
+                assertEquals(1200, this["lønn"])
+                assertEquals(960, this["arbeidsgiversutbetaling"])
+                assertEquals(0, this["personUtbetaling"])
+            }
+        }
+    }
+
+    @Test internal fun `arbeidsgiver og person splittes tilsvarer totalt`() {
+        Økonomi.sykdomsgrad(100.prosent, 50.prosent).lønn(999).also {
+            listOf(it).betale(1.januar)
+            it.toMap().apply {
+                assertEquals(100.0, this["grad"])
+                assertEquals(50.0, this["arbeidsgiverBetalingProsent"])
+                assertEquals(999.0, this["lønn"])
+                assertEquals(500, this["arbeidsgiversutbetaling"])
+                assertEquals(499, this["personUtbetaling"])
+            }
+        }
+    }
 }
 
 internal val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this, 100.prosent)
