@@ -2,10 +2,8 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
+import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -187,7 +185,7 @@ internal class SpeilBuilderTest {
         }
 
         val personDTO = serializePersonForSpeil(person, hendelser)
-        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
         val utbetalinger = vedtaksperioder[1].utbetalinger
 
         assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
@@ -243,12 +241,80 @@ internal class SpeilBuilderTest {
 
         val personDTO = serializePersonForSpeil(person, hendelser)
 
-        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder as List<VedtaksperiodeDTO>
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
 
         assertEquals(2, vedtaksperioder.size)
         assertEquals(vedtaksperioder.first().gruppeId, vedtaksperioder.last().gruppeId)
         assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder.last().dataForVilkårsvurdering)
         assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder.last().vilkår.opptjening)
+    }
+
+    @Test
+    fun `forlengelse fra Infotrygd får riktig første fraværsdag`() {
+        val fom1Periode = 1.januar
+        val tom1Periode = 31.januar
+        val førsteFraværsdagInfotrygd = 1.desember(2017)
+        val fom2Periode = 1.februar
+        val tom2Periode = 14.februar
+        val inntektshistorikk = listOf(Inntektsopplysning(førsteFraværsdagInfotrygd, 31000, orgnummer, true))
+
+        val (person, hendelser) = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = fom1Periode, tom = tom1Periode).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+
+                var sisteVedtaksperiodeId = collectVedtaksperiodeIder().last()
+                søknad(hendelseId = UUID.randomUUID(), fom = fom1Periode, tom = tom1Periode, sendtSøknad = 1.april.atStartOfDay())
+                    .also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+
+                // Her går den til Infotrygd pga overlap
+                håndter(ytelserForlengelseFraInfotrygd(
+                    vedtaksperiodeId = sisteVedtaksperiodeId,
+                    inntektshistorikk = inntektshistorikk,
+                    fom = førsteFraværsdagInfotrygd,
+                    tom = 4.januar
+                ))
+
+                // Ny periode
+                sykmelding(fom = fom2Periode, tom = tom2Periode).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = fom2Periode, tom = tom2Periode).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                sisteVedtaksperiodeId = collectVedtaksperiodeIder().last()
+
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = sisteVedtaksperiodeId))
+                håndter(ytelserForlengelseFraInfotrygd(
+                    vedtaksperiodeId = sisteVedtaksperiodeId,
+                    inntektshistorikk = inntektshistorikk,
+                    fom = førsteFraværsdagInfotrygd,
+                    tom = tom1Periode
+                ))
+
+                håndter(simulering(vedtaksperiodeId = sisteVedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = sisteVedtaksperiodeId))
+            }
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
+            .also {
+                assertEquals(1, it.size)
+            }
+
+        // Denne periode er forlengelse av Infotrygd-periode.
+        // Kombinasjonen førsteFraværsdag != første dag i sykdomstidslinjen og JA fører til riktig visnig
+        assertEquals(førsteFraværsdagInfotrygd, vedtaksperioder.first().førsteFraværsdag)
+        assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
     }
 
     @Test
@@ -484,6 +550,7 @@ internal class SpeilBuilderTest {
                     }
                 }
             }
+
         internal fun personMedToAdvarsler(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
@@ -734,6 +801,50 @@ internal class SpeilBuilderTest {
                         )
                     ),
                     inntektshistorikk = emptyList(),
+                    aktivitetslogg = it
+                ),
+                foreldrepermisjon = Foreldrepermisjon(
+                    foreldrepengeytelse = Periode(
+                        fom = 1.januar.minusYears(2),
+                        tom = 31.januar.minusYears(2)
+                    ),
+                    svangerskapsytelse = Periode(
+                        fom = 1.juli.minusYears(2),
+                        tom = 31.juli.minusYears(2)
+                    ),
+                    aktivitetslogg = it
+                ),
+                aktivitetslogg = it
+            )
+        }
+
+        internal fun ytelserForlengelseFraInfotrygd(
+            hendelseId: UUID = UUID.randomUUID(),
+            vedtaksperiodeId: String,
+            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+            fom: LocalDate,
+            tom: LocalDate
+        ) = Aktivitetslogg().let {
+            Ytelser(
+                meldingsreferanseId = hendelseId,
+                aktørId = aktørId,
+                fødselsnummer = fnr,
+                organisasjonsnummer = orgnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingshistorikk = Utbetalingshistorikk(
+                    aktørId = aktørId,
+                    fødselsnummer = fnr,
+                    organisasjonsnummer = orgnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalinger = listOf(
+                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                            fom = fom,
+                            tom = tom,
+                            dagsats = 31000,
+                            grad = 100
+                        )
+                    ),
+                    inntektshistorikk = inntektshistorikk,
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(

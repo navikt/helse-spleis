@@ -955,6 +955,7 @@ internal class Vedtaksperiode private constructor(
                                 .sisteSykepengeperiode() ?: return false
 
                             if (!sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) return false
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
                             if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
                                 sistePeriode.start
 
