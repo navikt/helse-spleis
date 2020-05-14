@@ -198,6 +198,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsprearbeidsgiver",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvspokelse",
                     "role": "CONSUMER"
                 },
