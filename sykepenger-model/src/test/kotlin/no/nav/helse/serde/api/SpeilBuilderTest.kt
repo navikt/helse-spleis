@@ -21,14 +21,10 @@ internal class SpeilBuilderTest {
     fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
-        assertEquals(
-            1.januar,
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.first().dato
-        )
-        assertEquals(
-            31.januar,
-            (personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO).utbetalingstidslinje.last().dato
-        )
+
+        val vedtaksperiodeDTO = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        assertEquals(1.januar, vedtaksperiodeDTO.utbetalingstidslinje.first().dato)
+        assertEquals(31.januar, vedtaksperiodeDTO.utbetalingstidslinje.last().dato)
     }
 
     @Test
@@ -270,12 +266,7 @@ internal class SpeilBuilderTest {
                     }
 
                 // Her går den til Infotrygd pga overlap
-                håndter(ytelserForlengelseFraInfotrygd(
-                    vedtaksperiodeId = sisteVedtaksperiodeId,
-                    inntektshistorikk = inntektshistorikk,
-                    fom = førsteFraværsdagInfotrygd,
-                    tom = 4.januar
-                ))
+                håndter(ytelser(vedtaksperiodeId = sisteVedtaksperiodeId, fom = førsteFraværsdagInfotrygd, tom = 4.januar))
 
                 // Ny periode
                 sykmelding(fom = fom2Periode, tom = tom2Periode).also { (sykmelding, sykmeldingDto) ->
@@ -289,7 +280,7 @@ internal class SpeilBuilderTest {
                 sisteVedtaksperiodeId = collectVedtaksperiodeIder().last()
 
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = sisteVedtaksperiodeId))
-                håndter(ytelserForlengelseFraInfotrygd(
+                håndter(ytelser(
                     vedtaksperiodeId = sisteVedtaksperiodeId,
                     inntektshistorikk = inntektshistorikk,
                     fom = førsteFraværsdagInfotrygd,
@@ -550,9 +541,7 @@ internal class SpeilBuilderTest {
 
         private fun personMedToAdvarsler(
             fom: LocalDate = 1.januar,
-            tom: LocalDate = 31.januar,
-            sendtSøknad: LocalDate = 1.april,
-            søknadhendelseId: UUID = UUID.randomUUID()
+            tom: LocalDate = 31.januar
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
@@ -562,10 +551,7 @@ internal class SpeilBuilderTest {
                     }
                     fangeVedtaksperiodeId()
                     søknad(
-                        hendelseId = søknadhendelseId,
-                        fom = fom,
-                        tom = tom,
-                        sendtSøknad = sendtSøknad.atStartOfDay()
+                        hendelseId = UUID.randomUUID(), fom = fom, tom = tom, sendtSøknad = 1.april.atStartOfDay()
                     ).also { (søknad, søknadDTO) ->
                         håndter(søknad)
                         håndter(søknad)
@@ -777,50 +763,12 @@ internal class SpeilBuilderTest {
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )
 
-        private fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
-            Ytelser(
-                meldingsreferanseId = hendelseId,
-                aktørId = aktørId,
-                fødselsnummer = fnr,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingshistorikk = Utbetalingshistorikk(
-                    aktørId = aktørId,
-                    fødselsnummer = fnr,
-                    organisasjonsnummer = orgnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalinger = listOf(
-                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                            fom = 1.januar.minusYears(1),
-                            tom = 31.januar.minusYears(1),
-                            dagsats = 31000,
-                            grad = 100
-                        )
-                    ),
-                    inntektshistorikk = emptyList(),
-                    aktivitetslogg = it
-                ),
-                foreldrepermisjon = Foreldrepermisjon(
-                    foreldrepengeytelse = Periode(
-                        fom = 1.januar.minusYears(2),
-                        tom = 31.januar.minusYears(2)
-                    ),
-                    svangerskapsytelse = Periode(
-                        fom = 1.juli.minusYears(2),
-                        tom = 31.juli.minusYears(2)
-                    ),
-                    aktivitetslogg = it
-                ),
-                aktivitetslogg = it
-            )
-        }
-
-        private fun ytelserForlengelseFraInfotrygd(
+        private fun ytelser(
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-            fom: LocalDate,
-            tom: LocalDate
+            fom: LocalDate = 1.januar.minusYears(1),
+            tom: LocalDate = 31.januar.minusYears(1)
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
