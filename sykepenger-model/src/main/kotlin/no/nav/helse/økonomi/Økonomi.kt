@@ -28,13 +28,13 @@ internal class Økonomi private constructor(
         internal fun samletGrad(økonomiList: List<Økonomi>) =
             Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad to it.lønn() })
 
-        internal fun betale(økonomiList: List<Økonomi>, dato: LocalDate) {
-            delteUtbetalinger(økonomiList)
-            justereForGrense(økonomiList, utbetalingsgrense(økonomiList, dato))
+        internal fun betale(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
+            delteUtbetalinger(it)
+            justereForGrense(it, utbetalingsgrense(it, dato))
         }
 
         private fun utbetalingsgrense(økonomiList: List<Økonomi>, dato: LocalDate) =
-            (Grunnbeløp.`6G`.beløp(dato) * samletGrad(økonomiList).toDouble()).roundToInt()
+            (Grunnbeløp.`6G`.dagsats(dato) * samletGrad(økonomiList).ratio()).roundToInt()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betale() }
 
