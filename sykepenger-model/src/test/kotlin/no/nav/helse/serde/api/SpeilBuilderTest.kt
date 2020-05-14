@@ -17,9 +17,6 @@ import java.util.*
 
 
 internal class SpeilBuilderTest {
-    private val aktørId = "1234"
-    private val fnr = "12020052345"
-
     @Test
     fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
@@ -35,7 +32,7 @@ internal class SpeilBuilderTest {
     }
 
     @Test
-    internal fun `person uten utbetalingsdager`() {
+    fun `person uten utbetalingsdager`() {
         val (person, hendelser) = ingenBetalingsperson()
         val personDTO = serializePersonForSpeil(person, hendelser)
 
@@ -43,7 +40,7 @@ internal class SpeilBuilderTest {
     }
 
     @Test
-    internal fun `person med foreldet dager`() {
+    fun `person med foreldet dager`() {
         val (person, hendelser) = person(sendtSøknad = 1.juni)
         val personDTO = serializePersonForSpeil(person, hendelser)
 
@@ -342,12 +339,12 @@ internal class SpeilBuilderTest {
         val (person, hendelser) = person(fom = fom, tom = tom, sendtSøknad = 1.februar)
         val personDTO = serializePersonForSpeil(person, hendelser)
 
-        assertEquals("12020052345", personDTO.fødselsnummer)
-        assertEquals("12345", personDTO.aktørId)
+        assertEquals(fnr, personDTO.fødselsnummer)
+        assertEquals(aktørId, personDTO.aktørId)
         assertEquals(1, personDTO.arbeidsgivere.size)
 
         val arbeidsgiver = personDTO.arbeidsgivere.first()
-        assertEquals("987654321", arbeidsgiver.organisasjonsnummer)
+        assertEquals(orgnummer, arbeidsgiver.organisasjonsnummer)
         assertEquals(1, arbeidsgiver.vedtaksperioder.size)
 
         val vedtaksperiode = arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO
@@ -491,7 +488,7 @@ internal class SpeilBuilderTest {
         private lateinit var vedtaksperiodeId: String
         private lateinit var utbetalingsliste: List<Utbetaling>
 
-        internal fun person(
+        private fun person(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
@@ -551,7 +548,7 @@ internal class SpeilBuilderTest {
                 }
             }
 
-        internal fun personMedToAdvarsler(
+        private fun personMedToAdvarsler(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
@@ -587,7 +584,7 @@ internal class SpeilBuilderTest {
                 }
             }
 
-        internal fun ingenBetalingsperson(
+        private fun ingenBetalingsperson(
             sendtSøknad: LocalDate = 1.april,
             søknadhendelseId: UUID = UUID.randomUUID()
         ): Pair<Person, List<HendelseDTO>> =
@@ -616,7 +613,7 @@ internal class SpeilBuilderTest {
                 }
             }
 
-        internal fun ingenutbetalingPåfølgendeBetaling(
+        private fun ingenutbetalingPåfølgendeBetaling(
             søknadhendelseId: UUID = UUID.randomUUID()
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
@@ -675,7 +672,7 @@ internal class SpeilBuilderTest {
             })
         }
 
-        internal fun sykmelding(
+        private fun sykmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar
@@ -692,7 +689,7 @@ internal class SpeilBuilderTest {
             rapportertdato = fom.atStartOfDay()
         )
 
-        internal fun søknad(
+        private fun søknad(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
@@ -714,7 +711,7 @@ internal class SpeilBuilderTest {
             sendtNav = sendtSøknad
         )
 
-        internal fun søknadSendtTilArbeidsgiver(
+        private fun søknadSendtTilArbeidsgiver(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
@@ -733,7 +730,7 @@ internal class SpeilBuilderTest {
             sendtArbeidsgiver = sendtTilArbeidsgiver
         )
 
-        internal fun inntektsmelding(
+        private fun inntektsmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate
         ) = Inntektsmelding(
@@ -758,7 +755,7 @@ internal class SpeilBuilderTest {
             mottattDato = fom.atStartOfDay()
         )
 
-        internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+        private fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -780,7 +777,7 @@ internal class SpeilBuilderTest {
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )
 
-        internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
+        private fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
@@ -818,7 +815,7 @@ internal class SpeilBuilderTest {
             )
         }
 
-        internal fun ytelserForlengelseFraInfotrygd(
+        private fun ytelserForlengelseFraInfotrygd(
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
@@ -862,7 +859,7 @@ internal class SpeilBuilderTest {
             )
         }
 
-        internal fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
+        private fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -872,7 +869,7 @@ internal class SpeilBuilderTest {
             godkjenttidspunkt = LocalDateTime.now()
         )
 
-        internal fun simulering(vedtaksperiodeId: String) = Simulering(
+        private fun simulering(vedtaksperiodeId: String) = Simulering(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -918,7 +915,7 @@ internal class SpeilBuilderTest {
             )
         )
 
-        internal fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
+        private fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
