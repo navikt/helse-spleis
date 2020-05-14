@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class GradØkonomiTest {  // bare arbeidsgiver betalte
+internal class ØkonomiTest {  // bare arbeidsgiver betalte
 
     @Test
     internal fun minimumssyke() {

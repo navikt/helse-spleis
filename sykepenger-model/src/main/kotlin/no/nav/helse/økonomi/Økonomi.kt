@@ -34,11 +34,35 @@ internal class Økonomi private constructor(
         }
 
         private fun utbetalingsgrense(økonomiList: List<Økonomi>, dato: LocalDate) =
-            Grunnbeløp.`6G`.beløp(dato) * samletGrad(økonomiList).toDouble()
+            (Grunnbeløp.`6G`.beløp(dato) * samletGrad(økonomiList).toDouble()).roundToInt()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betale() }
 
-        private fun justereForGrense(økonomiList: List<Økonomi>, grense: Double) {}
+        private fun justereForGrense(økonomiList: List<Økonomi>, grense: Int) {
+            val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
+            val totalPerson = totalPerson(økonomiList)
+            when {
+                totalArbeidsgiver + totalPerson <= grense -> return
+                totalArbeidsgiver <= grense -> justerPerson(økonomiList, grense - totalArbeidsgiver)
+                else -> {
+                    justerArbeidsgiver(økonomiList, grense)
+                    tilbakestillPerson(økonomiList)
+                }
+            }
+        }
+
+        private fun justerPerson(økonomiList: List<Økonomi>, grense: Int) {}
+
+        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, grense: Int) {}
+
+        private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
+            økonomiList.forEach { it.personUtbetaling = 0 }
+
+        private fun totalArbeidsgiver(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
+            it.arbeidsgiversutbetaling ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+
+        private fun totalPerson(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
+            it.personUtbetaling ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
     }
 
     internal fun erUnderGrensen() = grad.compareTo(GRENSE) < 0
