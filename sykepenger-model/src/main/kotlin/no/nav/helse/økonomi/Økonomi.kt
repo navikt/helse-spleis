@@ -43,17 +43,42 @@ internal class Økonomi private constructor(
             val totalPerson = totalPerson(økonomiList)
             when {
                 totalArbeidsgiver + totalPerson <= grense -> return
-                totalArbeidsgiver <= grense -> justerPerson(økonomiList, grense - totalArbeidsgiver)
+                totalArbeidsgiver <= grense -> justerPerson(økonomiList, totalPerson, grense - totalArbeidsgiver)
                 else -> {
-                    justerArbeidsgiver(økonomiList, grense)
+                    justerArbeidsgiver(økonomiList, totalArbeidsgiver, grense)
                     tilbakestillPerson(økonomiList)
                 }
             }
         }
 
-        private fun justerPerson(økonomiList: List<Økonomi>, grense: Int) {}
+        private fun justerPerson(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
+            val ratio = budsjett.toDouble() / total
+            økonomiList.forEach {
+                it.personUtbetaling = (it.personUtbetaling!! * ratio).toInt()
+            }
+            (budsjett - totalPerson(økonomiList)).also { remainder ->
+                if (remainder == 0) return
+                (0..(remainder - 1)).forEach {
+                        index -> økonomiList[index].personUtbetaling =
+                    økonomiList[index].personUtbetaling!! + 1
+                }
+            }
+            require(budsjett == totalPerson(økonomiList))
+        }
 
-        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, grense: Int) {}
+        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int,  budsjett: Int) {
+            val ratio = budsjett.toDouble() / total
+            økonomiList.forEach {
+                it.arbeidsgiversutbetaling = (it.arbeidsgiversutbetaling!! * ratio).toInt()
+            }
+            (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
+                if (remainder == 0) return
+                (0..(remainder - 1)).forEach {
+                        index -> økonomiList[index].arbeidsgiversutbetaling =
+                    økonomiList[index].arbeidsgiversutbetaling!! + 1
+                }            }
+            require(budsjett == totalArbeidsgiver(økonomiList))
+        }
 
         private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
             økonomiList.forEach { it.personUtbetaling = 0 }
