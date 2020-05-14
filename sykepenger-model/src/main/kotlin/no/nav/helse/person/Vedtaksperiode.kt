@@ -198,7 +198,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(other: Vedtaksperiode, hendelse: Arbeidsgiver.AvsluttBehandling) {
-        if (this.periode().overlapperMed(other.periode()) || other.periode().endInclusive.harTilstøtende(this.periode().start)) {
+        if (this.periode()
+                .overlapperMed(other.periode()) || other.periode().endInclusive.harTilstøtende(this.periode().start)
+        ) {
             kontekst(hendelse.hendelse)
             tilstand.håndter(this, hendelse)
         }
@@ -309,7 +311,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        utbetalingshistorikk(hendelse, Periode(arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive))
+        utbetalingshistorikk(
+            hendelse,
+            Periode(arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode().endInclusive)
+        )
         foreldrepenger(hendelse)
     }
 
@@ -465,8 +470,16 @@ internal class Vedtaksperiode private constructor(
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
 
-        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode()).hasErrors()) return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd) {
+        fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk
+        ) {
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode()).hasErrors()) return vedtaksperiode.tilstand(
+                utbetalingshistorikk,
+                TilInfotrygd
+            ) {
                 utbetalingshistorikk.error("Avdekket overlapp med utbetalt periode i Infotrygd")
             }
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket for overlapp; fant ingenting.")
@@ -942,14 +955,16 @@ internal class Vedtaksperiode private constructor(
                                 .sisteSykepengeperiode() ?: return false
 
                             if (!sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) return false
-                            if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag = sistePeriode.start
+                            if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
+                                sistePeriode.start
 
                             arbeidsgiver.addInntekt(ytelser)
                             ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
                             return true
                         }
 
-                        override fun feilmelding() = "Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda"
+                        override fun feilmelding() =
+                            "Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda"
                     }
                 }
                 it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
@@ -987,8 +1002,9 @@ internal class Vedtaksperiode private constructor(
             return UtbetalingstidslinjeBuilder(
                 sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
-                arbeidsgiverperiodeGjennomført = ytelser.utbetalingshistorikk()
-                    .arbeidsgiverperiodeGjennomført(vedtaksperiode.førsteDag()),
+                forlengelseStrategy = { sykdomstidslinje ->
+                    ytelser.utbetalingshistorikk().arbeidsgiverperiodeGjennomført(sykdomstidslinje.førsteDag())
+                },
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result(arbeidsgiver.sykdomstidslinje())
         }
@@ -1039,8 +1055,9 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
 
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime = tilstandsendringstidspunkt
-            .plusHours(24)
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+            tilstandsendringstidspunkt
+                .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             godkjenning(
@@ -1087,7 +1104,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
                 requireNotNull(vedtaksperiode.maksdato),
-                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet"}
+                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" }
             )
         }
 
@@ -1113,7 +1130,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1133,7 +1151,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1164,7 +1183,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1184,7 +1204,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1206,7 +1227,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1227,7 +1249,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {}
+        ) {
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }

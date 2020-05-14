@@ -19,12 +19,12 @@ import java.time.LocalDate
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val sisteDag: LocalDate,
     private val inntekthistorikk: Inntekthistorikk,
-    arbeidsgiverperiodeGjennomført: Boolean = false,
+    private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
     private var state: UtbetalingState = Initiell
 
-    private var sykedagerIArbeidsgiverperiode = if (arbeidsgiverperiodeGjennomført) 16 else 0
+    private var sykedagerIArbeidsgiverperiode = 0
     private var ikkeSykedager = 0
     private var fridager = 0
 
@@ -33,6 +33,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private val tidslinje = Utbetalingstidslinje()
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
+        if (forlengelseStrategy(sykdomstidslinje)) sykedagerIArbeidsgiverperiode += 16
         sykdomstidslinje.kutt(sisteDag).accept(this)
         return tidslinje
     }

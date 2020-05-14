@@ -776,6 +776,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `To forlengelser som forlenger utbetaling fra infotrygd skal ha samme maksdato`() {
+        håndterSykmelding(Triple(3.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(3.januar,  31.januar, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterSimulering(0)
+        forventetEndringTeller++
+        håndterUtbetalingsgodkjenning(0, true)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Triple(1.februar, 23.februar, 100))
+        håndterSøknad(Sykdom(1.februar,  23.februar, 100))
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterSimulering(1)
+        håndterUtbetalingsgodkjenning(1, true)
+        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertEquals(inspektør.maksdato(0), inspektør.maksdato(1))
+    }
+
+    @Test
     fun `To tilstøtende perioder søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
