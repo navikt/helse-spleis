@@ -145,7 +145,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             oppdrag.accept(this)
         }
 
-        override fun preVisitOppdrag(oppdrag: Oppdrag) {
+        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
             this.oppdrag.add(oppdrag)
             fagsystemIder.add(oppdrag.fagsystemId())
         }

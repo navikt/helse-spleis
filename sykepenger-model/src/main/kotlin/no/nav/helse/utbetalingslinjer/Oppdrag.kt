@@ -16,6 +16,8 @@ internal class Oppdrag private constructor(
     private val sisteArbeidsgiverdag: LocalDate?
 ): MutableList<Utbetalingslinje> by linjer {
 
+    private var nettoBeløp = 0
+
     internal constructor(
         mottaker: String,
         fagområde: Fagområde,
@@ -32,7 +34,7 @@ internal class Oppdrag private constructor(
     )
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp)
         linjer.forEach { it.accept(visitor) }
         visitor.postVisitOppdrag(this)
     }
@@ -53,6 +55,10 @@ internal class Oppdrag private constructor(
     )
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
+
+    internal fun nettoBeløp(tidligere: Oppdrag?) {
+        nettoBeløp = totalbeløp() - (tidligere?.totalbeløp() ?: 0)
+    }
 
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
 

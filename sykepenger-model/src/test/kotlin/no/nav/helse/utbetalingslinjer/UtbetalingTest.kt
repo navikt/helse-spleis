@@ -38,12 +38,13 @@ internal class UtbetalingTest {
         val tidligere = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
         val utbetaling = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = tidligere)
 
-        val inspektør = OppdragInspektør(utbetaling.arbeidsgiverOppdrag())
-        assertEquals(2, inspektør.antallLinjer())
-        assertNull(inspektør.refDelytelseId(0))
-        assertNull(inspektør.refFagsystemId(0))
-        assertNotNull(inspektør.refDelytelseId(1))
-        assertNotNull(inspektør.refFagsystemId(1))
+        OppdragInspektør(utbetaling.arbeidsgiverOppdrag()).also {
+            assertEquals(2, it.antallLinjer())
+            assertNull(it.refDelytelseId(0))
+            assertNull(it.refFagsystemId(0))
+            assertNotNull(it.refDelytelseId(1))
+            assertNotNull(it.refFagsystemId(1))
+        }
     }
 
     @Test
@@ -119,6 +120,8 @@ internal class UtbetalingTest {
     private class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         private var linjeteller = 0
         private val fagsystemIder = mutableListOf<String>()
+        private val totalBeløp = mutableListOf<Int>()
+        private val nettoBeløp = mutableListOf<Int>()
         private val delytelseIder = mutableListOf<Int>()
         private val refDelytelseIder = mutableListOf<Int?>()
         private val refFagsystemIder = mutableListOf<String?>()
@@ -127,7 +130,7 @@ internal class UtbetalingTest {
             oppdrag.accept(this)
         }
 
-        override fun preVisitOppdrag(oppdrag: Oppdrag) {
+        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
             fagsystemIder.add(oppdrag.fagsystemId())
         }
 
@@ -155,5 +158,7 @@ internal class UtbetalingTest {
         internal fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
         internal fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
         internal fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)
+        internal fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
+        internal fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     }
 }

@@ -33,6 +33,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
+    internal val totalBeløp = mutableListOf<Int>()
+    internal val nettoBeløp = mutableListOf<Int>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
@@ -77,6 +79,12 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         arbeidsgiverOppdrag.add(oppdrag)
+    }
+
+    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
+        if (oppdrag != arbeidsgiverOppdrag.last()) return
+        this.totalBeløp.add(totalBeløp)
+        this.nettoBeløp.add(nettoBeløp)
     }
 
     internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =

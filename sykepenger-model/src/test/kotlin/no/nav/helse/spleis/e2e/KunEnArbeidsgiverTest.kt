@@ -752,13 +752,24 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
+            assertNotNull(it.maksdato(0))
+            assertNotNull(it.maksdato(1))
+            assertEquals(10_017, it.totalBeløp[0])
+            assertEquals(10_017, it.nettoBeløp[0])
+            assertEquals(34_344, it.totalBeløp[1])
+            assertEquals(24_327, it.nettoBeløp[1])
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
         assertTilstander(
             0,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             1,

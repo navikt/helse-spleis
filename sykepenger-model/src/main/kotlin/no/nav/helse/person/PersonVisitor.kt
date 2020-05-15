@@ -126,7 +126,7 @@ internal interface UtbetalingVisitor: UtbetalingsdagVisitor, OppdragVisitor {
 }
 
 internal interface OppdragVisitor {
-    fun preVisitOppdrag(oppdrag: Oppdrag) {}
+    fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {}
     fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
         fom: LocalDate,
