@@ -27,9 +27,17 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
+    private fun arbeidsgivereForSisteHistoriskeUtbetalinger() : List<Periode.Utbetalingsperiode> {
+        val utbetalingsperioder = utbetalinger.filterIsInstance<Periode.Utbetalingsperiode>()
+        val sisteUtbetalteDatoIInfotrygd = utbetalingsperioder.maxBy { it.tom }?.tom
+        return utbetalingsperioder.filter { periode -> periode.tom == sisteUtbetalteDatoIInfotrygd }
+    }
+
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
         Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
+        if(arbeidsgivereForSisteHistoriskeUtbetalinger().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer })
+            aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
         return aktivitetslogg
     }
 
@@ -98,12 +106,10 @@ class Utbetalingshistorikk(
             if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
         }
 
-        abstract class Utbetalingsperiode(
-            fom: LocalDate,
-            tom: LocalDate,
+        abstract class Utbetalingsperiode(fom: LocalDate, internal val tom: LocalDate,
             internal val dagsats: Int,
             internal val grad: Int
-        ) : Periode(fom, tom) {
+        , internal val orgnr: String) : Periode(fom, tom) {
             private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
             private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == gradertSats
 
@@ -187,10 +193,11 @@ class Utbetalingshistorikk(
 
         class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Tilbakeført(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Konvertert(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
-        class Opphold(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Sanksjon(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
+        class Opphold(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
                 if (periode.endInclusive < other.start.minusDays(18)) return

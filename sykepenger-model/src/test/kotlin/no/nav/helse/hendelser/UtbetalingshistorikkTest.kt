@@ -27,7 +27,7 @@ class UtbetalingshistorikkTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
-    private fun utbetalingshistorikk(utbetalinger: List<Utbetalingshistorikk.Periode>, inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning>) =
+    private fun utbetalingshistorikk(utbetalinger: List<Utbetalingshistorikk.Periode>, inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()) =
         Utbetalingshistorikk(AKTØRID, UNG_PERSON_FNR_2018, ORGNUMMER, VEDTAKSPERIODEID, utbetalinger, inntektshistorikk, aktivitetslogg)
 
     @Test
@@ -57,6 +57,16 @@ class UtbetalingshistorikkTest {
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "987654321", true)
             )
         )
+
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `Siste utbetalinger fra Infotrygd matcher KUN med vårt orgnummer gir ikke error`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, "1234")
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
         assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
     }
@@ -196,7 +206,7 @@ class UtbetalingshistorikkTest {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.Ferie(5.januar, 20.januar),
-            Utbetalingshistorikk.Periode.Utbetaling(15.januar, 25.januar, 1234, 100)
+            Utbetalingshistorikk.Periode.Utbetaling(15.januar, 25.januar, 1234, 100, ORGNUMMER)
         )
 
         val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -215,7 +225,7 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.Tilbakeført(5.januar, 20.januar),
             Utbetalingshistorikk.Periode.Sanksjon(15.januar, 25.januar),
-            Utbetalingshistorikk.Periode.ReduksjonMedlem(20.januar, 31.januar, 623, 100)
+            Utbetalingshistorikk.Periode.ReduksjonMedlem(20.januar, 31.januar, 623, 100, ORGNUMMER)
         )
 
         val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)

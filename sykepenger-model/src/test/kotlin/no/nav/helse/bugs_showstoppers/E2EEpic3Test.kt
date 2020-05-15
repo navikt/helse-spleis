@@ -563,7 +563,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
-        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400, 100, ORGNUMMER))   // Duplicate processing
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            17.januar(2020),
+            31.januar(2020),
+            1400,
+            100,
+            ORGNUMMER
+        ))   // Duplicate processing
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,

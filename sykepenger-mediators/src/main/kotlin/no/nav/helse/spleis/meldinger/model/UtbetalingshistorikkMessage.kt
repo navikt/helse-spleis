@@ -26,8 +26,8 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
         val orgnummer = utbetaling["orgnummer"].asText()
         if (fom == null || tom == null || fom > tom) Periode.Ugyldig(fom, tom)
         else when (utbetaling["typeKode"].asText()) {
-            "0" -> Periode.Utbetaling(fom, tom, dagsats, grad)
-            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats, grad)
+            "0" -> Periode.Utbetaling(fom, tom, dagsats, grad, orgnr)
+            "1" -> Periode.ReduksjonMedlem(fom, tom, dagsats, grad, orgnr)
             "2", "3" -> Periode.Etterbetaling(fom, tom)
             "4" -> Periode.KontertRegnskap(fom, tom)
             "5" -> Periode.RefusjonTilArbeidsgiver(fom, tom, dagsats, grad, orgnummer)

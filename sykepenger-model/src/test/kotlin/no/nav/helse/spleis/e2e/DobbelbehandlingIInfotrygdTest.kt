@@ -10,10 +10,22 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     internal fun `avdekker overlapp dobbelbehandlinger i Infotrygd`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
-        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            3.januar,
+            26.januar,
+            1000,
+            100,
+            ORGNUMMER
+        ))
 
         håndterSykmelding(Triple(3.februar, 26.februar, 100))
-        håndterUtbetalingshistorikk(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.februar, 26.mars, 1000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            26.februar,
+            26.mars,
+            1000,
+            100,
+            ORGNUMMER
+        ))
 
         håndterSykmelding(Triple(1.mai, 30.mai, 100))
         håndterUtbetalingshistorikk(2, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 1.mai, 1000, 100, ORGNUMMER))

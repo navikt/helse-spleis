@@ -60,7 +60,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Utbetaling mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Utbetaling(1.januar, 1.januar, 1234, 100)
+        val periode = Utbetalingshistorikk.Periode.Utbetaling(1.januar, 1.januar, 1234, 100, "81549300")
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
@@ -73,7 +73,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `ReduksjonMedlem mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.ReduksjonMedlem(1.januar, 1.januar, 1234, 100)
+        val periode = Utbetalingshistorikk.Periode.ReduksjonMedlem(1.januar, 1.januar, 1234, 100, "81549300")
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
