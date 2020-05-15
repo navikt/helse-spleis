@@ -8,14 +8,16 @@ import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
 
 internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
-    private val aktiviteter = Aktivitetslogginspektør(aktivitetslogg).aktiviteter
+    private val inspektør = Aktivitetslogginspektør(aktivitetslogg)
 
     internal fun toMap() = mutableMapOf(
-        "aktiviteter" to aktiviteter
+        "aktiviteter" to inspektør.aktiviteter,
+        "kontekster" to inspektør.kontekster
     )
 
     private inner class Aktivitetslogginspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
         internal val aktiviteter = mutableListOf<Map<String, Any>>()
+        internal val kontekster = mutableListOf<Map<String, Any>>()
 
         init {
             aktivitetslogg.accept(this)
@@ -67,7 +69,7 @@ internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
         ) {
             aktiviteter.add(
                 mutableMapOf<String, Any>(
-                    "kontekster" to map(kontekster),
+                    "kontekster" to kontekstIndices(kontekster),
                     "alvorlighetsgrad" to alvorlighetsgrad.name,
                     "melding" to melding,
                     "detaljer" to emptyMap<String, Any>(),
@@ -86,7 +88,7 @@ internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
         ) {
             aktiviteter.add(
                 mutableMapOf<String, Any>(
-                    "kontekster" to map(kontekster),
+                    "kontekster" to kontekstIndices(kontekster),
                     "alvorlighetsgrad" to alvorlighetsgrad.name,
                     "behovtype" to type.toString(),
                     "melding" to melding,
@@ -95,6 +97,15 @@ internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
                 )
             )
         }
+
+        private fun kontekstIndices(kontekster: List<SpesifikkKontekst>) = map(kontekster)
+            .map { kontekstAsMap ->
+                this.kontekster.indexOfFirst { it == kontekstAsMap }.takeIf { it > -1 }
+                    ?: let {
+                        this.kontekster.add(kontekstAsMap)
+                        this.kontekster.size - 1
+                    }
+            }
 
         private fun map(kontekster: List<SpesifikkKontekst>): List<Map<String, Any>> {
             return kontekster.map {
