@@ -60,7 +60,7 @@ class Søknad constructor(
     override fun valider(periode: Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
         if (harAndreInntektskilder) error("Søknaden inneholder andre inntektskilder")
-        if (permittert) warn("Søknaden inneholder permittering - se om det har innvirkning på saken før du utbetaler")
+        if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         return aktivitetslogg
     }
 

@@ -131,7 +131,7 @@ class Utbetalingshistorikk(
                         .filterIsInstance<Utbetalingsperiode>()
                         .zipWithNext { left, right ->
                             if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats) {
-                                aktivitetslogg.warn("Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode")
+                                aktivitetslogg.warn("Direkte overgang fra Infotrygd. Dagsatsen har endret seg minst én gang i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.")
                             }
                         }
                     return aktivitetslogg
@@ -161,7 +161,7 @@ class Utbetalingshistorikk(
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
                 if (periode.endInclusive < other.start.minusDays(18)) return
                 aktivitetslogg.warn(
-                    "Det er en utbetalingsperiode som er lagt inn i Infotrygd uten at inntektsopplysninger er registrert.",
+                    "Perioden er lagt inn i Infotrygd - men mangler inntektsopplysninger. Fjern perioden fra SP UB hvis du utbetaler via speil.",
                     this::class.simpleName
                 )
             }

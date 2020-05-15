@@ -22,7 +22,7 @@ class Inntektsvurdering(
 
     internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal): Aktivitetslogg {
         if (antallPerioder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
-        if (flereVirksomheter()) aktivitetslogg.warn("Finnes inntekter fra flere virksomheter siste tre måneder")
+        if (flereVirksomheter()) aktivitetslogg.warn("Inntekter fra mer enn én arbeidsgiver i A-ordningen siste tre måneder. Kontroller om brukeren har flere arbeidsforhold på sykmeldingstidspunktet. Flere arbeidsforhold støttes ikke av systemet.")
         if (sammenligningsgrunnlag <= 0.0) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
         avviksprosent = avviksprosent(beregnetInntekt)
         if (avviksprosent > MAKSIMALT_TILLATT_AVVIK) aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)

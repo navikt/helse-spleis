@@ -8,7 +8,7 @@ class Medlemskapsvurdering(
     internal fun valider(aktivitetslogg: Aktivitetslogg): Aktivitetslogg {
         when (medlemskapstatus) {
             Medlemskapstatus.Ja -> aktivitetslogg.info("Bruker er medlem av Folketrygden")
-            Medlemskapstatus.VetIkke -> aktivitetslogg.warn("Lovvalg og medlemskap må vurderes manuelt")
+            Medlemskapstatus.VetIkke -> aktivitetslogg.warn("Vurder lovvalg og medlemskap")
             Medlemskapstatus.Nei -> aktivitetslogg.error("Bruker er ikke medlem av Folketrygden")
         }
         return aktivitetslogg

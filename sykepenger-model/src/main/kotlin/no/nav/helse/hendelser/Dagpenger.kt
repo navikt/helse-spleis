@@ -7,7 +7,7 @@ import java.time.LocalDate
 class Dagpenger(private val perioder: List<Periode>) {
     internal fun valider(aktivitetslogg: Aktivitetslogg, førsteFraværsdag: LocalDate): Aktivitetslogg {
         if (perioder.etter(førsteFraværsdag.minusWeeks(4))) {
-            aktivitetslogg.warn("Bruker har mottatt dagpenger innenfor 4 uker av første fraværsdag")
+            aktivitetslogg.warn("Bruker har mottatt dagpenger innenfor 4 uker av første fraværsdag. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet")
         }
         return aktivitetslogg
     }

@@ -267,7 +267,7 @@ internal class Vedtaksperiode private constructor(
             if (hendelse.førsteFraværsdag > sisteDag())
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
             if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
-                hendelse.warn("Første fraværsdag i inntektsmeldingen er ulik første fraværsdag i sykdomsperioden")
+                hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode")
         }
         hendelse.valider(periode())
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
@@ -448,12 +448,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.warn("Mottatt flere sykmeldinger - den første sykmeldingen som ble mottatt er lagt til grunn.")
+            sykmelding.warn("Mottatt flere sykmeldinger for perioden - den første sykmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode().endInclusive)
-            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn.")
+            søknad.warn("Mottatt flere søknade for perioden - den første søknaden som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
@@ -463,7 +463,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
-            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn.")
+            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
