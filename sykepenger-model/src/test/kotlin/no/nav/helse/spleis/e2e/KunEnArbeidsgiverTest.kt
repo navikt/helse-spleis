@@ -798,6 +798,19 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `fortsettelse av Infotrygd-perioder skal ikke generere utbetalingslinjer for Infotrygd-periode`() {
+        håndterSykmelding(Triple(3.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(3.januar,  31.januar, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+
+        inspektør.also {
+            assertEquals(3.januar, it.arbeidsgiverOppdrag[0][0].fom)
+        }
+    }
+
+    @Test
     fun `To tilstøtende perioder søknad først`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
