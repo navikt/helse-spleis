@@ -790,7 +790,8 @@ internal class SpeilBuilderTest {
                             fom = fom,
                             tom = tom,
                             dagsats = 31000,
-                            grad = 100
+                            grad = 100,
+                            orgnummer = orgnummer
                         )
                     ),
                     inntektshistorikk = inntektshistorikk,

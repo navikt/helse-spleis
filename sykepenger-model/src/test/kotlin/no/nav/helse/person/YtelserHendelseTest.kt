@@ -56,7 +56,8 @@ internal class YtelserHendelseTest {
                     sisteHistoriskeSykedag.minusDays(14),
                     sisteHistoriskeSykedag,
                     1000,
-                    100
+                    100,
+                    ORGNR
                 )
             )
         )

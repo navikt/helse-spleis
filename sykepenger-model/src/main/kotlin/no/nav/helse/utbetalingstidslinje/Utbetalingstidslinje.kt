@@ -141,7 +141,9 @@ internal class Utbetalingstidslinje private constructor(
         return Utbetalingstidslinje(utbetalingsdager.asReversed())
     }
 
-    internal fun kutt(sisteDato: LocalDate) = subset(førsteDato(), sisteDato)
+    internal fun kutt(sisteDato: LocalDate) =
+        if (utbetalingsdager.isEmpty()) this
+        else subset(førsteDato(), sisteDato)
 
     internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
 

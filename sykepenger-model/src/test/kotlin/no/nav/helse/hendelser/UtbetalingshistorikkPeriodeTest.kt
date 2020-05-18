@@ -14,6 +14,7 @@ import java.time.LocalDate
 class UtbetalingshistorikkPeriodeTest {
     private companion object {
         private val EN_PERIODE = Periode(1.mars, 1.mars)
+        private const val ORGNUMMER = "987654321"
     }
     private lateinit var aktivitetslogg: Aktivitetslogg
 
@@ -30,7 +31,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 1.januar, 1234, 100)
+        val periode = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 1.januar, 1234, 100, ORGNUMMER)
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
@@ -43,7 +44,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `ReduksjonArbeidsgiverRefusjon mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234, 100)
+        val periode = Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234, 100, ORGNUMMER)
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 

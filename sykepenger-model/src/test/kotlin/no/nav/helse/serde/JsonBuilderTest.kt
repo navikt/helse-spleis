@@ -325,7 +325,8 @@ internal class JsonBuilderTest {
                             fom = 1.januar.minusYears(1),
                             tom = 31.januar.minusYears(1),
                             dagsats = 31000,
-                            grad = 100
+                            grad = 100,
+                            orgnummer = orgnummer
                         )
                     ),
                     inntektshistorikk = emptyList(),

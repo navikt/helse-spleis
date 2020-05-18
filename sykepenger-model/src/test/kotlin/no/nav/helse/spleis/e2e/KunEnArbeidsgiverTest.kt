@@ -309,7 +309,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 15.desember(2017), 15000, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 15.desember(2017), 15000, 100, ORGNUMMER))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -345,7 +345,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 16.desember(2017), 15000, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 16.desember(2017), 15000, 100, ORGNUMMER))
         inspektør.also {
             assertNoErrors(it)
             assertTrue(it.personLogg.hasOnlyInfoAndNeeds())
@@ -659,7 +659,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100), inntektshistorikk = emptyList())
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100, ORGNUMMER), inntektshistorikk = emptyList())
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
@@ -667,9 +667,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd`() {
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterSimulering(0)
 
         assertTilstander(
@@ -790,9 +790,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To forlengelser som forlenger utbetaling fra infotrygd skal ha samme maksdato`() {
         håndterSykmelding(Triple(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar,  31.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterSimulering(0)
         forventetEndringTeller++
         håndterUtbetalingsgodkjenning(0, true)
@@ -800,7 +800,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Triple(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar,  23.februar, 100))
-        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterSimulering(1)
         håndterUtbetalingsgodkjenning(1, true)
         håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -812,9 +812,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `fortsettelse av Infotrygd-perioder skal ikke generere utbetalingslinjer for Infotrygd-periode`() {
         håndterSykmelding(Triple(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar,  31.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
 
         inspektør.also {
             assertEquals(3.januar, it.arbeidsgiverOppdrag[0][0].fom)
@@ -1417,7 +1417,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100)) // -> TIL_INFOTRYGD
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100, ORGNUMMER)) // -> TIL_INFOTRYGD
 
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }

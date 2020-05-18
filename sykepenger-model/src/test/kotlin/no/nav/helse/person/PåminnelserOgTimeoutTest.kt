@@ -317,7 +317,8 @@ class PåminnelserOgTimeoutTest {
                     17.januar(2017),
                     20.januar(2017),
                     1000,
-                    100
+                    100,
+                    orgnummer
                 )
             ),
             inntektshistorikk = emptyList(),

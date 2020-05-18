@@ -1266,6 +1266,7 @@ internal class Vedtaksperiode private constructor(
 
     internal companion object {
         internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
+            .filterNot { other == it }
             .filter { it.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje()) }
             .minBy { it.periode().start }
 

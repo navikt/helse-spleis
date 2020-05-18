@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Grad
-import java.time.DayOfWeek
+import java.time.DayOfWeek.*
 import java.time.LocalDate
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
@@ -16,19 +16,26 @@ internal sealed class Dag(
     companion object {
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
-            if (venstre == høyre) venstre else ProblemDag(høyre.dato, høyre.kilde,
-                "Kan ikke velge mellom ${venstre.name()} fra ${venstre.kilde} og ${høyre.name()} fra ${høyre.kilde}.")
+            if (venstre == høyre) venstre else ProblemDag(
+                høyre.dato, høyre.kilde,
+                "Kan ikke velge mellom ${venstre.name()} fra ${venstre.kilde} og ${høyre.name()} fra ${høyre.kilde}."
+            )
         }
 
         internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
-            ProblemDag(høyre.dato, høyre.kilde, "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})")
+            ProblemDag(
+                høyre.dato,
+                høyre.kilde,
+                "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})"
+            )
         }
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
 
-    internal fun problem(other: Dag): Dag = ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
+    internal fun problem(other: Dag): Dag =
+        ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
 
     override fun equals(other: Any?) =
         other != null && this::class == other::class && this.equals(other as Dag)
@@ -194,13 +201,17 @@ internal sealed class Dag(
 
 }
 
-private val helgedager = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
-internal fun LocalDate.harTilstøtende(other: LocalDate) =
-    when (this.dayOfWeek) {
-        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY -> this.plusDays(1) == other
-        DayOfWeek.FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
-        DayOfWeek.SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+internal fun LocalDate.harTilstøtende(other: LocalDate): Boolean {
+    if (this > other) {
+        return other.harTilstøtende(this)
+    }
+    return when (this.dayOfWeek) {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
+        FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
+        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
+}

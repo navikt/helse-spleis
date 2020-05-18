@@ -6,6 +6,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.harTilstøtende
+import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -36,7 +37,7 @@ class Utbetalingshistorikk(
         .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
     internal fun arbeidsgiverperiodeGjennomført(førsteDag: LocalDate) =
-            utbetalingstidslinje(førsteDag)
+        utbetalingstidslinje(førsteDag)
             .sisteSykepengedag()
             ?.harTilstøtende(førsteDag) // checking for adjacency first; generalize more later
             ?: false
@@ -60,7 +61,11 @@ class Utbetalingshistorikk(
     ) {
 
         internal companion object {
-            fun valider(liste: List<Inntektsopplysning>, aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
+            fun valider(
+                liste: List<Inntektsopplysning>,
+                aktivitetslogg: Aktivitetslogg,
+                periode: no.nav.helse.hendelser.Periode
+            ) {
                 liste
                     .filter { it.sykepengerFom >= periode.start.minusMonths(12) }
                     .distinctBy { it.orgnummer }
@@ -87,6 +92,12 @@ class Utbetalingshistorikk(
         }
     }
 
+    internal fun append(oldtid: Oldtidsutbetalinger) {
+        utbetalinger.forEach {
+            it.append(oldtid)
+        }
+    }
+
     sealed class Periode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun trim(liste: List<Periode>, dato: LocalDate): List<Periode> {
@@ -94,8 +105,12 @@ class Utbetalingshistorikk(
                 return liste
                     .sortedByDescending { it.periode.start }
                     .filter { periode ->
-                        (ChronoUnit.DAYS.between(periode.periode.start, forrigePeriodeFom) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
-                            if (it && periode.periode.start < forrigePeriodeFom) forrigePeriodeFom = periode.periode.start
+                        (ChronoUnit.DAYS.between(
+                            periode.periode.start,
+                            forrigePeriodeFom
+                        ) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
+                            if (it && periode.periode.start < forrigePeriodeFom) forrigePeriodeFom =
+                                periode.periode.start
                         }
                     }
             }
@@ -107,11 +122,18 @@ class Utbetalingshistorikk(
 
         internal open fun tidslinje() = Utbetalingstidslinje()
 
+        internal open fun append(oldtid: Oldtidsutbetalinger) {}
+
         internal open fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
             if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
         }
 
-        abstract class Utbetalingsperiode(fom: LocalDate, tom: LocalDate, internal val dagsats: Int, internal val grad: Int) : Periode(fom, tom) {
+        abstract class Utbetalingsperiode(
+            fom: LocalDate,
+            tom: LocalDate,
+            internal val dagsats: Int,
+            internal val grad: Int
+        ) : Periode(fom, tom) {
             private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
             private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == gradertSats
 
@@ -125,7 +147,11 @@ class Utbetalingshistorikk(
             }
 
             internal companion object {
-                fun valider(liste: List<Periode>, aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
+                fun valider(
+                    liste: List<Periode>,
+                    aktivitetslogg: Aktivitetslogg,
+                    periode: no.nav.helse.hendelser.Periode
+                ): Aktivitetslogg {
                     liste
                         .onEach { it.valider(aktivitetslogg, periode) }
                         .filterIsInstance<Utbetalingsperiode>()
@@ -139,18 +165,56 @@ class Utbetalingshistorikk(
             }
         }
 
-        class RefusjonTilArbeidsgiver(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) : Utbetalingsperiode(fom, tom, dagsats, grad)
-        class ReduksjonArbeidsgiverRefusjon(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) : Utbetalingsperiode(fom, tom, dagsats, grad)
-        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) : Utbetalingsperiode(fom, tom, dagsats, grad)
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) : Utbetalingsperiode(fom, tom, dagsats, grad)
+        class RefusjonTilArbeidsgiver(
+            fom: LocalDate,
+            tom: LocalDate,
+            dagsats: Int,
+            grad: Int,
+            private val orgnummer: String
+        ) : Utbetalingsperiode(fom, tom, dagsats, grad){
+            override fun append(oldtid: Oldtidsutbetalinger) {
+                oldtid.addUtbetaling(orgnummer, tidslinje())
+            }
+        }
+
+        class ReduksjonArbeidsgiverRefusjon(
+            fom: LocalDate,
+            tom: LocalDate,
+            dagsats: Int,
+            grad: Int,
+            private val orgnummer: String
+        ) : Utbetalingsperiode(fom, tom, dagsats, grad){
+            override fun append(oldtid: Oldtidsutbetalinger) {
+                oldtid.addUtbetaling(orgnummer, tidslinje())
+            }
+        }
+
+        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
+            Utbetalingsperiode(fom, tom, dagsats, grad){
+            override fun append(oldtid: Oldtidsutbetalinger) {
+                oldtid.addUtbetaling(tidslinje = tidslinje())
+            }
+        }
+
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
+            Utbetalingsperiode(fom, tom, dagsats, grad){
+            override fun append(oldtid: Oldtidsutbetalinger) {
+                oldtid.addUtbetaling(tidslinje = tidslinje())
+            }
+        }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje().apply { periode.forEach { addFridag(it) } }
+
+            override fun append(oldtid: Oldtidsutbetalinger) {
+                oldtid.addFerie(tidslinje = tidslinje())
+            }
         }
 
         abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {}
         }
+
         class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Tilbakeført(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
@@ -166,7 +230,9 @@ class Utbetalingshistorikk(
                 )
             }
         }
-        class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) : IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
+
+        class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) :
+            IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
             override fun tidslinje(): Utbetalingstidslinje {
                 throw IllegalStateException("Kan ikke hente ut utbetalingslinjer for en Ugyldig periode")
             }
@@ -177,7 +243,9 @@ class Utbetalingshistorikk(
                     fom > tom -> "fom er nyere enn tom"
                     else -> null
                 }
-                aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
+                aktivitetslogg.error(
+                    "Det er en ugyldig utbetalingsperiode i Infotrygd%s",
+                    tekst?.let { " ($it)" } ?: "")
             }
         }
     }

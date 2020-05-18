@@ -131,10 +131,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(
             0,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100, 100),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100, 100),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100, 100),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100, 100)
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100, 100, ORGNUMMER)
         )
         håndterSimulering(0)
         assertNotNull(inspektør.maksdato(0))
@@ -238,7 +238,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
+     fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
         håndterSykmelding(Triple(10.januar(2020), 21.januar(2020), 100))
         håndterSykmelding(Triple(23.januar(2020), 24.januar(2020), 100))
         håndterSøknad(Sykdom(23.januar(2020),  24.januar(2020), 100))
@@ -563,7 +563,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
-        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400, 100))   // Duplicate processing
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400, 100, ORGNUMMER))   // Duplicate processing
 
         assertTilstander(0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
