@@ -10,36 +10,40 @@ internal fun konverterTilAktivitetslogg(aktivitetsloggData: AktivitetsloggData):
 
     val aktiviteter = aktivitetslogg.get<MutableList<Any>>("aktiviteter")
     aktivitetsloggData.aktiviteter.forEach {
-        val kontekster = it.kontekster.map { SpesifikkKontekst(it.kontekstType, it.kontekstMap) }
-        aktiviteter.add(when (it.alvorlighetsgrad) {
-            AktivitetsloggData.Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info(
-                kontekster,
-                it.melding,
-                it.tidsstempel
-            )
-            AktivitetsloggData.Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Warn(
-                kontekster,
-                it.melding,
-                it.tidsstempel
-            )
-            AktivitetsloggData.Alvorlighetsgrad.BEHOV -> Aktivitetslogg.Aktivitet.Behov(
-                Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.behovtype!!),
-                kontekster,
-                it.melding,
-                it.detaljer,
-                it.tidsstempel
-            )
-            AktivitetsloggData.Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.Error(
-                kontekster,
-                it.melding,
-                it.tidsstempel
-            )
-            AktivitetsloggData.Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.Severe(
-                kontekster,
-                it.melding,
-                it.tidsstempel
-            )
-        })
+        val kontekster = it.kontekster
+            .map { index -> aktivitetsloggData.kontekster[index] }
+            .map { kontekstData -> SpesifikkKontekst(kontekstData.kontekstType, kontekstData.kontekstMap) }
+        aktiviteter.add(
+            when (it.alvorlighetsgrad) {
+                AktivitetsloggData.Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info(
+                    kontekster,
+                    it.melding,
+                    it.tidsstempel
+                )
+                AktivitetsloggData.Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Warn(
+                    kontekster,
+                    it.melding,
+                    it.tidsstempel
+                )
+                AktivitetsloggData.Alvorlighetsgrad.BEHOV -> Aktivitetslogg.Aktivitet.Behov(
+                    Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.behovtype!!),
+                    kontekster,
+                    it.melding,
+                    it.detaljer,
+                    it.tidsstempel
+                )
+                AktivitetsloggData.Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.Error(
+                    kontekster,
+                    it.melding,
+                    it.tidsstempel
+                )
+                AktivitetsloggData.Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.Severe(
+                    kontekster,
+                    it.melding,
+                    it.tidsstempel
+                )
+            }
+        )
     }
 
     return aktivitetslogg
