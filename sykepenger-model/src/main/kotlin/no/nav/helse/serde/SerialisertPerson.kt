@@ -56,7 +56,8 @@ class SerialisertPerson(val json: String) {
             V10EndreNavnPåSykdomstidslinjer(),
             V11LeggeTilForlengelseFraInfotrygd(),
             V12Aktivitetslogg(),
-            V13NettoBeløpIOppdrag()
+            V13NettoBeløpIOppdrag(),
+            V14NettoBeløpIVedtaksperiode()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -221,7 +222,9 @@ class SerialisertPerson(val json: String) {
             sykdomshistorikk = parseSykdomshistorikk(data.sykdomshistorikk),
             utbetalingstidslinje = konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
             personFagsystemId = data.personFagsystemId,
+            personNettoBeløp = data.personNettoBeløp,
             arbeidsgiverFagsystemId = data.arbeidsgiverFagsystemId,
+            arbeidsgiverNettoBeløp = data.arbeidsgiverNettoBeløp,
             forlengelseFraInfotrygd = data.forlengelseFraInfotrygd
         )
     }
@@ -483,7 +486,9 @@ internal data class PersonData(
             val tilstand: TilstandType,
             val utbetalingstidslinje: UtbetalingstidslinjeData,
             val personFagsystemId: String?,
+            val personNettoBeløp: Int,
             val arbeidsgiverFagsystemId: String?,
+            val arbeidsgiverNettoBeløp: Int,
             val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
         ) {
             data class DagData(

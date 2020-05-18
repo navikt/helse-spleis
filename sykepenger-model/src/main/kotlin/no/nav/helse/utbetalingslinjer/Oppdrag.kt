@@ -57,6 +57,8 @@ internal class Oppdrag private constructor(
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
+    internal fun nettoBeløp() = nettoBeløp
+
     internal fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }

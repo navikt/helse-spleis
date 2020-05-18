@@ -126,9 +126,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
     ) {
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
     }
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -167,8 +169,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.visitDataForSimulering(dataForSimuleringResultat)
     }
 
-    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
+    override fun postVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
+    ) =
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
@@ -286,7 +294,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID
+            gruppeId: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int
         ) {
             pushState(
                 VedtaksperiodeState(
@@ -409,7 +419,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID
+            gruppeId: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
             vedtaksperiodeMap["utbetalinger"] = byggUtbetalingerForPeriode()

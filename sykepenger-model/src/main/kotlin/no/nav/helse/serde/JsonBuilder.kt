@@ -125,9 +125,11 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -172,9 +174,11 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId)
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -308,7 +312,9 @@ internal class JsonBuilder : PersonVisitor {
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID
+            gruppeId: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperioder.add(vedtaksperiodeMap)
@@ -437,7 +443,9 @@ internal class JsonBuilder : PersonVisitor {
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID
+            gruppeId: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int
         ) {
             popState()
         }

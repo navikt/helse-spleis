@@ -59,7 +59,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
     ) {
         vedtaksperiodeindeks += 1
         tilstander[vedtaksperiodeindeks] = mutableListOf()
@@ -73,7 +75,13 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
     }
 
-    override fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID) {
+    override fun postVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        gruppeId: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int
+    ) {
         inVedtaksperiode = false
     }
 

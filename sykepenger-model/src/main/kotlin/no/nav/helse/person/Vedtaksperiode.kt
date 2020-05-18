@@ -49,7 +49,9 @@ internal class Vedtaksperiode private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
+    private var personNettoBeløp: Int,
     private var arbeidsgiverFagsystemId: String?,
+    private var arbeidsgiverNettoBeløp: Int,
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 ) : Aktivitetskontekst {
 
@@ -81,14 +83,16 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk = Sykdomshistorikk(),
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
-        arbeidsgiverFagsystemId = null
+        personNettoBeløp = 0,
+        arbeidsgiverFagsystemId = null,
+        arbeidsgiverNettoBeløp = 0
     )
 
     internal fun arbeidsgiverFagsystemId() = arbeidsgiverFagsystemId
     internal fun personFagsystemId() = personFagsystemId
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, gruppeId)
+        visitor.preVisitVedtaksperiode(this, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.visitTilstand(tilstand)
@@ -99,7 +103,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, gruppeId)
+        visitor.postVisitVedtaksperiode(this, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -386,7 +390,9 @@ internal class Vedtaksperiode private constructor(
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode())
         personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
+        personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
         arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
+        arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
         if (utbetalingstidslinje.kunArbeidsgiverdager() &&
             person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
         ) return tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {

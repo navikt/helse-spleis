@@ -465,7 +465,9 @@ internal class SpeilBuilderTest {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
-                gruppeId: UUID
+                gruppeId: UUID,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int
             ) {
                 add(id.toString())
             }
@@ -643,7 +645,9 @@ internal class SpeilBuilderTest {
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
-                    gruppeId: UUID
+                    gruppeId: UUID,
+                    arbeidsgiverNettoBeløp: Int,
+                    personNettoBeløp: Int
                 ) {
                     vedtaksperiodeId = id.toString()
                 }
