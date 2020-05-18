@@ -181,6 +181,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(påminnelse)
         person.vedtaksperiodePåminnet(påminnelse)
         if (LocalDateTime.now() >= tilstand.makstid(this, påminnelse.tilstandsendringstidspunkt())) {
+            påminnelse.kontekst(person)
             påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
             tilstand(påminnelse, TilInfotrygd)
         } else {
@@ -480,6 +481,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingshistorikk,
                 TilInfotrygd
             ) {
+                utbetalingshistorikk.kontekst(person)
                 utbetalingshistorikk.error("Avdekket overlapp med utbetalt periode i Infotrygd")
             }
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket for overlapp; fant ingenting.")

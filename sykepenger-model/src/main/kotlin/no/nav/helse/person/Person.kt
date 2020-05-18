@@ -35,7 +35,6 @@ class Person private constructor(
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
-        registrer(utbetalingshistorikk, "Behandler historiske utbetalinger")
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk)
     }
 
@@ -70,7 +69,6 @@ class Person private constructor(
     }
 
     fun håndter(påminnelse: Påminnelse) {
-        registrer(påminnelse, "Behandler påminnelse")
         try {
             if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return
         } catch (err: Aktivitetslogg.AktivitetException) {
