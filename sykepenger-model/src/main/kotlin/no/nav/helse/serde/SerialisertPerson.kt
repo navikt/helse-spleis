@@ -55,7 +55,8 @@ class SerialisertPerson(val json: String) {
             V9FjernerGamleSykdomstidslinjer(),
             V10EndreNavnPåSykdomstidslinjer(),
             V11LeggeTilForlengelseFraInfotrygd(),
-            V12Aktivitetslogg()
+            V12Aktivitetslogg(),
+            V13NettoBeløpIOppdrag()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -142,7 +143,8 @@ class SerialisertPerson(val json: String) {
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.fagsystemId,
             Endringskode.valueOf(data.endringskode),
-            data.sisteArbeidsgiverdag
+            data.sisteArbeidsgiverdag,
+            data.nettoBeløp
         )
     }
 
@@ -576,7 +578,8 @@ data class OppdragData(
     val linjer: List<UtbetalingslinjeData>,
     val fagsystemId: String,
     val endringskode: String,
-    val sisteArbeidsgiverdag: LocalDate?
+    val sisteArbeidsgiverdag: LocalDate?,
+    val nettoBeløp: Int
 )
 
 data class UtbetalingslinjeData(

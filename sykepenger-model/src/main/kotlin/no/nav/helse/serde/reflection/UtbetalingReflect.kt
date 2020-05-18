@@ -26,7 +26,8 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
         "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
-        "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"]
+        "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
+        "nettoBeløp" to oppdrag["nettoBeløp"]
     )
 }
 

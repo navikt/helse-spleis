@@ -43,10 +43,16 @@ internal class Utbetaling private constructor(
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SPREF, sisteDato, arbeidsgiverUtbetaling).result()
-            .minus(tidligere?.arbeidsgiverOppdrag ?: Oppdrag(organisasjonsnummer, SPREF, sisteArbeidsgiverdag = LocalDate.MIN))
-            .also {
-                it.nettoBeløp(tidligere?.arbeidsgiverOppdrag)
-                if (it.isEmpty())
+            .minus(
+                tidligere?.arbeidsgiverOppdrag ?: Oppdrag(
+                    organisasjonsnummer,
+                    SPREF,
+                    sisteArbeidsgiverdag = LocalDate.MIN
+                )
+            )
+            .also { oppdrag ->
+                tidligere?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
+                if (oppdrag.isEmpty())
                     aktivitetslogg.info("Ingen utbetalingslinjer bygget")
                 else
                     aktivitetslogg.info("Utbetalingslinjer bygget vellykket")

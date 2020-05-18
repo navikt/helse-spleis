@@ -7,16 +7,17 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.util.*
 import kotlin.streams.toList
+
 internal class Oppdrag private constructor(
     private val mottaker: String,
     private val fagområde: Fagområde,
     private val linjer: MutableList<Utbetalingslinje>,
     private var fagsystemId: String,
     private var endringskode: Endringskode,
-    private val sisteArbeidsgiverdag: LocalDate?
-): MutableList<Utbetalingslinje> by linjer {
+    private val sisteArbeidsgiverdag: LocalDate?,
+    private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() }
+) : MutableList<Utbetalingslinje> by linjer {
 
-    private var nettoBeløp = 0
 
     internal constructor(
         mottaker: String,
@@ -24,7 +25,7 @@ internal class Oppdrag private constructor(
         linjer: List<Utbetalingslinje> = listOf(),
         fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
         sisteArbeidsgiverdag: LocalDate?
-    ): this(
+    ) : this(
         mottaker,
         fagområde,
         linjer.toMutableList(),
@@ -56,8 +57,8 @@ internal class Oppdrag private constructor(
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
-    internal fun nettoBeløp(tidligere: Oppdrag?) {
-        nettoBeløp = totalbeløp() - (tidligere?.totalbeløp() ?: 0)
+    internal fun nettoBeløp(tidligere: Oppdrag) {
+        nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
@@ -79,7 +80,9 @@ internal class Oppdrag private constructor(
                         .filter { !it.erHelg() }
                         .map { it to detalj.sats.sats }
                         .toList()
-                } } }
+                }
+            }
+        }
 
     internal operator fun minus(other: Oppdrag): Oppdrag {
         val tidligere = other.copyWith(other.linjerUtenOpphør())
@@ -150,7 +153,7 @@ internal class Oppdrag private constructor(
     private var deletion: Utbetalingslinje? = null
 
     private fun kopierLikeLinjer(tidligere: Oppdrag) {
-        tilstand = if(tidligere.sistedato > this.sistedato) Slett() else Identisk()
+        tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
         sisteLinjeITidligereOppdrag = tidligere.last()
         this.zip(tidligere).forEach { (a, b) -> tilstand.forskjell(a, b) }
     }
@@ -213,7 +216,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private inner class Ny: Tilstand {
+    private inner class Ny : Tilstand {
         override fun forskjell(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje
