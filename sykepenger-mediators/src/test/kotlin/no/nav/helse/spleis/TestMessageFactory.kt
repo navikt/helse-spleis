@@ -160,7 +160,14 @@ internal class TestMessageFactory(
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ): String {
         return lagBehovMedLøsning(
-            behov = listOf("Inntektsberegning", "EgenAnsatt", "Opptjening", "Dagpenger", "Arbeidsavklaringspenger", "Medlemskap"),
+            behov = listOf(
+                "Inntektsberegning",
+                "EgenAnsatt",
+                "Opptjening",
+                "Dagpenger",
+                "Arbeidsavklaringspenger",
+                "Medlemskap"
+            ),
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             løsninger = mapOf(
@@ -170,11 +177,13 @@ internal class TestMessageFactory(
                     .map {
                         mapOf(
                             "årMåned" to it.key,
-                            "inntektsliste" to it.value.map { mapOf(
-                                "beløp" to it.second,
-                                "inntektstype" to "LOENNSINNTEKT",
-                                "orgnummer" to organisasjonsnummer
-                            ) }
+                            "inntektsliste" to it.value.map {
+                                mapOf(
+                                    "beløp" to it.second,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to organisasjonsnummer
+                                )
+                            }
                         )
                     },
                 "Opptjening" to opptjening.map {
@@ -203,7 +212,11 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagSimulering(vedtaksperiodeId: UUID, tilstand: TilstandType, status: SimuleringMessage.Simuleringstatus): String {
+    fun lagSimulering(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        status: SimuleringMessage.Simuleringstatus
+    ): String {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -296,17 +309,19 @@ internal class TestMessageFactory(
     }
 
     fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
-        return nyHendelse("påminnelse", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "tilstand" to tilstand.name,
-            "antallGangerPåminnet" to 0,
-            "tilstandsendringstidspunkt" to LocalDateTime.now(),
-            "påminnelsestidspunkt" to LocalDateTime.now(),
-            "nestePåminnelsestidspunkt" to LocalDateTime.now()
-        ))
+        return nyHendelse(
+            "påminnelse", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "tilstand" to tilstand.name,
+                "antallGangerPåminnet" to 0,
+                "tilstandsendringstidspunkt" to LocalDateTime.now(),
+                "påminnelsestidspunkt" to LocalDateTime.now(),
+                "nestePåminnelsestidspunkt" to LocalDateTime.now()
+            )
+        )
     }
 
     fun lagUtbetaling(vedtaksperiodeId: UUID, tilstand: TilstandType, utbetalingOK: Boolean = true): String {
@@ -327,13 +342,25 @@ internal class TestMessageFactory(
     }
 
     fun lagKansellerUtbetaling(fagsystemId: String): String {
-        return nyHendelse("kanseller_utbetaling", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "fagsystemId" to fagsystemId,
-            "saksbehandler" to "Ola Nordmann"
-        ))
+        return nyHendelse(
+            "kanseller_utbetaling", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "fagsystemId" to fagsystemId,
+                "saksbehandler" to "Ola Nordmann"
+            )
+        )
+    }
+
+    fun lagRollback(personVersjon: Long): String {
+        return nyHendelse(
+            "rollback_person", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "personVersjon" to personVersjon
+            )
+        )
     }
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
@@ -351,15 +378,17 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap()
-    ) = nyHendelse("behov", ekstraFelter + mapOf(
-        "@behov" to behov,
-        "tilstand" to tilstand.name,
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "vedtaksperiodeId" to vedtaksperiodeId.toString(),
-        "@løsning" to løsninger,
-        "@final" to true,
-        "@besvart" to LocalDateTime.now()
-    ))
+    ) = nyHendelse(
+        "behov", ekstraFelter + mapOf(
+            "@behov" to behov,
+            "tilstand" to tilstand.name,
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId.toString(),
+            "@løsning" to løsninger,
+            "@final" to true,
+            "@besvart" to LocalDateTime.now()
+        )
+    )
 }

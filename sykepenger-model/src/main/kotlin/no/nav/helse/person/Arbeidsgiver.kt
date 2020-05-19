@@ -192,4 +192,8 @@ internal class Arbeidsgiver private constructor(
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }
+
+    fun invaliderIkkeUtbetaltePerioder(hendelse: PersonHendelse) {
+        perioder.forEach { it.invaliderIkkeUtbetaltePerioder(hendelse) }
+    }
 }

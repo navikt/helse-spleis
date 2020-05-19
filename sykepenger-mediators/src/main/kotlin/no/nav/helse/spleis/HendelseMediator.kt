@@ -15,7 +15,7 @@ import java.util.*
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
-    rapidsConnection: RapidsConnection,
+    private val rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
     private val lagrePersonDao: LagrePersonDao
 
@@ -131,8 +131,18 @@ internal class HendelseMediator(
         val nåværendeVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(nyestePersonId)
         val rollbackVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(rollback.personVersjon())
         val diff = nåværendeVedtaksperiodeIder - rollbackVedtaksperiodeIder
+
         val rollbackPerson = personRepository.hentPerson(rollback.personVersjon())
+        rollbackPerson.invaliderIkkeUtbetalteVedtaksperioder(rollback)
         lagrePersonDao.lagrePerson(message, rollbackPerson, rollback)
+
+        rapidsConnection.publish("vedtaksperioder_slettet", JsonMessage.newMessage(
+            mapOf(
+                "hendelseId" to message.id,
+                "fnr" to rollback.fødselsnummer(),
+                "vedtaksperioder" to diff
+            )
+        ).toJson())
     }
 
     private fun <Hendelse : ArbeidstakerHendelse> håndter(

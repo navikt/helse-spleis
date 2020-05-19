@@ -212,7 +212,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
+    internal fun invaliderPeriode(hendelse: PersonHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
     }
@@ -437,9 +437,17 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    fun invaliderIkkeUtbetaltePerioder(hendelse: PersonHendelse) {
+        this.tilstand.invalider(this, hendelse)
+    }
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
+
+        fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+            vedtaksperiode.invaliderPeriode(hendelse)
+        }
 
         fun makstid(
             vedtaksperiode: Vedtaksperiode,
@@ -1122,6 +1130,10 @@ internal class Vedtaksperiode private constructor(
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
+        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetalinger")
+        }
+
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
@@ -1218,6 +1230,10 @@ internal class Vedtaksperiode private constructor(
     internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
 
+        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+            hendelse.info("Invaliderer ikke en vedtaksperiode som er avsluttet med inntektsmelding")
+        }
+
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
@@ -1238,6 +1254,10 @@ internal class Vedtaksperiode private constructor(
 
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
+
+        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetalinger")
+        }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX

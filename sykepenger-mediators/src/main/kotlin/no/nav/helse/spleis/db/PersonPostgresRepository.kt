@@ -28,7 +28,7 @@ internal class PersonPostgresRepository(private val dataSource: DataSource) : Pe
 
     override fun hentNyestePersonId(fødselsnummer: String) =
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("""SELECT max(id) WHERE fnr=?;""", fødselsnummer)
+            session.run(queryOf("""SELECT max(id) AS id FROM person WHERE fnr=?;""", fødselsnummer)
                 .map { it.long("id") }.asSingle)
         }
 

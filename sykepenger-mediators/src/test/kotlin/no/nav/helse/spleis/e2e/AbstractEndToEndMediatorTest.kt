@@ -34,8 +34,8 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractEndToEndMediatorTest {
-    private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
+    internal companion object {
+        internal const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private val INNTEKT = 31000.00
@@ -45,7 +45,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected val testRapid = TestRapid()
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
-    private lateinit var dataSource: DataSource
+    protected lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
 
@@ -91,16 +91,6 @@ internal abstract class AbstractEndToEndMediatorTest {
 
         testRapid.reset()
     }
-
-    private fun createHikariConfig(jdbcUrl: String) =
-        HikariConfig().apply {
-            this.jdbcUrl = jdbcUrl
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
 
     protected fun sendNySøknad(vararg perioder: SoknadsperiodeDTO) {
         testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder))
@@ -197,6 +187,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         ))
     }
 
+    protected fun sendRollback(personVersjon: Long) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagRollback(personVersjon))
+    }
+
     protected fun sendKansellerUtbetaling() {
         val fagsystemId = testRapid.inspektør.let {
             it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"]
@@ -211,3 +205,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 }
+
+internal fun createHikariConfig(jdbcUrl: String) =
+    HikariConfig().apply {
+        this.jdbcUrl = jdbcUrl
+        maximumPoolSize = 3
+        minimumIdle = 1
+        idleTimeout = 10001
+        connectionTimeout = 1000
+        maxLifetime = 30001
+    }

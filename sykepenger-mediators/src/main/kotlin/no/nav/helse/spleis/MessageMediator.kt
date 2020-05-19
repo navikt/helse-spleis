@@ -33,6 +33,7 @@ internal class MessageMediator(
             PåminnelserRiver(it, this)
             SimuleringerRiver(it, this)
             KansellerUtbetalingerRiver(it, this)
+            RollbackRiver(it, this)
         }
     }
 

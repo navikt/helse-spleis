@@ -170,4 +170,10 @@ class Person private constructor(
             newValue
         }
 
+    fun invaliderIkkeUtbetalteVedtaksperioder(hendelse: PersonHendelse) {
+        arbeidsgivere.forEach {
+            it.invaliderIkkeUtbetaltePerioder(hendelse)
+        }
+    }
+
 }
