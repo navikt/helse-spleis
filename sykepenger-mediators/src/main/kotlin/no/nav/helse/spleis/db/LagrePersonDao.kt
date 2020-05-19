@@ -3,8 +3,8 @@ package no.nav.helse.spleis.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -12,7 +12,7 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class LagrePersonDao(private val dataSource: DataSource) {
-    fun lagrePerson(message: HendelseMessage, person: Person, hendelse: ArbeidstakerHendelse) {
+    fun lagrePerson(message: HendelseMessage, person: Person, hendelse: PersonHendelse) {
         val serialisering = person.serialize()
         lagrePerson(
             aktørId = hendelse.aktørId(),

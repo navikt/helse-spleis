@@ -126,6 +126,15 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: RollbackMessage, rollback: Rollback) {
+        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
+        val nåværendeVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(nyestePersonId)
+        val rollbackVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(rollback.personVersjon())
+        val diff = nåværendeVedtaksperiodeIder - rollbackVedtaksperiodeIder
+        val rollbackPerson = personRepository.hentPerson(rollback.personVersjon())
+        lagrePersonDao.lagrePerson(message, rollbackPerson, rollback)
+    }
+
     private fun <Hendelse : ArbeidstakerHendelse> håndter(
         message: HendelseMessage,
         hendelse: Hendelse,
@@ -296,4 +305,5 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse)
     fun behandle(message: SimuleringMessage, simulering: Simulering)
     fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
+    fun behandle(message: RollbackMessage, rollback: Rollback)
 }
