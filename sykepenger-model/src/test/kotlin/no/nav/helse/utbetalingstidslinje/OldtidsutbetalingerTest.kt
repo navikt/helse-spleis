@@ -37,6 +37,41 @@ internal class OldtidsutbetalingerTest {
     }
 
     @Test
+    fun `ferie før første nav dag blir ignorert`() {
+        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
+        oldtid.addFerie(tidslinje = tidslinjeOf(18.FRI))
+
+        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertEquals(19.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+    }
+
+    @Test
+    fun `ferie mellom nav dager gir ikke gap`() {
+        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(1.NAV))
+        oldtid.addFerie(tidslinje = tidslinjeOf(1.UTELATE, 17.FRI))
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
+
+        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertEquals(1.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+    }
+
+    @Test
+    fun `ferie med gap dag foran blir ignorert`() {
+        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(1.NAV))
+        oldtid.addFerie(tidslinje = tidslinjeOf(2.UTELATE, 16.FRI))
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
+
+        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertEquals(19.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+    }
+
+    @Test
     fun `periode er ikke tilstøtende til kun feriedager`() {
         val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
 
@@ -59,6 +94,15 @@ internal class OldtidsutbetalingerTest {
     @Test
     fun `tom utbetalingstidslinje er aldri tilstøtende`() {
         val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+
+        assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
+    }
+
+    @Test
+    fun `tilstøtende sjekker bare mot utbetalinger tidligere enn periodeTom`() {
+        val oldtid = Oldtidsutbetalinger(Periode(1.januar, 12.januar))
+
+        oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(12.UTELATE, 12.NAV))
 
         assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
     }

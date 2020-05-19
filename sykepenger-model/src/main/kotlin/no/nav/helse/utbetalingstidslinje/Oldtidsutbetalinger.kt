@@ -14,7 +14,7 @@ internal class Oldtidsutbetalinger(
     private val utbetalinger = mutableMapOf<String, MutableList<Utbetalingstidslinje>>()
     private val ferier = mutableMapOf<String, MutableList<Utbetalingstidslinje>>()
 
-    private var tilstand: Tilstand = Initial()
+    private var tilstand: Tilstand = FinnSiste()
     private var førsteSykepengedagISistePeriode: LocalDate? = null
     private var sisteSykepengedagISistePeriode: LocalDate? = null
 
@@ -43,7 +43,7 @@ internal class Oldtidsutbetalinger(
     }
 
     private fun Utbetalingstidslinje.sistePeriode(): Periode? {
-        tilstand = Initial()
+        tilstand = FinnSiste()
         førsteSykepengedagISistePeriode = null
         sisteSykepengedagISistePeriode = null
         val tidslinje = kutt(periode.start.minusDays(1)).reverse()
@@ -63,16 +63,16 @@ internal class Oldtidsutbetalinger(
         fun gap(dag: Utbetalingstidslinje.Utbetalingsdag) {}
     }
 
-    private inner class Initial : Tilstand {
+    private inner class FinnSiste : Tilstand {
         override fun utbetaling(dag: Utbetalingstidslinje.Utbetalingsdag) {
             førsteSykepengedagISistePeriode = dag.dato
             sisteSykepengedagISistePeriode = dag.dato
-            tilstand = B()
+            tilstand = FinnFørste()
         }
 
         override fun fri(dag: Utbetalingstidslinje.Utbetalingsdag) {
             sisteSykepengedagISistePeriode = dag.dato
-            tilstand = B()
+            tilstand = FinnFørste()
         }
 
         override fun gap(dag: Utbetalingstidslinje.Utbetalingsdag) {
@@ -80,12 +80,9 @@ internal class Oldtidsutbetalinger(
         }
     }
 
-    private inner class B : Tilstand {
+    private inner class FinnFørste : Tilstand {
         override fun utbetaling(dag: Utbetalingstidslinje.Utbetalingsdag) {
             førsteSykepengedagISistePeriode = dag.dato
-        }
-
-        override fun fri(dag: Utbetalingstidslinje.Utbetalingsdag) {
         }
 
         override fun gap(dag: Utbetalingstidslinje.Utbetalingsdag) {
