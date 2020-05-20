@@ -147,7 +147,7 @@ class Utbetalingshistorikk(
             dagsats: Int,
             grad: Int,
             private val orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, dagsats, grad) {
+        ) : Utbetalingsperiode(fom, tom, dagsats, grad, orgnummer) {
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(orgnummer, tidslinje())
             }
@@ -159,21 +159,21 @@ class Utbetalingshistorikk(
             dagsats: Int,
             grad: Int,
             private val orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, dagsats, grad) {
+        ) : Utbetalingsperiode(fom, tom, dagsats, grad, orgnummer) {
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(orgnummer, tidslinje())
             }
         }
 
-        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
-            Utbetalingsperiode(fom, tom, dagsats, grad) {
+        class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int, orgnummer: String) :
+            Utbetalingsperiode(fom, tom, dagsats, grad, orgnummer) {
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
             }
         }
 
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
-            Utbetalingsperiode(fom, tom, dagsats, grad) {
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int, orgnummer: String) :
+            Utbetalingsperiode(fom, tom, dagsats, grad, orgnummer) {
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
             }
@@ -191,7 +191,6 @@ class Utbetalingshistorikk(
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {}
         }
 
-        class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Tilbakeført(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
