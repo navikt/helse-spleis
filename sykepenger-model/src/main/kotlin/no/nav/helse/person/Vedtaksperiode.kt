@@ -22,6 +22,7 @@ import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import java.time.LocalDate
@@ -728,25 +729,34 @@ internal class Vedtaksperiode private constructor(
                         .also { vedtaksperiode.trengerInntektsmelding() }
                 }
                 it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
+                lateinit var nesteTilstand: Vedtaksperiodetilstand
                 it.onSuccess {
                     arbeidsgiver.addInntekt(ytelser)
-                    val sistePeriode =
-                        ytelser.utbetalingshistorikk().utbetalingstidslinje(vedtaksperiode.periode().start)
-                            .sisteSykepengeperiode()
-                    val nesteTilstand =
-                        if (sistePeriode == null || !sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) {
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
-                            AvventerInntektsmeldingFerdigGap
-                        } else {
-                            vedtaksperiode.førsteFraværsdag = sistePeriode.start
+                    Oldtidsutbetalinger(vedtaksperiode.periode()).also {
+                        ytelser.utbetalingshistorikk().append(it)
+                        if (it.tilstøtende(arbeidsgiver)) {
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                            if (arbeidsgiver.inntekt(sistePeriode.start) == null) TilInfotrygd.also {
-                                ytelser.error("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger")
-                            } else {
-                                ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                                AvventerVilkårsprøvingGap
-                            }
+                            it.førsteUtbetalingsdag(arbeidsgiver).also { dato ->
+                                vedtaksperiode.førsteFraværsdag = dato
+                                    ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                                    nesteTilstand = AvventerVilkårsprøvingGap
+                                }
                         }
+                        else {
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
+                            nesteTilstand = AvventerInntektsmeldingFerdigGap
+                        }
+                    }
+                }
+                it.valider {
+                    object: Valideringssteg {
+                        override fun isValid() =
+                            vedtaksperiode.førsteFraværsdag?.let { arbeidsgiver.inntekt(it) != null } ?: true
+                        override fun feilmelding() =
+                            "Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger"
+                    }
+                }
+                it.onSuccess {
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
             }
