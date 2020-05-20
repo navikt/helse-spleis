@@ -155,7 +155,7 @@ internal class HendelseMediator(
                 mapOf(
                     "@event_name" to "person_rullet_tilbake",
                     "hendelseId" to message.id,
-                    "fnr" to rollback.fødselsnummer(),
+                    "fødselsnummer" to rollback.fødselsnummer(),
                     "vedtaksperioderSlettet" to vedtaksperioderSlettet
                 )
             ).toJson()
