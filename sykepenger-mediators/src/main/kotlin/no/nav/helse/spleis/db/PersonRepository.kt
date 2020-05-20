@@ -5,7 +5,9 @@ import java.util.*
 
 internal interface PersonRepository {
     fun hentPerson(fødselsnummer: String): Person?
-    fun hentVedtaksperiodeIder(personId: Long): List<UUID>
+    fun hentVedtaksperiodeIderMedTilstand(personId: Long): List<VedtaksperiodeIdTilstand>
     fun hentNyestePersonId(fødselsnummer: String): Long?
     fun hentPerson(id: Long): Person
 }
+
+data class VedtaksperiodeIdTilstand(val id: UUID, val tilstand: String)

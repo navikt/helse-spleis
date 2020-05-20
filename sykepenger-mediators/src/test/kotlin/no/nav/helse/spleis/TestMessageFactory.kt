@@ -355,10 +355,21 @@ internal class TestMessageFactory(
 
     fun lagRollback(personVersjon: Long): String {
         return nyHendelse(
-            "rollback_person", mapOf(
+            "rollback_person", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
+                "type" to "Rollback",
                 "personVersjon" to personVersjon
+            )
+        )
+    }
+
+    fun lagRollbackDelete(): String {
+        return nyHendelse(
+            "rollback_person", mutableMapOf<String, Any>(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "type" to "Delete"
             )
         )
     }

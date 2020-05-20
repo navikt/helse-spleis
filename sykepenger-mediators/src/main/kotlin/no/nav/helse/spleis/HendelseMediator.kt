@@ -128,22 +128,51 @@ internal class HendelseMediator(
 
     override fun behandle(message: RollbackMessage, rollback: Rollback) {
         val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
-        val nåværendeVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(nyestePersonId)
-        val rollbackVedtaksperiodeIder = personRepository.hentVedtaksperiodeIder(rollback.personVersjon())
-        val diff = nåværendeVedtaksperiodeIder - rollbackVedtaksperiodeIder
+        val vedtaksperiodeIderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
+        val vedtaksperiodeIderEtterRollback = personRepository.hentVedtaksperiodeIderMedTilstand(rollback.personVersjon())
+//        val diff = vedtaksperiodeIderFørRollback - vedtaksperiodeIderEtterRollback
 
-        val rollbackPerson = personRepository.hentPerson(rollback.personVersjon())
+        require(diff.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
+            "Prøvde å rulle tilbake en person med en utbetalt periode"
+        }
+
+        val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
         rollbackPerson.invaliderIkkeUtbetalteVedtaksperioder(rollback)
         lagrePersonDao.lagrePerson(message, rollbackPerson, rollback)
 
-        rapidsConnection.publish("vedtaksperioder_slettet", JsonMessage.newMessage(
-            mapOf(
-                "hendelseId" to message.id,
-                "fnr" to rollback.fødselsnummer(),
-                "vedtaksperioder" to diff
-            )
-        ).toJson())
+        publiserPersonRulletTilbake(rollback, message, diff)
     }
+
+    private fun publiserPersonRulletTilbake(
+        rollback: PersonHendelse,
+        message: RollbackMessage,
+        vedtaksperioderSlettet: List<UUID>
+    ) {
+        rapidsConnection.publish(
+            rollback.fødselsnummer(), JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "person_rullet_tilbake",
+                    "hendelseId" to message.id,
+                    "fnr" to rollback.fødselsnummer(),
+                    "vedtaksperioderSlettet" to vedtaksperioderSlettet
+                )
+            ).toJson()
+        )
+    }
+
+    override fun behandle(message: RollbackMessage, rollback: RollbackDelete) {
+        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
+        val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
+
+        require(vedtaksperioderFørRollback.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
+            "Prøvde å rulle tilbake en person med en utbetalt periode"
+        }
+
+        lagrePersonDao.lagrePerson (message, Person(rollback.aktørId(), rollback.fødselsnummer()), rollback)
+
+        publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
+    }
+
 
     private fun <Hendelse : ArbeidstakerHendelse> håndter(
         message: HendelseMessage,
@@ -157,13 +186,22 @@ internal class HendelseMediator(
     }
 
     private fun person(message: HendelseMessage, hendelse: ArbeidstakerHendelse): Person {
-        return (personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
-            aktørId = hendelse.aktørId(),
-            fødselsnummer = hendelse.fødselsnummer()
-        )).also {
-            personMediator.observer(it, message, hendelse)
-            it.addObserver(VedtaksperiodeProbe)
-        }
+        return initPerson(
+            personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
+                aktørId = hendelse.aktørId(),
+                fødselsnummer = hendelse.fødselsnummer()
+            ), message, hendelse
+        )
+    }
+
+    private fun personForId(id: Long, message: HendelseMessage, hendelse: PersonHendelse): Person {
+        return initPerson(personRepository.hentPerson(id), message, hendelse)
+    }
+
+    private fun initPerson(person: Person, message: HendelseMessage, hendelse: PersonHendelse): Person {
+        personMediator.observer(person, message, hendelse)
+        person.addObserver(VedtaksperiodeProbe)
+        return person
     }
 
     private fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
@@ -179,7 +217,7 @@ internal class HendelseMediator(
 
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun observer(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
+        fun observer(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
             person.addObserver(Observatør(message, hendelse))
         }
 
@@ -189,7 +227,7 @@ internal class HendelseMediator(
 
         private inner class Observatør(
             private val message: HendelseMessage,
-            private val hendelse: ArbeidstakerHendelse
+            private val hendelse: PersonHendelse
         ) : PersonObserver {
             override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
                 publish(
@@ -216,7 +254,8 @@ internal class HendelseMediator(
                             "aktivitetslogg" to event.aktivitetslogg.toMap(),
                             "vedtaksperiode_aktivitetslogg" to event.vedtaksperiodeaktivitetslogg.toMap(),
                             "hendelser" to event.hendelser,
-                        "makstid" to event.makstid)
+                            "makstid" to event.makstid
+                        )
                     )
                 )
             }
@@ -290,7 +329,9 @@ internal class HendelseMediator(
                 )
                 this["aktørId"] = hendelse.aktørId()
                 this["fødselsnummer"] = hendelse.fødselsnummer()
-                this["organisasjonsnummer"] = hendelse.organisasjonsnummer()
+                if (hendelse is ArbeidstakerHendelse) {
+                    this["organisasjonsnummer"] = hendelse.organisasjonsnummer()
+                }
             }
 
             private fun publish(event: String, outgoingMessage: JsonMessage) {
@@ -316,4 +357,5 @@ internal interface IHendelseMediator {
     fun behandle(message: SimuleringMessage, simulering: Simulering)
     fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
     fun behandle(message: RollbackMessage, rollback: Rollback)
+    fun behandle(message: RollbackMessage, rollback: RollbackDelete)
 }

@@ -13,7 +13,8 @@ internal class RollbackRiver(
     override val riverName = "Rollback person"
 
     override fun validate(packet: JsonMessage) {
-        packet.requireKey("@id", "aktørId", "fødselsnummer", "personVersjon")
+        packet.requireKey("@id", "aktørId", "fødselsnummer", "type")
+        packet.interestedIn("personVersjon")
     }
 
     override fun createMessage(packet: JsonMessage) = RollbackMessage(packet)

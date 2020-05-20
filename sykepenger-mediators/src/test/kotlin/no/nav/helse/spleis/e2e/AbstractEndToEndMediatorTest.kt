@@ -191,6 +191,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagRollback(personVersjon))
     }
 
+    protected fun sendRollbackDelete() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagRollbackDelete())
+    }
+
     protected fun sendKansellerUtbetaling() {
         val fagsystemId = testRapid.inspektør.let {
             it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"]
