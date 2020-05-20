@@ -94,22 +94,6 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `arbeidsgiverperioden regnes som gjennomført når siste utbetalingsdag er tilstøtende`() {
-        val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
-
-        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(6.januar))
-        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(7.januar))
-        assertTrue(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(8.januar))
-        assertFalse(utbetalingshistorikk.arbeidsgiverperiodeGjennomført(9.januar))
-    }
-
-    @Test
     fun `lager warning når dagsats endrer seg i en sammenhengende periode`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100, ORGNUMMER),
@@ -196,12 +180,8 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER)
         )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
+        val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -212,39 +192,14 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Gammel ugyldig periode ignoreres ved bygging av utbetalingstidslinje`() {
-        val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(17.januar, 31.januar, 1234, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.Ugyldig(1.januar(2017), 10.januar(2017))
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
-
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
-
-        assertFalse(aktivitetslogg.hasWarnings())
-
-        val inspektør = Inspektør().apply { tidslinje.accept(this) }
-        assertEquals(17.januar, inspektør.førsteDag)
-        assertEquals(31.januar, inspektør.sisteDag)
-        assertEquals(11, inspektør.navDagTeller)
-    }
-
-    @Test
     fun `RefusjonTilArbeidsgiver regnes som utbetalingsdag selv om den overlapper med ferie`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.Ferie(5.januar, 20.januar),
             Utbetalingshistorikk.Periode.Utbetaling(15.januar, 25.januar, 1234, 100)
         )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
+        val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -262,12 +217,8 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.Sanksjon(15.januar, 25.januar),
             Utbetalingshistorikk.Periode.ReduksjonMedlem(20.januar, 31.januar, 623, 100)
         )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
+        val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
 
         assertFalse(aktivitetslogg.hasWarnings())
 
@@ -283,19 +234,16 @@ class UtbetalingshistorikkTest {
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.Ukjent(5.januar, 5.januar)
         )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
 
-        val tidslinje = utbetalingshistorikk.utbetalingstidslinje(1.januar)
+        val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
+
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
         assertEquals(10.januar, inspektør.sisteDag)
     }
 
     @Test
-    fun `Feiler ikke selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
+    fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 10.januar, 1234, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.Ugyldig(5.januar, 5.januar)
@@ -305,7 +253,6 @@ class UtbetalingshistorikkTest {
             inntektshistorikk = emptyList()
         )
 
-        assertDoesNotThrow { utbetalingshistorikk.utbetalingstidslinje(1.januar) }
         assertTrue(utbetalingshistorikk.valider(Periode(1.mars, 1.mars)).hasErrors())
     }
 

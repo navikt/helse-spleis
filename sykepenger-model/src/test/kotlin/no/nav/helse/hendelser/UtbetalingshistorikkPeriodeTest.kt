@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class UtbetalingshistorikkPeriodeTest {
@@ -16,6 +15,7 @@ class UtbetalingshistorikkPeriodeTest {
         private val EN_PERIODE = Periode(1.mars, 1.mars)
         private const val ORGNUMMER = "987654321"
     }
+
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -25,7 +25,9 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `ugyldig periode`() {
-        assertDoesNotThrow { Utbetalingshistorikk.Periode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE) }
+        assertDoesNotThrow {
+            Utbetalingshistorikk.Periode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE)
+        }
         assertTrue(aktivitetslogg.hasErrors())
     }
 
@@ -44,7 +46,8 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `ReduksjonArbeidsgiverRefusjon mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234, 100, ORGNUMMER)
+        val periode =
+            Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234, 100, ORGNUMMER)
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
@@ -192,14 +195,6 @@ class UtbetalingshistorikkPeriodeTest {
     fun `Ugyldig lager error`() {
         Utbetalingshistorikk.Periode.Ugyldig(1.januar, null).valider(aktivitetslogg, Periode(1.januar, 1.januar))
         assertTrue(aktivitetslogg.hasErrors())
-    }
-
-    @Test
-    fun `Ugyldig mappes til utbetalingstidslinje`() {
-        assertThrows<IllegalStateException> {
-            Utbetalingshistorikk.Periode.Ugyldig(1.januar, null)
-                .tidslinje()
-        }
     }
 
     private class Inspektør : UtbetalingsdagVisitor {

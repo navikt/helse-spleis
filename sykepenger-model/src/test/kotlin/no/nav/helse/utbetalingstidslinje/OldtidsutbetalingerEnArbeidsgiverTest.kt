@@ -10,8 +10,10 @@ import org.junit.jupiter.api.assertThrows
 
 internal class OldtidsutbetalingerEnArbeidsgiverTest {
     private companion object {
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
+        private const val AKTØRID = "42"
         private const val ORGNUMMER = "12345678"
-        private val PERSON = Person("aktørId", "fnr")
+        private val PERSON = Person(AKTØRID, UNG_PERSON_FNR_2018)
         private val ARBEIDSGIVER = Arbeidsgiver(PERSON, ORGNUMMER)
     }
 
