@@ -62,7 +62,7 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `forlengelser fra infotrygd med samme orgnr er ok`() {
+    fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234, 100, "1234"),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, ORGNUMMER)
@@ -73,10 +73,21 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `forlengelser fra infotrygd med forskjellig orgnr gir feil`() {
+    fun `forlengelser fra infotrygd med to tilstøtende perioder hvor den ene har forskjellig orgnr gir feil`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, "1234"),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, ORGNUMMER)
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
+
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `forlengelser fra infotrygd med én tilstøtende periode med forskjellig orgnr gir feil`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, "1234"),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234, 100, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 

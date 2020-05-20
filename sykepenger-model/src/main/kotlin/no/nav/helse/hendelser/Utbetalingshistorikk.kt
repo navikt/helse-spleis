@@ -34,10 +34,12 @@ class Utbetalingshistorikk(
     }
 
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
-        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
-        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
-        if(sisteHistoriskeUtbetalingsperioder().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer })
+        if(sisteHistoriskeUtbetalingsperioder().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer }) {
             aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
+        } else {
+            Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
+            Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
+        }
         return aktivitetslogg
     }
 
