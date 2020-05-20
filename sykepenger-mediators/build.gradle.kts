@@ -17,7 +17,7 @@ dependencies {
 
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
     testImplementation("no.nav.syfo.kafka:felles:2020.04.16-12.30-92d9c5cc")
-    testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
+    testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
