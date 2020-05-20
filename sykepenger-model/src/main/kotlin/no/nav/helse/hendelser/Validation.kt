@@ -5,6 +5,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 
@@ -75,7 +76,7 @@ internal class ByggUtbetalingstidlinjer(
     override fun isValid(): Boolean {
         engine = ArbeidsgiverUtbetalinger(
             tidslinjer = tidslinjer,
-            personTidslinje = ytelser.utbetalingshistorikk().utbetalingstidslinje(førsteFraværsdag),
+            personTidslinje = personTidslinje(ytelser, periode),
             periode = periode,
             alder = alder,
             arbeidsgiverRegler = NormalArbeidstaker,
@@ -92,4 +93,10 @@ internal class ByggUtbetalingstidlinjer(
     internal fun gjenståendeSykedager() = engine.gjenståendeSykedager()
     internal fun forbrukteSykedager() = engine.forbrukteSykedager()
     override fun feilmelding() = "Feil ved kalkulering av utbetalingstidslinjer"
+
+    private fun personTidslinje(ytelser: Ytelser, periode: Periode) =
+        Oldtidsutbetalinger(periode).let {
+            ytelser.utbetalingshistorikk().append(it)
+            it.personTidslinje()
+        }
 }
