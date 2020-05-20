@@ -732,26 +732,26 @@ internal class Vedtaksperiode private constructor(
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 it.onSuccess {
                     arbeidsgiver.addInntekt(ytelser)
-                    Oldtidsutbetalinger(vedtaksperiode.periode()).also {
-                        ytelser.utbetalingshistorikk().append(it)
-                        if (it.tilstøtende(arbeidsgiver)) {
+                    Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
+                        ytelser.utbetalingshistorikk().append(oldtid)
+                        if (oldtid.tilstøtende(arbeidsgiver)) {
                             nesteTilstand = AvventerVilkårsprøvingGap
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                            vedtaksperiode.førsteFraværsdag = it.førsteUtbetalingsdag(arbeidsgiver)
+                            vedtaksperiode.førsteFraværsdag = oldtid.førsteUtbetalingsdag(arbeidsgiver)
                             ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                        }
-                        else {
+                        } else {
                             nesteTilstand = AvventerInntektsmeldingFerdigGap
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
                         }
                     }
                 }
                 it.valider {
-                    object: Valideringssteg {
+                    object : Valideringssteg {
                         override fun isValid() =
                             vedtaksperiode.førsteFraværsdag
                                 ?.let { arbeidsgiver.inntekt(it) != null }
                                 ?: true
+
                         override fun feilmelding() =
                             "Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger"
                     }
@@ -968,14 +968,15 @@ internal class Vedtaksperiode private constructor(
                                 vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
                             }
 
-                            val sistePeriode = ytelser.utbetalingshistorikk()
-                                .utbetalingstidslinje(vedtaksperiode.førsteDag())
-                                .sisteSykepengeperiode() ?: return false
+                            Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
+                                ytelser.utbetalingshistorikk().append(oldtid)
 
-                            if (!sistePeriode.endInclusive.harTilstøtende(vedtaksperiode.førsteDag())) return false
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                            if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
-                                sistePeriode.start
+                                if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return false
+
+                                vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
+                                if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
+                                    oldtid.førsteUtbetalingsdag(vedtaksperiode.arbeidsgiver)
+                            }
 
                             arbeidsgiver.addInntekt(ytelser)
                             ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
