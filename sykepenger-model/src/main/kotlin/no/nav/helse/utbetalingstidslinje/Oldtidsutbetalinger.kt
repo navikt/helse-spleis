@@ -11,8 +11,7 @@ private const val ALLE_ARBEIDSGIVERE = "UKJENT"
 internal class Oldtidsutbetalinger(
     private val periode: Periode
 ) {
-    private val utbetalinger = mutableMapOf<String, MutableList<Utbetalingstidslinje>>()
-    private val ferier = mutableMapOf<String, MutableList<Utbetalingstidslinje>>()
+    private val tidslinjer = mutableMapOf<String, MutableList<Utbetalingstidslinje>>()
 
     private var tilstand: Tilstand = FinnSiste()
     private var førsteSykepengedagISistePeriode: LocalDate? = null
@@ -32,17 +31,18 @@ internal class Oldtidsutbetalinger(
         return requireNotNull(tidslinje(arbeidsgiver).sistePeriode()).start
     }
 
+    internal fun personTidslinje() = tidslinjer.values
+        .flatten()
+        .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        .kutt(periode.endInclusive)
+
     private fun tidslinje(arbeidsgiver: Arbeidsgiver) =
-        (ferier.getOrDefault(ALLE_ARBEIDSGIVERE, mutableListOf()) +
-            utbetalinger.getOrDefault(arbeidsgiver.organisasjonsnummer(), mutableListOf()))
+        (tidslinjer.getOrDefault(ALLE_ARBEIDSGIVERE, mutableListOf()) +
+            tidslinjer.getOrDefault(arbeidsgiver.organisasjonsnummer(), mutableListOf()))
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-    internal fun addUtbetaling(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
-        utbetalinger.getOrPut(orgnummer) { mutableListOf() }.add(tidslinje)
-    }
-
-    internal fun addFerie(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
-        ferier.getOrPut(orgnummer) { mutableListOf() }.add(tidslinje)
+    internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
+        tidslinjer.getOrPut(orgnummer) { mutableListOf() }.add(tidslinje)
     }
 
     private fun Utbetalingstidslinje.sistePeriode(): Periode? {

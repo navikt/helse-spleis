@@ -348,7 +348,6 @@ internal class ArbeidsgiverUtbetalingerTest {
             forbrukteSykedager = it.forbrukteSykedager()
         }
         inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.nåværendeTidslinje())
-            .result()
     }
 
 }

@@ -47,6 +47,5 @@ internal class SykdomsgradfilterTest {
         aktivitetslogg = Aktivitetslogg()
         Sykdomsgradfilter(sykdomsgrader, tidslinjer, periode, aktivitetslogg).filter()
         inspektør = UtbetalingstidslinjeInspektør(tidslinjer.first())
-            .result()
     }
 }

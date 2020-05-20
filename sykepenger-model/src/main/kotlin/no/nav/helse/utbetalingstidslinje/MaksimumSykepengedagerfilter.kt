@@ -33,9 +33,9 @@ internal class MaksimumSykepengedagerfilter(
     internal fun gjenståendeSykedager() = sisteBetalteDag?.let { teller.gjenståendeSykedager(it) }
     internal fun forbrukteSykedager() = forbrukteSykedager
 
-    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, historiskTidslinje: Utbetalingstidslinje) {
+    internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
         require(tidslinjer.size == 1) { "Flere arbeidsgivere er ikke støttet enda" }
-        val tidslinje = (tidslinjer + listOf(historiskTidslinje)).reduce(Utbetalingstidslinje::plus)
+        val tidslinje = (tidslinjer + listOf(personTidslinje)).reduce(Utbetalingstidslinje::plus)
         tidslinje.accept(this)
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 

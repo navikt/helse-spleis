@@ -5,7 +5,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 
 // Collects assertable statistics for a Utbetalingstidslinje
-internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje):
+internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingstidslinje):
     UtbetalingsdagVisitor {
     internal var arbeidsdagTeller = 0
     internal var arbeidsgiverperiodeDagTeller = 0
@@ -25,7 +25,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
             navHelgDagTeller +
             ukjentDagTeller
 
-    internal fun result(): UtbetalingstidslinjeInspektør {
+    init {
         arbeidsdagTeller = 0
         arbeidsgiverperiodeDagTeller = 0
         avvistDagTeller = 0
@@ -35,7 +35,6 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
         ukjentDagTeller = 0
         totalUtbetaling = 0
         utbetalingstidslinje.accept(this)
-        return this
     }
 
     override fun visitArbeidsdag(dag: Arbeidsdag) { arbeidsdagTeller += 1 }

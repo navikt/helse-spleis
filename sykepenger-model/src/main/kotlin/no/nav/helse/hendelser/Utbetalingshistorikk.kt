@@ -6,6 +6,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.harTilstøtende
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -22,10 +23,6 @@ class Utbetalingshistorikk(
     private val inntektshistorikk: List<Inntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(aktivitetslogg) {
-    private companion object {
-        private const val TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE = 26 * 7
-    }
-
     private val utbetalinger = Periode.sorter(utbetalinger)
 
     override fun aktørId() = aktørId
@@ -108,7 +105,7 @@ class Utbetalingshistorikk(
                         (ChronoUnit.DAYS.between(
                             periode.periode.start,
                             forrigePeriodeFom
-                        ) <= TILSTREKKELIG_OPPHOLD_FOR_NY_248_GRENSE).also {
+                        ) <= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).also {
                             if (it && periode.periode.start < forrigePeriodeFom) forrigePeriodeFom =
                                 periode.periode.start
                         }
@@ -173,7 +170,7 @@ class Utbetalingshistorikk(
             private val orgnummer: String
         ) : Utbetalingsperiode(fom, tom, dagsats, grad){
             override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.addUtbetaling(orgnummer, tidslinje())
+                oldtid.add(orgnummer, tidslinje())
             }
         }
 
@@ -185,21 +182,21 @@ class Utbetalingshistorikk(
             private val orgnummer: String
         ) : Utbetalingsperiode(fom, tom, dagsats, grad){
             override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.addUtbetaling(orgnummer, tidslinje())
+                oldtid.add(orgnummer, tidslinje())
             }
         }
 
         class Utbetaling(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
             Utbetalingsperiode(fom, tom, dagsats, grad){
             override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.addUtbetaling(tidslinje = tidslinje())
+                oldtid.add(tidslinje = tidslinje())
             }
         }
 
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int) :
             Utbetalingsperiode(fom, tom, dagsats, grad){
             override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.addUtbetaling(tidslinje = tidslinje())
+                oldtid.add(tidslinje = tidslinje())
             }
         }
 
@@ -207,7 +204,7 @@ class Utbetalingshistorikk(
             override fun tidslinje() = Utbetalingstidslinje().apply { periode.forEach { addFridag(it) } }
 
             override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.addFerie(tidslinje = tidslinje())
+                oldtid.add(tidslinje = tidslinje())
             }
         }
 

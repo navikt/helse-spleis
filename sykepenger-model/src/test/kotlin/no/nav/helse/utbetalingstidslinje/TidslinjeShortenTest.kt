@@ -40,6 +40,6 @@ internal class TidslinjeShortenTest {
     }
 
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
-        inspektør = UtbetalingstidslinjeInspektør(tidslinje).result()
+        inspektør = UtbetalingstidslinjeInspektør(tidslinje)
     }
 }

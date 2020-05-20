@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
-    private val historiskTidslinje: Utbetalingstidslinje,
+    private val personTidslinje: Utbetalingstidslinje,
     private val periode: Periode,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
@@ -30,7 +30,7 @@ internal class ArbeidsgiverUtbetalinger(
         Sykdomsgradfilter(sykdomsgrader, tidslinjer, periode, aktivitetslogg).filter()
         MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
         MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
-            it.filter(tidslinjer, historiskTidslinje)
+            it.filter(tidslinjer, personTidslinje)
             maksdato = it.maksdato()
             gjenståendeSykedager = it.gjenståendeSykedager()
             forbrukteSykedager = it.forbrukteSykedager()
