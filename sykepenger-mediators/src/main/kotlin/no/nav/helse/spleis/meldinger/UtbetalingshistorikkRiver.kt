@@ -1,14 +1,12 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
-import no.nav.helse.spleis.meldinger.model.YtelserMessage
 
 internal class UtbetalingshistorikkRiver(
     rapidsConnection: RapidsConnection,

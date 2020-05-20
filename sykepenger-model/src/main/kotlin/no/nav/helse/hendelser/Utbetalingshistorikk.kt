@@ -27,7 +27,7 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    private fun arbeidsgivereForSisteHistoriskeUtbetalinger() : List<Periode.Utbetalingsperiode> {
+    private fun sisteHistoriskeUtbetalingsperioder() : List<Periode.Utbetalingsperiode> {
         val utbetalingsperioder = utbetalinger.filterIsInstance<Periode.Utbetalingsperiode>()
         val sisteUtbetalteDatoIInfotrygd = utbetalingsperioder.maxBy { it.tom }?.tom
         return utbetalingsperioder.filter { periode -> periode.tom == sisteUtbetalteDatoIInfotrygd }
@@ -36,7 +36,7 @@ class Utbetalingshistorikk(
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
         Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
         Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
-        if(arbeidsgivereForSisteHistoriskeUtbetalinger().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer })
+        if(sisteHistoriskeUtbetalingsperioder().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer })
             aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
         return aktivitetslogg
     }

@@ -62,9 +62,21 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `Siste utbetalinger fra Infotrygd matcher KUN med vårt orgnummer gir ikke error`() {
+    fun `forlengelser fra infotrygd med samme orgnr er ok`() {
         val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, "1234")
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234, 100, "1234"),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, ORGNUMMER)
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
+
+        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar)).hasErrors())
+    }
+
+    @Test
+    fun `forlengelser fra infotrygd med forskjellig orgnr gir feil`() {
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, "1234"),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234, 100, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 

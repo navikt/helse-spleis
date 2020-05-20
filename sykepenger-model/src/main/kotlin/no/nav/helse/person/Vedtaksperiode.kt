@@ -479,7 +479,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode().endInclusive)
-            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt")
+            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -497,9 +497,9 @@ internal class Vedtaksperiode private constructor(
                 TilInfotrygd
             ) {
                 utbetalingshistorikk.kontekst(person)
-                utbetalingshistorikk.error("Avdekket overlapp med utbetalt periode i Infotrygd")
+                utbetalingshistorikk.error("Utbetalingshistorikk sjekket; fant feil, sender perioden til Infotrygd.")
             }
-            utbetalingshistorikk.info("Utbetalingshistorikk sjekket for overlapp; fant ingenting.")
+            utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
