@@ -964,10 +964,13 @@ internal class Vedtaksperiode private constructor(
                     object : Valideringssteg {
                         override fun isValid(): Boolean {
                             val tilstøtende = arbeidsgiver.tilstøtende(vedtaksperiode) ?: return true
+
+                            //This is impacted by trashcan
                             if (tilstøtende.tilstand != TilInfotrygd) return true.also {
                                 vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
                             }
 
+                            //This will only happen if we come here from a blue state
                             Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
                                 ytelser.utbetalingshistorikk().append(oldtid)
 
@@ -1023,7 +1026,10 @@ internal class Vedtaksperiode private constructor(
                 sisteDag = vedtaksperiode.sisteDag(),
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
                 forlengelseStrategy = { sykdomstidslinje ->
-                    ytelser.utbetalingshistorikk().arbeidsgiverperiodeGjennomført(sykdomstidslinje.førsteDag())
+                    Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
+                        ytelser.utbetalingshistorikk().append(oldtid)
+                        oldtid.arbeidsgiverperiodeBetalt(arbeidsgiver)
+                    }
                 },
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result(arbeidsgiver.sykdomstidslinje())

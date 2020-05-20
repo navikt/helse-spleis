@@ -22,6 +22,7 @@ internal class OldtidsutbetalingerTest {
         oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(19.NAV))
 
         assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertTrue(oldtid.arbeidsgiverperiodeBetalt(ARBEIDSGIVER))
         assertEquals(1.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
     }
 
@@ -88,6 +89,7 @@ internal class OldtidsutbetalingerTest {
         oldtid.addUtbetaling(ORGNUMMER, tidslinjeOf(18.NAV))
 
         assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertFalse(oldtid.arbeidsgiverperiodeBetalt(ARBEIDSGIVER))
         assertThrows<IllegalArgumentException> { oldtid.førsteUtbetalingsdag(ARBEIDSGIVER) }
     }
 

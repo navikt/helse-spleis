@@ -24,6 +24,9 @@ internal class Oldtidsutbetalinger(
             ?.harTilstøtende(periode.start)
             ?: false
 
+    //Hvis historikken ikke er tilstøtende, så forventer vi å få en inntektsmelding
+    internal fun arbeidsgiverperiodeBetalt(arbeidsgiver: Arbeidsgiver) = tilstøtende(arbeidsgiver)
+
     internal fun førsteUtbetalingsdag(arbeidsgiver: Arbeidsgiver): LocalDate {
         require(tilstøtende(arbeidsgiver)) { "Periode er ikke tilstøtende" }
         return requireNotNull(tidslinje(arbeidsgiver).sistePeriode()).start
