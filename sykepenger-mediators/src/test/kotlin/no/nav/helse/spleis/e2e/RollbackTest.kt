@@ -64,14 +64,30 @@ internal class RollbackTest : AbstractEndToEndMediatorTest() {
         val versjoner = finnPersonversjoner()
         sendRollback(versjoner[versjoner.lastIndex - 2])
         val versjonerEtterRollback = finnPersonversjoner()
-        assertEquals(versjoner, versjonerEtterRollback)
+        assertEquals(versjoner, versjonerEtterRollback, "Vedtaksperiode ble endret og persistert etter tilbakerulling som burde feilet.")
 
         val perioderTilInfotrygdEvents = finnHendelser("vedtaksperiode_endret")
             .filter { it["gjeldendeTilstand"].textValue() == "TIL_INFOTRYGD" }
         assertEquals(0, perioderTilInfotrygdEvents.size)
 
-        val rollbackHendelse = finnHendelser("person_rullet_tilbake").last()
-        assertEquals(0, rollbackHendelse["vedtaksperioderSlettet"].size())
+        val rollbackHendelse = finnHendelser("person_rullet_tilbake")
+        assertEquals(0, rollbackHendelse.size)
+    }
+
+    @Test
+    fun `rollback ved sletting over utbetaling`() {
+        utbetaltPeriode()
+        val versjoner = finnPersonversjoner()
+        sendRollbackDelete()
+        val versjonerEtterRollback = finnPersonversjoner()
+        assertEquals(versjoner, versjonerEtterRollback, "Vedtaksperiode ble endret og persistert etter tilbakerulling som burde feilet.")
+
+        val perioderTilInfotrygdEvents = finnHendelser("vedtaksperiode_endret")
+            .filter { it["gjeldendeTilstand"].textValue() == "TIL_INFOTRYGD" }
+        assertEquals(0, perioderTilInfotrygdEvents.size)
+
+        val rollbackHendelse = finnHendelser("person_rullet_tilbake")
+        assertEquals(0, rollbackHendelse.size)
     }
 
     private fun påbegyntPeriode() {

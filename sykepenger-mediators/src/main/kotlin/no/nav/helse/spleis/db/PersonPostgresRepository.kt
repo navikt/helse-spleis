@@ -18,7 +18,7 @@ internal class PersonPostgresRepository(private val dataSource: DataSource) : Pe
         using(sessionOf(dataSource)) { session ->
             session.run(queryOf(
                 """
-                    SELECT DISTINCT vedtaksperiode ->> 'id' AS vedtaksperiode_id, vedtaksperiode ->> tilstand
+                    SELECT DISTINCT vedtaksperiode ->> 'id' AS vedtaksperiode_id, vedtaksperiode ->> 'tilstand' as tilstand
                     FROM person,
                          json_array_elements(data -> 'arbeidsgivere') arbeidsgiver,
                          json_array_elements(arbeidsgiver -> 'vedtaksperioder') vedtaksperiode

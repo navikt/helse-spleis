@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
+import no.nav.helse.spleis.db.VedtaksperiodeIdTilstand
 import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -129,18 +130,19 @@ internal class HendelseMediator(
     override fun behandle(message: RollbackMessage, rollback: Rollback) {
         val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
         val vedtaksperiodeIderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
-        val vedtaksperiodeIderEtterRollback = personRepository.hentVedtaksperiodeIderMedTilstand(rollback.personVersjon())
-//        val diff = vedtaksperiodeIderFørRollback - vedtaksperiodeIderEtterRollback
+        val vedtaksperiodeIderEtterRollback =
+            personRepository.hentVedtaksperiodeIderMedTilstand(rollback.personVersjon())
 
-        require(diff.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
-            "Prøvde å rulle tilbake en person med en utbetalt periode"
-        }
+        val vedtaksperioderEndretTilstand = vedtaksperiodeIderFørRollback - vedtaksperiodeIderEtterRollback
+        val vedtaksperioderSlettet = vedtaksperiodeIderFørRollback.map(VedtaksperiodeIdTilstand::id) - vedtaksperiodeIderEtterRollback.map(VedtaksperiodeIdTilstand::id)
+
+        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand)
 
         val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
         rollbackPerson.invaliderIkkeUtbetalteVedtaksperioder(rollback)
         lagrePersonDao.lagrePerson(message, rollbackPerson, rollback)
 
-        publiserPersonRulletTilbake(rollback, message, diff)
+        publiserPersonRulletTilbake(rollback, message, vedtaksperioderSlettet)
     }
 
     private fun publiserPersonRulletTilbake(
@@ -164,13 +166,17 @@ internal class HendelseMediator(
         val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
         val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
 
-        require(vedtaksperioderFørRollback.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
-            "Prøvde å rulle tilbake en person med en utbetalt periode"
-        }
+        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
 
-        lagrePersonDao.lagrePerson (message, Person(rollback.aktørId(), rollback.fødselsnummer()), rollback)
+        lagrePersonDao.lagrePerson(message, Person(rollback.aktørId(), rollback.fødselsnummer()), rollback)
 
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
+    }
+
+    private fun sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand: List<VedtaksperiodeIdTilstand>) {
+        require(vedtaksperioderEndretTilstand.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
+            "Prøvde å rulle tilbake en person med en utbetalt periode"
+        }
     }
 
 
