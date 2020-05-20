@@ -735,23 +735,23 @@ internal class Vedtaksperiode private constructor(
                     Oldtidsutbetalinger(vedtaksperiode.periode()).also {
                         ytelser.utbetalingshistorikk().append(it)
                         if (it.tilstøtende(arbeidsgiver)) {
+                            nesteTilstand = AvventerVilkårsprøvingGap
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                            it.førsteUtbetalingsdag(arbeidsgiver).also { dato ->
-                                vedtaksperiode.førsteFraværsdag = dato
-                                    ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                                    nesteTilstand = AvventerVilkårsprøvingGap
-                                }
+                            vedtaksperiode.førsteFraværsdag = it.førsteUtbetalingsdag(arbeidsgiver)
+                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
                         }
                         else {
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
                             nesteTilstand = AvventerInntektsmeldingFerdigGap
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
                         }
                     }
                 }
                 it.valider {
                     object: Valideringssteg {
                         override fun isValid() =
-                            vedtaksperiode.førsteFraværsdag?.let { arbeidsgiver.inntekt(it) != null } ?: true
+                            vedtaksperiode.førsteFraværsdag
+                                ?.let { arbeidsgiver.inntekt(it) != null }
+                                ?: true
                         override fun feilmelding() =
                             "Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger"
                     }
