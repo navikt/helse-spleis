@@ -19,6 +19,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Grad
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -180,13 +181,43 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(
+        dag: Arbeidsgiverdag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) = currentState.visitDag(dag, dato, grad, økonomi, kilde)
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
-    override fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
-    override fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, grad, kilde)
+    override fun visitDag(
+        dag: ArbeidsgiverHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) = currentState.visitDag(dag, dato, grad, økonomi, kilde)
+    override fun visitDag(
+        dag: Sykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) = currentState.visitDag(dag, dato, grad, økonomi, kilde)
+    override fun visitDag(
+        dag: ForeldetSykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) = currentState.visitDag(dag, dato, grad, økonomi, kilde)
+    override fun visitDag(
+        dag: SykHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) = currentState.visitDag(dag, dato, grad, økonomi, kilde)
     override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
@@ -611,13 +642,43 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
         override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
-        override fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(
+            dag: Arbeidsgiverdag,
+            dato: LocalDate,
+            grad: Grad,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) = leggTilDag(dag, dato, kilde, grad)
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
         override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
-        override fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
-        override fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
-        override fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
-        override fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(
+            dag: ArbeidsgiverHelgedag,
+            dato: LocalDate,
+            grad: Grad,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(
+            dag: Sykedag,
+            dato: LocalDate,
+            grad: Grad,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(
+            dag: ForeldetSykedag,
+            dato: LocalDate,
+            grad: Grad,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) = leggTilDag(dag, dato, kilde, grad)
+        override fun visitDag(
+            dag: SykHelgedag,
+            dato: LocalDate,
+            grad: Grad,
+            økonomi: Økonomi,
+            kilde: Hendelseskilde
+        ) = leggTilDag(dag, dato, kilde, grad)
         override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
         override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)
         override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, dato, kilde)

@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Grad
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -59,7 +60,13 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
         set(dag, dato, kilde)
 
-    override fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(
+        dag: Arbeidsgiverdag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) =
         set(dag, dato, grad, kilde)
 
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -68,16 +75,40 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
         set(dag, dato, kilde)
 
-    override fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(
+        dag: ArbeidsgiverHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) =
         set(dag, dato, grad, kilde)
 
-    override fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(
+        dag: Sykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) =
         set(dag, dato, grad, kilde)
 
-    override fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(
+        dag: ForeldetSykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) =
         set(dag, dato, grad, kilde)
 
-    override fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) =
+    override fun visitDag(
+        dag: SykHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) =
         set(dag, dato, grad, kilde)
 
     override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) =

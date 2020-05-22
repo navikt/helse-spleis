@@ -2,6 +2,8 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.økonomi.Grad
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
 
@@ -67,6 +69,7 @@ internal sealed class Dag(
     internal class Arbeidsgiverdag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
+        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
@@ -74,10 +77,10 @@ internal sealed class Dag(
             dato: LocalDate,
             grad: Number = 100,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Grad.sykdomsgrad(grad), kilde)
+        ) : this(dato, Grad.sykdomsgrad(grad), Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, grad, kilde)
+            visitor.visitDag(this, dato, grad, økonomi, kilde)
     }
 
     internal class Feriedag(
@@ -101,6 +104,7 @@ internal sealed class Dag(
     internal class ArbeidsgiverHelgedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
+        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
@@ -108,15 +112,16 @@ internal sealed class Dag(
             dato: LocalDate,
             grad: Number = 100,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Grad.sykdomsgrad(grad), kilde)
+        ) : this(dato, Grad.sykdomsgrad(grad), Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, grad, kilde)
+            visitor.visitDag(this, dato, grad, økonomi, kilde)
     }
 
     internal class Sykedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
+        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
@@ -124,15 +129,16 @@ internal sealed class Dag(
             dato: LocalDate,
             grad: Number = 100,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Grad.sykdomsgrad(grad), kilde)
+        ) : this(dato, Grad.sykdomsgrad(grad), Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, grad, kilde)
+            visitor.visitDag(this, dato, grad, økonomi, kilde)
     }
 
     internal class ForeldetSykedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
+        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
@@ -140,15 +146,16 @@ internal sealed class Dag(
             dato: LocalDate,
             grad: Number = 100,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Grad.sykdomsgrad(grad), kilde)
+        ) : this(dato, Grad.sykdomsgrad(grad), Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, grad, kilde)
+            visitor.visitDag(this, dato, grad, økonomi, kilde)
     }
 
     internal class SykHelgedag(
         dato: LocalDate,
         private val grad: Grad = Grad.sykdomsgrad(100),
+        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
 
@@ -156,10 +163,10 @@ internal sealed class Dag(
             dato: LocalDate,
             grad: Number = 100,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Grad.sykdomsgrad(grad), kilde)
+        ) : this(dato, Grad.sykdomsgrad(grad), Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, grad, kilde)
+            visitor.visitDag(this, dato, grad, økonomi, kilde)
     }
 
     internal class Permisjonsdag(

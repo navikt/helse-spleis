@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Grad
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -92,13 +93,43 @@ internal interface SykdomstidslinjeVisitor {
     fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
     fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: Arbeidsgiverdag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(
+        dag: Arbeidsgiverdag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {}
     fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: ArbeidsgiverHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: Sykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: ForeldetSykedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
-    fun visitDag(dag: SykHelgedag, dato: LocalDate, grad: Grad, kilde: Hendelseskilde) {}
+    fun visitDag(
+        dag: ArbeidsgiverHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {}
+    fun visitDag(
+        dag: Sykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {}
+    fun visitDag(
+        dag: ForeldetSykedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {}
+    fun visitDag(
+        dag: SykHelgedag,
+        dato: LocalDate,
+        grad: Grad,
+        økonomi: Økonomi,
+        kilde: Hendelseskilde
+    ) {}
     fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
