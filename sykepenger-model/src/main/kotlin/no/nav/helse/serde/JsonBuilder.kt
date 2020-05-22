@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Grad
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -538,6 +539,7 @@ internal class JsonBuilder : PersonVisitor {
             dato: LocalDate,
             kilde: Hendelseskilde,
             grad: Grad? = null,
+            økonomi: Økonomi? = null,
             melding: String? = null
         ) {
             dager.add(
@@ -547,6 +549,7 @@ internal class JsonBuilder : PersonVisitor {
                     "kilde" to kilde.toJson()
                 ).also { data ->
                     grad?.let { data["grad"] = it.toPercentage() }
+                    økonomi?.let { data.putAll(økonomi.toMap())}
                     melding?.let { data["melding"] = it }
                 }
             )

@@ -121,7 +121,7 @@ internal class Økonomi private constructor(
         }
     }
 
-    private abstract sealed class Tilstand {
+    internal abstract sealed class Tilstand {
 
         internal open fun lønn(økonomi: Økonomi, beløp: Double) {
             throw IllegalStateException("Forsøk å stille lønn igjen")
@@ -144,11 +144,11 @@ internal class Økonomi private constructor(
 
             override fun lønn(økonomi: Økonomi, beløp: Double) {
                 økonomi.lønn = beløp
-                økonomi.tilstand = HaLønn()
+                økonomi.tilstand = HarLønn()
             }
         }
 
-        internal class HaLønn: Tilstand() {
+        internal class HarLønn: Tilstand() {
 
             override fun toMap(økonomi: Økonomi) = super.toMap(økonomi) + mapOf(
                 "lønn" to økonomi.lønn()
@@ -160,11 +160,11 @@ internal class Økonomi private constructor(
 
             override fun betale(økonomi: Økonomi) {
                 økonomi._betale()
-                økonomi.tilstand = HaUtbetatlinger()
+                økonomi.tilstand = HarUtbetatlinger()
             }
         }
 
-        internal class HaUtbetatlinger: Tilstand() {
+        internal class HarUtbetatlinger: Tilstand() {
 
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +

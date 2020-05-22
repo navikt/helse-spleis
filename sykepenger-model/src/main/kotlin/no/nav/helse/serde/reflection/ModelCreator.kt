@@ -4,10 +4,13 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
+import no.nav.helse.serde.ØkonomiData
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -84,6 +87,19 @@ internal fun createVedtaksperiode(
         arbeidsgiverFagsystemId,
         arbeidsgiverNettoBeløp,
         forlengelseFraInfotrygd
+    )
+
+
+
+internal fun createØkonomi(data: ØkonomiData) = Økonomi::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(
+        data.grad.prosent,
+        data.arbeidsgiverBetalingProsent.prosent,
+        data.lønn,
+        data.arbeidsgiversutbetaling,
+        data.personUtbetaling,
+        data.tilstand()
     )
 
 internal fun createUtbetaling(

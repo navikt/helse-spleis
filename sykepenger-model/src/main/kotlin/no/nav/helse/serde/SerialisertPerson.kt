@@ -30,6 +30,7 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.Økonomi
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -567,6 +568,20 @@ internal data class PersonData(
                 )
             }
         }
+    }
+}
+
+data class ØkonomiData(
+    val grad: Double,
+    val arbeidsgiverBetalingProsent: Double,
+    val lønn: Double?,
+    val arbeidsgiversutbetaling: Int?,
+    val personUtbetaling: Int?
+) {
+    internal fun tilstand() = when {
+        lønn == null -> Økonomi.Tilstand.KunGrad()
+        arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarLønn()
+        else -> Økonomi.Tilstand.HarUtbetatlinger()
     }
 }
 
