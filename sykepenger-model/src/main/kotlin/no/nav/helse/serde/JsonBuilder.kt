@@ -547,7 +547,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad)
+            leggTilDag(dag, dato, kilde, grad, økonomi)
 
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
@@ -562,7 +562,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad)
+            leggTilDag(dag, dato, kilde, grad, økonomi)
 
         override fun visitDag(
             dag: Sykedag,
@@ -571,7 +571,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad)
+            leggTilDag(dag, dato, kilde, grad, økonomi)
 
         override fun visitDag(
             dag: ForeldetSykedag,
@@ -580,7 +580,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad)
+            leggTilDag(dag, dato, kilde, grad, økonomi)
 
         override fun visitDag(
             dag: SykHelgedag,
@@ -589,7 +589,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad)
+            leggTilDag(dag, dato, kilde, grad, økonomi)
 
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
             leggTilDag(dag, dato, kilde, melding = melding)

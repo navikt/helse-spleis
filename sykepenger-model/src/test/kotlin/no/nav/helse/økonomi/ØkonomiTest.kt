@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -150,6 +151,19 @@ internal class ØkonomiTest {
         assertUtbetaling(a, 691, 0)  // (1059 / (1200 + 640)) * 1200
         assertUtbetaling(b, 368, 0)
         assertUtbetaling(c, 0, 0)
+    }
+
+    @Disabled
+    @Test fun `tre arbeidsgivere med arbeidsgivere2`() {  // Alternate algorithm
+        val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).lønn(969.23)
+        val b =  Økonomi.sykdomsgrad(80.prosent, 90.prosent).lønn(461.53)
+        val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).lønn(1430.76)
+        listOf(a, b, c).betale(1.januar(2018)).also {
+            assertEquals(40.prosent, it.samletGrad())
+        }
+        assertUtbetaling(a, 464, 0)
+        assertUtbetaling(b, 325, 0)
+        assertUtbetaling(c, 72, 0)
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Int, expectedPerson: Int) {

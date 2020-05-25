@@ -3,7 +3,6 @@ package no.nav.helse.økonomi
 import no.nav.helse.serde.reflection.createØkonomi
 import no.nav.helse.serde.ØkonomiData
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -19,7 +18,9 @@ internal class CreateØkonomiTest {
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
                 assertNull(map["lønn"])
             }
+            // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
+            assertDoesNotThrow { økonomi.lønn(1200) }
         }
     }
 
@@ -34,7 +35,9 @@ internal class CreateØkonomiTest {
                 assertNull(map["arbeidsgiversutbetaling"])
                 assertNull(map["personUtbetaling"])
             }
+            // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.lønn(1200) }
+            assertDoesNotThrow { listOf(økonomi).betale(1.januar) }
         }
     }
 
@@ -49,6 +52,7 @@ internal class CreateØkonomiTest {
                 assertEquals(640, map["arbeidsgiversutbetaling"])
                 assertEquals(320, map["personUtbetaling"])
             }
+            // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.lønn(1200) }
             assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
         }

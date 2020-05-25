@@ -109,6 +109,7 @@ internal class Økonomi private constructor(
 
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
 
+    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
     internal fun lønn() = lønn ?: throw IllegalStateException("Lønn er ikke satt ennå")
 
     private fun betale() = this.also { tilstand.betale(this) }
@@ -121,7 +122,7 @@ internal class Økonomi private constructor(
         }
     }
 
-    internal abstract sealed class Tilstand {
+    internal sealed class Tilstand {
 
         internal open fun lønn(økonomi: Økonomi, beløp: Double) {
             throw IllegalStateException("Forsøk å stille lønn igjen")
