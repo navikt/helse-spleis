@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -48,6 +48,8 @@ internal class Arbeidsgiver private constructor(
     internal fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun utbetaling() = utbetalinger.lastOrNull()
+
+    internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
 
     internal fun nåværendeTidslinje() =
         utbetaling()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
@@ -167,10 +169,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun addInntekt(ytelser: Ytelser) {
         ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
-    }
-
-    internal fun append(oldtid: Oldtidsutbetalinger) {
-        utbetaling()?.append(organisasjonsnummer, oldtid)
     }
 
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {

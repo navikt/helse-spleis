@@ -147,7 +147,8 @@ class SerialisertPerson(val json: String) {
         konverterTilUtbetalingstidslinje(data.utbetalingstidslinje),
         konverterTilOppdrag(data.arbeidsgiverOppdrag),
         konverterTilOppdrag(data.personOppdrag),
-        data.tidsstempel
+        data.tidsstempel,
+        enumValueOf(data.status)
     )
 
     private fun konverterTilOppdrag(data: OppdragData): Oppdrag {
@@ -594,7 +595,8 @@ data class UtbetalingData(
     val utbetalingstidslinje: UtbetalingstidslinjeData,
     val arbeidsgiverOppdrag: OppdragData,
     val personOppdrag: OppdragData,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
+    val status: String
 )
 
 data class OppdragData(

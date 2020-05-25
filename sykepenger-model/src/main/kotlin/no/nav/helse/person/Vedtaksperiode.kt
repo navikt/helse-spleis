@@ -202,7 +202,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(other: Vedtaksperiode, hendelse: Arbeidsgiver.AvsluttBehandling) {
-        if(this.periode().endInclusive < other.periode().start) arbeidsgiver.forkast(this)
+        if (this.periode().endInclusive < other.periode().start) arbeidsgiver.forkast(this)
         else if (this.periode()
                 .overlapperMed(other.periode()) || other.periode().endInclusive.harTilstøtende(this.periode().start)
         ) {
@@ -741,7 +741,8 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.addInntekt(ytelser)
                     Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)
-                        arbeidsgiver.append(oldtid)
+                        arbeidsgiver.utbetalteUtbetalinger()
+                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         if (oldtid.tilstøtende(arbeidsgiver)) {
                             nesteTilstand = AvventerVilkårsprøvingGap
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
@@ -973,7 +974,8 @@ internal class Vedtaksperiode private constructor(
                     //This will only happen if we come here from a blue state
                     Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)
-                        arbeidsgiver.append(oldtid)
+                        arbeidsgiver.utbetalteUtbetalinger()
+                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
 
                         if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return@valider false
 
@@ -990,9 +992,10 @@ internal class Vedtaksperiode private constructor(
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     fun personTidslinje(ytelser: Ytelser, periode: Periode) =
-                        Oldtidsutbetalinger(periode).let {oldtid ->
+                        Oldtidsutbetalinger(periode).let { oldtid ->
                             ytelser.utbetalingshistorikk().append(oldtid)
-                            arbeidsgiver.append(oldtid)
+                            arbeidsgiver.utbetalteUtbetalinger()
+                                .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                             oldtid.personTidslinje()
                         }
 
@@ -1033,7 +1036,8 @@ internal class Vedtaksperiode private constructor(
                 forlengelseStrategy = { sykdomstidslinje ->
                     Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)
-                        arbeidsgiver.append(oldtid)
+                        arbeidsgiver.utbetalteUtbetalinger()
+                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         oldtid.arbeidsgiverperiodeBetalt(arbeidsgiver)
                     }
                 },
@@ -1152,6 +1156,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
+            vedtaksperiode.utbetaling().håndter(utbetaling)
+
             if (utbetaling.valider().hasErrors()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
                 utbetaling.error("Utbetaling ble ikke gjennomført")
             }

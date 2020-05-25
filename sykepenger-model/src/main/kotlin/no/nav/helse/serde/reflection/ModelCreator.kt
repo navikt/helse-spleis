@@ -109,10 +109,11 @@ internal fun createUtbetaling(
     utbetalingstidslinje: Utbetalingstidslinje,
     arbeidsgiverOppdrag: Oppdrag,
     personOppdrag: Oppdrag,
-    tidsstempel: LocalDateTime
+    tidsstempel: LocalDateTime,
+    status: Utbetaling.Status
 ) = Utbetaling::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(utbetalingstidslinje, arbeidsgiverOppdrag, personOppdrag, tidsstempel)
+    .call(utbetalingstidslinje, arbeidsgiverOppdrag, personOppdrag, tidsstempel, status)
 
 internal fun createOppdrag(
     mottaker: String,

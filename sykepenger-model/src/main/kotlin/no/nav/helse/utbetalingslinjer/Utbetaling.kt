@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
@@ -14,7 +16,8 @@ internal class Utbetaling private constructor(
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
-    private val tidsstempel: LocalDateTime
+    private val tidsstempel: LocalDateTime,
+    private var status: Status
 ) {
 
     internal constructor(
@@ -28,8 +31,20 @@ internal class Utbetaling private constructor(
         utbetalingstidslinje,
         buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        IKKE_UTBETALT
     )
+
+    internal enum class Status {
+        IKKE_UTBETALT,
+        UTBETALT,
+        UTBETALING_FEILET,
+        ANNULLERT
+    }
+
+    fun håndter(utbetaling: UtbetalingHendelse) {
+        status = if(utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
+    }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
@@ -58,7 +73,6 @@ internal class Utbetaling private constructor(
                 else
                     aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
             }
-
         private fun buildPerson(
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
@@ -68,6 +82,8 @@ internal class Utbetaling private constructor(
         ): Oppdrag {
             return Oppdrag(fødselsnummer, Fagområde.Sykepenger, sisteArbeidsgiverdag = LocalDate.MIN)
         }
+
+        internal fun List<Utbetaling>.utbetalte() = filter { it.status == UTBETALT }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
@@ -88,12 +104,11 @@ internal class Utbetaling private constructor(
         utbetalingstidslinje,
         arbeidsgiverOppdrag.emptied() - arbeidsgiverOppdrag,
         personOppdrag.emptied() - personOppdrag,
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        ANNULLERT
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
         oldtid.add(organisasjonsnummer, utbetalingstidslinje)
     }
 }
-
-
