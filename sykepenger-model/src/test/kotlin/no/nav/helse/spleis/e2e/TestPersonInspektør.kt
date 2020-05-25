@@ -26,6 +26,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
+    private val gyldigePerioderIder = mutableListOf<UUID>()
+    private val forkastedePerioderIder = mutableListOf<UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
@@ -40,12 +42,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
     private val gruppeIder = mutableMapOf<Int, UUID>()
+    private val periodeIder = mutableListOf<UUID>()
 
     init {
         person.accept(this)
     }
 
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
+    internal fun gyldigVedtaksperiodeId(index: Int) = gyldigePerioderIder[index]
+    internal fun forkastetVedtaksperiodeId(index: Int) = forkastedePerioderIder[index]
     internal fun gruppeId(index: Int) = requireNotNull(gruppeIder[index])
 
     override fun preVisitArbeidsgiver(
@@ -55,6 +60,22 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     ) {
         arbeidsgiverindeks += 1
         this.arbeidsgiver = arbeidsgiver
+    }
+
+    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        periodeIder.clear()
+    }
+
+    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        gyldigePerioderIder.addAll(periodeIder)
+    }
+
+    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        periodeIder.clear()
+    }
+
+    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        forkastedePerioderIder.addAll(periodeIder)
     }
 
     override fun preVisitVedtaksperiode(
@@ -67,6 +88,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         vedtaksperiodeindeks += 1
         tilstander[vedtaksperiodeindeks] = mutableListOf()
         vedtaksperiodeIder[vedtaksperiodeindeks] = id
+        periodeIder.add(id)
         gruppeIder[vedtaksperiodeindeks] = gruppeId
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
         inVedtaksperiode = true

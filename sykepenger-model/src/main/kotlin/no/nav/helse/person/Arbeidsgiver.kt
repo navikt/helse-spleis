@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -168,6 +169,10 @@ internal class Arbeidsgiver private constructor(
         ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
     }
 
+    internal fun append(oldtid: Oldtidsutbetalinger) {
+        utbetaling()?.append(organisasjonsnummer, oldtid)
+    }
+
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
@@ -196,6 +201,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
+
     internal class AvsluttBehandling(internal val hendelse: PersonHendelse)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

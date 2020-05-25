@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
 import java.time.LocalDate
@@ -89,6 +90,10 @@ internal class Utbetaling private constructor(
         personOppdrag.emptied() - personOppdrag,
         LocalDateTime.now()
     )
+
+    internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
+        oldtid.add(organisasjonsnummer, utbetalingstidslinje)
+    }
 }
 
 
