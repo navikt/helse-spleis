@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
@@ -20,11 +21,8 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -383,7 +381,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun høstingsresultater(
-        engineForTimeline: ByggUtbetalingstidlinjer,
+        engineForTimeline: ArbeidsgiverUtbetalinger,
         ytelser: Ytelser
     ) {
         maksdato = engineForTimeline.maksdato()
@@ -731,14 +729,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            Validation(ytelser).also {
-                it.onError {
+            validation(ytelser) {
+                onError {
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                         .also { vedtaksperiode.trengerInntektsmelding() }
                 }
-                it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
+                validerYtelser(vedtaksperiode.periode(), ytelser)
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
-                it.onSuccess {
+                onSuccess {
                     arbeidsgiver.addInntekt(ytelser)
                     Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)
@@ -753,18 +751,12 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                it.valider {
-                    object : Valideringssteg {
-                        override fun isValid() =
-                            vedtaksperiode.førsteFraværsdag
-                                ?.let { arbeidsgiver.inntekt(it) != null }
-                                ?: true
-
-                        override fun feilmelding() =
-                            "Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger"
-                    }
+                valider("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger") {
+                    vedtaksperiode.førsteFraværsdag
+                        ?.let { arbeidsgiver.inntekt(it) != null }
+                        ?: true
                 }
-                it.onSuccess {
+                onSuccess {
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
                 }
             }
@@ -964,62 +956,63 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            Validation(ytelser).also { it ->
-                it.onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                it.valider { ValiderYtelser(vedtaksperiode.periode(), ytelser) }
-                it.valider { Overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger()) }
-                it.valider {
-                    object : Valideringssteg {
-                        override fun isValid(): Boolean {
-                            val tilstøtende = arbeidsgiver.tilstøtende(vedtaksperiode) ?: return true
+            validation(ytelser) {
+                onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                validerYtelser(vedtaksperiode.periode(), ytelser)
+                overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger())
+                valider("Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda") {
+                    val tilstøtende = arbeidsgiver.tilstøtende(vedtaksperiode) ?: return@valider true
 
-                            //This is impacted by trashcan
-                            if (tilstøtende.tilstand != TilInfotrygd) return true.also {
-                                vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
-                            }
+                    //This is impacted by trashcan
+                    if (tilstøtende.tilstand != TilInfotrygd) return@valider true.also {
+                        vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
+                    }
 
-                            //This will only happen if we come here from a blue state
-                            Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
-                                ytelser.utbetalingshistorikk().append(oldtid)
+                    //This will only happen if we come here from a blue state
+                    Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
+                        ytelser.utbetalingshistorikk().append(oldtid)
 
-                                if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return false
+                        if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return@valider false
 
-                                vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                                if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
-                                    oldtid.førsteUtbetalingsdag(vedtaksperiode.arbeidsgiver)
-                            }
+                        vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
+                        if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
+                            oldtid.førsteUtbetalingsdag(vedtaksperiode.arbeidsgiver)
+                    }
 
-                            arbeidsgiver.addInntekt(ytelser)
-                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                            return true
+                    arbeidsgiver.addInntekt(ytelser)
+                    ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                    return@valider true
+                }
+                harInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag())
+                lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
+                valider("Feil ved kalkulering av utbetalingstidslinjer") {
+                    fun personTidslinje(ytelser: Ytelser, periode: Periode) =
+                        Oldtidsutbetalinger(periode).let {
+                            ytelser.utbetalingshistorikk().append(it)
+                            it.personTidslinje()
                         }
 
-                        override fun feilmelding() =
-                            "Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda"
-                    }
-                }
-                it.valider { HarInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag()) }
-                lateinit var engineForTimeline: ByggUtbetalingstidlinjer
-                it.valider {
-                    val førsteFraværsdag =
-                        requireNotNull(vedtaksperiode.førsteFraværsdag) { "Mangler første fraværsdag" }
-                    ByggUtbetalingstidlinjer(
-                        mapOf(
+                    engineForTimeline = ArbeidsgiverUtbetalinger(
+                        tidslinjer = mapOf(
                             arbeidsgiver to utbetalingstidslinje(
                                 arbeidsgiver,
                                 vedtaksperiode,
                                 ytelser
                             )
                         ),
-                        vedtaksperiode.periode(),
-                        ytelser,
-                        vedtaksperiode.fødselsnummer,
-                        vedtaksperiode.organisasjonsnummer,
-                        Alder(vedtaksperiode.fødselsnummer),
-                        førsteFraværsdag
-                    ).also { engineForTimeline = it }
+                        personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode()),
+                        periode = vedtaksperiode.periode(),
+                        alder = Alder(vedtaksperiode.fødselsnummer),
+                        arbeidsgiverRegler = NormalArbeidstaker,
+                        aktivitetslogg = ytelser.aktivitetslogg,
+                        organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                        fødselsnummer = vedtaksperiode.fødselsnummer
+                    ).also { engine ->
+                        engine.beregn()
+                    }
+                    !ytelser.hasErrors()
                 }
-                it.onSuccess {
+                onSuccess {
                     vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
                 }
             }

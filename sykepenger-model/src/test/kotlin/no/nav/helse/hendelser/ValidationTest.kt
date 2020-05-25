@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,51 +18,29 @@ internal class ValidationTest {
     }
 
     @Test
-    internal fun success() {
+    fun success() {
         var success = false
-        Validation(TestHendelse(aktivitetslogg)).also {
-            it.onError { fail("Uventet kall") }
-            it.onSuccess { success = true }
+        validation(TestHendelse(aktivitetslogg)) {
+            onError { fail("Uventet kall") }
+            successBlock()
+            onSuccess { success = true }
         }
         assertTrue(success)
     }
 
     @Test
-    internal fun failure() {
+    fun failure() {
         var failure = false
-        Validation(TestHendelse(aktivitetslogg)).also {
-            it.onError { failure = true }
-            it.valider { FailureBlock() }
-            it.onSuccess { fail("Uventet kall") }
+        validation(TestHendelse(aktivitetslogg)) {
+            onError { failure = true }
+            failureBlock()
+            onSuccess { fail("Uventet kall") }
         }
         assertTrue(failure)
     }
 
-    @Test internal fun `when does constructor run`() {
-        var variableChanged = false
-        Validation(TestHendelse(aktivitetslogg)).also {
-            it.onError { fail("we failed") }
-            it.valider { ReturnValues().also { variableChanged = it.variable()}}
-        }
-        assertTrue(variableChanged)
-    }
-
-    private class ReturnValues : Valideringssteg {
-        private var variable = false
-        init {
-            variable = true
-        }
-        override fun isValid() = true
-        internal fun variable() = variable
-        override fun feilmelding(): String {
-            fail("Uventet kall")
-        }
-    }
-
-    private inner class FailureBlock : Valideringssteg {
-        override fun isValid() = false
-        override fun feilmelding() = "feilmelding"
-    }
+    private fun Validation.successBlock() = valider("feilmelding") { true }
+    private fun Validation.failureBlock() = valider("feilmelding") { false }
 
     private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(aktivitetslogg) {
 
