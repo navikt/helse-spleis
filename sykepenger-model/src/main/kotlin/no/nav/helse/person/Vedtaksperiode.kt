@@ -333,7 +333,7 @@ internal class Vedtaksperiode private constructor(
         opptjening(hendelse)
         dagpenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
         arbeidsavklaringspenger(hendelse, periode().start.minusMonths(6), periode().endInclusive)
-        medlemskap(hendelse, periode().start.minusYears(1), periode().endInclusive)
+        medlemskap(hendelse, periode().start, periode().endInclusive)
     }
 
     private fun trengerInntektsmelding() {
