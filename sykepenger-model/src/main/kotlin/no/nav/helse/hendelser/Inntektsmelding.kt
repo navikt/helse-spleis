@@ -65,9 +65,9 @@ class Inntektsmelding(
         ferieperioder.map { it.asFerietidslinje() }
 
     private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<Sykdomstidslinje> =
-        listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, kilde = kilde) } ?: Sykdomstidslinje())
+        listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, 100, kilde) } ?: Sykdomstidslinje())
 
-    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, kilde = kilde)
+    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, 100, kilde)
     private fun Periode.asFerietidslinje() = Sykdomstidslinje.feriedager(start, endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje

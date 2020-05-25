@@ -9,6 +9,8 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -200,80 +202,94 @@ internal class Sykdomstidslinje private constructor(
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number = 100.0,
+            grad: Number,
             kilde: Hendelseskilde
         ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, Dag>(
-                            { it },
-                            { if (it.erHelg()) SykHelgedag(it, grad, kilde) else Sykedag(it, grad, kilde) })
-                    )
-            )
+            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                Sykdomstidslinje(
+                    førsteDato.datesUntil(sisteDato.plusDays(1))
+                        .collect(
+                            toMap<LocalDate, LocalDate, Dag>(
+                                { it },
+                                { if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde) })
+                        )
+                )
+            }
 
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             avskjæringsdato: LocalDate,
-            grad: Number = 100.0,
+            grad: Number,
             kilde: Hendelseskilde
         ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, Dag>(
-                            { it },
-                            {
-                                if (it.erHelg()) SykHelgedag(it, grad, kilde) else sykedag(
-                                    it,
-                                    avskjæringsdato,
-                                    grad,
-                                    kilde
-                                )
-                            })
-                    )
-            )
+            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                Sykdomstidslinje(
+                    førsteDato.datesUntil(sisteDato.plusDays(1))
+                        .collect(
+                            toMap<LocalDate, LocalDate, Dag>(
+                                { it },
+                                {
+                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else sykedag(
+                                        it,
+                                        avskjæringsdato,
+                                        økonomi,
+                                        kilde
+                                    )
+                                })
+                        )
+                )
+            }
 
         private fun sykedag(
             dato: LocalDate,
             avskjæringsdato: LocalDate,
-            grad: Number,
+            økonomi: Økonomi,
             kilde: Hendelseskilde
-        ) = if (dato < avskjæringsdato) ForeldetSykedag(dato, grad, kilde) else Sykedag(dato, grad, kilde)
+        ) = if (dato < avskjæringsdato) ForeldetSykedag(dato, økonomi, kilde) else Sykedag(dato, økonomi, kilde)
 
         internal fun foreldetSykedag(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number = 100.0,
+            grad: Number,
             kilde: Hendelseskilde
         ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, Dag>(
-                            { it },
-                            { if (it.erHelg()) SykHelgedag(it, grad, kilde) else ForeldetSykedag(it, grad, kilde) })
-                    )
-            )
+            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                Sykdomstidslinje(
+                    førsteDato.datesUntil(sisteDato.plusDays(1))
+                        .collect(
+                            toMap<LocalDate, LocalDate, Dag>(
+                                { it },
+                                {
+                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else ForeldetSykedag(
+                                        it,
+                                        økonomi,
+                                        kilde
+                                    )
+                                })
+                        )
+                )
+            }
 
         internal fun arbeidsgiverdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number = 100.0,
+            grad: Number,
             kilde: Hendelseskilde
         ) =
-            Sykdomstidslinje(
-                førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(
-                        toMap<LocalDate, LocalDate, Dag>(
-                            { it },
-                            {
-                                if (it.erHelg()) ArbeidsgiverHelgedag(it, grad, kilde)
-                                else Arbeidsgiverdag(it, grad, kilde)
-                            })
-                    )
-            )
+            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                Sykdomstidslinje(
+                    førsteDato.datesUntil(sisteDato.plusDays(1))
+                        .collect(
+                            toMap<LocalDate, LocalDate, Dag>(
+                                { it },
+                                {
+                                    if (it.erHelg()) ArbeidsgiverHelgedag(it, økonomi, kilde)
+                                    else Arbeidsgiverdag(it, økonomi, kilde)
+                                })
+                        )
+                )
+            }
 
         internal fun feriedager(
             førsteDato: LocalDate,

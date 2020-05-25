@@ -67,15 +67,9 @@ internal sealed class Dag(
 
     internal class Arbeidsgiverdag(
         dato: LocalDate,
-        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
+        private val økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
-
-        internal constructor(
-            dato: LocalDate,
-            grad: Number = 100,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato,økonomi, kilde)
@@ -101,15 +95,9 @@ internal sealed class Dag(
 
     internal class ArbeidsgiverHelgedag(
         dato: LocalDate,
-        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
+        private val økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
-
-        internal constructor(
-            dato: LocalDate,
-            grad: Number = 100,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, økonomi, kilde)
@@ -117,15 +105,9 @@ internal sealed class Dag(
 
     internal class Sykedag(
         dato: LocalDate,
-        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
+        private val økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
-
-        internal constructor(
-            dato: LocalDate,
-            grad: Number = 100,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, økonomi, kilde)
@@ -133,15 +115,9 @@ internal sealed class Dag(
 
     internal class ForeldetSykedag(
         dato: LocalDate,
-        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
+        private val økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
-
-        internal constructor(
-            dato: LocalDate,
-            grad: Number = 100,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, økonomi, kilde)
@@ -149,15 +125,9 @@ internal sealed class Dag(
 
     internal class SykHelgedag(
         dato: LocalDate,
-        private val økonomi: Økonomi = Økonomi.sykdomsgrad(100.prosent),
+        private val økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
-
-        internal constructor(
-            dato: LocalDate,
-            grad: Number = 100,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
-        ) : this(dato, Økonomi.sykdomsgrad(grad.prosent), kilde)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, økonomi, kilde)

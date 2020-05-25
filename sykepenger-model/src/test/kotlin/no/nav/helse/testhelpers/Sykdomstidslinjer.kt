@@ -7,6 +7,8 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
 import java.util.stream.Collectors
@@ -68,7 +70,7 @@ internal val Int.nEDU
 internal val Int.nH
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, 100.0, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.nP

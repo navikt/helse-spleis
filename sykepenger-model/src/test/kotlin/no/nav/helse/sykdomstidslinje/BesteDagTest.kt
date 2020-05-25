@@ -3,6 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.dagturnering
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -12,9 +14,9 @@ internal class BesteDagTest {
         private val ukjentDag get() = Dag.UkjentDag(2.mandag, TestEvent.søknad)
         private val arbeidsdagFraSøknad get() = Dag.Arbeidsdag(2.mandag, TestEvent.søknad)
         private val ferieFraInntektsmelding get() = Dag.Feriedag(2.mandag, TestEvent.inntektsmelding)
-        private val arbeidsgiverdagFraInntektsmelding get() = Dag.Arbeidsgiverdag(2.mandag, 100.0, TestEvent.inntektsmelding)
+        private val arbeidsgiverdagFraInntektsmelding get() = Dag.Arbeidsgiverdag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
-        private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, 100.0, TestEvent.søknad)
+        private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
         private val utenlandsFraSøknad get() = Dag.Utenlandsdag(2.mandag, TestEvent.søknad)
     }
 
