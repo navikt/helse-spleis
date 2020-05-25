@@ -9,9 +9,9 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Grad
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -143,49 +143,44 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     private inner class Dagteller : SykdomstidslinjeVisitor {
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag)
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag)
-        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = inkrementer(dag)
+        override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) = inkrementer(dag)
 
         private fun inkrementer(klasse: Dag) {
             dagtelling.compute(klasse::class) { _, value -> 1 + (value ?: 0) }

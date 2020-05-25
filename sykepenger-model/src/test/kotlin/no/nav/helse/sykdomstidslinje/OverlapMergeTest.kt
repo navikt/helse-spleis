@@ -3,7 +3,6 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Grad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -98,7 +97,7 @@ internal class OverlapMergeTest {
         assertEquals(1, tidslinje.filterIsInstance<Sykedag>().size)
 
         inspektør.also {
-            assertEquals(Grad.sykdomsgrad(50), it.grader[1.januar])
+            assertEquals(50, it.grader[1.januar])
         }
     }
 

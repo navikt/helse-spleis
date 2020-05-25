@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Grad
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -120,7 +119,6 @@ internal class ForeldetSykedagTest {
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
@@ -129,28 +127,24 @@ internal class ForeldetSykedagTest {
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)

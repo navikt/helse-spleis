@@ -112,6 +112,9 @@ internal class Økonomi private constructor(
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
     internal fun lønn() = lønn ?: throw IllegalStateException("Lønn er ikke satt ennå")
 
+    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
+    internal fun grad() = grad
+
     private fun betale() = this.also { tilstand.betale(this) }
 
     private fun _betale() {

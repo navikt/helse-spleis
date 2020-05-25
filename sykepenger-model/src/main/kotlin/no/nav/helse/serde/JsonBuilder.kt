@@ -13,7 +13,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Grad
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -188,11 +187,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitDag(
         dag: Arbeidsgiverdag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, grad, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, kilde)
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -200,35 +198,31 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitDag(
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, grad, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, kilde)
     override fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, grad, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, kilde)
     override fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, grad, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, kilde)
     override fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, grad, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, kilde)
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
 
@@ -543,11 +537,10 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad, økonomi)
+            leggTilDag(dag, dato, kilde, økonomi)
 
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, dato, kilde)
@@ -558,38 +551,34 @@ internal class JsonBuilder : PersonVisitor {
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad, økonomi)
+            leggTilDag(dag, dato, kilde, økonomi)
 
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad, økonomi)
+            leggTilDag(dag, dato, kilde, økonomi)
 
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad, økonomi)
+            leggTilDag(dag, dato, kilde, økonomi)
 
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
-            grad: Grad,
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) =
-            leggTilDag(dag, dato, kilde, grad, økonomi)
+            leggTilDag(dag, dato, kilde, økonomi)
 
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
             leggTilDag(dag, dato, kilde, melding = melding)
@@ -598,7 +587,6 @@ internal class JsonBuilder : PersonVisitor {
             dag: Dag,
             dato: LocalDate,
             kilde: Hendelseskilde,
-            grad: Grad? = null,
             økonomi: Økonomi? = null,
             melding: String? = null
         ) {
@@ -608,7 +596,6 @@ internal class JsonBuilder : PersonVisitor {
                     "type" to dag.toJsonType(),
                     "kilde" to kilde.toJson()
                 ).also { data ->
-                    grad?.let { data["grad"] = it.toPercentage() }
                     økonomi?.let { data.putAll(økonomi.toMap())}
                     melding?.let { data["melding"] = it }
                 }

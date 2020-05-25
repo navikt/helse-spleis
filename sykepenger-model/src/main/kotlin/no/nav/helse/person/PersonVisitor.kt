@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Grad
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -96,7 +95,6 @@ internal interface SykdomstidslinjeVisitor {
     fun visitDag(
         dag: Arbeidsgiverdag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {}
@@ -105,28 +103,24 @@ internal interface SykdomstidslinjeVisitor {
     fun visitDag(
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {}

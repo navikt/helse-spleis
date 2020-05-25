@@ -7,7 +7,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.økonomi.Grad
 import no.nav.helse.økonomi.Økonomi
 import java.math.MathContext
 import java.math.RoundingMode
@@ -47,7 +46,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitDag(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
@@ -56,31 +54,27 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykHelgedag(dato, grad.toPercentage())
+    ) = sykHelgedag(dato, økonomi.grad().toDouble())
     override fun visitDag(
         dag: Dag.Sykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykedag(dato, grad.toPercentage())
+    ) = sykedag(dato, økonomi.grad().toDouble())
     override fun visitDag(
         dag: Dag.ForeldetSykedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = foreldetSykedag(dato, grad.toPercentage())
+    ) = foreldetSykedag(dato, økonomi.grad().toDouble())
     override fun visitDag(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
-        grad: Grad,
         økonomi: Økonomi,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) = sykHelgedag(dato, grad.toPercentage())
+    ) = sykHelgedag(dato, økonomi.grad().toDouble())
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
 
     private fun foreldetSykedag(dagen: LocalDate, grad: Double) {
