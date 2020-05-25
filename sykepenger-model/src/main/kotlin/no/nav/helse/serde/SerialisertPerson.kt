@@ -30,6 +30,7 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -421,12 +422,12 @@ internal data class PersonData(
                 )
                 ARBEIDSGIVERDAG -> Arbeidsgiverdag(
                     data.dato,
-                    data.grad,
+                    data.økonomi,
                     SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id)
                 )
                 ARBEIDSGIVER_HELGEDAG -> ArbeidsgiverHelgedag(
                     data.dato,
-                    data.grad,
+                    data.økonomi,
                     SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id)
                 )
                 FERIEDAG -> Feriedag(data.dato, SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id))
@@ -436,7 +437,7 @@ internal data class PersonData(
                 )
                 FORELDET_SYKEDAG -> ForeldetSykedag(
                     data.dato,
-                    data.grad,
+                    data.økonomi,
                     SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id)
                 )
                 PERMISJONSDAG -> Permisjonsdag(
@@ -454,12 +455,12 @@ internal data class PersonData(
                 )
                 SYKEDAG -> Sykedag(
                     data.dato,
-                    data.grad,
+                    data.økonomi,
                     SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id)
                 )
                 SYK_HELGEDAG -> SykHelgedag(
                     data.dato,
-                    data.grad,
+                    data.økonomi,
                     SykdomstidslinjeHendelse.Hendelseskilde(data.kilde.type, data.kilde.id)
                 )
                 UTENLANDSDAG -> Utenlandsdag(
@@ -498,8 +499,14 @@ internal data class PersonData(
                 val type: JsonDagType,
                 val kilde: KildeData,
                 val grad: Double,
+                val arbeidsgiverBetalingProsent: Double,
+                val lønn: Double?,
+                val arbeidsgiversutbetaling: Int?,
+                val personUtbetaling: Int?,
                 val melding: String?
-            )
+            ) {
+                val økonomi get() = createØkonomi(this)
+            }
 
             data class KildeData(
                 val type: String,
@@ -569,20 +576,6 @@ internal data class PersonData(
                 )
             }
         }
-    }
-}
-
-data class ØkonomiData(
-    val grad: Double,
-    val arbeidsgiverBetalingProsent: Double,
-    val lønn: Double?,
-    val arbeidsgiversutbetaling: Int?,
-    val personUtbetaling: Int?
-) {
-    internal fun tilstand() = when {
-        lønn == null -> Økonomi.Tilstand.KunGrad()
-        arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarLønn()
-        else -> Økonomi.Tilstand.HarUtbetatlinger()
     }
 }
 

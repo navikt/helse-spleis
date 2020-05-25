@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
-import no.nav.helse.serde.ØkonomiData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
@@ -89,9 +89,7 @@ internal fun createVedtaksperiode(
         forlengelseFraInfotrygd
     )
 
-
-
-internal fun createØkonomi(data: ØkonomiData) = Økonomi::class.primaryConstructor!!
+internal fun createØkonomi(data: DagData) = Økonomi::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         data.grad.prosent,
@@ -99,7 +97,11 @@ internal fun createØkonomi(data: ØkonomiData) = Økonomi::class.primaryConstru
         data.lønn,
         data.arbeidsgiversutbetaling,
         data.personUtbetaling,
-        data.tilstand()
+        when {
+            data.lønn == null -> Økonomi.Tilstand.KunGrad()
+            data.arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarLønn()
+            else -> Økonomi.Tilstand.HarUtbetatlinger()
+        }
     )
 
 internal fun createUtbetaling(

@@ -1,17 +1,20 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
+import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.createØkonomi
-import no.nav.helse.serde.ØkonomiData
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 
 internal class CreateØkonomiTest {
 
     @Test
     fun `opprette bare prosenter`() {
-        val data = ØkonomiData(79.5, 66.67, null, null, null)
+        val data = økonomiData(79.5, 66.67)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -26,7 +29,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `opprette med bare lønn`() {
-        val data = ØkonomiData(79.5, 66.67, 1199.6, null, null)
+        val data = økonomiData(79.5, 66.67, 1199.6)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -43,7 +46,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = ØkonomiData(79.5, 66.67, 1199.6, 640, 320)
+        val data = økonomiData(79.5, 66.67, 1199.6, 640, 320)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -57,4 +60,22 @@ internal class CreateØkonomiTest {
             assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
         }
     }
+
+    private fun økonomiData(
+        grad: Double,
+        arbeidsgiverBetalingProsent: Double,
+        lønn: Double? = null,
+        arbeidsgiversutbetaling: Int? = null,
+        personUtbetaling: Int? = null
+    ) = DagData(
+        1.januar,
+        JsonDagType.SYKEDAG,
+        PersonData.ArbeidsgiverData.VedtaksperiodeData.KildeData("type", UUID.randomUUID()),
+        grad,
+        arbeidsgiverBetalingProsent,
+        lønn,
+        arbeidsgiversutbetaling,
+        personUtbetaling,
+        null
+    )
 }
