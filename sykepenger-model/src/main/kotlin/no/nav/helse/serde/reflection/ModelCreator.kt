@@ -100,7 +100,7 @@ internal fun createØkonomi(data: DagData) = Økonomi::class.primaryConstructor!
         data.personUtbetaling,
         when {
             data.lønn == null -> Økonomi.Tilstand.KunGrad()
-            data.arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarLønn()
+            data.arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarDagsats()
             else -> Økonomi.Tilstand.HarUtbetatlinger()
         }
     )

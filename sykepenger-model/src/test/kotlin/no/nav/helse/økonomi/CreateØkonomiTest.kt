@@ -19,11 +19,11 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertNull(map["lønn"])
+                assertNull(map["dagsats"])
             }
             // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
-            assertDoesNotThrow { økonomi.lønn(1200) }
+            assertDoesNotThrow { økonomi.dagsats(1200) }
         }
     }
 
@@ -34,12 +34,12 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1199.6, map["lønn"])
+                assertEquals(1199.6, map["dagsats"])
                 assertNull(map["arbeidsgiversutbetaling"])
                 assertNull(map["personUtbetaling"])
             }
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.lønn(1200) }
+            assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
             assertDoesNotThrow { listOf(økonomi).betale(1.januar) }
         }
     }
@@ -51,12 +51,12 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1199.6, map["lønn"])
+                assertEquals(1199.6, map["dagsats"])
                 assertEquals(640, map["arbeidsgiversutbetaling"])
                 assertEquals(320, map["personUtbetaling"])
             }
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.lønn(1200) }
+            assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
             assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
         }
     }
