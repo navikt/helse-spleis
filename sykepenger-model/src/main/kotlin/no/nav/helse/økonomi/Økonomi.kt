@@ -17,7 +17,6 @@ internal class Økonomi private constructor(
 ) {
 
     companion object {
-        private val GRENSE = 20.prosent
 
         internal fun sykdomsgrad(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
             Økonomi(grad, arbeidsgiverBetalingProsent)
@@ -26,7 +25,7 @@ internal class Økonomi private constructor(
             Økonomi(!grad, arbeidsgiverBetalingProsent)
 
         internal fun samletGrad(økonomiList: List<Økonomi>) =
-            Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad to it.lønn() })
+            Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.lønn() })
 
         internal fun betale(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
@@ -90,8 +89,6 @@ internal class Økonomi private constructor(
             it.personUtbetaling ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
     }
 
-    internal fun erUnderGrensen() = grad.compareTo(GRENSE) < 0
-
     internal fun lønn(beløp: Number): Økonomi {
         beløp.toDouble().also {
             require(it >= 0) { "lønn kan ikke være negativ" }
@@ -105,6 +102,10 @@ internal class Økonomi private constructor(
         return this
     }
 
+    internal fun lås() = tilstand.lås(this)
+
+    internal fun låsOpp() = tilstand.låsOpp(this)
+
     internal fun toMap(): Map<String, Any> = tilstand.toMap(this)
 
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
@@ -113,34 +114,51 @@ internal class Økonomi private constructor(
     internal fun lønn() = lønn ?: throw IllegalStateException("Lønn er ikke satt ennå")
 
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
-    internal fun grad() = grad
+    internal fun grad() = tilstand.grad(this)
 
     private fun betale() = this.also { tilstand.betale(this) }
 
     private fun _betale() {
-        val total = lønn() * grad.ratio()
+        val total = lønn() * grad().ratio()
         (total * arbeidsgiverBetalingProsent.ratio()).roundToInt().also {
             arbeidsgiversutbetaling = it
             personUtbetaling = total.roundToInt() - it
         }
     }
 
+    private fun utbetalingMap() = mapOf(
+        "arbeidsgiversutbetaling" to arbeidsgiversutbetaling!!,
+        "personUtbetaling" to personUtbetaling!!
+    )
+
     internal sealed class Tilstand {
+
+        internal open fun grad(økonomi: Økonomi) = økonomi.grad
 
         internal open fun lønn(økonomi: Økonomi, beløp: Double) {
             throw IllegalStateException("Forsøk å stille lønn igjen")
         }
+
         internal open fun betale(økonomi: Økonomi) {
             throw IllegalStateException("utbetalingen er ikke beregnet ennå")
         }
 
+        internal open fun lås(økonomi: Økonomi): Økonomi {
+            throw IllegalStateException("Kan ikke låse Økonomi på dette tidspunktet")
+        }
+
+
+        internal open fun låsOpp(økonomi: Økonomi): Økonomi {
+            throw IllegalStateException("Kan ikke låse opp Økonomi på dette tidspunktet")
+        }
+
         internal open fun toMap(økonomi: Økonomi): Map<String, Any> = mapOf(
-            "grad" to økonomi.grad.toDouble(),
+            "grad" to økonomi.grad.toDouble(),   // Must use instance value here
             "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.toDouble()
         )
 
         internal open fun toIntMap(økonomi: Økonomi): Map<String, Any> = mapOf(
-            "grad" to økonomi.grad.roundToInt(),
+            "grad" to økonomi.grad.roundToInt(),   // Must use instance value here
             "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.roundToInt()
         )
 
@@ -153,6 +171,10 @@ internal class Økonomi private constructor(
         }
 
         internal class HarLønn: Tilstand() {
+
+            override fun lås(økonomi: Økonomi) = økonomi.also {
+                it.tilstand = Låst()
+            }
 
             override fun toMap(økonomi: Økonomi) = super.toMap(økonomi) + mapOf(
                 "lønn" to økonomi.lønn()
@@ -173,19 +195,57 @@ internal class Økonomi private constructor(
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +
                     mapOf("lønn" to økonomi.lønn()) +
-                    toUtbetalingMap(økonomi)
+                    økonomi.utbetalingMap()
 
             override fun toIntMap(økonomi: Økonomi) =
                 super.toIntMap(økonomi) +
                     mapOf("lønn" to økonomi.lønn().roundToInt()) +
-                    toUtbetalingMap(økonomi)
-
-            private fun toUtbetalingMap(økonomi: Økonomi) = mapOf(
-                "arbeidsgiversutbetaling" to økonomi.arbeidsgiversutbetaling!!,
-                "personUtbetaling" to økonomi.personUtbetaling!!
-            )
+                    økonomi.utbetalingMap()
         }
 
+        internal class Låst: Tilstand() {
+
+            override fun grad(økonomi: Økonomi) = 0.prosent
+
+            override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
+                økonomi.tilstand = HarLønn()
+            }
+
+            override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
+
+            override fun toMap(økonomi: Økonomi) =
+                super.toMap(økonomi) + mapOf("lønn" to økonomi.lønn())
+
+            override fun toIntMap(økonomi: Økonomi) =
+                super.toIntMap(økonomi) + mapOf("lønn" to økonomi.lønn().roundToInt())
+
+            override fun betale(økonomi: Økonomi) {
+                økonomi.arbeidsgiversutbetaling = 0
+                økonomi.personUtbetaling = 0
+                økonomi.tilstand = LåstMedUtbetling()
+            }
+        }
+
+        internal class LåstMedUtbetling: Tilstand() {
+
+            override fun grad(økonomi: Økonomi) = 0.prosent
+
+            override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
+
+            override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
+                økonomi.tilstand = HarLønn()
+            }
+
+            override fun toMap(økonomi: Økonomi) =
+                super.toMap(økonomi) +
+                    mapOf("lønn" to økonomi.lønn()) +
+                    økonomi.utbetalingMap()
+
+            override fun toIntMap(økonomi: Økonomi) =
+                super.toIntMap(økonomi) +
+                    mapOf("lønn" to økonomi.lønn().roundToInt()) +
+                    økonomi.utbetalingMap()
+        }
     }
 }
 

@@ -2,8 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -36,5 +35,11 @@ internal class ProsentdelTest {
     internal fun `parameterskontroll av sykdomsgrad`() {
         assertThrows<IllegalArgumentException> { (-0.001).prosent }
         assertThrows<IllegalArgumentException> { (100.001).prosent }
+    }
+
+    @Test fun minimumssyke() {
+        assertFalse(25.prosent.erUnderGrensen())
+        assertFalse(20.prosent.erUnderGrensen())
+        assertTrue(15.prosent.erUnderGrensen())
     }
 }

@@ -15,6 +15,7 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
     companion object {
         private const val EPSILON = 0.000001
         private const val SIKKER_BRØK = 1.0
+        private val GRENSE = 20.prosent
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Double>>): Prosentdel {
             val total = parene.sumByDouble { it.second }
@@ -44,6 +45,8 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
     internal fun toDouble() = brøkdel * 100.0
 
     internal fun roundToInt() = toDouble().roundToInt()
+
+    internal fun erUnderGrensen() = this < GRENSE
 }
 
 internal val Number.prosent get() = Prosentdel(this)

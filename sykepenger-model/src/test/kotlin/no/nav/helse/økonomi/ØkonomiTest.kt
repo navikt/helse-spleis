@@ -8,16 +8,6 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ØkonomiTest {
 
-    @Test fun minimumssyke() {
-        assertFalse(25.prosent.sykdomsgrad.erUnderGrensen())
-        assertFalse(20.prosent.sykdomsgrad.erUnderGrensen())
-        assertTrue(15.prosent.sykdomsgrad.erUnderGrensen())
-
-        assertFalse(Økonomi.arbeidshelse(75.prosent).erUnderGrensen())
-        assertFalse(Økonomi.arbeidshelse(80.prosent).erUnderGrensen())
-        assertTrue(Økonomi.arbeidshelse(85.prosent).erUnderGrensen())
-    }
-
     @Test fun `kan ikke sette lønn mer enn en gang`() {
         assertThrows<IllegalStateException>{ 25.prosent.sykdomsgrad.lønn(1200).lønn(800) }
     }
@@ -37,7 +27,9 @@ internal class ØkonomiTest {
             listOf(
                 50.prosent.sykdomsgrad.lønn(1200),
                 20.prosent.sykdomsgrad.lønn(800)
-            ).samletGrad()
+            ).samletGrad().also {
+                assertFalse(it.erUnderGrensen())
+            }
         )
     }
 
@@ -50,6 +42,70 @@ internal class ØkonomiTest {
                 60.prosent.sykdomsgrad.lønn(2000)
             ).samletGrad()
         )
+    }
+
+    @Test fun `fastlåst økonomi fungerer som arbeidsdag`() {
+        assertEquals(
+            19.prosent,
+            listOf(
+                50.prosent.sykdomsgrad.lønn(1200),
+                20.prosent.sykdomsgrad.lønn(800),
+                60.prosent.sykdomsgrad.lønn(2000).lås()
+            ).samletGrad().also {
+                assertTrue(it.erUnderGrensen())
+            }
+        )
+    }
+
+    @Test fun `kan låse igjen hvis allerede låst`() {
+        assertDoesNotThrow { 50.prosent.sykdomsgrad.lønn(1200).lås().lås()}
+    }
+
+    @Test fun `kan ikke låse uten lønn`() {
+        assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.lås() }
+    }
+
+    @Test fun `kan ikke låses etter betaling`() {
+        50.prosent.sykdomsgrad.lønn(1200).also { økonomi ->
+            listOf(økonomi).betale(1.januar)
+            assertUtbetaling(økonomi, 600, 0)
+            assertThrows<IllegalStateException> { økonomi.lås() }
+        }
+    }
+
+    @Test fun `opplåsing tillater betaling`() {
+        50.prosent.sykdomsgrad.lønn(1200).lås().låsOpp().also { økonomi ->
+            listOf(økonomi).betale(1.januar)
+            assertUtbetaling(økonomi, 600, 0)
+        }
+    }
+
+    @Test fun `kan ikke låses opp med mindre den er låst`() {
+        50.prosent.sykdomsgrad.also { økonomi ->
+            assertThrows<IllegalStateException> { økonomi.låsOpp() }
+            økonomi.lønn(1200)
+            assertThrows<IllegalStateException> { økonomi.låsOpp() }
+            listOf(økonomi).betale(1.januar)
+            assertUtbetaling(økonomi, 600, 0)
+            assertThrows<IllegalStateException> { økonomi.låsOpp() }
+        }
+    }
+
+    @Test fun `betal 0 hvis låst`() {
+        50.prosent.sykdomsgrad.lønn(1200).lås().also { økonomi ->
+            listOf(økonomi).betale(1.januar)
+            assertUtbetaling(økonomi, 0, 0)
+            økonomi.låsOpp()
+            listOf(økonomi).betale(1.januar)
+            assertUtbetaling(økonomi, 600, 0)
+        }
+    }
+
+    @Test fun `kan ikke låses etter utbetaling`() {
+        50.prosent.sykdomsgrad.lønn(1200).also { økonomi ->
+            listOf(økonomi).betale(1.januar)
+            assertThrows<IllegalStateException> { økonomi.lås() }
+        }
     }
 
     @Test fun `toMap uten lønn`() {
