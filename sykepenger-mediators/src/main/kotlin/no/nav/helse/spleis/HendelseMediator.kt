@@ -147,7 +147,7 @@ internal class HendelseMediator(
 
     private fun publiserPersonRulletTilbake(
         rollback: PersonHendelse,
-        message: RollbackMessage,
+        message: HendelseMessage,
         vedtaksperioderSlettet: List<UUID>
     ) {
         rapidsConnection.publish(
@@ -162,7 +162,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun behandle(message: RollbackMessage, rollback: RollbackDelete) {
+    override fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete) {
         val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
         val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
 
@@ -363,5 +363,5 @@ internal interface IHendelseMediator {
     fun behandle(message: SimuleringMessage, simulering: Simulering)
     fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
     fun behandle(message: RollbackMessage, rollback: Rollback)
-    fun behandle(message: RollbackMessage, rollback: RollbackDelete)
+    fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
 }

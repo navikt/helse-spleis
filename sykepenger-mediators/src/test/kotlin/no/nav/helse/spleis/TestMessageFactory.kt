@@ -358,7 +358,6 @@ internal class TestMessageFactory(
             "rollback_person", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "type" to "Rollback",
                 "personVersjon" to personVersjon
             )
         )
@@ -366,10 +365,9 @@ internal class TestMessageFactory(
 
     fun lagRollbackDelete(): String {
         return nyHendelse(
-            "rollback_person", mutableMapOf<String, Any>(
+            "rollback_person_delete", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "type" to "Delete"
+                "fødselsnummer" to fødselsnummer
             )
         )
     }

@@ -3,7 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.meldinger.model.*
 
-internal class TestHendelseMediator() : IHendelseMediator {
+internal class TestHendelseMediator : IHendelseMediator {
 
     internal var lestNySøknad = false
         private set
@@ -114,7 +114,7 @@ internal class TestHendelseMediator() : IHendelseMediator {
         lestRollback = true
     }
 
-    override fun behandle(message: RollbackMessage, rollback: RollbackDelete) {
+    override fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete) {
         lestRollbackDelete = true
     }
 }
