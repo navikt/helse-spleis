@@ -965,30 +965,28 @@ internal class Vedtaksperiode private constructor(
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 validerYtelser(vedtaksperiode.periode(), ytelser)
                 overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger())
-                valider("Oppdaget forlengelse fra Infotrygd, men perioden er ikke utbetalt enda") {
-                    val tilstøtende = arbeidsgiver.tilstøtende(vedtaksperiode) ?: return@valider true
-
-                    //This is impacted by trashcan
-                    if (tilstøtende.tilstand != TilInfotrygd) return@valider true.also {
-                        vedtaksperiode.førsteFraværsdag = tilstøtende.førsteFraværsdag
+                onSuccess {
+                    arbeidsgiver.tilstøtende(vedtaksperiode)?.run {
+                        vedtaksperiode.førsteFraværsdag = førsteFraværsdag
+                        return@onSuccess
                     }
 
-                    //This will only happen if we come here from a blue state
                     Oldtidsutbetalinger(vedtaksperiode.periode()).also { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)
                         arbeidsgiver.utbetalteUtbetalinger()
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
 
-                        if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return@valider false
+                        if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return@onSuccess
 
                         vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
+
+                        //This will only happen if we come here from a blue state and previous period(s) were discarded during migration
                         if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
                             oldtid.førsteUtbetalingsdag(vedtaksperiode.arbeidsgiver)
                     }
 
                     arbeidsgiver.addInntekt(ytelser)
                     ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
-                    return@valider true
                 }
                 harInntektshistorikk(arbeidsgiver, vedtaksperiode.førsteDag())
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
