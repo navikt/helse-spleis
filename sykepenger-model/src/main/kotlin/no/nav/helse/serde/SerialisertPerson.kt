@@ -30,8 +30,6 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.økonomi.prosent
-import no.nav.helse.økonomi.Økonomi
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -143,7 +141,7 @@ class SerialisertPerson(val json: String) {
     private fun konverterTilOppdrag(data: OppdragData): Oppdrag {
         return createOppdrag(
             data.mottaker,
-            Fagområde.valueOf(data.fagområde),
+            Fagområde.from(data.fagområde),
             data.linjer.map(::konverterTilUtbetalingslinje),
             data.fagsystemId,
             Endringskode.valueOf(data.endringskode),

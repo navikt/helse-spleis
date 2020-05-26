@@ -78,7 +78,7 @@ private class UtbetaltEventBuilder(
         oppdragListe.add(
             PersonObserver.UtbetaltEvent.Utbetalt(
                 mottaker = orgnummer,
-                fagområde = "SPREF",
+                fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
                 totalbeløp = oppdrag.totalbeløp(),
                 utbetalingslinjer = utbetalingslinjer.toList()
@@ -94,7 +94,7 @@ private class UtbetaltEventBuilder(
         oppdragListe.add(
             PersonObserver.UtbetaltEvent.Utbetalt(
                 mottaker = fødselnummer,
-                fagområde = "SP",
+                fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
                 totalbeløp = oppdrag.totalbeløp(),
                 utbetalingslinjer = utbetalingslinjer.toList()

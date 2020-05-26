@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
+import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -520,7 +520,7 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     private fun tomtOppdrag(sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)) =
-        Oppdrag(ORGNUMMER, SPREF, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 
@@ -545,13 +545,13 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     private fun linjer(vararg linjer: TestUtbetalingslinje) =
-        Oppdrag(ORGNUMMER, SPREF, linjer.map { it.asUtbetalingslinje() }, sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.linkTo(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }
 
     private fun linjer(vararg linjer: Utbetalingslinje) =
-        Oppdrag(ORGNUMMER, SPREF, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.linkTo(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }

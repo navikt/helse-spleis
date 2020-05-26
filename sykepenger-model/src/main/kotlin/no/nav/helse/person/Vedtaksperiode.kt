@@ -1072,7 +1072,7 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                oppdrag = Fagområde.SPREF.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
+                oppdrag = Fagområde.SykepengerRefusjon.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
                 saksbehandler = "Spleis"
             )

@@ -122,16 +122,23 @@ internal enum class Endringskode {
 internal enum class Klassekode(internal val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP");
 
-    companion object {
+    internal companion object {
         private val map = values().associateBy(Klassekode::verdi)
-        fun from(verdi: String) = map[verdi] ?: throw IllegalArgumentException("Støtter ikke klassekode: $verdi")
+        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
     }
 }
 
-internal enum class Fagområde(private val linjerStrategy: (Utbetaling) -> Oppdrag) {
-    SPREF(Utbetaling::arbeidsgiverOppdrag),
-    SP(Utbetaling::personOppdrag);
+internal enum class Fagområde(internal val verdi: String, private val linjerStrategy: (Utbetaling) -> Oppdrag) {
+    SykepengerRefusjon("SPREF", Utbetaling::arbeidsgiverOppdrag),
+    Sykepenger("SP", Utbetaling::personOppdrag);
+
+    override fun toString() = verdi
 
     internal fun utbetalingslinjer(utbetaling: Utbetaling): Oppdrag =
         linjerStrategy(utbetaling)
+
+    internal companion object {
+        private val map = values().associateBy(Fagområde::verdi)
+        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
+    }
 }

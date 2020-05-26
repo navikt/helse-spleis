@@ -40,6 +40,8 @@ internal class Oppdrag private constructor(
         visitor.postVisitOppdrag(this)
     }
 
+    internal fun fagområde() = fagområde
+
     internal fun fagsystemId() = fagsystemId
 
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN

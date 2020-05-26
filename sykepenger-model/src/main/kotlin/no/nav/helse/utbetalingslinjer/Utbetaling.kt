@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
+import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
 import java.time.LocalDate
@@ -42,11 +42,11 @@ internal class Utbetaling private constructor(
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
-        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SPREF, sisteDato, arbeidsgiverUtbetaling).result()
+        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverUtbetaling).result()
             .minus(
                 tidligere?.arbeidsgiverOppdrag ?: Oppdrag(
                     organisasjonsnummer,
-                    SPREF,
+                    SykepengerRefusjon,
                     sisteArbeidsgiverdag = LocalDate.MIN
                 )
             )
@@ -65,7 +65,7 @@ internal class Utbetaling private constructor(
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
         ): Oppdrag {
-            return Oppdrag(fødselsnummer, Fagområde.SP, sisteArbeidsgiverdag = LocalDate.MIN)
+            return Oppdrag(fødselsnummer, Fagområde.Sykepenger, sisteArbeidsgiverdag = LocalDate.MIN)
         }
     }
 

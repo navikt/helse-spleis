@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Fagområde.SPREF
+import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -183,7 +183,7 @@ internal class OppdragBuilderTest {
         oppdrag = OppdragBuilder(
             tidslinje,
             ORGNUMMER,
-            SPREF,
+            SykepengerRefusjon,
             sisteDato ?: tidslinje.sisteDato()
         ).result()
     }

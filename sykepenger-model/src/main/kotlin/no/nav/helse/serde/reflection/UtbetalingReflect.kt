@@ -22,7 +22,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 internal class OppdragReflect(private val oppdrag: Oppdrag) {
     internal fun toMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
-        "fagområde" to oppdrag.get<Fagområde>("fagområde").toString(),
+        "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
         "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
@@ -45,7 +45,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
         "endringskode" to utbetalingslinje.get<Endringskode>("endringskode").toString(),
         "klassekode" to utbetalingslinje.get<Klassekode>("klassekode").verdi
-        )
+    )
 }
 
 private class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbetalingstidslinje) {
