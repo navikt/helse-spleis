@@ -150,9 +150,9 @@ internal class Arbeidsgiver private constructor(
             )
     }
 
-    fun håndter(hendelse: Rollback) {
+    internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        perioder.toList().forEach { it.håndter(hendelse) }
+        perioder.toList().forEach { it.håndter(TilbakestillBehandling(organisasjonsnummer, hendelse)) }
     }
 
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
@@ -195,17 +195,21 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(perioder, vedtaksperiode)
 
-    internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+    internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         perioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
-    internal fun avsluttBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+    internal fun avsluttBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         perioder.toList().forEach { it.håndter(vedtaksperiode, AvsluttBehandling(hendelse)) }
     }
 
-    internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
-
-    internal class AvsluttBehandling(internal val hendelse: PersonHendelse)
+    internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)
+    internal class AvsluttBehandling(internal val hendelse: ArbeidstakerHendelse)
+    internal class TilbakestillBehandling(internal val organisasjonsnummer: String, internal val hendelse: PersonHendelse) : ArbeidstakerHendelse(hendelse.aktivitetslogg) {
+        override fun organisasjonsnummer() = organisasjonsnummer
+        override fun aktørId() = hendelse.aktørId()
+        override fun fødselsnummer() = hendelse.fødselsnummer()
+    }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
