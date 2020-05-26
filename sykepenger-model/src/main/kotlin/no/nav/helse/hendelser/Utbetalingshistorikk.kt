@@ -130,16 +130,20 @@ class Utbetalingshistorikk(
                     aktivitetslogg: Aktivitetslogg,
                     periode: no.nav.helse.hendelser.Periode
                 ): Aktivitetslogg {
-                    liste
-                        .onEach { it.valider(aktivitetslogg, periode) }
-                        .filterIsInstance<Utbetalingsperiode>()
-                        .zipWithNext { left, right ->
-                            if (left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats) {
-                                aktivitetslogg.warn("Direkte overgang fra Infotrygd. Dagsatsen har endret seg minst én gang i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.")
-                            }
-                        }
+                    liste.onEach { it.valider(aktivitetslogg, periode) }
+                    if (liste.harHistoriskeSammenhengendePerioderMedEndring())
+                        aktivitetslogg.warn("Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.")
                     return aktivitetslogg
                 }
+
+                private fun List<Periode>.harHistoriskeSammenhengendePerioderMedEndring() =
+                    this
+                        .filterIsInstance<Utbetalingsperiode>()
+                        .zipWithNext { left, right -> erTilstøtendeMedEndring(left, right) }
+                        .any { it }
+
+                private fun erTilstøtendeMedEndring(left: Utbetalingsperiode, right: Utbetalingsperiode) =
+                    left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats
             }
         }
 
