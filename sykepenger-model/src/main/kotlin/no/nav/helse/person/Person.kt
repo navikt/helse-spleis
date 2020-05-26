@@ -87,6 +87,19 @@ class Person private constructor(
         }
     }
 
+    fun håndter(hendelse: Rollback) {
+        hendelse.kontekst(this)
+        arbeidsgivere.forEach {
+            it.håndter(hendelse)
+        }
+        hendelse.warn("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.")
+    }
+
+    fun håndter(hendelse: RollbackDelete) {
+        hendelse.kontekst(this)
+        hendelse.warn("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.")
+    }
+
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
@@ -169,11 +182,4 @@ class Person private constructor(
             add(newValue)
             newValue
         }
-
-    fun invaliderIkkeUtbetalteVedtaksperioder(hendelse: PersonHendelse) {
-        arbeidsgivere.forEach {
-            it.invaliderIkkeUtbetaltePerioder(hendelse)
-        }
-    }
-
 }

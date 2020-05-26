@@ -139,10 +139,21 @@ internal class HendelseMediator(
         sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand)
 
         val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
-        rollbackPerson.invaliderIkkeUtbetalteVedtaksperioder(rollback)
-        lagrePersonDao.lagrePerson(message, rollbackPerson, rollback)
+        rollbackPerson.håndter(rollback)
+        finalize(rollbackPerson, message, rollback)
 
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderSlettet)
+    }
+
+    override fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete) {
+        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
+        val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
+
+        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
+        val person = Person(rollback.aktørId(), rollback.fødselsnummer())
+        person.håndter(rollback)
+        finalize(person, message, rollback)
+        publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
     }
 
     private fun publiserPersonRulletTilbake(
@@ -160,17 +171,6 @@ internal class HendelseMediator(
                 )
             ).toJson()
         )
-    }
-
-    override fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete) {
-        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
-        val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
-
-        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
-
-        lagrePersonDao.lagrePerson(message, Person(rollback.aktørId(), rollback.fødselsnummer()), rollback)
-
-        publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
     }
 
     private fun sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand: List<VedtaksperiodeIdTilstand>) {
@@ -210,7 +210,7 @@ internal class HendelseMediator(
         return person
     }
 
-    private fun finalize(person: Person, message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
+    private fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
         lagrePersonDao.lagrePerson(message, person, hendelse)
 
         if (!hendelse.hasMessages()) return

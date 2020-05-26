@@ -436,15 +436,15 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    fun invaliderIkkeUtbetaltePerioder(hendelse: PersonHendelse) {
-        this.tilstand.invalider(this, hendelse)
+    fun håndter(hendelse: Rollback) {
+        this.tilstand.håndter(this, hendelse)
     }
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
 
-        fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Rollback) {
             vedtaksperiode.invaliderPeriode(hendelse)
         }
 
@@ -1132,8 +1132,8 @@ internal class Vedtaksperiode private constructor(
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
-        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetalinger")
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Rollback) {
+            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetaling")
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -1234,7 +1234,7 @@ internal class Vedtaksperiode private constructor(
     internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
 
-        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Rollback) {
             hendelse.info("Invaliderer ikke en vedtaksperiode som er avsluttet med inntektsmelding")
         }
 
@@ -1259,7 +1259,7 @@ internal class Vedtaksperiode private constructor(
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
 
-        override fun invalider(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Rollback) {
             hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetalinger")
         }
 

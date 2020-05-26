@@ -150,6 +150,11 @@ internal class Arbeidsgiver private constructor(
             )
     }
 
+    fun håndter(hendelse: Rollback) {
+        hendelse.kontekst(this)
+        perioder.toList().forEach { it.håndter(hendelse) }
+    }
+
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
@@ -204,9 +209,5 @@ internal class Arbeidsgiver private constructor(
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
-    }
-
-    fun invaliderIkkeUtbetaltePerioder(hendelse: PersonHendelse) {
-        perioder.toList().forEach { it.invaliderIkkeUtbetaltePerioder(hendelse) }
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -13,11 +13,11 @@ internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
     private val sikkerLogg: Logger
 ) {
-    internal fun håndter(message: HendelseMessage, hendelse: ArbeidstakerHendelse) {
+    internal fun håndter(message: HendelseMessage, hendelse: PersonHendelse) {
         hendelse.kontekster().forEach { if (!it.hasErrors()) håndter(message, hendelse, it.behov()) }
     }
 
-    private fun håndter(message: HendelseMessage, hendelse: ArbeidstakerHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
+    private fun håndter(message: HendelseMessage, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
         behov.groupBy { it.kontekst() }.forEach { (kontekst, behov) ->
             val behovsliste = mutableListOf<String>()
             val id = UUID.randomUUID()
