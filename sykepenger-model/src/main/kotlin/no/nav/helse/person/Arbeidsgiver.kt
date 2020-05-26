@@ -207,6 +207,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun invaliderIkkeUtbetaltePerioder(hendelse: PersonHendelse) {
-        perioder.forEach { it.invaliderIkkeUtbetaltePerioder(hendelse) }
+        perioder.toList().forEach { it.invaliderIkkeUtbetaltePerioder(hendelse) }
     }
 }
