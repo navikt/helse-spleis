@@ -205,16 +205,19 @@ internal class Sykdomstidslinje private constructor(
             grad: Number,
             kilde: Hendelseskilde
         ) =
-            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
-                Sykdomstidslinje(
-                    førsteDato.datesUntil(sisteDato.plusDays(1))
-                        .collect(
-                            toMap<LocalDate, LocalDate, Dag>(
-                                { it },
-                                { if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde) })
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, Dag>(
+                            { it },
+                            {
+                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                                    if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
+                                }
+
+                            }
                         )
-                )
-            }
+                    ))
 
         internal fun sykedager(
             førsteDato: LocalDate,
@@ -223,23 +226,23 @@ internal class Sykdomstidslinje private constructor(
             grad: Number,
             kilde: Hendelseskilde
         ) =
-            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
-                Sykdomstidslinje(
-                    førsteDato.datesUntil(sisteDato.plusDays(1))
-                        .collect(
-                            toMap<LocalDate, LocalDate, Dag>(
-                                { it },
-                                {
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, Dag>(
+                            { it },
+                            {
+                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else sykedag(
                                         it,
                                         avskjæringsdato,
                                         økonomi,
                                         kilde
                                     )
-                                })
-                        )
-                )
-            }
+                                }
+                            })
+                    )
+            )
 
         private fun sykedag(
             dato: LocalDate,
@@ -254,22 +257,22 @@ internal class Sykdomstidslinje private constructor(
             grad: Number,
             kilde: Hendelseskilde
         ) =
-            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
-                Sykdomstidslinje(
-                    førsteDato.datesUntil(sisteDato.plusDays(1))
-                        .collect(
-                            toMap<LocalDate, LocalDate, Dag>(
-                                { it },
-                                {
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, Dag>(
+                            { it },
+                            {
+                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else ForeldetSykedag(
                                         it,
                                         økonomi,
                                         kilde
                                     )
-                                })
-                        )
-                )
-            }
+                                }
+                            })
+                    )
+            )
 
         internal fun arbeidsgiverdager(
             førsteDato: LocalDate,
@@ -277,19 +280,19 @@ internal class Sykdomstidslinje private constructor(
             grad: Number,
             kilde: Hendelseskilde
         ) =
-            Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
-                Sykdomstidslinje(
-                    førsteDato.datesUntil(sisteDato.plusDays(1))
-                        .collect(
-                            toMap<LocalDate, LocalDate, Dag>(
-                                { it },
-                                {
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, Dag>(
+                            { it },
+                            {
+                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
                                     if (it.erHelg()) ArbeidsgiverHelgedag(it, økonomi, kilde)
                                     else Arbeidsgiverdag(it, økonomi, kilde)
-                                })
-                        )
-                )
-            }
+                                }
+                            })
+                    )
+            )
 
         internal fun feriedager(
             førsteDato: LocalDate,
