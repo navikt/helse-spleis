@@ -27,19 +27,9 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    private fun sisteHistoriskeUtbetalingsperioder() : List<Periode.Utbetalingsperiode> {
-        val utbetalingsperioder = utbetalinger.filterIsInstance<Periode.Utbetalingsperiode>()
-        val sisteUtbetalteDatoIInfotrygd = utbetalingsperioder.maxBy { it.tom }?.tom
-        return utbetalingsperioder.filter { periode -> periode.tom == sisteUtbetalteDatoIInfotrygd }
-    }
-
     internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
-        if(sisteHistoriskeUtbetalingsperioder().any { it.tom.harTilstøtende(periode.start) && it.orgnr != organisasjonsnummer }) {
-            aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
-        } else {
-            Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode)
-            Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
-        }
+        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer)
+        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
         return aktivitetslogg
     }
 
@@ -108,10 +98,13 @@ class Utbetalingshistorikk(
             if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
         }
 
-        abstract class Utbetalingsperiode(fom: LocalDate, internal val tom: LocalDate,
-            internal val dagsats: Int,
-            internal val grad: Int
-        , internal val orgnr: String) : Periode(fom, tom) {
+        abstract class Utbetalingsperiode(
+            fom: LocalDate,
+            tom: LocalDate,
+            private val dagsats: Int,
+            private val grad: Int,
+            private val orgnr: String
+        ) : Periode(fom, tom) {
             private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
             private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == gradertSats
 
@@ -128,13 +121,33 @@ class Utbetalingshistorikk(
                 fun valider(
                     liste: List<Periode>,
                     aktivitetslogg: Aktivitetslogg,
-                    periode: no.nav.helse.hendelser.Periode
+                    periode: no.nav.helse.hendelser.Periode,
+                    organisasjonsnummer: String
                 ): Aktivitetslogg {
+                    if (liste.harTilstøtendePeriodeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
+                        aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
+                        return aktivitetslogg
+                    }
+
                     liste.onEach { it.valider(aktivitetslogg, periode) }
                     if (liste.harHistoriskeSammenhengendePerioderMedEndring())
-                        aktivitetslogg.warn("Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd. Kontroller at sykepengegrunnlaget er riktig.")
+                        aktivitetslogg.warn(
+                            "Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd.%s",
+                            if (liste.harTilstøtende(periode)) " Direkte overgang fra Infotrygd; kontroller at sykepengegrunnlaget er riktig." else ""
+                        )
                     return aktivitetslogg
                 }
+
+                private fun List<Periode>.harTilstøtende(periode: no.nav.helse.hendelser.Periode) =
+                    this
+                        .filterIsInstance<Utbetalingsperiode>()
+                        .any { it.periode.endInclusive.harTilstøtende(periode.start) }
+
+                private fun List<Periode>.harTilstøtendePeriodeFraAnnenArbeidsgiver(periode: no.nav.helse.hendelser.Periode, organisasjonsnummer: String) =
+                    this
+                        .filterIsInstance<Utbetalingsperiode>()
+                        .filter { it.periode.endInclusive.harTilstøtende(periode.start) }
+                        .any { it.orgnr != organisasjonsnummer }
 
                 private fun List<Periode>.harHistoriskeSammenhengendePerioderMedEndring() =
                     this
