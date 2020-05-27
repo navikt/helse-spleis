@@ -50,6 +50,8 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitMaksdato(maksdato: LocalDate?) {}
     fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
+    fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {}
+    fun visitPersonFagsystemId(fagsystemId: String?) {}
     fun visitGodkjentAv(godkjentAv: String?) {}
     fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}

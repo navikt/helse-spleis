@@ -83,7 +83,7 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(inspektør.personLogg.hasBehov())
         assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -131,7 +131,7 @@ internal class SøknadHendelseTest {
         )
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = "987654321") =

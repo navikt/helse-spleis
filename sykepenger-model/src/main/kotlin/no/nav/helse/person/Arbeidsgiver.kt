@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import java.math.BigDecimal
@@ -136,13 +136,12 @@ internal class Arbeidsgiver private constructor(
             ?.also {
                 kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
                 utbetalinger.add(it)
-                Aktivitet.Behov.utbetaling(
-                    kansellerUtbetaling.aktivitetslogg,
-                    it.arbeidsgiverOppdrag(),
+                utbetaling(
+                    aktivitetslogg = kansellerUtbetaling.aktivitetslogg,
+                    oppdrag = it.arbeidsgiverOppdrag(),
                     saksbehandler = kansellerUtbetaling.saksbehandler
                 )
-                perioder.filter { periode -> periode.arbeidsgiverFagsystemId() == kansellerUtbetaling.fagsystemId }
-                    .forEach { periode -> periode.annullerPeriode(kansellerUtbetaling) }
+                perioder.toList().forEach { it.håndter(kansellerUtbetaling) }
             }
             ?: kansellerUtbetaling.error(
                 "Avvis hvis vi ikke finner fagsystemId %s",
@@ -152,7 +151,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        perioder.toList().forEach { it.håndter(TilbakestillBehandling(organisasjonsnummer, hendelse)) }
+        perioder.toList().forEach { it.forkast(TilbakestillBehandling(organisasjonsnummer, hendelse)) }
     }
 
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
@@ -160,12 +159,20 @@ internal class Arbeidsgiver private constructor(
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)
 
-    internal fun invaliderPerioder(hendelse: ArbeidstakerHendelse) {
-        perioder.toList().forEach { it.invaliderPeriode(hendelse) }
+    internal fun forkastPerioder(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(this)
+        perioder.toList().forEach { it.forkast(hendelse) }
     }
 
     internal fun forkast(vedtaksperiode: Vedtaksperiode) {
-        if (perioder.remove(vedtaksperiode)) forkastede.add(vedtaksperiode)
+        if (!perioder.remove(vedtaksperiode)) return
+        forkastede.add(vedtaksperiode)
+        Vedtaksperiode.sorter(forkastede)
+    }
+
+    internal fun forkast(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        forkast(vedtaksperiode)
+        perioder.toList().forEach { it.forkast(vedtaksperiode, hendelse) }
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
@@ -199,12 +206,7 @@ internal class Arbeidsgiver private constructor(
         perioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
-    internal fun avsluttBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        perioder.toList().forEach { it.håndter(vedtaksperiode, AvsluttBehandling(hendelse)) }
-    }
-
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)
-    internal class AvsluttBehandling(internal val hendelse: ArbeidstakerHendelse)
     internal class TilbakestillBehandling(internal val organisasjonsnummer: String, internal val hendelse: PersonHendelse) : ArbeidstakerHendelse(hendelse.aktivitetslogg) {
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()

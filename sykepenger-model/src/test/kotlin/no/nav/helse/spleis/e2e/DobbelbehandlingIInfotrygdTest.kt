@@ -30,8 +30,8 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(1.mai, 30.mai, 100))
         håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 1.mai, 1000, 100, ORGNUMMER))
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 }

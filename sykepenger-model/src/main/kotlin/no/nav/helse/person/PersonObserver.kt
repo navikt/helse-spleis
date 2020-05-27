@@ -32,6 +32,14 @@ interface PersonObserver {
         val makstid: LocalDateTime
     )
 
+    data class VedtaksperiodeForkastetEvent(
+        val vedtaksperiodeId: UUID,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val gjeldendeTilstand: TilstandType
+    )
+
     data class UtbetaltEvent(
         val aktørId: String,
         val fødselsnummer: String,
@@ -73,6 +81,8 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
+
+    fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
 
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
 

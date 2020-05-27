@@ -104,6 +104,10 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
+    fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+        observers.forEach { it.vedtaksperiodeForkastet(event) }
+    }
+
     fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
         observers.forEach { it.vedtaksperiodeUtbetalt(event) }
     }
@@ -157,7 +161,7 @@ class Person private constructor(
     private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
         arbeidstakerHendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.invaliderPerioder(arbeidstakerHendelse)
+            arbeidsgiver.forkastPerioder(arbeidstakerHendelse)
         }
     }
 

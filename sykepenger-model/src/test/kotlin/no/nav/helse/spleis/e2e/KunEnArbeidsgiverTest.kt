@@ -678,7 +678,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             100,
             ORGNUMMER
         ), inntektshistorikk = emptyList())
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1194,9 +1194,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingsgodkjenning(0, false)
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 
@@ -1211,11 +1211,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, false) // går til TilInfotrygd
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1458,7 +1457,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `søknad med papirsykmelding`() {
         håndterSykmelding(Triple(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100), Søknad.Søknadsperiode.Papirsykmelding(1.januar, 20.januar))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1482,13 +1481,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(14.januar, INNTEKT, emptyList()))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null, INNTEKT, listOf(14.januar)))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 }

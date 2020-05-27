@@ -3,6 +3,8 @@ package no.nav.helse.person
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,7 +39,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -45,7 +47,7 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyMap(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -57,7 +59,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -71,7 +73,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
+        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(0))
         val historikkFom = inspektør.sykdomstidslinje(0).førsteDag().minusYears(4)
         val historikkTom = inspektør.sykdomstidslinje(0).sisteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
@@ -110,7 +112,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -125,7 +127,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     private fun ansattSidenStart2017() =
@@ -135,13 +137,6 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun tolvMånederMedInntekt(beregnetInntekt: Double) =
         (1..12).map { YearMonth.of(2018, it) to (ORGNR to beregnetInntekt) }
             .groupBy({ it.first }) { it.second }
-
-    private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.sisteTilstand(0)
-        )
-    }
 
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,

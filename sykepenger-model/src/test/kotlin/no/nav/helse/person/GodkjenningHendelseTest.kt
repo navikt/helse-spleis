@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,7 +34,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -40,7 +42,7 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(false))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -48,9 +50,9 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
         person.håndter(ytelser())
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
 
@@ -60,14 +62,7 @@ internal class GodkjenningHendelseTest {
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
         person.håndter(utbetalingsgodkjenning(true))
-        assertTilstand(TilstandType.TIL_UTBETALING)
-    }
-
-    private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.sisteTilstand(0)
-        )
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
     }
 
     private fun håndterYtelser() {

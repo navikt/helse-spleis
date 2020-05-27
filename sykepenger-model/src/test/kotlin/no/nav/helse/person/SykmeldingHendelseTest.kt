@@ -48,9 +48,8 @@ internal class SykmeldingHendelseTest {
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
         assertTrue(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test

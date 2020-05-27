@@ -178,7 +178,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         )
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =

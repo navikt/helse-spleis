@@ -811,9 +811,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Periode(30.mars(2020), 30.mars(2020))
         ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
         håndterVilkårsgrunnlag(0, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, TIL_INFOTRYGD)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
     }
 
     @Test
@@ -824,7 +824,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             Periode(1.januar, 16.januar)
         ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList()))
         håndterVilkårsgrunnlag(0, INNTEKT, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei) // make sure Vilkårsgrunnlag fails
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, TIL_INFOTRYGD)
     }
 
     @Test

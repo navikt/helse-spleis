@@ -109,7 +109,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(inntektsmelding(virksomhetsnummer = "456"))
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test

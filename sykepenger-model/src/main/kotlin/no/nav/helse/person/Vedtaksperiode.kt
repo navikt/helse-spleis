@@ -88,9 +88,6 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiverNettoBeløp = 0
     )
 
-    internal fun arbeidsgiverFagsystemId() = arbeidsgiverFagsystemId
-    internal fun personFagsystemId() = personFagsystemId
-
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
         sykdomshistorikk.accept(visitor)
@@ -100,6 +97,8 @@ internal class Vedtaksperiode private constructor(
         visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
         visitor.visitGjenståendeSykedager(gjenståendeSykedager)
         visitor.visitForbrukteSykedager(forbrukteSykedager)
+        visitor.visitArbeidsgiverFagsystemId(arbeidsgiverFagsystemId)
+        visitor.visitPersonFagsystemId(personFagsystemId)
         visitor.visitGodkjentAv(godkjentAv)
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
@@ -128,8 +127,6 @@ internal class Vedtaksperiode private constructor(
         kontekst(søknad)
         valider(søknad) { tilstand.håndter(this, søknad) }
     }
-
-    override fun toString() = "${this.periode().start} - ${this.periode().endInclusive}"
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
@@ -203,28 +200,37 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndter(other: Vedtaksperiode, hendelse: Arbeidsgiver.AvsluttBehandling) {
-        if (this.periode().endInclusive < other.periode().start) arbeidsgiver.forkast(this)
-        else if (this.periode()
-                .overlapperMed(other.periode()) || other.periode().endInclusive.harTilstøtende(this.periode().start)
-        ) {
-            kontekst(hendelse.hendelse)
-            tilstand.håndter(this, hendelse)
-        }
+    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
+        if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
+        kontekst(kansellerUtbetaling)
+        kansellerUtbetaling.info("Invaliderer vedtaksperiode: %s på grunn av annullering", this.id.toString())
+        invaliderPeriode(kansellerUtbetaling)
     }
 
-    internal fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
+    internal fun forkast(other: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        if (mottattSykmelding() || (this.periode().start > other.periode().endInclusive && !other.periode().endInclusive.harTilstøtende(this.periode().start))) return
+        hendelse.warn("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd")
+        forkast(hendelse)
+    }
+
+    internal fun forkast(hendelse: ArbeidstakerHendelse) {
+        kontekst(hendelse)
+        hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
+        if (erFerdigBehandlet()) return arbeidsgiver.forkast(this).also {
+            person.vedtaksperiodeForkastet(PersonObserver.VedtaksperiodeForkastetEvent(
+                vedtaksperiodeId = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                gjeldendeTilstand = tilstand.type
+            ))
+        }
+        invaliderPeriode(hendelse)
+    }
+
+    private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
-    }
-
-    internal fun annullerPeriode(hendelse: ArbeidstakerHendelse) {
-        hendelse.info("Invaliderer vedtaksperiode: %s på grunn av annullering", this.id.toString())
-        tilstand(hendelse, TilInfotrygd)
-    }
-
-    internal fun håndter(hendelse: TilbakestillBehandling) {
-        this.tilstand.håndter(this, hendelse)
     }
 
     private fun periode() =
@@ -415,14 +421,23 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun erFerdigBehandlet(other: Vedtaksperiode): Boolean {
-        if (this.periode().start >= other.periode().start) return true
-        return this.tilstand.type in listOf(
+    private fun erFerdigBehandlet(other: Vedtaksperiode) =
+        this.periode().start >= other.periode().start || erFerdigBehandlet()
+
+    private fun erFerdigBehandlet() =
+        this.tilstand.type in listOf(
             TIL_INFOTRYGD,
             AVSLUTTET,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
-    }
+
+    private fun mottattSykmelding() =
+        this.tilstand.type in listOf(
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_UFERDIG_GAP
+        )
 
     private fun utbetaling() =
         arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
@@ -441,6 +456,8 @@ internal class Vedtaksperiode private constructor(
             )
         )
     }
+
+    override fun toString() = "${this.periode().start} - ${this.periode().endInclusive}"
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -540,14 +557,6 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandling.hendelse.info("Tidligere periode ferdig behandlet")
         }
 
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            avsluttBehandling: Arbeidsgiver.AvsluttBehandling
-        ) {
-            avsluttBehandling.hendelse.warn("Avslutter perioden fordi tilstøtende gikk til Infotrygd")
-            vedtaksperiode.tilstand(avsluttBehandling.hendelse, TilInfotrygd)
-        }
-
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
 
         fun leaving(aktivitetslogg: IAktivitetslogg) {}
@@ -583,8 +592,6 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
@@ -598,8 +605,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
@@ -629,8 +634,6 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_GAP
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
-
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
@@ -651,8 +654,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, avsluttBehandling: Arbeidsgiver.AvsluttBehandling) {}
 
         override fun håndter(
             vedtaksperiode: Vedtaksperiode,
@@ -1295,8 +1296,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.forkast(vedtaksperiode)
-            vedtaksperiode.arbeidsgiver.avsluttBehandling(vedtaksperiode, hendelse)
+            vedtaksperiode.arbeidsgiver.forkast(vedtaksperiode, hendelse)
         }
 
         override fun håndter(

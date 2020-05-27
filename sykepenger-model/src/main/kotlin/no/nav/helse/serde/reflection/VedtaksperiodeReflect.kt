@@ -19,9 +19,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
-    private val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
+    internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
-    private val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
+    internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
     private val arbeidsgiverNettoBeløp: Int = vedtaksperiode["arbeidsgiverNettoBeløp"]
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {

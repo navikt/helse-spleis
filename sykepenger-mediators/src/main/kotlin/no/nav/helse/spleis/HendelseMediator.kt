@@ -280,6 +280,17 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+                publish(
+                    "vedtaksperiode_forkastet", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "tilstand" to event.gjeldendeTilstand
+                        )
+                    )
+                )
+            }
+
             override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
                 publish(
                     "utbetalt", JsonMessage.newMessage(

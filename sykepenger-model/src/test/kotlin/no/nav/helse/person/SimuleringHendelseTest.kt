@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -32,7 +34,7 @@ internal class SimuleringHendelseTest {
     fun `simulering er OK`() {
         håndterYtelser()
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasOnlyInfoAndNeeds())
     }
 
@@ -40,7 +42,7 @@ internal class SimuleringHendelseTest {
     fun `simulering med endret dagsats`() {
         håndterYtelser()
         person.håndter(simulering(dagsats = 500))
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasOnlyInfoAndNeeds())
     }
@@ -49,15 +51,8 @@ internal class SimuleringHendelseTest {
     fun `simulering er ikke OK`() {
         håndterYtelser()
         person.håndter(simulering(false))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
         assertTrue(inspektør.personLogg.hasWarnings())
-    }
-
-    private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.sisteTilstand(0)
-        )
     }
 
     private fun håndterYtelser() {

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,17 +35,17 @@ internal class YtelserHendelseTest {
         person.håndter(sykmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
 
         person.håndter(søknad())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+        assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
 
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
+        assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -66,60 +67,53 @@ internal class YtelserHendelseTest {
     @Test
     fun `ugyldig utbetalinghistorikk før inntektsmelding kaster perioden ut`() {
         håndterUgyldigYtelser()
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
         håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null)))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
     fun `fordrepengeytelse før periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
     }
 
     @Test
     fun `fordrepengeytelse i periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
     fun `fordrepengeytelse etter periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
     }
 
     @Test
     fun `svangerskapsytelse før periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
     }
 
     @Test
     fun `svangerskapsytelse i periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
-        assertTilstand(TilstandType.TIL_INFOTRYGD)
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
     fun `svangerskapsytelse etter periode`() {
         håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
-    }
-
-    private fun assertTilstand(expectedTilstand: TilstandType) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.sisteTilstand(0)
-        ) { "Forventet tilstand $expectedTilstand. Er i ${inspektør.sisteTilstand(0)}:\n${inspektør.personLogg}" }
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
     }
 
     private fun håndterYtelser(

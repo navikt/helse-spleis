@@ -391,6 +391,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
 
+        private var arbeidsgiverFagsystemId: String?
+        private var personFagsystemId: String?
+
         init {
             val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
             vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver))
@@ -399,6 +402,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] =
                 aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }.distinctBy { it.melding }
+            arbeidsgiverFagsystemId = vedtaksperiodeReflect.arbeidsgiverFagsystemId
+            personFagsystemId = vedtaksperiodeReflect.personFagsystemId
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -483,11 +488,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
             UtbetalingerDTO(
                 utbetalinger.byggUtbetaling(
-                    vedtaksperiode.arbeidsgiverFagsystemId(),
+                    arbeidsgiverFagsystemId,
                     Utbetaling::arbeidsgiverOppdrag
                 ),
                 utbetalinger.byggUtbetaling(
-                    vedtaksperiode.personFagsystemId(),
+                    personFagsystemId,
                     Utbetaling::personOppdrag
                 )
             )

@@ -19,15 +19,18 @@ import java.util.*
 import kotlin.reflect.KClass
 
 internal class TestPersonInspektør(person: Person) : PersonVisitor {
+    internal var vedtaksperiodeTeller: Int = 0
+        private set
     private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
-    private val tilstander = mutableMapOf<Int, MutableList<TilstandType>>()
+    private val tilstander = mutableMapOf<Int, TilstandType>()
+    private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
     private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
+    private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
-    private val gyldigePerioderIder = mutableListOf<UUID>()
-    private val forkastedePerioderIder = mutableListOf<UUID>()
+    private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
     internal lateinit var personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
@@ -41,18 +44,18 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val nettoBeløp = mutableListOf<Int>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
+    private var inGyldigePerioder = false
     private var inVedtaksperiode = false
     private val gruppeIder = mutableMapOf<Int, UUID>()
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
-    private val periodeIder = mutableListOf<UUID>()
+    private val periodeIder = mutableMapOf<Int, UUID>()
 
     init {
         person.accept(this)
     }
 
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
-    internal fun gyldigVedtaksperiodeId(index: Int) = gyldigePerioderIder[index]
-    internal fun forkastetVedtaksperiodeId(index: Int) = forkastedePerioderIder[index]
+    internal fun forkastetVedtaksperiodeId(index: Int) = requireNotNull(forkastedePerioderIder[index])
     internal fun gruppeId(index: Int) = requireNotNull(gruppeIder[index])
 
     override fun preVisitArbeidsgiver(
@@ -65,19 +68,23 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        inGyldigePerioder = true
+        vedtaksperiodeindeks = -1
         periodeIder.clear()
     }
 
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-        gyldigePerioderIder.addAll(periodeIder)
+        vedtaksperiodeIder.putAll(periodeIder)
+        inGyldigePerioder = false
     }
 
     override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        vedtaksperiodeindeks = -1
         periodeIder.clear()
     }
 
     override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
-        forkastedePerioderIder.addAll(periodeIder)
+        forkastedePerioderIder.putAll(periodeIder)
     }
 
     override fun preVisitVedtaksperiode(
@@ -87,13 +94,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int
     ) {
+        inVedtaksperiode = true
+        vedtaksperiodeTeller += 1
         vedtaksperiodeindeks += 1
-        tilstander[vedtaksperiodeindeks] = mutableListOf()
-        vedtaksperiodeIder[vedtaksperiodeindeks] = id
-        periodeIder.add(id)
+        periodeIder[vedtaksperiodeindeks] = id
+
+        if (!inGyldigePerioder) return
+
         gruppeIder[vedtaksperiodeindeks] = gruppeId
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
-        inVedtaksperiode = true
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
@@ -101,6 +110,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
+        if (!inGyldigePerioder) return
         forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
     }
 
@@ -139,13 +149,14 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-        if (førsteFraværsdag != null) {
-            førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
-        }
+        if (!inGyldigePerioder || førsteFraværsdag == null) return
+        førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
     }
 
     override fun visitMaksdato(maksdato: LocalDate?) {
-        maksdato?.also { maksdatoer[vedtaksperiodeindeks] = it }
+        if (maksdato == null) return
+        if (!inGyldigePerioder) forkastetMaksdatoer[vedtaksperiodeindeks] = maksdato
+        else maksdatoer[vedtaksperiodeindeks] = maksdato
     }
 
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
@@ -164,9 +175,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-        tilstander[vedtaksperiodeindeks]?.add(tilstand.type) ?: fail {
-            "Missing collection initialization"
-        }
+        if (!inGyldigePerioder) forkastedeTilstander[vedtaksperiodeindeks] = tilstand.type
+        else tilstander[vedtaksperiodeindeks] = tilstand.type
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
@@ -219,7 +229,9 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         }
     }
 
-    internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
+    internal fun forkastetMaksdato(indeks: Int) = forkastetMaksdatoer[indeks] ?: fail {
+        "Missing collection initialization"
+    }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
         "Missing collection initialization"
@@ -239,11 +251,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 
-    internal fun tilstand(indeks: Int) = tilstander[indeks] ?: fail {
+    internal fun sisteTilstand(indeks: Int) = tilstander[indeks] ?: fail {
         "Missing collection initialization"
     }
-
-    internal fun sisteTilstand(indeks: Int) = tilstander[indeks]?.last() ?: fail {
+    internal fun sisteForkastetTilstand(indeks: Int) = forkastedeTilstander[indeks] ?: fail {
         "Missing collection initialization"
     }
 

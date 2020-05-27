@@ -47,11 +47,6 @@ internal abstract class AbstractEndToEndTest {
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
-    protected fun assertGyldigPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
-        val id = inspektør.gyldigVedtaksperiodeId(indeks)
-        assertEquals(tilstander.asList(), observatør.tilstander[id])
-    }
-
     protected fun assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
         val id = inspektør.forkastetVedtaksperiodeId(indeks)
         assertEquals(tilstander.asList(), observatør.tilstander[id])

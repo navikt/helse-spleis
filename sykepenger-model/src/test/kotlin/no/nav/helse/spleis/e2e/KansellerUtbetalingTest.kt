@@ -67,13 +67,13 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     fun `En enkel periode som blir annullert blir også invalidert`() {
         val behovTeller = inspektør.personLogg.behov().size
         inspektør.also {
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
         }
     }
 
@@ -81,16 +81,16 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     fun `Annullering av én periode fører til at alle sammenhengende perioder blir invalidert`() {
         forlengVedtak(27.januar, 30.januar, 100)
         inspektør.also {
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(1))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
         }
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(0))
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(1))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
         }
     }
 
@@ -99,18 +99,18 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         forlengVedtak(27.januar, 30.januar, 100)
         nyttVedtak(1.mars, 20.mars, 100, 1.mars,2)
         inspektør.also {
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(1))
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(2))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2))
         }
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(1))
-            assertEquals(listOf(TilstandType.TIL_INFOTRYGD), inspektør.tilstand(2))
-            assertEquals(listOf(TilstandType.AVSLUTTET), inspektør.tilstand(0))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
     }
 
