@@ -11,8 +11,9 @@ internal class Økonomi private constructor(
     private val grad: Prosentdel,
     private val arbeidsgiverBetalingProsent: Prosentdel,
     private var dagsats: Double? = null,
-    private var arbeidsgiversutbetaling: Int? = null,
-    private var personUtbetaling: Int? = null,
+    private var arbeidsgiverbeløp: Int? = null,
+    private var personbeløp: Int? = null,
+    private var er6GBegrenset: Boolean? = null,
     private var tilstand: Tilstand = Tilstand.KunGrad()
 ) {
 
@@ -43,7 +44,11 @@ internal class Økonomi private constructor(
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             when {
-                totalArbeidsgiver + totalPerson <= grense -> return
+                (totalArbeidsgiver + totalPerson <= grense).also {
+                    økonomiList.forEach {økonomi ->
+                        økonomi.er6GBegrenset = !it
+                    }
+                } -> return
                 totalArbeidsgiver <= grense -> justerPerson(økonomiList, totalPerson, grense - totalArbeidsgiver)
                 else -> {
                     justerArbeidsgiver(økonomiList, totalArbeidsgiver, grense)
@@ -55,13 +60,13 @@ internal class Økonomi private constructor(
         private fun justerPerson(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
             val ratio = budsjett.toDouble() / total
             økonomiList.forEach {
-                it.personUtbetaling = (it.personUtbetaling!! * ratio).toInt()
+                it.personbeløp = (it.personbeløp!! * ratio).toInt()
             }
             (budsjett - totalPerson(økonomiList)).also { remainder ->
                 if (remainder == 0) return
                 (0..(remainder - 1)).forEach {
-                        index -> økonomiList[index].personUtbetaling =
-                    økonomiList[index].personUtbetaling!! + 1
+                        index -> økonomiList[index].personbeløp =
+                    økonomiList[index].personbeløp!! + 1
                 }
             }
             require(budsjett == totalPerson(økonomiList))
@@ -70,25 +75,25 @@ internal class Økonomi private constructor(
         private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int,  budsjett: Int) {
             val ratio = budsjett.toDouble() / total
             økonomiList.forEach {
-                it.arbeidsgiversutbetaling = (it.arbeidsgiversutbetaling!! * ratio).toInt()
+                it.arbeidsgiverbeløp = (it.arbeidsgiverbeløp!! * ratio).toInt()
             }
             (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
                 if (remainder == 0) return
                 (0..(remainder - 1)).forEach {
-                        index -> økonomiList[index].arbeidsgiversutbetaling =
-                    økonomiList[index].arbeidsgiversutbetaling!! + 1
+                        index -> økonomiList[index].arbeidsgiverbeløp =
+                    økonomiList[index].arbeidsgiverbeløp!! + 1
                 }            }
             require(budsjett == totalArbeidsgiver(økonomiList))
         }
 
         private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
-            økonomiList.forEach { it.personUtbetaling = 0 }
+            økonomiList.forEach { it.personbeløp = 0 }
 
         private fun totalArbeidsgiver(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
-            it.arbeidsgiversutbetaling ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+            it.arbeidsgiverbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
 
         private fun totalPerson(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
-            it.personUtbetaling ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+            it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
     }
 
     internal fun dagsats(beløp: Number): Økonomi =
@@ -116,19 +121,25 @@ internal class Økonomi private constructor(
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
     internal fun grad() = tilstand.grad(this)
 
+    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
+    internal fun arbeidsgiverbeløp() = tilstand.arbeidsgiverbeløp(this)
+
     private fun betale() = this.also { tilstand.betale(this) }
+
+    internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
     private fun _betale() {
         val total = dagsats() * grad().ratio()
         (total * arbeidsgiverBetalingProsent.ratio()).roundToInt().also {
-            arbeidsgiversutbetaling = it
-            personUtbetaling = total.roundToInt() - it
+            arbeidsgiverbeløp = it
+            personbeløp = total.roundToInt() - it
         }
     }
 
     private fun utbetalingMap() = mapOf(
-        "arbeidsgiversutbetaling" to arbeidsgiversutbetaling!!,
-        "personUtbetaling" to personUtbetaling!!
+        "arbeidsgiverbeløp" to arbeidsgiverbeløp!!,
+        "personbeløp" to personbeløp!!,
+        "er6GBegrenset" to er6GBegrenset!!
     )
 
     internal sealed class Tilstand {
@@ -140,7 +151,15 @@ internal class Økonomi private constructor(
         }
 
         internal open fun betale(økonomi: Økonomi) {
-            throw IllegalStateException("utbetalingen er ikke beregnet ennå")
+            throw IllegalStateException("Kan ikke beregne utbetaling på dette tidspunktet")
+        }
+
+        internal open fun er6GBegrenset(økonomi: Økonomi): Boolean {
+            throw IllegalStateException("Beløp er ikke beregnet ennå")
+        }
+
+        internal open fun arbeidsgiverbeløp(økonomi: Økonomi): Int {
+            throw IllegalStateException("Arbeidsgiverbeløp er ikke beregnet ennå")
         }
 
         internal open fun lås(økonomi: Økonomi): Økonomi {
@@ -186,11 +205,15 @@ internal class Økonomi private constructor(
 
             override fun betale(økonomi: Økonomi) {
                 økonomi._betale()
-                økonomi.tilstand = HarUtbetatlinger()
+                økonomi.tilstand = HarBeløp()
             }
         }
 
-        internal class HarUtbetatlinger: Tilstand() {
+        internal class HarBeløp: Tilstand() {
+
+            override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
+
+            override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +
@@ -220,13 +243,13 @@ internal class Økonomi private constructor(
                 super.toIntMap(økonomi) + mapOf("dagsats" to økonomi.dagsats().roundToInt())
 
             override fun betale(økonomi: Økonomi) {
-                økonomi.arbeidsgiversutbetaling = 0
-                økonomi.personUtbetaling = 0
-                økonomi.tilstand = LåstMedUtbetling()
+                økonomi.arbeidsgiverbeløp = 0
+                økonomi.personbeløp = 0
+                økonomi.tilstand = LåstMedBeløp()
             }
         }
 
-        internal class LåstMedUtbetling: Tilstand() {
+        internal class LåstMedBeløp: Tilstand() {
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
@@ -235,6 +258,10 @@ internal class Økonomi private constructor(
             override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
                 økonomi.tilstand = HarDagsats()
             }
+
+            override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
+
+            override fun er6GBegrenset(økonomi: Økonomi) = false
 
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +

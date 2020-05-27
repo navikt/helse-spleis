@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
+import no.nav.helse.serde.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
@@ -95,15 +96,32 @@ internal fun createØkonomi(data: DagData) = Økonomi::class.primaryConstructor!
     .call(
         data.grad.prosent,
         data.arbeidsgiverBetalingProsent.prosent,
-        data.lønn,
-        data.arbeidsgiversutbetaling,
-        data.personUtbetaling,
+        data.dagsats,
+        data.arbeidsgiverbeløp,
+        data.personbeløp,
+        data.er6GBegrenset,
         when {
-            data.lønn == null -> Økonomi.Tilstand.KunGrad()
-            data.arbeidsgiversutbetaling == null -> Økonomi.Tilstand.HarDagsats()
-            else -> Økonomi.Tilstand.HarUtbetatlinger()
+            data.dagsats == null -> Økonomi.Tilstand.KunGrad()
+            data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarDagsats()
+            else -> Økonomi.Tilstand.HarBeløp()
         }
     )
+
+internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) = Økonomi::class.primaryConstructor!!
+    .apply { isAccessible = true }
+    .call(
+        data.grad?.prosent,
+        data.arbeidsgiverBetalingProsent?.prosent,
+        data.dagsats.toDouble(),
+        data.arbeidsgiverbeløp,
+        data.personbeløp,
+        data.er6GBegrenset,
+        when {
+            data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarDagsats()
+            else -> Økonomi.Tilstand.HarBeløp()
+        }
+    )
+
 
 internal fun createUtbetaling(
     utbetalingstidslinje: Utbetalingstidslinje,
@@ -177,10 +195,8 @@ internal fun createUtbetalingstidslinje(
     .call(utbetalingsdager)
 
 internal fun createNavUtbetalingdag(
-    inntekt: Int,
     dato: LocalDate,
-    utbetaling: Int,
-    grad: Double
+    økonomi: Økonomi
 ) = Utbetalingstidslinje.Utbetalingsdag.NavDag::class.primaryConstructor!!
     .apply { isAccessible = true }
-    .call(inntekt, dato, utbetaling, grad)
+    .call(dato, økonomi)

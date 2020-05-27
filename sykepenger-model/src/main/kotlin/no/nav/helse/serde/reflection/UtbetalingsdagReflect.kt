@@ -4,6 +4,7 @@ import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
@@ -37,16 +38,13 @@ internal class UtbetalingsdagMedGradReflect(
 internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
     private val dagsats: Int = utbetalingsdag["dagsats"]
     private val dato: LocalDate = utbetalingsdag["dato"]
-    private val utbetaling: Int = utbetalingsdag["utbetaling"]
-    private val grad: Double = utbetalingsdag["grad"]
+    private val økonomi: Økonomi = utbetalingsdag["økonomi"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to type,
         "dagsats" to dagsats,
-        "dato" to dato,
-        "utbetaling" to utbetaling,
-        "grad" to grad
-    )
+        "dato" to dato
+    ).also { it.putAll(økonomi.toMap()) }
 }
 
 internal class AvvistdagReflect(avvistdag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {

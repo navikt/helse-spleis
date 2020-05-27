@@ -36,7 +36,7 @@ internal class OppdragBuilder(
 
     override fun visitNavDag(dag: NavDag) {
         if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag)
-        if (dag.grad == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
+        if (dag.økonomi.grad().toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
             tilstand.betalingsdag(dag)
         else
             tilstand.nyLinje(dag)
@@ -71,7 +71,7 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: NavDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.dagsats, dag.grad, fagsystemId))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, dagStrategy(dag), dag.dagsats, dag.økonomi.grad().toDouble(), fagsystemId))
     }
 
     private fun addLinje(dag: NavHelgDag) {

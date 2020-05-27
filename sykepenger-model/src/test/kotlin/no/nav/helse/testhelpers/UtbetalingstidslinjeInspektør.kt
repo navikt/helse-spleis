@@ -43,8 +43,11 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     override fun visitFridag(dag: Fridag) { fridagTeller += 1 }
     override fun visitNavDag(dag: NavDag) {
         navDagTeller += 1
-        totalUtbetaling += dag.utbetaling
-        totalInntekt += dag.dagsats
+        try {
+            totalUtbetaling += dag.økonomi.arbeidsgiverbeløp()
+        } catch (e: IllegalStateException) {
+        }
+        totalInntekt += dag.økonomi.dagsats()
     }
     override fun visitNavHelgDag(dag: NavHelgDag) { navHelgDagTeller += 1 }
     override fun visitUkjentDag(dag: UkjentDag) { ukjentDagTeller += 1 }

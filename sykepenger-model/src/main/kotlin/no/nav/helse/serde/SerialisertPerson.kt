@@ -173,10 +173,8 @@ class SerialisertPerson(val json: String) {
                 }
                 UtbetalingstidslinjeData.TypeData.NavDag -> {
                     createNavUtbetalingdag(
-                        inntekt = it.dagsats,
                         dato = it.dato,
-                        utbetaling = it.utbetaling!!,
-                        grad = it.grad!!
+                        økonomi = createØkonomi(it)
                     )
                 }
                 UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
@@ -209,7 +207,6 @@ class SerialisertPerson(val json: String) {
         }
             .toMutableList())
     }
-
 
     private fun parseVedtaksperiode(
         person: Person,
@@ -514,9 +511,10 @@ internal data class PersonData(
                 val kilde: KildeData,
                 val grad: Double,
                 val arbeidsgiverBetalingProsent: Double,
-                val lønn: Double?,
-                val arbeidsgiversutbetaling: Int?,
-                val personUtbetaling: Int?,
+                val dagsats: Double?,
+                val arbeidsgiverbeløp: Int?,
+                val personbeløp: Int?,
+                val er6GBegrenset: Boolean?,
                 val melding: String?
             ) {
                 val økonomi get() = createØkonomi(this)
@@ -652,6 +650,10 @@ data class UtbetalingstidslinjeData(
         val dagsats: Int,
         val utbetaling: Int?,
         val begrunnelse: BegrunnelseData?,
-        val grad: Double?
+        val grad: Double?,
+        val arbeidsgiverBetalingProsent: Double?,
+        val arbeidsgiverbeløp: Int?,
+        val personbeløp: Int?,
+        val er6GBegrenset: Boolean?
     )
 }

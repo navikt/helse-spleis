@@ -386,7 +386,6 @@ internal class UtbetalingstidslinjeBuilderTest {
                 add(17.januar, hendelseId, 31000.toBigDecimal())
             }
         )
-        assertFalse(inspektør.navdager.first().grad.isNaN())
         assertFalse(0 == inspektør.navdager.first().dagsats)
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }

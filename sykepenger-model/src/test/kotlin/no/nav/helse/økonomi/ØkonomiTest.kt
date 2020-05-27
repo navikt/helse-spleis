@@ -150,15 +150,15 @@ internal class ØkonomiTest {
                 assertEquals(80.0, this["grad"])
                 assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
                 assertEquals(1200.0, this["dagsats"])
-                assertEquals(960, this["arbeidsgiversutbetaling"])
-                assertEquals(0, this["personUtbetaling"])
+                assertEquals(960, this["arbeidsgiverbeløp"])
+                assertEquals(0, this["personbeløp"])
             }
             it.toIntMap().apply {
                 assertEquals(80, this["grad"])
                 assertEquals(100, this["arbeidsgiverBetalingProsent"])
                 assertEquals(1200, this["dagsats"])
-                assertEquals(960, this["arbeidsgiversutbetaling"])
-                assertEquals(0, this["personUtbetaling"])
+                assertEquals(960, this["arbeidsgiverbeløp"])
+                assertEquals(0, this["personbeløp"])
             }
         }
     }
@@ -170,8 +170,8 @@ internal class ØkonomiTest {
                 assertEquals(100.0, this["grad"])
                 assertEquals(50.0, this["arbeidsgiverBetalingProsent"])
                 assertEquals(999.0, this["dagsats"])
-                assertEquals(500, this["arbeidsgiversutbetaling"])
-                assertEquals(499, this["personUtbetaling"])
+                assertEquals(500, this["arbeidsgiverbeløp"])
+                assertEquals(499, this["personbeløp"])
             }
         }
     }
@@ -182,6 +182,9 @@ internal class ØkonomiTest {
         val c =  Økonomi.sykdomsgrad(60.prosent, 0.prosent).dagsats(1000)
         listOf(a, b, c).betale(1.januar).also {
             assertEquals(49.prosent, it.samletGrad())
+        }
+        listOf(a, b, c).forEach {
+            assertFalse(it.er6GBegrenset())
         }
         assertUtbetaling(a, 150, 150)
         assertUtbetaling(b, 80, 0)
@@ -196,6 +199,9 @@ internal class ØkonomiTest {
             assertEquals(49.prosent, it.samletGrad())
             // grense = 1059
         }
+        listOf(a, b, c).forEach {
+            assertTrue(it.er6GBegrenset())
+        }
         assertUtbetaling(a, 300, 120)
         assertUtbetaling(b, 160, 0)
         assertUtbetaling(c, 0, 479)
@@ -208,6 +214,9 @@ internal class ØkonomiTest {
         listOf(a, b, c).betale(1.januar).also {
             assertEquals(49.prosent, it.samletGrad())
             // grense = 1059
+        }
+        listOf(a, b, c).forEach {
+            assertTrue(it.er6GBegrenset())
         }
         assertUtbetaling(a, 691, 0)  // (1059 / (1200 + 640)) * 1200
         assertUtbetaling(b, 368, 0)
@@ -229,8 +238,8 @@ internal class ØkonomiTest {
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Int, expectedPerson: Int) {
         økonomi.toMap().also { map ->
-            assertEquals(expectedArbeidsgiver, map["arbeidsgiversutbetaling"], "arbeidsgiver utbetaling problem")
-            assertEquals(expectedPerson, map["personUtbetaling"], "person utbetaling problem")
+            assertEquals(expectedArbeidsgiver, map["arbeidsgiverbeløp"], "arbeidsgiverbeløp problem")
+            assertEquals(expectedPerson, map["personbeløp"], "personbeløp problem")
         }
     }
 }

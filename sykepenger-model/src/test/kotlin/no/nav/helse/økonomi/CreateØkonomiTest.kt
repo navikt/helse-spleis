@@ -35,8 +35,9 @@ internal class CreateØkonomiTest {
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
                 assertEquals(1199.6, map["dagsats"])
-                assertNull(map["arbeidsgiversutbetaling"])
-                assertNull(map["personUtbetaling"])
+                assertNull(map["arbeidsgiverbeløp"])
+                assertNull(map["personbeløp"])
+                assertNull(map["er6GBegrenset"])
             }
             // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
@@ -46,14 +47,15 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = økonomiData(79.5, 66.67, 1199.6, 640, 320)
+        val data = økonomiData(79.5, 66.67, 1199.6, 640, 320, true)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
                 assertEquals(1199.6, map["dagsats"])
-                assertEquals(640, map["arbeidsgiversutbetaling"])
-                assertEquals(320, map["personUtbetaling"])
+                assertEquals(640, map["arbeidsgiverbeløp"])
+                assertEquals(320, map["personbeløp"])
+                assertTrue(map["er6GBegrenset"] as Boolean)
             }
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
@@ -64,18 +66,20 @@ internal class CreateØkonomiTest {
     private fun økonomiData(
         grad: Double,
         arbeidsgiverBetalingProsent: Double,
-        lønn: Double? = null,
-        arbeidsgiversutbetaling: Int? = null,
-        personUtbetaling: Int? = null
+        dagsats: Double? = null,
+        arbeidsgiverbeløp: Int? = null,
+        personbeløp: Int? = null,
+        er6GBegrenset: Boolean = false
     ) = DagData(
         1.januar,
         JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.VedtaksperiodeData.KildeData("type", UUID.randomUUID()),
         grad,
         arbeidsgiverBetalingProsent,
-        lønn,
-        arbeidsgiversutbetaling,
-        personUtbetaling,
+        dagsats,
+        arbeidsgiverbeløp,
+        personbeløp,
+        er6GBegrenset,
         null
     )
 }

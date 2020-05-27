@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.økonomi.betale
 import kotlin.math.roundToInt
 
 internal class MaksimumUtbetaling(
@@ -29,8 +30,7 @@ internal class MaksimumUtbetaling(
     }
 
     override fun visitNavDag(dag: NavDag) {
-        require(!dag.grad.isNaN()) { "Grad for ${dag.dato} er NaN" }
         if (dag.dato in periode && dag.dagsats > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
-        dag.utbetaling = (minOf(dag.dagsats, `6G`.dagsats(dag.dato)) * (dag.grad / 100.0)).roundToInt()
+        listOf(dag.økonomi).betale(dag.dato)
     }
 }

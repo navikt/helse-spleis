@@ -548,11 +548,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     type = TypeDataDTO.NavDag,
                     inntekt = dag.dagsats,
                     dato = dag.dato,
-                    utbetaling = dag.utbetaling,
-                    grad = dag.grad
+                    utbetaling = dag.økonomi.arbeidsgiverbeløp(),
+                    grad = dag.økonomi.grad().toDouble()
                 )
             )
-            utbetalinger.add(dag.utbetaling)
+            utbetalinger.add(dag.økonomi.arbeidsgiverbeløp())
         }
 
         override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
