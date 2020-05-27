@@ -50,16 +50,21 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.add(Arbeidsdag(økonomi.dagsats().toInt(), dato))
     }
 
-    internal fun addFridag(dagen: LocalDate, grad: Double = Double.NaN) {
-        utbetalingsdager.add(Fridag(0, dagen))
+    internal fun addFridag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(Fridag(økonomi.dagsats().toInt(), dato))
     }
 
     internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
         utbetalingsdager.add(NavHelgDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble()))
     }
 
-    private fun addUkjentDag(dagsats: Int, dagen: LocalDate, grad: Double = Double.NaN) {
-        utbetalingsdager.add(UkjentDag(0, dagen))
+    private fun addUkjentDag(dato: LocalDate) =
+        Økonomi.ikkeBetalt().dagsats(0).let { økonomi ->
+            if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
+        }
+
+    private fun addUkjentDag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(UkjentDag(økonomi.dagsats().toInt(), dato))
     }
 
     internal fun addAvvistDag(dagsats: Int = 0, dagen: LocalDate, grad: Double, begrunnelse: Begrunnelse) {
@@ -69,9 +74,6 @@ internal class Utbetalingstidslinje private constructor(
     internal fun addForeldetDag(dagen: LocalDate) {
         utbetalingsdager.add(ForeldetDag(0, dagen))
     }
-
-    private fun addUkjentDag(dato: LocalDate) =
-        if (dato.erHelg()) addFridag(dato, 0.0) else addUkjentDag(0, dato, 0.0)
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         if (other.utbetalingsdager.isEmpty()) return this
@@ -90,7 +92,8 @@ internal class Utbetalingstidslinje private constructor(
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
             val original = this@Utbetalingstidslinje
-            tidligsteDato.datesUntil(original.førsteDato()).forEach { this.addUkjentDag(it) }
+            tidligsteDato.datesUntil(original.førsteDato())
+                .forEach { this.addUkjentDag(it) }
             this.utbetalingsdager.addAll(original.utbetalingsdager)
             original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1))
                 .forEach { this.addUkjentDag(it) }

@@ -1,6 +1,9 @@
 package no.nav.helse.person
 
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.*
 
@@ -26,6 +29,15 @@ internal class Inntekthistorikk {
     }
 
     internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
+
+    internal fun dagsats(dato: LocalDate, regler: ArbeidsgiverRegler) =
+        inntekt(dato)
+        ?.multiply(regler.prosentLønn().toBigDecimal())
+        ?.multiply(12.toBigDecimal())
+        ?.divide(260.toBigDecimal(), MathContext.DECIMAL128)
+        ?.setScale(0, RoundingMode.HALF_UP)
+        ?.toInt()
+        ?: 0
 
     internal class Inntekt(
         private val fom: LocalDate,

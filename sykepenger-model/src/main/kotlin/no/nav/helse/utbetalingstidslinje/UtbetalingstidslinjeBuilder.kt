@@ -8,8 +8,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Økonomi
-import java.math.MathContext
-import java.math.RoundingMode
 import java.time.LocalDate
 
 /**
@@ -114,14 +112,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tilstand.fridag(this, dagen)
     }
 
-    private fun oppdatereDagsats(dagen: LocalDate) {
-        nåværendeDagsats = inntekthistorikk.inntekt(dagen)
-            ?.multiply(arbeidsgiverRegler.prosentLønn().toBigDecimal())
-            ?.multiply(12.toBigDecimal())
-            ?.divide(260.toBigDecimal(), MathContext.DECIMAL128)
-            ?.setScale(0, RoundingMode.HALF_UP)
-            ?.toInt()
-            ?: 0
+    private fun oppdatereDagsats(dato: LocalDate) {
+        nåværendeDagsats = inntekthistorikk.dagsats(dato, arbeidsgiverRegler)
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {
@@ -154,7 +146,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun håndterFridag(dato: LocalDate) {
         fridager += 1
-        tidslinje.addFridag(dato)
+        tidslinje.addFridag(dato, Økonomi.ikkeBetalt().dagsats(nåværendeDagsats))
     }
 
     private fun håndterFriEgenmeldingsdag(dagen: LocalDate) {

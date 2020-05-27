@@ -201,7 +201,8 @@ class Utbetalingshistorikk(
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun tidslinje() = Utbetalingstidslinje().apply { periode.forEach { addFridag(it) } }
+            override fun tidslinje() = Utbetalingstidslinje()
+                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().dagsats(0)) } }
 
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
