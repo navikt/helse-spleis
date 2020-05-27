@@ -97,6 +97,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje.accept(visitor)
         visitor.visitTilstand(tilstand)
         visitor.visitMaksdato(maksdato)
+        visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
         visitor.visitGjenståendeSykedager(gjenståendeSykedager)
         visitor.visitForbrukteSykedager(forbrukteSykedager)
         visitor.visitGodkjentAv(godkjentAv)
@@ -566,7 +567,6 @@ internal class Vedtaksperiode private constructor(
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
 
             if (tilstøtende != null) {
-                vedtaksperiode.forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
                 vedtaksperiode.gruppeId = tilstøtende.gruppeId
             }
 
@@ -747,12 +747,10 @@ internal class Vedtaksperiode private constructor(
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         if (oldtid.tilstøtende(arbeidsgiver)) {
                             nesteTilstand = AvventerVilkårsprøvingGap
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
                             vedtaksperiode.førsteFraværsdag = oldtid.førsteUtbetalingsdag(arbeidsgiver)
                             ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
                         } else {
                             nesteTilstand = AvventerInntektsmeldingFerdigGap
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
                         }
                     }
                 }
@@ -966,8 +964,9 @@ internal class Vedtaksperiode private constructor(
                 validerYtelser(vedtaksperiode.periode(), ytelser)
                 overlappende(vedtaksperiode.periode(), ytelser.foreldrepenger())
                 onSuccess {
-                    arbeidsgiver.tilstøtende(vedtaksperiode)?.run {
-                        vedtaksperiode.førsteFraværsdag = førsteFraværsdag
+                    arbeidsgiver.tilstøtende(vedtaksperiode)?.also { tilstøtendePeriode ->
+                        vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
+                        vedtaksperiode.førsteFraværsdag = tilstøtendePeriode.førsteFraværsdag
                         return@onSuccess
                     }
 
@@ -976,7 +975,10 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiver.utbetalteUtbetalinger()
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
 
-                        if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) return@onSuccess
+                        if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) {
+                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
+                            return@onSuccess
+                        }
 
                         vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
 

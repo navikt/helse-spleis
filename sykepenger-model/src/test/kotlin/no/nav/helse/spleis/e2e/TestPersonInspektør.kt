@@ -8,7 +8,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -44,6 +43,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inVedtaksperiode = false
     private val gruppeIder = mutableMapOf<Int, UUID>()
+    private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val periodeIder = mutableListOf<UUID>()
 
     init {
@@ -98,6 +98,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
         if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
+    }
+
+    override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
+        forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
     }
 
     override fun postVisitVedtaksperiode(
@@ -218,6 +222,10 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal val vedtaksperiodeTeller get() = vedtaksperiodeindeks + 1
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun forlengelseFraInfotrygd(indeks: Int) = forlengelserFraInfotrygd[indeks] ?: fail {
         "Missing collection initialization"
     }
 
