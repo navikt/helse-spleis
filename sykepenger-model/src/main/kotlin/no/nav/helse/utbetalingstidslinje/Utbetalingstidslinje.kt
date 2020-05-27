@@ -67,12 +67,12 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.add(UkjentDag(økonomi.dagsats().toInt(), dato))
     }
 
-    internal fun addAvvistDag(dagsats: Int = 0, dagen: LocalDate, grad: Double, begrunnelse: Begrunnelse) {
-        utbetalingsdager.add(AvvistDag(dagsats, dagen, grad, begrunnelse))
+    internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
+        utbetalingsdager.add(AvvistDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble(), begrunnelse))
     }
 
-    internal fun addForeldetDag(dagen: LocalDate) {
-        utbetalingsdager.add(ForeldetDag(0, dagen))
+    internal fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(ForeldetDag(økonomi.dagsats().toInt(), dato))
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {

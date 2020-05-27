@@ -35,9 +35,9 @@ internal fun Int.HELG(dagsats: Int, grad: Double = 100.0) = Utbetalingsdager(thi
 internal val Int.UTELATE get() = Utbetalingsdager(this, { _, _, _ -> }, 0)
 
 private fun Utbetalingstidslinje.addForeldetDag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addForeldetDag(dato)
+    this.addForeldetDag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
 private fun Utbetalingstidslinje.addAvvistDag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addAvvistDag(dagsats, dato, grad, Begrunnelse.MinimumSykdomsgrad)
+    this.addAvvistDag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats), Begrunnelse.MinimumSykdomsgrad)
 private fun Utbetalingstidslinje.addNAVdag(dagsats: Int, dato: LocalDate, grad: Double) =
     this.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
 private fun Utbetalingstidslinje.addHelg(dagsats: Int, dato: LocalDate, grad: Double) =

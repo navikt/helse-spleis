@@ -78,15 +78,19 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
             tilstand = UtbetalingSykedager
-            tidslinje.addForeldetDag(dagen)
+            tidslinje.addForeldetDag(dagen, økonomi.dagsats(nåværendeDagsats))
         }
         else tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
     }
 
-    private fun egenmeldingsdag(dagen: LocalDate) =
+    private fun egenmeldingsdag(dato: LocalDate) =
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
-            tidslinje.addAvvistDag(0, dagen, Double.NaN, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
-        else tilstand.egenmeldingsdagIArbeidsgiverperioden(this, dagen)
+            tidslinje.addAvvistDag(
+                dato,
+                Økonomi.ikkeBetalt().dagsats(nåværendeDagsats),
+                Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+            )
+        else tilstand.egenmeldingsdagIArbeidsgiverperioden(this, dato)
 
     private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
 
@@ -149,10 +153,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tidslinje.addFridag(dato, Økonomi.ikkeBetalt().dagsats(nåværendeDagsats))
     }
 
-    private fun håndterFriEgenmeldingsdag(dagen: LocalDate) {
+    private fun håndterFriEgenmeldingsdag(dato: LocalDate) {
         sykedagerIArbeidsgiverperiode += fridager
-        val økonomi = Økonomi.ikkeBetalt().dagsats(0)
-        tidslinje.addAvvistDag(0, dagen, Double.NaN, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
+        tidslinje.addAvvistDag(
+            dato,
+            Økonomi.ikkeBetalt().dagsats(nåværendeDagsats),
+            Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+        )
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
             state(UtbetalingSykedager)
         else
@@ -165,7 +172,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         this.tilstand.entering(this)
     }
 
-    private interface UtbetalingState {
+    internal interface UtbetalingState {
         fun sykedagerIArbeidsgiverperioden(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
