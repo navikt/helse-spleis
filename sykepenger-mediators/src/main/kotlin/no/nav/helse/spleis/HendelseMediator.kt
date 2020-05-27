@@ -269,6 +269,7 @@ internal class HendelseMediator(
                     "vedtaksperiode_endret", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "organisasjonsnummer" to event.organisasjonsnummer,
                             "gjeldendeTilstand" to event.gjeldendeTilstand,
                             "forrigeTilstand" to event.forrigeTilstand,
                             "aktivitetslogg" to event.aktivitetslogg.toMap(),
