@@ -1102,6 +1102,8 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.førsteDag(),
                 periodeTom = vedtaksperiode.sisteDag(),
+                førsteFraværsdag = vedtaksperiode.førsteFraværsdag!!,
+                sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.førsteDag())!!.toDouble(),
                 vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode)
             )
         }

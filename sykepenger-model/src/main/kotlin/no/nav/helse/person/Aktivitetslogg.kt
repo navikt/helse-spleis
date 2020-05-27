@@ -271,12 +271,16 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg: IAktivitetslogg,
                     periodeFom: LocalDate,
                     periodeTom: LocalDate,
+                    førsteFraværsdag: LocalDate,
+                    sykepengegrunnlag: Double,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
                             "periodeFom" to periodeFom.toString(),
                             "periodeTom" to periodeTom.toString(),
+                            "førsteFraværsdag" to førsteFraværsdag.toString(),
+                            "sykepengegrunnlag" to sykepengegrunnlag,
                             "warnings" to Aktivitetslogg().apply {
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
                             }.toMap()
