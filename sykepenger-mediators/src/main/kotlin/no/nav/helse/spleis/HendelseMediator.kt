@@ -140,6 +140,7 @@ internal class HendelseMediator(
 
         val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
         rollbackPerson.håndter(rollback)
+        personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
         finalize(rollbackPerson, message, rollback)
 
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderSlettet)
@@ -152,6 +153,7 @@ internal class HendelseMediator(
         sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
         val person = Person(rollback.aktørId(), rollback.fødselsnummer())
         person.håndter(rollback)
+        personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), 0)
         finalize(person, message, rollback)
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
     }
