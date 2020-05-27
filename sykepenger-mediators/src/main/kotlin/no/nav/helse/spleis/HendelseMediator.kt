@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -140,7 +141,13 @@ internal class HendelseMediator(
 
         val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
         rollbackPerson.håndter(rollback)
-        personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
+        val tilbakerulledePerioder = personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
+        sikkerLogg.info("Rullet tilbake {} person for {}, gikk fra {} til {}",
+            keyValue("antallPersonIder", tilbakerulledePerioder),
+            keyValue("fødselsnummer", rollback.fødselsnummer()),
+            keyValue("forigePersonId", nyestePersonId),
+            keyValue("rullesTilbakeTilPersonId", rollback.personVersjon())
+        )
         finalize(rollbackPerson, message, rollback)
 
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderSlettet)
@@ -153,7 +160,12 @@ internal class HendelseMediator(
         sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
         val person = Person(rollback.aktørId(), rollback.fødselsnummer())
         person.håndter(rollback)
-        personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), 0)
+        val tilbakerulledePerioder = personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), 0)
+        sikkerLogg.info("Resetter person {} perioder for {}, original {}",
+            keyValue("antallPersonIder", tilbakerulledePerioder),
+            keyValue("fødselsnummer", rollback.fødselsnummer()),
+            keyValue("forigePersonId", nyestePersonId)
+        )
         finalize(person, message, rollback)
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
     }
