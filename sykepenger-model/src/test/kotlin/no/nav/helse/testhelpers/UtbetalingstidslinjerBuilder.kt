@@ -2,6 +2,8 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal fun tidslinjeOf(
@@ -36,6 +38,14 @@ private fun Utbetalingstidslinje.addForeldetDag(dagsats: Int, dato: LocalDate, g
     this.addForeldetDag(dato)
 private fun Utbetalingstidslinje.addAvvistDag(dagsats: Int, dato: LocalDate, grad: Double) =
     this.addAvvistDag(dagsats, dato, grad, Begrunnelse.MinimumSykdomsgrad)
+private fun Utbetalingstidslinje.addNAVdag(dagsats: Int, dato: LocalDate, grad: Double) =
+    this.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
+private fun Utbetalingstidslinje.addHelg(dagsats: Int, dato: LocalDate, grad: Double) =
+    this.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(0))
+private fun Utbetalingstidslinje.addArbeidsgiverperiodedag(dagsats: Int, dato: LocalDate, grad: Double) =
+    this.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
+private fun Utbetalingstidslinje.addArbeidsdag(dagsats: Int, dato: LocalDate, grad: Double) =
+    this.addArbeidsdag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
 internal data class Utbetalingsdager(
     val antallDager: Int,
     val addDagFun: Utbetalingstidslinje.(Int, LocalDate, Double) -> Unit,

@@ -8,6 +8,8 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
 import kotlin.math.roundToInt
@@ -113,8 +115,8 @@ class Utbetalingshistorikk(
             }
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(0, dato, grad)
-                else utbetalingstidslinje.addNAVdag(dagsats, dato, grad)
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(0))
+                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(gradertSats))
             }
 
             internal companion object {

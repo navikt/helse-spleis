@@ -5,6 +5,7 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -37,24 +38,24 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 
-    internal fun addArbeidsgiverperiodedag(dagsats: Int, dato: LocalDate, grad: Double = Double.NaN) {
-        utbetalingsdager.add(ArbeidsgiverperiodeDag(dagsats, dato))
+    internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(ArbeidsgiverperiodeDag(økonomi.dagsats().toInt(), dato))
     }
 
-    internal fun addNAVdag(dagsats: Int, dato: LocalDate, grad: Double) {
-        utbetalingsdager.add(NavDag(dagsats, dato, grad))
+    internal fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(NavDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble()))
     }
 
-    internal fun addArbeidsdag(dagsats: Int, dagen: LocalDate, grad: Double = Double.NaN) {
-        utbetalingsdager.add(Arbeidsdag(dagsats, dagen))
+    internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(Arbeidsdag(økonomi.dagsats().toInt(), dato))
     }
 
     internal fun addFridag(dagen: LocalDate, grad: Double = Double.NaN) {
         utbetalingsdager.add(Fridag(0, dagen))
     }
 
-    internal fun addHelg(dagsats: Int, dagen: LocalDate, grad: Double) {
-        utbetalingsdager.add(NavHelgDag(0, dagen, grad))
+    internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(NavHelgDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble()))
     }
 
     private fun addUkjentDag(dagsats: Int, dagen: LocalDate, grad: Double = Double.NaN) {
@@ -94,7 +95,6 @@ internal class Utbetalingstidslinje private constructor(
             original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1))
                 .forEach { this.addUkjentDag(it) }
         }
-
 
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.førsteDato(), other.førsteDato())

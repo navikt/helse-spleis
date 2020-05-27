@@ -24,7 +24,7 @@ internal class Økonomi private constructor(
         internal fun arbeidshelse(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
             Økonomi(!grad, arbeidsgiverBetalingProsent)
 
-        internal fun ikkeSyke() = sykdomsgrad(0.prosent)
+        internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
 
         internal fun samletGrad(økonomiList: List<Økonomi>) =
             Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dagsats() })
