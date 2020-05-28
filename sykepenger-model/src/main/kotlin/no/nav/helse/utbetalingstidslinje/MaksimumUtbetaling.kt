@@ -6,7 +6,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.betale
-import kotlin.math.roundToInt
+import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 
 internal class MaksimumUtbetaling(
     private val sykdomsgrader: Sykdomsgrader, // Skal brukes når vi støtter flere arbeidsgivere
@@ -29,7 +30,11 @@ internal class MaksimumUtbetaling(
             aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
     }
 
-    override fun visit(dag: NavDag) {
+    override fun visit(
+        dag: NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         if (dag.dato in periode && dag.økonomi.dagsats().toInt() > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
         listOf(dag.økonomi).betale(dag.dato)
     }

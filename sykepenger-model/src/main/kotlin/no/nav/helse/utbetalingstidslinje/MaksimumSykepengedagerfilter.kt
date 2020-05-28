@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class MaksimumSykepengedagerfilter(
@@ -56,32 +57,60 @@ internal class MaksimumSykepengedagerfilter(
         sisteBetalteDag = tidslinje.sisteDato()
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+    override fun visit(
+        dag: NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dag.dato] = dag
         state.betalbarDag(this, dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         oppholdsdag(dag.dato)
     }
 

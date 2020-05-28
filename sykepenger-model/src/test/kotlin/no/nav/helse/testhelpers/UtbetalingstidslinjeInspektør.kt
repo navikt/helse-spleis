@@ -3,6 +3,8 @@ package no.nav.helse.testhelpers
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 
 // Collects assertable statistics for a Utbetalingstidslinje
 internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingstidslinje):
@@ -37,11 +39,31 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         utbetalingstidslinje.accept(this)
     }
 
-    override fun visit(dag: Arbeidsdag) { arbeidsdagTeller += 1 }
-    override fun visit(dag: ArbeidsgiverperiodeDag) { arbeidsgiverperiodeDagTeller += 1 }
-    override fun visit(dag: AvvistDag) { avvistDagTeller += 1 }
-    override fun visit(dag: Fridag) { fridagTeller += 1 }
-    override fun visit(dag: NavDag) {
+    override fun visit(
+        dag: Arbeidsdag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { arbeidsdagTeller += 1 }
+    override fun visit(
+        dag: ArbeidsgiverperiodeDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { arbeidsgiverperiodeDagTeller += 1 }
+    override fun visit(
+        dag: AvvistDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { avvistDagTeller += 1 }
+    override fun visit(
+        dag: Fridag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { fridagTeller += 1 }
+    override fun visit(
+        dag: NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         navDagTeller += 1
         try {
             totalUtbetaling += dag.økonomi.arbeidsgiverbeløp()
@@ -49,8 +71,16 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         }
         totalInntekt += dag.økonomi.dagsats()
     }
-    override fun visit(dag: NavHelgDag) { navHelgDagTeller += 1 }
-    override fun visit(dag: UkjentDag) { ukjentDagTeller += 1 }
+    override fun visit(
+        dag: NavHelgDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { navHelgDagTeller += 1 }
+    override fun visit(
+        dag: UkjentDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) { ukjentDagTeller += 1 }
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
 }

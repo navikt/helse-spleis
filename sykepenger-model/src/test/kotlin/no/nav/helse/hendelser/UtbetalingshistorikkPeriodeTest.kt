@@ -5,6 +5,7 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -206,35 +207,67 @@ class UtbetalingshistorikkPeriodeTest {
             sisteDag = dag.dato
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
 
-        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+        override fun visit(
+            dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             visitDag(dag)
         }
     }

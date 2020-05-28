@@ -63,14 +63,46 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
 
 internal interface UtbetalingsdagVisitor {
     fun preVisit(tidslinje: Utbetalingstidslinje) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {}
-    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {}
     fun postVisit(tidslinje: Utbetalingstidslinje) {}
 }
 

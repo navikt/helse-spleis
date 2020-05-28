@@ -32,16 +32,28 @@ internal class MinimumInntektsfilter(
             aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
     }
 
-    override fun visit(dag: NavDag) {
-        addInntekt(dag.dato, dag.økonomi)
+    override fun visit(
+        dag: NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+        addInntekt(dato, økonomi)
     }
 
-    override fun visit(dag: Arbeidsdag) {
-        addInntekt(dag.dato, dag.økonomi)
+    override fun visit(
+        dag: Arbeidsdag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+        addInntekt(dato, økonomi)
     }
 
-    override fun visit(dag: ArbeidsgiverperiodeDag) {
-        addInntekt(dag.dato, dag.økonomi)
+    override fun visit(
+        dag: ArbeidsgiverperiodeDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+        addInntekt(dato, økonomi)
     }
 
     private fun addInntekt(dato: LocalDate, økonomi: Økonomi) {

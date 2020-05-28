@@ -6,6 +6,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
 
@@ -34,7 +35,11 @@ internal class OppdragBuilder(
 
     private val linje get() = arbeisdsgiverLinjer.first()
 
-    override fun visit(dag: NavDag) {
+    override fun visit(
+        dag: NavDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag)
         if (dag.økonomi.grad().toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
             tilstand.betalingsdag(dag)
@@ -42,31 +47,55 @@ internal class OppdragBuilder(
             tilstand.nyLinje(dag)
     }
 
-    override fun visit(dag: NavHelgDag) {
+    override fun visit(
+        dag: NavHelgDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         if (arbeisdsgiverLinjer.isEmpty() || dag.økonomi.grad().toDouble() != linje.grad)
             tilstand.nyLinje(dag)
         else
             tilstand.helgedag(dag)
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         sisteArbeidsgiverdag?.let { sisteArbeidsgiverdag = dag.dato }
         tilstand = Avsluttet
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+    override fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
         tilstand.ikkeBetalingsdag()
     }
 

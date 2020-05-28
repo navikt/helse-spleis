@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -435,43 +436,75 @@ internal class UtbetalingstidslinjeBuilderTest {
             tidslinje.accept(this)
         }
 
-        override fun visit(dag: NavDag) {
+        override fun visit(
+            dag: NavDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = NavDag::class
             navdager.add(dag)
             inkrementer(NavDag::class)
         }
 
-        override fun visit(dag: Arbeidsdag) {
+        override fun visit(
+            dag: Arbeidsdag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = Arbeidsdag::class
             inkrementer(Arbeidsdag::class)
         }
 
-        override fun visit(dag: NavHelgDag) {
+        override fun visit(
+            dag: NavHelgDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = NavHelgDag::class
             inkrementer(NavHelgDag::class)
         }
 
-        override fun visit(dag: UkjentDag) {
+        override fun visit(
+            dag: UkjentDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = UkjentDag::class
             inkrementer(UkjentDag::class)
         }
 
-        override fun visit(dag: ArbeidsgiverperiodeDag) {
+        override fun visit(
+            dag: ArbeidsgiverperiodeDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = ArbeidsgiverperiodeDag::class
             inkrementer(ArbeidsgiverperiodeDag::class)
         }
 
-        override fun visit(dag: Fridag) {
+        override fun visit(
+            dag: Fridag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = Fridag::class
             inkrementer(Fridag::class)
         }
 
-        override fun visit(dag: ForeldetDag) {
+        override fun visit(
+            dag: ForeldetDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = ForeldetDag::class
             inkrementer(ForeldetDag::class)
         }
 
-        override fun visit(dag: AvvistDag) {
+        override fun visit(
+            dag: AvvistDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             datoer[dag.dato] = AvvistDag::class
             inkrementer(AvvistDag::class)
         }
