@@ -30,7 +30,7 @@ internal class MaksimumUtbetaling(
     }
 
     override fun visitNavDag(dag: NavDag) {
-        if (dag.dato in periode && dag.dagsats > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
+        if (dag.dato in periode && dag.økonomi.dagsats().toInt() > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
         listOf(dag.økonomi).betale(dag.dato)
     }
 }

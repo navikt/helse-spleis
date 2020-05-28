@@ -40,7 +40,7 @@ internal class MinimumInntektsfilter (
     }
 
     private fun addInntekt(dag: Utbetalingstidslinje.Utbetalingsdag) {
-        inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.dagsats) ?: dag.dagsats
+        inntekter[dag.dato] = inntekter[dag.dato]?.plus(dag.økonomi.dagsats().toInt()) ?: dag.økonomi.dagsats().toInt()
     }
 
 }

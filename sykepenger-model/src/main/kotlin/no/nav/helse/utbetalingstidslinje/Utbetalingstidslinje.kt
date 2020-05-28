@@ -3,9 +3,9 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -21,7 +21,7 @@ internal class Utbetalingstidslinje private constructor(
     internal constructor() : this(mutableListOf())
 
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
-        Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }
+        Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }
             .toMutableList())
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
@@ -40,7 +40,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(ArbeidsgiverperiodeDag(økonomi.dagsats().toInt(), dato))
+        utbetalingsdager.add(ArbeidsgiverperiodeDag(dato, økonomi))
     }
 
     internal fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
@@ -48,11 +48,11 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(Arbeidsdag(økonomi.dagsats().toInt(), dato))
+        utbetalingsdager.add(Arbeidsdag(dato, økonomi))
     }
 
     internal fun addFridag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(Fridag(økonomi.dagsats().toInt(), dato))
+        utbetalingsdager.add(Fridag(dato, økonomi))
     }
 
     internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
@@ -65,15 +65,15 @@ internal class Utbetalingstidslinje private constructor(
         }
 
     private fun addUkjentDag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(UkjentDag(økonomi.dagsats().toInt(), dato))
+        utbetalingsdager.add(UkjentDag(dato, økonomi))
     }
 
     internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
-        utbetalingsdager.add(AvvistDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble(), begrunnelse))
+        utbetalingsdager.add(AvvistDag(dato, økonomi, begrunnelse))
     }
 
     internal fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(ForeldetDag(økonomi.dagsats().toInt(), dato))
+        utbetalingsdager.add(ForeldetDag(dato, økonomi))
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
@@ -169,7 +169,10 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 
-    internal sealed class Utbetalingsdag(internal val dagsats: Int, internal val dato: LocalDate) :
+    internal sealed class Utbetalingsdag(
+        internal val dato: LocalDate,
+        internal val økonomi: Økonomi
+    ) :
         Comparable<Utbetalingsdag> {
 
         internal abstract val prioritet: Int
@@ -180,15 +183,15 @@ internal class Utbetalingstidslinje private constructor(
 
         abstract fun accept(visitor: UtbetalingsdagVisitor)
 
-        internal class ArbeidsgiverperiodeDag(dagsats: Int, dato: LocalDate) : Utbetalingsdag(dagsats, dato) {
+        internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsgiverperiodeDag(this)
         }
 
         internal class NavDag (
             dato: LocalDate,
-            internal val økonomi: Økonomi
-        ) : Utbetalingsdag(økonomi.dagsats().toInt(), dato) {
+            økonomi: Økonomi
+        ) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 50
 
             companion object {
@@ -198,47 +201,46 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavDag(this)
 
             internal fun avvistDag(begrunnelse: Begrunnelse, grad: Double) =
-                AvvistDag(dagsats, dato, grad, begrunnelse)
+                AvvistDag(dato, økonomi, begrunnelse)
         }
 
-        internal class NavHelgDag(dato: LocalDate, val økonomi: Økonomi) :
-            Utbetalingsdag(økonomi.dagsats().toInt(), dato) {
+        internal class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
+            Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavHelgDag(this)
         }
 
-        internal class Arbeidsdag(dagsats: Int, dato: LocalDate) : Utbetalingsdag(dagsats, dato) {
+        internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 20
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitArbeidsdag(this)
         }
 
-        internal class Fridag(dagsats: Int, dato: LocalDate) : Utbetalingsdag(dagsats, dato) {
+        internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 10
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitFridag(this)
         }
 
         internal class AvvistDag(
-            dagsats: Int,
             dato: LocalDate,
-            internal val grad: Double,
+            økonomi: Økonomi,
             internal val begrunnelse: Begrunnelse
         ) :
-            Utbetalingsdag(dagsats, dato) {
+            Utbetalingsdag(dato, økonomi) {
             override val prioritet = 60
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitAvvistDag(this)
             internal fun navDag(): NavDag {
-                require(!grad.isNaN()) { "Kan ikke konvertere avvist egenmeldingsdag til NavDag" }
-                return NavDag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
+                require(begrunnelse != EgenmeldingUtenforArbeidsgiverperiode) { "Kan ikke konvertere avvist egenmeldingsdag til NavDag" }
+                return NavDag(dato, økonomi)
             }
         }
 
-        internal class ForeldetDag(dagsats: Int = 0, dato: LocalDate) :
-            Utbetalingsdag(dagsats, dato) {
+        internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
+            Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40 // Mellom ArbeidsgiverperiodeDag og NavDag
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitForeldetDag(this)
         }
 
-        internal class UkjentDag(dagsats: Int, dato: LocalDate) : Utbetalingsdag(0, dato) {
+        internal class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 0
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitUkjentDag(this)
         }
