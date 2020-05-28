@@ -561,7 +561,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     type = TypeDataDTO.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dag.dato,
-                    grad = dag.grad
+                    grad = dag.økonomi.grad().toDouble()
                 )
             )
         }

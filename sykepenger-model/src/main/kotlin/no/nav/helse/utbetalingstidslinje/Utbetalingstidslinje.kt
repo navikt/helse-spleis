@@ -56,7 +56,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(NavHelgDag(økonomi.dagsats().toInt(), dato, økonomi.grad().toDouble()))
+        utbetalingsdager.add(NavHelgDag(dato, økonomi))
     }
 
     private fun addUkjentDag(dato: LocalDate) =
@@ -201,8 +201,8 @@ internal class Utbetalingstidslinje private constructor(
                 AvvistDag(dagsats, dato, grad, begrunnelse)
         }
 
-        internal class NavHelgDag(dagsats: Int, dato: LocalDate, internal val grad: Double) :
-            Utbetalingsdag(0, dato) {
+        internal class NavHelgDag(dato: LocalDate, val økonomi: Økonomi) :
+            Utbetalingsdag(økonomi.dagsats().toInt(), dato) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visitNavHelgDag(this)
         }

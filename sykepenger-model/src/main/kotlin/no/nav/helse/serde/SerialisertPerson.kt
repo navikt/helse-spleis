@@ -178,7 +178,7 @@ class SerialisertPerson(val json: String) {
                     )
                 }
                 UtbetalingstidslinjeData.TypeData.NavHelgDag -> {
-                    Utbetalingsdag.NavHelgDag(dagsats = it.dagsats, dato = it.dato, grad = it.grad!!)
+                    Utbetalingsdag.NavHelgDag(dato = it.dato, økonomi = createØkonomi(it))
                 }
                 UtbetalingstidslinjeData.TypeData.Arbeidsdag -> {
                     Utbetalingsdag.Arbeidsdag(dagsats = it.dagsats, dato = it.dato)

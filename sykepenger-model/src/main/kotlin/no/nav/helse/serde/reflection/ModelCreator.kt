@@ -116,8 +116,8 @@ internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) =
         data.arbeidsgiverbeløp,
         data.personbeløp,
         data.er6GBegrenset,
-        when {
-            data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarDagsats()
+        when (data.arbeidsgiverbeløp) {
+            null -> Økonomi.Tilstand.HarDagsats()
             else -> Økonomi.Tilstand.HarBeløp()
         }
     )

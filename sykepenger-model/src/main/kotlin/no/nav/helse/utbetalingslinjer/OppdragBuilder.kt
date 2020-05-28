@@ -43,7 +43,7 @@ internal class OppdragBuilder(
     }
 
     override fun visitNavHelgDag(dag: NavHelgDag) {
-        if (arbeisdsgiverLinjer.isEmpty() || dag.grad != linje.grad)
+        if (arbeisdsgiverLinjer.isEmpty() || dag.økonomi.grad().toDouble() != linje.grad)
             tilstand.nyLinje(dag)
         else
             tilstand.helgedag(dag)
@@ -75,7 +75,7 @@ internal class OppdragBuilder(
     }
 
     private fun addLinje(dag: NavHelgDag) {
-        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, 0, dag.grad, fagsystemId))
+        arbeisdsgiverLinjer.add(0, Utbetalingslinje(dag.dato, dag.dato, 0, 0, dag.økonomi.grad().toDouble(), fagsystemId))
     }
 
     private interface Tilstand {

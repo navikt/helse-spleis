@@ -22,27 +22,22 @@ internal class UtbetalingsdagMedGradReflect(
     utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag,
     private val type: TypeData
 ) {
-    private val dagsats: Int = utbetalingsdag["dagsats"]
-    private val dato: LocalDate = utbetalingsdag["dato"]
-    private val grad: Double = utbetalingsdag["grad"]
-
-    internal fun toMap() = mutableMapOf<String, Any?>(
-        "type" to type,
-        "dagsats" to dagsats,
-        "dato" to dato,
-        "grad" to grad
-    )
-}
-
-
-internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
-    private val dagsats: Int = utbetalingsdag["dagsats"]
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val økonomi: Økonomi = utbetalingsdag["økonomi"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to type,
-        "dagsats" to dagsats,
+        "dato" to dato
+    ).also { it.putAll(økonomi.toMap()) }
+}
+
+
+internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
+    private val dato: LocalDate = utbetalingsdag["dato"]
+    private val økonomi: Økonomi = utbetalingsdag["økonomi"]
+
+    internal fun toMap() = mutableMapOf<String, Any?>(
+        "type" to type,
         "dato" to dato
     ).also { it.putAll(økonomi.toMap()) }
 }

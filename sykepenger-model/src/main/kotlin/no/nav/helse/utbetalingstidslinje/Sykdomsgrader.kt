@@ -19,6 +19,6 @@ internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): Utbetaling
         grader[dag.dato] = dag.økonomi.grad().toDouble()
     }
     override fun visitNavHelgDag(dag: NavHelgDag) {
-        grader[dag.dato] = dag.grad
+        grader[dag.dato] = dag.økonomi.grad().toDouble()
     }
 }
