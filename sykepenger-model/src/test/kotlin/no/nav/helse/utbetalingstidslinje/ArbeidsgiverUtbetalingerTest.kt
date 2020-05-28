@@ -24,7 +24,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `uavgrenset utbetaling`() {
+    fun `uavgrenset utbetaling`() {
         undersøke(UNG_PERSON_FNR_2018, 5.NAV, 2.HELG, 5.NAV)
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
@@ -37,7 +37,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `avgrenset betaling pga minimum inntekt`() {
+    fun `avgrenset betaling pga minimum inntekt`() {
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
@@ -52,7 +52,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `avgrenset betaling pga maksimum inntekt`() {
+    fun `avgrenset betaling pga maksimum inntekt`() {
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
@@ -65,7 +65,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `avgrenset betaling pga minimun sykdomsgrad`() {
+    fun `avgrenset betaling pga minimun sykdomsgrad`() {
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
@@ -76,7 +76,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `avgrenset betaling pga oppbrukte sykepengedager`() {
+    fun `avgrenset betaling pga oppbrukte sykepengedager`() {
         undersøke(
             PERSON_67_ÅR_FNR_2018,
             7.UTELATE,
@@ -107,7 +107,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `avgrenset betaling pga oppbrukte sykepengedager i tillegg til beløpsgrenser`() {
+    fun `avgrenset betaling pga oppbrukte sykepengedager i tillegg til beløpsgrenser`() {
         undersøke(
             PERSON_67_ÅR_FNR_2018,
             7.UTELATE,
@@ -139,7 +139,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    internal fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
+    fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
         undersøke(
             PERSON_67_ÅR_FNR_2018,
             tidslinjeOf(35.UTELATE, 50.NAV),
@@ -227,7 +227,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             2.HELG,
             3.FRI
         )
-        assertEquals(28.desember, maksdato)
+        assertEquals(2.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
 
@@ -241,7 +241,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             3.FRI,
             1.ARB
         )
-        assertEquals(28.desember, maksdato)
+        assertEquals(3.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
 

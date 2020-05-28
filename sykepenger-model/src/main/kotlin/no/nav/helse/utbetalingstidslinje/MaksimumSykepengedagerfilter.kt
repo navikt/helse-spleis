@@ -19,6 +19,7 @@ internal class MaksimumSykepengedagerfilter(
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
 
+    private lateinit var sisteUkedag: LocalDate
     private lateinit var sisteBetalteDag: LocalDate
     private var state: State = State.Initiell
     private val teller = UtbetalingTeller(alder, arbeidsgiverRegler)
@@ -28,7 +29,7 @@ internal class MaksimumSykepengedagerfilter(
     private val avvisteDatoer = mutableListOf<LocalDate>()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
 
-    internal fun maksdato() = teller.maksdato(sisteBetalteDag)
+    internal fun maksdato() = if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
     internal fun gjenståendeSykedager() = teller.gjenståendeSykedager(sisteBetalteDag)
     internal fun forbrukteSykedager() = teller.forbrukteDager()
 
@@ -51,6 +52,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        sisteUkedag = tidslinje.sisteUkedag()
         sisteBetalteDag = tidslinje.sisteDato()
     }
 

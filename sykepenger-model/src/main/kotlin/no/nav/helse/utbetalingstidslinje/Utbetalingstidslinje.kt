@@ -104,6 +104,7 @@ internal class Utbetalingstidslinje private constructor(
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.sisteDato(), other.sisteDato())
 
+    internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
     internal fun sisteDato() = utbetalingsdager.last().dato
 
     internal fun førsteSykepengedag() = utbetalingsdager.firstOrNull { it is NavDag }?.dato
