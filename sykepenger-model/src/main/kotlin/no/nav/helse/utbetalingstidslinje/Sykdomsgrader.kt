@@ -15,10 +15,10 @@ internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): Utbetaling
         require(tidslinjer.size == 1) { "Flere arbeidsgivere støttes ikke (epic 7)" }
         tidslinjer.first().accept(this)
     }
-    override fun visitNavDag(dag: NavDag) {
+    override fun visit(dag: NavDag) {
         grader[dag.dato] = dag.økonomi.grad().toDouble()
     }
-    override fun visitNavHelgDag(dag: NavHelgDag) {
+    override fun visit(dag: NavHelgDag) {
         grader[dag.dato] = dag.økonomi.grad().toDouble()
     }
 }

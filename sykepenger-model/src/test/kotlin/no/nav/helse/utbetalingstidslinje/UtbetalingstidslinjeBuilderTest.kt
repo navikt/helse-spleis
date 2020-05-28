@@ -435,43 +435,43 @@ internal class UtbetalingstidslinjeBuilderTest {
             tidslinje.accept(this)
         }
 
-        override fun visitNavDag(dag: NavDag) {
+        override fun visit(dag: NavDag) {
             datoer[dag.dato] = NavDag::class
             navdager.add(dag)
             inkrementer(NavDag::class)
         }
 
-        override fun visitArbeidsdag(dag: Arbeidsdag) {
+        override fun visit(dag: Arbeidsdag) {
             datoer[dag.dato] = Arbeidsdag::class
             inkrementer(Arbeidsdag::class)
         }
 
-        override fun visitNavHelgDag(dag: NavHelgDag) {
+        override fun visit(dag: NavHelgDag) {
             datoer[dag.dato] = NavHelgDag::class
             inkrementer(NavHelgDag::class)
         }
 
-        override fun visitUkjentDag(dag: UkjentDag) {
+        override fun visit(dag: UkjentDag) {
             datoer[dag.dato] = UkjentDag::class
             inkrementer(UkjentDag::class)
         }
 
-        override fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) {
+        override fun visit(dag: ArbeidsgiverperiodeDag) {
             datoer[dag.dato] = ArbeidsgiverperiodeDag::class
             inkrementer(ArbeidsgiverperiodeDag::class)
         }
 
-        override fun visitFridag(dag: Fridag) {
+        override fun visit(dag: Fridag) {
             datoer[dag.dato] = Fridag::class
             inkrementer(Fridag::class)
         }
 
-        override fun visitForeldetDag(dag: ForeldetDag) {
+        override fun visit(dag: ForeldetDag) {
             datoer[dag.dato] = ForeldetDag::class
             inkrementer(ForeldetDag::class)
         }
 
-        override fun visitAvvistDag(dag: AvvistDag) {
+        override fun visit(dag: AvvistDag) {
             datoer[dag.dato] = AvvistDag::class
             inkrementer(AvvistDag::class)
         }

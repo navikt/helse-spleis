@@ -1,6 +1,7 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.utbetalingstidslinje.Alder
 import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
@@ -94,6 +95,10 @@ internal class Økonomi private constructor(
 
         private fun totalPerson(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
             it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+
+        internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
+            return økonomiList.sumByDouble { it.dagsats() } < alder.minimumInntekt(dato)
+        }
     }
 
     internal fun dagsats(beløp: Number): Økonomi =
@@ -279,3 +284,8 @@ internal class Økonomi private constructor(
 internal fun List<Økonomi>.samletGrad(): Prosentdel = Økonomi.samletGrad(this)
 
 internal fun List<Økonomi>.betale(dato: LocalDate) = Økonomi.betale(this, dato)
+
+internal fun List<Økonomi>.erUnderInntekstgrensen(
+    alder: Alder,
+    dato: LocalDate
+) = Økonomi.erUnderInntektsgrensen(this, alder, dato)

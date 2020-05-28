@@ -105,7 +105,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun preVisit(tidslinje: Utbetalingstidslinje) {
         if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
     }
 

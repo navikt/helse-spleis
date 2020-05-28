@@ -15,42 +15,42 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
         tidslinje.accept(this)
     }
 
-    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.NavDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.NavDag::class)
     }
 
-    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class)
     }
 
-    override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class)
     }
 
-    override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class)
     }
 
-    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class)
     }
 
-    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.Fridag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.Fridag::class)
     }
 
-    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.ForeldetDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.ForeldetDag::class)
     }
 
-    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class)
     }

@@ -34,7 +34,7 @@ internal class OppdragBuilder(
 
     private val linje get() = arbeisdsgiverLinjer.first()
 
-    override fun visitNavDag(dag: NavDag) {
+    override fun visit(dag: NavDag) {
         if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag)
         if (dag.økonomi.grad().toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
             tilstand.betalingsdag(dag)
@@ -42,31 +42,31 @@ internal class OppdragBuilder(
             tilstand.nyLinje(dag)
     }
 
-    override fun visitNavHelgDag(dag: NavHelgDag) {
+    override fun visit(dag: NavHelgDag) {
         if (arbeisdsgiverLinjer.isEmpty() || dag.økonomi.grad().toDouble() != linje.grad)
             tilstand.nyLinje(dag)
         else
             tilstand.helgedag(dag)
     }
 
-    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
         sisteArbeidsgiverdag?.let { sisteArbeidsgiverdag = dag.dato }
         tilstand = Avsluttet
     }
 
-    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
         tilstand.ikkeBetalingsdag()
     }
 
-    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
         tilstand.ikkeBetalingsdag()
     }
 

@@ -29,7 +29,7 @@ internal class MaksimumUtbetaling(
             aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
     }
 
-    override fun visitNavDag(dag: NavDag) {
+    override fun visit(dag: NavDag) {
         if (dag.dato in periode && dag.økonomi.dagsats().toInt() > `6G`.dagsats(dag.dato)) harRedusertUtbetaling = true
         listOf(dag.økonomi).betale(dag.dato)
     }

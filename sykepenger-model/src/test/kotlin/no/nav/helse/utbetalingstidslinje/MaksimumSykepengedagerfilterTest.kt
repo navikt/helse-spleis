@@ -239,7 +239,7 @@ internal class MaksimumSykepengedagerfilterTest {
             tidslinje.accept(this)
         }
 
-        override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
             datoer.add(dag.dato)
         }
 

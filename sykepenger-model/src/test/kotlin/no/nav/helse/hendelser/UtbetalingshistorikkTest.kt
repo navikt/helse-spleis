@@ -383,36 +383,36 @@ class UtbetalingshistorikkTest {
             sisteDag = dag.dato
         }
 
-        override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             visitDag(dag)
         }
 
-        override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             navDagTeller += 1
             visitDag(dag)
         }
 
-        override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             visitDag(dag)
         }
 
-        override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
             visitDag(dag)
         }
 
-        override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             visitDag(dag)
         }
 
-        override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
             visitDag(dag)
         }
 
-        override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
             visitDag(dag)
         }
 
-        override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             visitDag(dag)
         }
     }

@@ -94,35 +94,35 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
         currentState.preVisitTidslinjer(tidslinjer)
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
-        currentState.preVisitUtbetalingstidslinje(tidslinje)
+    override fun preVisit(tidslinje: Utbetalingstidslinje) =
+        currentState.preVisit(tidslinje)
 
-    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
-        currentState.visitArbeidsdag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) =
+        currentState.visit(dag)
 
-    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
-        currentState.visitArbeidsgiverperiodeDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) =
+        currentState.visit(dag)
 
-    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
-        currentState.visitNavDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) =
+        currentState.visit(dag)
 
-    override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
-        currentState.visitNavHelgDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) =
+        currentState.visit(dag)
 
-    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
-        currentState.visitFridag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) =
+        currentState.visit(dag)
 
-    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
-        currentState.visitAvvistDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) =
+        currentState.visit(dag)
 
-    override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
-        currentState.visitUkjentDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) =
+        currentState.visit(dag)
 
-    override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) =
-        currentState.visitForeldetDag(dag)
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) =
+        currentState.visit(dag)
 
-    override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) =
-        currentState.postVisitUtbetalingstidslinje(tidslinje)
+    override fun postVisit(tidslinje: Utbetalingstidslinje) =
+        currentState.postVisit(tidslinje)
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitPerioder(vedtaksperioder)
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitPerioder(vedtaksperioder)
@@ -423,7 +423,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private var førsteSykepengedag: LocalDate? = null
         private var sisteSykepengedag: LocalDate? = null
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun preVisit(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
             førsteSykepengedag = tidslinje.førsteSykepengedag()
@@ -522,7 +522,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private var utbetalinger: MutableList<Int>
     ) : JsonState {
 
-        override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.Arbeidsdag,
@@ -532,7 +532,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ArbeidsgiverperiodeDag,
@@ -542,7 +542,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
@@ -555,7 +555,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalinger.add(dag.økonomi.arbeidsgiverbeløp())
         }
 
-        override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagMedGradDTO(
                     type = TypeDataDTO.NavHelgDag,
@@ -566,7 +566,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = if (dag.dato.erHelg()) TypeDataDTO.Helgedag else TypeDataDTO.Feriedag,
@@ -576,7 +576,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.UkjentDag,
@@ -586,7 +586,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
             utbetalingstidslinjeMap.add(
                 AvvistDagDTO(
                     type = TypeDataDTO.AvvistDag,
@@ -598,7 +598,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ForeldetDag,
@@ -608,7 +608,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
         }
 
-        override fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+        override fun postVisit(tidslinje: Utbetalingstidslinje) {
             popState()
         }
     }

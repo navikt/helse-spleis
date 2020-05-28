@@ -51,37 +51,37 @@ internal class MaksimumSykepengedagerfilter(
         state.entering(this)
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
+    override fun preVisit(tidslinje: Utbetalingstidslinje) {
         sisteUkedag = tidslinje.sisteUkedag()
         sisteBetalteDag = tidslinje.sisteDato()
     }
 
-    override fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {
         if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dag.dato] = dag
         state.betalbarDag(this, dag.dato)
     }
 
-    override fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {
         oppholdsdag(dag.dato)
     }
 
-    override fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
+    override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {
         oppholdsdag(dag.dato)
     }
 

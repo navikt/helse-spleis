@@ -62,16 +62,16 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
 }
 
 internal interface UtbetalingsdagVisitor {
-    fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
-    fun visitArbeidsgiverperiodeDag(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
-    fun visitNavDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
-    fun visitNavHelgDag(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
-    fun visitArbeidsdag(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
-    fun visitFridag(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
-    fun visitAvvistDag(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
-    fun visitForeldetDag(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {}
-    fun visitUkjentDag(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
-    fun postVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {}
+    fun preVisit(tidslinje: Utbetalingstidslinje) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag) {}
+    fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag) {}
+    fun postVisit(tidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {

@@ -37,11 +37,11 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         utbetalingstidslinje.accept(this)
     }
 
-    override fun visitArbeidsdag(dag: Arbeidsdag) { arbeidsdagTeller += 1 }
-    override fun visitArbeidsgiverperiodeDag(dag: ArbeidsgiverperiodeDag) { arbeidsgiverperiodeDagTeller += 1 }
-    override fun visitAvvistDag(dag: AvvistDag) { avvistDagTeller += 1 }
-    override fun visitFridag(dag: Fridag) { fridagTeller += 1 }
-    override fun visitNavDag(dag: NavDag) {
+    override fun visit(dag: Arbeidsdag) { arbeidsdagTeller += 1 }
+    override fun visit(dag: ArbeidsgiverperiodeDag) { arbeidsgiverperiodeDagTeller += 1 }
+    override fun visit(dag: AvvistDag) { avvistDagTeller += 1 }
+    override fun visit(dag: Fridag) { fridagTeller += 1 }
+    override fun visit(dag: NavDag) {
         navDagTeller += 1
         try {
             totalUtbetaling += dag.økonomi.arbeidsgiverbeløp()
@@ -49,8 +49,8 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         }
         totalInntekt += dag.økonomi.dagsats()
     }
-    override fun visitNavHelgDag(dag: NavHelgDag) { navHelgDagTeller += 1 }
-    override fun visitUkjentDag(dag: UkjentDag) { ukjentDagTeller += 1 }
+    override fun visit(dag: NavHelgDag) { navHelgDagTeller += 1 }
+    override fun visit(dag: UkjentDag) { ukjentDagTeller += 1 }
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
 }
