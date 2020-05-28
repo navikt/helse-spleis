@@ -4,8 +4,7 @@
 
 Tar i mot hendelser knytter til sykepengesaken for en person, for eksempel søknader og inntektsmeldinger.
 
-Håndterer vedtaksperiodene for en person, og sørger for å innhente informasjon vi trenger for å kunne ta beslutning om
-saken skal resultere i en automatisk utbetaling eller ikke.
+Håndterer vedtaksperiodene for en person, og sørger for å innhente informasjon vi trenger for å kunne foreslå en utbetaling.
 
 # Henvendelser
 
