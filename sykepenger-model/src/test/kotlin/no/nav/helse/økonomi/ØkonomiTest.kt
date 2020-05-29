@@ -67,7 +67,7 @@ internal class ØkonomiTest {
 
     @Test fun `kan ikke låses etter betaling`() {
         50.prosent.sykdomsgrad.dagsats(1200).also { økonomi ->
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600, 0)
             assertThrows<IllegalStateException> { økonomi.lås() }
         }
@@ -75,7 +75,7 @@ internal class ØkonomiTest {
 
     @Test fun `opplåsing tillater betaling`() {
         50.prosent.sykdomsgrad.dagsats(1200).lås().låsOpp().also { økonomi ->
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600, 0)
         }
     }
@@ -84,7 +84,7 @@ internal class ØkonomiTest {
         assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.låsOpp() }
         50.prosent.sykdomsgrad.dagsats(1200).also { økonomi ->
             assertThrows<IllegalStateException> { økonomi.låsOpp() }
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600, 0)
             assertThrows<IllegalStateException> { økonomi.låsOpp() }
         }
@@ -98,17 +98,17 @@ internal class ØkonomiTest {
 
     @Test fun `betal 0 hvis låst`() {
         50.prosent.sykdomsgrad.dagsats(1200).lås().also { økonomi ->
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 0, 0)
             økonomi.låsOpp()
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertUtbetaling(økonomi, 600, 0)
         }
     }
 
     @Test fun `kan ikke låses etter utbetaling`() {
         50.prosent.sykdomsgrad.dagsats(1200).also { økonomi ->
-            listOf(økonomi).betale(1.januar)
+            listOf(økonomi).betal(1.januar)
             assertThrows<IllegalStateException> { økonomi.lås() }
         }
     }
@@ -139,13 +139,13 @@ internal class ØkonomiTest {
 
     @Test fun `kan beregne betaling bare en gang`() {
         assertThrows<IllegalStateException> {
-            listOf(80.prosent.sykdomsgrad.dagsats(1200)).betale(1.januar).betale(1.januar)
+            listOf(80.prosent.sykdomsgrad.dagsats(1200)).betal(1.januar).betal(1.januar)
         }
     }
 
     @Test fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.sykdomsgrad.dagsats(1200).also {
-            listOf(it).betale(1.januar)
+            listOf(it).betal(1.januar)
             it.toMap().apply {
                 assertEquals(80.0, this["grad"])
                 assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
@@ -165,7 +165,7 @@ internal class ØkonomiTest {
 
     @Test fun `arbeidsgiver og person splittes tilsvarer totalt`() {
         Økonomi.sykdomsgrad(100.prosent, 50.prosent).dagsats(999).also {
-            listOf(it).betale(1.januar)
+            listOf(it).betal(1.januar)
             it.toMap().apply {
                 assertEquals(100.0, this["grad"])
                 assertEquals(50.0, this["arbeidsgiverBetalingProsent"])
@@ -180,7 +180,7 @@ internal class ØkonomiTest {
         val a =  Økonomi.sykdomsgrad(50.prosent, 50.prosent).dagsats(600)
         val b =  Økonomi.sykdomsgrad(20.prosent, 100.prosent).dagsats(400)
         val c =  Økonomi.sykdomsgrad(60.prosent, 0.prosent).dagsats(1000)
-        listOf(a, b, c).betale(1.januar).also {
+        listOf(a, b, c).betal(1.januar).also {
             assertEquals(49.prosent, it.samletGrad())
         }
         listOf(a, b, c).forEach {
@@ -195,7 +195,7 @@ internal class ØkonomiTest {
         val a =  Økonomi.sykdomsgrad(50.prosent, 50.prosent).dagsats(1200)
         val b =  Økonomi.sykdomsgrad(20.prosent, 100.prosent).dagsats(800)
         val c =  Økonomi.sykdomsgrad(60.prosent, 0.prosent).dagsats(2000)
-        listOf(a, b, c).betale(1.januar).also {
+        listOf(a, b, c).betal(1.januar).also {
             assertEquals(49.prosent, it.samletGrad())
             // grense = 1059
         }
@@ -211,7 +211,7 @@ internal class ØkonomiTest {
         val a =  Økonomi.sykdomsgrad(50.prosent, 50.prosent).dagsats(4800)
         val b =  Økonomi.sykdomsgrad(20.prosent, 100.prosent).dagsats(3200)
         val c =  Økonomi.sykdomsgrad(60.prosent, 0.prosent).dagsats(8000)
-        listOf(a, b, c).betale(1.januar).also {
+        listOf(a, b, c).betal(1.januar).also {
             assertEquals(49.prosent, it.samletGrad())
             // grense = 1059
         }
@@ -228,7 +228,7 @@ internal class ØkonomiTest {
         val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).dagsats(969.23)
         val b =  Økonomi.sykdomsgrad(80.prosent, 90.prosent).dagsats(461.53)
         val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).dagsats(1430.76)
-        listOf(a, b, c).betale(1.januar(2018)).also {
+        listOf(a, b, c).betal(1.januar(2018)).also {
             assertEquals(40.prosent, it.samletGrad())
         }
         assertUtbetaling(a, 464, 0)

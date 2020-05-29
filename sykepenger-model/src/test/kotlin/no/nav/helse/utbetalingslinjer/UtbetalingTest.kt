@@ -1,11 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
-import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -102,11 +100,9 @@ internal class UtbetalingTest {
 
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
         MaksimumUtbetaling(
-            Sykdomsgrader(listOf(*tidslinjer)),
             listOf(*tidslinjer),
-            Periode(tidslinjer.first().førsteDato(), tidslinjer.last().sisteDato()),
             aktivitetslogg
-        ).beregn()
+        ).betal()
 
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,

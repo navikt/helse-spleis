@@ -24,7 +24,7 @@ internal class ProsentdelTest {
     internal fun avrundingsfeil() {
         val karakterMedAvrunding = (1 / 7.0).prosent
         assertEquals(karakterMedAvrunding, !!karakterMedAvrunding)
-        Assertions.assertNotEquals(
+        assertNotEquals(
             karakterMedAvrunding.get<Double>("brøkdel"),
             (!!karakterMedAvrunding).get<Double>("brøkdel")
         )
@@ -41,5 +41,10 @@ internal class ProsentdelTest {
         assertFalse(25.prosent.erUnderGrensen())
         assertFalse(20.prosent.erUnderGrensen())
         assertTrue(15.prosent.erUnderGrensen())
+    }
+
+    @Test fun `vektlagt gjennomsnitt`() {
+        assertEquals(0.prosent,
+        Prosentdel.vektlagtGjennomsnitt(listOf(50.prosent to 0.0, 75.prosent to 0.0)))
     }
 }

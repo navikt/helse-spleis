@@ -22,7 +22,7 @@ internal class CreateØkonomiTest {
                 assertNull(map["dagsats"])
             }
             // Indirect test of Økonomi state is KunGrad
-            assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
             assertDoesNotThrow { økonomi.dagsats(1200) }
         }
     }
@@ -41,7 +41,7 @@ internal class CreateØkonomiTest {
             }
             // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
-            assertDoesNotThrow { listOf(økonomi).betale(1.januar) }
+            assertDoesNotThrow { listOf(økonomi).betal(1.januar) }
         }
     }
 
@@ -59,7 +59,7 @@ internal class CreateØkonomiTest {
             }
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
-            assertThrows<IllegalStateException> { listOf(økonomi).betale(1.januar) }
+            assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
         }
     }
 

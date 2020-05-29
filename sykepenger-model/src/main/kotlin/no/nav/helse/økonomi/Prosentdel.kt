@@ -19,6 +19,7 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Double>>): Prosentdel {
             val total = parene.sumByDouble { it.second }
+            if (total <= 0.0) return Prosentdel(0)
             return Prosentdel(parene.sumByDouble { it.first.brøkdel * it.second } / total)
         }
     }

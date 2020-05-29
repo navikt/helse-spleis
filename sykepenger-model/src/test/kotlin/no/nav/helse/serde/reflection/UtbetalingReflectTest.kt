@@ -7,7 +7,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.økonomi.betale
+import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -107,5 +107,5 @@ internal class UtbetalingReflectTest {
     }
 
     private fun tidslinjeMedDagsats(tidslinje: Utbetalingstidslinje) =
-        tidslinje.onEach { if (it is NavDag) listOf(it.økonomi).betale(it.dato) }
+        tidslinje.onEach { if (it is NavDag) listOf(it.økonomi).betal(it.dato) }
 }

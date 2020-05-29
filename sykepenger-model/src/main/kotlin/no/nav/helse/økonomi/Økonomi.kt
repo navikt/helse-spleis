@@ -31,7 +31,7 @@ internal class Økonomi private constructor(
         internal fun samletGrad(økonomiList: List<Økonomi>) =
             Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dagsats() })
 
-        internal fun betale(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
+        internal fun betal(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
             justereForGrense(it, utbetalingsgrense(it, dato))
         }
@@ -39,14 +39,14 @@ internal class Økonomi private constructor(
         private fun utbetalingsgrense(økonomiList: List<Økonomi>, dato: LocalDate) =
             (Grunnbeløp.`6G`.dagsats(dato) * samletGrad(økonomiList).ratio()).roundToInt()
 
-        private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betale() }
+        private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
         private fun justereForGrense(økonomiList: List<Økonomi>, grense: Int) {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             when {
                 (totalArbeidsgiver + totalPerson <= grense).also {
-                    økonomiList.forEach {økonomi ->
+                    økonomiList.forEach { økonomi ->
                         økonomi.er6GBegrenset = !it
                     }
                 } -> return
@@ -65,25 +65,26 @@ internal class Økonomi private constructor(
             }
             (budsjett - totalPerson(økonomiList)).also { remainder ->
                 if (remainder == 0) return
-                (0..(remainder - 1)).forEach {
-                        index -> økonomiList[index].personbeløp =
-                    økonomiList[index].personbeløp!! + 1
+                (0..(remainder - 1)).forEach { index ->
+                    økonomiList[index].personbeløp =
+                        økonomiList[index].personbeløp!! + 1
                 }
             }
             require(budsjett == totalPerson(økonomiList))
         }
 
-        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int,  budsjett: Int) {
+        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
             val ratio = budsjett.toDouble() / total
             økonomiList.forEach {
                 it.arbeidsgiverbeløp = (it.arbeidsgiverbeløp!! * ratio).toInt()
             }
             (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
                 if (remainder == 0) return
-                (0..(remainder - 1)).forEach {
-                        index -> økonomiList[index].arbeidsgiverbeløp =
-                    økonomiList[index].arbeidsgiverbeløp!! + 1
-                }            }
+                (0..(remainder - 1)).forEach { index ->
+                    økonomiList[index].arbeidsgiverbeløp =
+                        økonomiList[index].arbeidsgiverbeløp!! + 1
+                }
+            }
             require(budsjett == totalArbeidsgiver(økonomiList))
         }
 
@@ -91,24 +92,31 @@ internal class Økonomi private constructor(
             økonomiList.forEach { it.personbeløp = 0 }
 
         private fun totalArbeidsgiver(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
-            it.arbeidsgiverbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+            it.arbeidsgiverbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet")
+        }
 
         private fun totalPerson(økonomiList: List<Økonomi>): Int = økonomiList.sumBy {
-            it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
+            it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet")
+        }
 
         internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
             return økonomiList.sumByDouble { it.dagsats() } < alder.minimumInntekt(dato)
         }
+
+        internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
+            økonomiList.fold(false) { result, økonomi -> result || økonomi.er6GBegrenset() }
     }
 
     internal fun dagsats(beløp: Number): Økonomi =
         beløp.toDouble().let {
             require(it >= 0) { "dagsats kan ikke være negativ" }
-            require(it !in listOf(
-                POSITIVE_INFINITY,
-                NEGATIVE_INFINITY,
-                NaN
-            )) { "dagsats må være gyldig positivt nummer" }
+            require(
+                it !in listOf(
+                    POSITIVE_INFINITY,
+                    NEGATIVE_INFINITY,
+                    NaN
+                )
+            ) { "dagsats må være gyldig positivt nummer" }
             tilstand.dagsats(this, it)
         }
 
@@ -129,11 +137,11 @@ internal class Økonomi private constructor(
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
     internal fun arbeidsgiverbeløp() = tilstand.arbeidsgiverbeløp(this)
 
-    private fun betale() = this.also { tilstand.betale(this) }
+    private fun betal() = this.also { tilstand.betal(this) }
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
-    private fun _betale() {
+    private fun _betal() {
         val total = dagsats() * grad().ratio()
         (total * arbeidsgiverBetalingProsent.ratio()).roundToInt().also {
             arbeidsgiverbeløp = it
@@ -155,7 +163,7 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke sette dagsats på dette tidspunktet")
         }
 
-        internal open fun betale(økonomi: Økonomi) {
+        internal open fun betal(økonomi: Økonomi) {
             throw IllegalStateException("Kan ikke beregne utbetaling på dette tidspunktet")
         }
 
@@ -186,7 +194,7 @@ internal class Økonomi private constructor(
             "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.roundToInt()
         )
 
-        internal class KunGrad: Tilstand() {
+        internal class KunGrad : Tilstand() {
 
             override fun dagsats(økonomi: Økonomi, beløp: Double) =
                 Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, beløp)
@@ -194,7 +202,7 @@ internal class Økonomi private constructor(
 
         }
 
-        internal class HarDagsats: Tilstand() {
+        internal class HarDagsats : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi.also {
                 it.tilstand = Låst()
@@ -208,13 +216,13 @@ internal class Økonomi private constructor(
                 "dagsats" to økonomi.dagsats().roundToInt()
             )
 
-            override fun betale(økonomi: Økonomi) {
-                økonomi._betale()
+            override fun betal(økonomi: Økonomi) {
+                økonomi._betal()
                 økonomi.tilstand = HarBeløp()
             }
         }
 
-        internal class HarBeløp: Tilstand() {
+        internal class HarBeløp : Tilstand() {
 
             override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
 
@@ -231,7 +239,7 @@ internal class Økonomi private constructor(
                     økonomi.utbetalingMap()
         }
 
-        internal class Låst: Tilstand() {
+        internal class Låst : Tilstand() {
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
@@ -247,14 +255,14 @@ internal class Økonomi private constructor(
             override fun toIntMap(økonomi: Økonomi) =
                 super.toIntMap(økonomi) + mapOf("dagsats" to økonomi.dagsats().roundToInt())
 
-            override fun betale(økonomi: Økonomi) {
+            override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0
                 økonomi.personbeløp = 0
                 økonomi.tilstand = LåstMedBeløp()
             }
         }
 
-        internal class LåstMedBeløp: Tilstand() {
+        internal class LåstMedBeløp : Tilstand() {
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
@@ -283,9 +291,11 @@ internal class Økonomi private constructor(
 
 internal fun List<Økonomi>.samletGrad(): Prosentdel = Økonomi.samletGrad(this)
 
-internal fun List<Økonomi>.betale(dato: LocalDate) = Økonomi.betale(this, dato)
+internal fun List<Økonomi>.betal(dato: LocalDate) = Økonomi.betal(this, dato)
 
 internal fun List<Økonomi>.erUnderInntekstgrensen(
     alder: Alder,
     dato: LocalDate
 ) = Økonomi.erUnderInntektsgrensen(this, alder, dato)
+
+internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)

@@ -20,6 +20,13 @@ internal class Utbetalingstidslinje private constructor(
 
     internal constructor() : this(mutableListOf())
 
+    internal companion object {
+        internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = Periode(
+            tidslinjer.map { it.førsteDato() }.min()!!,
+            tidslinjer.map { it.sisteDato() }.max()!!
+        )
+    }
+
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }
             .toMutableList())
@@ -151,6 +158,10 @@ internal class Utbetalingstidslinje private constructor(
         else subset(førsteDato(), sisteDato)
 
     internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
+
+    internal operator fun get(dato: LocalDate) =
+        if (dato in førsteDato()..sisteDato()) utbetalingsdager.first { it.dato == dato }
+        else UkjentDag(dato, Økonomi.ikkeBetalt().dagsats(0))
 
     override fun toString(): String {
         return utbetalingsdager.joinToString(separator = "") {

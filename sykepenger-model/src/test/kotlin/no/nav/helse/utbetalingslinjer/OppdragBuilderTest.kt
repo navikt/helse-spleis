@@ -1,12 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
-import no.nav.helse.utbetalingstidslinje.Sykdomsgrader
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -175,11 +173,9 @@ internal class OppdragBuilderTest {
     private fun opprett(vararg dager: Utbetalingsdager, sisteDato: LocalDate? = null) {
         val tidslinje = tidslinjeOf(*dager)
         MaksimumUtbetaling(
-            Sykdomsgrader(listOf(tidslinje)),
             listOf(tidslinje),
-            Periode(1.januar, 1.mars),
             Aktivitetslogg()
-        ).beregn()
+        ).betal()
         oppdrag = OppdragBuilder(
             tidslinje,
             ORGNUMMER,

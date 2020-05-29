@@ -35,7 +35,7 @@ internal class ArbeidsgiverUtbetalinger(
             gjenståendeSykedager = it.gjenståendeSykedager()
             forbrukteSykedager = it.forbrukteSykedager()
         }
-        MaksimumUtbetaling(sykdomsgrader, tidslinjer, periode, aktivitetslogg).beregn()
+        MaksimumUtbetaling(tidslinjer, aktivitetslogg).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.push(Utbetaling(
                 fødselsnummer,

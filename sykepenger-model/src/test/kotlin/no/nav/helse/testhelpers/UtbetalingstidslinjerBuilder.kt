@@ -21,7 +21,7 @@ internal fun tidslinjeOf(
 internal val Int.AP get() = this.AP(1200)
 internal fun Int.AP(dagsats: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsgiverperiodedag, dagsats)
 internal val Int.NAV get() = this.NAV(1200)
-internal fun Int.NAV(dagsats: Int, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addNAVdag, dagsats, grad)
+internal fun Int.NAV(dagsats: Int, grad: Number = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addNAVdag, dagsats, grad)
 internal val Int.ARB get() = this.ARB(1200)
 internal fun Int.ARB(dagsats: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsdag, dagsats)
 internal val Int.FRI get() = this.FRI(1200)
@@ -31,7 +31,7 @@ internal fun Int.FOR(dagsats: Int) = Utbetalingsdager(this, Utbetalingstidslinje
 internal val Int.AVV get() = this.AVV(1200)
 internal fun Int.AVV(dagsats: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addAvvistDag, dagsats)
 internal val Int.HELG get() = this.HELG(1200)
-internal fun Int.HELG(dagsats: Int, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addHelg, dagsats, grad)
+internal fun Int.HELG(dagsats: Int, grad: Number = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addHelg, dagsats, grad)
 internal val Int.UTELATE get() = Utbetalingsdager(this, { _, _ -> }, 0)
 
 private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonomi) =
@@ -40,5 +40,5 @@ internal data class Utbetalingsdager(
     val antallDager: Int,
     val addDagFun: Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit,
     val dagsats: Int = 1200,
-    val grad: Double = 0.0
+    val grad: Number = 0.0
 )
