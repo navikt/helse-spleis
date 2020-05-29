@@ -12,7 +12,7 @@ internal fun tidslinjeOf(
 ) = Utbetalingstidslinje().apply {
     utbetalingsdager.fold(startDato){ startDato, (antallDager, utbetalingsdag, dagsats, grad) ->
         (0 until antallDager).forEach {
-            this.utbetalingsdag(dagsats, startDato.plusDays(it.toLong()), grad)
+            this.utbetalingsdag(startDato.plusDays(it.toLong()), Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
         }
         startDato.plusDays(antallDager.toLong())
     }
@@ -32,25 +32,13 @@ internal val Int.AVV get() = this.AVV(1200)
 internal fun Int.AVV(dagsats: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addAvvistDag, dagsats)
 internal val Int.HELG get() = this.HELG(1200)
 internal fun Int.HELG(dagsats: Int, grad: Double = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addHelg, dagsats, grad)
-internal val Int.UTELATE get() = Utbetalingsdager(this, { _, _, _ -> }, 0)
+internal val Int.UTELATE get() = Utbetalingsdager(this, { _, _ -> }, 0)
 
-private fun Utbetalingstidslinje.addForeldetDag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addForeldetDag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
-private fun Utbetalingstidslinje.addAvvistDag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addAvvistDag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats), Begrunnelse.MinimumSykdomsgrad)
-private fun Utbetalingstidslinje.addNAVdag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
-private fun Utbetalingstidslinje.addHelg(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(0))
-private fun Utbetalingstidslinje.addArbeidsgiverperiodedag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
-private fun Utbetalingstidslinje.addArbeidsdag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addArbeidsdag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
-private fun Utbetalingstidslinje.addFridag(dagsats: Int, dato: LocalDate, grad: Double) =
-    this.addFridag(dato, Økonomi.ikkeBetalt().dagsats(dagsats))
+private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonomi) =
+    this.addAvvistDag(dato, økonomi, Begrunnelse.MinimumSykdomsgrad)
 internal data class Utbetalingsdager(
     val antallDager: Int,
-    val addDagFun: Utbetalingstidslinje.(Int, LocalDate, Double) -> Unit,
+    val addDagFun: Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit,
     val dagsats: Int = 1200,
     val grad: Double = 0.0
 )
