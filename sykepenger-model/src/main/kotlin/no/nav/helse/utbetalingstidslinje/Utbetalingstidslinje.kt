@@ -42,7 +42,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse) {
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
             if (utbetalingsdag is NavDag && utbetalingsdag.dato in avvisteDatoer)
-                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse, utbetalingsdag.økonomi.grad().toDouble())
+                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
         }
     }
 
@@ -211,7 +211,7 @@ internal class Utbetalingstidslinje private constructor(
 
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
 
-            internal fun avvistDag(begrunnelse: Begrunnelse, grad: Double) =
+            internal fun avvistDag(begrunnelse: Begrunnelse) =
                 AvvistDag(dato, økonomi, begrunnelse)
         }
 
@@ -235,14 +235,13 @@ internal class Utbetalingstidslinje private constructor(
             dato: LocalDate,
             økonomi: Økonomi,
             internal val begrunnelse: Begrunnelse
-        ) :
-            Utbetalingsdag(dato, økonomi) {
+        ) : Utbetalingsdag(dato, økonomi) {
+            init {
+                økonomi.lås()
+            }
             override val prioritet = 60
             override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
-            internal fun navDag(): NavDag {
-                require(begrunnelse != EgenmeldingUtenforArbeidsgiverperiode) { "Kan ikke konvertere avvist egenmeldingsdag til NavDag" }
-                return NavDag(dato, økonomi)
-            }
+            internal fun navDag(): Utbetalingsdag = if(begrunnelse == EgenmeldingUtenforArbeidsgiverperiode) this else NavDag(dato, økonomi.låsOpp())
         }
 
         internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :

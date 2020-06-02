@@ -44,7 +44,7 @@ internal class ØkonomiTest {
         )
     }
 
-    @Test fun `fastlåst økonomi fungerer som arbeidsdag`() {
+    @Test fun `låst økonomi fungerer som arbeidsdag`() {
         assertEquals(
             19.prosent,
             listOf(
@@ -61,7 +61,7 @@ internal class ØkonomiTest {
         assertDoesNotThrow { 50.prosent.sykdomsgrad.dekningsgrunnlag(1200).lås().lås()}
     }
 
-    @Test fun `kan ikke låse uten dagsats`() {
+    @Test fun `kan ikke låse uten dekningsgrunnlag`() {
         assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.lås() }
     }
 
@@ -90,7 +90,7 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `dagsats returns clone`() {
+    @Test fun `dekningsgrunnlag returns clone`() {
         50.prosent.sykdomsgrad.also { original ->
             assertNotSame(original, original.dekningsgrunnlag(1200))
         }
@@ -113,7 +113,7 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `toMap uten dagsats`() {
+    @Test fun `toMap uten dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.toMap().apply {
             assertEquals(79.5, this["grad"])
             assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
@@ -121,7 +121,7 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `toMap med dagsats`() {
+    @Test fun `toMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.dekningsgrunnlag(1200.4).toMap().apply {
             assertEquals(79.5, this["grad"])
             assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
@@ -129,7 +129,7 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `toIntMap med dagsats`() {
+    @Test fun `toIntMap med dekningsgrunnlag`() {
         79.5.prosent.sykdomsgrad.dekningsgrunnlag(1200.4).toIntMap().apply {
             assertEquals(80, this["grad"])
             assertEquals(100, this["arbeidsgiverBetalingProsent"])
