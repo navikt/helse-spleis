@@ -9,13 +9,14 @@ import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
+import kotlin.math.roundToInt
 
 internal class OppdragBuilder(
     tidslinje: Utbetalingstidslinje,
     private val orgnummer: String,
     private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
-    private val dagStrategy: UtbetalingStrategy = NavDag.arbeidsgiverUtbetaling
+    private val dagStrategy: UtbetalingStrategy = NavDag.arbeidsgiverBeløp
 ) : UtbetalingsdagVisitor {
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
@@ -106,7 +107,7 @@ internal class OppdragBuilder(
                 dag.dato,
                 dag.dato,
                 dagStrategy(dag),
-                dag.økonomi.dekningsgrunnlag().toInt(),
+                dag.økonomi.dekningsgrunnlag().roundToInt(),
                 dag.økonomi.grad().toDouble(),
                 fagsystemId
             )

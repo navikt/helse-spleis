@@ -11,6 +11,7 @@ import kotlin.math.roundToInt
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
     private val arbeidsgiverBetalingProsent: Prosentdel,
+    private var aktuellDagsinntekt: Double? = null,
     private var dekningsgrunnlag: Double? = null,
     private var arbeidsgiverbeløp: Int? = null,
     private var personbeløp: Int? = null,
@@ -107,8 +108,8 @@ internal class Økonomi private constructor(
             økonomiList.fold(false) { result, økonomi -> result || økonomi.er6GBegrenset() }
     }
 
-    internal fun dekningsgrunnlag(beløp: Number): Økonomi =
-        beløp.toDouble().let {
+    internal fun inntekt(aktuellDagsinntekt: Number, dekningsgrunnlag: Number = aktuellDagsinntekt): Økonomi =
+        dekningsgrunnlag.toDouble().let {
             require(it >= 0) { "dekningsgrunnlag kan ikke være negativ" }
             require(
                 it !in listOf(
@@ -117,7 +118,7 @@ internal class Økonomi private constructor(
                     NaN
                 )
             ) { "dekningsgrunnlag må være gyldig positivt nummer" }
-            tilstand.dekningsgrunnlag(this, it)
+            tilstand.inntekt(this, aktuellDagsinntekt.toDouble(), it)
         }
 
     internal fun lås() = tilstand.lås(this)
@@ -129,7 +130,8 @@ internal class Økonomi private constructor(
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
 
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
-    internal fun dekningsgrunnlag() = dekningsgrunnlag ?: throw IllegalStateException("Dekningsgrunnlag er ikke satt ennå")
+    internal fun dekningsgrunnlag() =
+        dekningsgrunnlag ?: throw IllegalStateException("Dekningsgrunnlag er ikke satt ennå")
 
     @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
     internal fun grad() = tilstand.grad(this)
@@ -159,8 +161,12 @@ internal class Økonomi private constructor(
 
         internal open fun grad(økonomi: Økonomi) = økonomi.grad
 
-        internal open fun dekningsgrunnlag(økonomi: Økonomi, beløp: Double): Økonomi {
-            throw IllegalStateException("Kan ikke sette dekningsgrunnlag på dette tidspunktet")
+        internal open fun inntekt(
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double
+        ): Økonomi {
+            throw IllegalStateException("Kan ikke sette inntekt på dette tidspunktet")
         }
 
         internal open fun betal(økonomi: Økonomi) {
@@ -196,24 +202,30 @@ internal class Økonomi private constructor(
 
         internal class KunGrad : Tilstand() {
 
-            override fun dekningsgrunnlag(økonomi: Økonomi, beløp: Double) =
-                Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, beløp)
-                    .also { other -> other.tilstand = HarDekningsgrunnlag() }
+            override fun inntekt(
+                økonomi: Økonomi,
+                aktuellDagsinntekt: Double,
+                dekningsgrunnlag: Double
+            ) =
+                Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag)
+                    .also { other -> other.tilstand = HarInntekt() }
 
         }
 
-        internal class HarDekningsgrunnlag : Tilstand() {
+        internal class HarInntekt : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi.also {
                 it.tilstand = Låst()
             }
 
             override fun toMap(økonomi: Økonomi) = super.toMap(økonomi) + mapOf(
-                "dekningsgrunnlag" to økonomi.dekningsgrunnlag()
+                "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
+                "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
             )
 
             override fun toIntMap(økonomi: Økonomi) = super.toIntMap(økonomi) + mapOf(
-                "dekningsgrunnlag" to økonomi.dekningsgrunnlag().roundToInt()
+                "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
+                "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
             )
 
             override fun betal(økonomi: Økonomi) {
@@ -230,12 +242,18 @@ internal class Økonomi private constructor(
 
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +
-                    mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag()) +
+                    mapOf(
+                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
+                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
+                    ) +
                     økonomi.utbetalingMap()
 
             override fun toIntMap(økonomi: Økonomi) =
                 super.toIntMap(økonomi) +
-                    mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag().roundToInt()) +
+                    mapOf(
+                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
+                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
+                    ) +
                     økonomi.utbetalingMap()
         }
 
@@ -244,16 +262,22 @@ internal class Økonomi private constructor(
             override fun grad(økonomi: Økonomi) = 0.prosent
 
             override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarDekningsgrunnlag()
+                økonomi.tilstand = HarInntekt()
             }
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
             override fun toMap(økonomi: Økonomi) =
-                super.toMap(økonomi) + mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag())
+                super.toMap(økonomi) + mapOf(
+                    "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
+                    "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
+                )
 
             override fun toIntMap(økonomi: Økonomi) =
-                super.toIntMap(økonomi) + mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag().roundToInt())
+                super.toIntMap(økonomi) + mapOf(
+                    "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
+                    "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
+                )
 
             override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0
@@ -269,7 +293,7 @@ internal class Økonomi private constructor(
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
             override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarDekningsgrunnlag()
+                økonomi.tilstand = HarInntekt()
             }
 
             override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
@@ -278,12 +302,18 @@ internal class Økonomi private constructor(
 
             override fun toMap(økonomi: Økonomi) =
                 super.toMap(økonomi) +
-                    mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag()) +
+                    mapOf(
+                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
+                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
+                    ) +
                     økonomi.utbetalingMap()
 
             override fun toIntMap(økonomi: Økonomi) =
                 super.toIntMap(økonomi) +
-                    mapOf("dekningsgrunnlag" to økonomi.dekningsgrunnlag().roundToInt()) +
+                    mapOf(
+                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
+                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
+                    ) +
                     økonomi.utbetalingMap()
         }
     }

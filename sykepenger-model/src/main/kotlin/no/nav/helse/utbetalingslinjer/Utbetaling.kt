@@ -7,7 +7,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverUtbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.arbeidsgiverBeløp
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -58,7 +58,7 @@ internal class Utbetaling private constructor(
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             tidligere: Utbetaling?
-        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverUtbetaling).result()
+        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverBeløp).result()
             .minus(
                 tidligere?.arbeidsgiverOppdrag ?: Oppdrag(
                     organisasjonsnummer,

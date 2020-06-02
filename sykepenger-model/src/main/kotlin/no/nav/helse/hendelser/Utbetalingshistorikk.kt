@@ -103,20 +103,20 @@ class Utbetalingshistorikk(
         abstract class Utbetalingsperiode(
             fom: LocalDate,
             tom: LocalDate,
-            private val dagsats: Int,
+            private val beløp: Int,
             private val grad: Int,
             private val orgnr: String
         ) : Periode(fom, tom) {
-            private val gradertSats = ((dagsats * 100) / grad.toDouble()).roundToInt()
-            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == gradertSats
+            private val ugradertBeløp = ((beløp * 100) / grad.toDouble()).roundToInt()
+            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == ugradertBeløp
 
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
             }
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dekningsgrunnlag(0))
-                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dekningsgrunnlag(gradertSats))
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(0))
+                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(ugradertBeløp))
             }
 
             internal companion object {
@@ -158,7 +158,7 @@ class Utbetalingshistorikk(
                         .any { it }
 
                 private fun erTilstøtendeMedEndring(left: Utbetalingsperiode, right: Utbetalingsperiode) =
-                    left.periode.endInclusive.harTilstøtende(right.periode.start) && left.gradertSats != right.gradertSats && !left.maksDagsats && !right.maksDagsats
+                    left.periode.endInclusive.harTilstøtende(right.periode.start) && left.ugradertBeløp != right.ugradertBeløp && !left.maksDagsats && !right.maksDagsats
             }
         }
 
@@ -202,7 +202,7 @@ class Utbetalingshistorikk(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje()
-                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().dekningsgrunnlag(0)) } }
+                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(0)) } }
 
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())

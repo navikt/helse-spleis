@@ -11,8 +11,8 @@ import kotlin.streams.toList
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
-    internal var dagsats: Int,
-    internal var lønn: Int,
+    internal var dagsats: Int, //TODO: arbeidsgiverbeløp || personbeløp
+    internal var lønn: Int, //TODO: aktuellDagsinntekt
     internal val grad: Double,
     internal var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
