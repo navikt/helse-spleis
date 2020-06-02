@@ -67,7 +67,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun addUkjentDag(dato: LocalDate) =
-        Økonomi.ikkeBetalt().dagsats(0).let { økonomi ->
+        Økonomi.ikkeBetalt().dekningsgrunnlag(0).let { økonomi ->
             if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
         }
 
@@ -161,7 +161,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal operator fun get(dato: LocalDate) =
         if (dato in førsteDato()..sisteDato()) utbetalingsdager.first { it.dato == dato }
-        else UkjentDag(dato, Økonomi.ikkeBetalt().dagsats(0))
+        else UkjentDag(dato, Økonomi.ikkeBetalt().dekningsgrunnlag(0))
 
     override fun toString(): String {
         return utbetalingsdager.joinToString(separator = "") {

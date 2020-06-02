@@ -32,7 +32,7 @@ internal class Inntekthistorikk {
 
     internal fun dagsats(dato: LocalDate, regler: ArbeidsgiverRegler) =
         inntekt(dato)
-        ?.multiply(regler.prosentLønn().toBigDecimal())
+        ?.multiply(regler.dekningsgrad().toBigDecimal())
         ?.multiply(12.toBigDecimal())
         ?.divide(260.toBigDecimal(), MathContext.DECIMAL128)
         ?.setScale(0, RoundingMode.HALF_UP)

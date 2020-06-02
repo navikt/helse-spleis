@@ -12,7 +12,7 @@ internal fun tidslinjeOf(
 ) = Utbetalingstidslinje().apply {
     utbetalingsdager.fold(startDato){ startDato, (antallDager, utbetalingsdag, dagsats, grad) ->
         (0 until antallDager).forEach {
-            this.utbetalingsdag(startDato.plusDays(it.toLong()), Økonomi.sykdomsgrad(grad.prosent).dagsats(dagsats))
+            this.utbetalingsdag(startDato.plusDays(it.toLong()), Økonomi.sykdomsgrad(grad.prosent).dekningsgrunnlag(dagsats))
         }
         startDato.plusDays(antallDager.toLong())
     }

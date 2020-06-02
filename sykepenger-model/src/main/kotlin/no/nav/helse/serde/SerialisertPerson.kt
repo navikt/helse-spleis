@@ -511,7 +511,7 @@ internal data class PersonData(
                 val kilde: KildeData,
                 val grad: Double,
                 val arbeidsgiverBetalingProsent: Double,
-                val dagsats: Double?,
+                val dekningsgrunnlag: Double?,
                 val arbeidsgiverbeløp: Int?,
                 val personbeløp: Int?,
                 val er6GBegrenset: Boolean?,
@@ -647,7 +647,7 @@ data class UtbetalingstidslinjeData(
     data class UtbetalingsdagData(
         val type: TypeData,
         val dato: LocalDate,
-        val dagsats: Int,
+        val dekningsgrunnlag: Int,
         val utbetaling: Int?,
         val begrunnelse: BegrunnelseData?,
         val grad: Double?,

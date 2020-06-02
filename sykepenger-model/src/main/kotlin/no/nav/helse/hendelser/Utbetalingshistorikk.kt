@@ -115,8 +115,8 @@ class Utbetalingshistorikk(
             }
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(0))
-                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dagsats(gradertSats))
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).dekningsgrunnlag(0))
+                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).dekningsgrunnlag(gradertSats))
             }
 
             internal companion object {
@@ -202,7 +202,7 @@ class Utbetalingshistorikk(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje()
-                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().dagsats(0)) } }
+                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().dekningsgrunnlag(0)) } }
 
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())

@@ -69,7 +69,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
             totalUtbetaling += dag.økonomi.arbeidsgiverbeløp()
         } catch (e: IllegalStateException) {
         }
-        totalInntekt += dag.økonomi.dagsats()
+        totalInntekt += dag.økonomi.dekningsgrunnlag()
     }
     override fun visit(
         dag: NavHelgDag,

@@ -387,7 +387,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 add(17.januar, hendelseId, 31000.toBigDecimal())
             }
         )
-        assertNotEquals(0.0, inspektør.navdager.first().økonomi.toMap()["dagsats"])
+        assertNotEquals(0.0, inspektør.navdager.first().økonomi.toMap()["dekningsgrunnlag"])
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
 
@@ -413,7 +413,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private fun assertDagsats(dagsats: Int) {
-        inspektør.navdager.forEach { assertEquals(dagsats.toDouble(), it.økonomi.toMap()["dagsats"]) }
+        inspektør.navdager.forEach { assertEquals(dagsats.toDouble(), it.økonomi.toMap()["dekningsgrunnlag"]) }
     }
 
     private fun Sykdomstidslinje.utbetalingslinjer(

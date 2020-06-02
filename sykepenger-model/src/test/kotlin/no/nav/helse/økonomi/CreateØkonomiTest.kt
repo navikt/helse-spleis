@@ -19,11 +19,11 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertNull(map["dagsats"])
+                assertNull(map["dekningsgrunnlag"])
             }
             // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
-            assertDoesNotThrow { økonomi.dagsats(1200) }
+            assertDoesNotThrow { økonomi.dekningsgrunnlag(1200) }
         }
     }
 
@@ -34,13 +34,13 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1199.6, map["dagsats"])
+                assertEquals(1199.6, map["dekningsgrunnlag"])
                 assertNull(map["arbeidsgiverbeløp"])
                 assertNull(map["personbeløp"])
                 assertNull(map["er6GBegrenset"])
             }
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
+            assertThrows<IllegalStateException> { økonomi.dekningsgrunnlag(1200) }
             assertDoesNotThrow { listOf(økonomi).betal(1.januar) }
         }
     }
@@ -52,13 +52,13 @@ internal class CreateØkonomiTest {
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
                 assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1199.6, map["dagsats"])
+                assertEquals(1199.6, map["dekningsgrunnlag"])
                 assertEquals(640, map["arbeidsgiverbeløp"])
                 assertEquals(320, map["personbeløp"])
                 assertTrue(map["er6GBegrenset"] as Boolean)
             }
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.dagsats(1200) }
+            assertThrows<IllegalStateException> { økonomi.dekningsgrunnlag(1200) }
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
         }
     }

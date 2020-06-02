@@ -106,7 +106,7 @@ internal class OppdragBuilder(
                 dag.dato,
                 dag.dato,
                 dagStrategy(dag),
-                dag.økonomi.dagsats().toInt(),
+                dag.økonomi.dekningsgrunnlag().toInt(),
                 dag.økonomi.grad().toDouble(),
                 fagsystemId
             )
@@ -180,7 +180,7 @@ internal class OppdragBuilder(
 
         override fun betalingsdag(dag: NavDag) {
             linje.dagsats = dagStrategy(dag)
-            linje.lønn = dag.økonomi.dagsats().toInt() //Needs to be changed for self employed
+            linje.lønn = dag.økonomi.dekningsgrunnlag().toInt() //Needs to be changed for self employed
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
         }
