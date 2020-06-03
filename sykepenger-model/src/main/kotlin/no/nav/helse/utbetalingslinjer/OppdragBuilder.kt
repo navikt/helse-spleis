@@ -6,6 +6,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
@@ -39,10 +40,14 @@ internal class OppdragBuilder(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
         if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag)
-        if (dag.økonomi.grad().toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
+        if (grad.toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
             tilstand.betalingsdag(dag)
         else
             tilstand.nyLinje(dag)

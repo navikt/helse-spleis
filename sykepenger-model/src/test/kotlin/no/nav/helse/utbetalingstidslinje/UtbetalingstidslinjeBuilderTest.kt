@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -439,9 +440,13 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visit(
             dag: NavDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            dekningsgrunnlag: Double?,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?
         ) {
-            datoer[dag.dato] = NavDag::class
+            datoer[dato] = NavDag::class
             navdager.add(dag)
             inkrementer(NavDag::class)
         }

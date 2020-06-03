@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -71,7 +72,11 @@ internal interface UtbetalingsdagVisitor {
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,

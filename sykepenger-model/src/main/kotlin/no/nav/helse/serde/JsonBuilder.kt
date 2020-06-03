@@ -13,6 +13,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -111,9 +112,13 @@ internal class JsonBuilder : PersonVisitor {
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
@@ -455,7 +460,11 @@ internal class JsonBuilder : PersonVisitor {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            dekningsgrunnlag: Double?,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?
         ) {
             dager.add(NavDagReflect(dag, TypeData.NavDag).toMap())
         }

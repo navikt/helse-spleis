@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -19,9 +20,13 @@ internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): Utbetaling
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
-        grader[dag.dato] = dag.økonomi.grad().toDouble()
+        grader[dato] = grad.toDouble()
     }
     override fun visit(
         dag: NavHelgDag,

@@ -5,6 +5,7 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -218,7 +219,11 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            dekningsgrunnlag: Double?,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?
         ) {
             visitDag(dag)
         }

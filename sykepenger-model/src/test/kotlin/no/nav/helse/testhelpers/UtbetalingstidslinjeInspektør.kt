@@ -3,6 +3,7 @@ package no.nav.helse.testhelpers
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -62,12 +63,16 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
         navDagTeller += 1
         try {
-            totalUtbetaling += dag.økonomi.arbeidsgiverbeløp()
-        } catch (e: IllegalStateException) {
+            totalUtbetaling += arbeidsgiverbeløp!!
+        } catch (e: NullPointerException) {
         }
         totalInntekt += dag.økonomi.dekningsgrunnlag()
     }

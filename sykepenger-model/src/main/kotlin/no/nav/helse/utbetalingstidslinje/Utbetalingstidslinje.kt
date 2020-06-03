@@ -192,7 +192,7 @@ internal class Utbetalingstidslinje private constructor(
             return this.prioritet.compareTo(other.prioritet)
         }
 
-        abstract fun accept(visitor: UtbetalingsdagVisitor)
+        internal abstract fun accept(visitor: UtbetalingsdagVisitor)
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
@@ -209,7 +209,8 @@ internal class Utbetalingstidslinje private constructor(
                 internal val arbeidsgiverBeløp = { dag: NavDag -> dag.økonomi.arbeidsgiverbeløp() }
             }
 
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+//            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
 
             internal fun avvistDag(begrunnelse: Begrunnelse) =
                 AvvistDag(dato, økonomi, begrunnelse)

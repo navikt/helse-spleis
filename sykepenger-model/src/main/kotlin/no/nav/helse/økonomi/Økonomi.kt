@@ -1,7 +1,9 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
@@ -156,6 +158,9 @@ internal class Økonomi private constructor(
         "personbeløp" to personbeløp!!,
         "er6GBegrenset" to er6GBegrenset!!
     )
+
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
+        visitor.visit(dag, dato, this, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     internal sealed class Tilstand {
 

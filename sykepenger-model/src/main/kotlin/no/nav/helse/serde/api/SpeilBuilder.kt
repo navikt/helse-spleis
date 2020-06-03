@@ -18,6 +18,7 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -114,9 +115,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
@@ -585,15 +590,19 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            dekningsgrunnlag: Double?,
+            arbeidsgiverbeløp: Int?,
+            personbeløp: Int?
         ) {
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
-                    inntekt = dag.økonomi.dekningsgrunnlag().toInt(),
+                    inntekt = dekningsgrunnlag?.toInt() ?: 0,
                     dato = dag.dato,
-                    utbetaling = dag.økonomi.arbeidsgiverbeløp(),
-                    grad = dag.økonomi.grad().toDouble()
+                    utbetaling = arbeidsgiverbeløp ?: 0,
+                    grad = grad.toDouble()
                 )
             )
             utbetalinger.add(dag.økonomi.arbeidsgiverbeløp())

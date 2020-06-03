@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -19,9 +20,13 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
-        datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.NavDag::class
+        datoer[dato] = Utbetalingstidslinje.Utbetalingsdag.NavDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.NavDag::class)
     }
 

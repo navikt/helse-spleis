@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -60,10 +61,14 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
-        if (dag.dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dag.dato] = dag
-        state.betalbarDag(this, dag.dato)
+        if (dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dato] = dag
+        state.betalbarDag(this, dato)
     }
 
     override fun visit(

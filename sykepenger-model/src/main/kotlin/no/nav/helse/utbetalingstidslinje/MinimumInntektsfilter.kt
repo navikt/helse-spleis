@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.erUnderInntekstgrensen
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -35,7 +36,11 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        dekningsgrunnlag: Double?,
+        arbeidsgiverbeløp: Int?,
+        personbeløp: Int?
     ) {
         addInntekt(dato, økonomi)
     }
