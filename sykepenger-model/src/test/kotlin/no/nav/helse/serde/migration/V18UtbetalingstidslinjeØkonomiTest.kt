@@ -30,47 +30,28 @@ private const val personJson = """{
             "dager": [
               {
                 "type": "ArbeidsgiverperiodeDag",
-                "dato": "2018-01-01",
-                "grad": 0.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "dagsats": 1431,
+                "dato": "2018-01-01"
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-17",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-18",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavHelgDag",
+                "dagsats": 0,
                 "dato": "2018-01-20",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 0.0,
-                "aktuellDagsinntekt": 0.0,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "grad": 100.0
               }
             ]
           }
@@ -80,47 +61,28 @@ private const val personJson = """{
             "dager": [
               {
                 "type": "ArbeidsgiverperiodeDag",
-                "dato": "2018-01-01",
-                "grad": 0.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "dagsats": 1431,
+                "dato": "2018-01-01"
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-17",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-18",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavHelgDag",
+                "dagsats": 0,
                 "dato": "2018-01-20",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 0.0,
-                "aktuellDagsinntekt": 0.0,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "grad": 100.0
               }
             ]
           }
@@ -132,55 +94,35 @@ private const val personJson = """{
             "dager": [
               {
                 "type": "ArbeidsgiverperiodeDag",
-                "dato": "2018-01-01",
-                "grad": 0.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "dagsats": 1431,
+                "dato": "2018-01-01"
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-17",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavDag",
+                "dagsats": 1431,
                 "dato": "2018-01-18",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
-                "arbeidsgiverbeløp": 1431,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "utbetaling": 1431,
+                "grad": 100.0
               },
               {
                 "type": "NavHelgDag",
+                "dagsats": 0,
                 "dato": "2018-01-20",
-                "grad": 100.0,
-                "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 0.0,
-                "aktuellDagsinntekt": 0.0,
-                "arbeidsgiverbeløp": 0,
-                "personbeløp": 0,
-                "er6GBegrenset": false
+                "grad": 100.0
               }
             ]
           }
         }
       ]
     }
-  ],
-  "skjemaVersjon": 17
+  ]
 }
 """
 
