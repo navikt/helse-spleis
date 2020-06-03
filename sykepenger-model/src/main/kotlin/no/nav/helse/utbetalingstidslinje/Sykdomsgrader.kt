@@ -22,6 +22,7 @@ internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): Utbetaling
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
+        aktuellDagsinntekt: Double?,
         dekningsgrunnlag: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?

@@ -160,7 +160,7 @@ internal class Økonomi private constructor(
     )
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
+        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     internal sealed class Tilstand {
 

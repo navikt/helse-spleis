@@ -117,11 +117,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
+        aktuellDagsinntekt: Double?,
         dekningsgrunnlag: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) =
-        currentState.visit(dag, dato, økonomi, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
+        currentState.visit(dag, dato, økonomi, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
@@ -592,6 +593,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
+            aktuellDagsinntekt: Double?,
             dekningsgrunnlag: Double?,
             arbeidsgiverbeløp: Int?,
             personbeløp: Int?
@@ -599,7 +601,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
-                    inntekt = dekningsgrunnlag?.toInt() ?: 0,
+                    inntekt = aktuellDagsinntekt?.toInt() ?: 0,
                     dato = dag.dato,
                     utbetaling = arbeidsgiverbeløp ?: 0,
                     grad = grad.toDouble()

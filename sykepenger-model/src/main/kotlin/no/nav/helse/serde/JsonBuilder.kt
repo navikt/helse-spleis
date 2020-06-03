@@ -114,11 +114,12 @@ internal class JsonBuilder : PersonVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
+        aktuellDagsinntekt: Double?,
         dekningsgrunnlag: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?
     ) =
-        currentState.visit(dag, dato, økonomi, grad, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
+        currentState.visit(dag, dato, økonomi, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
@@ -462,6 +463,7 @@ internal class JsonBuilder : PersonVisitor {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
+            aktuellDagsinntekt: Double?,
             dekningsgrunnlag: Double?,
             arbeidsgiverbeløp: Int?,
             personbeløp: Int?
