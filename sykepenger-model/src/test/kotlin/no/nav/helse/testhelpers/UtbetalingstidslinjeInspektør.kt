@@ -43,17 +43,24 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     override fun visit(
         dag: Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) { arbeidsdagTeller += 1 }
     override fun visit(
         dag: ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) { arbeidsgiverperiodeDagTeller += 1 }
     override fun visit(
         dag: AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) { avvistDagTeller += 1 }
     override fun visit(
         dag: Fridag,
@@ -65,22 +72,20 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {
         navDagTeller += 1
-        try {
-            totalUtbetaling += arbeidsgiverbeløp!!
-        } catch (e: NullPointerException) {
-        }
-        totalInntekt += dag.økonomi.dekningsgrunnlag()
+        totalUtbetaling += arbeidsgiverbeløp
+        totalInntekt += aktuellDagsinntekt
     }
     override fun visit(
         dag: NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel
     ) { navHelgDagTeller += 1 }
     override fun visit(
         dag: UkjentDag,

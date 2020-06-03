@@ -67,27 +67,30 @@ internal interface UtbetalingsdagVisitor {
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
@@ -97,7 +100,12 @@ internal interface UtbetalingsdagVisitor {
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
@@ -139,6 +147,8 @@ internal interface SykdomstidslinjeVisitor {
         dag: Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
@@ -147,24 +157,32 @@ internal interface SykdomstidslinjeVisitor {
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {}
     fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}

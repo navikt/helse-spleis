@@ -1,9 +1,12 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
@@ -22,6 +25,8 @@ internal class Økonomi private constructor(
 ) {
 
     companion object {
+        internal val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
+        internal val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
 
         internal fun sykdomsgrad(grad: Prosentdel, arbeidsgiverBetalingProsent: Prosentdel = 100.prosent) =
             Økonomi(grad, arbeidsgiverBetalingProsent)
@@ -32,7 +37,7 @@ internal class Økonomi private constructor(
         internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
 
         internal fun sykdomsgrad(økonomiList: List<Økonomi>) =
-            Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag() })
+            Prosentdel.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
 
         internal fun betal(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
@@ -103,11 +108,11 @@ internal class Økonomi private constructor(
         }
 
         internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
-            return økonomiList.sumByDouble { it.dekningsgrunnlag() } < alder.minimumInntekt(dato)
+            return økonomiList.sumByDouble { it.aktuellDagsinntekt!! } < alder.minimumInntekt(dato)
         }
 
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
-            økonomiList.fold(false) { result, økonomi -> result || økonomi.er6GBegrenset() }
+            økonomiList.any { it.er6GBegrenset() }
     }
 
     internal fun inntekt(aktuellDagsinntekt: Number, dekningsgrunnlag: Number = aktuellDagsinntekt): Økonomi =
@@ -131,22 +136,14 @@ internal class Økonomi private constructor(
 
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
 
-    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
-    internal fun dekningsgrunnlag() =
-        dekningsgrunnlag ?: throw IllegalStateException("Dekningsgrunnlag er ikke satt ennå")
-
-    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
-    internal fun grad() = tilstand.grad(this)
-
-    @Deprecated("Temporary visibility until Utbetalingstidslinje has Økonomi support")
-    internal fun arbeidsgiverbeløp() = tilstand.arbeidsgiverbeløp(this)
+    private fun grad() = tilstand.grad(this)
 
     private fun betal() = this.also { tilstand.betal(this) }
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
     private fun _betal() {
-        val total = dekningsgrunnlag() * grad().ratio()
+        val total = dekningsgrunnlag!! * grad().ratio()
         (total * arbeidsgiverBetalingProsent.ratio()).roundToInt().also {
             arbeidsgiverbeløp = it
             personbeløp = total.roundToInt() - it
@@ -178,7 +175,30 @@ internal class Økonomi private constructor(
     )
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
+        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt ?: 0.0, dekningsgrunnlag ?: 0.0, arbeidsgiverbeløp ?: 0, personbeløp ?: 0)
+
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: AvvistDag, dato: LocalDate) =
+        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt ?: 0.0, dekningsgrunnlag ?: 0.0, arbeidsgiverbeløp ?: 0, personbeløp ?: 0)
+
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavHelgDag, dato: LocalDate) =
+        visitor.visit(dag, dato, this, grad)
+
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: ArbeidsgiverperiodeDag, dato: LocalDate) =
+        visitor.visit(dag, dato, this, aktuellDagsinntekt ?: 0.0)
+
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: Arbeidsdag, dato: LocalDate) =
+        visitor.visit(dag, dato, this, aktuellDagsinntekt ?: 0.0)
+
+    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.Arbeidsgiverdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.Sykedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.SykHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.ForeldetSykedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
 
     internal sealed class Tilstand {
 
@@ -198,10 +218,6 @@ internal class Økonomi private constructor(
 
         internal open fun er6GBegrenset(økonomi: Økonomi): Boolean {
             throw IllegalStateException("Beløp er ikke beregnet ennå")
-        }
-
-        internal open fun arbeidsgiverbeløp(økonomi: Økonomi): Int {
-            throw IllegalStateException("Arbeidsgiverbeløp er ikke beregnet ennå")
         }
 
         internal open fun lås(økonomi: Økonomi): Økonomi {
@@ -250,8 +266,6 @@ internal class Økonomi private constructor(
 
         internal object HarBeløp : Tilstand() {
 
-            override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
-
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
             override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
@@ -263,8 +277,8 @@ internal class Økonomi private constructor(
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
-            override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarInntekt
+            override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
+                tilstand = HarInntekt
             }
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
@@ -285,11 +299,9 @@ internal class Økonomi private constructor(
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
-            override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarInntekt
+            override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
+                tilstand = HarInntekt
             }
-
-            override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 

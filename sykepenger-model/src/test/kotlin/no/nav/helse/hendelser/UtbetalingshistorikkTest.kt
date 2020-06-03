@@ -388,7 +388,8 @@ class UtbetalingshistorikkTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             visitDag(dag)
         }
@@ -398,10 +399,10 @@ class UtbetalingshistorikkTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            aktuellDagsinntekt: Double?,
-            dekningsgrunnlag: Double?,
-            arbeidsgiverbeløp: Int?,
-            personbeløp: Int?
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             navDagTeller += 1
             visitDag(dag)
@@ -410,7 +411,8 @@ class UtbetalingshistorikkTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel
         ) {
             visitDag(dag)
         }
@@ -418,7 +420,8 @@ class UtbetalingshistorikkTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             visitDag(dag)
         }
@@ -434,7 +437,12 @@ class UtbetalingshistorikkTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             visitDag(dag)
         }

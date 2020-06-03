@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
@@ -72,7 +71,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato,økonomi, kilde)
+            økonomi.accept(visitor, this, dato, kilde)
     }
 
     internal class Feriedag(
@@ -100,7 +99,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, økonomi, kilde)
+            økonomi.accept(visitor, this, dato, kilde)
     }
 
     internal class Sykedag(
@@ -110,7 +109,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, økonomi, kilde)
+            økonomi.accept(visitor, this, dato, kilde)
     }
 
     internal class ForeldetSykedag(
@@ -120,7 +119,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, økonomi, kilde)
+            økonomi.accept(visitor, this, dato, kilde)
     }
 
     internal class SykHelgedag(
@@ -130,7 +129,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, økonomi, kilde)
+            økonomi.accept(visitor, this, dato, kilde)
     }
 
     internal class Permisjonsdag(

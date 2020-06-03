@@ -63,10 +63,10 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {
         if (dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
@@ -75,7 +75,8 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel
     ) {
         oppholdsdag(dag.dato)
     }
@@ -83,7 +84,8 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {
         oppholdsdag(dag.dato)
     }
@@ -91,7 +93,8 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {
         oppholdsdag(dag.dato)
     }
@@ -107,7 +110,12 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {
         oppholdsdag(dag.dato)
     }

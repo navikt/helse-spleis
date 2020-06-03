@@ -38,10 +38,10 @@ internal class MinimumInntektsfilter(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {
         addInntekt(dato, økonomi)
     }
@@ -49,7 +49,8 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {
         addInntekt(dato, økonomi)
     }
@@ -57,7 +58,8 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) {
         addInntekt(dato, økonomi)
     }

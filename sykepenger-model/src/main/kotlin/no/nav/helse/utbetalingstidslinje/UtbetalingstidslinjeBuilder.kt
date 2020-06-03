@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -46,6 +47,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
     override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
@@ -54,24 +57,32 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
     override fun visitDag(
         dag: Dag.Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykedag(dato, økonomi)
     override fun visitDag(
         dag: Dag.ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = foreldetSykedag(dato, økonomi)
     override fun visitDag(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")

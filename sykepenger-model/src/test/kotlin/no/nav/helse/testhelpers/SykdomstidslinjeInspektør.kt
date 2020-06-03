@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -63,6 +64,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dag: Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -77,6 +80,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -85,6 +90,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dag: Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -93,6 +100,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dag: ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -101,6 +110,8 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dag: SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)

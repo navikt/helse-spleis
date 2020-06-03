@@ -442,10 +442,10 @@ internal class UtbetalingstidslinjeBuilderTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            aktuellDagsinntekt: Double?,
-            dekningsgrunnlag: Double?,
-            arbeidsgiverbeløp: Int?,
-            personbeløp: Int?
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             datoer[dato] = NavDag::class
             navdager.add(dag)
@@ -455,7 +455,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visit(
             dag: Arbeidsdag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             datoer[dag.dato] = Arbeidsdag::class
             inkrementer(Arbeidsdag::class)
@@ -464,7 +465,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visit(
             dag: NavHelgDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel
         ) {
             datoer[dag.dato] = NavHelgDag::class
             inkrementer(NavHelgDag::class)
@@ -482,7 +484,8 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visit(
             dag: ArbeidsgiverperiodeDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             datoer[dag.dato] = ArbeidsgiverperiodeDag::class
             inkrementer(ArbeidsgiverperiodeDag::class)
@@ -509,7 +512,12 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun visit(
             dag: AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             datoer[dag.dato] = AvvistDag::class
             inkrementer(AvvistDag::class)

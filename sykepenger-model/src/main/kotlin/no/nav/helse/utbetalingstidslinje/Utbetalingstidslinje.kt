@@ -196,7 +196,7 @@ internal class Utbetalingstidslinje private constructor(
 
         internal class ArbeidsgiverperiodeDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 30
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
         internal class NavDag (
@@ -206,11 +206,11 @@ internal class Utbetalingstidslinje private constructor(
             override val prioritet = 50
 
             companion object {
-                internal val arbeidsgiverBeløp = { dag: NavDag -> dag.økonomi.arbeidsgiverbeløp() }
+                internal val arbeidsgiverBeløp = { dag: NavDag -> Økonomi.arbeidsgiverBeløp(dag.økonomi) }
+                internal val personBeløp = { dag: NavDag -> Økonomi.personBeløp(dag.økonomi) }
             }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
-//            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
 
             internal fun avvistDag(begrunnelse: Begrunnelse) =
                 AvvistDag(dato, økonomi, begrunnelse)
@@ -219,12 +219,12 @@ internal class Utbetalingstidslinje private constructor(
         internal class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
             Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
         internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 20
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
         internal class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -241,7 +241,7 @@ internal class Utbetalingstidslinje private constructor(
                 økonomi.lås()
             }
             override val prioritet = 60
-            override fun accept(visitor: UtbetalingsdagVisitor) = visitor.visit(this, dato, økonomi)
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
             internal fun navDag(): Utbetalingsdag = if(begrunnelse == EgenmeldingUtenforArbeidsgiverperiode) this else NavDag(dato, økonomi.låsOpp())
         }
 

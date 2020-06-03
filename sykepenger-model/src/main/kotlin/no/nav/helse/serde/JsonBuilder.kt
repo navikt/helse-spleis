@@ -98,35 +98,38 @@ internal class JsonBuilder : PersonVisitor {
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, aktuellDagsinntekt)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        aktuellDagsinntekt: Double
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, aktuellDagsinntekt)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) =
         currentState.visit(dag, dato, økonomi, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, grad)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
@@ -138,9 +141,14 @@ internal class JsonBuilder : PersonVisitor {
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel,
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) =
-        currentState.visit(dag, dato, økonomi)
+        currentState.visit(dag, dato, økonomi, grad, aktuellDagsinntekt, dekningsgrunnlag, arbeidsgiverbeløp, personbeløp)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
@@ -229,9 +237,11 @@ internal class JsonBuilder : PersonVisitor {
         dag: Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -240,30 +250,38 @@ internal class JsonBuilder : PersonVisitor {
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
     override fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
     override fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
     override fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
+        grad: Prosentdel,
+        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
 
@@ -445,7 +463,8 @@ internal class JsonBuilder : PersonVisitor {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             dager.add(UtbetalingsdagReflect(dag, TypeData.Arbeidsdag).toMap())
         }
@@ -453,7 +472,8 @@ internal class JsonBuilder : PersonVisitor {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            aktuellDagsinntekt: Double
         ) {
             dager.add(UtbetalingsdagReflect(dag, TypeData.ArbeidsgiverperiodeDag).toMap())
         }
@@ -463,10 +483,10 @@ internal class JsonBuilder : PersonVisitor {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            aktuellDagsinntekt: Double?,
-            dekningsgrunnlag: Double?,
-            arbeidsgiverbeløp: Int?,
-            personbeløp: Int?
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             dager.add(NavDagReflect(dag, TypeData.NavDag).toMap())
         }
@@ -474,7 +494,8 @@ internal class JsonBuilder : PersonVisitor {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel
         ) {
             dager.add(UtbetalingsdagMedGradReflect(dag, TypeData.NavHelgDag).toMap())
         }
@@ -498,7 +519,12 @@ internal class JsonBuilder : PersonVisitor {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi
+            økonomi: Økonomi,
+            grad: Prosentdel,
+            aktuellDagsinntekt: Double,
+            dekningsgrunnlag: Double,
+            arbeidsgiverbeløp: Int,
+            personbeløp: Int
         ) {
             val avvistDagMap = mutableMapOf<String, Any?>()
             dager.add(avvistDagMap)
@@ -628,6 +654,8 @@ internal class JsonBuilder : PersonVisitor {
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) =
             leggTilDag(dag, dato, kilde, økonomi)
@@ -642,6 +670,8 @@ internal class JsonBuilder : PersonVisitor {
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) =
             leggTilDag(dag, dato, kilde, økonomi)
@@ -650,6 +680,8 @@ internal class JsonBuilder : PersonVisitor {
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) =
             leggTilDag(dag, dato, kilde, økonomi)
@@ -658,6 +690,8 @@ internal class JsonBuilder : PersonVisitor {
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) =
             leggTilDag(dag, dato, kilde, økonomi)
@@ -666,6 +700,8 @@ internal class JsonBuilder : PersonVisitor {
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) =
             leggTilDag(dag, dato, kilde, økonomi)

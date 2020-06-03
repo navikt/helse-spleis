@@ -22,18 +22,19 @@ internal class Sykdomsgrader(tidslinjer: List<Utbetalingstidslinje>): Utbetaling
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        aktuellDagsinntekt: Double?,
-        dekningsgrunnlag: Double?,
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ) {
         grader[dato] = grad.toDouble()
     }
     override fun visit(
         dag: NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi
+        økonomi: Økonomi,
+        grad: Prosentdel
     ) {
-        grader[dag.dato] = dag.økonomi.grad().toDouble()
+        grader[dato] = grad.toDouble()
     }
 }

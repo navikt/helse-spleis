@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -191,6 +192,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
@@ -199,24 +202,32 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
+            grad: Prosentdel,
+            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
         override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
