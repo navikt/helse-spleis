@@ -18,7 +18,7 @@ internal class Økonomi private constructor(
     private var arbeidsgiverbeløp: Int? = null,
     private var personbeløp: Int? = null,
     private var er6GBegrenset: Boolean? = null,
-    private var tilstand: Tilstand = Tilstand.KunGrad()
+    private var tilstand: Tilstand = Tilstand.KunGrad
 ) {
 
     companion object {
@@ -153,6 +153,24 @@ internal class Økonomi private constructor(
         }
     }
 
+    private fun prosentMap(): Map<String, Any> = mapOf(
+        "grad" to grad.toDouble(),   // Must use instance value here
+        "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.toDouble()
+    )
+    private fun inntektMap(): Map<String, Any> = mapOf(
+        "dekningsgrunnlag" to dekningsgrunnlag!!,
+        "aktuellDagsinntekt" to aktuellDagsinntekt!!
+    )
+
+    private fun prosentIntMap(): Map<String, Int> = mapOf(
+        "grad" to grad.roundToInt(),   // Must use instance value here
+        "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.roundToInt()
+    )
+    private fun inntektIntMap(): Map<String, Int> = mapOf(
+        "dekningsgrunnlag" to dekningsgrunnlag!!.roundToInt(),
+        "aktuellDagsinntekt" to aktuellDagsinntekt!!.roundToInt()
+    )
+
     private fun utbetalingMap() = mapOf(
         "arbeidsgiverbeløp" to arbeidsgiverbeløp!!,
         "personbeløp" to personbeløp!!,
@@ -195,17 +213,16 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi på dette tidspunktet")
         }
 
-        internal open fun toMap(økonomi: Økonomi): Map<String, Any> = mapOf(
-            "grad" to økonomi.grad.toDouble(),   // Must use instance value here
-            "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.toDouble()
-        )
+        internal fun toMap(økonomi: Økonomi): Map<String, Any> = prosentMap(økonomi) + inntektMap(økonomi) + beløpMap(økonomi)
+        internal fun toIntMap(økonomi: Økonomi): Map<String, Any> = prosentIntMap(økonomi) + inntektIntMap(økonomi) + beløpMap(økonomi)
 
-        internal open fun toIntMap(økonomi: Økonomi): Map<String, Any> = mapOf(
-            "grad" to økonomi.grad.roundToInt(),   // Must use instance value here
-            "arbeidsgiverBetalingProsent" to økonomi.arbeidsgiverBetalingProsent.roundToInt()
-        )
+        protected open fun prosentMap(økonomi: Økonomi): Map<String, Any> = økonomi.prosentMap()
+        protected open fun inntektMap(økonomi: Økonomi): Map<String, Any> = emptyMap()
+        protected open fun beløpMap(økonomi: Økonomi): Map<String, Any> = emptyMap()
+        protected open fun prosentIntMap(økonomi: Økonomi): Map<String, Int> = økonomi.prosentIntMap()
+        protected open fun inntektIntMap(økonomi: Økonomi): Map<String, Int> = emptyMap()
 
-        internal class KunGrad : Tilstand() {
+        internal object KunGrad : Tilstand() {
 
             override fun inntekt(
                 økonomi: Økonomi,
@@ -213,113 +230,72 @@ internal class Økonomi private constructor(
                 dekningsgrunnlag: Double
             ) =
                 Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag)
-                    .also { other -> other.tilstand = HarInntekt() }
-
+                    .also { other -> other.tilstand = HarInntekt }
         }
 
-        internal class HarInntekt : Tilstand() {
+        internal object HarInntekt : Tilstand() {
 
             override fun lås(økonomi: Økonomi) = økonomi.also {
-                it.tilstand = Låst()
+                it.tilstand = Låst
             }
 
-            override fun toMap(økonomi: Økonomi) = super.toMap(økonomi) + mapOf(
-                "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
-                "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
-            )
-
-            override fun toIntMap(økonomi: Økonomi) = super.toIntMap(økonomi) + mapOf(
-                "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
-                "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
-            )
+            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
+            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()
-                økonomi.tilstand = HarBeløp()
+                økonomi.tilstand = HarBeløp
             }
         }
 
-        internal class HarBeløp : Tilstand() {
+        internal object HarBeløp : Tilstand() {
 
             override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
 
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
-            override fun toMap(økonomi: Økonomi) =
-                super.toMap(økonomi) +
-                    mapOf(
-                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
-                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
-                    ) +
-                    økonomi.utbetalingMap()
-
-            override fun toIntMap(økonomi: Økonomi) =
-                super.toIntMap(økonomi) +
-                    mapOf(
-                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
-                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
-                    ) +
-                    økonomi.utbetalingMap()
+            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
+            override fun beløpMap(økonomi: Økonomi) = økonomi.utbetalingMap()
+            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
         }
 
-        internal class Låst : Tilstand() {
+        internal object Låst : Tilstand() {
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
             override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarInntekt()
+                økonomi.tilstand = HarInntekt
             }
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
-            override fun toMap(økonomi: Økonomi) =
-                super.toMap(økonomi) + mapOf(
-                    "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
-                    "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
-                )
-
-            override fun toIntMap(økonomi: Økonomi) =
-                super.toIntMap(økonomi) + mapOf(
-                    "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
-                    "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
-                )
+            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
+            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
 
             override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0
                 økonomi.personbeløp = 0
-                økonomi.tilstand = LåstMedBeløp()
+                økonomi.tilstand = LåstMedBeløp
             }
         }
 
-        internal class LåstMedBeløp : Tilstand() {
+        internal object LåstMedBeløp : Tilstand() {
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
             override fun låsOpp(økonomi: Økonomi) = økonomi.also { økonomi ->
-                økonomi.tilstand = HarInntekt()
+                økonomi.tilstand = HarInntekt
             }
 
             override fun arbeidsgiverbeløp(økonomi: Økonomi) = økonomi.arbeidsgiverbeløp!!
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 
-            override fun toMap(økonomi: Økonomi) =
-                super.toMap(økonomi) +
-                    mapOf(
-                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!,
-                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!
-                    ) +
-                    økonomi.utbetalingMap()
-
-            override fun toIntMap(økonomi: Økonomi) =
-                super.toIntMap(økonomi) +
-                    mapOf(
-                        "dekningsgrunnlag" to økonomi.dekningsgrunnlag!!.roundToInt(),
-                        "aktuellDagsinntekt" to økonomi.aktuellDagsinntekt!!.roundToInt()
-                    ) +
-                    økonomi.utbetalingMap()
+            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
+            override fun beløpMap(økonomi: Økonomi) = økonomi.utbetalingMap()
+            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
         }
     }
 }
