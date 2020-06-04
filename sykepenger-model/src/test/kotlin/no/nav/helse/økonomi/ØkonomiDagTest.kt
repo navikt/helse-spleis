@@ -1,17 +1,13 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.AVV
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ØkonomiDagTest {
@@ -82,6 +78,13 @@ internal class ØkonomiDagTest {
         assertØkonomi(a, 721)
         assertØkonomi(b, 720)
         assertØkonomi(c, 720)
+    }
+
+    @Test
+    fun `generate all Utbetalingsdag types`() {
+        val tidslinje = tidslinjeOf(1.ARB, 1.AP, 1.AVV, 1.FRI, 1.FOR, 1.NAV, 1.HELG)
+        MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg()).betal()
+
     }
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Int, personbeløp: Int = 0) {

@@ -1,15 +1,14 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.testhelpers.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class V18UtbetalingstidslinjeØkonomiTest {
     private val objectMapper = jacksonObjectMapper()
 
-    @Disabled
     @Test
     fun `befolke økonomifelt i Utbetalalingstidslinjer`() {
         val json = objectMapper.readTree(personJson)
@@ -17,6 +16,11 @@ internal class V18UtbetalingstidslinjeØkonomiTest {
         val migratedJson = objectMapper.readTree(json.toString())
         val expected = objectMapper.readTree(expectedPersonJson)
         assertEquals(expected, migratedJson)
+    }
+
+    @Test
+    fun `generate all Utbetalingsdag types`() {
+        listOf(tidslinjeOf(1.ARB, 1.AP, 1.AVV, 1.FRI, 1.FOR, 1.NAV, 1.HELG))
     }
 }
 
@@ -139,8 +143,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-01",
                 "grad": 0.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 0,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -150,8 +154,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-17",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -161,8 +165,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-18",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -189,8 +193,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-01",
                 "grad": 0.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 0,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -200,8 +204,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-17",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -211,8 +215,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-18",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -241,8 +245,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-01",
                 "grad": 0.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 0,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -252,8 +256,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-17",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false
@@ -263,8 +267,8 @@ private const val expectedPersonJson = """{
                 "dato": "2018-01-18",
                 "grad": 100.0,
                 "arbeidsgiverBetalingProsent": 100.0,
-                "dekningsgrunnlag": 1430.7692307692307,
-                "aktuellDagsinntekt": 1430.7692307692307,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 1431,
                 "personbeløp": 0,
                 "er6GBegrenset": false

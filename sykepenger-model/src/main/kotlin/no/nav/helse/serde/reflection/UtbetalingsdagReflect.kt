@@ -7,7 +7,10 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
+internal class UtbetalingsdagReflect(
+    utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag,
+    private val type: TypeData
+) {
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val økonomi: Økonomi = utbetalingsdag["økonomi"]
 
@@ -31,7 +34,10 @@ internal class UtbetalingsdagMedGradReflect(
 }
 
 
-internal class NavDagReflect(utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag, private val type: TypeData) {
+internal class NavDagReflect(
+    utbetalingsdag: Utbetalingstidslinje.Utbetalingsdag,
+    private val type: TypeData
+) {
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val økonomi: Økonomi = utbetalingsdag["økonomi"]
 
