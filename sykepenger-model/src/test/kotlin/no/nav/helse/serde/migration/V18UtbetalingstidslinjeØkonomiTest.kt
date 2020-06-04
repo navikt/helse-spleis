@@ -50,6 +50,16 @@ private const val personJson = """{
                 "dagsats": 0,
                 "dato": "2018-01-20",
                 "grad": 100.0
+              },
+              {
+                "type": "Arbeidsdag",
+                "dagsats": 1431,
+                "dato": "2018-01-21"
+              },
+              {
+                "type": "Fridag",
+                "dagsats": 0,
+                "dato": "2018-01-22"
               }
             ]
           }
@@ -172,6 +182,28 @@ private const val expectedPersonJson = """{
                 "arbeidsgiverBetalingProsent": 100.0,
                 "dekningsgrunnlag": 0.0,
                 "aktuellDagsinntekt": 0.0,
+                "arbeidsgiverbeløp": 0,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              },
+              {
+                "type": "Arbeidsdag",
+                "dato": "2018-01-21",
+                "grad": 0.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
+                "arbeidsgiverbeløp": 0,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              },
+              {
+                "type": "Fridag",
+                "dato": "2018-01-22",
+                "grad": 0.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
                 "arbeidsgiverbeløp": 0,
                 "personbeløp": 0,
                 "er6GBegrenset": false

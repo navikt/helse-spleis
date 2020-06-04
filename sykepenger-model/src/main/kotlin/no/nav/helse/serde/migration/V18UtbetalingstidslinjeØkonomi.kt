@@ -44,12 +44,12 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
             "Arbeidsdag" -> opprettMedInntekt(dag)
             "ArbeidsgiverperiodeDag" -> opprett(dag, dag["dagsats"].intValue())
             "AvvistDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
-            "Feriedag" -> opprettMedInntekt(dag)
+            "Fridag" -> opprettMedInntekt(dag)
             "ForeldetDag" -> opprettMedInntekt(dag)
             "NavDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
             "NavHelgDag" -> opprett(dag, grad = dag["grad"].doubleValue())
             "UkjentDag" -> opprett(dag)
-            else -> throw IllegalArgumentException("ukjent utbetalingsdagstype")
+            else -> throw IllegalArgumentException("ukjent utbetalingsdagstype: ${dag["type"].textValue()}")
         }
     }
 
@@ -70,7 +70,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0
-    ) = opprett(dag, inntekthistorikk.aktuellDagsinntekt(dag.dato), grad, utbetaling)
+    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato)?.toDouble() ?: 0.0, grad, utbetaling)
 }
 
 private val ObjectNode.dato get() = LocalDate.parse(this["dato"].textValue(), ISO_DATE)
