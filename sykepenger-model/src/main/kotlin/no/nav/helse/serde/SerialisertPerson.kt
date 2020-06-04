@@ -61,7 +61,8 @@ class SerialisertPerson(val json: String) {
             V15ØkonomiSykdomstidslinjer(),
             V16StatusIUtbetaling(),
             V17ForkastedePerioder(),
-            V18UtbetalingstidslinjeØkonomi()
+            V18UtbetalingstidslinjeØkonomi(),
+            V19KlippOverlappendeVedtaksperioder()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
