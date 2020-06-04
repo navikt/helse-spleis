@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter.ISO_DATE
 import java.util.*
 
 internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
-    override val description = "befolke økonomifelt i Utbetalingstidslinjer"
+    override val description = "utvide økonomifelt i Utbetalingstidslinjer"
 
     private lateinit var inntekthistorikk: Inntekthistorikk
 
@@ -41,11 +41,11 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
 
     private fun opprettØkonomi(dag: ObjectNode, inntekthistorikk: Inntekthistorikk) {
         when(dag["type"].textValue()) {
-            "Arbeidsdag" -> opprettMedLønn(dag)
+            "Arbeidsdag" -> opprettMedInntekt(dag)
             "ArbeidsgiverperiodeDag" -> opprett(dag, dag["dagsats"].intValue())
             "AvvistDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
-            "Feriedag" -> opprettMedLønn(dag)
-            "ForeldetDag" -> opprettMedLønn(dag)
+            "Feriedag" -> opprettMedInntekt(dag)
+            "ForeldetDag" -> opprettMedInntekt(dag)
             "NavDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
             "NavHelgDag" -> opprett(dag, grad = dag["grad"].doubleValue())
             "UkjentDag" -> opprett(dag)
@@ -66,7 +66,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag.put("er6GBegrenset", false)
     }
 
-    private fun opprettMedLønn(
+    private fun opprettMedInntekt(
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0

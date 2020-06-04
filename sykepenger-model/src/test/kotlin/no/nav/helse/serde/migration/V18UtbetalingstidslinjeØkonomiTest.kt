@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.testhelpers.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,11 +15,6 @@ internal class V18UtbetalingstidslinjeØkonomiTest {
         val migratedJson = objectMapper.readTree(json.toString())
         val expected = objectMapper.readTree(expectedPersonJson)
         assertEquals(expected, migratedJson)
-    }
-
-    @Test
-    fun `generate all Utbetalingsdag types`() {
-        listOf(tidslinjeOf(1.ARB, 1.AP, 1.AVV, 1.FRI, 1.FOR, 1.NAV, 1.HELG))
     }
 }
 
