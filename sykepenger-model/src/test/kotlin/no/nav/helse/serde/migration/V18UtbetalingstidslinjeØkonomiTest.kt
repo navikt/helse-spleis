@@ -70,7 +70,8 @@ private const val personJson = """{
               {
                 "type": "ArbeidsgiverperiodeDag",
                 "dagsats": 1431,
-                "dato": "2018-01-01"
+                "dato": "2018-01-01",
+                "grad": "NaN"
               },
               {
                 "type": "NavDag",

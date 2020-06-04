@@ -60,7 +60,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag.remove("dagsats")
         dag.remove("utbetaling")
         dag.remove("grad")
-        dag.put("grad", grad)
+        dag.put("grad", grad.takeUnless(Double::isNaN) ?: 0.0)
         dag.put("arbeidsgiverBetalingProsent", 100.0)
         dag.put("aktuellDagsinntekt", dagsats.toDouble())
         dag.put("dekningsgrunnlag", dagsats.toDouble())
