@@ -101,11 +101,7 @@ internal fun createØkonomi(data: DagData) = Økonomi::class.primaryConstructor!
         data.arbeidsgiverbeløp,
         data.personbeløp,
         data.er6GBegrenset,
-        when {
-            data.dekningsgrunnlag == null -> Økonomi.Tilstand.KunGrad
-            data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
-            else -> Økonomi.Tilstand.HarBeløp
-        }
+        Økonomi.Tilstand.KunGrad
     )
 
 internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) = Økonomi::class.primaryConstructor!!
@@ -118,8 +114,10 @@ internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) =
         data.arbeidsgiverbeløp,
         data.personbeløp,
         data.er6GBegrenset,
-        when (data.arbeidsgiverbeløp) {
-            null -> Økonomi.Tilstand.HarInntekt
+        when {
+            data.arbeidsgiverbeløp == null && data.type == UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.Låst
+            data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
+            data.type == UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.LåstMedBeløp
             else -> Økonomi.Tilstand.HarBeløp
         }
     )
