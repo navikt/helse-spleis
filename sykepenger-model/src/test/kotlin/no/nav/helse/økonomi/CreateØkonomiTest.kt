@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
+import no.nav.helse.serde.UtbetalingstidslinjeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.createØkonomi
 import no.nav.helse.testhelpers.januar
@@ -14,7 +15,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `opprette bare prosenter`() {
-        val data = økonomiData(79.5, 66.67)
+        val data = sykdomstidslinjedag(79.5, 66.67)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -30,7 +31,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `opprette med bare inntekt`() {
-        val data = økonomiData(79.5, 66.67, 1500.0, 1199.6)
+        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -49,7 +50,7 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = økonomiData(79.5, 66.67, 1500.0, 1199.6, 640, 320, true)
+        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640, 320, true)
         createØkonomi(data).also { økonomi ->
             økonomi.toMap().also { map ->
                 assertEquals(79.5, map["grad"])
@@ -66,7 +67,28 @@ internal class CreateØkonomiTest {
         }
     }
 
-    private fun økonomiData(
+    private fun utbetalingsdag(
+        grad: Double,
+        arbeidsgiverBetalingProsent: Double,
+        aktuellDagsinntekt: Double,
+        dekningsgrunnlag: Double,
+        arbeidsgiverbeløp: Int? = null,
+        personbeløp: Int? = null,
+        er6GBegrenset: Boolean = false
+    ) = UtbetalingstidslinjeData.UtbetalingsdagData(
+        UtbetalingstidslinjeData.TypeData.NavDag,
+        1.januar,
+        aktuellDagsinntekt,
+        dekningsgrunnlag,
+        null,
+        grad,
+        arbeidsgiverBetalingProsent,
+        arbeidsgiverbeløp,
+        personbeløp,
+        er6GBegrenset
+    )
+
+    private fun sykdomstidslinjedag(
         grad: Double,
         arbeidsgiverBetalingProsent: Double,
         aktuellDagsinntekt: Double? = null,

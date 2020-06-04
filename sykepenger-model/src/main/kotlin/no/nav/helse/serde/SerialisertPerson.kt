@@ -651,7 +651,6 @@ data class UtbetalingstidslinjeData(
         val dato: LocalDate,
         val aktuellDagsinntekt: Double,
         val dekningsgrunnlag: Double,
-        val utbetaling: Int?,
         val begrunnelse: BegrunnelseData?,
         val grad: Double?,
         val arbeidsgiverBetalingProsent: Double?,
