@@ -128,6 +128,39 @@ private const val personJson = """{
             ]
           }
         }
+      ],
+      "forkastede": [
+        {
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "ArbeidsgiverperiodeDag",
+                "dagsats": 1431,
+                "dato": "2018-01-01"
+              },
+              {
+                "type": "NavDag",
+                "dagsats": 1431,
+                "dato": "2018-01-17",
+                "utbetaling": 1431,
+                "grad": 100.0
+              },
+              {
+                "type": "NavDag",
+                "dagsats": 1431,
+                "dato": "2018-01-18",
+                "utbetaling": 1431,
+                "grad": 100.0
+              },
+              {
+                "type": "NavHelgDag",
+                "dagsats": 0,
+                "dato": "2018-01-20",
+                "grad": 100.0
+              }
+            ]
+          }
+        }
       ]
     }
   ]
@@ -263,6 +296,58 @@ private const val expectedPersonJson = """{
         }
       ],
       "vedtaksperioder": [
+        {
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "ArbeidsgiverperiodeDag",
+                "dato": "2018-01-01",
+                "grad": 0.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
+                "arbeidsgiverbeløp": 0,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              },
+              {
+                "type": "NavDag",
+                "dato": "2018-01-17",
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
+                "arbeidsgiverbeløp": 1431,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              },
+              {
+                "type": "NavDag",
+                "dato": "2018-01-18",
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 1431.0,
+                "aktuellDagsinntekt": 1431.0,
+                "arbeidsgiverbeløp": 1431,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              },
+              {
+                "type": "NavHelgDag",
+                "dato": "2018-01-20",
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0,
+                "dekningsgrunnlag": 0.0,
+                "aktuellDagsinntekt": 0.0,
+                "arbeidsgiverbeløp": 0,
+                "personbeløp": 0,
+                "er6GBegrenset": false
+              }
+            ]
+          }
+        }
+      ],
+      "forkastede": [
         {
           "utbetalingstidslinje": {
             "dager": [

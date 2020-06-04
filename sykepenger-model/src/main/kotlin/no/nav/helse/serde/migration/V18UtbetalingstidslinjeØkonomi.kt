@@ -17,6 +17,9 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 opprettØkonomi(utbetaling.path("utbetalingstidslinje").path("dager"))
             }
+            arbeidsgiver.path("forkastede").forEach { periode ->
+                opprettØkonomi(periode.path("utbetalingstidslinje").path("dager"))
+            }
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 opprettØkonomi(periode.path("utbetalingstidslinje").path("dager"))
             }
