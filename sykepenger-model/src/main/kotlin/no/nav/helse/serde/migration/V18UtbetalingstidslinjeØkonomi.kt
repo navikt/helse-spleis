@@ -33,7 +33,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
 
     private fun inntekthistorikk(dager: JsonNode) = Inntekthistorikk().also { historikk ->
         dager.forEach { dag ->
-            dag["dagsats"].intValue().also { lønn ->
+            dag.path("dagsats").asInt().also { lønn ->
                 if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.toBigDecimal())
             }
         }
@@ -42,14 +42,14 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     private fun opprettØkonomi(dag: ObjectNode, inntekthistorikk: Inntekthistorikk) {
         when(dag["type"].textValue()) {
             "Arbeidsdag" -> opprettMedInntekt(dag)
-            "ArbeidsgiverperiodeDag" -> opprett(dag, dag["dagsats"].intValue())
-            "AvvistDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
+            "ArbeidsgiverperiodeDag" -> opprett(dag, dag.path("dagsats").asInt())
+            "AvvistDag" -> opprett(dag, dag.path("dagsats").asInt(), dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
             "Fridag" -> opprettMedInntekt(dag)
             "ForeldetDag" -> opprettMedInntekt(dag)
-            "NavDag" -> opprett(dag, dag["dagsats"].intValue(), dag["grad"].doubleValue(), dag["utbetaling"].intValue())
-            "NavHelgDag" -> opprett(dag, grad = dag["grad"].doubleValue())
+            "NavDag" -> opprett(dag, dag.path("dagsats").asInt(), dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
+            "NavHelgDag" -> opprett(dag, grad = dag.path("grad").asDouble())
             "UkjentDag" -> opprett(dag)
-            else -> throw IllegalArgumentException("ukjent utbetalingsdagstype: ${dag["type"].textValue()}")
+            else -> throw IllegalArgumentException("ukjent utbetalingsdagstype: ${dag.path("type").asText()}")
         }
     }
 
