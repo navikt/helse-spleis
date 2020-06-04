@@ -488,7 +488,7 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverbeløp: Int,
             personbeløp: Int
         ) {
-            dager.add(NavDagReflect(dag, TypeData.NavDag).toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.NavDag).toMap())
         }
 
         override fun visit(
@@ -497,7 +497,7 @@ internal class JsonBuilder : PersonVisitor {
             økonomi: Økonomi,
             grad: Prosentdel
         ) {
-            dager.add(UtbetalingsdagMedGradReflect(dag, TypeData.NavHelgDag).toMap())
+            dager.add(UtbetalingsdagReflect(dag, TypeData.NavHelgDag).toMap())
         }
 
         override fun visit(

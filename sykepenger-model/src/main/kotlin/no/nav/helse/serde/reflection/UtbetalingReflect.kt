@@ -55,8 +55,8 @@ private class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbe
             when(it::class) {
                 Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()
                 ArbeidsgiverperiodeDag::class -> UtbetalingsdagReflect(it, TypeData.ArbeidsgiverperiodeDag).toMap()
-                NavDag::class -> NavDagReflect(it, TypeData.NavDag).toMap()
-                NavHelgDag::class -> UtbetalingsdagMedGradReflect(it, TypeData.NavHelgDag).toMap()
+                NavDag::class -> UtbetalingsdagReflect(it, TypeData.NavDag).toMap()
+                NavHelgDag::class -> UtbetalingsdagReflect(it, TypeData.NavHelgDag).toMap()
                 Fridag::class -> UtbetalingsdagReflect(it, TypeData.Fridag).toMap()
                 UkjentDag::class -> UtbetalingsdagReflect(it, TypeData.UkjentDag).toMap()
                 AvvistDag::class -> AvvistdagReflect(it as AvvistDag).toMap()
