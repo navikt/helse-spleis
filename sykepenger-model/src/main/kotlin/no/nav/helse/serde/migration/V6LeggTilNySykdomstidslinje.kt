@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.serde.mapping.JsonDagType
-import no.nav.helse.serde.mapping.JsonDagTypePreV10.*
+import no.nav.helse.serde.migration.V6LeggTilNySykdomstidslinje.JsonDagTypePreV10.*
 import java.util.*
 
 internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
@@ -148,5 +148,27 @@ internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
         SYK_HELGEDAG_SØKNAD -> JsonDagType.SYK_HELGEDAG
         UBESTEMTDAG -> JsonDagType.PROBLEMDAG
         UTENLANDSDAG -> JsonDagType.UTENLANDSDAG
+    }
+
+    private enum class JsonDagTypePreV10 {
+        ARBEIDSDAG_INNTEKTSMELDING,
+        ARBEIDSDAG_SØKNAD,
+        EGENMELDINGSDAG_INNTEKTSMELDING,
+        EGENMELDINGSDAG_SØKNAD,
+        FERIEDAG_INNTEKTSMELDING,
+        FERIEDAG_SØKNAD,
+        FRISK_HELGEDAG_INNTEKTSMELDING,
+        FRISK_HELGEDAG_SØKNAD,
+        FORELDET_SYKEDAG,
+        IMPLISITT_DAG,
+        PERMISJONSDAG_SØKNAD,
+        PERMISJONSDAG_AAREG,
+        STUDIEDAG,
+        SYKEDAG_SYKMELDING,
+        SYKEDAG_SØKNAD,
+        SYK_HELGEDAG_SYKMELDING,
+        SYK_HELGEDAG_SØKNAD,
+        UBESTEMTDAG,
+        UTENLANDSDAG
     }
 }
