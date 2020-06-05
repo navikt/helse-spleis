@@ -1,14 +1,18 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.serde.mapping.JsonDagType
-import no.nav.helse.serde.reflection.createØkonomi
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.util.*
 
 internal class CreateØkonomiTest {
@@ -96,10 +100,10 @@ internal class CreateØkonomiTest {
         arbeidsgiverbeløp: Int? = null,
         personbeløp: Int? = null,
         er6GBegrenset: Boolean = false
-    ) = DagData(
+    ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         1.januar,
         JsonDagType.SYKEDAG,
-        PersonData.ArbeidsgiverData.VedtaksperiodeData.KildeData("type", UUID.randomUUID()),
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID()),
         grad,
         arbeidsgiverBetalingProsent,
         aktuellDagsinntekt,
@@ -109,4 +113,40 @@ internal class CreateØkonomiTest {
         er6GBegrenset,
         null
     )
+
+    private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
+        lateinit var _økonomi: Økonomi
+        dagData.parseDag().accept(object : UtbetalingsdagVisitor {
+            override fun visit(
+                dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+                dato: LocalDate,
+                økonomi: Økonomi,
+                grad: Prosentdel,
+                aktuellDagsinntekt: Double,
+                dekningsgrunnlag: Double,
+                arbeidsgiverbeløp: Int,
+                personbeløp: Int
+            ) {
+                _økonomi = økonomi
+            }
+        })
+        return _økonomi
+    }
+
+    private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
+        lateinit var _økonomi: Økonomi
+        dagData.parseDag().accept(object : SykdomstidslinjeVisitor {
+            override fun visitDag(
+                dag: Dag.Sykedag,
+                dato: LocalDate,
+                økonomi: Økonomi,
+                grad: Prosentdel,
+                arbeidsgiverBetalingProsent: Prosentdel,
+                kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            ) {
+                _økonomi = økonomi
+            }
+        })
+        return _økonomi
+    }
 }
