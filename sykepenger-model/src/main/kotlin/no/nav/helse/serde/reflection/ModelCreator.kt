@@ -3,9 +3,9 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
+import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
-import no.nav.helse.serde.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
@@ -104,7 +104,7 @@ internal fun createØkonomi(data: DagData) = Økonomi::class.primaryConstructor!
         Økonomi.Tilstand.KunGrad
     )
 
-internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) = Økonomi::class.primaryConstructor!!
+internal fun createØkonomi(data: PersonData.UtbetalingstidslinjeData.UtbetalingsdagData) = Økonomi::class.primaryConstructor!!
     .apply { isAccessible = true }
     .call(
         data.grad?.prosent,
@@ -115,9 +115,9 @@ internal fun createØkonomi(data: UtbetalingstidslinjeData.UtbetalingsdagData) =
         data.personbeløp,
         data.er6GBegrenset,
         when {
-            data.arbeidsgiverbeløp == null && data.type == UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.Låst
+            data.arbeidsgiverbeløp == null && data.type == PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.Låst
             data.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
-            data.type == UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.LåstMedBeløp
+            data.type == PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag -> Økonomi.Tilstand.LåstMedBeløp
             else -> Økonomi.Tilstand.HarBeløp
         }
     )

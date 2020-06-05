@@ -2,7 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DagData
-import no.nav.helse.serde.UtbetalingstidslinjeData
+import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.reflection.createØkonomi
 import no.nav.helse.testhelpers.januar

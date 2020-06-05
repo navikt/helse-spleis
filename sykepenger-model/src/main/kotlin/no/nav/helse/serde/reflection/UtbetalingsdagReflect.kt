@@ -1,6 +1,6 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
+import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -8,7 +8,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Avv
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingsdag, private val type: TypeData) {
+internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingsdag, private val type: PersonData.UtbetalingstidslinjeData.TypeData) {
     private val dato: LocalDate = utbetalingsdag["dato"]
     private val økonomi: Økonomi = utbetalingsdag["økonomi"]
 
@@ -24,7 +24,7 @@ internal class AvvistdagReflect(avvistdag: AvvistDag) {
     private val begrunnelse: Begrunnelse = avvistdag["begrunnelse"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
-        "type" to TypeData.AvvistDag,
+        "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
         "dato" to dato,
         "begrunnelse" to begrunnelse.name
     ).also { it.putAll(økonomi.toMap()) }

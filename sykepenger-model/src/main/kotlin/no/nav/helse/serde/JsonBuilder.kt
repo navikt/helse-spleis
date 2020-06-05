@@ -3,7 +3,7 @@ package no.nav.helse.serde
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.serde.UtbetalingstidslinjeData.TypeData
+import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.mapping.JsonDagType.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Dag
