@@ -134,9 +134,9 @@ enum class TypeDataDTO {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
-    Helgedag,  // SpeilBuilder only code
+    Helgedag,   // SpeilBuilder only code breakout of Fridag
     Arbeidsdag,
-    Feriedag,
+    Feriedag,   // SpeilBuilder only code breakout of Fridag
     AvvistDag,
     UkjentDag,
     ForeldetDag
