@@ -52,7 +52,7 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese OK simulering" }
         hendelseMediator.reset()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.FEIL))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), TilstandType.START, SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL))
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese simulering med feil" }
         hendelseMediator.reset()
 

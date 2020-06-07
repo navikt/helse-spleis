@@ -224,7 +224,7 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Simulering" to mapOf(
                     "status" to status.name,
-                    "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) "" else "FEIL I SIMULERING",
+                    "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) null else "FEIL I SIMULERING",
                     "simulering" to if (status != SimuleringMessage.Simuleringstatus.OK) null else mapOf(
                         "gjelderId" to fødselsnummer,
                         "gjelderNavn" to "Korona",

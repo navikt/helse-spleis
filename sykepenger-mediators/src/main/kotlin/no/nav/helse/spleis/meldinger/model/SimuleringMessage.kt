@@ -14,10 +14,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val status = packet["@løsning.${Behovtype.Simulering.name}.status"].asText().let {
-        try { Simuleringstatus.valueOf(it) }
-        catch (err: IllegalArgumentException) { Simuleringstatus.UKJENT }
-    }
+    private val status = Simuleringstatus.valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
     private val simuleringOK = status == Simuleringstatus.OK
     private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText()
     private val simuleringResultat = packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
@@ -78,6 +75,6 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     }
 
     internal enum class Simuleringstatus {
-        OK, FEIL, OPPDRAG_UR_ER_STENGT, UKJENT
+        OK, FUNKSJONELL_FEIL, TEKNISK_FEIL, OPPDRAG_UR_ER_STENGT
     }
 }

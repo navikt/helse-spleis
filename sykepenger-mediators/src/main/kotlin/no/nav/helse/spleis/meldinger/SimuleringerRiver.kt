@@ -16,11 +16,14 @@ internal class SimuleringerRiver(
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Simulering.name}.status")
         packet.require("@løsning.${Simulering.name}") { løsning ->
+            packet.require("@løsning.${Simulering.name}.status") {
+                SimuleringMessage.Simuleringstatus.valueOf(it.asText())
+            }
             if (løsning["status"].asText() == "OK") {
                 packet.requireKey("@løsning.${Simulering.name}.simulering")
-                packet.interestedIn("@løsning.${Simulering.name}.feilmelding")
+                packet.forbid("@løsning.${Simulering.name}.feilmelding")
             } else {
-                packet.interestedIn("@løsning.${Simulering.name}.simulering")
+                packet.forbid("@løsning.${Simulering.name}.simulering")
                 packet.requireKey("@løsning.${Simulering.name}.feilmelding")
             }
         }
