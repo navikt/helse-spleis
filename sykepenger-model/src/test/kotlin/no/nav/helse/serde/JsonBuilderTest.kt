@@ -21,7 +21,7 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
 
-internal class JsonBuilderTest {
+class JsonBuilderTest {
 
     private val objectMapper = jacksonObjectMapper()
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -41,7 +41,7 @@ internal class JsonBuilderTest {
     private class VedtaksperiodeMixin
 
     @Test
-    internal fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
+    fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
         assertEquals(TilstandType.AVSLUTTET, tilstand)
         val personPre = objectMapper.writeValueAsString(person)

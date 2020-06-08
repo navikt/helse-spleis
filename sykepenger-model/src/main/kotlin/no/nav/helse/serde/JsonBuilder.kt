@@ -183,6 +183,9 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
 
+    override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
+        currentState.postVisitSykdomshistorikk(sykdomshistorikk)
+
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
@@ -554,22 +557,12 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
         }
 
-        private val sykdomshistorikkElementer = mutableListOf<MutableMap<String, Any?>>()
-
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            val sykdomshistorikkElementer = mutableListOf<MutableMap<String, Any?>>()
+            pushState(SykdomshistorikkState(sykdomshistorikkElementer))
             vedtaksperiodeMap["sykdomshistorikk"] = sykdomshistorikkElementer
         }
 
-        override fun preVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
-            id: UUID,
-            tidsstempel: LocalDateTime
-        ) {
-            val elementMap = mutableMapOf<String, Any?>()
-            sykdomshistorikkElementer.add(elementMap)
-
-            pushState(SykdomshistorikkElementState(id, tidsstempel, elementMap))
-        }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
@@ -588,6 +581,25 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int
         ) {
+            popState()
+        }
+    }
+
+    private inner class SykdomshistorikkState(
+        private val sykdomshistorikkElementer: MutableList<MutableMap<String, Any?>>
+    ) : JsonState {
+        override fun preVisitSykdomshistorikkElement(
+            element: Sykdomshistorikk.Element,
+            id: UUID,
+            tidsstempel: LocalDateTime
+        ) {
+            val elementMap = mutableMapOf<String, Any?>()
+            sykdomshistorikkElementer.add(elementMap)
+
+            pushState(SykdomshistorikkElementState(id, tidsstempel, elementMap))
+        }
+
+        override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             popState()
         }
     }

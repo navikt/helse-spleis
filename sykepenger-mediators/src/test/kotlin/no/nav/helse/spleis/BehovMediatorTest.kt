@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class BehovMediatorTest {
+class BehovMediatorTest {
 
     private companion object {
         private const val aktørId = "aktørId"
@@ -58,7 +58,7 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    internal fun `grupperer behov`() {
+    fun `grupperer behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -113,7 +113,7 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    internal fun `duplikatnøkler er ok når verdi er lik`(){
+    fun `duplikatnøkler er ok når verdi er lik`(){
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
