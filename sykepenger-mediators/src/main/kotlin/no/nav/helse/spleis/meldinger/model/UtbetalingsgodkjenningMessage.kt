@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Godkjenning-behov
@@ -12,8 +11,8 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val saksbehandler = packet.saksbehandler()
-    private val godkjenttidspunkt = packet.godkjenttidspunkt()
+    private val saksbehandler = packet["@løsning.${Godkjenning.name}.saksbehandlerIdent"].asText()
+    private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
 
     private val utbetalingsgodkjenning get() = Utbetalingsgodkjenning(
@@ -30,13 +29,3 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage
         mediator.behandle(this, utbetalingsgodkjenning)
     }
 }
-
-private fun JsonMessage.saksbehandler() =
-    (this["@løsning"][Godkjenning.name]["saksbehandlerIdent"]?.takeUnless { it.isMissingOrNull() } ?:
-    this["saksbehandlerIdent"])
-        .asText()
-
-private fun JsonMessage.godkjenttidspunkt() =
-    (this["@løsning"][Godkjenning.name]["godkjenttidspunkt"]?.takeUnless { it.isMissingOrNull() } ?:
-    this["godkjenttidspunkt"])
-        .asLocalDateTime()

@@ -90,12 +90,6 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestUtbetaling)
     }
 
-    @Test
-    internal fun `leser gammel løsning på godkjenning behov`(){
-        testRapid.sendTestMessage(meldingsfabrikk.lagGammelUtbetalingsgodkjenning(UUID.randomUUID(), TilstandType.START, true))
-        assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
-    }
-
     @BeforeEach
     internal fun reset() {
         testRapid.reset()

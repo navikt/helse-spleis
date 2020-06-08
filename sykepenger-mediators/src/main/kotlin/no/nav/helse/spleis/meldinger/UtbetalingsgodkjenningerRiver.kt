@@ -23,19 +23,3 @@ internal class UtbetalingsgodkjenningerRiver(
 
     override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(packet)
 }
-
-internal class GammelUtbetalingsgodkjenningerRiver(
-    rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
-) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(Godkjenning)
-    override val riverName = "Gammel utbetalingsgodkjenning"
-
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
-        packet.requireKey("saksbehandlerIdent")
-        packet.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
-    }
-
-    override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(packet)
-}

@@ -268,27 +268,6 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagGammelUtbetalingsgodkjenning(
-        vedtaksperiodeId: UUID,
-        tilstand: TilstandType,
-        utbetalingGodkjent: Boolean
-    ): String {
-        return lagBehovMedLøsning(
-            behov = listOf("Godkjenning"),
-            tilstand = tilstand,
-            vedtaksperiodeId = vedtaksperiodeId,
-            ekstraFelter = mapOf(
-                "saksbehandlerIdent" to "en_saksbehandler",
-                "godkjenttidspunkt" to LocalDateTime.now()
-            ),
-            løsninger = mapOf(
-                "Godkjenning" to mapOf(
-                    "godkjent" to utbetalingGodkjent
-                )
-            )
-        )
-    }
-
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,

@@ -26,7 +26,6 @@ internal class MessageMediator(
             UtbetalingshistorikkRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
-            GammelUtbetalingsgodkjenningerRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)
             UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)
