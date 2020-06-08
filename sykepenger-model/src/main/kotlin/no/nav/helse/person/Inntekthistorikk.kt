@@ -30,6 +30,8 @@ internal class Inntekthistorikk {
 
     internal fun inntekt(dato: LocalDate) = Inntekt.inntekt(inntekter, dato)
 
+    internal fun sykepengegrunnlag(dato: LocalDate) = Inntekt.sykepengegrunnlag(inntekter, dato)
+
     internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
         aktuellDagsinntekt(dato) * regler.dekningsgrad()
 

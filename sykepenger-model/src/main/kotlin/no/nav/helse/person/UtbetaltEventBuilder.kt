@@ -10,11 +10,14 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
     aktørId: String,
     fødselnummer: String,
     orgnummer: String,
+    sykepengegrunnlag: Double,
     sykdomshistorikk: Sykdomshistorikk,
     utbetaling: Utbetaling,
     periode: Periode,
@@ -25,6 +28,7 @@ internal fun tilUtbetaltEvent(
     fødselnummer = fødselnummer,
     orgnummer = orgnummer,
     sykdomshistorikk = sykdomshistorikk,
+    sykepengegrunnlag = sykepengegrunnlag,
     utbetaling = utbetaling,
     periode = periode,
     forbrukteSykedager = forbrukteSykedager,
@@ -36,12 +40,14 @@ private class UtbetaltEventBuilder(
     private val fødselnummer: String,
     private val orgnummer: String,
     sykdomshistorikk: Sykdomshistorikk,
+    sykepengegrunnlag: Double,
     utbetaling: Utbetaling,
     private val periode: Periode,
     private val forbrukteSykedager: Int,
     private var gjenståendeSykedager: Int
 ) : ArbeidsgiverVisitor {
     private lateinit var opprettet: LocalDateTime
+    private val dagsats = (sykepengegrunnlag / 260).roundToInt()
     private val hendelser = mutableSetOf<UUID>()
     private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt>()
     private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje>()
@@ -120,7 +126,7 @@ private class UtbetaltEventBuilder(
             PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                dagsats = aktuellDagsinntekt,
+                dagsats = min(aktuellDagsinntekt, this.dagsats),
                 beløp = beløp,
                 grad = grad,
                 sykedager = linje.filterNot { it.erHelg() }.count()

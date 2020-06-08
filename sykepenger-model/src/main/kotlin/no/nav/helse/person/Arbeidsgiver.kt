@@ -159,6 +159,8 @@ internal class Arbeidsgiver private constructor(
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)
 
+    internal fun sykepengegrunnlag(dato: LocalDate): Double? = inntekthistorikk.sykepengegrunnlag(dato)
+
     internal fun forkastPerioder(hendelse: ArbeidstakerHendelse) {
         hendelse.kontekst(this)
         perioder.toList().forEach { it.forkast(hendelse) }

@@ -443,12 +443,17 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
 
     private fun sendUtbetaltEvent() {
+        val førsteFraværsdag =
+            requireNotNull(førsteFraværsdag) { "Forventet førsteFraværsdag ved opprettelse av utbetalt-event" }
+        val sykepengegrunnlag =
+            requireNotNull(arbeidsgiver.sykepengegrunnlag(førsteFraværsdag)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
         person.vedtaksperiodeUtbetalt(
             tilUtbetaltEvent(
                 aktørId = aktørId,
                 fødselnummer = fødselsnummer,
                 orgnummer = organisasjonsnummer,
                 utbetaling = utbetaling(),
+                sykepengegrunnlag = sykepengegrunnlag,
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
                 sykdomshistorikk = sykdomshistorikk,
