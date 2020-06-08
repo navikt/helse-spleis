@@ -1,9 +1,11 @@
 package no.nav.helse.person
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
+import kotlin.math.min
 
 internal class Inntekthistorikk {
     private val inntekter = mutableListOf<Inntekt>()
@@ -46,6 +48,11 @@ internal class Inntekthistorikk {
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
                 (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
+
+            internal fun sykepengegrunnlag(inntekter: List<Inntekt>, dato: LocalDate): Double? =
+                inntekt(inntekter, dato)?.toDouble()?.let {
+                    min(it * 12, Grunnbeløp.`6G`.beløp(dato))
+                }
         }
 
         internal fun fom() = fom

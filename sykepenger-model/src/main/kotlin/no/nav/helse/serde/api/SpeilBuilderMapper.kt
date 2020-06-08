@@ -186,6 +186,7 @@ internal fun mapVilkår(
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
+    val sykepengegrunnlag = Inntekthistorikk.Inntekt.sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
     val beregnetMånedsinntekt = Inntekthistorikk.Inntekt.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = SpleisAlder(fødselsnummer)
@@ -225,9 +226,9 @@ internal fun mapVilkår(
             oppfylt = søknadsfristOppfylt(it)
         )
     }
-    val sykepengegrunnlag = førsteFraværsdag?.let {
+    val sykepengegrunnlagDTO = førsteFraværsdag?.let {
         SykepengegrunnlagDTO(
-            sykepengegrunnlag = beregnetMånedsinntekt?.times(12),
+            sykepengegrunnlag = sykepengegrunnlag,
             grunnbeløp = `1G`.beløp(førsteFraværsdag).toInt(),
             oppfylt = sykepengegrunnlagOppfylt(
                 over67 = over67,
@@ -236,7 +237,7 @@ internal fun mapVilkår(
             )
         )
     }
-    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlag)
+    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO)
 }
 
 private fun sykepengegrunnlagOppfylt(
