@@ -36,8 +36,10 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
     internal fun toMap() = mutableMapOf<String, Any?>(
         "fom" to utbetalingslinje.get<LocalDate>("fom").toString(),
         "tom" to utbetalingslinje.get<LocalDate>("tom").toString(),
-        "dagsats" to utbetalingslinje["dagsats"],
-        "lønn" to utbetalingslinje["lønn"],
+        "dagsats" to utbetalingslinje["beløp"],           // TODO: change "dagsats" to "beløp",
+                                                          //    but needs JSON migration and change in Need apps
+        "lønn" to utbetalingslinje["aktuellDagsinntekt"], // TODO: change "lønn" to "aktuellDagsinntekt",
+                                                          //    but needs JSON migration and change in Need apps
         "grad" to utbetalingslinje["grad"],
         "refFagsystemId" to utbetalingslinje["refFagsystemId"],
         "delytelseId" to utbetalingslinje["delytelseId"],

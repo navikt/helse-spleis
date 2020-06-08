@@ -146,7 +146,7 @@ internal class OppdragBuilderTest {
         fom: LocalDate,
         tom: LocalDate,
         refFagsystemId: String? = oppdrag.fagsystemId(),
-        sats: Int = oppdrag[index].dagsats,
+        sats: Int = oppdrag[index].beløp,
         grad: Double = oppdrag[index].grad,
         delytelseId: Int = oppdrag[index]["delytelseId"],
         refDelytelseId: Int? = oppdrag[index]["refDelytelseId"]
@@ -154,7 +154,7 @@ internal class OppdragBuilderTest {
         assertEquals(fom, oppdrag[index].fom)
         assertEquals(tom, oppdrag[index].tom)
         assertEquals(grad, oppdrag[index].grad)
-        assertEquals(sats, oppdrag[index].dagsats)
+        assertEquals(sats, oppdrag[index].beløp)
         assertEquals(delytelseId, oppdrag[index]["delytelseId"])
         assertEquals(refDelytelseId, oppdrag[index].get<Int?>("refDelytelseId"))
         assertEquals(refFagsystemId, oppdrag[index].refFagsystemId)

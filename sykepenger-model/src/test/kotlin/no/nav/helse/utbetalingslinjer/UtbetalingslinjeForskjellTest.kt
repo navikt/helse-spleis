@@ -539,7 +539,7 @@ internal class UtbetalingslinjeForskjellTest {
         (expected zip actual).forEach { (a, b) ->
             assertEquals(a.fom, b.fom, "fom stemmer ikke overens")
             assertEquals(a.tom, b.tom, "tom stemmer ikke overens")
-            assertEquals(a.dagsats, b.dagsats, "dagsats stemmer ikke overens")
+            assertEquals(a.beløp, b.beløp, "dagsats stemmer ikke overens")
             assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
         }
     }

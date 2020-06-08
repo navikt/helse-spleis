@@ -11,8 +11,8 @@ import kotlin.streams.toList
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
-    internal var dagsats: Int, //TODO: arbeidsgiverbeløp || personbeløp
-    internal var lønn: Int, //TODO: aktuellDagsinntekt
+    internal var beløp: Int, //TODO: arbeidsgiverbeløp || personbeløp
+    internal var aktuellDagsinntekt: Int,
     internal val grad: Double,
     internal var refFagsystemId: String? = null,
     private var delytelseId: Int = 1,
@@ -33,8 +33,8 @@ internal class Utbetalingslinje internal constructor(
             this,
             fom,
             tom,
-            dagsats,
-            lønn,
+            beløp,
+            aktuellDagsinntekt,
             grad,
             delytelseId,
             refDelytelseId,
@@ -49,7 +49,7 @@ internal class Utbetalingslinje internal constructor(
         this.refDelytelseId = other.delytelseId
     }
 
-    internal fun totalbeløp() = dagsats * antallDager()
+    internal fun totalbeløp() = beløp * antallDager()
 
     internal fun dager() = fom
         .datesUntil(tom.plusDays(1))
@@ -63,18 +63,18 @@ internal class Utbetalingslinje internal constructor(
     private fun equals(other: Utbetalingslinje) =
         this.fom == other.fom &&
             this.tom == other.tom &&
-            this.dagsats == other.dagsats &&
+            this.beløp == other.beløp &&
             this.grad == other.grad
 
     internal fun kunTomForskjelligFra(other: Utbetalingslinje) =
         this.fom == other.fom &&
-            this.dagsats == other.dagsats &&
+            this.beløp == other.beløp &&
             this.grad == other.grad
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
             tom.hashCode() * 17 +
-            dagsats.hashCode() * 41 +
+            beløp.hashCode() * 41 +
             grad.hashCode() * 61 +
             endringskode.name.hashCode() * 59 +
             datoStatusFom.hashCode() * 23
@@ -102,8 +102,8 @@ internal class Utbetalingslinje internal constructor(
         Utbetalingslinje(
             fom = fom,
             tom = tom,
-            dagsats = dagsats,
-            lønn = lønn,
+            beløp = beløp,
+            aktuellDagsinntekt = aktuellDagsinntekt,
             grad = grad,
             refFagsystemId = null,
             delytelseId = delytelseId,

@@ -566,7 +566,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                         UtbetalingerDTO.UtbetalingslinjeDTO(
                             fom = linje.fom,
                             tom = linje.tom,
-                            dagsats = linje.dagsats,
+                            dagsats = linje.beløp,
                             grad = linje.grad
                         )
                     }

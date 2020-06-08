@@ -106,8 +106,8 @@ private class UtbetaltEventBuilder(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        dagsats: Int,
-        lønn: Int,
+        beløp: Int,
+        aktuellDagsinntekt: Int,
         grad: Double,
         delytelseId: Int,
         refDelytelseId: Int?,
@@ -120,8 +120,8 @@ private class UtbetaltEventBuilder(
             PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                dagsats = lønn,
-                beløp = dagsats,
+                dagsats = aktuellDagsinntekt,
+                beløp = beløp,
                 grad = grad,
                 sykedager = linje.filterNot { it.erHelg() }.count()
             )

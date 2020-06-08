@@ -29,7 +29,7 @@ internal class OppdragBuilder(
     }
 
     internal fun result(): Oppdrag {
-        arbeisdsgiverLinjer.removeAll { it.dagsats == 0 }
+        arbeisdsgiverLinjer.removeAll { it.beløp == 0 }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
         return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
@@ -48,7 +48,7 @@ internal class OppdragBuilder(
         personbeløp: Int
     ) {
         if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
-        if (grad.toDouble() == linje.grad && (linje.dagsats == 0 || linje.dagsats == dagStrategy(dag)))
+        if (grad.toDouble() == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag)))
             tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
         else
             tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -253,8 +253,8 @@ internal class OppdragBuilder(
             grad: Prosentdel,
             aktuellDagsinntekt: Double
         ) {
-            linje.dagsats = dagStrategy(dag)
-            linje.lønn = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
+            linje.beløp = dagStrategy(dag)
+            linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
         }
