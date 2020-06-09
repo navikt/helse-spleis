@@ -47,7 +47,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
 }
 
 internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, UtbetalingsdagVisitor {
-    fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {}
+    fun preVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, periode: Periode) {}
     fun visitMaksdato(maksdato: LocalDate?) {}
     fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
@@ -59,7 +59,7 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {}
-    fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {}
+    fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, gruppeId: UUID, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, periode: Periode) {}
 }
 
 internal interface UtbetalingsdagVisitor {

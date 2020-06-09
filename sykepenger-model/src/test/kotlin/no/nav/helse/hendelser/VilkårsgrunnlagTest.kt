@@ -149,7 +149,8 @@ internal class VilkårsgrunnlagTest {
                 id: UUID,
                 gruppeId: UUID,
                 arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int
+                personNettoBeløp: Int,
+                periode: Periode
             ) {
                 _id = id
             }

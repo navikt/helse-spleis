@@ -176,9 +176,10 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -228,9 +229,10 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -413,9 +415,12 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int
+            personNettoBeløp: Int,
+            periode: Periode
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
+            vedtaksperiodeMap["fom"] = periode.start
+            vedtaksperiodeMap["tom"] = periode.endInclusive
             vedtaksperioder.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
 
@@ -579,7 +584,8 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int
+            personNettoBeløp: Int,
+            periode: Periode
         ) {
             popState()
         }

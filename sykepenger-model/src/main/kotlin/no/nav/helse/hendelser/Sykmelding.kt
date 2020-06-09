@@ -30,6 +30,8 @@ class Sykmelding(
             }
     }
 
+    override fun periode() = Periode(fom = sykdomstidslinje.førsteDag(), tom = sykdomstidslinje.sisteDag())
+
     override fun valider(periode: Periode) = aktivitetslogg  // No invalid possibilities if passed init block
 
     override fun melding(klassName: String) = "Sykmelding"

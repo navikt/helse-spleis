@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
@@ -93,7 +94,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
@@ -120,7 +122,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) {
         inVedtaksperiode = false
     }

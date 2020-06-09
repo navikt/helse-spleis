@@ -14,6 +14,8 @@ abstract class SykdomstidslinjeHendelse(
     private val meldingsreferanseId: UUID,
     melding: Melding? = null
 ) : ArbeidstakerHendelse() {
+    private var forrigeTom: LocalDate? = null
+
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId)
 
     internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
@@ -39,9 +41,19 @@ abstract class SykdomstidslinjeHendelse(
         "id" to "$meldingsreferanseId"
     )
 
-    internal abstract fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje
-
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
+
+    internal open fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
+        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
+
+        return (forrigeTom?.let { sykdomstidslinje().subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje().kutt(tom))
+            .also { trimLeft(tom) }
+            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
+    }
+
+    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
+
+    internal open fun periode() = Periode(forrigeTom?.plusDays(1) ?: sykdomstidslinje().førsteDag(), sykdomstidslinje().sisteDag())
 
     internal abstract fun valider(periode: Periode): Aktivitetslogg
 

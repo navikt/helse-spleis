@@ -204,7 +204,8 @@ class JsonBuilderTest {
                     id: UUID,
                     gruppeId: UUID,
                     arbeidsgiverNettoBeløp: Int,
-                    personNettoBeløp: Int
+                    personNettoBeløp: Int,
+                    periode: Periode
                 ) {
                     vedtaksperiodeId = id.toString()
                 }

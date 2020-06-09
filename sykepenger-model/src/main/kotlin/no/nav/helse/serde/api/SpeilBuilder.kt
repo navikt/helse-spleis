@@ -192,9 +192,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) {
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
     }
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -238,9 +239,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int
+        personNettoBeløp: Int,
+        periode: Periode
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp)
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
     override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = currentState.visitDag(dag, dato, kilde)
@@ -399,7 +401,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int
+            personNettoBeløp: Int,
+            periode: Periode
         ) {
             pushState(
                 VedtaksperiodeState(
@@ -529,7 +532,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int
+            personNettoBeløp: Int,
+            periode: Periode
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
             vedtaksperiodeMap["utbetalinger"] = byggUtbetalingerForPeriode()

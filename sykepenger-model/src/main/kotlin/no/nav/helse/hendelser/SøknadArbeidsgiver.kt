@@ -19,7 +19,6 @@ class SøknadArbeidsgiver constructor(
 
     private val fom: LocalDate
     private val tom: LocalDate
-    private var forrigeTom: LocalDate? = null
     private val sykdomstidslinje: Sykdomstidslinje
 
     init {
@@ -30,17 +29,7 @@ class SøknadArbeidsgiver constructor(
         sykdomstidslinje = perioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
     }
 
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return forrigeTom?.let { sykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje.kutt(tom)
-            .also { trimLeft(tom) }
-            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
-    }
-
     override fun sykdomstidslinje() = sykdomstidslinje
-
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
     override fun fødselsnummer() = fnr
 

@@ -473,7 +473,8 @@ internal class SpeilBuilderTest {
                 id: UUID,
                 gruppeId: UUID,
                 arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int
+                personNettoBeløp: Int,
+                periode: Periode
             ) {
                 add(id.toString())
             }
@@ -653,7 +654,8 @@ internal class SpeilBuilderTest {
                     id: UUID,
                     gruppeId: UUID,
                     arbeidsgiverNettoBeløp: Int,
-                    personNettoBeløp: Int
+                    personNettoBeløp: Int,
+                    periode: Periode
                 ) {
                     vedtaksperiodeId = id.toString()
                 }

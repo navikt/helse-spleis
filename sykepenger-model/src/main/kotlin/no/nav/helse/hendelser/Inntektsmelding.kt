@@ -26,7 +26,6 @@ class Inntektsmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
-    private var forrigeTom: LocalDate? = null
 
     private val beste = { venstre: Dag, høyre: Dag ->
         when {
@@ -71,16 +70,6 @@ class Inntektsmelding(
     private fun Periode.asFerietidslinje() = Sykdomstidslinje.feriedager(start, endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
-
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
-
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return (forrigeTom?.let { sykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje.kutt(tom))
-            .also { trimLeft(tom) }
-            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til inntektsmeldingen") }
-    }
 
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {

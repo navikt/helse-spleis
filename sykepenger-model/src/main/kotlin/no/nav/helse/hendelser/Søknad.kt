@@ -23,7 +23,6 @@ class Søknad constructor(
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
-    private var forrigeTom: LocalDate? = null
 
     private companion object {
         private const val tidslinjegrense = 16L
@@ -39,17 +38,7 @@ class Søknad constructor(
             .merge(søknadDagturnering::beste)
     }
 
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return (forrigeTom?.let { sykdomstidslinje.subset(Periode(it.plusDays(1), tom))} ?: sykdomstidslinje.kutt(tom))
-            .also { trimLeft(tom) }
-            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
-    }
-
     override fun sykdomstidslinje() = sykdomstidslinje
-
-    internal fun trimLeft(dato: LocalDate) { forrigeTom = dato }
 
     override fun fødselsnummer() = fnr
 

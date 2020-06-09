@@ -33,6 +33,8 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
         return start.format(formatter) + " til " + endInclusive.format(formatter)
     }
 
+    internal fun oppdaterFom(other: Periode) = Periode(arrayOf(other.start, start).min()!!, endInclusive)
+
     override fun equals(other: Any?) =
         other is Periode && this.equals(other)
 
