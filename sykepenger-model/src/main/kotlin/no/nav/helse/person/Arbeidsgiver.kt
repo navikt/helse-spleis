@@ -1,7 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import java.math.BigDecimal
@@ -13,6 +15,7 @@ internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
+    private val sykdomshistorikk: Sykdomshistorikk,
     private val perioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<Vedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>
@@ -25,6 +28,7 @@ internal class Arbeidsgiver private constructor(
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
+        sykdomshistorikk = Sykdomshistorikk(),
         perioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf()
@@ -33,6 +37,7 @@ internal class Arbeidsgiver private constructor(
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntekthistorikk.accept(visitor)
+        sykdomshistorikk.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -63,26 +68,46 @@ internal class Arbeidsgiver private constructor(
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             Vedtaksperiode.sorter(perioder)
         }
+        validation(sykmelding) {
+            onSuccess {
+                sykdomshistorikk.nyHåndter(sykmelding)
+            }
+        }
     }
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        if (perioder.toList().map { it.håndter(søknad) }.none { it }) {
-            søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
+        validation(søknad) {
+            valider("Forventet ikke søknad. Har nok ikke mottatt sykmelding") {
+                perioder.toList().map { it.håndter(søknad) }.any { it }
+            }
+            onSuccess {
+                sykdomshistorikk.nyHåndter(søknad)
+            }
         }
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         søknad.kontekst(this)
-        if (perioder.toList().map { it.håndter(søknad) }.none { it }) {
-            søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
+        validation(søknad) {
+            valider("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding") {
+                perioder.toList().map { it.håndter(søknad) }.any { it }
+            }
+            onSuccess {
+                sykdomshistorikk.nyHåndter(søknad)
+            }
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        if (perioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
-            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+        validation(inntektsmelding) {
+            valider("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding") {
+                perioder.toList().map { it.håndter(inntektsmelding) }.any { it }
+            }
+            onSuccess {
+                sykdomshistorikk.nyHåndter(inntektsmelding)
+            }
         }
     }
 

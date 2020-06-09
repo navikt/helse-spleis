@@ -126,6 +126,7 @@ internal data class PersonData(
         private val organisasjonsnummer: String,
         private val id: UUID,
         private val inntekter: List<InntektData>,
+        private val sykdomshistorikk: List<SykdomshistorikkData>?, // TODO: Remove this whenever the migration is in place
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<VedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
@@ -133,6 +134,7 @@ internal data class PersonData(
         private val modelInntekthistorikk = Inntekthistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
         }
+        private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk ?: emptyList())
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = mutableListOf<Vedtaksperiode>()
         private val modelUtbetalinger = mutableListOf<Utbetaling>().apply {
@@ -146,7 +148,7 @@ internal data class PersonData(
         ): Arbeidsgiver {
             val arbeidsgiver = Arbeidsgiver::class.primaryConstructor!!
                 .apply { isAccessible = true }
-                .call(person, organisasjonsnummer, id, modelInntekthistorikk, vedtaksperiodeliste, forkastedeliste, modelUtbetalinger)
+                .call(person, organisasjonsnummer, id, modelInntekthistorikk, modelSykdomshistorikk, vedtaksperiodeliste, forkastedeliste, modelUtbetalinger)
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
                 it.parseVedtaksperiode(
@@ -403,32 +405,6 @@ internal data class PersonData(
                 TilstandType.AVVENTER_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerUferdigForlengelse
             }
 
-            data class SykdomshistorikkData(
-                private val tidsstempel: LocalDateTime,
-                private val hendelseId: UUID,
-                private val hendelseSykdomstidslinje: SykdomstidslinjeData,
-                private val beregnetSykdomstidslinje: SykdomstidslinjeData
-            ) {
-
-                internal companion object {
-                    internal fun parseSykdomshistorikk(data: List<ArbeidsgiverData.VedtaksperiodeData.SykdomshistorikkData>) =
-                        Sykdomshistorikk::class.primaryConstructor!!
-                            .apply { isAccessible = true }
-                            .call(data.map { it.parseSykdomshistorikk() })
-                }
-
-                internal fun parseSykdomshistorikk(): Sykdomshistorikk.Element {
-                    return Sykdomshistorikk.Element::class.primaryConstructor!!
-                        .apply { isAccessible = true }
-                        .call(
-                            hendelseId,
-                            tidsstempel,
-                            hendelseSykdomstidslinje.parseSykdomstidslinje(),
-                            beregnetSykdomstidslinje.parseSykdomstidslinje()
-                        )
-                }
-            }
-
             data class DataForVilkårsvurderingData(
                 private val erEgenAnsatt: Boolean,
                 private val beregnetÅrsinntektFraInntektskomponenten: Double,
@@ -544,6 +520,32 @@ internal data class PersonData(
                     val navn: String
                 )
             }
+        }
+    }
+
+    data class SykdomshistorikkData(
+        private val tidsstempel: LocalDateTime,
+        private val hendelseId: UUID,
+        private val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
+        private val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
+    ) {
+
+        internal companion object {
+            internal fun parseSykdomshistorikk(data: List<SykdomshistorikkData>) =
+                Sykdomshistorikk::class.primaryConstructor!!
+                    .apply { isAccessible = true }
+                    .call(data.map { it.parseSykdomshistorikk() }.toMutableList())
+        }
+
+        internal fun parseSykdomshistorikk(): Sykdomshistorikk.Element {
+            return Sykdomshistorikk.Element::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(
+                    hendelseId,
+                    tidsstempel,
+                    hendelseSykdomstidslinje.parseSykdomstidslinje(),
+                    beregnetSykdomstidslinje.parseSykdomstidslinje()
+                )
         }
     }
 

@@ -27,6 +27,12 @@ internal class Sykdomshistorikk private constructor(
         )
     }
 
+    internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse) {
+        elementer.add(
+            0, Element.opprett(this, hendelse)
+        )
+    }
+
     internal fun accept(visitor: SykdomshistorikkVisitor) {
         visitor.preVisitSykdomshistorikk(this)
         elementer.forEach { it.accept(visitor) }
@@ -65,6 +71,20 @@ internal class Sykdomshistorikk private constructor(
         companion object {
 
             fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+
+            fun opprett(historikk: Sykdomshistorikk,
+                          hendelse: SykdomstidslinjeHendelse): Element {
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
+                return Element(
+                    hendelseId = hendelse.meldingsreferanseId(),
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                    beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                        hendelse,
+                        hendelseSykdomstidslinje
+                    )
+                )
+            }
 
             fun opprett(
                 historikk: Sykdomshistorikk,

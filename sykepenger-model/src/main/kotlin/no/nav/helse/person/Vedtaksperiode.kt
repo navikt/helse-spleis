@@ -272,6 +272,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
         arbeidsgiver.addInntekt(hendelse)
+        hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
         sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag

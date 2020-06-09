@@ -172,6 +172,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        if (!inVedtaksperiode) return
         sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
         this.sykdomshistorikk = sykdomshistorikk
         if(!sykdomshistorikk.isEmpty())

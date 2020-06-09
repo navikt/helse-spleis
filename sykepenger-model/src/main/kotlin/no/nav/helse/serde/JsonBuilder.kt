@@ -374,6 +374,12 @@ internal class JsonBuilder : PersonVisitor {
             pushState(InntektHistorieState(inntekter))
         }
 
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            val sykdomshistorikkList = mutableListOf<MutableMap<String, Any?>>()
+            arbeidsgiverMap["sykdomshistorikk"] = sykdomshistorikkList
+            pushState(SykdomshistorikkState(sykdomshistorikkList))
+        }
+
         private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {

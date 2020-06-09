@@ -5,7 +5,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDate
 
 internal class Validation private constructor(private val hendelse: ArbeidstakerHendelse) {
-    private lateinit var errorBlock: () -> Unit
+    private var errorBlock: () -> Unit = {}
 
     internal companion object {
         internal fun validation(hendelse: ArbeidstakerHendelse, block: Validation.() -> Unit) {
