@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
+import no.nav.helse.serde.migration.V17ForkastedePerioder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -23,7 +24,8 @@ data class AktivitetDTO(
 data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
-    val vedtaksperioder: List<VedtaksperiodeDTOBase>
+    val vedtaksperioder: List<VedtaksperiodeDTOBase>,
+    val forkastedePerioder: List<VedtaksperiodeDTOBase>
 )
 
 data class VedtaksperiodeDTO(

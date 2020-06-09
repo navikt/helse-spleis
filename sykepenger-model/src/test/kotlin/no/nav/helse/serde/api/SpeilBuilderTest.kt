@@ -1,10 +1,12 @@
 package no.nav.helse.serde.api
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.SpeilDagtype
+import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.*
@@ -452,6 +454,15 @@ internal class SpeilBuilderTest {
     }
 
     @Test
+    fun `Skal ta med forkastede vedtaksperioder`() {
+        val (person, hendelser) = tilbakerulletPerson()
+        person.aktivitetslogg.toString()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
+        assertEquals(2, personDTO.arbeidsgivere.first().forkastedePerioder.size)
+    }
+
+    @Test
     fun `Sender unike advarsler per periode`() {
         val (person, hendelser) = personMedToAdvarsler(fom = 1.januar(2018), tom = 31.januar(2018))
 
@@ -523,7 +534,6 @@ internal class SpeilBuilderTest {
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
 
                     påfølgendePerioder.forEach { periode ->
-
                         sykmelding(fom = periode.start, tom = periode.endInclusive).also { (sykmelding, sykmeldingDTO) ->
                             håndter(sykmelding)
                             add(sykmeldingDTO)
@@ -547,6 +557,81 @@ internal class SpeilBuilderTest {
                     }
                 }
             }
+
+        private fun tilbakerulletPerson(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+                fangeVedtaksperiodeId()
+                søknad(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sendtSøknad = 1.april.atStartOfDay()
+                ).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+
+                sykmelding(fom = 1.februar, tom = 28.februar).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+                fangeVedtaksperiodeId()
+                søknad(
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sendtSøknad = 1.april.atStartOfDay()
+                ).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.februar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingGodkjent = false))
+
+                sykmelding(fom = 1.mars, tom = 31.mars).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+                fangeVedtaksperiodeId()
+                søknad(
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    sendtSøknad = 1.april.atStartOfDay()
+                ).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.mars).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+            }
+        }
 
         private fun personMedToAdvarsler(
             fom: LocalDate = 1.januar,
@@ -649,6 +734,15 @@ internal class SpeilBuilderTest {
 
         private fun Person.fangeVedtaksperiodeId() {
             accept(object : PersonVisitor {
+                var iPeriode = false
+
+                override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+                    iPeriode = true
+                }
+
+                override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+                    iPeriode = false
+                }
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
@@ -657,7 +751,7 @@ internal class SpeilBuilderTest {
                     personNettoBeløp: Int,
                     periode: Periode
                 ) {
-                    vedtaksperiodeId = id.toString()
+                    if (iPeriode) vedtaksperiodeId = id.toString()
                 }
             })
         }
@@ -820,12 +914,12 @@ internal class SpeilBuilderTest {
             )
         }
 
-        private fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
+        private fun utbetalingsgodkjenning(vedtaksperiodeId: String, utbetalingGodkjent: Boolean = true) = Utbetalingsgodkjenning(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
-            utbetalingGodkjent = true,
+            utbetalingGodkjent = utbetalingGodkjent,
             saksbehandler = "en_saksbehandler_ident",
             godkjenttidspunkt = LocalDateTime.now()
         )

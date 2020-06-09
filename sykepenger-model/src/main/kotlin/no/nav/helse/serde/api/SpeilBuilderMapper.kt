@@ -56,7 +56,8 @@ internal fun MutableMap<String, Any?>.mapTilPersonDto() = PersonDTO(
 internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
     organisasjonsnummer = this["organisasjonsnummer"] as String,
     id = this["id"] as UUID,
-    vedtaksperioder = this["vedtaksperioder"] as List<VedtaksperiodeDTO>
+    vedtaksperioder = this["vedtaksperioder"] as List<VedtaksperiodeDTO>,
+    forkastedePerioder = this["forkastedePerioder"] as List<VedtaksperiodeDTO>
 )
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(

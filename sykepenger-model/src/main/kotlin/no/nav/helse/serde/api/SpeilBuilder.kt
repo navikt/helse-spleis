@@ -187,6 +187,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitPerioder(vedtaksperioder)
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitPerioder(vedtaksperioder)
+    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitForkastedePerioder(vedtaksperioder)
+    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitForkastedePerioder(vedtaksperioder)
+
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -392,6 +395,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
         }
 
+        override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            this.vedtaksperioder.clear()
+        }
+
+        override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            arbeidsgiverMap["forkastedePerioder"] = this.vedtaksperioder.toList()
+        }
+
         override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
             inntekter.add(inntekt)
         }
@@ -439,7 +450,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                         } else {
                             vedtaksperiode
                         }
-                    }
+                    },
+                forkastedePerioder = arbeidsgiverDTO.forkastedePerioder
             )
 
             arbeidsgivere.add(mappedeArbeidsgivere)
