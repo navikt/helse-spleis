@@ -13,6 +13,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
@@ -23,7 +24,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar(2020), 3.januar(2020), 50))
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
-        håndterSøknad(Sykdom(13.januar(2020),  17.januar(2020), 100))
+        håndterSøknad(Sykdom(13.januar(2020), 17.januar(2020), 100))
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
     }
 
@@ -33,13 +34,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(6.januar(2020), 10.januar(2020), 100))
         håndterSykmelding(Triple(13.januar(2020), 17.januar(2020), 100))
         håndterSøknad(
-            Sykdom(13.januar(2020),  17.januar(2020), 100),
+            Sykdom(13.januar(2020), 17.januar(2020), 100),
             Egenmelding(30.desember(2019), 31.desember(2019))
         )
         håndterSykmelding(Triple(18.januar(2020), 26.januar(2020), 100))
-        håndterSøknad(Sykdom(18.januar(2020),  26.januar(2020), 100))
+        håndterSøknad(Sykdom(18.januar(2020), 26.januar(2020), 100))
         håndterSykmelding(Triple(27.januar(2020), 30.januar(2020), 100))
-        håndterSøknad(Sykdom(27.januar(2020),  30.januar(2020), 100))
+        håndterSøknad(Sykdom(27.januar(2020), 30.januar(2020), 100))
         håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
         håndterSykmelding(Triple(30.januar(2020), 14.februar(2020), 100))
         håndterInntektsmelding(
@@ -59,7 +60,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ), førsteFraværsdag = 13.januar(2020)
         )
 
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -79,12 +81,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE
         )
-        assertTilstander(3,
+        assertTilstander(
+            3,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
-        assertTilstander(4,
+        assertTilstander(
+            4,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
@@ -111,12 +115,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             )
         )
 
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP
         )
-        assertTilstander(1,
+        assertTilstander(
+            1,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
@@ -127,15 +133,27 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     internal fun `inntektsmelding starter etter sykmeldingsperioden`() {
         håndterSykmelding(Triple(15.januar(2020), 12.februar(2020), 100))
-        håndterSøknad(Sykdom(15.januar(2020),  12.februar(2020), 100))
+        håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(
             0,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100, 100, ORGNUMMER)
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                29.november(2017),
+                3.desember(2017),
+                100,
+                100,
+                ORGNUMMER
+            ),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                13.november(2017),
+                28.november(2017),
+                100,
+                100,
+                ORGNUMMER
+            )
         )
         håndterSimulering(0)
         assertNotNull(inspektør.maksdato(0))
@@ -165,7 +183,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             3.januar
         )
 
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  4.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 4.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
 
@@ -179,7 +197,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
 
-        håndterSøknadMedValidering(1, Sykdom(8.januar,  9.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(8.januar, 9.januar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
 
@@ -221,17 +239,20 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ),
             førsteFraværsdag = 27.februar(2020)
         )
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP
         )
-        assertTilstander(1,
+        assertTilstander(
+            1,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP
         )
-        assertTilstander(2,
+        assertTilstander(
+            2,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP
@@ -239,10 +260,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-     fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
+    fun `Inntektsmelding med ferie etter arbeidsgiverperioden`() {
         håndterSykmelding(Triple(10.januar(2020), 21.januar(2020), 100))
         håndterSykmelding(Triple(23.januar(2020), 24.januar(2020), 100))
-        håndterSøknad(Sykdom(23.januar(2020),  24.januar(2020), 100))
+        håndterSøknad(Sykdom(23.januar(2020), 24.januar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(6.januar(2020), 21.januar(2020))),
             førsteFraværsdag = 23.januar(2020),
@@ -266,8 +287,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     internal fun `ignorerer egenmeldingsdag i søknaden langt tilbake i tid`() {
         håndterSykmelding(Triple(6.januar(2020), 23.januar(2020), 100))
         håndterSøknad(
-            Egenmelding(24.september(2019), 24.september(2019)), // ignored because it's too long ago relative to 6.januar
-            Sykdom(6.januar(2020),  23.januar(2020), 100)
+            Egenmelding(
+                24.september(2019),
+                24.september(2019)
+            ), // ignored because it's too long ago relative to 6.januar
+            Sykdom(6.januar(2020), 23.januar(2020), 100)
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
@@ -285,7 +309,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     internal fun `person med gammel sykmelding`() {
         håndterSykmelding(Triple(13.januar(2020), 31.januar(2020), 100))
         håndterSykmelding(Triple(9.februar(2017), 15.februar(2017), 100))
-        håndterSøknad(Sykdom(13.januar(2020),  31.januar(2020), 100))
+        håndterSøknad(Sykdom(13.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
                 Periode(13.januar(2020), 21.januar(2020))
@@ -299,7 +323,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(1))
 
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
+        )
     }
 
     @Test
@@ -319,11 +352,19 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     internal fun `sykmeldinger som overlapper med gradering`() {
         håndterSykmelding(Triple(13.januar(2020), 28.januar(2020), 100)) // sykmelding A
-        håndterSykmelding(Triple(13.januar(2020), 19.januar(2020), 80),
-            Triple(20.januar(2020), 26.januar(2020), 100)) // sykmelding B (ignored)
+        håndterSykmelding(
+            Triple(13.januar(2020), 19.januar(2020), 80),
+            Triple(20.januar(2020), 26.januar(2020), 100)
+        ) // sykmelding B (ignored)
         håndterSykmelding(Triple(27.januar(2020), 11.februar(2020), 100)) // sykmelding C (ignored)
         håndterSykmelding(Triple(10.februar(2020), 29.februar(2020), 100)) // sykmelding D
-        håndterSøknad(Sykdom(27.januar(2020),  11.februar(2020), 100)) // søknad for sykemelding C (covers A & D actually)
+        håndterSøknad(
+            Sykdom(
+                27.januar(2020),
+                11.februar(2020),
+                100
+            )
+        ) // søknad for sykemelding C (covers A & D actually)
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
@@ -333,7 +374,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ),
             førsteFraværsdag = 13.januar(2020)
         ) // <-- error here
-        håndterSøknad(Sykdom(10.februar(2020),  29.februar(2020), 100)) // søknad for sykmelding D (ignored)
+        håndterSøknad(Sykdom(10.februar(2020), 29.februar(2020), 100)) // søknad for sykmelding D (ignored)
         håndterSykmelding(Triple(1.mars(2020), 15.mars(2020), 100)) // sykmelding E
         assertEquals(3, inspektør.vedtaksperiodeTeller)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
@@ -346,9 +387,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
         håndterSykmelding(Triple(16.januar(2020), 31.januar(2020), 100)) // sykmelding B
         håndterSykmelding(Triple(1.februar(2020), 16.februar(2020), 100)) // sykmelding C
-        håndterSøknad(Sykdom(16.januar(2020),  31.januar(2020), 100)) // -> sykmelding B
-        håndterSøknad(Sykdom(1.februar(2020),  16.februar(2020), 100)) // sykmelding C
-        håndterSøknad(Sykdom(31.januar(2020),  15.februar(2020), 100)) // sykmelding A, part 2
+        håndterSøknad(Sykdom(16.januar(2020), 31.januar(2020), 100)) // -> sykmelding B
+        håndterSøknad(Sykdom(1.februar(2020), 16.februar(2020), 100)) // sykmelding C
+        håndterSøknad(Sykdom(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
         håndterSykmelding(Triple(18.februar(2020), 8.mars(2020), 100)) // sykmelding D
         assertEquals(3, inspektør.vedtaksperiodeTeller)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
@@ -372,11 +413,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(14.januar(2020), 24.januar(2020), 100))
         håndterSøknad(
             Egenmelding(6.januar(2020), 6.januar(2020)),
-            Sykdom(14.januar(2020),  24.januar(2020), 100)
+            Sykdom(14.januar(2020), 24.januar(2020), 100)
         )
         håndterSykmelding(Triple(25.januar(2020), 7.februar(2020), 80))
         håndterSykmelding(Triple(8.februar(2020), 28.februar(2020), 80))
-        håndterSøknad(Sykdom(25.januar(2020),  7.februar(2020), 80))
+        håndterSøknad(Sykdom(25.januar(2020), 7.februar(2020), 80))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
                 Periode(6.januar(2020), 21.januar(2020))
@@ -390,8 +431,23 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK
+        )
         assertTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(4, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
@@ -402,7 +458,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(21.desember(2019), 5.januar(2020), 80))
         håndterSøknad(
             Egenmelding(18.september(2019), 20.september(2019)),
-            Sykdom(21.desember(2019),  5.januar(2020), 80)
+            Sykdom(21.desember(2019), 5.januar(2020), 80)
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
@@ -427,13 +483,21 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(0))
         assertTrue(inspektør.utbetalingslinjer(0).isEmpty())
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING
+        )
     }
 
     @Test
     fun `Inntektsmelding, etter søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         håndterSykmelding(Triple(7.januar, 28.januar, 100))
-        håndterSøknad(Sykdom(7.januar,  28.januar, 100))
+        håndterSøknad(Sykdom(7.januar, 28.januar, 100))
         // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
@@ -472,7 +536,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     internal fun `andre vedtaksperiode utbetalingslinjer dekker to perioder`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
-        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
@@ -484,7 +548,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
-        håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
+        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterUtbetalingsgodkjenning(1, true)
@@ -493,12 +557,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertNotNull(inspektør.maksdato(0))
         assertNotNull(inspektør.maksdato(1))
 
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(1,
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
 
         inspektør.also {
             assertEquals(1, it.arbeidsgiverOppdrag[0]?.size)
@@ -523,8 +591,23 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(1)   // No history
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -544,14 +627,32 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterYtelser(1)   // No history
 
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
     }
 
     @Test
     internal fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
-        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
@@ -563,21 +664,27 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Triple(1.februar(2020), 28.februar(2020), 100))
-        håndterSøknad(Sykdom(1.februar(2020),  28.februar(2020), 100))
-        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-            17.januar(2020),
-            31.januar(2020),
-            1400,
-            100,
-            ORGNUMMER
-        ))   // Duplicate processing
+        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100))
+        håndterYtelser(
+            1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                17.januar(2020),
+                31.januar(2020),
+                1400,
+                100,
+                ORGNUMMER
+            )
+        )   // Duplicate processing
 
-        assertTilstander(0,
+        assertTilstander(
+            0,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(1,
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
+        )
+        assertTilstander(
+            1,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            AVVENTER_HISTORIKK, AVVENTER_SIMULERING
+        )
     }
 
     @Test
@@ -633,11 +740,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `Syk, en arbeidsdag, ferie og syk`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 1.januar(2020)), Periode(11.januar(2020), 25.januar(2020))),
+            arbeidsgiverperioder = listOf(
+                Periode(1.januar(2020), 1.januar(2020)),
+                Periode(11.januar(2020), 25.januar(2020))
+            ),
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020))),
             førsteFraværsdag = 11.januar(2020)
         )
-        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100), sendtTilNav = 1.februar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
@@ -670,11 +780,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `Syk, ferie og syk`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 2.januar(2020)), Periode(11.januar(2020), 24.januar(2020))),
+            arbeidsgiverperioder = listOf(
+                Periode(1.januar(2020), 2.januar(2020)),
+                Periode(11.januar(2020), 24.januar(2020))
+            ),
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100), sendtTilNav = 1.februar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
@@ -706,10 +819,13 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `Syk, mange arbeidsdager, syk igjen på en lørdag`() {
         håndterSykmelding(Triple(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 1.januar(2020)), Periode(11.januar(2020), 25.januar(2020))),
+            arbeidsgiverperioder = listOf(
+                Periode(1.januar(2020), 1.januar(2020)),
+                Periode(11.januar(2020), 25.januar(2020))
+            ),
             førsteFraværsdag = 11.januar(2020)
         )
-        håndterSøknad(Sykdom(1.januar(2020),  31.januar(2020), 100), sendtTilNav = 1.februar(2020))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100), sendtTilNav = 1.februar(2020))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
@@ -739,7 +855,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Utbetaling med forlengelse`(){
+    fun `Utbetaling med forlengelse`() {
         håndterSykmelding(Triple(1.juni(2020), 30.juni(2020), 100))
         håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100))
         håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
@@ -764,7 +880,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Grad endrer tredje periode`(){
+    fun `Grad endrer tredje periode`() {
         håndterSykmelding(Triple(1.juni(2020), 30.juni(2020), 100))
         håndterSøknad(Sykdom(1.juni(2020), 30.juni(2020), 100))
         håndterInntektsmelding(listOf(Periode(1.juni(2020), 16.juni(2020))))
@@ -805,37 +921,107 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Triple(30.mars(2020), 15.april(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.mars(2020), 29.mars(2020), 100))
         håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100))
-        håndterInntektsmeldingMedValidering(0, listOf(
-            Periode(2.mars(2020), 2.mars(2020)),
-            Periode(16.mars(2020), 29.mars(2020)),
-            Periode(30.mars(2020), 30.mars(2020))
-        ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            0, listOf(
+                Periode(2.mars(2020), 2.mars(2020)),
+                Periode(16.mars(2020), 29.mars(2020)),
+                Periode(30.mars(2020), 30.mars(2020))
+            ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList())
+        )
         håndterVilkårsgrunnlag(0, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            TIL_INFOTRYGD
+        )
+        assertForkastetPeriodeTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE
+        )
     }
 
     @Test
     fun `ikke medlem`() {
         håndterSykmelding(Triple(1.januar, 31.januar, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(
-            Periode(1.januar, 16.januar)
-        ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList()))
-        håndterVilkårsgrunnlag(0, INNTEKT, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei) // make sure Vilkårsgrunnlag fails
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, TIL_INFOTRYGD)
+        håndterInntektsmeldingMedValidering(
+            0, listOf(
+                Periode(1.januar, 16.januar)
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterVilkårsgrunnlag(
+            0,
+            INNTEKT,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+        ) // make sure Vilkårsgrunnlag fails
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test
     fun `periode som begynner på søndag skal ikke gi warning på krav om minimuminntekt`() {
         håndterSykmelding(Triple(15.mars(2020), 8.april(2020), 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(16.mars(2020), 31.mars(2020))), førsteFraværsdag = 16.mars(2020), refusjon = Triple(null, INNTEKT, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            0,
+            listOf(Periode(16.mars(2020), 31.mars(2020))),
+            førsteFraværsdag = 16.mars(2020),
+            refusjon = Triple(null, INNTEKT, emptyList())
+        )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100))
-        håndterVilkårsgrunnlag( 0, INNTEKT)
+        håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
         assertTrue(inspektør.personLogg.hasOnlyInfoAndNeeds())
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+    }
+
+    @Disabled
+    @Test
+    fun `Out of order sykmeldinger gjør at vedtaksperiodene feilaktig får forskjellig gruppe-id`() {
+        /*Sykmelding for 19-22.mars får en annen gruppeId enn de to foregående,
+        selv om den i virkeligheten er en invers forlengelse av disse.
+        Inntektsmeldingen som senere kommer inn treffer denne og blir markert som qualified.
+        Når neste søknad (23 - 29.mars) plukker opp inntektsmeldingen ser den denne som allerede vurdert
+        og går til "AvsluttetUtenUtbetalingMedInntektsmelding" i stedet for "AvventerVilkårsprøvingArbeidsgiversøknad".
+        Dette gjør at denne "gruppen" ender opp med å ikke ha vilkårsvurdering.
+        Når SpeilBuilder senere henter ut dataForVilkårsvurdering basert på den første perioden knyttet til en gruppeId,
+        finner den null. Dermed blir sykepengegrunnlaget null. */
+        håndterSykmelding(Triple(23.mars(2020), 29.mars(2020), 100))
+        håndterSykmelding(Triple(30.mars(2020), 12.april(2020), 100))
+        håndterSykmelding(Triple(19.mars(2020), 22.mars(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(23.mars(2020), 29.mars(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(19.mars(2020), 22.mars(2020), 100))
+        håndterSøknad(Sykdom(30.mars(2020), 12.april(2020), 100))
+        håndterInntektsmelding(
+            førsteFraværsdag = 17.mars(2020),
+            arbeidsgiverperioder = listOf(Periode(17.mars(2020), 1.april(2020)))
+        )
     }
 }
