@@ -32,11 +32,12 @@ jobs:
       with:
         args: --all-sub-projects
     - name: Docker image vulnerability check
-      uses: snyk/actions/gradle-jdk12@master
+      uses: snyk/actions/docker@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --docker ${{ env.IMAGE }}:${{ env.TAG }} --file=Dockerfile
+        image: ${{ env.IMAGE }}:${{ env.TAG }}
+        args: --file=Dockerfile
     - name: push docker image
       run: |
         echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
