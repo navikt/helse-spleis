@@ -13,24 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Gradle vulnerability check
+      uses: snyk/actions/gradle-jdk12@master
+      env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+          args: --all-sub-projects
     - uses: actions/setup-java@v1
       with:
-        java-version: '12.x'
+          java-version: '12.x'
     - name: create docker tag
       run: echo ::set-env name=TAG::$(echo ${{ github.sha }} | cut -c1-7)
     - name: test and build
       run: ./gradlew test build
       env:
-        ORG_GRADLE_PROJECT_githubUser: x-access-token
-        ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
     - name: build docker image
       run: docker build . --pull -t ${{ env.IMAGE }}:${{ env.TAG }}
-    - name: Gradle vulnerability check
-      uses: snyk/actions/gradle-jdk12@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --all-sub-projects
     - name: Docker image vulnerability check
       uses: snyk/actions/docker@master
       env:
