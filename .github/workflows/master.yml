@@ -68,5 +68,5 @@ jobs:
         ORG_GRADLE_PROJECT_githubUser: x-access-token
         ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: --all-sub-projects --org=tbd-ty7 --fail-on=all --project-name=spleis
+        args: --all-sub-projects --org=tbd-ty7 --fail-on=all
         command: monitor
