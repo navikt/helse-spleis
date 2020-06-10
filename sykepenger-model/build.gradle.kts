@@ -4,7 +4,7 @@ val logbackVersion = "1.2.3"
 
 dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("commons-codec:commons-codec:1.11")
+    implementation("commons-codec:commons-codec:1.13")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 

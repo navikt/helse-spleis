@@ -4,7 +4,7 @@ val jacksonVersion = "2.10.3"
 val hikariVersion = "3.4.2"
 val vaultJdbcVersion = "1.3.1"
 val kotliqueryVersion = "1.3.1"
-val wireMockVersion = "2.23.2"
+val wireMockVersion = "2.24.1"
 val flywayVersion = "6.3.1"
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -32,7 +32,7 @@ dependencies {
     }
 
     testImplementation("org.flywaydb:flyway-core:$flywayVersion")
-    testImplementation("com.opentable.components:otj-pg-embedded:0.13.1")
+    testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
     testImplementation("org.awaitility:awaitility:3.1.6")
     testImplementation("com.github.tomakehurst:wiremock:$wireMockVersion") {
