@@ -306,33 +306,12 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `person med gammel sykmelding`() {
+    fun `person med gammel sykmelding`() {
         håndterSykmelding(Triple(13.januar(2020), 31.januar(2020), 100))
         håndterSykmelding(Triple(9.februar(2017), 15.februar(2017), 100))
-        håndterSøknad(Sykdom(13.januar(2020), 31.januar(2020), 100))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(13.januar(2020), 21.januar(2020))
-            ),
-            førsteFraværsdag = 13.januar(2020)
-        )
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
 
-        assertNotNull(inspektør.maksdato(1))
-
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
+        assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1002,7 +981,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled
+    @Disabled("Tester ingenting, men viser et out of order-scenario")
     @Test
     fun `Out of order sykmeldinger gjør at vedtaksperiodene feilaktig får forskjellig gruppe-id`() {
         /*Sykmelding for 19-22.mars får en annen gruppeId enn de to foregående,
@@ -1023,5 +1002,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 17.mars(2020),
             arbeidsgiverperioder = listOf(Periode(17.mars(2020), 1.april(2020)))
         )
+    }
+
+    @Test
+    fun `Out of order sykmeldinger blir kastet ut og tar med alt etterfølgende`() {
+        håndterSykmelding(Triple(23.mars(2020), 29.mars(2020), 100))
+        håndterSykmelding(Triple(30.mars(2020), 2.april(2020), 100))
+        håndterSykmelding(Triple(10.april(2020), 20.april(2020), 100))
+        håndterSykmelding(Triple(19.mars(2020), 22.mars(2020), 100))
+        assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD);
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
     }
 }

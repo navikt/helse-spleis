@@ -173,8 +173,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )  // <-- TIL_INFOTRYGD
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+        assertForkastetPeriodeTilstander(1, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test

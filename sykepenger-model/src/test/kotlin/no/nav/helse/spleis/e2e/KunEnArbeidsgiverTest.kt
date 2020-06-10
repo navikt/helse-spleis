@@ -1366,14 +1366,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Sykmelding i omvendt rekkefølge`() {
         håndterSykmelding(Triple(10.januar, 20.januar, 100))
         håndterSykmelding(Triple(3.januar, 5.januar, 100))
-        håndterInntektsmelding(
-            listOf(
-                Periode(4.januar, 5.januar),
-                Periode(9.januar, 23.januar)
-            )
-        )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test

@@ -19,7 +19,6 @@ import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.*
@@ -209,9 +208,15 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(kansellerUtbetaling)
     }
 
-    internal fun forkast(other: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (mottattSykmelding() || (this.periode.start > other.periode.endInclusive && !other.periode.endInclusive.harTilstøtende(this.periode.start))) return
+    internal fun forkastHvisPåfølgendeUnntattNy(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.tilstøtende(this))) return
         hendelse.warn("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd")
+        forkast(hendelse)
+    }
+
+    internal fun forkastHvisEtterfølgende(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        if (this.periode.start <= forkastet.periode.start) return
+        hendelse.warn("Avslutter perioden fordi tidligere periode gikk til Infotrygd")
         forkast(hendelse)
     }
 
@@ -230,7 +235,7 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(hendelse)
     }
 
-    internal fun tilstøtende(other: Vedtaksperiode) = this.periode.tilstøtende(other.periode)
+    internal fun tilstøtende(other: Vedtaksperiode) = this.periode.tilstøtendeLenient(other.periode)
 
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
@@ -435,7 +440,7 @@ internal class Vedtaksperiode private constructor(
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
 
-    private fun mottattSykmelding() =
+    private fun kunMottattSykmelding() =
         this.tilstand.type in listOf(
             MOTTATT_SYKMELDING_FERDIG_GAP,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
@@ -575,26 +580,26 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            vedtaksperiode.håndter(sykmelding) { nesteTilstand(vedtaksperiode, sykmelding) }
+            vedtaksperiode.håndter(sykmelding) {
+                if (vedtaksperiode.arbeidsgiver.harPerioderSomStarterEtter(vedtaksperiode)) {
+                    vedtaksperiode.arbeidsgiver.forkastAlleEtterfølgende(vedtaksperiode, sykmelding)
+                    return@håndter TilInfotrygd
+                }
+                val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
+                val forlengelse = tilstøtende != null
+                val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+                if (tilstøtende != null) {
+                    vedtaksperiode.gruppeId = tilstøtende.gruppeId
+                }
+                when {
+                    forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
+                    forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
+                    !forlengelse && ferdig -> MottattSykmeldingFerdigGap
+                    !forlengelse && !ferdig -> MottattSykmeldingUferdigGap
+                    else -> sykmelding.severe("Klarer ikke bestemme hvilken sykmeldingmottattilstand vi skal til")
+                }
+            }
             sykmelding.info("Fullført behandling av sykmelding")
-        }
-
-        private fun nesteTilstand(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Vedtaksperiodetilstand {
-            val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
-            val forlengelse = tilstøtende != null
-            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-
-            if (tilstøtende != null) {
-                vedtaksperiode.gruppeId = tilstøtende.gruppeId
-            }
-
-            return when {
-                forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
-                forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
-                !forlengelse && ferdig -> MottattSykmeldingFerdigGap
-                !forlengelse && !ferdig -> MottattSykmeldingUferdigGap
-                else -> sykmelding.severe("Klarer ikke bestemme hvilken sykmeldingmottattilstand vi skal til")
-            }
         }
     }
 
@@ -1304,7 +1309,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.forkast(vedtaksperiode, hendelse)
+            vedtaksperiode.arbeidsgiver.forkastPåfølgendeUnntattNye(vedtaksperiode, hendelse)
         }
 
         override fun håndter(
@@ -1323,6 +1328,10 @@ internal class Vedtaksperiode private constructor(
             .filterNot { other == it }
             .filter { it.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje()) }
             .minBy { it.periode.start }
+
+        internal fun harPerioderSomStarterEtter(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
+            .filterNot { other == it }
+            .any { it.periode.start >= other.periode.start }
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }

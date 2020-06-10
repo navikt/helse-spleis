@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.sykdomstidslinje.harTilstøtende
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -18,15 +19,21 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun overlapperMed(other: Periode) =
         maxOf(this.start, other.start) <= minOf(this.endInclusive, other.endInclusive)
 
-    internal fun etter(other: LocalDate) =
+    internal fun slutterEtter(other: LocalDate) =
         other <= this.endInclusive
 
     internal fun utenfor(other: Periode) =
         start < other.start || endInclusive > other.endInclusive
 
-    internal fun tilstøtende(other: Periode) =
+    /** All days considered, including weekends */
+    internal fun tilstøtendeStrict(other: Periode) =
         this.endInclusive.plusDays(1) == other.start ||
             other.endInclusive.plusDays(1) == this.start
+
+    /** Gap on weekend days not considered gap */
+    internal fun tilstøtendeLenient(other: Periode) =
+        this.endInclusive.harTilstøtende(other.start) ||
+            other.endInclusive.harTilstøtende(this.start)
 
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive
@@ -63,7 +70,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
-        fun List<Periode>.etter(grense: LocalDate) = any { it.etter(grense)}
+        fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense)}
     }
 }
 

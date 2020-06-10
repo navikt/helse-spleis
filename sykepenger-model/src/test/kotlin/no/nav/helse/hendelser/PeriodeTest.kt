@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Periode.Companion.etter
+import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -47,10 +47,10 @@ internal class PeriodeTest {
 
     @Test
     internal fun `periode på eller etter dato`() {
-        assertFalse(listOf(Periode(1.juli, 2.juli)).etter(3.juli))
-        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(2.juli))
-        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(1.juli))
-        assertTrue(listOf(Periode(1.juli, 2.juli)).etter(30.juni))
+        assertFalse(listOf(Periode(1.juli, 2.juli)).slutterEtter(3.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).slutterEtter(2.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).slutterEtter(1.juli))
+        assertTrue(listOf(Periode(1.juli, 2.juli)).slutterEtter(30.juni))
     }
 
     @Test
@@ -61,11 +61,11 @@ internal class PeriodeTest {
 
     @Test
     fun tilstøtende() {
-        assertTrue((1.januar to 5.januar).tilstøtende(6.januar to 10.januar))
-        assertTrue((6.januar to 10.januar).tilstøtende(1.januar to 5.januar))
-        assertFalse((1.januar to 5.januar).tilstøtende(7.januar to 10.januar))
-        assertFalse((1.januar to 6.januar).tilstøtende(6.januar to 10.januar))
-        assertFalse((1.januar to 6.januar).tilstøtende(2.januar to 5.januar))
+        assertTrue((1.januar to 5.januar).tilstøtendeStrict(6.januar to 10.januar))
+        assertTrue((6.januar to 10.januar).tilstøtendeStrict(1.januar to 5.januar))
+        assertFalse((1.januar to 5.januar).tilstøtendeStrict(7.januar to 10.januar))
+        assertFalse((1.januar to 6.januar).tilstøtendeStrict(6.januar to 10.januar))
+        assertFalse((1.januar to 6.januar).tilstøtendeStrict(2.januar to 5.januar))
     }
 
     private fun assertSize(expected: Int, periode: Periode) {

@@ -198,9 +198,14 @@ internal class Arbeidsgiver private constructor(
         Vedtaksperiode.sorter(forkastede)
     }
 
-    internal fun forkast(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+    internal fun forkastPåfølgendeUnntattNye(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         forkast(vedtaksperiode)
-        perioder.toList().forEach { it.forkast(vedtaksperiode, hendelse) }
+        perioder.toList().forEach { it.forkastHvisPåfølgendeUnntattNy(vedtaksperiode, hendelse) }
+    }
+
+    internal fun forkastAlleEtterfølgende(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        forkast(vedtaksperiode)
+        perioder.toList().forEach { it.forkastHvisEtterfølgende(vedtaksperiode, hendelse) }
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
@@ -226,6 +231,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
+
+    internal fun harPerioderSomStarterEtter(vedtaksperiode: Vedtaksperiode) =
+        Vedtaksperiode.harPerioderSomStarterEtter(vedtaksperiode, perioder)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(perioder, vedtaksperiode)
