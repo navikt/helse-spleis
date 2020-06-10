@@ -31,7 +31,7 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         image: ${{ env.IMAGE }}:${{ env.TAG }}
-        args: --file=Dockerfile --org=tbd-ty7 --fail-on=all
+        args: --file=Dockerfile --org=tbd-ty7 --fail-on=all --exclude-base-image-vulns
     - name: push docker image
       run: |
         echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
