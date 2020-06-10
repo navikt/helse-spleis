@@ -41,7 +41,7 @@ jobs:
 
   snyk:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [set_version, build]
     steps:
     - uses: actions/checkout@v1
     - name: Gradle vulnerability check
