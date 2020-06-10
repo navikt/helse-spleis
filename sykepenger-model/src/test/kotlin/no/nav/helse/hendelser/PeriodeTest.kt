@@ -59,6 +59,15 @@ internal class PeriodeTest {
         assertSize(19, actual)
     }
 
+    @Test
+    fun tilstøtende() {
+        assertTrue((1.januar to 5.januar).tilstøtende(6.januar to 10.januar))
+        assertTrue((6.januar to 10.januar).tilstøtende(1.januar to 5.januar))
+        assertFalse((1.januar to 5.januar).tilstøtende(7.januar to 10.januar))
+        assertFalse((1.januar to 6.januar).tilstøtende(6.januar to 10.januar))
+        assertFalse((1.januar to 6.januar).tilstøtende(2.januar to 5.januar))
+    }
+
     private fun assertSize(expected: Int, periode: Periode) {
         var count = 0
         periode.forEach { _ -> count++ }
