@@ -193,6 +193,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun forkast(vedtaksperiode: Vedtaksperiode) {
         if (!perioder.remove(vedtaksperiode)) return
+        sykdomshistorikk.fjernTidligereDager(vedtaksperiode.periode())
         forkastede.add(vedtaksperiode)
         Vedtaksperiode.sorter(forkastede)
     }

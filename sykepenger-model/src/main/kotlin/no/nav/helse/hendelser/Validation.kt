@@ -25,7 +25,7 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
     }
 
     internal fun onSuccess(successBlock: () -> Unit) {
-        if (!hendelse.hasBehov()) successBlock()
+        if (!hendelse.hasErrors()) successBlock()
     }
 }
 

@@ -251,7 +251,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) {
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
@@ -265,7 +265,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
@@ -565,9 +565,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID,
+            id: UUID?,
             tidsstempel: LocalDateTime
         ) {
+            if (id == null) return
             hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
         }
 
@@ -817,7 +818,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID,
+            id: UUID?,
             tidsstempel: LocalDateTime
         ) {
             hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
@@ -829,7 +830,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun postVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID,
+            id: UUID?,
             tidsstempel: LocalDateTime
         ) {
             popState()

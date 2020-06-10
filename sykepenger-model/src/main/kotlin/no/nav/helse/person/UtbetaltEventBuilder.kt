@@ -136,9 +136,10 @@ private class UtbetaltEventBuilder(
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) {
+        if (id == null) return
         hendelser.add(id)
     }
 }

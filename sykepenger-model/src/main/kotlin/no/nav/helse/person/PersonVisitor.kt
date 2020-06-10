@@ -124,7 +124,7 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
     fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) {}
     fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
@@ -133,7 +133,7 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
     fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) {}
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}

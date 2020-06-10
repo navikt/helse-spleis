@@ -189,7 +189,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) =
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
@@ -219,7 +219,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
@@ -602,7 +602,7 @@ internal class JsonBuilder : PersonVisitor {
     ) : JsonState {
         override fun preVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID,
+            id: UUID?,
             tidsstempel: LocalDateTime
         ) {
             val elementMap = mutableMapOf<String, Any?>()
@@ -617,7 +617,7 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     private inner class SykdomshistorikkElementState(
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime,
         private val elementMap: MutableMap<String, Any?>
     ) : JsonState {
@@ -640,7 +640,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun postVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID,
+            id: UUID?,
             tidsstempel: LocalDateTime
         ) {
             popState()

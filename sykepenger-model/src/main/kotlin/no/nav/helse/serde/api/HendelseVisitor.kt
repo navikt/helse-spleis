@@ -18,9 +18,10 @@ internal class HendelseVisitor : PersonVisitor {
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID,
+        id: UUID?,
         tidsstempel: LocalDateTime
     ) {
+        if (id == null) return
         hendelsereferanser.add(id)
     }
 

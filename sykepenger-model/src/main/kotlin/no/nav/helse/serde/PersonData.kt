@@ -525,7 +525,7 @@ internal data class PersonData(
 
     data class SykdomshistorikkData(
         private val tidsstempel: LocalDateTime,
-        private val hendelseId: UUID,
+        private val hendelseId: UUID?,
         private val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
         private val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
     ) {

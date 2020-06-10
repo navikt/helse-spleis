@@ -84,8 +84,8 @@ internal class SimpleMergeTest {
         }
 
         original.kutt(10.januar).also {
-            assertEquals(Periode(1.januar, 10.januar), it.periode())
-            assertSize(10, it)
+            assertEquals(Periode(1.januar, 5.januar), it.periode())
+            assertSize(5, it)
         }
 
         original.kutt(1.februar).also {

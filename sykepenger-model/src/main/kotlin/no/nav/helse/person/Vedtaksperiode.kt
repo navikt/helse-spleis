@@ -239,6 +239,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
+    internal fun periode() = periode
+
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
         if (hendelse.valider(periode).hasErrors())
             return tilstand(hendelse, TilInfotrygd)
@@ -372,9 +374,10 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk.accept(object : SykdomshistorikkVisitor {
             override fun postVisitSykdomshistorikkElement(
                 element: Sykdomshistorikk.Element,
-                id: UUID,
+                id: UUID?,
                 tidsstempel: LocalDateTime
             ) {
+                if (id == null) return
                 hendelser.add(id)
             }
         })

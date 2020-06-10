@@ -112,12 +112,10 @@ internal class Sykdomstidslinje private constructor(
      * Without padding of days
      */
     internal fun kutt(kuttDatoInclusive: LocalDate) =
-        when {
-            periode == null -> this
-            kuttDatoInclusive < periode.start -> Sykdomstidslinje()
-            kuttDatoInclusive > periode.endInclusive -> this
-            else -> subset(Periode(periode.start, kuttDatoInclusive))
-        }
+        Sykdomstidslinje(dager.headMap(kuttDatoInclusive.plusDays(1)))
+
+    internal fun trimLeft(newStartInclusive: LocalDate) =
+        Sykdomstidslinje(dager.tailMap(newStartInclusive))
 
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)

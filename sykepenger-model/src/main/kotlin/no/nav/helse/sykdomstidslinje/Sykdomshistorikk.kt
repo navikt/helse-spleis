@@ -1,5 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.dagturnering
 import java.time.LocalDate
@@ -33,6 +34,14 @@ internal class Sykdomshistorikk private constructor(
         )
     }
 
+    internal fun fjernTidligereDager(periode: Periode) {
+        if (sykdomstidslinje().length() == 0) return
+        periode.endInclusive.plusDays(1).also { førsteDagViBeholder ->
+            if (førsteDagViBeholder <= sykdomstidslinje().førsteDag()) return
+            elementer.add(0, Element.opprettReset(this, førsteDagViBeholder))
+        }
+    }
+
     internal fun accept(visitor: SykdomshistorikkVisitor) {
         visitor.preVisitSykdomshistorikk(this)
         elementer.forEach { it.accept(visitor) }
@@ -51,7 +60,7 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal class Element private constructor(
-        private val hendelseId: UUID,
+        private val hendelseId: UUID?,
         private val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: Sykdomstidslinje,
         private val beregnetSykdomstidslinje: Sykdomstidslinje
@@ -101,6 +110,18 @@ internal class Sykdomshistorikk private constructor(
                         hendelse,
                         hendelseSykdomstidslinje
                     )
+                )
+            }
+
+            fun opprettReset(
+                historikk: Sykdomshistorikk,
+                førsteDatoViBeholder: LocalDate
+            ) : Element {
+                return Element(
+                    hendelseId = null,
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = Sykdomstidslinje(),
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trimLeft(førsteDatoViBeholder)
                 )
             }
         }
