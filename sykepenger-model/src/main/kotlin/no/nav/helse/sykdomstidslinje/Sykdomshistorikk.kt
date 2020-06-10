@@ -35,7 +35,8 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal fun fjernTidligereDager(periode: Periode) {
-        if (sykdomstidslinje().length() == 0) return
+        // TODO: Remove size == 0 whenever migration is done
+        if (size == 0 || sykdomstidslinje().length() == 0) return
         periode.endInclusive.plusDays(1).also { førsteDagViBeholder ->
             if (førsteDagViBeholder <= sykdomstidslinje().førsteDag()) return
             elementer.add(0, Element.opprettReset(this, førsteDagViBeholder))
