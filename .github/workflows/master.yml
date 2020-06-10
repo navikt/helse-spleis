@@ -32,6 +32,13 @@ jobs:
         ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
     - name: build docker image
       run: docker build . --pull -t ${{ env.IMAGE }}:${{ needs.set_version.outputs.tag }}
+    - name: Docker image vulnerability check
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: ${{ env.IMAGE }}:${{ needs.set_version.outputs.tag }}
+        args: --file=Dockerfile --org=tbd-ty7 --fail-on=all --exclude-base-image-vulns
     - name: push docker image
       run: |
         echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_REPOSITORY" --password-stdin https://docker.pkg.github.com
@@ -41,7 +48,7 @@ jobs:
 
   snyk:
     runs-on: ubuntu-latest
-    needs: [set_version, build]
+    needs: build
     steps:
     - uses: actions/checkout@v1
     - name: Gradle vulnerability check
@@ -53,13 +60,6 @@ jobs:
       with:
         args: --all-sub-projects --org=tbd-ty7 --fail-on=all
         command: monitor
-    - name: Docker image vulnerability check
-      uses: snyk/actions/docker@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        image: ${{ env.IMAGE }}:${{ needs.set_version.outputs.tag }}
-        args: --file=Dockerfile --org=tbd-ty7 --fail-on=all --exclude-base-image-vulns
 
   deploy_dev:
     runs-on: ubuntu-latest
