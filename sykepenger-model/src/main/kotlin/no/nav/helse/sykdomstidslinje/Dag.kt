@@ -174,14 +174,10 @@ internal sealed class Dag(
 private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
-internal fun LocalDate.harTilstøtende(other: LocalDate): Boolean {
-    if (this > other) {
-        return other.harTilstøtende(this)
-    }
-    return when (this.dayOfWeek) {
+internal fun LocalDate.harTilstøtende(other: LocalDate) =
+    when (this.dayOfWeek) {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
         FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
         SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
-}
