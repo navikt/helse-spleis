@@ -24,6 +24,10 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun utenfor(other: Periode) =
         start < other.start || endInclusive > other.endInclusive
 
+    internal fun tilstøtende(other: Periode) =
+        this.endInclusive.plusDays(1) == other.start ||
+            other.endInclusive.plusDays(1) == this.start
+
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive
 

@@ -230,6 +230,8 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(hendelse)
     }
 
+    internal fun tilstøtende(other: Vedtaksperiode) = this.periode.tilstøtende(other.periode)
+
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
