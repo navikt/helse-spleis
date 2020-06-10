@@ -17,6 +17,8 @@ jobs:
       uses: snyk/actions/gradle-jdk12@master
       env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       with:
           args: --all-sub-projects
     - uses: actions/setup-java@v1
