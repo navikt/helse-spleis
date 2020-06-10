@@ -1,12 +1,10 @@
 package no.nav.helse.serde.api
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.SpeilDagtype
-import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.*
@@ -18,7 +16,7 @@ import java.time.YearMonth
 import java.util.*
 
 
-internal class SpeilBuilderTest {
+class SpeilBuilderTest {
     @Test
     fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
@@ -458,8 +456,7 @@ internal class SpeilBuilderTest {
         val (person, hendelser) = tilbakerulletPerson()
         person.aktivitetslogg.toString()
         val personDTO = serializePersonForSpeil(person, hendelser)
-        assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
-        assertEquals(2, personDTO.arbeidsgivere.first().forkastedePerioder.size)
+        assertEquals(2, personDTO.arbeidsgivere.first().vedtaksperioder.size)
     }
 
     @Test
