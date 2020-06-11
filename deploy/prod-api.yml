@@ -8,8 +8,6 @@ metadata:
 spec:
   image: {{image}}:{{tag}}
   port: 8080
-  strategy:
-    type: Recreate
   liveness:
     path: isalive
     initialDelay: 5
