@@ -223,7 +223,7 @@ class Utbetalingshistorikk(
             override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
                 if (periode.endInclusive < other.start.minusDays(18)) return
                 aktivitetslogg.warn(
-                    "Perioden er lagt inn i Infotrygd - men mangler inntektsopplysninger. Fjern perioden fra SP UB hvis du utbetaler via speil.",
+                    "Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.",
                     this::class.simpleName
                 )
             }
