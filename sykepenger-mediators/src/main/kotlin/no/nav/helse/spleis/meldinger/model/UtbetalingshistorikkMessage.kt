@@ -47,7 +47,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     }.map { opplysning ->
         Utbetalingshistorikk.Inntektsopplysning(
             sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-            inntektPerMåned = opplysning["inntekt"].asInt(),
+            inntektPerMåned = opplysning["inntekt"].let { if (it.isInt) it.asInt().toDouble() else it.asDouble() },
             orgnummer = opplysning["orgnummer"].asText(),
             refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
             refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()

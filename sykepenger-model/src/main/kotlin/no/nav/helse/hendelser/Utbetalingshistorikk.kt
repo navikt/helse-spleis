@@ -41,7 +41,7 @@ class Utbetalingshistorikk(
 
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
-        private val inntektPerMåned: Int,
+        private val inntektPerMåned: Double,
         private val orgnummer: String,
         private val refusjonTilArbeidsgiver: Boolean,
         private val refusjonTom: LocalDate? = null
