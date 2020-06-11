@@ -102,9 +102,6 @@ internal class Sykdomstidslinje private constructor(
 
     internal operator fun plus(other: Sykdomstidslinje) = this.merge(other)
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
-
-    internal fun harTilstøtende(other: Sykdomstidslinje) = this.sisteDag().harTilstøtende(other.førsteDag())
-
     internal fun subset(periode: Periode) =
         Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), periode)
 

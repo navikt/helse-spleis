@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.sykdomstidslinje.harTilstøtende
+import no.nav.helse.sykdomstidslinje.tilstøterKronologisk
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -25,15 +25,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun utenfor(other: Periode) =
         start < other.start || endInclusive > other.endInclusive
 
-    /** All days considered, including weekends */
-    internal fun tilstøtendeStrict(other: Periode) =
-        this.endInclusive.plusDays(1) == other.start ||
-            other.endInclusive.plusDays(1) == this.start
-
-    /** Gap on weekend days not considered gap */
-    internal fun tilstøtendeLenient(other: Periode) =
-        this.endInclusive.harTilstøtende(other.start) ||
-            other.endInclusive.harTilstøtende(this.start)
+    internal fun etterfølgesAv(other: Periode) = this.endInclusive.tilstøterKronologisk(other.start)
 
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive

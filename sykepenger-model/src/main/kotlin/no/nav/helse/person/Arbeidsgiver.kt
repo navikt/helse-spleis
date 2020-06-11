@@ -229,11 +229,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun tilstøtende(vedtaksperiode: Vedtaksperiode) =
-        Vedtaksperiode.tilstøtendePeriode(vedtaksperiode, perioder)
+    internal fun finnForegåendePeriode(vedtaksperiode: Vedtaksperiode) =
+        perioder.firstOrNull { other -> other.etterfølgesAv(vedtaksperiode) }
 
     internal fun harPerioderSomStarterEtter(vedtaksperiode: Vedtaksperiode) =
-        Vedtaksperiode.harPerioderSomStarterEtter(vedtaksperiode, perioder)
+        perioder.any { it.starterSenereEnn(vedtaksperiode) }
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(perioder, vedtaksperiode)

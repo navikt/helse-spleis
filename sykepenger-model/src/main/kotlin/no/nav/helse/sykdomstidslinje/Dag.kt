@@ -174,8 +174,8 @@ internal sealed class Dag(
 private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
-internal fun LocalDate.harTilstøtende(other: LocalDate) =
-    when (this.dayOfWeek) {
+internal fun LocalDate.tilstøterKronologisk(other: LocalDate): Boolean =
+    this.isBefore(other) && when (this.dayOfWeek) {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
         FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
         SATURDAY -> other in this.plusDays(1)..this.plusDays(2)

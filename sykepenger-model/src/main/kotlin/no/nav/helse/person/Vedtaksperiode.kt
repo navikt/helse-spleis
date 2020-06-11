@@ -209,7 +209,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun forkastHvisPåfølgendeUnntattNy(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.tilstøtende(this))) return
+        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(this))) return
         hendelse.warn("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd")
         forkast(hendelse)
     }
@@ -235,7 +235,8 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(hendelse)
     }
 
-    internal fun tilstøtende(other: Vedtaksperiode) = this.periode.tilstøtendeLenient(other.periode)
+    internal fun etterfølgesAv(other: Vedtaksperiode) = this.periode.etterfølgesAv(other.periode)
+    internal fun starterSenereEnn(other: Vedtaksperiode) = this.periode.start > other.periode.start
 
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
@@ -288,7 +289,7 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.førsteFraværsdag != null) {
             if (hendelse.førsteFraværsdag > periode.endInclusive)
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
-            if (arbeidsgiver.tilstøtende(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
+            if (arbeidsgiver.finnForegåendePeriode(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode")
         }
         hendelse.valider(periode)
@@ -585,7 +586,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.arbeidsgiver.forkastAlleEtterfølgende(vedtaksperiode, sykmelding)
                     return@håndter TilInfotrygd
                 }
-                val tilstøtende = vedtaksperiode.arbeidsgiver.tilstøtende(vedtaksperiode)
+                val tilstøtende = vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode)
                 val forlengelse = tilstøtende != null
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
                 if (tilstøtende != null) {
@@ -979,7 +980,7 @@ internal class Vedtaksperiode private constructor(
                 validerYtelser(vedtaksperiode.periode, ytelser)
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {
-                    arbeidsgiver.tilstøtende(vedtaksperiode)?.also { tilstøtendePeriode ->
+                    arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
                         vedtaksperiode.førsteFraværsdag = tilstøtendePeriode.førsteFraværsdag
                         return@onSuccess
@@ -1324,14 +1325,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        internal fun tilstøtendePeriode(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
-            .filterNot { other == it }
-            .filter { it.sykdomstidslinje().harTilstøtende(other.sykdomstidslinje()) }
-            .minBy { it.periode.start }
-
-        internal fun harPerioderSomStarterEtter(other: Vedtaksperiode, perioder: List<Vedtaksperiode>) = perioder
-            .filterNot { other == it }
-            .any { it.periode.start >= other.periode.start }
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }

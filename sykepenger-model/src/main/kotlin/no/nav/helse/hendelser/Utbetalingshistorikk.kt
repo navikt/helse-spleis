@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.sykdomstidslinje.harTilstøtende
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.prosent
@@ -126,7 +125,7 @@ class Utbetalingshistorikk(
                     periode: no.nav.helse.hendelser.Periode,
                     organisasjonsnummer: String
                 ): Aktivitetslogg {
-                    if (liste.harTilstøtendePeriodeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
+                    if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
                         aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
                         return aktivitetslogg
                     }
@@ -135,20 +134,20 @@ class Utbetalingshistorikk(
                     if (liste.harHistoriskeSammenhengendePerioderMedEndring())
                         aktivitetslogg.warn(
                             "Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd.%s",
-                            if (liste.harTilstøtende(periode)) " Direkte overgang fra Infotrygd; kontroller at sykepengegrunnlaget er riktig." else ""
+                            if (liste.harForegående(periode)) " Direkte overgang fra Infotrygd; kontroller at sykepengegrunnlaget er riktig." else ""
                         )
                     return aktivitetslogg
                 }
 
-                private fun List<Periode>.harTilstøtende(periode: no.nav.helse.hendelser.Periode) =
+                private fun List<Periode>.harForegående(periode: no.nav.helse.hendelser.Periode) =
                     this
                         .filterIsInstance<Utbetalingsperiode>()
-                        .any { it.periode.endInclusive.harTilstøtende(periode.start) }
+                        .any { it.periode.etterfølgesAv(periode) }
 
-                private fun List<Periode>.harTilstøtendePeriodeFraAnnenArbeidsgiver(periode: no.nav.helse.hendelser.Periode, organisasjonsnummer: String) =
+                private fun List<Periode>.harForegåendeFraAnnenArbeidsgiver(periode: no.nav.helse.hendelser.Periode, organisasjonsnummer: String) =
                     this
                         .filterIsInstance<Utbetalingsperiode>()
-                        .filter { it.periode.endInclusive.harTilstøtende(periode.start) }
+                        .filter { it.periode.etterfølgesAv(periode) }
                         .any { it.orgnr != organisasjonsnummer }
 
                 private fun List<Periode>.harHistoriskeSammenhengendePerioderMedEndring() =
@@ -158,7 +157,7 @@ class Utbetalingshistorikk(
                         .any { it }
 
                 private fun erTilstøtendeMedEndring(left: Utbetalingsperiode, right: Utbetalingsperiode) =
-                    left.periode.endInclusive.harTilstøtende(right.periode.start) && left.ugradertBeløp != right.ugradertBeløp && !left.maksDagsats && !right.maksDagsats
+                    left.periode.etterfølgesAv(right.periode) && left.ugradertBeløp != right.ugradertBeløp && !left.maksDagsats && !right.maksDagsats
             }
         }
 

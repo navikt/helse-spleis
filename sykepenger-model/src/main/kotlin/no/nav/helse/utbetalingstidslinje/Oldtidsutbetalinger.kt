@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.harTilstøtende
+import no.nav.helse.sykdomstidslinje.tilstøterKronologisk
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
@@ -20,7 +20,7 @@ internal class Oldtidsutbetalinger(
     internal fun tilstøtende(arbeidsgiver: Arbeidsgiver): Boolean =
         tidslinje(arbeidsgiver).sistePeriode()
             ?.endInclusive
-            ?.harTilstøtende(periode.start)
+            ?.tilstøterKronologisk(periode.start)
             ?: false
 
     //Hvis historikken ikke er tilstøtende, så forventer vi å få en inntektsmelding
