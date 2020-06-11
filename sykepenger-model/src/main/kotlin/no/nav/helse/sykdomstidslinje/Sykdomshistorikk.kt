@@ -17,7 +17,7 @@ internal class Sykdomshistorikk private constructor(
             historikker
                 .flatMap { it.elementer }
                 .sorted()
-                .reduce { forrige, nåværende -> forrige.merge(nåværende).also { result.elementer.add(0, it) }
+                .fold(Element.empty) { forrige, nåværende -> forrige.merge(nåværende).also { result.elementer.add(0, it) }
                 }
         }
     }
@@ -59,7 +59,7 @@ internal class Sykdomshistorikk private constructor(
         visitor.postVisitSykdomshistorikk(this)
     }
 
-    private fun kalkulerBeregnetSykdomstidslinje(
+    private fun sammenslåttTidslinje(
         hendelse: SykdomstidslinjeHendelse,
         hendelseSykdomstidslinje: Sykdomstidslinje
     ): Sykdomstidslinje {
@@ -98,25 +98,29 @@ internal class Sykdomshistorikk private constructor(
             this.beregnetSykdomstidslinje.merge(other.beregnetSykdomstidslinje, { venstre: Dag, høyre: Dag -> høyre })
         )
 
+        override fun toString() = beregnetSykdomstidslinje.toString()
+
         companion object {
 
-            fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+            internal val empty = Element(null, LocalDateTime.now(), Sykdomstidslinje(), Sykdomstidslinje())
 
-            fun opprett(historikk: Sykdomshistorikk,
+            internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+
+            internal fun opprett(historikk: Sykdomshistorikk,
                           hendelse: SykdomstidslinjeHendelse): Element {
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
                     )
                 )
             }
 
-            fun opprett(
+            internal fun opprett(
                 historikk: Sykdomshistorikk,
                 hendelse: SykdomstidslinjeHendelse,
                 tom: LocalDate
@@ -127,14 +131,14 @@ internal class Sykdomshistorikk private constructor(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.kalkulerBeregnetSykdomstidslinje(
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
                     )
                 )
             }
 
-            fun opprettReset(
+            internal fun opprettReset(
                 historikk: Sykdomshistorikk,
                 førsteDatoViBeholder: LocalDate
             ) : Element {

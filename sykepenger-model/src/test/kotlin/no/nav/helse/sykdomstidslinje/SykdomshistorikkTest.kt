@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSykmelding
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -61,11 +61,33 @@ internal class SykdomshistorikkTest {
 
         historikk = listOf(historikk1, historikk2).merge()
 
+        assertEquals(2, historikk.size)
         assertEquals(Periode(1.januar, 20.januar), tidslinje.periode())
         assertEquals(10, tidslinje.filterIsInstance<Dag.Arbeidsdag>().size)
         assertEquals(2, tidslinje.filterIsInstance<Dag.FriskHelgedag>().size)
         assertEquals(3, tidslinje.filterIsInstance<Dag.SykHelgedag>().size)
         assertEquals(5, tidslinje.filterIsInstance<Dag.Sykedag>().size)
+    }
+
+    @Test
+    internal fun `slå sammen flere hendelser per historie`() {
+        val historikk1 = Sykdomshistorikk()
+        val historikk2 = Sykdomshistorikk()
+
+        // Deliberatly "out of order"
+        historikk1.håndter(TestSykmelding((1.januar sykTil  11.januar)))
+        historikk2.håndter(TestSykmelding((16.januar sykTil 20.januar)))
+        historikk2.håndter(TestInntektsmelding((15.januar sykTil 15.januar)))
+        historikk1.håndter(TestSøknad((11.januar ferieTil 13.januar)))
+
+        historikk = listOf(historikk1, historikk2).merge()
+
+        assertEquals(4, historikk.size)
+        assertEquals(Periode(1.januar, 20.januar), tidslinje.periode())
+        assertEquals(3, tidslinje.filterIsInstance<Dag.Feriedag>().size)
+        assertEquals(3, tidslinje.filterIsInstance<Dag.SykHelgedag>().size)
+        assertEquals(13, tidslinje.filterIsInstance<Dag.Sykedag>().size)
+        assertEquals(1, tidslinje.filterIsInstance<Dag.UkjentDag>().size)
     }
 
     internal sealed class TestEvent(

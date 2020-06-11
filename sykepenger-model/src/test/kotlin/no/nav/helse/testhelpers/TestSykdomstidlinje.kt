@@ -17,7 +17,7 @@ internal class TestSykdomstidslinje(
     internal infix fun grad(grad: Number) = this.also { it.grad = grad.toDouble() }
 
     internal fun asSykdomstidslinje(kilde: Hendelseskilde = TestEvent.testkilde) = daggenerator(førsteDato, sisteDato, grad, kilde)
-    internal fun merge(annen: TestSykdomstidslinje) = this.asSykdomstidslinje().merge(annen)
+    internal infix fun merge(annen: TestSykdomstidslinje) = this.asSykdomstidslinje().merge(annen)
     internal fun merge(annen: Sykdomstidslinje) = this.asSykdomstidslinje().merge(annen)
     internal fun lås(periode: Periode) = this.asSykdomstidslinje().also { it.lås(periode) }
     internal fun låsOpp(periode: Periode) = this.asSykdomstidslinje().also { it.låsOpp(periode) }
@@ -34,6 +34,7 @@ internal infix fun LocalDate.ferieTil(sisteDato: LocalDate) =
     }
 
 internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::sykedager )
+
 internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager )
 
 internal fun Sykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): Sykdomstidslinje = this.merge(testTidslinje.asSykdomstidslinje())
