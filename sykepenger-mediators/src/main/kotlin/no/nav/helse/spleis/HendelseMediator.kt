@@ -243,7 +243,7 @@ internal class HendelseMediator(
 
         fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
             if (meldinger.isEmpty()) return
-            sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} på rapid for fnr=${hendelse.fødselsnummer()}")
+            sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} meldinger på rapid for fnr=${hendelse.fødselsnummer()}")
             meldinger.forEach { (fødselsnummer, melding) ->
                 rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $it") })
             }
