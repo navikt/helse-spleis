@@ -40,7 +40,7 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", false)
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", false)
             )
         )
 
@@ -55,8 +55,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "987654321", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.0, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "987654321", true)
             )
         )
 
@@ -104,8 +104,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.0, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", true)
             )
         )
 
@@ -120,8 +120,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 1234, "987654321", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 1234.0, "987654321", true)
             )
         )
 

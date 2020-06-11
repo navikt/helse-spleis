@@ -152,7 +152,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterUtbetalingshistorikk(vedtaksperiodeIndex: Int, vararg utbetalinger: Utbetalingshistorikk.Periode, inntektshistorikk: List<Inntektsopplysning> = listOf(
         Inntektsopplysning(
             1.desember(2017),
-            INNTEKT.toInt(),
+            INNTEKT,
             ORGNUMMER,
             true
         )
@@ -163,7 +163,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterYtelser(vedtaksperiodeIndex: Int, vararg utbetalinger: Utbetalingshistorikk.Periode, inntektshistorikk: List<Inntektsopplysning> = listOf(
         Inntektsopplysning(
             1.desember(2017),
-            INNTEKT.toInt(),
+            INNTEKT,
             ORGNUMMER,
             true
         )
@@ -336,7 +336,7 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning> = listOf(
             Inntektsopplysning(
                 1.desember(2017),
-                INNTEKT.toInt(),
+                INNTEKT,
                 ORGNUMMER,
                 true
             )
@@ -360,7 +360,7 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning> = listOf(
             Inntektsopplysning(
                 1.desember(2017),
-                INNTEKT.toInt(),
+                INNTEKT,
                 ORGNUMMER,
                 true
             )

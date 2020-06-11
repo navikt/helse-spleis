@@ -249,7 +249,7 @@ class SpeilBuilderTest {
         val førsteFraværsdagInfotrygd = 1.desember(2017)
         val fom2Periode = 1.februar
         val tom2Periode = 14.februar
-        val inntektshistorikk = listOf(Inntektsopplysning(førsteFraværsdagInfotrygd, 31000, orgnummer, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(førsteFraværsdagInfotrygd, 31000.0, orgnummer, true))
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {

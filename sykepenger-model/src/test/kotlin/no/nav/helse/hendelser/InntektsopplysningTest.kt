@@ -60,5 +60,5 @@ internal class InntektsopplysningTest {
     }
 
     private fun inntektsopplysning(dato: LocalDate, orgnr: String, refusjonTom: LocalDate? = null) =
-        Utbetalingshistorikk.Inntektsopplysning(dato, 1000, orgnr, true, refusjonTom)
+        Utbetalingshistorikk.Inntektsopplysning(dato, 1000.0, orgnr, true, refusjonTom)
 }
