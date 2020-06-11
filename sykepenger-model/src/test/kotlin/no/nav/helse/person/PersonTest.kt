@@ -32,7 +32,7 @@ internal class PersonTest {
     private val inspektør get() = TestPersonInspektør(testPerson)
 
     @BeforeEach
-    internal fun setup() {
+    fun setup() {
         testObserver = TestPersonObserver()
         testPerson = Person(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
             it.addObserver(this.testObserver)
@@ -50,7 +50,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sykmelding fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
+    fun `sykmelding fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         testPerson.also {
             it.håndter(sykmelding())
         }
@@ -61,13 +61,14 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `påminnelse for periode som ikke finnes`() {
+    fun `påminnelse for periode som ikke finnes`() {
         val påminnelse = påminnelse(
             vedtaksperiodeId = UUID.randomUUID(),
             tilstandType = MOTTATT_SYKMELDING_FERDIG_GAP
         )
 
-        assertThrows<Aktivitetslogg.AktivitetException> { testPerson.also { it.håndter(påminnelse) } }
+        testPerson.also { it.håndter(påminnelse) }
+        assertTrue(påminnelse.hasErrors())
 
         assertPersonIkkeEndret()
         assertVedtaksperiodeIkkeEndret()
@@ -85,7 +86,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
+    fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
             it.håndter(sykmelding())
             it.håndter(inntektsmelding())
@@ -96,7 +97,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `eksisterende periode må behandles i infotrygd når en sykmelding overlapper sykdomstidslinjen i den eksisterende perioden`() {
+    fun `eksisterende periode må behandles i infotrygd når en sykmelding overlapper sykdomstidslinjen i den eksisterende perioden`() {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
         sykmelding(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
             testPerson.håndter(it)
@@ -106,7 +107,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
+    fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
         testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
@@ -135,7 +136,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `sykmelding med periode som ikke er 100 %`() {
+    fun `sykmelding med periode som ikke er 100 %`() {
         sykmelding(
             perioder = listOf(
                 Triple(1.mandag, 1.torsdag, 60),
@@ -148,7 +149,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `søknad trigger vedtaksperiode endret-hendelse`() {
+    fun `søknad trigger vedtaksperiode endret-hendelse`() {
         testPerson.also {
             it.håndter(sykmelding())
             it.håndter(søknad())
@@ -159,7 +160,7 @@ internal class PersonTest {
     }
 
     @Test
-    internal fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
+    fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             testPerson.also {
                 it.håndter(

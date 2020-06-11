@@ -226,7 +226,7 @@ internal class HendelseMediator(
 
     private fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
         lagrePersonDao.lagrePerson(message, person, hendelse)
-
+        personMediator.finalize(person, message, hendelse)
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
@@ -234,15 +234,24 @@ internal class HendelseMediator(
     }
 
     private class PersonMediator(private val rapidsConnection: RapidsConnection) {
-
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val meldinger = mutableListOf<Pair<String, String>>()
 
         fun observer(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
             person.addObserver(Observatør(message, hendelse))
         }
 
-        private fun publish(fødselsnummer: String, message: String) {
-            rapidsConnection.publish(fødselsnummer, message.also { sikkerLogg.info("sender $it") })
+        fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
+            if (meldinger.isEmpty()) return
+            sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} på rapid for fnr=${hendelse.fødselsnummer()}")
+            meldinger.forEach { (fødselsnummer, melding) ->
+                rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $it") })
+            }
+            meldinger.clear()
+        }
+
+        private fun queueMessage(fødselsnummer: String, message: String) {
+            meldinger.add(fødselsnummer to message)
         }
 
         private inner class Observatør(
@@ -250,7 +259,7 @@ internal class HendelseMediator(
             private val hendelse: PersonHendelse
         ) : PersonObserver {
             override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-                publish(
+                queueMessage(
                     "vedtaksperiode_påminnet", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
@@ -265,7 +274,7 @@ internal class HendelseMediator(
             }
 
             override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-                publish(
+                queueMessage(
                     "vedtaksperiode_endret", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -282,7 +291,7 @@ internal class HendelseMediator(
             }
 
             override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
-                publish(
+                queueMessage(
                     "vedtaksperiode_forkastet", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -293,7 +302,7 @@ internal class HendelseMediator(
             }
 
             override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
-                publish(
+                queueMessage(
                     "utbetalt", JsonMessage.newMessage(
                         mapOf(
                             "aktørId" to event.aktørId,
@@ -329,7 +338,7 @@ internal class HendelseMediator(
             }
 
             override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-                publish(
+                queueMessage(
                     "vedtaksperiode_ikke_funnet", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
@@ -339,7 +348,7 @@ internal class HendelseMediator(
             }
 
             override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-                publish(
+                queueMessage(
                     "trenger_inntektsmelding", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -366,8 +375,8 @@ internal class HendelseMediator(
                 }
             }
 
-            private fun publish(event: String, outgoingMessage: JsonMessage) {
-                publish(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
+            private fun queueMessage(event: String, outgoingMessage: JsonMessage) {
+                queueMessage(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
             }
         }
     }

@@ -70,9 +70,9 @@ class Person private constructor(
 
     fun håndter(påminnelse: Påminnelse) {
         try {
-            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return
+            finnArbeidsgiver(påminnelse).håndter(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
-            påminnelse.info("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+            påminnelse.error("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
             observers.forEach {
                 it.vedtaksperiodeIkkeFunnet(
                     PersonObserver.VedtaksperiodeIkkeFunnetEvent(
@@ -83,7 +83,6 @@ class Person private constructor(
                     )
                 )
             }
-            throw err
         }
     }
 
