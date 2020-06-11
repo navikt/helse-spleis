@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSykmelding
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -13,15 +14,15 @@ import java.time.LocalDate
 import java.util.*
 
 internal class SykdomshistorikkTest {
-    val historikk = Sykdomshistorikk()
+    private var historikk = Sykdomshistorikk()
     private val inspektør get() = SykdomstidslinjeInspektør(tidslinje)
     private val tidslinje: Sykdomstidslinje get() = historikk.sykdomstidslinje()
 
     @Test
     fun `Legger på to hendelser`() {
 
-        historikk.håndter(TestEvent.TestSykmelding((1.januar jobbTil 12.januar)))
-        historikk.håndter(TestEvent.TestSykmelding((13.januar sykTil 20.januar)))
+        historikk.håndter(TestSykmelding((1.januar jobbTil 12.januar)))
+        historikk.håndter(TestSykmelding((13.januar sykTil 20.januar)))
 
         assertEquals(10, tidslinje.filterIsInstance<Dag.Arbeidsdag>().size)
         assertEquals(2, tidslinje.filterIsInstance<Dag.FriskHelgedag>().size)
@@ -31,8 +32,8 @@ internal class SykdomshistorikkTest {
 
     @Test
     fun `sykmelding til 12 januar blir sendt til Infotrygd`() {
-        historikk.håndter(TestEvent.TestSykmelding((1.januar jobbTil 12.januar)))
-        historikk.håndter(TestEvent.TestSykmelding((20.januar sykTil 25.januar)))
+        historikk.håndter(TestSykmelding((1.januar jobbTil 12.januar)))
+        historikk.håndter(TestSykmelding((20.januar sykTil 25.januar)))
 
         val søknad = TestEvent.TestSøknad((20.januar sykTil 25.januar))
         historikk.håndter(søknad)
@@ -49,7 +50,25 @@ internal class SykdomshistorikkTest {
 
         assertEquals(4, historikk.size)
     }
-    private sealed class TestEvent(
+
+    @Test
+    internal fun `overlap av samme type`() {
+        val historikk1 = Sykdomshistorikk()
+        val historikk2 = Sykdomshistorikk()
+
+        historikk1.håndter(TestSykmelding((1.januar jobbTil 12.januar)))
+        historikk2.håndter(TestSykmelding((13.januar sykTil 20.januar)))
+
+        historikk = listOf(historikk1, historikk2).merge()
+
+        assertEquals(Periode(1.januar, 20.januar), tidslinje.periode())
+        assertEquals(10, tidslinje.filterIsInstance<Dag.Arbeidsdag>().size)
+        assertEquals(2, tidslinje.filterIsInstance<Dag.FriskHelgedag>().size)
+        assertEquals(3, tidslinje.filterIsInstance<Dag.SykHelgedag>().size)
+        assertEquals(5, tidslinje.filterIsInstance<Dag.Sykedag>().size)
+    }
+
+    internal sealed class TestEvent(
         private val sykdomstidslinje: TestSykdomstidslinje,
         melding: Melding
     ) : SykdomstidslinjeHendelse(UUID.randomUUID(), melding) {

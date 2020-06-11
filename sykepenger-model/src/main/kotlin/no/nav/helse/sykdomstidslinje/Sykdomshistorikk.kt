@@ -12,6 +12,16 @@ internal class Sykdomshistorikk private constructor(
 ) {
     internal constructor() : this(mutableListOf())
 
+    companion object {
+        internal fun merge(historikker: List<Sykdomshistorikk>) = Sykdomshistorikk().also { result ->
+            historikker
+                .flatMap { it.elementer }
+                .sorted()
+                .reduce { forrige, nåværende -> forrige.merge(nåværende).also { result.elementer.add(0, it) }
+                }
+        }
+    }
+
     internal val size get() = elementer.size
 
     internal fun isEmpty() = elementer.isEmpty()
@@ -65,7 +75,8 @@ internal class Sykdomshistorikk private constructor(
         private val tidsstempel: LocalDateTime,
         private val hendelseSykdomstidslinje: Sykdomstidslinje,
         private val beregnetSykdomstidslinje: Sykdomstidslinje
-    ) {
+    ) : Comparable<Element> {
+
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
             visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
@@ -77,6 +88,15 @@ internal class Sykdomshistorikk private constructor(
 
             visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
         }
+
+        override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
+
+        internal fun merge(other: Element) = Element(
+            other.hendelseId,
+            other.tidsstempel,
+            other.hendelseSykdomstidslinje,
+            this.beregnetSykdomstidslinje.merge(other.beregnetSykdomstidslinje, { venstre: Dag, høyre: Dag -> høyre })
+        )
 
         companion object {
 
@@ -128,3 +148,5 @@ internal class Sykdomshistorikk private constructor(
         }
     }
 }
+
+internal fun List<Sykdomshistorikk>.merge() = Sykdomshistorikk.merge(this)
