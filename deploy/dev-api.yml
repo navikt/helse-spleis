@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: {{app}}
-  namespace: default
+  namespace: tbd
   labels:
     team: {{team}}
 spec:
@@ -33,7 +33,7 @@ spec:
     enabled: true
     paths:
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/spleis-api/default
+        kvPath: /kv/preprod/fss/spleis-api/tbd
       - mountPath: /var/run/secrets/nais.io/azure
         kvPath: /azuread/data/dev/creds/spleis
   secureLogs:

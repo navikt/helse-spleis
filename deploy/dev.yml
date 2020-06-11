@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: {{app}}
-  namespace: default
+  namespace: tbd
   labels:
     team: {{team}}
 spec:
