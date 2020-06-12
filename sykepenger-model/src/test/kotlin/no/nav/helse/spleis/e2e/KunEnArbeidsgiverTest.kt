@@ -204,15 +204,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
         )
         assertTilstander(
             2,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
+            AVVENTER_UFERDIG_FORLENGELSE
         )
     }
 
@@ -1525,5 +1524,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertThrows<AssertionFailedError> {
             assertNull(inspektør.vilkårsgrunnlag(3))
         }
+    }
+
+    @Test
+    fun `perioden henter vilkårsgrunnlag selv om tidligere periode har lest inntektsmelding når det er gap mellom periodene`() {
+        håndterSykmelding(Triple(1.januar,  4.januar, 100))
+        håndterSykmelding(Triple(8.januar,  15.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertNotNull(inspektør.vilkårsgrunnlag(0))
+        assertNotNull(inspektør.vilkårsgrunnlag(1))
+        assertNotEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
     }
 }
