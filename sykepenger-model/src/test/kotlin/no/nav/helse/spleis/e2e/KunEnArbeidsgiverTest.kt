@@ -9,6 +9,8 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.opentest4j.AssertionFailedError
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -1483,5 +1485,45 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Triple(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null, INNTEKT, listOf(14.januar)))
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `data for vilkårsvurdering propageres til tilstøtende`() {
+        håndterSykmelding(Triple(1.januar, 31.januar, 100))
+        håndterSykmelding(Triple(1.februar, 28.februar, 100))
+        håndterSykmelding(Triple(1.mars, 31.mars, 100))
+        håndterSykmelding(Triple(5.april, 30.april, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+
+        assertNotNull(inspektør.vilkårsgrunnlag(0))
+        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
+        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
+        assertThrows<AssertionFailedError> {
+            assertNull(inspektør.vilkårsgrunnlag(3))
+        }
+    }
+
+    @Test
+    fun `data for vilkårsvurdering hentes fra foregående`() {
+        håndterSykmelding(Triple(1.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+
+        håndterSykmelding(Triple(1.februar, 28.februar, 100))
+        håndterSykmelding(Triple(1.mars, 31.mars, 100))
+        håndterSykmelding(Triple(5.april, 30.april, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(5.april, 30.april, 100))
+
+        assertNotNull(inspektør.vilkårsgrunnlag(0))
+        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
+        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
+        assertThrows<AssertionFailedError> {
+            assertNull(inspektør.vilkårsgrunnlag(3))
+        }
     }
 }

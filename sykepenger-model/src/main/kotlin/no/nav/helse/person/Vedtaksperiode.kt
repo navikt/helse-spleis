@@ -209,7 +209,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun forkastHvisPåfølgendeUnntattNy(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(this))) return
+        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(
+                this
+            ))
+        ) return
         hendelse.warn("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd")
         forkast(hendelse)
     }
@@ -224,13 +227,15 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (erFerdigBehandlet()) return arbeidsgiver.forkast(this).also {
-            person.vedtaksperiodeForkastet(PersonObserver.VedtaksperiodeForkastetEvent(
-                vedtaksperiodeId = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                gjeldendeTilstand = tilstand.type
-            ))
+            person.vedtaksperiodeForkastet(
+                PersonObserver.VedtaksperiodeForkastetEvent(
+                    vedtaksperiodeId = id,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    gjeldendeTilstand = tilstand.type
+                )
+            )
         }
         invaliderPeriode(hendelse)
     }
@@ -327,13 +332,18 @@ internal class Vedtaksperiode private constructor(
             "Finner ikke inntekt for perioden $førsteFraværsdag"
         )
         if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
-                dataForVilkårsvurdering = vilkårsgrunnlag.grunnlagsdata()
+                mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
+    }
+
+    private fun mottaVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) {
+        dataForVilkårsvurdering = grunnlagsdata
+        arbeidsgiver.finnPåfølgendePeriode(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
@@ -590,6 +600,7 @@ internal class Vedtaksperiode private constructor(
                 val forlengelse = tilstøtende != null
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
                 if (tilstøtende != null) {
+                    vedtaksperiode.dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering
                     vedtaksperiode.gruppeId = tilstøtende.gruppeId
                 }
                 when {

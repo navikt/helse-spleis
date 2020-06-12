@@ -232,6 +232,9 @@ internal class Arbeidsgiver private constructor(
     internal fun finnForegåendePeriode(vedtaksperiode: Vedtaksperiode) =
         perioder.firstOrNull { other -> other.etterfølgesAv(vedtaksperiode) }
 
+    internal fun finnPåfølgendePeriode(vedtaksperiode: Vedtaksperiode) =
+        perioder.firstOrNull { other -> vedtaksperiode.etterfølgesAv(other) }
+
     internal fun harPerioderSomStarterEtter(vedtaksperiode: Vedtaksperiode) =
         perioder.any { it.starterSenereEnn(vedtaksperiode) }
 
@@ -243,7 +246,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)
-    internal class TilbakestillBehandling(internal val organisasjonsnummer: String, internal val hendelse: PersonHendelse) : ArbeidstakerHendelse(hendelse.aktivitetslogg) {
+    internal class TilbakestillBehandling(
+        internal val organisasjonsnummer: String,
+        internal val hendelse: PersonHendelse
+    ) : ArbeidstakerHendelse(hendelse.aktivitetslogg) {
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()
