@@ -147,7 +147,6 @@ internal class VilkårsgrunnlagTest {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
-                gruppeId: UUID,
                 arbeidsgiverNettoBeløp: Int,
                 personNettoBeløp: Int,
                 periode: Periode

@@ -63,7 +63,8 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     fødselsnummer: String,
     inntekter: List<Inntekthistorikk.Inntekt>,
     førsteSykepengedag: LocalDate?,
-    sisteSykepengedag: LocalDate?
+    sisteSykepengedag: LocalDate?,
+    gruppeId: UUID
 ): VedtaksperiodeDTO {
     val sykdomstidslinje = this["sykdomstidslinje"] as List<SykdomstidslinjedagDTO>
     val dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO }
@@ -81,7 +82,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     )
     return VedtaksperiodeDTO(
         id = this["id"] as UUID,
-        gruppeId = this["gruppeId"] as UUID,
+        gruppeId = gruppeId,
         fom = sykdomstidslinje.first().dagen,
         tom = sykdomstidslinje.last().dagen,
         tilstand = this["tilstand"] as TilstandstypeDTO,
@@ -141,11 +142,11 @@ internal fun Simulering.SimuleringResultat.mapTilSimuleringsdataDto(): Simulerin
     )
 }
 
-internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(): UfullstendigVedtaksperiodeDTO {
+internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppeId: UUID): UfullstendigVedtaksperiodeDTO {
     val sykdomstidslinje = this["sykdomstidslinje"] as List<SykdomstidslinjedagDTO>
     return UfullstendigVedtaksperiodeDTO(
         id = this["id"] as UUID,
-        gruppeId = this["gruppeId"] as UUID,
+        gruppeId = gruppeId,
         fom = sykdomstidslinje.first().dagen,
         tom = sykdomstidslinje.last().dagen,
         tilstand = this["tilstand"] as TilstandstypeDTO,

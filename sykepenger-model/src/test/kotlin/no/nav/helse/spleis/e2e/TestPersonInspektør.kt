@@ -48,7 +48,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inGyldigePerioder = false
     private var inVedtaksperiode = false
-    private val gruppeIder = mutableMapOf<Int, UUID>()
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val periodeIder = mutableMapOf<Int, UUID>()
 
@@ -58,7 +57,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
     internal fun forkastetVedtaksperiodeId(index: Int) = requireNotNull(forkastedePerioderIder[index])
-    internal fun gruppeId(index: Int) = requireNotNull(gruppeIder[index])
 
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
@@ -92,7 +90,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode
@@ -104,7 +101,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
         if (!inGyldigePerioder) return
 
-        gruppeIder[vedtaksperiodeindeks] = gruppeId
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
     }
 
@@ -120,7 +116,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode

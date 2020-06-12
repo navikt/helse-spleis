@@ -229,6 +229,27 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
+
+                sykmelding(fom = 20.februar, tom = 28.februar).also { (sykmelding, sykmeldingDto) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDto)
+                }
+                søknad(fom = 20.februar, tom = 28.februar).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 20.februar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+
+                vedtaksperiodeIder = collectVedtaksperiodeIder()
+
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
             }
         }
 
@@ -236,12 +257,14 @@ class SpeilBuilderTest {
 
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
 
-        assertEquals(2, vedtaksperioder.size)
-        assertEquals(vedtaksperioder.first().gruppeId, vedtaksperioder.last().gruppeId)
+        assertEquals(3, vedtaksperioder.size)
+        assertEquals(vedtaksperioder.first().gruppeId, vedtaksperioder[1].gruppeId)
+        assertNotEquals(vedtaksperioder.first().gruppeId, vedtaksperioder.last().gruppeId)
+
         assertNotNull(vedtaksperioder.first().dataForVilkårsvurdering)
         assertNotNull(vedtaksperioder.first().vilkår.opptjening)
-        assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder.last().dataForVilkårsvurdering)
-        assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder.last().vilkår.opptjening)
+        assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder[1].dataForVilkårsvurdering)
+        assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder[1].vilkår.opptjening)
     }
 
     @Test
@@ -481,7 +504,6 @@ class SpeilBuilderTest {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
-                gruppeId: UUID,
                 arbeidsgiverNettoBeløp: Int,
                 personNettoBeløp: Int,
                 periode: Periode
@@ -745,7 +767,6 @@ class SpeilBuilderTest {
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
-                    gruppeId: UUID,
                     arbeidsgiverNettoBeløp: Int,
                     personNettoBeløp: Int,
                     periode: Periode

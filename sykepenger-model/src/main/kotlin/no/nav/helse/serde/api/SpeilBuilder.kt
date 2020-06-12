@@ -223,7 +223,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode
@@ -231,7 +230,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.preVisitVedtaksperiode(
             vedtaksperiode,
             id,
-            gruppeId,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             periode
@@ -277,7 +275,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode
@@ -285,7 +282,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.postVisitVedtaksperiode(
             vedtaksperiode,
             id,
-            gruppeId,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             periode
@@ -440,6 +436,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
+        private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
         lateinit var utbetalinger: List<Utbetaling>
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
@@ -450,6 +447,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            vedtaksperioder.forEach { periode ->
+                gruppeIder[periode] = arbeidsgiver.finnForegåendePeriode(periode)
+                    ?.let { foregående -> gruppeIder.getValue(foregående) }
+                    ?: UUID.randomUUID()
+            }
             this.vedtaksperioder.clear()
         }
 
@@ -458,6 +460,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+            vedtaksperioder.forEach { periode ->
+                gruppeIder[periode] = arbeidsgiver.finnForegåendePeriode(periode)
+                    ?.let { foregående -> gruppeIder.getValue(foregående) }
+                    ?: UUID.randomUUID()
+            }
             this.vedtaksperioder.clear()
         }
 
@@ -474,7 +481,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode
@@ -485,6 +491,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     arbeidsgiver = arbeidsgiver,
                     vedtaksperiodeMap = vedtaksperiodeMap,
                     vedtaksperioder = vedtaksperioder,
+                    gruppeId = gruppeIder.getValue(vedtaksperiode),
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
                     utbetalinger = utbetalinger,
@@ -509,6 +516,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
+        private val gruppeId: UUID,
         private val fødselsnummer: String,
         private val inntekter: List<Inntekthistorikk.Inntekt>,
         private val utbetalinger: List<Utbetaling>,
@@ -573,7 +581,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             ) {
                 fullstendig = true
             } else {
-                vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto())
+                vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto(gruppeId))
             }
         }
 
@@ -586,7 +594,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode
@@ -599,7 +606,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                         fødselsnummer,
                         inntekter,
                         førsteSykepengedag,
-                        sisteSykepengedag
+                        sisteSykepengedag,
+                        gruppeId
                     )
                 )
             }

@@ -174,12 +174,11 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -227,12 +226,11 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        gruppeId: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -419,7 +417,6 @@ internal class JsonBuilder : PersonVisitor {
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode
@@ -588,7 +585,6 @@ internal class JsonBuilder : PersonVisitor {
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            gruppeId: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode

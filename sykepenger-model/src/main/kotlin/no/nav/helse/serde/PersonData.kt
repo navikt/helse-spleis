@@ -319,7 +319,6 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             private val id: UUID,
-            private val gruppeId: UUID,
             private val maksdato: LocalDate?,
             private val gjenståendeSykedager: Int?,
             private val forbrukteSykedager: Int?,
@@ -353,7 +352,6 @@ internal data class PersonData(
                         person,
                         arbeidsgiver,
                         id,
-                        gruppeId,
                         aktørId,
                         fødselsnummer,
                         organisasjonsnummer,

@@ -12,7 +12,6 @@ import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal val id: UUID = vedtaksperiode["id"]
-    private val gruppeId: UUID = vedtaksperiode["gruppeId"]
     private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
     private val gjenståendeSykedager: Int? = vedtaksperiode["gjenståendeSykedager"]
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
@@ -84,7 +83,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
 
     internal fun toMap() = mutableMapOf(
         "id" to id,
-        "gruppeId" to gruppeId,
         "maksdato" to maksdato,
         "gjenståendeSykedager" to gjenståendeSykedager,
         "forbrukteSykedager" to forbrukteSykedager,
@@ -102,7 +100,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
         "id" to id,
-        "gruppeId" to gruppeId,
         "maksdato" to maksdato,
         "gjenståendeSykedager" to gjenståendeSykedager,
         "forbrukteSykedager" to forbrukteSykedager,

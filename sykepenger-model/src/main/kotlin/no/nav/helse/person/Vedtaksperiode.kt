@@ -32,7 +32,6 @@ internal class Vedtaksperiode private constructor(
     private val person: Person,
     private val arbeidsgiver: Arbeidsgiver,
     private val id: UUID,
-    private var gruppeId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -67,7 +66,6 @@ internal class Vedtaksperiode private constructor(
         person = person,
         arbeidsgiver = arbeidsgiver,
         id = id,
-        gruppeId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
@@ -90,7 +88,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.visitTilstand(tilstand)
@@ -104,7 +102,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, gruppeId, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -601,7 +599,6 @@ internal class Vedtaksperiode private constructor(
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
                 if (tilstøtende != null) {
                     vedtaksperiode.dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering
-                    vedtaksperiode.gruppeId = tilstøtende.gruppeId
                 }
                 when {
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
