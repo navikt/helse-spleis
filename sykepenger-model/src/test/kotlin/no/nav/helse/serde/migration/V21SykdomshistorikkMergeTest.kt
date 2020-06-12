@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -60,8 +61,26 @@ internal class V21SykdomshistorikkMergeTest {
             arbeidsgiverHistorikkElementer = objectMapper.createArrayNode()
         )
         val result = 1.januar.dager("SSSSSHH SSSSSHH")
+        DagKilde.Søknad().also { kilde ->
+            val element = 2.februar.element(
+                kilde,
+                8.januar.dager("SSSSSHH", kilde),
+                1.januar.dager("SSSSSHH SSSSSHH", kilde)
+            )
+        }
+
         println(personJson.toPrettyString())
     }
+
+    private fun LocalDate.element(kilde: DagKilde, hendelseSykdomstidslinje: String, beregnetSykdomstidslinje: String) =
+        """
+            {
+            "hendelseId" : ${kilde.uuid},
+            "tidsstempel" : ${this.atStartOfDay()},
+            "beregnetSykdomstidslinje" : $hendelseSykdomstidslinje,
+            "beregnetSykdomstidslinje" : $beregnetSykdomstidslinje
+            }
+        """
 
     private fun LocalDate.dager(dagString: String, kilde: DagKilde = DagKilde.Søknad()): String {
         var dato = this
