@@ -94,7 +94,6 @@ internal class V21SykdomshistorikkMergeTest {
         assertEquals(expected, migrated)
     }
 
-    @Disabled
     @Test
     fun `inntektsmelding som går over flere vedtaksperioder`() {
         val inntektsmelding = DagKilde.Inntektsmelding()
@@ -132,7 +131,114 @@ internal class V21SykdomshistorikkMergeTest {
             arbeidsgiverHistorikk = expectedHistorikk,
             skjemaVersjon = 21
         )
+        println(person)
         assertEquals(expected, migrated)
+    }
+
+    @Disabled
+    @Test
+    fun `forkastede vedtaksperioder fjerner deler av sykdomstidslinjen`() {
+        val sykmelding1 = DagKilde.Sykmelding()
+        val sykmelding2 = DagKilde.Sykmelding()
+        val inntektsmelding = DagKilde.Inntektsmelding()
+        val søknad2 = DagKilde.Søknad()
+        val søknad1 = DagKilde.Søknad()
+        val historikk1 = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            ),
+            3.februar.element(
+                kilde = inntektsmelding,
+                hendelseSykdomstidslinje = 1.januar.dager("S", inntektsmelding),
+                beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding) + 2.januar.dager("SSSSHH", sykmelding1)
+            )/*,
+            5.februar.element(
+                kilde = søknad1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSARR", søknad1),
+                beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding) + 2.januar.dager("SSS", sykmelding1) + 5.januar.dager("ARR", søknad1)
+            )*/
+        )
+        val historikk2 = historikk(
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+            ),
+            3.februar.element(
+                kilde = inntektsmelding,
+                hendelseSykdomstidslinje = 11.januar.dager("A", inntektsmelding),
+                beregnetSykdomstidslinje = 8.januar.dager("SSS", sykmelding2)
+                    + 11.januar.dager("A", inntektsmelding)
+                    + 12.januar.dager("SHH", sykmelding2)
+            ),
+            4.februar.element(
+                kilde = søknad2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", søknad2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSS", sykmelding2)
+                    + 11.januar.dager("A", inntektsmelding)
+                    + 12.januar.dager("SHH", sykmelding2)
+            )
+        )
+
+        val expectedHistory = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            ),
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) + 8.januar.dager("SSSSSHH", sykmelding2)
+            ),
+            3.februar.element(
+                kilde = inntektsmelding,
+                hendelseSykdomstidslinje = 1.januar.dager("S", inntektsmelding) + 11.januar.dager("A", inntektsmelding),
+                beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding)
+                    + 2.januar.dager("SSSSHH", sykmelding1)
+                    + 8.januar.dager("SSS", sykmelding2)
+                    + 11.januar.dager("A", inntektsmelding)
+                    + 12.januar.dager("SHH", sykmelding2)
+            ),
+            4.februar.element(
+                kilde = søknad2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", søknad2),
+                beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding)
+                    + 2.januar.dager("SSSSHH", sykmelding1)
+                    + 8.januar.dager("SSS", sykmelding2)
+                    + 11.januar.dager("A", inntektsmelding)
+                    + 12.januar.dager("SHH", sykmelding2)
+            )/*,
+            5.februar.element(
+                kilde = søknad1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSARR", søknad1),
+                beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding)
+                    + 2.januar.dager("SSS", sykmelding1)
+                    + 5.januar.dager("ARR", søknad1)
+                    + 8.januar.dager("SSS", sykmelding2)
+                    + 11.januar.dager("A", inntektsmelding)
+                    + 12.januar.dager("SHH", sykmelding2)
+            )*/
+        )
+
+        val person = person(
+            vedtaksperioder = listOf(
+                vedtaksperiode(historikk1),
+                vedtaksperiode(historikk2)
+            )
+        )
+        val merged = listOf(V21SykdomshistorikkMerge()).migrate(person)
+        val expected = person(
+            vedtaksperioder = listOf(
+                vedtaksperiode(historikk1),
+                vedtaksperiode(historikk2)
+            ),
+            arbeidsgiverHistorikk = expectedHistory,
+            skjemaVersjon = 21
+        )
+        assertEquals(expected, merged)
     }
 
     fun historikk(
@@ -148,7 +254,7 @@ internal class V21SykdomshistorikkMergeTest {
             {
             "hendelseId" : "${kilde.uuid}",
             "tidsstempel" : "${this.atStartOfDay()}",
-            "beregnetSykdomstidslinje" : ${hendelseSykdomstidslinje.joinToJsonArray()},
+            "hendelseSykdomstidslinje" : ${hendelseSykdomstidslinje.joinToJsonArray()},
             "beregnetSykdomstidslinje" : ${beregnetSykdomstidslinje.joinToJsonArray()}
             }
         """
