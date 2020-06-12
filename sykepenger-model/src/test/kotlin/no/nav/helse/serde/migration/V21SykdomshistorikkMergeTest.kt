@@ -1,19 +1,16 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
-import kotlin.streams.toList
-
-private typealias Datoer = Pair<LocalDate, LocalDate>
 
 internal class V21SykdomshistorikkMergeTest {
 
@@ -22,67 +19,141 @@ internal class V21SykdomshistorikkMergeTest {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Test
-    fun test() {
+    fun `enkel vedtaksperiode`() {
         val sykmelding = DagKilde.Sykmelding()
         val inntektsmelding = DagKilde.Inntektsmelding()
         val søknad = DagKilde.Søknad()
 
-        val sykmeldingElement = element(
+        val sykmeldingElement = 2.februar.element(
             kilde = sykmelding,
-            hendelseSykdomstidslinje = (11.januar to 31.januar).sykedager(sykmelding),
-            beregnetSykdomstidslinje = (11.januar to 31.januar).sykedager(sykmelding)
+            hendelseSykdomstidslinje = 2.januar.dager("SSSSHH SSSSSHH SSSSSHH", sykmelding),
+            beregnetSykdomstidslinje = 2.januar.dager("SSSSHH SSSSSHH SSSSSHH", sykmelding)
         )
-
-        val inntektsmeldingElement = element(
+        val inntektsmeldingElement = 3.februar.element(
             kilde = inntektsmelding,
-            hendelseSykdomstidslinje = (1.januar to 10.januar).arbeidsdager(inntektsmelding),
-            beregnetSykdomstidslinje = (1.januar to 5.januar).arbeidsdager(inntektsmelding) +
-                (5.januar to 10.januar).sykedager(inntektsmelding) +
-                (11.januar to 31.januar).sykedager(sykmelding)
-        )
-
-        val søknadElement = element(
-            kilde = søknad,
-            hendelseSykdomstidslinje = (11.januar to 28.januar).sykedager(søknad) + (29.januar to 31.januar).arbeidsdager(
-                søknad
-            ),
-            beregnetSykdomstidslinje = (1.januar to 5.januar).arbeidsdager(inntektsmelding) +
-                (5.januar to 10.januar).sykedager(inntektsmelding) +
-                (11.januar to 28.januar).sykedager(sykmelding) +
-                (29.januar to 31.januar).arbeidsdager(søknad)
-        )
-
-        val personJson = personJson(
-            vedtaksperioder = vedtaksperiode(
-                historikkElementer = søknadElement + inntektsmeldingElement + sykmeldingElement
-
-            ),
-            forkastedeVedtaksperioder = objectMapper.createArrayNode(),
-            arbeidsgiverHistorikkElementer = objectMapper.createArrayNode()
-        )
-        val result = 1.januar.dager("SSSSSHH SSSSSHH")
-        DagKilde.Søknad().also { kilde ->
-            val element = 2.februar.element(
-                kilde,
-                8.januar.dager("SSSSSHH", kilde),
-                1.januar.dager("SSSSSHH SSSSSHH", kilde)
+            hendelseSykdomstidslinje = 1.januar.dager("S", inntektsmelding),
+            beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding) + 2.januar.dager(
+                "SSSSHH SSSSSHH SSSSSHH",
+                sykmelding
             )
-        }
+        )
+        val søknadElement = 4.februar.element(
+            kilde = søknad,
+            hendelseSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH SSSSARR", søknad),
+            beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH SSSSARR", søknad)
+        )
 
-        println(personJson.toPrettyString())
+        val historikk = historikk(sykmeldingElement, inntektsmeldingElement, søknadElement)
+        val person = person(listOf(vedtaksperiode(historikk)))
+        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 21)
+        val migrated = listOf(V21SykdomshistorikkMerge()).migrate(person)
+
+        assertEquals(expected, migrated)
     }
 
-    private fun LocalDate.element(kilde: DagKilde, hendelseSykdomstidslinje: String, beregnetSykdomstidslinje: String) =
+    @Test
+    fun `to sykmeldinger fører til en kombinert beregnet sykdomstidslinje`() {
+        val sykmelding1 = DagKilde.Sykmelding()
+        val sykmelding2 = DagKilde.Sykmelding()
+
+        val elementVedtaksperiode1 = 1.februar.element(
+            kilde = sykmelding1,
+            hendelseSykdomstidslinje = 1.januar.dager("SSSSSHH", sykmelding1),
+            beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH", sykmelding1)
+        )
+        val vedtaksperiode1 = vedtaksperiode(
+            historikk(elementVedtaksperiode1)
+        )
+        val vedtaksperiode2 = vedtaksperiode(
+            historikk(
+                2.februar.element(
+                    kilde = sykmelding2,
+                    hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                    beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+                )
+            )
+        )
+        val expectedArbeidsgiverHistory = historikk(
+            elementVedtaksperiode1,
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH", sykmelding1) + 8.januar.dager(
+                    "SSSSSHH",
+                    sykmelding2
+                )
+            )
+        )
+        val person = person(listOf(vedtaksperiode1, vedtaksperiode2), listOf())
+        val migrated = listOf(V21SykdomshistorikkMerge()).migrate(person)
+        val expected = person(
+            listOf(vedtaksperiode1, vedtaksperiode2),
+            arbeidsgiverHistorikk = expectedArbeidsgiverHistory,
+            skjemaVersjon = 21
+        )
+        assertEquals(expected, migrated)
+    }
+
+    @Disabled
+    @Test
+    fun `inntektsmelding som går over flere vedtaksperioder`() {
+        val inntektsmelding = DagKilde.Inntektsmelding()
+
+        val vedtaksperiode1 = vedtaksperiode(
+            historikk(
+                1.februar.element(
+                    kilde = inntektsmelding,
+                    beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH", inntektsmelding),
+                    hendelseSykdomstidslinje = 1.januar.dager("SSSSSHH", inntektsmelding)
+                )
+            )
+        )
+        val vedtaksperiode2 = vedtaksperiode(
+            historikk(
+                1.februar.element(
+                    kilde = inntektsmelding,
+                    beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", inntektsmelding),
+                    hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", inntektsmelding)
+                )
+            )
+        )
+
+        val expectedHistorikk = historikk(
+            1.februar.element(
+                kilde = inntektsmelding,
+                beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH", inntektsmelding),
+                hendelseSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH", inntektsmelding)
+            )
+        )
+        val person = person(listOf(vedtaksperiode1, vedtaksperiode2), listOf())
+        val migrated = listOf(V21SykdomshistorikkMerge()).migrate(person)
+        val expected = person(
+            listOf(vedtaksperiode1, vedtaksperiode2),
+            arbeidsgiverHistorikk = expectedHistorikk,
+            skjemaVersjon = 21
+        )
+        assertEquals(expected, migrated)
+    }
+
+    fun historikk(
+        vararg historikkElementer: String
+    ) = historikkElementer.reversed().joinToJsonArray()
+
+    private fun LocalDate.element(
+        kilde: DagKilde,
+        hendelseSykdomstidslinje: List<String>,
+        beregnetSykdomstidslinje: List<String>
+    ) =
         """
             {
-            "hendelseId" : ${kilde.uuid},
-            "tidsstempel" : ${this.atStartOfDay()},
-            "beregnetSykdomstidslinje" : $hendelseSykdomstidslinje,
-            "beregnetSykdomstidslinje" : $beregnetSykdomstidslinje
+            "hendelseId" : "${kilde.uuid}",
+            "tidsstempel" : "${this.atStartOfDay()}",
+            "beregnetSykdomstidslinje" : ${hendelseSykdomstidslinje.joinToJsonArray()},
+            "beregnetSykdomstidslinje" : ${beregnetSykdomstidslinje.joinToJsonArray()}
             }
         """
 
-    private fun LocalDate.dager(dagString: String, kilde: DagKilde = DagKilde.Søknad()): String {
+    private fun LocalDate.dager(dagString: String, kilde: DagKilde): List<String> {
         var dato = this
         return dagString.toCharArray().filterNot { it == ' ' }.map {
             when (it) {
@@ -95,8 +166,10 @@ internal class V21SykdomshistorikkMergeTest {
                 'R' -> dagString("FriskHelgedag", dato, kilde)
                 else -> throw IllegalArgumentException("Don't recognize character $it")
             }.also { dato = dato.plusDays(1) }
-        }.joinToString(",", "[", "]")
+        }
     }
+
+    fun Iterable<String>.joinToJsonArray() = joinToString(",", "[", "]")
 
     private fun dagString(type: String, dato: LocalDate, kilde: DagKilde) = """
         {
@@ -116,81 +189,27 @@ internal class V21SykdomshistorikkMergeTest {
         class Inntektsmelding : DagKilde(UUID.randomUUID(), "INNTEKTSMELDING")
     }
 
-    operator fun ArrayNode.plus(other: ArrayNode) = objectMapper.createArrayNode().apply {
-        addAll(this@plus)
-        addAll(other)
-    }
-
-    @Language("JSON")
-    fun element(
-        kilde: DagKilde,
-        hendelseSykdomstidslinje: ArrayNode,
-        beregnetSykdomstidslinje: ArrayNode
-    ) = objectMapper.createArrayNode().apply {
-        add(
-            objectMapper.readTree(
-                """
-        {
-          "hendelseId": "${kilde.uuid}",
-          "tidsstempel": "${LocalDateTime.now()}",
-          "beregnetSykdomstidslinje": $beregnetSykdomstidslinje,
-          "hendelseSykdomstidslinje": $hendelseSykdomstidslinje
-        }
-        """
-            )
-        )
-    }
-
-    fun Datoer.sykedager(kilde: DagKilde) = dager("Sykedag", kilde)
-    fun Datoer.arbeidsdager(kilde: DagKilde) = dager("Arbeidsdag", kilde)
-
-    fun Pair<LocalDate, LocalDate>.dager(type: String, kilde: DagKilde) = first.datesUntil(second.plusDays(1))
-        .map { it.dag(type, kilde) }
-        .toList()
-        .fold(objectMapper.createArrayNode()) { acc, node ->
-            acc.add(node)
-        }
-
-    @Language("JSON")
-    fun LocalDate.dag(dagType: String, kilde: DagKilde) = objectMapper.readTree(
-        """
-        {
-          "dato": "$this",
-          "type": "$dagType",
-          "kilde": {
-            "type": "${kilde.type}",
-            "id": "${kilde.uuid}"
-          },
-          "grad": 100.0,
-          "arbeidsgiverBetalingProsent": 100.0
-        }
-    """
-    )
-
     fun vedtaksperiode(
-        historikkElementer: ArrayNode
-    ) = objectMapper.createArrayNode().apply {
-        add(objectMapper.readTree("""{"sykdomshistorikk": $historikkElementer}"""))
-    }
-
+        sykdomshistorikk: String
+    ) = """{"sykdomshistorikk": $sykdomshistorikk}"""
 
     @Language("JSON")
-    fun personJson(
-        vedtaksperioder: ArrayNode,
-        forkastedeVedtaksperioder: ArrayNode,
-        arbeidsgiverHistorikkElementer: ArrayNode
+    fun person(
+        vedtaksperioder: List<String>,
+        forkastedeVedtaksperioder: List<String> = listOf(),
+        arbeidsgiverHistorikk: String = "[]",
+        skjemaVersjon: Int = 20
     ) = objectMapper.readTree(
-        """{
-    "aktørId": "12345",
-    "fødselsnummer": "12020052345",
+        """
+{
     "arbeidsgivere": [
         {
-            "sykdomshistorikk": $arbeidsgiverHistorikkElementer,
-            "vedtaksperioder": $vedtaksperioder,
-            "forkastede": $forkastedeVedtaksperioder
+            "sykdomshistorikk": $arbeidsgiverHistorikk,
+            "vedtaksperioder": ${vedtaksperioder.joinToJsonArray()},
+            "forkastede": ${forkastedeVedtaksperioder.joinToJsonArray()}
         }
     ],
-    "skjemaVersjon": 20
+    "skjemaVersjon": $skjemaVersjon
 }
 """
     )
