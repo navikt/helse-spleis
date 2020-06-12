@@ -238,6 +238,8 @@ class SpeilBuilderTest {
 
         assertEquals(2, vedtaksperioder.size)
         assertEquals(vedtaksperioder.first().gruppeId, vedtaksperioder.last().gruppeId)
+        assertNotNull(vedtaksperioder.first().dataForVilkårsvurdering)
+        assertNotNull(vedtaksperioder.first().vilkår.opptjening)
         assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder.last().dataForVilkårsvurdering)
         assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder.last().vilkår.opptjening)
     }

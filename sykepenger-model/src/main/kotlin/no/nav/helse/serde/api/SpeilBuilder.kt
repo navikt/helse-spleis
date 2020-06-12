@@ -442,8 +442,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
         lateinit var utbetalinger: List<Utbetaling>
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
-        val fellesGrunnlagsdata = mutableMapOf<UUID, GrunnlagsdataDTO>()
-        val fellesOpptjening = mutableMapOf<UUID, OpptjeningDTO>()
         var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
 
 
@@ -486,8 +484,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     vedtaksperiode = vedtaksperiode,
                     arbeidsgiver = arbeidsgiver,
                     vedtaksperiodeMap = vedtaksperiodeMap,
-                    fellesGrunnlagsdata = fellesGrunnlagsdata,
-                    fellesOpptjening = fellesOpptjening,
                     vedtaksperioder = vedtaksperioder,
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
@@ -502,24 +498,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             organisasjonsnummer: String
         ) {
-
             val arbeidsgiverDTO = arbeidsgiverMap.mapTilArbeidsgiverDto()
-
-            val mappedeArbeidsgivere = arbeidsgiverDTO.copy(
-                vedtaksperioder = arbeidsgiverDTO.vedtaksperioder
-                    .map { vedtaksperiode ->
-                        if (vedtaksperiode.fullstendig) {
-                            (vedtaksperiode as VedtaksperiodeDTO).copy(
-                                dataForVilkårsvurdering = fellesGrunnlagsdata[vedtaksperiode.gruppeId],
-                                vilkår = vedtaksperiode.vilkår.copy(opptjening = fellesOpptjening[vedtaksperiode.gruppeId])
-                            )
-                        } else {
-                            vedtaksperiode
-                        }
-                    }
-            )
-
-            arbeidsgivere.add(mappedeArbeidsgivere)
+            arbeidsgivere.add(arbeidsgiverDTO)
             popState()
         }
     }
@@ -528,8 +508,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
-        private val fellesGrunnlagsdata: MutableMap<UUID, GrunnlagsdataDTO>,
-        private val fellesOpptjening: MutableMap<UUID, OpptjeningDTO>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val fødselsnummer: String,
         private val inntekter: List<Inntekthistorikk.Inntekt>,
@@ -625,19 +603,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     )
                 )
             }
-            samleFellesdata(gruppeId)
             popState()
-        }
-
-        private fun samleFellesdata(gruppeId: UUID) {
-            val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
-            val opptjening = førsteFraværsdag?.let {
-                dataForVilkårsvurdering?.let {
-                    mapOpptjening(førsteFraværsdag, it)
-                }
-            }
-            dataForVilkårsvurdering?.let { fellesGrunnlagsdata.putIfAbsent(gruppeId, it) }
-            opptjening?.let { fellesOpptjening.putIfAbsent(gruppeId, it) }
         }
 
         private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
