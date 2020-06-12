@@ -59,8 +59,37 @@ internal class V21SykdomshistorikkMergeTest {
             forkastedeVedtaksperioder = objectMapper.createArrayNode(),
             arbeidsgiverHistorikkElementer = objectMapper.createArrayNode()
         )
+        val result = 1.januar.dager("SSSSSHH SSSSSHH")
         println(personJson.toPrettyString())
     }
+
+    private fun LocalDate.dager(dagString: String, kilde: DagKilde = DagKilde.Søknad()): String {
+        var dato = this
+        return dagString.toCharArray().filterNot { it == ' ' }.map {
+            when (it) {
+                'S' -> dagString("Sykedag", dato, kilde)
+                'H' -> dagString("SykHelgedag", dato, kilde)
+                'A' -> dagString("Arbeidsdag", dato, kilde)
+                'U' -> dagString("Arbeidsgiverdag", dato, kilde)
+                'G' -> dagString("ArbeidsgiverHelgedag", dato, kilde)
+                'F' -> dagString("Feriedag", dato, kilde)
+                'R' -> dagString("FriskHelgedag", dato, kilde)
+                else -> throw IllegalArgumentException("Don't recognize character $it")
+            }.also { dato = dato.plusDays(1) }
+        }.joinToString(",", "[", "]")
+    }
+
+    private fun dagString(type: String, dato: LocalDate, kilde: DagKilde) = """
+        {
+          "dato": "$dato",
+          "type": "$type",
+          "kilde": {
+            "type": "${kilde.type}",
+            "id": "${kilde.uuid}"
+          },
+          "grad": 100.0,
+          "arbeidsgiverBetalingProsent": 100.0
+        }"""
 
     sealed class DagKilde(internal val uuid: UUID, internal val type: String) {
         class Sykmelding : DagKilde(UUID.randomUUID(), "SYKMELDING")
