@@ -1,7 +1,7 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Grunnbeløp.Companion.`1G`
-import no.nav.helse.Grunnbeløp.Companion.`2G`
+import no.nav.helse.Grunnbeløp.Companion
+import no.nav.helse.Grunnbeløp.Companion
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
@@ -10,7 +10,6 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -191,16 +190,10 @@ internal fun mapVilkår(
     val beregnetMånedsinntekt = Inntekthistorikk.Inntekt.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = SpleisAlder(fødselsnummer)
-    val forbrukteSykedager = vedtaksperiodeMap["forbrukteSykedager"] as Int?
+    val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
     val over67 = personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
-    val maksdato = vedtaksperiodeMap["maksdato"] as LocalDate?
-    val gjenståendeDager = maksdato?.let {
-        if (sisteSykepengedagEllerSisteDagIPerioden.isBefore(it)) {
-            sisteSykepengedagEllerSisteDagIPerioden.datesUntil(it).filter { d -> !d.erHelg() }.count().toInt()
-        } else {
-            0
-        }
-    }
+    val maksdato = (vedtaksperiodeMap["maksdato"] as LocalDate?) ?: LocalDate.MAX
+    val gjenståendeDager = (vedtaksperiodeMap["gjenståendeSykedager"] as Int?) ?: 0
     val sykepengedager = SykepengedagerDTO(
         forbrukteSykedager = forbrukteSykedager,
         førsteFraværsdag = førsteFraværsdag,
