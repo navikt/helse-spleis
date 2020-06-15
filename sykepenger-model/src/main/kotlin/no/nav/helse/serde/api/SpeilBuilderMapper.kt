@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Grunnbeløp.Companion
-import no.nav.helse.Grunnbeløp.Companion
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
@@ -223,7 +222,7 @@ internal fun mapVilkår(
     val sykepengegrunnlagDTO = førsteFraværsdag?.let {
         SykepengegrunnlagDTO(
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnbeløp = `1G`.beløp(førsteFraværsdag).toInt(),
+            grunnbeløp = Grunnbeløp.`1G`.beløp(førsteFraværsdag).toInt(),
             oppfylt = sykepengegrunnlagOppfylt(
                 over67 = over67,
                 beregnetMånedsinntekt = beregnetMånedsinntekt,
@@ -239,7 +238,7 @@ private fun sykepengegrunnlagOppfylt(
     beregnetMånedsinntekt: Double?,
     førsteFraværsdag: LocalDate
 ) = beregnetMånedsinntekt?.times(12)?.let {
-    if (over67) it > `2G`.beløp(førsteFraværsdag) else it > halvG.beløp(førsteFraværsdag)
+    if (over67) it > Grunnbeløp.`2G`.beløp(førsteFraværsdag) else it > halvG.beløp(førsteFraværsdag)
 }
 
 private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {

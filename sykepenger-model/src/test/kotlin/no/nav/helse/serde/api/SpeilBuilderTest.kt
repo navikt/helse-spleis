@@ -265,6 +265,10 @@ class SpeilBuilderTest {
         assertNotNull(vedtaksperioder.first().vilkår.opptjening)
         assertEquals(vedtaksperioder.first().dataForVilkårsvurdering, vedtaksperioder[1].dataForVilkårsvurdering)
         assertEquals(vedtaksperioder.first().vilkår.opptjening, vedtaksperioder[1].vilkår.opptjening)
+
+        assertEquals(220, vedtaksperioder.last().vilkår.sykepengedager.gjenståendeDager)
+        assertEquals(28, vedtaksperioder.last().vilkår.sykepengedager.forbrukteSykedager)
+        assertEquals(2.januar(2019), vedtaksperioder.last().vilkår.sykepengedager.maksdato)
     }
 
     @Test
@@ -805,13 +809,14 @@ class SpeilBuilderTest {
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
-            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON)
+            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
+            andrePerioder: List<Søknad.Søknadsperiode> = emptyList()
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100)) + andrePerioder,
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad,
             permittert = false
