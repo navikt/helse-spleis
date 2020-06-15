@@ -32,7 +32,7 @@ internal val objectMapper = jacksonObjectMapper()
         indentObjectsWith(DefaultIndenter("  ", "\n"))
     })
 
-private val httpTraceLog = LoggerFactory.getLogger("sikkerLogg")
+private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
 
 fun main() {
     val config = ApplicationConfiguration()
