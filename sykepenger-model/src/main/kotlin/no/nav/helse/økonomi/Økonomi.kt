@@ -73,7 +73,7 @@ internal class Økonomi private constructor(
             }
             (budsjett - totalPerson(økonomiList)).also { remainder ->
                 if (remainder == 0) return
-                (0..(remainder - 1)).forEach { index ->
+                (0 until remainder).forEach { index ->
                     økonomiList[index].personbeløp =
                         økonomiList[index].personbeløp!! + 1
                 }
@@ -88,7 +88,7 @@ internal class Økonomi private constructor(
             }
             (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
                 if (remainder == 0) return
-                (0..(remainder - 1)).forEach { index ->
+                (0 until remainder).forEach { index ->
                     økonomiList[index].arbeidsgiverbeløp =
                         økonomiList[index].arbeidsgiverbeløp!! + 1
                 }

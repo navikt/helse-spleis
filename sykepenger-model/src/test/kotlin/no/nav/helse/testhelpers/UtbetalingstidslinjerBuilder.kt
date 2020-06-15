@@ -21,7 +21,7 @@ internal fun tidslinjeOf(
 internal val Int.AP get() = this.AP(1200)
 internal fun Int.AP(dekningsgrunnlag: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsgiverperiodedag, dekningsgrunnlag)
 internal val Int.NAV get() = this.NAV(1200)
-internal fun Int.NAV(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addNAVdag, dekningsgrunnlag, grad)
+internal fun Int.NAV(dekningsgrunnlag: Number, grad: Number = 100.0) = Utbetalingsdager(this, Utbetalingstidslinje::addNAVdag, dekningsgrunnlag, grad)
 internal val Int.ARB get() = this.ARB(1200)
 internal fun Int.ARB(dekningsgrunnlag: Int) = Utbetalingsdager(this, Utbetalingstidslinje::addArbeidsdag, dekningsgrunnlag)
 internal val Int.FRI get() = this.FRI(1200)
@@ -39,6 +39,6 @@ private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonom
 internal data class Utbetalingsdager(
     val antallDager: Int,
     val addDagFun: Utbetalingstidslinje.(LocalDate, Økonomi) -> Unit,
-    val dekningsgrunnlag: Int = 1200,
+    val dekningsgrunnlag: Number = 1200,
     val grad: Number = 0.0
 )

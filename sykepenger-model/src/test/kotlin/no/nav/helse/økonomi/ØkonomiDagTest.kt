@@ -27,6 +27,20 @@ internal class ØkonomiDagTest {
     }
 
     @Test
+    fun `Dekningsgrunnlag med desimaler`() {
+        val a = tidslinjeOf(2.NAV(1200.75, 50.0))
+        MaksimumUtbetaling(listOf(a), Aktivitetslogg()).betal()
+        assertØkonomi(a, 600)
+    }
+
+    @Test
+    fun `Dekningsgrunnlag uten desimaler`() {
+        val a = tidslinjeOf(2.NAV(1201, 50.0))
+        MaksimumUtbetaling(listOf(a), Aktivitetslogg()).betal()
+        assertØkonomi(a, 601)
+    }
+
+    @Test
     fun `Beløp er 6G-begrenset`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
