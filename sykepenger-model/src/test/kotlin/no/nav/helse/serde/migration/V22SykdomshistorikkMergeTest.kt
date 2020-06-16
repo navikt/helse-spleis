@@ -7,7 +7,6 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -78,9 +77,9 @@ internal class V22SykdomshistorikkMergeTest {
             2.februar.element(
                 kilde = sykmelding2,
                 hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
-                beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH", sykmelding1) + 8.januar.dager(
-                    "SSSSSHH",
-                    sykmelding2
+                beregnetSykdomstidslinje =
+                1.januar.dager("SSSSSHH", sykmelding1) +
+                    8.januar.dager("SSSSSHH", sykmelding2
                 )
             )
         )
@@ -135,7 +134,7 @@ internal class V22SykdomshistorikkMergeTest {
         assertEquals(expected, migrated)
     }
 
-    @Disabled
+//    @Disabled
     @Test
     fun `forkastede vedtaksperioder fjerner deler av sykdomstidslinjen`() {
         val sykmelding1 = DagKilde.Sykmelding()
@@ -245,6 +244,7 @@ internal class V22SykdomshistorikkMergeTest {
         vararg historikkElementer: String
     ) = historikkElementer.reversed().joinToJsonArray()
 
+    @Language("JSON")
     private fun LocalDate.element(
         kilde: DagKilde,
         hendelseSykdomstidslinje: List<String>,
@@ -277,6 +277,7 @@ internal class V22SykdomshistorikkMergeTest {
 
     fun Iterable<String>.joinToJsonArray() = joinToString(",", "[", "]")
 
+    @Language("JSON")
     private fun dagString(type: String, dato: LocalDate, kilde: DagKilde) = """
         {
           "dato": "$dato",

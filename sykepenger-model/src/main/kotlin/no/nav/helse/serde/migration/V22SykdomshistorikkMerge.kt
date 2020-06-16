@@ -12,19 +12,19 @@ internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
             arbeidsgiver as ObjectNode
             val originaleElementer = (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder"))
                 .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
+                .map { it.deepCopy<ObjectNode>() }
 
             val elementer = (listOf(originaleElementer.first()) + originaleElementer
                 .zipWithNext { nåværende, neste ->
-                    neste.deepCopy<ObjectNode>().also { resultat ->
-                        kombinerHendelse(nåværende, neste, resultat)
-                        kombinerBeregnetSykdomstidslinje(nåværende, neste, resultat)
+                    neste.also { resultat ->
+                        kombinerHendelse(nåværende, neste)
+                        kombinerBeregnetSykdomstidslinje(nåværende, neste)
                     }
                 })
                 .reversed()
                 .distinctBy { it["hendelseId"] }
 
-            arbeidsgiver.withArray("sykdomshistorikk")
-                .addAll(elementer)
+            arbeidsgiver.withArray("sykdomshistorikk").addAll(elementer)
         }
     }
 
@@ -33,30 +33,28 @@ internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
 
     private fun kombinerBeregnetSykdomstidslinje(
         nåværende: JsonNode,
-        neste: JsonNode,
-        resultat: ObjectNode
+        neste: ObjectNode
     ) {
         val kombinert = kombinerBeregnetTidslinje(
             nåværende["beregnetSykdomstidslinje"],
             neste["beregnetSykdomstidslinje"]
         )
-        resultat.putArray("beregnetSykdomstidslinje")
-            .addAll(kombinert)
+        neste.putArray("beregnetSykdomstidslinje").addAll(kombinert)
     }
 
-    private fun kombinerHendelse(nåværende: JsonNode, neste: JsonNode, resultat: ObjectNode) {
+    private fun kombinerHendelse(nåværende: JsonNode, neste: ObjectNode) {
         if (nåværende["hendelseId"] == neste["hendelseId"]) {
             val hendelseKombinert = kombinerBeregnetTidslinje(
                 nåværende["hendelseSykdomstidslinje"],
                 neste["hendelseSykdomstidslinje"]
             )
-            resultat.putArray("hendelseSykdomstidslinje")
-                .addAll(hendelseKombinert)
+            neste.putArray("hendelseSykdomstidslinje").addAll(hendelseKombinert)
         }
     }
 
     fun kombinerBeregnetTidslinje(nåværende: JsonNode, neste: JsonNode): List<JsonNode> {
         val datoerFraNeste = neste.map { it["dato"].asText() }
-        return (nåværende.filterNot { it["dato"].asText() in datoerFraNeste } + neste).sortedBy { it["dato"].asText() }
+        return (nåværende.filterNot { it["dato"].asText() in datoerFraNeste } + neste)
+            .sortedBy { it["dato"].asText() }
     }
 }
