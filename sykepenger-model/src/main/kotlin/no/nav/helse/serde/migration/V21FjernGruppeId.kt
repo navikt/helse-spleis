@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V22FjernGruppeId : JsonMigration(version = 22) {
+internal class V21FjernGruppeId : JsonMigration(version = 21) {
     override val description: String = "Fjerner gruppeId fra vedtaksperiode"
 
     override fun doMigration(jsonNode: ObjectNode) {

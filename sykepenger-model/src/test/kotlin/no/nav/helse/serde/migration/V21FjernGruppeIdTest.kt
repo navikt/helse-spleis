@@ -5,13 +5,13 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V22FjernGruppeIdTest {
+internal class V21FjernGruppeIdTest {
     private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `Fjerner gruppeId`() {
         val json = objectMapper.readTree(personJson)
-        listOf(V22FjernGruppeId()).migrate(json)
+        listOf(V21FjernGruppeId()).migrate(json)
         val migratedJson = objectMapper.readTree(json.toString())
         val expected = objectMapper.readTree(expectedPersonJson)
         assertEquals(expected, migratedJson)
@@ -53,6 +53,6 @@ private const val expectedPersonJson = """
       ]
     }
   ],
-  "skjemaVersjon": 22
+  "skjemaVersjon": 21
 }
 """
