@@ -65,6 +65,15 @@ internal class GodkjenningHendelseTest {
         assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
     }
 
+    @Test
+    fun `legger på periodetype på utgående godkjenningsbehov`() {
+        håndterYtelser()
+        person.håndter(simulering())
+        assertEquals(1, hendelse.behov().size)
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING.name, hendelse.behov().first().detaljer()["periodetype"])
+        person.håndter(utbetalingsgodkjenning(true))
+    }
+
     private fun håndterYtelser() {
         person.håndter(sykmelding())
         person.håndter(søknad())

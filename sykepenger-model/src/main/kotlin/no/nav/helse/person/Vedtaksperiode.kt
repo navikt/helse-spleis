@@ -1123,12 +1123,18 @@ internal class Vedtaksperiode private constructor(
                 .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            val periodetype = when {
+                vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode) == null -> Periodetype.FØRSTEGANGSBEHANDLING
+                vedtaksperiode.forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA -> Periodetype.INFOTRYGDFORLENGELSE
+                else -> Periodetype.FORLENGELSE
+            }
             godkjenning(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode.start,
                 periodeTom = vedtaksperiode.periode.endInclusive,
                 sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode.start)!!.toDouble(),
-                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode)
+                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
+                periodetype = periodetype
             )
         }
 
@@ -1352,4 +1358,10 @@ enum class ForlengelseFraInfotrygd {
     IKKE_ETTERSPURT,
     JA,
     NEI
+}
+
+enum class Periodetype {
+    FØRSTEGANGSBEHANDLING,
+    FORLENGELSE,
+    INFOTRYGDFORLENGELSE
 }
