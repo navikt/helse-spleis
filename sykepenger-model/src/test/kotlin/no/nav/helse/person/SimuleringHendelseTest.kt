@@ -43,8 +43,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering(dagsats = 500))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasOnlyInfoAndNeeds())
+        assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
 
     @Test
@@ -52,7 +51,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering(false))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-        assertTrue(inspektør.personLogg.hasWarnings())
+        assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
 
     private fun håndterYtelser() {

@@ -89,7 +89,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             .map { Aktivitetslogg(this).apply { aktiviteter.addAll(it.value) } }
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
-    private fun warn() = Aktivitet.Warn.filter(aktiviteter)
+    internal fun warn() = Aktivitet.Warn.filter(aktiviteter)
     override fun behov() = Aktivitet.Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)

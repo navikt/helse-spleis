@@ -772,7 +772,7 @@ internal class Vedtaksperiode private constructor(
                         if (oldtid.tilstøtende(arbeidsgiver)) {
                             nesteTilstand = AvventerVilkårsprøvingGap
                             vedtaksperiode.førsteFraværsdag = oldtid.førsteUtbetalingsdag(arbeidsgiver)
-                            ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                            ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
                         } else {
                             nesteTilstand = AvventerInntektsmeldingFerdigGap
                         }
@@ -1001,6 +1001,7 @@ internal class Vedtaksperiode private constructor(
 
                         if (!oldtid.tilstøtende(vedtaksperiode.arbeidsgiver)) {
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
+                            ytelser.info("Perioden er en førstegangsbehandling")
                             return@onSuccess
                         }
 
@@ -1012,7 +1013,7 @@ internal class Vedtaksperiode private constructor(
                     }
 
                     arbeidsgiver.addInntekt(ytelser)
-                    ytelser.warn("Perioden er en direkte overgang fra periode i Infotrygd")
+                    ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
                 }
                 harInntektshistorikk(arbeidsgiver, vedtaksperiode.periode.start)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger

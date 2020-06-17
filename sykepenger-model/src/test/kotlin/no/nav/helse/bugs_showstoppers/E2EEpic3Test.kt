@@ -170,7 +170,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `periode uten sykedager`() {
+    fun `periode uten sykedager`() {
         håndterSykmelding(Triple(3.januar, 4.januar, 100))
         håndterSykmelding(Triple(8.januar, 9.januar, 100))
         håndterSykmelding(Triple(15.januar, 16.januar, 100))
@@ -387,7 +387,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `overlapp i arbeidsgivertidslinjer`() {
+    fun `overlapp i arbeidsgivertidslinjer`() {
         håndterSykmelding(Triple(7.januar(2020), 13.januar(2020), 100))
         håndterSykmelding(Triple(14.januar(2020), 24.januar(2020), 100))
         håndterSøknad(
