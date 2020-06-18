@@ -1124,9 +1124,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             val periodetype = when {
-                vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode) == null -> Periodetype.FØRSTEGANGSBEHANDLING
                 vedtaksperiode.forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA -> Periodetype.INFOTRYGDFORLENGELSE
-                else -> Periodetype.FORLENGELSE
+                harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode) -> Periodetype.FORLENGELSE
+                else -> Periodetype.FØRSTEGANGSBEHANDLING
             }
             godkjenning(
                 aktivitetslogg = hendelse,
@@ -1137,6 +1137,11 @@ internal class Vedtaksperiode private constructor(
                 periodetype = periodetype
             )
         }
+
+        private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.let {
+                it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()
+            } == true
 
         override fun håndter(
             person: Person,
