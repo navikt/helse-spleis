@@ -140,7 +140,12 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
 }
 
 internal interface SykdomstidslinjeVisitor {
-    fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {}
+    fun preVisitSykdomstidslinje(
+        tidslinje: Sykdomstidslinje,
+        låstePerioder: List<Periode>,
+        id: UUID,
+        tidsstempel: LocalDateTime
+    ) {}
     fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(

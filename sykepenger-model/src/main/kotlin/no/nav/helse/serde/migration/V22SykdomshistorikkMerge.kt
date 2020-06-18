@@ -35,7 +35,7 @@ internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
         nåværende: JsonNode,
         neste: ObjectNode
     ) {
-        val kombinert = kombinerBeregnetTidslinje(
+        val kombinert = kombinerTidslinje(
             nåværende["beregnetSykdomstidslinje"],
             neste["beregnetSykdomstidslinje"]
         )
@@ -44,7 +44,7 @@ internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
 
     private fun kombinerHendelse(nåværende: JsonNode, neste: ObjectNode) {
         if (nåværende["hendelseId"] == neste["hendelseId"]) {
-            val hendelseKombinert = kombinerBeregnetTidslinje(
+            val hendelseKombinert = kombinerTidslinje(
                 nåværende["hendelseSykdomstidslinje"],
                 neste["hendelseSykdomstidslinje"]
             )
@@ -52,7 +52,7 @@ internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
         }
     }
 
-    fun kombinerBeregnetTidslinje(nåværende: JsonNode, neste: JsonNode): List<JsonNode> {
+    fun kombinerTidslinje(nåværende: JsonNode, neste: JsonNode): List<JsonNode> {
         val datoerFraNeste = neste.map { it["dato"].asText() }
         return (nåværende.filterNot { it["dato"].asText() in datoerFraNeste } + neste)
             .sortedBy { it["dato"].asText() }
