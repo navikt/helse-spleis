@@ -541,6 +541,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] =
                 aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }.distinctBy { it.melding }
+            vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
             arbeidsgiverFagsystemId = vedtaksperiodeReflect.arbeidsgiverFagsystemId
             personFagsystemId = vedtaksperiodeReflect.personFagsystemId
         }

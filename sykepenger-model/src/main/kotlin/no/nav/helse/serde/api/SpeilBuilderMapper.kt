@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -99,7 +100,8 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         simuleringsdata = this["dataForSimulering"] as? SimuleringsdataDTO,
         aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>,
         utbetalinger = this["utbetalinger"] as UtbetalingerDTO,
-        forlengelseFraInfotrygd = this["forlengelseFraInfotrygd"] as ForlengelseFraInfotrygd
+        forlengelseFraInfotrygd = this["forlengelseFraInfotrygd"] as ForlengelseFraInfotrygd,
+        periodetype = this["periodetype"] as Periodetype
     )
 }
 

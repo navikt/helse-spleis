@@ -241,6 +241,17 @@ internal class Vedtaksperiode private constructor(
     internal fun etterfølgesAv(other: Vedtaksperiode) = this.periode.etterfølgesAv(other.periode)
     internal fun starterSenereEnn(other: Vedtaksperiode) = this.periode.start > other.periode.start
 
+    internal fun periodetype() = when {
+        forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA -> Periodetype.INFOTRYGDFORLENGELSE
+        harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
+        else -> Periodetype.FØRSTEGANGSBEHANDLING
+    }
+
+    private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.let {
+            it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()
+        } == true
+
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
         tilstand(hendelse, TilInfotrygd)
@@ -1123,25 +1134,15 @@ internal class Vedtaksperiode private constructor(
                 .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val periodetype = when {
-                vedtaksperiode.forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA -> Periodetype.INFOTRYGDFORLENGELSE
-                harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode) -> Periodetype.FORLENGELSE
-                else -> Periodetype.FØRSTEGANGSBEHANDLING
-            }
             godkjenning(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode.start,
                 periodeTom = vedtaksperiode.periode.endInclusive,
                 sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode.start)!!.toDouble(),
                 vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
-                periodetype = periodetype
+                periodetype = vedtaksperiode.periodetype()
             )
         }
-
-        private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.let {
-                it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()
-            } == true
 
         override fun håndter(
             person: Person,

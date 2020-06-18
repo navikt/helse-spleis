@@ -338,6 +338,7 @@ class SpeilBuilderTest {
         // Kombinasjonen førsteFraværsdag != første dag i sykdomstidslinjen og JA fører til riktig visnig
         assertEquals(førsteFraværsdagInfotrygd, vedtaksperioder.first().førsteFraværsdag)
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
+        assertEquals(Periodetype.INFOTRYGDFORLENGELSE, vedtaksperioder.first().periodetype)
     }
 
     @Test
