@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 
-internal class V22SykdomshistorikkMerge : JsonMigration(version = 22) {
+internal class V23SykdomshistorikkMerge : JsonMigration(version = 22) {
     override val description = "Legger inn en sykdomstidslinje i arbeidsgiver som er sammensatt fra vedtaksperioder"
 
     override fun doMigration(jsonNode: ObjectNode) {
