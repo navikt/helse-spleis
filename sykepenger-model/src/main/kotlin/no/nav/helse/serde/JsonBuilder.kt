@@ -193,8 +193,12 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
 
-    override fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.preVisitHendelseSykdomstidslinje(tidslinje)
+    override fun preVisitHendelseSykdomstidslinje(
+        tidslinje: Sykdomstidslinje,
+        hendelseId: UUID?,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.preVisitHendelseSykdomstidslinje(tidslinje, hendelseId, tidsstempel)
 
     override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) =
         currentState.postVisitHendelseSykdomstidslinje(tidslinje)
@@ -620,7 +624,11 @@ internal class JsonBuilder : PersonVisitor {
             elementMap["tidsstempel"] = tidsstempel
         }
 
-        override fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        override fun preVisitHendelseSykdomstidslinje(
+            tidslinje: Sykdomstidslinje,
+            hendelseId: UUID?,
+            tidsstempel: LocalDateTime
+        ) {
             val sykdomstidslinje = mutableMapOf<String, Any>()
             elementMap["hendelseSykdomstidslinje"] = sykdomstidslinje
             pushState(SykdomstidslinjeState(sykdomstidslinje))

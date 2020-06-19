@@ -79,7 +79,7 @@ internal class Sykdomshistorikk private constructor(
 
         fun accept(visitor: SykdomshistorikkVisitor) {
             visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
-            visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
+            visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje, hendelseId, tidsstempel)
             hendelseSykdomstidslinje.accept(visitor)
             visitor.postVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
             visitor.preVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)

@@ -127,7 +127,11 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
         id: UUID?,
         tidsstempel: LocalDateTime
     ) {}
-    fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
+    fun preVisitHendelseSykdomstidslinje(
+        tidslinje: Sykdomstidslinje,
+        hendelseId: UUID?,
+        tidsstempel: LocalDateTime
+    ) {}
     fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}

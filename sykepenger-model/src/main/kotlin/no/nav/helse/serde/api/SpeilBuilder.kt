@@ -51,6 +51,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     private val stack: Stack<JsonState> = Stack()
     private val rootState = Root()
     private val currentState: JsonState get() = stack.peek()
+    private val hendelsePerioder = mutableMapOf<UUID, Periode>()
+    private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     init {
         stack.push(rootState)
@@ -441,9 +443,20 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
 
-
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             this.utbetalinger = utbetalinger
+        }
+
+        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+            pushState(SykdomstidslinjeState(beregnetSykdomstidslinje))
+        }
+
+        override fun preVisitHendelseSykdomstidslinje(
+            tidslinje: Sykdomstidslinje,
+            hendelseId: UUID?,
+            tidsstempel: LocalDateTime
+        ) {
+            hendelseId?.also { hendelsePerioder[it] = tidslinje.periode()!! }
         }
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
