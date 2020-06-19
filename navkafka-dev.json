@@ -226,6 +226,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsporbar",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparenaproxy",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
