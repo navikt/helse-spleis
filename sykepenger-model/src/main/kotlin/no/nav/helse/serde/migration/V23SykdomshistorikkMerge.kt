@@ -4,27 +4,37 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 
-internal class V23SykdomshistorikkMerge : JsonMigration(version = 22) {
+internal class V23SykdomshistorikkMerge : JsonMigration(version = 23) {
     override val description = "Legger inn en sykdomstidslinje i arbeidsgiver som er sammensatt fra vedtaksperioder"
 
     override fun doMigration(jsonNode: ObjectNode) {
         for (arbeidsgiver in jsonNode.path("arbeidsgivere")) {
             arbeidsgiver as ObjectNode
-            val originaleElementer = (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder"))
-                .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
-                .map { it.deepCopy<ObjectNode>() }
+            val nullElementer =
+                arbeidsgiver.path("forkastede").map { it.path("sykdomshistorikk").first().deepCopy<ObjectNode>() }
+                    .onEach {
+                        it.remove("hendelseId")
+                        it.put("tidsstempel", LocalDateTime.parse(it["tidsstempel"].asText()).plusNanos(1).toString())
+                        it.putArray("hendelseSykdomstidslinje")
+                    }
+            val originaleElementer =
+                (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder") + nullElementer)
+                    .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
+                    .map { it.deepCopy<ObjectNode>() }
 
             val elementer = (listOf(originaleElementer.first()) + originaleElementer
                 .zipWithNext { nåværende, neste ->
                     neste.also { resultat ->
-                        kombinerHendelse(nåværende, neste)
-                        kombinerBeregnetSykdomstidslinje(nåværende, neste)
+                        resultat["hendelseId"]?.let {
+                            kombinerHendelse(nåværende, neste)
+                            kombinerBeregnetSykdomstidslinje(nåværende, neste)
+                        } ?: fjernDatoerFraNeste(nåværende, neste)
                     }
                 })
                 .reversed()
                 .distinctBy { it["hendelseId"] }
 
-            arbeidsgiver.withArray("sykdomshistorikk").addAll(elementer)
+            arbeidsgiver.putArray("sykdomshistorikk").addAll(elementer)
         }
     }
 
@@ -52,9 +62,15 @@ internal class V23SykdomshistorikkMerge : JsonMigration(version = 22) {
         }
     }
 
-    fun kombinerTidslinje(nåværende: JsonNode, neste: JsonNode): List<JsonNode> {
+    private fun kombinerTidslinje(nåværende: JsonNode, neste: JsonNode): List<JsonNode> {
         val datoerFraNeste = neste.map { it["dato"].asText() }
         return (nåværende.filterNot { it["dato"].asText() in datoerFraNeste } + neste)
             .sortedBy { it["dato"].asText() }
+    }
+
+    private fun fjernDatoerFraNeste(nåværende: JsonNode, neste: ObjectNode) {
+        val datoerFraNeste = neste["beregnetSykdomstidslinje"].map { it["dato"].asText() }
+        neste.putArray("beregnetSykdomstidslinje")
+            .addAll(nåværende["beregnetSykdomstidslinje"].filterNot { it["dato"].asText() in datoerFraNeste })
     }
 }

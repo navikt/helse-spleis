@@ -45,7 +45,7 @@ internal class V23SykdomshistorikkMergeTest {
 
         val historikk = historikk(sykmeldingElement, inntektsmeldingElement, søknadElement)
         val person = person(listOf(vedtaksperiode(historikk)))
-        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 22)
+        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 23)
         val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
 
         assertEquals(expected, migrated)
@@ -90,7 +90,7 @@ internal class V23SykdomshistorikkMergeTest {
         val expected = person(
             listOf(vedtaksperiode1, vedtaksperiode2),
             arbeidsgiverHistorikk = expectedArbeidsgiverHistory,
-            skjemaVersjon = 22
+            skjemaVersjon = 23
         )
         assertEquals(expected, migrated)
     }
@@ -130,7 +130,7 @@ internal class V23SykdomshistorikkMergeTest {
         val expected = person(
             listOf(vedtaksperiode1, vedtaksperiode2),
             arbeidsgiverHistorikk = expectedHistorikk,
-            skjemaVersjon = 22
+            skjemaVersjon = 23
         )
         println(person)
         assertEquals(expected, migrated)
@@ -242,12 +242,11 @@ internal class V23SykdomshistorikkMergeTest {
                 vedtaksperiode(historikk2)
             ),
             arbeidsgiverHistorikk = expectedHistory,
-            skjemaVersjon = 22
+            skjemaVersjon = 23
         )
         assertEquals(expected, merged)
     }
 
-    @Disabled
     @Test
     fun `merge med en forkastet periode`() {
         val sykmelding1 = DagKilde.Sykmelding()
@@ -313,17 +312,13 @@ internal class V23SykdomshistorikkMergeTest {
         )
 
         val person = person(
-            vedtaksperioder = listOf(
-                vedtaksperiode(historikk1),
-                vedtaksperiode(historikk2)
-            )
+            vedtaksperioder = listOf(vedtaksperiode(historikk2)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1))
         )
         val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
         val expected = person(
-            vedtaksperioder = listOf(
-                vedtaksperiode(historikk1),
-                vedtaksperiode(historikk2)
-            ),
+            vedtaksperioder = listOf(vedtaksperiode(historikk2)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1)),
             arbeidsgiverHistorikk = expectedHistory,
             skjemaVersjon = 23
         )
@@ -356,7 +351,7 @@ internal class V23SykdomshistorikkMergeTest {
     ) =
         """
             {
-            "tidsstempel" : "${this.atStartOfDay()}",
+            "tidsstempel" : "${this.atStartOfDay().plusNanos(1)}",
             "hendelseSykdomstidslinje" : [],
             "beregnetSykdomstidslinje" : ${beregnetSykdomstidslinje.joinToJsonArray()}
             }
@@ -407,7 +402,7 @@ internal class V23SykdomshistorikkMergeTest {
     fun person(
         vedtaksperioder: List<String>,
         forkastedeVedtaksperioder: List<String> = listOf(),
-        arbeidsgiverHistorikk: String = "[]",
+        arbeidsgiverHistorikk: String = """[{"hello": "world"}]""",
         skjemaVersjon: Int = 20
     ) = objectMapper.readTree(
         """
