@@ -196,21 +196,17 @@ internal data class PersonData(
         data class SykdomstidslinjeData(
             private val dager: List<DagData>,
             private val periode: Periode?,
-            private val låstePerioder: MutableList<Periode>? = mutableListOf(),
-            private val id: UUID,
-            private val tidsstempel: LocalDateTime
+            private val låstePerioder: MutableList<Periode>? = mutableListOf()
         ) {
             private val dagerMap: SortedMap<LocalDate, Dag> = DagData.parseDager(dager)
 
-            internal fun parseSykdomstidslinje(): Sykdomstidslinje =
+            internal fun createSykdomstidslinje(): Sykdomstidslinje =
                 Sykdomstidslinje::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(
                         dagerMap,
                         null,
-                        låstePerioder ?: mutableListOf<Periode>(),
-                        id,
-                        tidsstempel
+                        låstePerioder ?: mutableListOf<Periode>()
                     )
 
             data class DagData(
@@ -541,8 +537,8 @@ internal data class PersonData(
                 .call(
                     hendelseId,
                     tidsstempel,
-                    hendelseSykdomstidslinje.parseSykdomstidslinje(),
-                    beregnetSykdomstidslinje.parseSykdomstidslinje()
+                    hendelseSykdomstidslinje.createSykdomstidslinje(),
+                    beregnetSykdomstidslinje.createSykdomstidslinje()
                 )
         }
     }

@@ -207,14 +207,12 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitSykdomstidslinje(
         tidslinje: Sykdomstidslinje,
-        låstePerioder: List<Periode>,
-        id: UUID,
-        tidsstempel: LocalDateTime
+        låstePerioder: List<Periode>
     ) =
-        currentState.preVisitSykdomstidslinje(tidslinje, låstePerioder, id, tidsstempel)
+        currentState.preVisitSykdomstidslinje(tidslinje, låstePerioder)
 
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) =
-        currentState.postVisitSykdomstidslinje(tidslinje, id, tidsstempel)
+    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) =
+        currentState.postVisitSykdomstidslinje(tidslinje)
 
     override fun postVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
@@ -649,18 +647,14 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun preVisitSykdomstidslinje(
             tidslinje: Sykdomstidslinje,
-            låstePerioder: List<Periode>,
-            id: UUID,
-            tidsstempel: LocalDateTime
+            låstePerioder: List<Periode>
         ) {
-            sykdomstidslinje["id"] = id
-            sykdomstidslinje["tidsstempel"] = tidsstempel
             sykdomstidslinje["låstePerioder"] = låstePerioder.map {
                 mapOf("fom" to it.start, "tom" to it.endInclusive)
             }
         }
 
-        override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {
+        override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             sykdomstidslinje["dager"] = dager
         }
 

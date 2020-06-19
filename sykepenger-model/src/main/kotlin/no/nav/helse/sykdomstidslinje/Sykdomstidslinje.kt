@@ -13,16 +13,13 @@ import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors.toMap
 
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
     periode: Periode? = null,
-    private val låstePerioder: MutableList<Periode> = mutableListOf(),
-    private val id: UUID = UUID.randomUUID(),
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    private val låstePerioder: MutableList<Periode> = mutableListOf()
 ) : Iterable<Dag> {
 
     private val periode: Periode?
@@ -40,7 +37,6 @@ internal class Sykdomstidslinje private constructor(
             acc.apply { put(date, dag) }
         }
     )
-
 
     internal fun length() = count() // Added to limit number of changes when removing old sykdomstidlinje
     internal fun periode() = periode
@@ -155,9 +151,9 @@ internal class Sykdomstidslinje private constructor(
         it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitSykdomstidslinje(this, låstePerioder, id, tidsstempel)
+        visitor.preVisitSykdomstidslinje(this, låstePerioder)
         periode?.forEach { this[it].accept(visitor) }
-        visitor.postVisitSykdomstidslinje(this, id, tidsstempel)
+        visitor.postVisitSykdomstidslinje(this)
     }
 
     override fun toString() = toShortString()

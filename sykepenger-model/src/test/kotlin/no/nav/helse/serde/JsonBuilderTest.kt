@@ -219,9 +219,7 @@ class JsonBuilderTest {
             accept(object : PersonVisitor {
                 override fun preVisitSykdomstidslinje(
                     tidslinje: Sykdomstidslinje,
-                    låstePerioder: List<Periode>,
-                    id: UUID,
-                    tidsstempel: LocalDateTime
+                    låstePerioder: List<Periode>
                 ) {
                     sykdomstidslinje = tidslinje
                 }

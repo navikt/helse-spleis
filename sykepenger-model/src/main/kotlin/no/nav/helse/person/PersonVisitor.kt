@@ -142,9 +142,7 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
 internal interface SykdomstidslinjeVisitor {
     fun preVisitSykdomstidslinje(
         tidslinje: Sykdomstidslinje,
-        låstePerioder: List<Periode>,
-        id: UUID,
-        tidsstempel: LocalDateTime
+        låstePerioder: List<Periode>
     ) {}
     fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
@@ -194,14 +192,12 @@ internal interface SykdomstidslinjeVisitor {
     fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
-    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, id: UUID, tidsstempel: LocalDateTime) {}
+    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
 }
 
 internal interface InntekthistorikkVisitor {
     fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
-//    fun preVisitTidslinjer() {}
     fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {}
-//    fun postVisitTidslinjer() {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 }
 

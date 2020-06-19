@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -104,7 +103,10 @@ internal class ForeldetSykedagTest {
             søknad.sykdomstidslinje().accept(this)
         }
 
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>, id: UUID, tidsstempel: LocalDateTime) {
+        override fun preVisitSykdomstidslinje(
+            tidslinje: Sykdomstidslinje,
+            låstePerioder: List<Periode>
+        ) {
             dagerTeller = 0
         }
 
