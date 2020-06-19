@@ -2,7 +2,7 @@
     "topics": [
         {
             "configEntries": {
-                "retention.ms": -1
+                "retention.ms": 1209600000
             },
             "members": [
                 {
