@@ -22,7 +22,7 @@ internal class V23SykdomshistorikkMerge : JsonMigration(version = 23) {
                     .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
                     .map { it.deepCopy<ObjectNode>() }
 
-            val elementer = (listOf(originaleElementer.first()) + originaleElementer
+            var elementer = (listOf(originaleElementer.first()) + originaleElementer
                 .zipWithNext { nåværende, neste ->
                     neste.also { resultat ->
                         resultat["hendelseId"]?.let {
@@ -31,8 +31,12 @@ internal class V23SykdomshistorikkMerge : JsonMigration(version = 23) {
                         } ?: fjernDatoerFraNeste(nåværende, neste)
                     }
                 })
+            val kunNull = elementer.filter { it["hendelseId"] == null }
+            elementer = elementer.filterNot { it["hendelseId"] == null }
                 .reversed()
                 .distinctBy { it["hendelseId"] }
+                .plus(kunNull)
+                .sortedByDescending { it["tidsstempel"].asText() }
 
             arbeidsgiver.putArray("sykdomshistorikk").addAll(elementer)
         }
@@ -72,5 +76,6 @@ internal class V23SykdomshistorikkMerge : JsonMigration(version = 23) {
         val datoerFraNeste = neste["beregnetSykdomstidslinje"].map { it["dato"].asText() }
         neste.putArray("beregnetSykdomstidslinje")
             .addAll(nåværende["beregnetSykdomstidslinje"].filterNot { it["dato"].asText() in datoerFraNeste })
+            .sortedBy { it["dato"].asText() }
     }
 }

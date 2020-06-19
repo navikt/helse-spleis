@@ -7,7 +7,6 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -319,6 +318,193 @@ internal class V23SykdomshistorikkMergeTest {
         val expected = person(
             vedtaksperioder = listOf(vedtaksperiode(historikk2)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1)),
+            arbeidsgiverHistorikk = expectedHistory,
+            skjemaVersjon = 23
+        )
+        assertEquals(expected, merged)
+    }
+
+    @Test
+    fun `merge med to forkastede perioder`() {
+        val sykmelding1 = DagKilde.Sykmelding()
+        val sykmelding2 = DagKilde.Sykmelding()
+        val sykmelding3 = DagKilde.Sykmelding()
+        val søknad3 = DagKilde.Søknad()
+
+        val historikk1 = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            )
+        )
+        val historikk2 = historikk(
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+            )
+        )
+        val historikk3 = historikk(
+            3.februar.element(
+                kilde = sykmelding3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            4.februar.element(
+                kilde = søknad3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSARR", søknad3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSS", sykmelding3)
+                    + 19.januar.dager("ARR", søknad3)
+            )
+        )
+
+        val expectedHistory = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            ),
+            1.februar.nullElement(
+                beregnetSykdomstidslinje = 2.januar.dager("", sykmelding1)
+            ),
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+            ),
+            2.februar.nullElement(
+                beregnetSykdomstidslinje = 8.januar.dager("", sykmelding2)
+            ),
+            3.februar.element(
+                kilde = sykmelding3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            4.februar.element(
+                kilde = søknad3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSARR", søknad3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSS", sykmelding3)
+                    + 19.januar.dager("ARR", søknad3)
+            )
+        )
+
+        val person = person(
+            vedtaksperioder = listOf(vedtaksperiode(historikk3)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2))
+        )
+        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val expected = person(
+            vedtaksperioder = listOf(vedtaksperiode(historikk3)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2)),
+            arbeidsgiverHistorikk = expectedHistory,
+            skjemaVersjon = 23
+        )
+        assertEquals(expected, merged)
+    }
+
+    @Test
+    fun `hendelser i feil rekkefølge`() {
+        val sykmelding1 = DagKilde.Sykmelding()
+        val sykmelding2 = DagKilde.Sykmelding()
+        val sykmelding3 = DagKilde.Sykmelding()
+        val søknad2 = DagKilde.Søknad()
+        val søknad1 = DagKilde.Søknad()
+        val søknad3 = DagKilde.Søknad()
+
+        val historikk1 = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            ),
+            5.februar.element(
+                kilde = søknad1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", søknad1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            )
+        )
+        val historikk2 = historikk(
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+            ),
+            4.februar.element(
+                kilde = søknad2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", søknad2),
+                beregnetSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2)
+            )
+        )
+        val historikk3 = historikk(
+            3.februar.element(
+                kilde = sykmelding3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            6.februar.element(
+                kilde = søknad3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSARR", søknad3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSS", sykmelding3)
+                    + 19.januar.dager("ARR", søknad3)
+            )
+        )
+
+        val expectedHistory = historikk(
+            1.februar.element(
+                kilde = sykmelding1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1)
+            ),
+            2.februar.element(
+                kilde = sykmelding2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", sykmelding2),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) +
+                    8.januar.dager("SSSSSHH", sykmelding2)
+            ),
+            3.februar.element(
+                kilde = sykmelding3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) +
+                    8.januar.dager("SSSSSHH", sykmelding2) +
+                    15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            4.februar.element(
+                kilde = søknad2,
+                hendelseSykdomstidslinje = 8.januar.dager("SSSSSHH", søknad2),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) +
+                    8.januar.dager("SSSSSHH", sykmelding2) +
+                    15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            4.februar.nullElement(
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) +
+                    15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            5.februar.element(
+                kilde = søknad1,
+                hendelseSykdomstidslinje = 2.januar.dager("SSSSHH", søknad1),
+                beregnetSykdomstidslinje = 2.januar.dager("SSSSHH", sykmelding1) +
+                    15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            5.februar.nullElement(
+                beregnetSykdomstidslinje = 15.januar.dager("SSSSSHH", sykmelding3)
+            ),
+            6.februar.element(
+                kilde = søknad3,
+                hendelseSykdomstidslinje = 15.januar.dager("SSSSARR", søknad3),
+                beregnetSykdomstidslinje = 15.januar.dager("SSSS", sykmelding3)
+                    + 19.januar.dager("ARR", søknad3)
+            )
+        )
+
+        val person = person(
+            vedtaksperioder = listOf(vedtaksperiode(historikk3)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2))
+        )
+        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val expected = person(
+            vedtaksperioder = listOf(vedtaksperiode(historikk3)),
+            forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2)),
             arbeidsgiverHistorikk = expectedHistory,
             skjemaVersjon = 23
         )
