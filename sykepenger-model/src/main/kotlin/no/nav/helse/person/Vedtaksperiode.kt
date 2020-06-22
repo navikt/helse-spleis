@@ -495,7 +495,7 @@ internal class Vedtaksperiode private constructor(
 
     fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
         if (sykdomstidslinje() != arbeidsgiverSykdomstidslinje.subset(periode())) {
-            // TODO:  log.error("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
+            log.error("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
         }
     }
 

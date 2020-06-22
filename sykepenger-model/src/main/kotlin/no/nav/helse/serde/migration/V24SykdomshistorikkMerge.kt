@@ -1,6 +1,7 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 
@@ -15,7 +16,7 @@ internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
                     .onEach {
                         it.remove("hendelseId")
                         it.put("tidsstempel", LocalDateTime.parse(it["tidsstempel"].asText()).plusNanos(1).toString())
-                        it.putArray("hendelseSykdomstidslinje")
+                        it.dagerForTidslinje("hendelseSykdomstidslinje").removeAll()
                     }
             val originaleElementer =
                 (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder") + nullElementer)
@@ -50,19 +51,19 @@ internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
         neste: ObjectNode
     ) {
         val kombinert = kombinerTidslinje(
-            nåværende["beregnetSykdomstidslinje"],
-            neste["beregnetSykdomstidslinje"]
+            nåværende.dagerForTidslinje("beregnetSykdomstidslinje"),
+            neste.dagerForTidslinje("beregnetSykdomstidslinje")
         )
-        neste.putArray("beregnetSykdomstidslinje").addAll(kombinert)
+        neste.dagerForTidslinje("beregnetSykdomstidslinje").removeAll().addAll(kombinert)
     }
 
     private fun kombinerHendelse(nåværende: JsonNode, neste: ObjectNode) {
         if (nåværende["hendelseId"] == neste["hendelseId"]) {
             val hendelseKombinert = kombinerTidslinje(
-                nåværende["hendelseSykdomstidslinje"],
-                neste["hendelseSykdomstidslinje"]
+                nåværende["hendelseSykdomstidslinje"]["dager"],
+                neste["hendelseSykdomstidslinje"]["dager"]
             )
-            neste.putArray("hendelseSykdomstidslinje").addAll(hendelseKombinert)
+            neste.dagerForTidslinje("hendelseSykdomstidslinje").removeAll().addAll(hendelseKombinert)
         }
     }
 
@@ -73,9 +74,11 @@ internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
     }
 
     private fun fjernDatoerFraNeste(nåværende: JsonNode, neste: ObjectNode) {
-        val datoerFraNeste = neste["beregnetSykdomstidslinje"].map { it["dato"].asText() }
-        neste.putArray("beregnetSykdomstidslinje")
-            .addAll(nåværende["beregnetSykdomstidslinje"].filterNot { it["dato"].asText() in datoerFraNeste })
+        val datoerFraNeste = neste.dagerForTidslinje("beregnetSykdomstidslinje").map { it["dato"].asText() }
+        (neste["beregnetSykdomstidslinje"] as ObjectNode).putArray("dager")
+            .addAll(nåværende.dagerForTidslinje("beregnetSykdomstidslinje").filterNot { it["dato"].asText() in datoerFraNeste })
             .sortedBy { it["dato"].asText() }
     }
+
+    private fun JsonNode.dagerForTidslinje(navn: String) = this[navn]["dager"] as ArrayNode
 }

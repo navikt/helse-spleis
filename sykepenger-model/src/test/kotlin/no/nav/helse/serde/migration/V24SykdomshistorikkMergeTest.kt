@@ -1,5 +1,6 @@
 package no.nav.helse.serde.migration
 
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -15,7 +16,16 @@ internal class V24SykdomshistorikkMergeTest {
 
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
+        .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+    @Test
+    fun `ferdigbygd json blir migrert riktig`() {
+        val original = objectMapper.readTree(testPerson)
+        val expected = objectMapper.readTree(expectedPerson)
+
+        assertEquals(expected, listOf(V24SykdomshistorikkMerge()).migrate(original))
+    }
 
     @Test
     fun `enkel vedtaksperiode`() {
@@ -558,8 +568,8 @@ internal class V24SykdomshistorikkMergeTest {
             {
             "hendelseId" : "${kilde.uuid}",
             "tidsstempel" : "${this.atStartOfDay()}",
-            "hendelseSykdomstidslinje" : ${hendelseSykdomstidslinje.joinToJsonArray()},
-            "beregnetSykdomstidslinje" : ${beregnetSykdomstidslinje.joinToJsonArray()}
+            "hendelseSykdomstidslinje" : { "låstePerioder": [], "dager": ${hendelseSykdomstidslinje.joinToJsonArray()} },
+            "beregnetSykdomstidslinje" : { "låstePerioder": [], "dager": ${beregnetSykdomstidslinje.joinToJsonArray()} }
             }
         """
 
@@ -571,8 +581,8 @@ internal class V24SykdomshistorikkMergeTest {
         """
             {
             "tidsstempel" : "${this.atStartOfDay().plusNanos(1)}",
-            "hendelseSykdomstidslinje" : [],
-            "beregnetSykdomstidslinje" : ${beregnetSykdomstidslinje.joinToJsonArray()}
+            "hendelseSykdomstidslinje" : { "låstePerioder": [], "dager": [] },
+            "beregnetSykdomstidslinje" : { "låstePerioder": [], "dager": ${beregnetSykdomstidslinje.joinToJsonArray()} }
             }
         """
 
@@ -638,3 +648,262 @@ internal class V24SykdomshistorikkMergeTest {
 """
     )
 }
+
+@Language("JSON")
+private val testPerson = """
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "sykdomshistorikk": [
+            {
+              "hendelseId": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a",
+              "tidsstempel": "2020-06-22T13:37:50.16249",
+              "hendelseSykdomstidslinje": {
+                "låstePerioder": [],
+                "dager": [
+                  {
+                    "dato": "2018-01-01",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-02",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-16",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  }
+                ]
+              },
+              "beregnetSykdomstidslinje": {
+                "låstePerioder": [],
+                "dager": [
+                  {
+                    "dato": "2018-01-01",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-02",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-16",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "forkastede": []
+    }
+  ]
+}
+"""
+
+@Language("JSON")
+private val expectedPerson = """
+{
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [
+        {
+          "hendelseId": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a",
+          "tidsstempel": "2020-06-22T13:37:50.16249",
+          "hendelseSykdomstidslinje": {
+            "låstePerioder": [],
+            "dager": [
+              {
+                "dato": "2018-01-01",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              },
+              {
+                "dato": "2018-01-02",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              },
+              {
+                "dato": "2018-01-16",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [],
+            "dager": [
+              {
+                "dato": "2018-01-01",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              },
+              {
+                "dato": "2018-01-02",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              },
+              {
+                "dato": "2018-01-16",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                },
+                "grad": 100.0,
+                "arbeidsgiverBetalingProsent": 100.0
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "sykdomshistorikk": [
+            {
+              "hendelseId": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a",
+              "tidsstempel": "2020-06-22T13:37:50.16249",
+              "hendelseSykdomstidslinje": {
+                "låstePerioder": [],
+                "dager": [
+                  {
+                    "dato": "2018-01-01",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-02",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-16",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  }
+                ]
+              },
+              "beregnetSykdomstidslinje": {
+                "låstePerioder": [],
+                "dager": [
+                  {
+                    "dato": "2018-01-01",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-02",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  },
+                  {
+                    "dato": "2018-01-16",
+                    "type": "SYKEDAG",
+                    "kilde": {
+                      "type": "Sykmelding",
+                      "id": "dc11a2d4-274f-439d-b9ea-b74dd4b6b91a"
+                    },
+                    "grad": 100.0,
+                    "arbeidsgiverBetalingProsent": 100.0
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "forkastede": []
+    }
+  ],
+  "skjemaVersjon": 24
+}
+"""
