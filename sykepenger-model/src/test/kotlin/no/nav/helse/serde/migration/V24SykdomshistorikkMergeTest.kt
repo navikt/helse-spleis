@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class V23SykdomshistorikkMergeTest {
+internal class V24SykdomshistorikkMergeTest {
 
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
@@ -44,8 +44,8 @@ internal class V23SykdomshistorikkMergeTest {
 
         val historikk = historikk(sykmeldingElement, inntektsmeldingElement, søknadElement)
         val person = person(listOf(vedtaksperiode(historikk)))
-        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 23)
-        val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 24)
+        val migrated = listOf(V24SykdomshistorikkMerge()).migrate(person)
 
         assertEquals(expected, migrated)
     }
@@ -77,8 +77,8 @@ internal class V23SykdomshistorikkMergeTest {
 
         val historikk = historikk(sykmeldingElement, inntektsmeldingElement, søknadElement)
         val person = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk)
-        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 23)
-        val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 24)
+        val migrated = listOf(V24SykdomshistorikkMerge()).migrate(person)
 
         assertEquals(expected, migrated)
     }
@@ -118,11 +118,11 @@ internal class V23SykdomshistorikkMergeTest {
             )
         )
         val person = person(listOf(vedtaksperiode1, vedtaksperiode2), listOf())
-        val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val migrated = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             listOf(vedtaksperiode1, vedtaksperiode2),
             arbeidsgiverHistorikk = expectedArbeidsgiverHistory,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         assertEquals(expected, migrated)
     }
@@ -158,11 +158,11 @@ internal class V23SykdomshistorikkMergeTest {
             )
         )
         val person = person(listOf(vedtaksperiode1, vedtaksperiode2), listOf())
-        val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val migrated = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             listOf(vedtaksperiode1, vedtaksperiode2),
             arbeidsgiverHistorikk = expectedHistorikk,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         println(person)
         assertEquals(expected, migrated)
@@ -267,14 +267,14 @@ internal class V23SykdomshistorikkMergeTest {
                 vedtaksperiode(historikk2)
             )
         )
-        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val merged = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             vedtaksperioder = listOf(
                 vedtaksperiode(historikk1),
                 vedtaksperiode(historikk2)
             ),
             arbeidsgiverHistorikk = expectedHistory,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         assertEquals(expected, merged)
     }
@@ -347,12 +347,12 @@ internal class V23SykdomshistorikkMergeTest {
             vedtaksperioder = listOf(vedtaksperiode(historikk2)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1))
         )
-        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val merged = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             vedtaksperioder = listOf(vedtaksperiode(historikk2)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1)),
             arbeidsgiverHistorikk = expectedHistory,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         assertEquals(expected, merged)
     }
@@ -426,12 +426,12 @@ internal class V23SykdomshistorikkMergeTest {
             vedtaksperioder = listOf(vedtaksperiode(historikk3)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2))
         )
-        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val merged = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             vedtaksperioder = listOf(vedtaksperiode(historikk3)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2)),
             arbeidsgiverHistorikk = expectedHistory,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         assertEquals(expected, merged)
     }
@@ -534,12 +534,12 @@ internal class V23SykdomshistorikkMergeTest {
             vedtaksperioder = listOf(vedtaksperiode(historikk3)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2))
         )
-        val merged = listOf(V23SykdomshistorikkMerge()).migrate(person)
+        val merged = listOf(V24SykdomshistorikkMerge()).migrate(person)
         val expected = person(
             vedtaksperioder = listOf(vedtaksperiode(historikk3)),
             forkastedeVedtaksperioder = listOf(vedtaksperiode(historikk1), vedtaksperiode(historikk2)),
             arbeidsgiverHistorikk = expectedHistory,
-            skjemaVersjon = 23
+            skjemaVersjon = 24
         )
         assertEquals(expected, merged)
     }
