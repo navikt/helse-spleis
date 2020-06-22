@@ -46,7 +46,176 @@ internal class V19KlippOverlappendeVedtaksperioderTest {
         val migratedJson = objectMapper.readTree(json.toString())
         assertEquals(objectMapper.readTree(expectedOverlappSøknadJson), migratedJson)
     }
+
+    @Test
+    fun `klipper bort inntektsmelding etter søknad i periode`() {
+        val json = objectMapper.readTree(`inntektsmelding på tverrs`)
+        listOf(V19KlippOverlappendeVedtaksperioder()).migrate(json)
+        val migratedJson = objectMapper.readTree(json.toString())
+        assertEquals(objectMapper.readTree(`expected inntektsmelding på tverrs`), migratedJson)
+    }
 }
+
+@Language("JSON")
+private val `inntektsmelding på tverrs` = """{
+    "arbeidsgivere": [
+        {
+            "vedtaksperioder": [
+                {
+                    "id": "uuid-1",
+                    "sykdomshistorikk": [
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
+                        }
+                    ]
+                }, {
+                    "id": "uuid-2",
+                    "sykdomshistorikk": [
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" }},
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+"""
+
+@Language("JSON")
+private val `expected inntektsmelding på tverrs` = """{
+    "skjemaVersjon": 19,
+    "arbeidsgivere": [
+        {
+            "vedtaksperioder": [
+                {
+                    "id": "uuid-1",
+                    "sykdomshistorikk": [
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
+                        }
+                    ]
+                }, {
+                    "id": "uuid-2",
+                    "sykdomshistorikk": [
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+"""
 
 @Language("JSON")
 private val overlappSøknadJson = """{
@@ -97,6 +266,8 @@ private val overlappSøknadJson = """{
     ]
 }
 """
+
+
 
 @Language("JSON")
 private val expectedOverlappSøknadJson = """{
@@ -190,6 +361,19 @@ private val overlappJson = """{
                                     { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } }
                                 ]
                             }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } }
+
+                                ]
+                            }
                         }
                     ]
                 }
@@ -237,6 +421,18 @@ private val expectedOverlappJson = """{
                                     { "dato": "2020-04-10", "kilde": { "type": "Inntektsmelding" } }
                                 ]
                             }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
                         }
                     ]
                 }
@@ -269,6 +465,19 @@ private val ingenOverlappJson = """{
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } }
                                 ]
                             }
+                        },{
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
                         }
                     ]
                 },
@@ -286,6 +495,19 @@ private val ingenOverlappJson = """{
                                 "dager": [
                                     { "dato": "2020-04-10", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-11", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },{
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
                                 ]
                             }
                         }
@@ -321,6 +543,19 @@ private val expectedIngenOverlappJson = """{
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } }
                                 ]
                             }
+                        },{
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type": "Søknad" } }
+                                ]
+                            }
                         }
                     ]
                 },
@@ -338,6 +573,19 @@ private val expectedIngenOverlappJson = """{
                                 "dager": [
                                     { "dato": "2020-04-10", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-11", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },{
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type": "Søknad" } },
+                                    { "dato": "2020-04-11", "kilde": { "type": "Søknad" } }
                                 ]
                             }
                         }
@@ -370,6 +618,20 @@ private val overlappMedGammelTomHistorikkJson = """{
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } }
                                 ]
                             }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type":  "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type":  "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type":  "Søknad" } }
+                                ]
+                            }
                         }
                     ]
                 }, {
@@ -388,6 +650,18 @@ private val overlappMedGammelTomHistorikkJson = """{
                                     { "dato": "2020-04-08", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-10", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type":  "Søknad" } }
                                 ]
                             }
                         },
@@ -419,6 +693,18 @@ private val overlappMedGammelTomHistorikkJson = """{
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-10", "kilde": { "type":  "Inntektsmelding" } },
                                     { "dato": "2020-04-11", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-11", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-11", "kilde": { "type":  "Søknad" } }
                                 ]
                             }
                         }
@@ -452,6 +738,20 @@ private val expectedOverlappMedTomHistorikkJson = """{
                                     { "dato": "2020-04-09", "kilde": { "type":  "Inntektsmelding" } }
                                 ]
                             }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type":  "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-08", "kilde": { "type":  "Søknad" } },
+                                    { "dato": "2020-04-09", "kilde": { "type":  "Søknad" } }
+                                ]
+                            }
                         }
                     ]
                 }, {
@@ -466,6 +766,18 @@ private val expectedOverlappMedTomHistorikkJson = """{
                             "beregnetSykdomstidslinje": {
                                 "dager": [
                                     { "dato": "2020-04-10", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-10", "kilde": { "type":  "Søknad" } }
                                 ]
                             }
                         },
@@ -491,6 +803,18 @@ private val expectedOverlappMedTomHistorikkJson = """{
                             "beregnetSykdomstidslinje": {
                                 "dager": [
                                     { "dato": "2020-04-11", "kilde": { "type":  "Inntektsmelding" } }
+                                ]
+                            }
+                        },
+                        {
+                            "hendelseSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-11", "kilde": { "type":  "Søknad" } }
+                                ]
+                            },
+                            "beregnetSykdomstidslinje": {
+                                "dager": [
+                                    { "dato": "2020-04-11", "kilde": { "type":  "Søknad" } }
                                 ]
                             }
                         }

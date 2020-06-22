@@ -48,14 +48,43 @@ internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19)
                         )
                     }
                 }
+
                 tom =
-                    periode[sykdomshistorikkKey].first()[beregnetSykdomstidslinjeKey][dagerKey].lastOrNull()
-                        ?.get(datoKey)?.asText()
-                        ?.let (LocalDate::parse)
+                    periode[sykdomshistorikkKey].flatMap { it[hendelsetidslinjeKey][dagerKey] }
+                        .filter { it["kilde"]["type"].asText() != "Inntektsmelding" }
+                        .map { LocalDate.parse(it[datoKey].asText()) }
+                        .max()
                         ?: run {
                             log.error("Kunne ikke migrere vedtaksperiode: $vedtaksperiodeId med tom historikk.")
                             throw IllegalStateException("Kunne ikke migrere vedtaksperiode: $vedtaksperiodeId med tom historikk.")
                         }
+
+                periode[sykdomshistorikkKey].forEach { sykdomshistorikk ->
+                    val orginalHendelseTidslinje = (sykdomshistorikk[hendelsetidslinjeKey] as ObjectNode)
+                    val hendelseDagerKlippet = orginalHendelseTidslinje[dagerKey].filter {
+                        val kilde = it["kilde"]["type"].asText()
+                        !LocalDate.parse(it[datoKey].asText()).isAfter(tom) || kilde != "Inntektsmelding"
+                    }
+                    val orginalBeregnetDager = sykdomshistorikk[beregnetSykdomstidslinjeKey] as ObjectNode
+                    val beregnetDagerKlippet =
+                        orginalBeregnetDager[dagerKey].filter {
+                            val kilde = it["kilde"]["type"].asText()
+                            !LocalDate.parse(it[datoKey].asText()).isAfter(tom) || kilde != "Inntektsmelding"
+                        }
+
+                    if (orginalHendelseTidslinje[dagerKey].size() != hendelseDagerKlippet.size || orginalBeregnetDager[dagerKey].size() != beregnetDagerKlippet.size) {
+                        log.info("Klippet bort inntektsmeldinger som strekker seg ut til høyre utenfor vedtaksperioden: $vedtaksperiodeId")
+                    }
+
+                    orginalHendelseTidslinje.replace(
+                        dagerKey,
+                        jacksonObjectMapper().convertValue(hendelseDagerKlippet, ArrayNode::class.java)
+                    )
+                    orginalBeregnetDager.replace(
+                        dagerKey,
+                        jacksonObjectMapper().convertValue(beregnetDagerKlippet, ArrayNode::class.java)
+                    )
+                }
             }
         }
     }
