@@ -25,8 +25,8 @@ internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
                 (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder") + nullElementer)
                     .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
                     .map { it.deepCopy<ObjectNode>() }
-            if (arbeidsgivere.size() > 1 && originaleElementer.isEmpty()) {
-                log.info("Personen har flere arbeidsgivere, dette betyr at personen ikke har vedtaksperioder på den andre arbeidsgiveren. Oppretter tom sykdomshistorikk.")
+            if (originaleElementer.isEmpty()) {
+                log.info("Personen har ingen vedtaksperioder. Oppretter tom sykdomshistorikk.")
                 arbeidsgiver.withArray("sykdomshistorikk")
                 continue
             }

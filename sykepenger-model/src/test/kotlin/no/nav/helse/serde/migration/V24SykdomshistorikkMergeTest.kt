@@ -635,6 +635,28 @@ internal class V24SykdomshistorikkMergeTest {
         assertEquals(expectedPerson, merged)
     }
 
+    @Test
+    fun `person med arbeidsgiver uten vedtaksperioder`() {
+        // Dette caset kan oppstå om en person fikk søknad før sykmelding i en gammel versjon
+        val person = person(
+            arbeidsgiver(
+                vedtaksperioder = emptyList(),
+                forkastedeVedtaksperioder = emptyList()
+            )
+        )
+
+        val expectedPerson = person(
+            arbeidsgiver(
+                vedtaksperioder = emptyList(),
+                forkastedeVedtaksperioder = emptyList(),
+                arbeidsgiverHistorikk = "[]"
+            ),
+            skjemaVersjon = 24
+        )
+
+        val merged = listOf(V24SykdomshistorikkMerge()).migrate(person)
+        assertEquals(expectedPerson, merged)
+    }
 
     fun historikk(
         vararg historikkElementer: String
