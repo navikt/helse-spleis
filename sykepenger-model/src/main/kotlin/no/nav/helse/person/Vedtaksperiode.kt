@@ -496,6 +496,10 @@ internal class Vedtaksperiode private constructor(
     fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
         if (sykdomstidslinje() != arbeidsgiverSykdomstidslinje.subset(periode())) {
             log.error("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
+            sikkerLogg.error(
+                "Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje."
+                    + "vedtaksperiodeId=$id, aktørId=$aktørId, fødselsnummer=$fødselsnummer"
+            )
         }
     }
 
@@ -1355,6 +1359,7 @@ internal class Vedtaksperiode private constructor(
 
     internal companion object {
         private val log = LoggerFactory.getLogger("vedtaksperiode")
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }
