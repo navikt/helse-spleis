@@ -51,6 +51,39 @@ internal class V23SykdomshistorikkMergeTest {
     }
 
     @Test
+    fun `overskriver sykdomshistorikk på arbeidsgiver`() {
+        val sykmelding = DagKilde.Sykmelding()
+        val inntektsmelding = DagKilde.Inntektsmelding()
+        val søknad = DagKilde.Søknad()
+
+        val sykmeldingElement = 2.februar.element(
+            kilde = sykmelding,
+            hendelseSykdomstidslinje = 2.januar.dager("SSSSHH SSSSSHH SSSSSHH", sykmelding),
+            beregnetSykdomstidslinje = 2.januar.dager("SSSSHH SSSSSHH SSSSSHH", sykmelding)
+        )
+        val inntektsmeldingElement = 3.februar.element(
+            kilde = inntektsmelding,
+            hendelseSykdomstidslinje = 1.januar.dager("S", inntektsmelding),
+            beregnetSykdomstidslinje = 1.januar.dager("S", inntektsmelding) + 2.januar.dager(
+                "SSSSHH SSSSSHH SSSSSHH",
+                sykmelding
+            )
+        )
+        val søknadElement = 4.februar.element(
+            kilde = søknad,
+            hendelseSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH SSSSARR", søknad),
+            beregnetSykdomstidslinje = 1.januar.dager("SSSSSHH SSSSSHH SSSSARR", søknad)
+        )
+
+        val historikk = historikk(sykmeldingElement, inntektsmeldingElement, søknadElement)
+        val person = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk)
+        val expected = person(listOf(vedtaksperiode(historikk)), arbeidsgiverHistorikk = historikk, skjemaVersjon = 23)
+        val migrated = listOf(V23SykdomshistorikkMerge()).migrate(person)
+
+        assertEquals(expected, migrated)
+    }
+
+    @Test
     fun `to sykmeldinger fører til en kombinert beregnet sykdomstidslinje`() {
         val sykmelding1 = DagKilde.Sykmelding()
         val sykmelding2 = DagKilde.Sykmelding()
@@ -588,7 +621,7 @@ internal class V23SykdomshistorikkMergeTest {
     fun person(
         vedtaksperioder: List<String>,
         forkastedeVedtaksperioder: List<String> = listOf(),
-        arbeidsgiverHistorikk: String = """[{"hello": "world"}]""",
+        arbeidsgiverHistorikk: String = "[]",
         skjemaVersjon: Int = 20
     ) = objectMapper.readTree(
         """
