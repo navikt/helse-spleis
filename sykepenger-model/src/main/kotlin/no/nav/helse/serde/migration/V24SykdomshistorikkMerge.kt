@@ -3,13 +3,16 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
+    private val log = LoggerFactory.getLogger("sykdomshistorikk-merge")
     override val description = "Legger inn en sykdomstidslinje i arbeidsgiver som er sammensatt fra vedtaksperioder"
 
     override fun doMigration(jsonNode: ObjectNode) {
-        for (arbeidsgiver in jsonNode.path("arbeidsgivere")) {
+        val arbeidsgivere = jsonNode.path("arbeidsgivere")
+        for (arbeidsgiver in arbeidsgivere) {
             arbeidsgiver as ObjectNode
             val nullElementer =
                 arbeidsgiver.path("forkastede").map { it.path("sykdomshistorikk").first().deepCopy<ObjectNode>() }
@@ -22,6 +25,11 @@ internal class V24SykdomshistorikkMerge : JsonMigration(version = 24) {
                 (elementer(arbeidsgiver, "forkastede") + elementer(arbeidsgiver, "vedtaksperioder") + nullElementer)
                     .sortedBy { LocalDateTime.parse(it["tidsstempel"].asText()) }
                     .map { it.deepCopy<ObjectNode>() }
+            if (arbeidsgivere.size() > 1 && originaleElementer.isEmpty()) {
+                log.info("Personen har flere arbeidsgivere, dette betyr at personen ikke har vedtaksperioder på den andre arbeidsgiveren. Oppretter tom sykdomshistorikk.")
+                arbeidsgiver.withArray("sykdomshistorikk")
+                continue
+            }
 
             var elementer = (listOf(originaleElementer.first()) + originaleElementer
                 .zipWithNext { nåværende, neste ->
