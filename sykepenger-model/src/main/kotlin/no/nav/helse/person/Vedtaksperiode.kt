@@ -18,11 +18,13 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -489,6 +491,12 @@ internal class Vedtaksperiode private constructor(
                 periode = periode
             )
         )
+    }
+
+    fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
+        if (sykdomstidslinje() != arbeidsgiverSykdomstidslinje.subset(periode())) {
+            log.error("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
+        }
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
@@ -1346,6 +1354,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val log = LoggerFactory.getLogger("vedtaksperiode")
 
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }

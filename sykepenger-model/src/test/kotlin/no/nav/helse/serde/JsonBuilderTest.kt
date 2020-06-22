@@ -112,7 +112,7 @@ class JsonBuilderTest {
                     )
                 )
                 fangeSykdomstidslinje()
-                sykdomstidslinje.lås(Periode(5.januar, 10.januar))
+                //sykdomstidslinje.lås(Periode(5.januar, 10.januar))
                 håndter(inntektsmelding(fom = fom))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))

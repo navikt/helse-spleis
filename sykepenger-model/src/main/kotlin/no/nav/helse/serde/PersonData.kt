@@ -126,7 +126,7 @@ internal data class PersonData(
         private val organisasjonsnummer: String,
         private val id: UUID,
         private val inntekter: List<InntektData>,
-        private val sykdomshistorikk: List<SykdomshistorikkData>?, // TODO: Remove this whenever the migration is in place
+        private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<VedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
@@ -134,7 +134,7 @@ internal data class PersonData(
         private val modelInntekthistorikk = Inntekthistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
         }
-        private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk ?: emptyList())
+        private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = mutableListOf<Vedtaksperiode>()
         private val modelUtbetalinger = mutableListOf<Utbetaling>().apply {

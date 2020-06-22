@@ -61,6 +61,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
 
+    private fun validerSykdomstidslinjer() = perioder.forEach {
+        it.validerSykdomstidslinje(sykdomshistorikk.sykdomstidslinje())
+    }
+
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         if (perioder.toList().map { it.håndter(sykmelding) }.none { it }) {
@@ -71,6 +75,7 @@ internal class Arbeidsgiver private constructor(
         validation(sykmelding) {
             onSuccess {
                 sykdomshistorikk.nyHåndter(sykmelding)
+                validerSykdomstidslinjer()
             }
         }
     }
@@ -83,6 +88,7 @@ internal class Arbeidsgiver private constructor(
             }
             onSuccess {
                 sykdomshistorikk.nyHåndter(søknad)
+                validerSykdomstidslinjer()
             }
         }
     }
@@ -95,6 +101,7 @@ internal class Arbeidsgiver private constructor(
             }
             onSuccess {
                 sykdomshistorikk.nyHåndter(søknad)
+                validerSykdomstidslinjer()
             }
         }
     }
@@ -107,6 +114,7 @@ internal class Arbeidsgiver private constructor(
             }
             onSuccess {
                 sykdomshistorikk.nyHåndter(inntektsmelding)
+                validerSykdomstidslinjer()
             }
         }
     }

@@ -156,6 +156,12 @@ internal class Sykdomstidslinje private constructor(
         visitor.postVisitSykdomstidslinje(this)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Sykdomstidslinje) return false
+        return dager == other.dager
+            && låstePerioder == other.låstePerioder
+    }
+
     override fun toString() = toShortString()
 
     internal fun toShortString(): String {
