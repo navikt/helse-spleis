@@ -544,7 +544,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         aktivitetslogg: List<AktivitetDTO>
     ) : JsonState {
         private var fullstendig = false
-        private val vedtaksperiodehendelser = mutableListOf<HendelseDTO>()
+        private val vedtaksperiodehendelser = vedtaksperiodehendelser()
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
@@ -568,16 +568,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            pushState(SykdomshistorikkState(vedtaksperiodehendelser, beregnetSykdomstidslinje))
-        }
-
-        override fun preVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
-            id: UUID?,
-            tidsstempel: LocalDateTime
-        ) {
-            if (id == null) return
-            hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
+            pushState(SykdomshistorikkState(beregnetSykdomstidslinje))
         }
 
         private var førsteSykepengedag: LocalDate? = null
@@ -634,6 +625,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                 )
             }
             popState()
+        }
+
+        private fun vedtaksperiodehendelser(): MutableList<HendelseDTO> {
+            val hendelserIds = hendelsePerioder.filterValues { it.overlapperMed(vedtaksperiode.periode()) }.keys.map { it.toString() }
+            return hendelser.filter { it.id in hendelserIds }.toMutableList()
         }
 
         private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
@@ -808,17 +804,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     }
 
     private inner class SykdomshistorikkState(
-        private val vedtaksperiodehendelser: MutableList<HendelseDTO>,
         private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>
     ) : JsonState {
-
-        override fun preVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
-            id: UUID?,
-            tidsstempel: LocalDateTime
-        ) {
-            hendelser.find { it.id == id.toString() }?.also { vedtaksperiodehendelser.add(it) }
-        }
 
         override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
