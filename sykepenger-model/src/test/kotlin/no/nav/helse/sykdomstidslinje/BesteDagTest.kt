@@ -84,7 +84,7 @@ internal class BesteDagTest {
         dag1: Dag,
         dag2: Dag
     ) {
-        assertWinner(dag1, dag2, dag1.problem(dag2))
+        assertWinner(dag1, dag2, dag2.problem(dag1))
         assertWinner(dag2, dag1, dag2.problem(dag1))
     }
 }

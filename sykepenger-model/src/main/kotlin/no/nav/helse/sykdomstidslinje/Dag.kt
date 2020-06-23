@@ -40,7 +40,7 @@ internal sealed class Dag(
     override fun equals(other: Any?) =
         other != null && this::class == other::class && this.equals(other as Dag)
 
-    protected open fun equals(other: Dag) = this.dato == other.dato
+    protected open fun equals(other: Dag) = this.dato == other.dato && this.kilde == other.kilde
 
     override fun hashCode() = dato.hashCode() * 37 + this::class.hashCode()
 
@@ -167,6 +167,10 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde, melding)
+
+        override fun toString(): String {
+            return "Problemdag(${kilde.meldingsreferanseId()})"
+        }
     }
 
 }

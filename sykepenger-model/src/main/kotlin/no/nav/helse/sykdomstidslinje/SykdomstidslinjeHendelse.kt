@@ -60,4 +60,7 @@ abstract class SykdomstidslinjeHendelse(
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 
     internal open fun padLeft(dato: LocalDate) {}
+
+    override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
+        && this.meldingsreferanseId == other.meldingsreferanseId
 }
