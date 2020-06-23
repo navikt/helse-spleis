@@ -544,7 +544,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         aktivitetslogg: List<AktivitetDTO>
     ) : JsonState {
         private var fullstendig = false
-        private val vedtaksperiodehendelser = vedtaksperiodehendelser()
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
@@ -558,7 +557,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
             vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver))
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
-            vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser
+            vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser()
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] =
                 aktivitetslogg.filter { it.vedtaksperiodeId == vedtaksperiodeReflect.id }.distinctBy { it.melding }
@@ -628,7 +627,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private fun vedtaksperiodehendelser(): MutableList<HendelseDTO> {
-            val hendelserIds = hendelsePerioder.filterValues { it.overlapperMed(vedtaksperiode.periode()) }.keys.map { it.toString() }
+            val hendelserIds = hendelsePerioder
+                .filterValues { it.overlapperMed(vedtaksperiode.periode()) }
+                .keys
+                .map { it.toString() }
             return hendelser.filter { it.id in hendelserIds }.toMutableList()
         }
 

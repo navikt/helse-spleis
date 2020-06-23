@@ -28,7 +28,7 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
-    internal fun håndter(hendelse: SykdomstidslinjeHendelse) {
+    internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
         elementer.add(
             0, Element.opprett(
                 this,
@@ -36,6 +36,7 @@ internal class Sykdomshistorikk private constructor(
                 if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
             )
         )
+        return sykdomstidslinje()
     }
 
     internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse) {

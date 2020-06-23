@@ -47,6 +47,7 @@ internal class Vedtaksperiode private constructor(
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
+    private var sykdomstidslinje: Sykdomstidslinje,
     private var periode: Periode,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
@@ -81,6 +82,7 @@ internal class Vedtaksperiode private constructor(
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
         sykdomshistorikk = Sykdomshistorikk(),
+        sykdomstidslinje = Sykdomstidslinje(),
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
@@ -301,7 +303,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse)
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag != null) {
             if (hendelse.førsteFraværsdag > periode.endInclusive)
@@ -317,14 +319,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.periode()
-        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
     }
 
     private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
             .also { trengerInntektsmelding() }
         tilstand(hendelse, nesteTilstand)
@@ -332,7 +334,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }

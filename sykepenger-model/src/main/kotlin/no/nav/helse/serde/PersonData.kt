@@ -151,7 +151,7 @@ internal data class PersonData(
                 .call(person, organisasjonsnummer, id, modelInntekthistorikk, modelSykdomshistorikk, vedtaksperiodeliste, forkastedeliste, modelUtbetalinger)
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
-                it.parseVedtaksperiode(
+                it.createVedtaksperiode(
                     person,
                     arbeidsgiver,
                     aktørId,
@@ -161,7 +161,7 @@ internal data class PersonData(
             })
 
             forkastedeliste.addAll(this.forkastede.map {
-                it.parseVedtaksperiode(
+                it.createVedtaksperiode(
                     person,
                     arbeidsgiver,
                     aktørId,
@@ -324,6 +324,7 @@ internal data class PersonData(
             private val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             private val dataForSimulering: DataForSimuleringData?,
             private val sykdomshistorikk: List<SykdomshistorikkData>,
+            private val sykdomstidslinje: SykdomstidslinjeData,
             private val fom: LocalDate,
             private val tom: LocalDate,
             private val tilstand: TilstandType,
@@ -335,7 +336,7 @@ internal data class PersonData(
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
         ) {
 
-            internal fun parseVedtaksperiode(
+            internal fun createVedtaksperiode(
                 person: Person,
                 arbeidsgiver: Arbeidsgiver,
                 aktørId: String,
@@ -361,6 +362,7 @@ internal data class PersonData(
                         dataForVilkårsvurdering?.parseDataForVilkårsvurdering(),
                         dataForSimulering?.parseDataForSimulering(),
                         SykdomshistorikkData.parseSykdomshistorikk(this.sykdomshistorikk),
+                        sykdomstidslinje.createSykdomstidslinje(),
                         Periode(fom, tom),
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         personFagsystemId,

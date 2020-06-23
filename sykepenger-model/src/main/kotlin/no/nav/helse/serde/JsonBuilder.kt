@@ -664,6 +664,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             sykdomstidslinje["dager"] = dager
+            popState()
         }
 
         override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -757,6 +758,7 @@ internal class JsonBuilder : PersonVisitor {
         override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             popState()
         }
+
     }
 }
 
