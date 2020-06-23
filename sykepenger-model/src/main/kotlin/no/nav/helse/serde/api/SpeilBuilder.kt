@@ -106,6 +106,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
         currentState.preVisitInntekthistorikk(inntekthistorikk)
 
+    override fun preVisitHendelseSykdomstidslinje(
+        tidslinje: Sykdomstidslinje,
+        hendelseId: UUID?,
+        tidsstempel: LocalDateTime
+    ) {
+        currentState.preVisitHendelseSykdomstidslinje(tidslinje, hendelseId, tidsstempel)
+    }
+
     override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
@@ -448,7 +456,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            pushState(SykdomstidslinjeState(beregnetSykdomstidslinje))
+            sykdomshistorikk.sykdomstidslinje().accept(SykdomstidslinjeState2(beregnetSykdomstidslinje))
         }
 
         override fun preVisitHendelseSykdomstidslinje(
@@ -829,7 +837,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
     }
 
-    private inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
+    private open inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
         JsonState {
 
         override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -937,4 +945,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             popState()
         }
     }
+
+    private inner class SykdomstidslinjeState2(sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
+        SykdomstidslinjeState(sykdomstidslinjeListe) {
+        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        }
+    }
 }
+
+private fun MutableList<SykdomstidslinjedagDTO>.subset(periode: Periode) =
+    this.filter { it.dagen in periode }.toMutableList()
