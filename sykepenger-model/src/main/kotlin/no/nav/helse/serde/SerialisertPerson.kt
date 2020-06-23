@@ -39,6 +39,7 @@ class SerialisertPerson(val json: String) {
             V20AvgrensVedtaksperiode(),
             V21FjernGruppeId(),
             V22FjernFelterFraSykdomstidslinje(),
+            V23None(),
             V24SykdomshistorikkMerge()
         )
 
