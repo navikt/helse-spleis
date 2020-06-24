@@ -40,7 +40,8 @@ class SerialisertPerson(val json: String) {
             V21FjernGruppeId(),
             V22FjernFelterFraSykdomstidslinje(),
             V23None(),
-            V24SykdomshistorikkMerge()
+            V24SykdomshistorikkMerge(),
+            V25ManglendeForlengelseFraInfotrygd()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
