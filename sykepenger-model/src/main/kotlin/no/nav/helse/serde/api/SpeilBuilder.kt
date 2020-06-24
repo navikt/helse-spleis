@@ -52,7 +52,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     private val rootState = Root()
     private val currentState: JsonState get() = stack.peek()
     private val hendelsePerioder = mutableMapOf<UUID, Periode>()
-    private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
 
     init {
         stack.push(rootState)
@@ -244,6 +243,14 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             personNettoBeløp,
             periode
         )
+    }
+
+    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+        currentState.preVisitSykdomstidslinje(tidslinje, låstePerioder)
+    }
+
+    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        currentState.postVisitSykdomstidslinje(tidslinje)
     }
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -455,10 +462,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             this.utbetalinger = utbetalinger
         }
 
-        override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            sykdomshistorikk.sykdomstidslinje().accept(SykdomstidslinjeState2(beregnetSykdomstidslinje))
-        }
-
         override fun preVisitHendelseSykdomstidslinje(
             tidslinje: Sykdomstidslinje,
             hendelseId: UUID?,
@@ -566,8 +569,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             personFagsystemId = vedtaksperiodeReflect.personFagsystemId
         }
 
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+            pushState(SykdomstidslinjeState(beregnetSykdomstidslinje))
+        }
+
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-            pushState(SykdomshistorikkState(beregnetSykdomstidslinje))
+            pushState(SykdomshistorikkState())
         }
 
         private var førsteSykepengedag: LocalDate? = null
@@ -805,21 +812,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
     }
 
-    private inner class SykdomshistorikkState(
-        private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>
-    ) : JsonState {
-
-        override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            pushState(SykdomstidslinjeState(sykdomstidslinjeListe))
-        }
-
-        override fun postVisitSykdomshistorikkElement(
-            element: Sykdomshistorikk.Element,
-            id: UUID?,
-            tidsstempel: LocalDateTime
-        ) {
-            popState()
-        }
+    private inner class SykdomshistorikkState : JsonState {
 
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             popState()
@@ -930,16 +923,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             else -> SpeilKildetype.Ukjent
         }
 
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+        override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
             popState()
         }
     }
 
-    private inner class SykdomstidslinjeState2(sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
-        SykdomstidslinjeState(sykdomstidslinjeListe) {
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-        }
-    }
 }
 
 private fun MutableList<SykdomstidslinjedagDTO>.subset(periode: Periode) =

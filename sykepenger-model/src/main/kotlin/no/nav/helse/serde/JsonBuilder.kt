@@ -758,14 +758,6 @@ internal class JsonBuilder : PersonVisitor {
                 }
             )
         }
-
-//        override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-//            popState()
-//        }
-//
-//        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-//            popState()
-//        }
     }
 }
 
