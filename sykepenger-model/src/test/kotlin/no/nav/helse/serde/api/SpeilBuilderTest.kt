@@ -31,7 +31,6 @@ class SpeilBuilderTest {
     fun `person uten utbetalingsdager`() {
         val (person, hendelser) = ingenBetalingsperson()
         val personDTO = serializePersonForSpeil(person, hendelser)
-
         assertEquals(TilstandstypeDTO.IngenUtbetaling, (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand)
     }
 

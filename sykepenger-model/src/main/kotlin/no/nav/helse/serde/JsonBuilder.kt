@@ -567,12 +567,20 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
         }
 
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+            val sykdomstidslinje = mutableMapOf<String, Any>()
+            sykdomstidslinje["låstePerioder"] = låstePerioder.map {
+                mapOf("fom" to it.start, "tom" to it.endInclusive)
+            }
+            vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinje
+            pushState(SykdomstidslinjeState(sykdomstidslinje))
+        }
+
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             val sykdomshistorikkElementer = mutableListOf<MutableMap<String, Any?>>()
             pushState(SykdomshistorikkState(sykdomshistorikkElementer))
             vedtaksperiodeMap["sykdomshistorikk"] = sykdomshistorikkElementer
         }
-
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
             vedtaksperiodeMap["tilstand"] = tilstand.type.name
@@ -751,14 +759,13 @@ internal class JsonBuilder : PersonVisitor {
             )
         }
 
-        override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            popState()
-        }
-
-        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            popState()
-        }
-
+//        override fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+//            popState()
+//        }
+//
+//        override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
+//            popState()
+//        }
     }
 }
 

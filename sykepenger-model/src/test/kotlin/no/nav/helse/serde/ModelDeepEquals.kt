@@ -65,7 +65,7 @@ private class ModelDeepEquals {
     }
 
     private fun assertCollectionEquals(one: Collection<*>, other: Collection<*>, fieldName: String) {
-        assertEquals(one.size, other.size)
+        assertEquals(one.size, other.size, "Failure for fieldName $fieldName")
         (one.toTypedArray() to other.toTypedArray()).forEach { i1, i2 ->
             this.assertDeepEquals(i1, i2, fieldName)
         }
