@@ -5,8 +5,10 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
+import java.time.LocalDateTime
 
 internal class UtbetalingshistorikkRiver(
     rapidsConnection: RapidsConnection,
@@ -16,14 +18,15 @@ internal class UtbetalingshistorikkRiver(
     override val riverName = "Utbetalingshistorikk"
 
     override fun validate(packet: JsonMessage) {
+        packet.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         packet.requireArray("@løsning.${Sykepengehistorikk.name}") {
             requireArray("inntektsopplysninger") {
                 require("sykepengerFom", JsonNode::asLocalDate)
                 requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
             }
             requireArray("utbetalteSykeperioder") {
-                interestedIn("fom") { it.asLocalDate() }
-                interestedIn("tom") { it.asLocalDate() }
+                interestedIn("fom", JsonNode::asLocalDate)
+                interestedIn("tom", JsonNode::asLocalDate)
                 requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
             }
         }
