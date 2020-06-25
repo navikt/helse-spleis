@@ -1323,8 +1323,8 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode())
             vedtaksperiode.sendUtbetaltEvent()
-
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 

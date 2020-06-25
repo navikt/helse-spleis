@@ -23,6 +23,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
+        inspektør.låstePerioder.also {
+            assertEquals(0, it.size)
+        }
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
@@ -46,6 +49,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
+        inspektør.låstePerioder.also {
+            assertEquals(1, it.size)
+            assertEquals(Periode(1.januar, 26.januar), it.first())
+        }
     }
 
     @Test
@@ -92,7 +99,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(8, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
         }
@@ -140,7 +147,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
         }
@@ -187,7 +194,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertMessages(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(13, it.dagtelling[Sykedag::class])
         }
@@ -1327,7 +1334,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertWarnings(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(3, it.sykdomshistorikk.size)
+            assertEquals(12, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }

@@ -64,7 +64,7 @@ internal class Sykdomstidslinje private constructor(
         return Sykdomstidslinje(
             dager.toSortedMap(),
             this.periode?.merge(other.periode) ?: other.periode,
-            this.låstePerioder
+            this.låstePerioder.toMutableList()
         )
     }
 

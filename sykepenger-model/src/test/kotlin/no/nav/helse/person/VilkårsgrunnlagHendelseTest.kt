@@ -74,8 +74,8 @@ internal class VilkårsgrunnlagHendelseTest {
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(0))
-        val historikkFom = inspektør.sykdomstidslinje(0).førsteDag().minusYears(4)
-        val historikkTom = inspektør.sykdomstidslinje(0).sisteDag()
+        val historikkFom = inspektør.sykdomstidslinje.førsteDag().minusYears(4)
+        val historikkTom = inspektør.sykdomstidslinje.sisteDag()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
         assertEquals(
             historikkFom.toString(),

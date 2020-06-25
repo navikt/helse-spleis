@@ -52,26 +52,4 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET", "TIL_INFOTRYGD")
     }
-
-    @Test
-    fun `overlapp i arbeidsgivertidslinjer`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 7.januar(2020), tom = 13.januar(2020), sykmeldingsgrad = 100))
-        sendNySøknad(SoknadsperiodeDTO(fom = 14.januar(2020), tom = 24.januar(2020), sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 14.januar(2020), tom = 24.januar(2020), sykmeldingsgrad = 100)), listOf(PeriodeDTO(6.januar(2020), 6.januar(2020))))
-        sendNySøknad(SoknadsperiodeDTO(fom = 25.januar(2020), tom = 7.februar(2020), sykmeldingsgrad = 80))
-        sendNySøknad(SoknadsperiodeDTO(fom = 8.februar(2020), tom = 28.februar(2020), sykmeldingsgrad = 80))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 25.januar(2020), tom = 7.februar(2020), sykmeldingsgrad = 80)))
-        sendInnteksmelding(0, listOf(Periode(fom = 6.januar(2020), tom = 21.januar(2020))), førsteFraværsdag = 6.januar(2020))
-        sendNySøknad(SoknadsperiodeDTO(fom = 29.februar(2020), tom = 11.mars(2020), sykmeldingsgrad = 80))
-
-        sendVilkårsgrunnlag(0)
-        sendYtelserUtenHistorikk(0)
-
-        assertEquals(5, testRapid.inspektør.vedtaksperiodeteller)
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING")
-        assertTilstander(1, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE", "AVVENTER_UFERDIG_FORLENGELSE", "AVVENTER_HISTORIKK")
-        assertTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE")
-        assertTilstander(3, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE")
-        assertTilstander(4, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE")
     }
-}

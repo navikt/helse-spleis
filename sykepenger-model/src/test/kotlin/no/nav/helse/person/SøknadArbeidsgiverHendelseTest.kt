@@ -35,7 +35,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
+        assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
     @Test
@@ -94,29 +94,29 @@ internal class SøknadArbeidsgiverHendelseTest {
     @Test
     internal fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).count())
+        assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 
     @Test
     internal fun `To søknader med opphold`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(15.januar, 19.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(15.januar, 19.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).count())
+        assertEquals(19, inspektør.sykdomstidslinje.count())
     }
 
     @Test
@@ -128,9 +128,8 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).count())
+        assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 
     @Test
@@ -142,9 +141,8 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).count())
+        assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 
     @Test
@@ -156,9 +154,8 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).count())
+        assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 
     @Test

@@ -391,6 +391,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(7.januar(2020), 13.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(14.januar(2020), 24.januar(2020), 100))
         håndterSøknad(
+            Sykdom(7.januar(2020), 13.januar(2020), 100)
+        )
+        håndterSøknad(
             Egenmelding(6.januar(2020), 6.januar(2020)),
             Sykdom(14.januar(2020), 24.januar(2020), 100)
         )
@@ -697,21 +700,21 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 8.mars(2020), 100))
 
         inspektør.also {
-            assertEquals(20.februar(2020), it.sykdomstidslinje(0).førsteDag())
+            assertEquals(20.februar(2020), it.sykdomstidslinje.førsteDag())
         }
     }
 
     @Test
-    internal fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas sist`() {
+    fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas sist`() {
         håndterSykmelding(Sykmeldingsperiode(20.februar(2020), 8.mars(2020), 100))
         håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 8.mars(2020), 100))
         håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
 
         inspektør.also {
             assertNull(it.dagtelling[Arbeidsgiverdag::class])
-            assertEquals(3, it.dagtelling[Dag.Arbeidsdag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertEquals(12, it.dagtelling[Sykedag::class])
+            assertEquals(20.februar(2020), it.sykdomstidslinje.førsteDag())
         }
     }
 

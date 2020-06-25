@@ -27,7 +27,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
-    private val sykdomstidslinjer = mutableMapOf<Int, Sykdomstidslinje>()
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
@@ -38,6 +37,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
+    internal lateinit var sykdomstidslinje: Sykdomstidslinje
+    internal var låstePerioder = emptyList<Periode>()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
     private val arbeidsgiverutbetalinger = mutableMapOf<Int, List<Utbetaling>>()
@@ -167,11 +168,23 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        if (!inVedtaksperiode) return
-        sykdomstidslinjer[vedtaksperiodeindeks] = sykdomshistorikk.sykdomstidslinje()
+        if (inVedtaksperiode) return
         this.sykdomshistorikk = sykdomshistorikk
-        if(!sykdomshistorikk.isEmpty())
+        if (!sykdomshistorikk.isEmpty()) {
+            sykdomstidslinje = sykdomshistorikk.sykdomstidslinje()
             this.sykdomshistorikk.sykdomstidslinje().accept(Dagteller())
+        }
+        lagreLås(sykdomshistorikk)
+    }
+
+    private inner class LåsInspektør: SykdomstidslinjeVisitor {
+        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+            this@TestPersonInspektør.låstePerioder = låstePerioder
+        }
+    }
+
+    private fun lagreLås(sykdomshistorikk: Sykdomshistorikk) {
+        if (!sykdomshistorikk.isEmpty()) sykdomshistorikk.sykdomstidslinje().accept(LåsInspektør())
     }
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
@@ -269,10 +282,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?:fail {
-        "Missing collection initialization"
-    }
-
-    internal fun sykdomstidslinje(indeks: Int) = sykdomstidslinjer[indeks] ?:fail {
         "Missing collection initialization"
     }
 

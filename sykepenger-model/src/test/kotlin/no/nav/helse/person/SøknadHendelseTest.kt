@@ -40,7 +40,7 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
+        assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
     @Test
@@ -66,17 +66,17 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
+        assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
     @Test
-    internal fun `søknad kan utvide sykdomstidslinje tilbake i tid`() {
+    internal fun `søknad kan ikke utvide sykdomstidslinje tilbake i tid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(9, inspektør.sykdomstidslinje(0).count()) { inspektør.sykdomstidslinje(0).toString() }
+        assertEquals(5, inspektør.sykdomstidslinje.count()) { inspektør.sykdomstidslinje.toString() }
     }
 
     @Test
@@ -109,9 +109,8 @@ internal class SøknadHendelseTest {
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(5, inspektør.sykdomstidslinje(0).count())
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
-        assertEquals(5, inspektør.sykdomstidslinje(1).length())
+        assertEquals(10, inspektør.sykdomstidslinje.length())
     }
 
     @Test

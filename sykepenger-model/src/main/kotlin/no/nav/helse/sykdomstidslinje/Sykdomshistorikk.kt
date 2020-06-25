@@ -12,16 +12,6 @@ internal class Sykdomshistorikk private constructor(
 ) {
     internal constructor() : this(mutableListOf())
 
-    companion object {
-        internal fun merge(historikker: List<Sykdomshistorikk>) = Sykdomshistorikk().also { result ->
-            historikker
-                .flatMap { it.elementer }
-                .sorted()
-                .fold(Element.empty) { forrige, nåværende -> forrige.merge(nåværende).also { result.elementer.add(0, it) }
-                }
-        }
-    }
-
     internal val size get() = elementer.size
 
     internal fun isEmpty() = elementer.isEmpty()
@@ -153,5 +143,3 @@ internal class Sykdomshistorikk private constructor(
         }
     }
 }
-
-internal fun List<Sykdomshistorikk>.merge() = Sykdomshistorikk.merge(this)

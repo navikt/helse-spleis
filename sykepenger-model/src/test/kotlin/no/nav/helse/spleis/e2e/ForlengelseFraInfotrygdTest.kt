@@ -184,11 +184,16 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
+        inspektør.låstePerioder.also {
+            assertEquals(1, it.size)
+            assertEquals(Periode(1.januar, 31.januar), it.first())
+        }
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100), Permisjon(10.februar, 20.februar))    // <-- TIL_INFOTRYGD
-
+        inspektør.låstePerioder.also {
+            assertEquals(0, it.size)
+        }
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
@@ -198,6 +203,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        inspektør.låstePerioder.also {
+            assertEquals(1, it.size)
+            assertEquals(Periode(1.mars, 31.mars), it.first())
+        }
 
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
@@ -282,7 +291,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `setter forlengelse-flagget likt som forrige periode - ikke forlengelse fra infotrygd`() {
+    fun `setter forlengelse-flagget likt som forrige periode - ikke forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000, 100, ORGNUMMER)
         håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD
@@ -301,7 +310,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
+        inspektør.låstePerioder.also {
+            assertEquals(1, it.size)
+            assertEquals(Periode(29.januar, 23.februar), it.first())
+        }
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100))
         håndterSøknadMedValidering(1, Sykdom(24.februar, 28.februar, 100))
         håndterYtelser(1, historikk)

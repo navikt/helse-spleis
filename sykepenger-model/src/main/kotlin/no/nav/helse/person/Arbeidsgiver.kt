@@ -266,4 +266,8 @@ internal class Arbeidsgiver private constructor(
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }
+
+    internal fun lås(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().lås(periode)
+    }
 }
