@@ -45,6 +45,10 @@ spec:
     value: helse-rapid-v1
   - name: KAFKA_CONSUMER_GROUP_ID
     value: spleis-v4
+  - name: KAFKA_MAX_RECORDS
+    value: "1"
+  - name: KAFKA_MAX_POLL_INTERVAL_MS
+    value: "900000"
   - name: DATABASE_HOST
     value: a01dbfl039.adeo.no
   - name: DATABASE_PORT
