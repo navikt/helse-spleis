@@ -71,7 +71,7 @@ class SpeilBuilderTest {
 
     @Test
     fun `passer på at vedtakene har alle hendelsene`() {
-        var vedtaksperiodeIder: Set<String>
+        var vedtaksperiodeIder: List<String>
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
@@ -133,7 +133,7 @@ class SpeilBuilderTest {
 
     @Test
     fun `Utbetalinger blir lagt riktig på hver vedtaksperiode`() {
-        var vedtaksperiodeIder: Set<String>
+        var vedtaksperiodeIder: List<String>
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
@@ -189,7 +189,7 @@ class SpeilBuilderTest {
 
     @Test
     fun `passer på at alle vedtak får fellesdata for sykefraværet`() {
-        var vedtaksperiodeIder: Set<String>
+        var vedtaksperiodeIder: List<String>
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
@@ -338,7 +338,7 @@ class SpeilBuilderTest {
         // Kombinasjonen førsteFraværsdag != første dag i sykdomstidslinjen og JA fører til riktig visnig
         assertEquals(førsteFraværsdagInfotrygd, vedtaksperioder.first().førsteFraværsdag)
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
-        assertEquals(Periodetype.INFOTRYGDFORLENGELSE, vedtaksperioder.first().periodetype)
+        assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 
     @Test
@@ -504,7 +504,7 @@ class SpeilBuilderTest {
         forEach(func)
     }
 
-    private fun Person.collectVedtaksperiodeIder() = mutableSetOf<String>().apply {
+    private fun Person.collectVedtaksperiodeIder() = mutableListOf<String>().apply {
         accept(object : PersonVisitor {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,

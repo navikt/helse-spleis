@@ -244,7 +244,8 @@ internal class Vedtaksperiode private constructor(
     internal fun starterSenereEnn(other: Vedtaksperiode) = this.periode.start > other.periode.start
 
     internal fun periodetype() = when {
-        forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA -> Periodetype.INFOTRYGDFORLENGELSE
+        forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
+            arbeidsgiver.finnForegåendePeriode(this)?.run { Periodetype.INFOTRYGDFORLENGELSE } ?: Periodetype.OVERGANG_FRA_IT
         harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
         else -> Periodetype.FØRSTEGANGSBEHANDLING
     }
@@ -1383,5 +1384,6 @@ enum class ForlengelseFraInfotrygd {
 enum class Periodetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
+    OVERGANG_FRA_IT,
     INFOTRYGDFORLENGELSE
 }

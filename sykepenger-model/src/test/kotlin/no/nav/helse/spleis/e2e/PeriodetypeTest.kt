@@ -3,9 +3,11 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
+import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -94,7 +96,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periodetype settes til infotrygdforlengelse hvis foregående ble behandlet i Infotrygd`() {
+    fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
 
         håndterSykmelding(Triple(29.januar, 23.februar, 100))
@@ -115,6 +117,38 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
         )
+        assertEquals(
+            Periodetype.OVERGANG_FRA_IT.name,
+            hendelselogg.behov().first().detaljer()["periodetype"]
+        )
+    }
+
+    @Test
+    fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
+        val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
+
+        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(0, historikk)
+        håndterYtelser(0, historikk)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, historikk)
+        håndterSimulering(0)
+
+        assertEquals(
+            Periodetype.OVERGANG_FRA_IT.name,
+            hendelselogg.behov().first().detaljer()["periodetype"]
+        )
+
+        håndterUtbetalingsgodkjenning(0, true)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Triple(26.februar, 15.april, 100))
+        håndterSøknadMedValidering(1, Sykdom(26.februar, 15.april, 100))
+        håndterUtbetalingshistorikk(1, historikk)
+        håndterYtelser(1, historikk)
+        håndterSimulering(1)
+
         assertEquals(
             Periodetype.INFOTRYGDFORLENGELSE.name,
             hendelselogg.behov().first().detaljer()["periodetype"]
