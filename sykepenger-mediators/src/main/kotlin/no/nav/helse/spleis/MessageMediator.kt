@@ -29,7 +29,8 @@ internal class MessageMediator(
             UtbetalingsgodkjenningerRiver(it, this)
             UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)
-            PåminnelserRiver(it, this)
+            // Deaktivert midlertidig
+            // PåminnelserRiver(it, this)
             SimuleringerRiver(it, this)
             KansellerUtbetalingerRiver(it, this)
             RollbackRiver(it, this)

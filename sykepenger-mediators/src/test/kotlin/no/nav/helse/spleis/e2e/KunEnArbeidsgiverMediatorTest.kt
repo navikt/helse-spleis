@@ -10,11 +10,13 @@ import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
+    @Disabled("Påminnelser er midlertidig deaktivert")
     fun `påminnelse for vedtaksperiode som ikke finnes`() {
         sendNyPåminnelse()
         assertEquals(1, testRapid.inspektør.antall())

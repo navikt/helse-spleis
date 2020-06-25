@@ -10,6 +10,7 @@ import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -41,6 +42,7 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    @Disabled("Påminnelser er midlertidig deaktivert")
     fun påminnelser() {
         testRapid.sendTestMessage(meldingsfabrikk.lagPåminnelse(UUID.randomUUID(), TilstandType.START))
         assertTrue(hendelseMediator.lestPåminnelse)
