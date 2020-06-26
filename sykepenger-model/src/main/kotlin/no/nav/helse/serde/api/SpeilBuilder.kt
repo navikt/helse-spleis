@@ -522,7 +522,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
                     utbetalinger = utbetalinger,
-                    aktivitetslogg = aktivitetslogg
+                    aktivitetslogg = aktivitetslogg,
+                    hendelseIder = hendelseIder
                 )
             )
         }
@@ -547,7 +548,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val fødselsnummer: String,
         private val inntekter: List<Inntekthistorikk.Inntekt>,
         private val utbetalinger: List<Utbetaling>,
-        aktivitetslogg: List<AktivitetDTO>
+        aktivitetslogg: List<AktivitetDTO>,
+        private val hendelseIder: List<UUID>
     ) : JsonState {
         private var fullstendig = false
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
@@ -637,11 +639,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private fun vedtaksperiodehendelser(): MutableList<HendelseDTO> {
-            val hendelserIds = hendelsePerioder
-                .filterValues { it.overlapperMed(vedtaksperiode.periode()) }
-                .keys
-                .map { it.toString() }
-            return hendelser.filter { it.id in hendelserIds }.toMutableList()
+            return hendelseIder.map { it.toString() }.let { ids ->
+                hendelser.filter { it.id in ids }.toMutableList()
+            }
         }
 
         private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
