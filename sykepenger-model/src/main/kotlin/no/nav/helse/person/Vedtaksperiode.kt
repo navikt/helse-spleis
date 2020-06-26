@@ -263,7 +263,7 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, TilInfotrygd)
     }
 
-    private fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
+    private fun sykdomstidslinje() = arbeidsgiver.sykdomstidslinje()
 
     internal fun periode() = periode
 
@@ -279,8 +279,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        sykdomshistorikk.isEmpty() ||
-            this.sykdomstidslinje().overlapperMed(hendelse.sykdomstidslinje())
+        hendelse.erRelevant(this.periode())
 
     private fun tilstand(
         event: ArbeidstakerHendelse,
@@ -304,12 +303,13 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse)
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag != null) {
             if (hendelse.førsteFraværsdag > periode.endInclusive)
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
-            if (arbeidsgiver.finnForegåendePeriode(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje().førsteFraværsdag())
+            if (arbeidsgiver.finnForegåendePeriode(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje.førsteFraværsdag())
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode")
         }
         hendelse.valider(periode)
@@ -318,16 +318,18 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Fullført behandling av inntektsmelding")
     }
 
-    private fun håndter(hendelse: SykdomstidslinjeHendelse, nesteTilstand: () -> Vedtaksperiodetilstand) {
+    private fun håndter(hendelse: Sykmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.periode()
-        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
     }
 
     private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
             .also { trengerInntektsmelding() }
         tilstand(hendelse, nesteTilstand)
@@ -335,7 +337,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
@@ -1364,10 +1367,6 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val log = LoggerFactory.getLogger("vedtaksperiode")
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
-        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
-            .filterNot { it.tilstand == TilInfotrygd }
-            .map { it.sykdomstidslinje() }.join()
 
         internal fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode.start }

@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import java.math.BigDecimal
@@ -16,7 +16,7 @@ internal class Arbeidsgiver private constructor(
     private val id: UUID,
     private val inntekthistorikk: Inntekthistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
-    private val perioder: MutableList<Vedtaksperiode>,
+    private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<Vedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
@@ -29,7 +29,7 @@ internal class Arbeidsgiver private constructor(
         id = UUID.randomUUID(),
         inntekthistorikk = Inntekthistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
-        perioder = mutableListOf(),
+        vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf()
     )
@@ -41,9 +41,9 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
-        visitor.preVisitPerioder(perioder)
-        perioder.forEach { it.accept(visitor) }
-        visitor.postVisitPerioder(perioder)
+        visitor.preVisitPerioder(vedtaksperioder)
+        vedtaksperioder.forEach { it.accept(visitor) }
+        visitor.postVisitPerioder(vedtaksperioder)
         visitor.preVisitForkastedePerioder(forkastede)
         forkastede.forEach { it.accept(visitor) }
         visitor.postVisitForkastedePerioder(forkastede)
@@ -67,96 +67,76 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if (perioder.toList().map { it.håndter(sykmelding) }.none { it }) {
+        if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it }) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
-            Vedtaksperiode.sorter(perioder)
-        }
-        validation(sykmelding) {
-            onSuccess {
-                sykdomshistorikk.nyHåndter(sykmelding)
-                validerSykdomstidslinjer()
-            }
+            Vedtaksperiode.sorter(vedtaksperioder)
+            validerSykdomstidslinjer()
         }
     }
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        validation(søknad) {
-            valider("Forventet ikke søknad. Har nok ikke mottatt sykmelding") {
-                perioder.toList().map { it.håndter(søknad) }.any { it }
-            }
-            onSuccess {
-                sykdomshistorikk.nyHåndter(søknad)
-                validerSykdomstidslinjer()
-            }
+        if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
+            søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
+            validerSykdomstidslinjer()
         }
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
         søknad.kontekst(this)
-        validation(søknad) {
-            valider("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding") {
-                perioder.toList().map { it.håndter(søknad) }.any { it }
-            }
-            onSuccess {
-                sykdomshistorikk.nyHåndter(søknad)
-                validerSykdomstidslinjer()
-            }
+        if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
+            søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
+            validerSykdomstidslinjer()
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
-        validation(inntektsmelding) {
-            valider("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding") {
-                perioder.toList().map { it.håndter(inntektsmelding) }.any { it }
-            }
-            onSuccess {
-                sykdomshistorikk.nyHåndter(inntektsmelding)
-                validerSykdomstidslinjer()
-            }
+        if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
+            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
+            validerSykdomstidslinjer()
         }
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
-        perioder.toList().forEach { it.håndter(utbetalingshistorikk) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk) }
     }
 
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
-        perioder.toList().forEach { it.håndter(ytelser) }
+        vedtaksperioder.toList().forEach { it.håndter(ytelser) }
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
-        perioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
-        perioder.toList().forEach { it.håndter(vilkårsgrunnlag) }
+        vedtaksperioder.toList().forEach { it.håndter(vilkårsgrunnlag) }
     }
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
-        perioder.toList().forEach { it.håndter(simulering) }
+        vedtaksperioder.toList().forEach { it.håndter(simulering) }
     }
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
-        perioder.toList().forEach { it.håndter(utbetaling) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
-        perioder.toList().forEach { it.håndter(utbetaling) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return perioder.toList().any { it.håndter(påminnelse) }
+        return vedtaksperioder.toList().any { it.håndter(påminnelse) }
     }
 
     internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
@@ -174,7 +154,7 @@ internal class Arbeidsgiver private constructor(
                     oppdrag = it.arbeidsgiverOppdrag(),
                     saksbehandler = kansellerUtbetaling.saksbehandler
                 )
-                perioder.toList().forEach { it.håndter(kansellerUtbetaling) }
+                vedtaksperioder.toList().forEach { it.håndter(kansellerUtbetaling) }
             }
             ?: kansellerUtbetaling.error(
                 "Avvis hvis vi ikke finner fagsystemId %s",
@@ -184,10 +164,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        perioder.toList().forEach { it.forkast(TilbakestillBehandling(organisasjonsnummer, hendelse)) }
+        vedtaksperioder.toList().forEach { it.forkast(TilbakestillBehandling(organisasjonsnummer, hendelse)) }
     }
 
-    internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(perioder)
+    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
+
+    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)
@@ -196,11 +178,11 @@ internal class Arbeidsgiver private constructor(
 
     internal fun forkastPerioder(hendelse: ArbeidstakerHendelse) {
         hendelse.kontekst(this)
-        perioder.toList().forEach { it.forkast(hendelse) }
+        vedtaksperioder.toList().forEach { it.forkast(hendelse) }
     }
 
     internal fun forkast(vedtaksperiode: Vedtaksperiode) {
-        if (!perioder.remove(vedtaksperiode)) return
+        if (!vedtaksperioder.remove(vedtaksperiode)) return
         sykdomshistorikk.fjernTidligereDager(vedtaksperiode.periode())
         forkastede.add(vedtaksperiode)
         Vedtaksperiode.sorter(forkastede)
@@ -208,12 +190,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun forkastPåfølgendeUnntattNye(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         forkast(vedtaksperiode)
-        perioder.toList().forEach { it.forkastHvisPåfølgendeUnntattNy(vedtaksperiode, hendelse) }
+        vedtaksperioder.toList().forEach { it.forkastHvisPåfølgendeUnntattNy(vedtaksperiode, hendelse) }
     }
 
     internal fun forkastAlleEtterfølgende(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         forkast(vedtaksperiode)
-        perioder.toList().forEach { it.forkastHvisEtterfølgende(vedtaksperiode, hendelse) }
+        vedtaksperioder.toList().forEach { it.forkastHvisEtterfølgende(vedtaksperiode, hendelse) }
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
@@ -233,24 +215,24 @@ internal class Arbeidsgiver private constructor(
             fødselsnummer = sykmelding.fødselsnummer(),
             organisasjonsnummer = sykmelding.organisasjonsnummer()
         ).also {
-            perioder.add(it)
+            vedtaksperioder.add(it)
         }
     }
 
     internal fun finnForegåendePeriode(vedtaksperiode: Vedtaksperiode) =
-        perioder.firstOrNull { other -> other.etterfølgesAv(vedtaksperiode) }
+        vedtaksperioder.firstOrNull { other -> other.etterfølgesAv(vedtaksperiode) }
 
     internal fun finnPåfølgendePeriode(vedtaksperiode: Vedtaksperiode) =
-        perioder.firstOrNull { other -> vedtaksperiode.etterfølgesAv(other) }
+        vedtaksperioder.firstOrNull { other -> vedtaksperiode.etterfølgesAv(other) }
 
     internal fun harPerioderSomStarterEtter(vedtaksperiode: Vedtaksperiode) =
-        perioder.any { it.starterSenereEnn(vedtaksperiode) }
+        vedtaksperioder.any { it.starterSenereEnn(vedtaksperiode) }
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        Vedtaksperiode.tidligerePerioderFerdigBehandlet(perioder, vedtaksperiode)
+        Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        perioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
+        vedtaksperioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
     }
 
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)
@@ -270,4 +252,5 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
+
 }

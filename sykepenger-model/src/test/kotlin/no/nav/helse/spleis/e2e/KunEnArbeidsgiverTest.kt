@@ -1334,7 +1334,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertWarnings(it)
             assertEquals(INNTEKT.toBigDecimal(), it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(12, it.sykdomshistorikk.size)
+            assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }

@@ -60,7 +60,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `slå sammen to lister som ikke overlapper hverandre`() {
+    internal fun `slå sammen to lister som ikke overlapper med hverandre`() {
         assertEquals(
             listOf(1.mars to 5.mars, 1.mai to 5.mai, 1.juli to 5.juli),
             listOf(1.mars to 5.mars, 1.juli to 5.juli) + listOf(1.mai to 5.mai)

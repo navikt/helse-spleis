@@ -80,7 +80,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `søknad med utdanning avvist`() {
+    fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(inspektør.personLogg.hasBehov())

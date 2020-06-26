@@ -29,10 +29,11 @@ internal class Sykdomshistorikk private constructor(
         return sykdomstidslinje()
     }
 
-    internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse) {
-        elementer.add(
-            0, Element.opprett(this, hendelse)
-        )
+    internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
+            elementer.add(0, Element.opprett(this, hendelse))
+        }
+        return sykdomstidslinje()
     }
 
     internal fun fjernTidligereDager(periode: Periode) {
@@ -90,6 +91,8 @@ internal class Sykdomshistorikk private constructor(
         )
 
         override fun toString() = beregnetSykdomstidslinje.toString()
+
+        internal fun harHåndtert(hendelse: SykdomstidslinjeHendelse) = hendelseId == hendelse.meldingsreferanseId()
 
         companion object {
 
