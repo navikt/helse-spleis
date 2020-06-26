@@ -234,14 +234,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        hendelseIder: List<UUID>
     ) {
         currentState.preVisitVedtaksperiode(
             vedtaksperiode,
             id,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
-            periode
+            periode,
+            hendelseIder
         )
     }
 
@@ -507,7 +509,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
-            periode: Periode
+            periode: Periode,
+            hendelseIder: List<UUID>
         ) {
             pushState(
                 VedtaksperiodeState(

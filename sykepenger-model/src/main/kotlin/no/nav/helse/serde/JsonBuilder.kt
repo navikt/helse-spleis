@@ -176,9 +176,10 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, hendelseIder)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -421,11 +422,13 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
-            periode: Periode
+            periode: Periode,
+            hendelseIder: List<UUID>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeMap["fom"] = periode.start
             vedtaksperiodeMap["tom"] = periode.endInclusive
+            vedtaksperiodeMap["hendelseIder"] = hendelseIder
             vedtaksperioder.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
 

@@ -169,7 +169,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
-    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
+//    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
+
+    internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(vedtaksperioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
         inntekthistorikk.inntekt(dato)

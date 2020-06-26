@@ -48,6 +48,7 @@ internal class Vedtaksperiode private constructor(
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
     private var sykdomstidslinje: Sykdomstidslinje,
+    private val hendelseIder: MutableList<UUID>,
     private var periode: Periode,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
@@ -83,6 +84,7 @@ internal class Vedtaksperiode private constructor(
         dataForSimulering = null,
         sykdomshistorikk = Sykdomshistorikk(),
         sykdomstidslinje = Sykdomstidslinje(),
+        hendelseIder = mutableListOf(),
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
@@ -92,7 +94,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, hendelseIder)
         sykdomstidslinje.accept(visitor)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
@@ -263,8 +265,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, TilInfotrygd)
     }
 
-    private fun sykdomstidslinje() = arbeidsgiver.sykdomstidslinje()
-
     internal fun periode() = periode
 
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
@@ -303,8 +303,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.addInntekt(hendelse)
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
-        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        oppdaterHistorikk(hendelse)
         førsteFraværsdag = hendelse.førsteFraværsdag
         if (hendelse.førsteFraværsdag != null) {
             if (hendelse.førsteFraværsdag > periode.endInclusive)
@@ -318,18 +317,22 @@ internal class Vedtaksperiode private constructor(
         hendelse.info("Fullført behandling av inntektsmelding")
     }
 
+    private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
+        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        hendelseIder.add(hendelse.meldingsreferanseId())
+    }
+
     private fun håndter(hendelse: Sykmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.periode()
-        sykdomshistorikk.håndter(hendelse)
-        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        oppdaterHistorikk(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
     }
 
     private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
-        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        oppdaterHistorikk(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
             .also { trengerInntektsmelding() }
         tilstand(hendelse, nesteTilstand)
@@ -337,14 +340,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
-        sykdomshistorikk.håndter(hendelse)
-        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        oppdaterHistorikk(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        val førsteFraværsdag = sykdomstidslinje().førsteFraværsdag()
+        val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             ?: periode.start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
             "Finner ikke inntekt for perioden $førsteFraværsdag"
@@ -404,17 +406,6 @@ internal class Vedtaksperiode private constructor(
         vedtaksperiodeaktivitetslogg: Aktivitetslogg,
         previousState: Vedtaksperiodetilstand
     ) {
-        val hendelser = mutableSetOf<UUID>()
-        sykdomshistorikk.accept(object : SykdomshistorikkVisitor {
-            override fun postVisitSykdomshistorikkElement(
-                element: Sykdomshistorikk.Element,
-                id: UUID?,
-                tidsstempel: LocalDateTime
-            ) {
-                if (id == null) return
-                hendelser.add(id)
-            }
-        })
         val event = PersonObserver.VedtaksperiodeEndretTilstandEvent(
             vedtaksperiodeId = id,
             aktørId = aktørId,
@@ -424,7 +415,7 @@ internal class Vedtaksperiode private constructor(
             forrigeTilstand = previousState.type,
             aktivitetslogg = hendelseaktivitetslogg,
             vedtaksperiodeaktivitetslogg = vedtaksperiodeaktivitetslogg,
-            hendelser = hendelser,
+            hendelser = hendelseIder,
             makstid = currentState.makstid(this, LocalDateTime.now())
         )
 
@@ -494,7 +485,7 @@ internal class Vedtaksperiode private constructor(
                 sykepengegrunnlag = sykepengegrunnlag,
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
-                sykdomshistorikk = sykdomshistorikk,
+                hendelseIder = hendelseIder,
                 periode = periode
             )
         )
@@ -743,9 +734,9 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje())) {
+            if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje)) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
-                søknad.trimLeft(vedtaksperiode.sykdomshistorikk.sykdomstidslinje().førsteDag())
+                søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")
@@ -1367,6 +1358,10 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val log = LoggerFactory.getLogger("vedtaksperiode")
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
+            .filterNot { it.tilstand == TilInfotrygd }
+            .map { it.sykdomstidslinje }.join()
 
         internal fun sorter(perioder: MutableList<Vedtaksperiode>) {
             perioder.sortBy { it.periode.start }

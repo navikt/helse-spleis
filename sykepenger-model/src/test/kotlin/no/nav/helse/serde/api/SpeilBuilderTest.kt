@@ -510,7 +510,8 @@ class SpeilBuilderTest {
                 id: UUID,
                 arbeidsgiverNettoBeløp: Int,
                 personNettoBeløp: Int,
-                periode: Periode
+                periode: Periode,
+                hendelseIder: List<UUID>
             ) {
                 add(id.toString())
             }
@@ -773,7 +774,8 @@ class SpeilBuilderTest {
                     id: UUID,
                     arbeidsgiverNettoBeløp: Int,
                     personNettoBeløp: Int,
-                    periode: Periode
+                    periode: Periode,
+                    hendelseIder: List<UUID>
                 ) {
                     if (iPeriode) vedtaksperiodeId = id.toString()
                 }

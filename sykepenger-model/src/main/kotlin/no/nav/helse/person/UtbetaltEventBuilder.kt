@@ -18,7 +18,7 @@ internal fun tilUtbetaltEvent(
     fødselnummer: String,
     orgnummer: String,
     sykepengegrunnlag: Double,
-    sykdomshistorikk: Sykdomshistorikk,
+    hendelseIder: List<UUID>,
     utbetaling: Utbetaling,
     periode: Periode,
     forbrukteSykedager: Int,
@@ -27,7 +27,7 @@ internal fun tilUtbetaltEvent(
     aktørId = aktørId,
     fødselnummer = fødselnummer,
     orgnummer = orgnummer,
-    sykdomshistorikk = sykdomshistorikk,
+    hendelseIder = hendelseIder,
     sykepengegrunnlag = sykepengegrunnlag,
     utbetaling = utbetaling,
     periode = periode,
@@ -39,7 +39,7 @@ private class UtbetaltEventBuilder(
     private val aktørId: String,
     private val fødselnummer: String,
     private val orgnummer: String,
-    sykdomshistorikk: Sykdomshistorikk,
+    private val hendelseIder: List<UUID>,
     sykepengegrunnlag: Double,
     utbetaling: Utbetaling,
     private val periode: Periode,
@@ -48,12 +48,10 @@ private class UtbetaltEventBuilder(
 ) : ArbeidsgiverVisitor {
     private lateinit var opprettet: LocalDateTime
     private val dagsats = (sykepengegrunnlag / 260).roundToInt()
-    private val hendelser = mutableSetOf<UUID>()
     private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt>()
     private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje>()
 
     init {
-        sykdomshistorikk.accept(this)
         utbetaling.accept(this)
     }
 
@@ -62,7 +60,7 @@ private class UtbetaltEventBuilder(
             aktørId = aktørId,
             fødselsnummer = fødselnummer,
             organisasjonsnummer = orgnummer,
-            hendelser = hendelser.toSet(),
+            hendelser = hendelseIder.toSet(),
             oppdrag = oppdragListe.toList(),
             fom = periode.start,
             tom = periode.endInclusive,
@@ -134,12 +132,4 @@ private class UtbetaltEventBuilder(
         )
     }
 
-    override fun preVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-        if (id == null) return
-        hendelser.add(id)
-    }
 }

@@ -93,7 +93,8 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        hendelseIder: List<UUID>
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
