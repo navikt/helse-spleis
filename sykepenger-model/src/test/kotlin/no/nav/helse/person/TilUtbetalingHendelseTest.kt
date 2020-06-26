@@ -168,7 +168,8 @@ internal class TilUtbetalingHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
             orgnummer = ORGNUMMER,
-            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
+            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
+            mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
             hendelse = this
         }

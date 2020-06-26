@@ -6,6 +6,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -190,7 +191,8 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Triple(16.januar, 30.januar, 100))
+        sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100)),
+        mottatt = 1.april.atStartOfDay()
     )
 
     private fun søknad() = Søknad(

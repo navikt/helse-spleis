@@ -68,7 +68,7 @@ internal abstract class AbstractEndToEndTest {
         assertTrue(inspektør.personLogg.hasMessages(), inspektør.personLogg.toString())
     }
 
-    protected fun håndterSykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
+    protected fun håndterSykmelding(vararg sykeperioder: Sykmeldingsperiode) {
         person.håndter(sykmelding(*sykeperioder))
     }
 
@@ -216,13 +216,14 @@ internal abstract class AbstractEndToEndTest {
         )
 
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }

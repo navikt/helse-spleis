@@ -1,12 +1,13 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SykmeldingHendelseTest {
@@ -25,7 +26,7 @@ internal class SykmeldingHendelseTest {
 
     @Test
     internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -35,8 +36,8 @@ internal class SykmeldingHendelseTest {
 
     @Test
     internal fun `En ny Sykmelding er ugyldig`() {
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -45,8 +46,8 @@ internal class SykmeldingHendelseTest {
 
     @Test
     internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
@@ -54,8 +55,8 @@ internal class SykmeldingHendelseTest {
 
     @Test
     internal fun `To søknader uten overlapp`() {
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Triple(6.januar, 10.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         assertTrue(inspektør.personLogg.hasMessages())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -66,20 +67,21 @@ internal class SykmeldingHendelseTest {
 
     @Test
     internal fun `To søknader med overlapp`() {
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Triple(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnummer: String = "987654321") =
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

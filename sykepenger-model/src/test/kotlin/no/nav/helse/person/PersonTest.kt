@@ -98,8 +98,8 @@ internal class PersonTest {
 
     @Test
     fun `eksisterende periode må behandles i infotrygd når en sykmelding overlapper sykdomstidslinjen i den eksisterende perioden`() {
-        testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100))))
-        sykmelding(perioder = listOf(Triple(10.juli, 22.juli, 100))).also {
+        testPerson.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100))))
+        sykmelding(perioder = listOf(Sykmeldingsperiode(10.juli, 22.juli, 100))).also {
             testPerson.håndter(it)
             assertTrue(it.hasWarnings())
             assertFalse(it.hasErrors())
@@ -108,7 +108,7 @@ internal class PersonTest {
 
     @Test
     fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
-        testPerson.håndter(sykmelding(perioder = listOf(Triple(1.juli, 9.juli, 100))))
+        testPerson.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasMessages())
@@ -139,8 +139,8 @@ internal class PersonTest {
     fun `sykmelding med periode som ikke er 100 %`() {
         sykmelding(
             perioder = listOf(
-                Triple(1.mandag, 1.torsdag, 60),
-                Triple(1.fredag, 1.fredag, 100)
+                Sykmeldingsperiode(1.mandag, 1.torsdag, 60),
+                Sykmeldingsperiode(1.fredag, 1.fredag, 100)
             )
         ).also {
             testPerson.håndter(it)
@@ -257,13 +257,14 @@ internal class PersonTest {
 
     private fun sykmelding(
         orgnummer: String = organisasjonsnummer,
-        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(16.september, 5.oktober, 100))
     ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = perioder
+        sykeperioder = perioder,
+        mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(
@@ -284,20 +285,22 @@ internal class PersonTest {
         )
 
 
-    private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) = Påminnelse(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
-        tilstand = tilstandType,
-        antallGangerPåminnet = 1,
-        tilstandsendringstidspunkt = LocalDateTime.now(),
-        påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
-    )
+    private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) =
+        Påminnelse(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            tilstand = tilstandType,
+            antallGangerPåminnet = 1,
+            tilstandsendringstidspunkt = LocalDateTime.now(),
+            påminnelsestidspunkt = LocalDateTime.now(),
+            nestePåminnelsestidspunkt = LocalDateTime.now()
+        )
 
     private class TestPersonObserver : PersonObserver {
-        internal val tilstandsendringer: MutableMap<UUID, PersonObserver.VedtaksperiodeEndretTilstandEvent> = mutableMapOf()
+        internal val tilstandsendringer: MutableMap<UUID, PersonObserver.VedtaksperiodeEndretTilstandEvent> =
+            mutableMapOf()
         internal var vedtaksperiodeEndret = false
         internal var personEndret = false
         internal var forrigeVedtaksperiodetilstand: TilstandType? = null

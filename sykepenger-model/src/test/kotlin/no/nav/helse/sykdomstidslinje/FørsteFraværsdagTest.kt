@@ -1,15 +1,13 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.perioder
 import no.nav.helse.testhelpers.*
 import no.nav.helse.tournament.dagturnering
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class FørsteFraværsdagTest {
@@ -102,7 +100,7 @@ internal class FørsteFraværsdagTest {
 
     @Test
     internal fun `sykeperiode starter på første fraværsdag`() {
-        val sykmelding = sykmelding(Triple(4.februar(2020), 21.februar(2020), 100))
+        val sykmelding = sykmelding(Sykmeldingsperiode(4.februar(2020), 21.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(4.februar(2020),  21.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(20.januar(2020), 20.januar(2020)),
@@ -113,7 +111,7 @@ internal class FørsteFraværsdagTest {
 
     @Test
     internal fun `sykeperioden starter etter første fraværsdag`() {
-        val sykmelding = sykmelding(Triple(29.januar(2020), 16.februar(2020), 100))
+        val sykmelding = sykmelding(Sykmeldingsperiode(29.januar(2020), 16.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(29.januar(2020),  16.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(13.januar(2020), 17.januar(2020)),
@@ -124,7 +122,7 @@ internal class FørsteFraværsdagTest {
 
     @Test
     internal fun `arbeidsgiverperiode med enkeltdager før første fraværsdag`() {
-        val sykmelding = sykmelding(Triple(12.februar(2020), 19.februar(2020), 100))
+        val sykmelding = sykmelding(Sykmeldingsperiode(12.februar(2020), 19.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(12.februar(2020),  19.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(
             Periode(14.januar(2020), 14.januar(2020)),
@@ -153,13 +151,14 @@ internal class FørsteFraværsdagTest {
         }
     }
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 

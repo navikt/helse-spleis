@@ -22,7 +22,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sykmelding`() {
         val vedtaksperiode = periodeFor(
-            sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
         )
 
         assertFalse(
@@ -63,7 +63,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
         val vedtaksperiode = periodeFor(
-            sykmelding(perioder = listOf(Triple(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
         )
 
         assertNull(førsteFraværsdag(vedtaksperiode))
@@ -101,13 +101,14 @@ internal class VedtaksperiodeTest {
         fnr: String = fødselsnummer,
         aktørId: String = aktør,
         orgnummer: String = organisasjonsnummer,
-        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(16.september, 5.oktober, 100))
+        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(16.september, 5.oktober, 100))
     ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = perioder
+        sykeperioder = perioder,
+        mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(

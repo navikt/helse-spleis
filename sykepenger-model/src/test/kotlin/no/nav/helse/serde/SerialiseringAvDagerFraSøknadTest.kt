@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -88,7 +90,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Triple(1.januar, 2.januar, 100))
+        sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100)),
+        mottatt = 4.april.atStartOfDay()
     )
 
     private val søknad get() = Søknad(

@@ -1,15 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.TestPersonInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class InntektsmeldingHendelseTest {
@@ -40,7 +38,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.førsteFraværsdag(0))
@@ -48,7 +46,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `inntektsmelding før søknad`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
@@ -56,7 +54,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `inntektsmelding etter søknad`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrors())
@@ -66,7 +64,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `søknad etter inntektsmelding`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
@@ -76,9 +74,9 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `Sykmelding med overlapp på en periode`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
-        person.håndter(sykmelding(Triple(19.januar, 30.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(19.januar, 30.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
         assertFalse(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -94,7 +92,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `flere inntektsmeldinger`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
         assertTrue(inspektør.personLogg.hasWarnings())
@@ -105,7 +103,7 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `annen arbeidsgiver`() {
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100), orgnr = "123"))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100), orgnr = "123"))
         person.håndter(inntektsmelding(virksomhetsnummer = "456"))
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -128,7 +126,7 @@ internal class InntektsmeldingHendelseTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
-        person.håndter(sykmelding(Triple(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
@@ -152,12 +150,13 @@ internal class InntektsmeldingHendelseTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>, orgnr: String = ORGNR) = Sykmelding(
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNR) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
         orgnummer = orgnr,
-        sykeperioder = listOf(*sykeperioder)
+        sykeperioder = listOf(*sykeperioder),
+        mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNR) =

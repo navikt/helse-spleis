@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class Sykmelding(
@@ -14,13 +15,16 @@ class Sykmelding(
     private val fnr: String,
     private val aktørId: String,
     private val orgnummer: String,
-    sykeperioder: List<Triple<LocalDate, LocalDate, Int>>
+    sykeperioder: List<Sykmeldingsperiode>,
+    mottatt: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykdomstidslinje: Sykdomstidslinje
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
+        if (sykeperioder.harPeriodeEldreEnn(mottatt.minusMonths(6))) error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
+
         sykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
             Sykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
         }
@@ -50,3 +54,12 @@ class Sykmelding(
         arbeidsgiver.håndter(this)
     }
 }
+
+data class Sykmeldingsperiode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val grad: Int
+)
+
+private fun List<Sykmeldingsperiode>.harPeriodeEldreEnn(dato: LocalDateTime) =
+    dato.toLocalDate().isAfter(this.map{ it.fom }.min())

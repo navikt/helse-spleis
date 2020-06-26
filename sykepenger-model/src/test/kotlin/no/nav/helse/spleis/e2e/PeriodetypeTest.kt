@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.april
@@ -17,8 +14,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager`() {
-        håndterSykmelding(Triple(28.januar(2020), 10.februar(2020), 100))
-        håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.januar(2020), 10.februar(2020), 100))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
         håndterInntektsmelding(
@@ -56,8 +53,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager - ikke arbeidsgiversøknad`() {
-        håndterSykmelding(Triple(28.januar(2020), 10.februar(2020), 100))
-        håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100))
         håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
         håndterInntektsmelding(
@@ -99,7 +96,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
 
-        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingshistorikk(0, historikk)
         håndterYtelser(0, historikk)
@@ -127,7 +124,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
 
-        håndterSykmelding(Triple(29.januar, 23.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingshistorikk(0, historikk)
         håndterYtelser(0, historikk)
@@ -143,7 +140,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterSykmelding(Triple(26.februar, 15.april, 100))
+        håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100))
         håndterSøknadMedValidering(1, Sykdom(26.februar, 15.april, 100))
         håndterUtbetalingshistorikk(1, historikk)
         håndterYtelser(1, historikk)
@@ -157,8 +154,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager pga lav sykdomsgrad`() {
-        håndterSykmelding(Triple(20.januar(2020), 10.februar(2020), 15))
-        håndterSykmelding(Triple(11.februar(2020), 21.februar(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(20.januar(2020), 10.februar(2020), 15))
+        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100))
         håndterSøknad(Sykdom(20.januar(2020), 10.februar(2020), 15))
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
         håndterInntektsmelding(

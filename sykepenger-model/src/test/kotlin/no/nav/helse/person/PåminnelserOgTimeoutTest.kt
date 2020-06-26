@@ -33,7 +33,7 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i mottatt sykmelding innenfor makstid`() {
-        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
         person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
         assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(1, hendelse.behov().size)
@@ -55,8 +55,8 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i mottatt søknad innenfor makstid`() {
-        person.håndter(sykmelding(Triple(nå.minusDays(60), nå.minusDays(31), 100)))
-        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100)))
         assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1)
         person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1))
@@ -67,7 +67,7 @@ class PåminnelserOgTimeoutTest {
 
     @Test
     fun `påminnelse i mottatt inntektsmelding`() {
-        person.håndter(sykmelding(Triple(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
         person.håndter(inntektsmelding(Periode(nå.minusDays(30), nå.minusDays(14))))
         person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP))
         assertEquals(1, hendelse.behov().size)
@@ -198,13 +198,14 @@ class PåminnelserOgTimeoutTest {
             hendelse = this
         }
 
-    private fun sykmelding(vararg perioder: Triple<LocalDate, LocalDate, Int> = arrayOf(Triple(1.januar, 20.januar, 100))) =
+    private fun sykmelding(vararg perioder: Sykmeldingsperiode = arrayOf(Sykmeldingsperiode(1.januar, 20.januar, 100))) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = perioder.toList()
+            sykeperioder = perioder.toList(),
+            mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelse = this
         }

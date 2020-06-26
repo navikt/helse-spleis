@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -115,7 +116,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int, vedtaksperiodeIndex: Int = vedtaksperiodeCounter.inc()) {
-        håndterSykmelding(Triple(fom, tom, grad))
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         håndterSøknadMedValidering(vedtaksperiodeIndex, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterYtelser(vedtaksperiodeIndex)
         håndterSimulering(vedtaksperiodeIndex)
@@ -124,7 +125,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     private fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int, førsteFraværsdag: LocalDate, vedtaksperiodeIndex: Int = vedtaksperiodeCounter.inc()) {
-        håndterSykmelding(Triple(fom, tom, grad))
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         håndterInntektsmeldingMedValidering(vedtaksperiodeIndex, listOf(Periode(fom, fom.plusDays(15))), førsteFraværsdag = førsteFraværsdag)
         håndterSøknadMedValidering(vedtaksperiodeIndex, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterVilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT)

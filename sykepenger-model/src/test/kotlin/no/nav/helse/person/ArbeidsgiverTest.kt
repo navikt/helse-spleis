@@ -3,11 +3,12 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class ArbeidsgiverTest {
@@ -31,7 +32,7 @@ internal class ArbeidsgiverTest {
         )
         val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver(person, "12345678")
-        arbeidsgiver.håndter(sykmelding(Triple(10.september, 26.september, 100)))
+        arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100)))
         arbeidsgiver.håndter(inntektsmelding)
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
@@ -40,13 +41,14 @@ internal class ArbeidsgiverTest {
         )
     }
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>): Sykmelding {
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
             orgnummer = "orgnr",
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 

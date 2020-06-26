@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -89,13 +89,20 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `benytter forrige måned som utgangspunkt for inntektsberegning`() {
-        person.håndter(sykmelding(perioder = listOf(Triple(8.januar, 31.januar, 100))))
-        person.håndter(søknad(perioder = listOf(Søknad.Søknadsperiode.Sykdom(8.januar,  31.januar, 100))))
-        person.håndter(inntektsmelding(beregnetInntekt = 30000.0, arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))))
+        person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(8.januar, 31.januar, 100))))
+        person.håndter(søknad(perioder = listOf(Søknad.Søknadsperiode.Sykdom(8.januar, 31.januar, 100))))
+        person.håndter(
+            inntektsmelding(
+                beregnetInntekt = 30000.0,
+                arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
+            )
+        )
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
 
-        val inntektsberegningStart = hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningStart")
-        val inntektsberegningSlutt = hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningSlutt")
+        val inntektsberegningStart =
+            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningStart")
+        val inntektsberegningSlutt =
+            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningSlutt")
         assertEquals("2017-01", inntektsberegningStart)
         assertEquals("2017-12", inntektsberegningSlutt)
     }
@@ -151,31 +158,32 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun sykmelding(
-        perioder: List<Triple<LocalDate, LocalDate, Int>> = listOf(Triple(1.januar, 31.januar, 100))
+        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100))
     ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "aktørId",
         orgnummer = ORGNR,
-        sykeperioder = perioder
+        sykeperioder = perioder,
+        mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
         hendelse = this
     }
 
     private fun søknad(
-        perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(1.januar,  31.januar, 100))
+        perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
     ) = Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "aktørId",
-            orgnummer = ORGNR,
-            perioder = perioder,
-            harAndreInntektskilder = false,
-            sendtTilNAV = 31.januar.atStartOfDay(),
-            permittert = false
-        ).apply {
-            hendelse = this
-        }
+        meldingsreferanseId = UUID.randomUUID(),
+        fnr = UNG_PERSON_FNR_2018,
+        aktørId = "aktørId",
+        orgnummer = ORGNR,
+        perioder = perioder,
+        harAndreInntektskilder = false,
+        sendtTilNAV = 31.januar.atStartOfDay(),
+        permittert = false
+    ).apply {
+        hendelse = this
+    }
 
     private fun inntektsmelding(
         beregnetInntekt: Double,

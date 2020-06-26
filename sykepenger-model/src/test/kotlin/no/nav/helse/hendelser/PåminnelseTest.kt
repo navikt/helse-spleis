@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
+import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -57,7 +58,8 @@ internal class PåminnelseTest {
             fødselsnummer,
             aktørId,
             orgnummer,
-            listOf(Triple(1.januar, 6.januar, 100))
+            listOf(Sykmeldingsperiode(1.januar, 6.januar, 100)),
+            mottatt = 1.april.atStartOfDay()
         )
     }
 

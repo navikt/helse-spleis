@@ -33,6 +33,7 @@ internal class TestMessageFactory(
     }
 
     fun lagNySøknad(vararg perioder: SoknadsperiodeDTO): String {
+        val fom = perioder.minBy { it.fom!! }!!.fom!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
             id = UUID.randomUUID().toString(),
@@ -40,7 +41,7 @@ internal class TestMessageFactory(
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-            fom = perioder.minBy { it.fom!! }?.fom,
+            fom = fom,
             tom = perioder.maxBy { it.tom!! }?.tom,
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
@@ -48,7 +49,7 @@ internal class TestMessageFactory(
             egenmeldinger = emptyList(),
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now()
+            opprettet = fom.plusMonths(3)?.atStartOfDay()
         )
         return nyHendelse("ny_søknad", nySøknad.toMap())
     }

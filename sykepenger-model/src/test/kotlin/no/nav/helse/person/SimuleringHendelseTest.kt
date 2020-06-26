@@ -99,7 +99,8 @@ internal class SimuleringHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
+            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
+            mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
             hendelse = this
         }

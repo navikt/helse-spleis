@@ -3,12 +3,11 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.BeforeEach
+import no.nav.helse.testhelpers.juli
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SykmeldingTest {
@@ -18,16 +17,10 @@ internal class SykmeldingTest {
     }
 
     private lateinit var sykmelding: Sykmelding
-    private lateinit var aktivitetslogg: Aktivitetslogg
-
-    @BeforeEach
-    internal fun setup() {
-        aktivitetslogg = Aktivitetslogg()
-    }
 
     @Test
     internal fun `sykdomsgrad som er 100% støttes`() {
-        sykmelding(Triple(1.januar, 10.januar, 100), Triple(12.januar, 16.januar, 100))
+        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100), Sykmeldingsperiode(12.januar, 16.januar, 100))
         assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
         assertEquals(1, sykmelding.sykdomstidslinje().filterIsInstance<UkjentDag>().size)
@@ -35,7 +28,7 @@ internal class SykmeldingTest {
 
     @Test
     internal fun `sykdomsgrad under 100% støttes`() {
-        sykmelding(Triple(1.januar, 10.januar, 50), Triple(12.januar, 16.januar, 100))
+        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50), Sykmeldingsperiode(12.januar, 16.januar, 100))
         assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
     }
 
@@ -47,17 +40,31 @@ internal class SykmeldingTest {
     @Test
     internal fun `overlappende sykeperioder`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
-            sykmelding(Triple(10.januar, 12.januar, 100), Triple(1.januar, 12.januar, 100))
+            sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100), Sykmeldingsperiode(1.januar, 12.januar, 100))
         }
     }
 
-    private fun sykmelding(vararg sykeperioder: Triple<LocalDate, LocalDate, Int>) {
+    @Test
+    internal fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 1.juli.atStartOfDay())
+        assertFalse(sykmelding.valider(sykmelding.periode()).hasErrors())
+    }
+
+    @Test
+    internal fun `sykmelding eldre enn 6 måneder får error`() {
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 2.juli.atStartOfDay())
+        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrors())
+    }
+
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
+        val tidligsteFom = sykeperioder.map { it.fom }.min()?.atStartOfDay()
         sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = mottatt ?: tidligsteFom ?: LocalDateTime.now()
         )
     }
 

@@ -182,7 +182,8 @@ internal class YtelserHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            sykeperioder = listOf(Triple(førsteSykedag, sisteSykedag, 100))
+            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
+            mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         )
 
     private fun søknad() =
