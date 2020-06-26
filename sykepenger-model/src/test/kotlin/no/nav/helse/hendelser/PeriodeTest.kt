@@ -59,6 +59,34 @@ internal class PeriodeTest {
         assertSize(19, actual)
     }
 
+    @Test
+    internal fun `slå sammen to lister som ikke overlapper hverandre`() {
+        assertEquals(
+            listOf(1.mars to 5.mars, 1.mai to 5.mai, 1.juli to 5.juli),
+            listOf(1.mars to 5.mars, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+        )
+        assertEquals(
+            listOf(1.mars to 5.mars, 1.juli to 5.juli) + listOf(1.mai to 5.mai),
+            listOf(1.mai to 5.mai) + listOf(1.mars to 5.mars, 1.juli to 5.juli)
+        )
+    }
+
+    @Test
+    internal fun `ved å slå sammen to lister fjerner dubletter`() {
+        assertEquals(
+            listOf(1.mai to 5.mai, 1.juli to 5.juli),
+            listOf(1.mai to 5.mai, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+        )
+    }
+
+    @Test
+    internal fun `slå sammen to lister med overlappende elementer`() {
+        assertEquals(
+            listOf(1.mai to 7.mai, 1.juli to 5.juli),
+            listOf(3.mai to 7.mai, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+        )
+    }
+
     private fun assertSize(expected: Int, periode: Periode) {
         var count = 0
         periode.forEach { _ -> count++ }
