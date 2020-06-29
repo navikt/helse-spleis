@@ -61,7 +61,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
 
-    private fun validerSykdomstidslinjer() = perioder.forEach {
+    private fun validerSykdomstidslinjer() = vedtaksperioder.forEach {
         it.validerSykdomstidslinje(sykdomshistorikk.sykdomstidslinje())
     }
 
