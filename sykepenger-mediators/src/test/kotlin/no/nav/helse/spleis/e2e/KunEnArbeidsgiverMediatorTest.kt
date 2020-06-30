@@ -2,21 +2,16 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    @Disabled("Påminnelser er midlertidig deaktivert")
     fun `påminnelse for vedtaksperiode som ikke finnes`() {
         sendNyPåminnelse()
         assertEquals(1, testRapid.inspektør.antall())
