@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -59,7 +60,22 @@ internal class Arbeidsgiver private constructor(
     internal fun nåværendeTidslinje() =
         utbetaling()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
-    internal fun push(utbetaling: Utbetaling) = utbetalinger.add(utbetaling)
+    internal fun createUtbetaling(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        utbetalingstidslinje: Utbetalingstidslinje,
+        sisteDato: LocalDate,
+        aktivitetslogg: Aktivitetslogg
+    ) {
+        utbetalinger.add(Utbetaling(
+            fødselsnummer,
+            organisasjonsnummer,
+            utbetalingstidslinje,
+            sisteDato,
+            aktivitetslogg,
+            utbetalinger
+        ))
+    }
 
     private fun validerSykdomstidslinjer() = vedtaksperioder.forEach {
         it.validerSykdomstidslinje(sykdomshistorikk.sykdomstidslinje())
@@ -258,5 +274,4 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
-
 }

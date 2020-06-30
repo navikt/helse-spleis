@@ -111,7 +111,14 @@ internal class UtbetalingTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = Utbetaling(fødselsnummer, orgnummer, tidslinje, sisteDato, aktivitetslogg, tidligere)
+    ) = Utbetaling(
+        fødselsnummer,
+        orgnummer,
+        tidslinje,
+        sisteDato,
+        aktivitetslogg,
+        tidligere?.let { listOf(tidligere) } ?: emptyList()
+    )
 
     private class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         private var linjeteller = 0

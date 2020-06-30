@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
@@ -37,14 +36,13 @@ internal class ArbeidsgiverUtbetalinger(
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            arbeidsgiver.push(Utbetaling(
+            arbeidsgiver.createUtbetaling(
                 fødselsnummer,
                 organisasjonsnummer,
                 utbetalingstidslinje,
                 periode.endInclusive,
-                aktivitetslogg,
-                arbeidsgiver.utbetaling()
-            ))
+                aktivitetslogg
+            )
         }
     }
 

@@ -26,11 +26,11 @@ internal class Utbetaling private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
         sisteDato: LocalDate,
         aktivitetslogg: Aktivitetslogg,
-        tidligere: Utbetaling?
+        utbetalinger: List<Utbetaling>
     ) : this(
         utbetalingstidslinje,
-        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, tidligere),
+        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
+        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
         LocalDateTime.now(),
         IKKE_UTBETALT
     )
@@ -57,17 +57,17 @@ internal class Utbetaling private constructor(
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
-            tidligere: Utbetaling?
+            utbetalinger: List<Utbetaling>
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverBeløp).result()
             .minus(
-                tidligere?.arbeidsgiverOppdrag ?: Oppdrag(
+                utbetalinger.lastOrNull()?.arbeidsgiverOppdrag ?: Oppdrag(
                     organisasjonsnummer,
                     SykepengerRefusjon,
                     sisteArbeidsgiverdag = LocalDate.MIN
                 )
             )
             .also { oppdrag ->
-                tidligere?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
+                utbetalinger.lastOrNull()?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
                 if (oppdrag.isEmpty())
                     aktivitetslogg.info("Ingen utbetalingslinjer bygget")
                 else
@@ -78,7 +78,7 @@ internal class Utbetaling private constructor(
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
-            tidligere: Utbetaling?
+            utbetalinger: List<Utbetaling>
         ): Oppdrag {
             return Oppdrag(fødselsnummer, Fagområde.Sykepenger, sisteArbeidsgiverdag = LocalDate.MIN)
         }
