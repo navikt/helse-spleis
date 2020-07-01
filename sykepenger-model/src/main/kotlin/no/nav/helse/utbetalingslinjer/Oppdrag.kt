@@ -18,7 +18,6 @@ internal class Oppdrag private constructor(
     private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() }
 ) : MutableList<Utbetalingslinje> by linjer {
 
-
     internal constructor(
         mottaker: String,
         fagområde: Fagområde,
@@ -33,6 +32,9 @@ internal class Oppdrag private constructor(
         Endringskode.NY,
         sisteArbeidsgiverdag
     )
+
+    internal constructor(mottaker: String, fagområde: Fagområde):
+        this(mottaker, fagområde, sisteArbeidsgiverdag = LocalDate.MIN)
 
     internal fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp)

@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.testhelpers.*
@@ -118,7 +120,17 @@ internal class UtbetalingTest {
         sisteDato,
         aktivitetslogg,
         tidligere?.let { listOf(tidligere) } ?: emptyList()
-    )
+    ).also { utbetaling ->
+        utbetaling.håndter(UtbetalingHendelse(
+            vedtaksperiodeId = "ignore",
+            aktørId = "ignore",
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER,
+            utbetalingsreferanse = "ref",
+            status = AKSEPTERT,
+            melding = "hei"
+        ))
+    }
 
     private class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         private var linjeteller = 0

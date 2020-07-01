@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
@@ -39,10 +40,10 @@ internal class Utbetaling private constructor(
         IKKE_UTBETALT,
         UTBETALT,
         UTBETALING_FEILET,
-        ANNULLERT
+        ANNULLERT;
     }
 
-    fun håndter(utbetaling: UtbetalingHendelse) {
+    internal fun håndter(utbetaling: UtbetalingHendelse) {
         status = if(utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
     }
 
@@ -58,14 +59,9 @@ internal class Utbetaling private constructor(
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             utbetalinger: List<Utbetaling>
-        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverBeløp).result()
-            .minus(
-                utbetalinger.lastOrNull()?.arbeidsgiverOppdrag ?: Oppdrag(
-                    organisasjonsnummer,
-                    SykepengerRefusjon,
-                    sisteArbeidsgiverdag = LocalDate.MIN
-                )
-            )
+        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverBeløp)
+            .result()
+            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon)})
             .also { oppdrag ->
                 utbetalinger.lastOrNull()?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
                 if (oppdrag.isEmpty())
@@ -73,15 +69,20 @@ internal class Utbetaling private constructor(
                 else
                     aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
             }
-        private fun buildPerson(
+
+        private fun buildPerson(        // TODO("To be completed when payments to employees is supported")
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: Aktivitetslogg,
             utbetalinger: List<Utbetaling>
-        ): Oppdrag {
-            return Oppdrag(fødselsnummer, Fagområde.Sykepenger, sisteArbeidsgiverdag = LocalDate.MIN)
-        }
+        ) = Oppdrag(fødselsnummer, Sykepenger)
+
+        private fun sisteGyldig(utbetalinger: List<Utbetaling>, default: () -> Oppdrag) =
+            utbetalinger
+                .lastOrNull { it.status == UTBETALT }
+                ?.arbeidsgiverOppdrag
+                ?: default()
 
         internal fun List<Utbetaling>.utbetalte() = filter { it.status == UTBETALT }
     }

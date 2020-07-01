@@ -1,5 +1,6 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
@@ -52,7 +53,17 @@ internal class UtbetalingReflectTest {
             4.januar,
             Aktivitetslogg(),
             emptyList()
-        )
+        ).also { utbetaling ->
+            utbetaling.håndter(UtbetalingHendelse(
+                    vedtaksperiodeId = "ignore",
+                    aktørId = "ignore",
+                    fødselsnummer = UNG_PERSON_FNR_2018,
+                    orgnummer = ORGNUMMER,
+                    utbetalingsreferanse = "ref",
+                    status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+                    melding = "hei"
+                ))
+        }
 
         map = UtbetalingReflect(
             Utbetaling(
