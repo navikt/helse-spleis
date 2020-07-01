@@ -80,7 +80,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `når en periode går Til Infotrygd avsluttes ikke påfølgende, tilstøtende perioder som bare har mottatt sykmelding`() {
+    fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder som bare har mottatt sykmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
@@ -94,8 +94,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )  // <-- TIL_INFOTRYGD
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -150,7 +150,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TIL_INFOTRYGD
         )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP)
     }
 
     @Test

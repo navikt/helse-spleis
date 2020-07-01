@@ -214,10 +214,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun forkastHvisPåfølgendeUnntattNy(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (kunMottattSykmelding() || (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(
-                this
-            ))
-        ) return
+        if (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(this)) return
         hendelse.warn("Avslutter perioden fordi tilstøtende, eller nyere periode, gikk til Infotrygd")
         forkast(hendelse)
     }
@@ -458,14 +455,6 @@ internal class Vedtaksperiode private constructor(
             TIL_INFOTRYGD,
             AVSLUTTET,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
-        )
-
-    private fun kunMottattSykmelding() =
-        this.tilstand.type in listOf(
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_UFERDIG_GAP
         )
 
     private fun utbetaling() =
@@ -1342,6 +1331,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             vedtaksperiode.arbeidsgiver.forkastPåfølgendeUnntattNye(vedtaksperiode, hendelse)
+            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
         override fun håndter(

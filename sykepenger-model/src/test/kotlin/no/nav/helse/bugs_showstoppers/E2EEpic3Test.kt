@@ -950,6 +950,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 }
