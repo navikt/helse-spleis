@@ -1535,7 +1535,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvis sykmelding over 6 måneder gammel`() {
-        person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100)))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100))
+        person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrors())
+        assertEquals(1, inspektør.sykdomshistorikk.size)
     }
 }

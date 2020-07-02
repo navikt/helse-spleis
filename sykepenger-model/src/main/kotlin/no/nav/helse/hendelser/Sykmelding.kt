@@ -36,9 +36,12 @@ class Sykmelding(
     override fun periode() = Periode(fom = sykdomstidslinje.førsteDag(), tom = sykdomstidslinje.sisteDag())
 
     override fun valider(periode: Periode): Aktivitetslogg {
-        if (sykdomstidslinje.førsteDag() < mottatt.toLocalDate().minusMonths(6))
-            error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
+        forGammel()
         return aktivitetslogg
+    }
+
+    internal fun forGammel() = (sykdomstidslinje.førsteDag() < mottatt.toLocalDate().minusMonths(6)).also {
+        if (it) error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
     }
 
     override fun melding(klassName: String) = "Sykmelding"
