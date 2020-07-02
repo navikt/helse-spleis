@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ internal class SykmeldingHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestPersonInspektør(person)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
 
     @BeforeEach
     internal fun opprettPerson() {

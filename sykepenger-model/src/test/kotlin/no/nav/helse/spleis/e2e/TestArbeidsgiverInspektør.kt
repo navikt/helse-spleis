@@ -20,10 +20,9 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class TestPersonInspektør(person: Person) : PersonVisitor {
+internal class TestArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver, aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
-    private var arbeidsgiverindeks: Int = -1
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
@@ -33,15 +32,15 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
-    internal lateinit var personLogg: Aktivitetslogg
+    internal val personLogg = aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal lateinit var sykdomstidslinje: Sykdomstidslinje
     internal var låstePerioder = emptyList<Periode>()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
-    internal val inntekter = mutableMapOf<Int, MutableList<Inntekthistorikk.Inntekt>>()
-    private val arbeidsgiverutbetalinger = mutableMapOf<Int, List<Utbetaling>>()
+    internal val inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
+    internal lateinit var utbetalinger: List<Utbetaling>
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
@@ -53,7 +52,28 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     private val periodeIder = mutableMapOf<Int, UUID>()
 
     init {
-        person.accept(this)
+        arbeidsgiver.accept(this)
+    }
+
+    internal companion object {
+        internal fun person(person: Person, arbeidsgiver: Arbeidsgiver? = null): TestArbeidsgiverInspektør {
+            class HentAktivitetslogg(private val arbeidsgiver: Arbeidsgiver?): PersonVisitor {
+                private lateinit var aktivitetslogg: Aktivitetslogg
+                lateinit var inspektør: TestArbeidsgiverInspektør
+                override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+                    this.aktivitetslogg = aktivitetslogg
+                }
+                override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                    if (this.arbeidsgiver != null && this.arbeidsgiver != arbeidsgiver) return
+                    if (::inspektør.isInitialized) return
+                    inspektør = TestArbeidsgiverInspektør(arbeidsgiver, aktivitetslogg)
+                }
+            }
+            return HentAktivitetslogg(arbeidsgiver).let {
+                person.accept(it)
+                it.inspektør
+            }
+        }
     }
 
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
@@ -64,7 +84,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
         id: UUID,
         organisasjonsnummer: String
     ) {
-        arbeidsgiverindeks += 1
         this.arbeidsgiver = arbeidsgiver
     }
 
@@ -126,7 +145,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        arbeidsgiverutbetalinger[arbeidsgiverindeks] = utbetalinger
+        this.utbetalinger = utbetalinger
     }
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
@@ -145,10 +164,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     internal inline fun <reified T> etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, felt: String) =
         personLogg.etterspurtBehov<T>(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype, felt)
 
-    override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-        personLogg = aktivitetslogg
-    }
-
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
         if (!inGyldigePerioder || førsteFraværsdag == null) return
         førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
@@ -165,7 +180,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
-        inntekter.getOrPut(arbeidsgiverindeks) { mutableListOf() }.add(inntekt)
+        inntekter.add(inntekt)
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -180,7 +195,7 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
 
     private inner class LåsInspektør: SykdomstidslinjeVisitor {
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-            this@TestPersonInspektør.låstePerioder = låstePerioder
+            this@TestArbeidsgiverInspektør.låstePerioder = låstePerioder
         }
     }
 
@@ -266,10 +281,6 @@ internal class TestPersonInspektør(person: Person) : PersonVisitor {
     }
 
     internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks] ?: fail {
-        "Missing collection initialization"
-    }
-
-    internal fun arbeidsgiverutbetalinger(indeks: Int) = arbeidsgiverutbetalinger[indeks] ?: fail {
         "Missing collection initialization"
     }
 

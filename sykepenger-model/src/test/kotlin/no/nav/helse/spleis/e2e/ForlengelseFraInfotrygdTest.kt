@@ -253,7 +253,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        inspektør.arbeidsgiverutbetalinger(0).utbetalte().also { utbetalinger ->
+        inspektør.utbetalinger.utbetalte().also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
             UtbetalingstidslinjeInspektør(utbetalinger.first().utbetalingstidslinje()).also {
                 assertEquals(0, it.arbeidsgiverperiodeDagTeller)

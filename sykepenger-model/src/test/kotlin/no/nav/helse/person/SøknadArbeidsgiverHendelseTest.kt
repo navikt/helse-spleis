@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -21,7 +21,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestPersonInspektør(person)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -170,7 +170,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `to forskjellige arbeidsgivere er ikke støttet`() {
+    fun `to forskjellige arbeidsgivere er ikke støttet`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
         person.håndter(
             søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer2")

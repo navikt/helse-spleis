@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +20,7 @@ internal class YtelserHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestPersonInspektør(person)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -28,9 +28,8 @@ internal class YtelserHendelseTest {
     }
 
     @Test
-    internal fun `ytelser på feil tidspunkt`() {
+    fun `ytelser på feil tidspunkt`() {
         assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
 
         person.håndter(sykmelding())
         person.håndter(ytelser())

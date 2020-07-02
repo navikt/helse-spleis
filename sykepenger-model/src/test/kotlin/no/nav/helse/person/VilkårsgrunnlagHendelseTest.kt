@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,7 +22,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestPersonInspektør(person)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach

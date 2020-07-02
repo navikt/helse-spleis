@@ -32,7 +32,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
-    protected val inspektør get() = TestPersonInspektør(person)
+    protected val inspektør get() = TestArbeidsgiverInspektør.person(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
 
@@ -52,19 +52,19 @@ internal abstract class AbstractEndToEndTest {
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
-    protected fun assertNoErrors(inspektør: TestPersonInspektør) {
+    protected fun assertNoErrors(inspektør: TestArbeidsgiverInspektør) {
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
     }
 
-    protected fun assertNoWarnings(inspektør: TestPersonInspektør) {
+    protected fun assertNoWarnings(inspektør: TestArbeidsgiverInspektør) {
         assertFalse(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
     }
 
-    protected fun assertWarnings(inspektør: TestPersonInspektør) {
+    protected fun assertWarnings(inspektør: TestArbeidsgiverInspektør) {
         assertTrue(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
     }
 
-    protected fun assertMessages(inspektør: TestPersonInspektør) {
+    protected fun assertMessages(inspektør: TestArbeidsgiverInspektør) {
         assertTrue(inspektør.personLogg.hasMessages(), inspektør.personLogg.toString())
     }
 

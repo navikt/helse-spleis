@@ -3,7 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -22,7 +22,7 @@ internal class SimuleringHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestPersonInspektør(person)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach

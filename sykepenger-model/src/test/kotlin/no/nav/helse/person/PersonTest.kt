@@ -5,7 +5,7 @@ import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.september
-import no.nav.helse.spleis.e2e.TestPersonInspektør
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.fredag
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.testhelpers.torsdag
@@ -29,7 +29,7 @@ internal class PersonTest {
 
     private lateinit var testObserver: TestPersonObserver
     private lateinit var testPerson: Person
-    private val inspektør get() = TestPersonInspektør(testPerson)
+    private val inspektør get() = TestArbeidsgiverInspektør.person(testPerson)
 
     @BeforeEach
     fun setup() {
