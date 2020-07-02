@@ -1532,4 +1532,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(1))
         assertNotEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
     }
+
+    @Test
+    fun `avvis sykmelding over 6 måneder gammel`() {
+        person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100)))
+        assertTrue(inspektør.personLogg.hasErrors())
+    }
 }

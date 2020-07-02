@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
@@ -16,15 +17,13 @@ class Sykmelding(
     private val aktørId: String,
     private val orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
-    mottatt: LocalDateTime
+    private val mottatt: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykdomstidslinje: Sykdomstidslinje
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
-        if (sykeperioder.harPeriodeEldreEnn(mottatt.minusMonths(6))) error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
-
         sykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
             Sykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
         }
@@ -36,7 +35,11 @@ class Sykmelding(
 
     override fun periode() = Periode(fom = sykdomstidslinje.førsteDag(), tom = sykdomstidslinje.sisteDag())
 
-    override fun valider(periode: Periode) = aktivitetslogg  // No invalid possibilities if passed init block
+    override fun valider(periode: Periode): Aktivitetslogg {
+        if (sykdomstidslinje.førsteDag() < mottatt.toLocalDate().minusMonths(6))
+            error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
+        return aktivitetslogg
+    }
 
     override fun melding(klassName: String) = "Sykmelding"
 
@@ -60,6 +63,3 @@ data class Sykmeldingsperiode(
     val tom: LocalDate,
     val grad: Int
 )
-
-private fun List<Sykmeldingsperiode>.harPeriodeEldreEnn(dato: LocalDateTime) =
-    dato.toLocalDate().isAfter(this.map{ it.fom }.min())

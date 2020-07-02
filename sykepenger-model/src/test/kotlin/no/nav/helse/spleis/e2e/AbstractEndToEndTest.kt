@@ -215,7 +215,6 @@ internal abstract class AbstractEndToEndTest {
             melding = "hei"
         )
 
-
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -224,6 +223,19 @@ internal abstract class AbstractEndToEndTest {
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(*sykeperioder),
             mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+        ).apply {
+            hendelselogg = this
+        }
+    }
+
+    internal fun sentSykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
+        return Sykmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            fnr = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            orgnummer = ORGNUMMER,
+            sykeperioder = listOf(*sykeperioder),
+            mottatt = sykeperioder.map { it.fom }.min()?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
