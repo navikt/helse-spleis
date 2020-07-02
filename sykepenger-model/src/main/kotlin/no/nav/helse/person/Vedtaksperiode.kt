@@ -247,7 +247,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
-            arbeidsgiver.finnForegåendePeriode(this)?.run { Periodetype.INFOTRYGDFORLENGELSE } ?: Periodetype.OVERGANG_FRA_IT
+            arbeidsgiver.finnForegåendePeriode(this)?.run { Periodetype.INFOTRYGDFORLENGELSE }
+                ?: Periodetype.OVERGANG_FRA_IT
         harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
         else -> Periodetype.FØRSTEGANGSBEHANDLING
     }
@@ -431,19 +432,32 @@ internal class Vedtaksperiode private constructor(
         personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
         arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
         arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
-        if (utbetalingstidslinje.kunArbeidsgiverdager() &&
-            person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds()
-        ) return tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {
-            ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+
+        when {
+            utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds() -> {
+                tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {
+                    ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+                }
+            }
+            !utbetalingstidslinje.harUtbetalinger() -> {
+                loggHvisForlengelse(ytelser)
+                tilstand(ytelser, AvventerGodkjenning) {
+                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                }
+            }
+            else -> {
+                loggHvisForlengelse(ytelser)
+                tilstand(ytelser, AvventerSimulering) {
+                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
+                }
+            }
         }
-        if (!utbetalingstidslinje.harUtbetalinger()) return tilstand(
-            ytelser,
-            AvventerGodkjenning
-        ) {
-            ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-        }
-        tilstand(ytelser, AvventerSimulering) {
-            ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
+    }
+
+    private fun loggHvisForlengelse(logg: IAktivitetslogg) {
+        val periodetype = periodetype()
+        if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) {
+            logg.info("Perioden er en forlengelse, av type $periodetype")
         }
     }
 
@@ -1126,9 +1140,6 @@ internal class Vedtaksperiode private constructor(
                 .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (vedtaksperiode.periodetype() != Periodetype.FØRSTEGANGSBEHANDLING) {
-                hendelse.info("Perioden er en forlengelse, av type ${vedtaksperiode.periodetype()}")
-            }
             godkjenning(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode.start,
