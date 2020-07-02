@@ -1090,17 +1090,9 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(4)
+        ): LocalDateTime = tilstandsendringstidspunkt.plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerGodkjenning
-            ) {
-                hendelse.warn("Ingen simulering av utbetaling på grunn av manglende utbetalingsinformasjon, går til Avventer godkjenning")
-            }
-
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
