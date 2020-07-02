@@ -1133,6 +1133,9 @@ internal class Vedtaksperiode private constructor(
                 .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            if (vedtaksperiode.periodetype() != Periodetype.FØRSTEGANGSBEHANDLING) {
+                hendelse.info("Perioden er en forlengelse, av type ${vedtaksperiode.periodetype()}")
+            }
             godkjenning(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode.start,
