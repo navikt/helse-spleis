@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.SøknadArbeidsgiver.Søknadsperiode
@@ -21,7 +21,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {

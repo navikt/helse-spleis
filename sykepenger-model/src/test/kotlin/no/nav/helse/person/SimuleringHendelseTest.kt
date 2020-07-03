@@ -7,7 +7,8 @@ import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -22,7 +23,7 @@ internal class SimuleringHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach

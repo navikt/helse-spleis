@@ -24,7 +24,7 @@ class PåminnelserOgTimeoutTest {
 
     private lateinit var person: Person
     private lateinit var hendelse: ArbeidstakerHendelse
-    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {

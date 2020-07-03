@@ -20,7 +20,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class TestArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver, aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) : ArbeidsgiverVisitor {
+internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsgiver? = null) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
     private var vedtaksperiodeindeks: Int = -1
@@ -32,7 +32,7 @@ internal class TestArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver, aktivitets
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
-    internal val personLogg = aktivitetslogg
+    internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntekthistorikk
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
@@ -52,27 +52,27 @@ internal class TestArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver, aktivitets
     private val periodeIder = mutableMapOf<Int, UUID>()
 
     init {
-        arbeidsgiver.accept(this)
+        HentAktivitetslogg(person, arbeidsgiver).also { results ->
+            personLogg = results.aktivitetslogg
+            results.arbeidsgiver.accept(this)
+        }
     }
 
-    internal companion object {
-        internal fun person(person: Person, arbeidsgiver: Arbeidsgiver? = null): TestArbeidsgiverInspektør {
-            class HentAktivitetslogg(private val arbeidsgiver: Arbeidsgiver?): PersonVisitor {
-                private lateinit var aktivitetslogg: Aktivitetslogg
-                lateinit var inspektør: TestArbeidsgiverInspektør
-                override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-                    this.aktivitetslogg = aktivitetslogg
-                }
-                override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-                    if (this.arbeidsgiver != null && this.arbeidsgiver != arbeidsgiver) return
-                    if (::inspektør.isInitialized) return
-                    inspektør = TestArbeidsgiverInspektør(arbeidsgiver, aktivitetslogg)
-                }
+    private class HentAktivitetslogg(person: Person, private val valgfriArbeidsgiver: Arbeidsgiver?): PersonVisitor {
+        internal lateinit var aktivitetslogg: Aktivitetslogg
+        internal lateinit var arbeidsgiver: Arbeidsgiver
+        init {
+            person.accept(this)
+        }
+        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
+            this.aktivitetslogg = aktivitetslogg
+        }
+        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+            if (this.valgfriArbeidsgiver != null && this.arbeidsgiver != arbeidsgiver) {
+                this.arbeidsgiver = valgfriArbeidsgiver
             }
-            return HentAktivitetslogg(arbeidsgiver).let {
-                person.accept(it)
-                it.inspektør
-            }
+            if (this::arbeidsgiver.isInitialized) return
+            this.arbeidsgiver = arbeidsgiver
         }
     }
 

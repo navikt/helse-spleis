@@ -21,7 +21,7 @@ internal class GodkjenningHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
 
     @BeforeEach

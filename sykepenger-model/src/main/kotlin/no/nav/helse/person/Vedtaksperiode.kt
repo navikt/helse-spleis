@@ -455,9 +455,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun loggHvisForlengelse(logg: IAktivitetslogg) {
-        val periodetype = periodetype()
-        if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) {
-            logg.info("Perioden er en forlengelse, av type $periodetype")
+        periodetype().also { periodetype ->
+            if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) {
+                logg.info("Perioden er en forlengelse, av type $periodetype")
+            }
         }
     }
 

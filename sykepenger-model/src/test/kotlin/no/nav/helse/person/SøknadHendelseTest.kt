@@ -22,7 +22,7 @@ internal class SøknadHendelseTest {
     }
 
     private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
 
     @BeforeEach
     internal fun opprettPerson() {

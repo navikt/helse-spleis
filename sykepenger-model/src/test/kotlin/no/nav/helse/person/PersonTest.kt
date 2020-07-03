@@ -28,13 +28,13 @@ internal class PersonTest {
     private val virksomhetsnummer_b = "098765432"
 
     private lateinit var testObserver: TestPersonObserver
-    private lateinit var testPerson: Person
-    private val inspektør get() = TestArbeidsgiverInspektør.person(testPerson)
+    private lateinit var person: Person
+    private val inspektør get() = TestArbeidsgiverInspektør(person)
 
     @BeforeEach
     fun setup() {
         testObserver = TestPersonObserver()
-        testPerson = Person(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
+        person = Person(aktørId = aktørId, fødselsnummer = fødselsnummer).also {
             it.addObserver(this.testObserver)
         }
     }
@@ -51,7 +51,7 @@ internal class PersonTest {
 
     @Test
     fun `sykmelding fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
-        testPerson.also {
+        person.also {
             it.håndter(sykmelding())
         }
         assertTrue(inspektør.personLogg.toString().contains("Ny arbeidsgiver"))
@@ -67,7 +67,7 @@ internal class PersonTest {
             tilstandType = MOTTATT_SYKMELDING_FERDIG_GAP
         )
 
-        testPerson.also { it.håndter(påminnelse) }
+        person.also { it.håndter(påminnelse) }
         assertTrue(påminnelse.hasErrors())
 
         assertPersonIkkeEndret()
@@ -87,7 +87,7 @@ internal class PersonTest {
 
     @Test
     fun `inntektsmelding med eksisterende periode trigger vedtaksperiode endret-hendelse`() {
-        testPerson.also {
+        person.also {
             it.håndter(sykmelding())
             it.håndter(inntektsmelding())
         }
@@ -98,9 +98,9 @@ internal class PersonTest {
 
     @Test
     fun `eksisterende periode må behandles i infotrygd når en sykmelding overlapper sykdomstidslinjen i den eksisterende perioden`() {
-        testPerson.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100))))
+        person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100))))
         sykmelding(perioder = listOf(Sykmeldingsperiode(10.juli, 22.juli, 100))).also {
-            testPerson.håndter(it)
+            person.håndter(it)
             assertTrue(it.hasWarnings())
             assertFalse(it.hasErrors())
         }
@@ -108,7 +108,7 @@ internal class PersonTest {
 
     @Test
     fun `ny periode må behandles i infotrygd når vi mottar søknaden før sykmelding`() {
-        testPerson.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 9.juli, 100))))
+        person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         assertTrue(inspektør.personLogg.hasMessages())
@@ -123,7 +123,7 @@ internal class PersonTest {
                 )
             )
         ).also {
-            testPerson.håndter(it)
+            person.håndter(it)
             assertTrue(it.hasWarnings())
             assertTrue(it.hasErrors())
         }
@@ -143,14 +143,14 @@ internal class PersonTest {
                 Sykmeldingsperiode(1.fredag, 1.fredag, 100)
             )
         ).also {
-            testPerson.håndter(it)
+            person.håndter(it)
             assertFalse(it.hasErrors())
         }
     }
 
     @Test
     fun `søknad trigger vedtaksperiode endret-hendelse`() {
-        testPerson.also {
+        person.also {
             it.håndter(sykmelding())
             it.håndter(søknad())
         }
@@ -162,7 +162,7 @@ internal class PersonTest {
     @Test
     fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
-            testPerson.also {
+            person.also {
                 it.håndter(
                     Ytelser(
                         meldingsreferanseId = UUID.randomUUID(),
@@ -193,7 +193,7 @@ internal class PersonTest {
     private fun vedtaksperiodeIdForPerson() =
         testObserver.tilstandsendringer.keys.first()
 
-    private fun enPersonMedÉnArbeidsgiver(virksomhetsnummer: String) = testPerson.also {
+    private fun enPersonMedÉnArbeidsgiver(virksomhetsnummer: String) = person.also {
         it.håndter(sykmelding(orgnummer = virksomhetsnummer))
     }
 

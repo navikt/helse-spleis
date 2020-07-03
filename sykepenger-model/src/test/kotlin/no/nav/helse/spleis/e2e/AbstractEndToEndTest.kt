@@ -32,7 +32,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
-    protected val inspektør get() = TestArbeidsgiverInspektør.person(person)
+    protected val inspektør get() = TestArbeidsgiverInspektør(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
 
