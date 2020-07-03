@@ -133,7 +133,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterVilkårsgrunnlag(
-        vedtaksperiodeIndex: Int, inntekt: Double,
+        vedtaksperiodeIndex: Int,
+        inntekt: Double,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -147,12 +148,10 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(vilkårsgrunnlag(
             vedtaksperiodeIndex,
             inntekt,
-            if (arbeidsforhold.isEmpty()) listOf(
-                Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))
-            )
-            else arbeidsforhold,
+            arbeidsforhold,
             egenAnsatt,
-            medlemskapstatus
+            medlemskapstatus,
+            orgnummer
         ))
     }
 
@@ -239,7 +238,7 @@ internal abstract class AbstractEndToEndTest {
             melding = "hei"
         )
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = ORGNUMMER): Sykmelding {
+    protected fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = ORGNUMMER): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -265,9 +264,9 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun søknad(
+    protected fun søknad(
         vararg perioder: Søknad.Søknadsperiode,
-        harAndreInntektskilder: Boolean,
+        harAndreInntektskilder: Boolean = false,
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         orgnummer: String = ORGNUMMER
     ): Søknad {
@@ -297,12 +296,12 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun inntektsmelding(
+    protected fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjon: Triple<LocalDate?, Double, List<LocalDate>>,
+        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         orgnummer: String = ORGNUMMER
     ): Inntektsmelding {
         return Inntektsmelding(
@@ -322,7 +321,7 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-    private fun vilkårsgrunnlag(
+    protected fun vilkårsgrunnlag(
         vedtaksperiodeIndex: Int,
         inntekt: Double,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),

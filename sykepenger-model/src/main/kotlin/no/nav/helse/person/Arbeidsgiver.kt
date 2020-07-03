@@ -278,4 +278,6 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
+
+    internal fun overlapper(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
 }

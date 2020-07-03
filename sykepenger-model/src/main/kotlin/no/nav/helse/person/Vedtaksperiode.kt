@@ -1017,6 +1017,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                overlappende(vedtaksperiode.periode, person, ytelser)
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {

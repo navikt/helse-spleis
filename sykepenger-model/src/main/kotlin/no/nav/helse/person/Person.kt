@@ -34,7 +34,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
+//        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -162,7 +162,7 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    private fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
+    internal fun invaliderAllePerioder(arbeidstakerHendelse: ArbeidstakerHendelse) {
         arbeidstakerHendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.forkastPerioder(arbeidstakerHendelse)
@@ -190,4 +190,10 @@ class Person private constructor(
             add(newValue)
             newValue
         }
+
+    internal fun arbeidsgiverOverlapper(periode: Periode, arbeidstakerHendelse: ArbeidstakerHendelse) =
+        (arbeidsgivere.filter { it.overlapper(periode) }.size > 1).also {
+            if(it) invaliderAllePerioder(arbeidstakerHendelse)
+        }
+
 }

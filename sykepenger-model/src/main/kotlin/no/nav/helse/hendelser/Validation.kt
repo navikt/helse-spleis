@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
 import no.nav.helse.person.Periodetype
 import java.time.LocalDate
 
@@ -43,6 +44,14 @@ internal fun Validation.overlappende(
     foreldrepermisjon: Foreldrepermisjon
 ) = valider("Har overlappende foreldrepengeperioder med syketilfelle") {
     !foreldrepermisjon.overlapper(sykdomsperiode)
+}
+
+internal fun Validation.overlappende(
+    periode: Periode,
+    person: Person,
+    ytelser: Ytelser
+) = valider("Invaliderer alle perioder pga flere arbeidsgivere") {
+    !person.arbeidsgiverOverlapper(periode, ytelser)
 }
 
 internal fun Validation.harInntektshistorikk(
