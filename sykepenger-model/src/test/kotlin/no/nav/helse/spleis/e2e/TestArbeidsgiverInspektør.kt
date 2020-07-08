@@ -19,7 +19,10 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsgiver? = null) : ArbeidsgiverVisitor {
+internal class TestArbeidsgiverInspektør(
+    private val person: Person,
+    arbeidsgiver: Arbeidsgiver? = null
+) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
     private var vedtaksperiodeindeks: Int = -1
@@ -332,3 +335,4 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     internal fun dagTeller(klasse: KClass<out Utbetalingstidslinje.Utbetalingsdag>) =
         TestTidslinjeInspektør(arbeidsgiver.nåværendeTidslinje()).dagtelling[klasse] ?: 0
 }
+

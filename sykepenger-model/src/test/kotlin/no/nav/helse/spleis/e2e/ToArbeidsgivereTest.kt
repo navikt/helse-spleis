@@ -20,6 +20,6 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(inspektør)
         person.håndter(inntektsmelding(listOf(Periode(1.januar, 16.januar)), orgnummer = redCompany))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100), orgnummer = redCompany))
-        person.håndter(vilkårsgrunnlag(0, INNTEKT, orgnummer = redCompany))
+        person.håndter(vilkårsgrunnlag(redCompany.id(0), INNTEKT, orgnummer = redCompany))
     }
 }

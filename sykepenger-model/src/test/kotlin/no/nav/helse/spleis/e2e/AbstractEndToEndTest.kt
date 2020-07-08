@@ -5,13 +5,10 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
@@ -328,9 +325,25 @@ internal abstract class AbstractEndToEndTest {
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER
+    ) = vilkårsgrunnlag(
+        inspektør.vedtaksperiodeId(vedtaksperiodeIndex),
+        inntekt,
+        arbeidsforhold,
+        egenAnsatt,
+        medlemskapstatus,
+        orgnummer
+    )
+
+    protected fun vilkårsgrunnlag(
+        vedtaksperiodeId: UUID,
+        inntekt: Double,
+        arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
+        egenAnsatt: Boolean = false,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        orgnummer: String = ORGNUMMER
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
@@ -509,4 +522,37 @@ internal abstract class AbstractEndToEndTest {
             hendelselogg = this
         }
     }
+
+    private val vedtaksperioderIder = mutableMapOf<Pair<String, Int>, UUID>()
+
+    private inner class VedtaksperioderFinder(person: Person): PersonVisitor {
+        private lateinit var orgnummer: String
+        private var indeks = 0
+        init {
+            person.accept(this)
+        }
+
+        override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+            this.orgnummer = organisasjonsnummer
+            indeks = 0
+        }
+
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            periode: Periode
+        ) {
+            vedtaksperioderIder[orgnummer to indeks] = id
+            indeks++
+        }
+    }
+
 }
+
+internal fun String.id(indeks: Int): UUID {
+    if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
+    return requireNotNull(vedtaksperioderIder[this to indeks])
+}
+
