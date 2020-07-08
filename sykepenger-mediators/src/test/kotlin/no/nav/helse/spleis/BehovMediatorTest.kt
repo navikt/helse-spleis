@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -29,7 +30,9 @@ class BehovMediatorTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
 
-        private val message = mockk<HendelseMessage>(relaxed = true)
+        private val message = mockk<HendelseMessage>(relaxed = true) {
+            every { opprettet } returns LocalDateTime.now()
+        }
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
