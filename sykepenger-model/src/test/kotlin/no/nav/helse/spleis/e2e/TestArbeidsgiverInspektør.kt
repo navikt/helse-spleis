@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
-    arbeidsgiver: Arbeidsgiver? = null
+    orgnummer: String? = null
 ) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
@@ -56,13 +56,13 @@ internal class TestArbeidsgiverInspektør(
     private val periodeIder = mutableMapOf<Int, UUID>()
 
     init {
-        HentAktivitetslogg(person, arbeidsgiver).also { results ->
+        HentAktivitetslogg(person, orgnummer).also { results ->
             personLogg = results.aktivitetslogg
             results.arbeidsgiver.accept(this)
         }
     }
 
-    private class HentAktivitetslogg(person: Person, private val valgfriArbeidsgiver: Arbeidsgiver?) : PersonVisitor {
+    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         internal lateinit var aktivitetslogg: Aktivitetslogg
         internal lateinit var arbeidsgiver: Arbeidsgiver
 
@@ -75,9 +75,7 @@ internal class TestArbeidsgiverInspektør(
         }
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            if (this.valgfriArbeidsgiver != null && this.arbeidsgiver != arbeidsgiver) {
-                this.arbeidsgiver = valgfriArbeidsgiver
-            }
+            if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
         }

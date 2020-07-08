@@ -62,6 +62,10 @@ internal abstract class AbstractEndToEndTest {
         assertTrue(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
     }
 
+    protected fun assertErrors(inspektør: TestArbeidsgiverInspektør) {
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+    }
+
     protected fun assertMessages(inspektør: TestArbeidsgiverInspektør) {
         assertTrue(inspektør.personLogg.hasMessages(), inspektør.personLogg.toString())
     }
@@ -410,6 +414,22 @@ internal abstract class AbstractEndToEndTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         orgnummer: String = ORGNUMMER
+    ) = ytelser(
+        inspektør.vedtaksperiodeId(vedtaksperiodeIndex),
+        utbetalinger,
+        inntektshistorikk,
+        foreldrepenger,
+        svangerskapspenger,
+        orgnummer
+    )
+
+    protected fun ytelser(
+        vedtaksperiodeId: UUID,
+        utbetalinger: List<Utbetalingshistorikk.Periode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        foreldrepenger: Periode? = null,
+        svangerskapspenger: Periode? = null,
+        orgnummer: String = ORGNUMMER
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         return Ytelser(
@@ -417,12 +437,12 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 aktivitetslogg = aktivitetslogg
