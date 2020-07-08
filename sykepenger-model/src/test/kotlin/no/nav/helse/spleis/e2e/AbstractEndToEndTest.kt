@@ -532,7 +532,7 @@ internal abstract class AbstractEndToEndTest {
             person.accept(this)
         }
 
-        override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
             this.orgnummer = organisasjonsnummer
             indeks = 0
         }
@@ -549,10 +549,10 @@ internal abstract class AbstractEndToEndTest {
         }
     }
 
-}
+    internal fun String.id(indeks: Int): UUID {
+        if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
+        return requireNotNull(vedtaksperioderIder[this to indeks])
+    }
 
-internal fun String.id(indeks: Int): UUID {
-    if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
-    return requireNotNull(vedtaksperioderIder[this to indeks])
 }
 

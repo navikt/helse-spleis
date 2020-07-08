@@ -102,15 +102,6 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `annen arbeidsgiver`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100), orgnr = "123"))
-        person.håndter(inntektsmelding(virksomhetsnummer = "456"))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-    }
-
-    @Test
     internal fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),

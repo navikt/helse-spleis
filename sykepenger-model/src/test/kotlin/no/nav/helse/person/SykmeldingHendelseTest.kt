@@ -45,15 +45,6 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    internal fun `To forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer2"))
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-    }
-
-    @Test
     internal fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))

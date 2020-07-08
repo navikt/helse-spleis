@@ -169,17 +169,6 @@ internal class SøknadArbeidsgiverHendelseTest {
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
 
-    @Test
-    fun `to forskjellige arbeidsgivere er ikke støttet`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer1"))
-        person.håndter(
-            søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100), orgnummer = "orgnummer2")
-        )
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-    }
-
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),

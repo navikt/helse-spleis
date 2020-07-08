@@ -40,16 +40,6 @@ internal class PersonTest {
     }
 
     @Test
-    fun `flere arbeidsgivere`() {
-        enPersonMedÉnArbeidsgiver(virksomhetsnummer_a).also {
-            it.håndter(sykmelding(orgnummer = virksomhetsnummer_b))
-        }
-        assertTrue(inspektør.personLogg.hasErrors())
-        assertAntallPersonerEndret(1)
-        assertAlleVedtaksperiodetilstander(TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `sykmelding fører til at vedtaksperiode trigger en vedtaksperiode endret hendelse`() {
         person.also {
             it.håndter(sykmelding())
