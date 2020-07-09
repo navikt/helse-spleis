@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -54,7 +55,11 @@ internal class InntektsvurderingTest {
 
     private fun undersøke(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Double): Boolean {
         aktivitetslogg = Aktivitetslogg()
-        return inntektsvurdering.valider(aktivitetslogg, beregnetInntekt.toBigDecimal()).hasErrors()
+        return inntektsvurdering.valider(
+            aktivitetslogg,
+            beregnetInntekt.toBigDecimal(),
+            Periodetype.FØRSTEGANGSBEHANDLING
+        ).hasErrors()
     }
 
     private fun inntektsvurdering(

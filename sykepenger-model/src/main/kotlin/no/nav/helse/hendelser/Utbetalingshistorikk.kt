@@ -4,6 +4,9 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -28,8 +31,8 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun valider(periode: no.nav.helse.hendelser.Periode): Aktivitetslogg {
-        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer)
+    internal fun valider(periode: no.nav.helse.hendelser.Periode, periodetype: Periodetype): Aktivitetslogg {
+        Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer, periodetype)
         Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
         return aktivitetslogg
     }
@@ -123,7 +126,8 @@ class Utbetalingshistorikk(
                     liste: List<Periode>,
                     aktivitetslogg: Aktivitetslogg,
                     periode: no.nav.helse.hendelser.Periode,
-                    organisasjonsnummer: String
+                    organisasjonsnummer: String,
+                    periodetype: Periodetype
                 ): Aktivitetslogg {
                     if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
                         aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
@@ -131,11 +135,14 @@ class Utbetalingshistorikk(
                     }
 
                     liste.onEach { it.valider(aktivitetslogg, periode) }
-                    if (liste.harHistoriskeSammenhengendePerioderMedEndring())
-                        aktivitetslogg.warn(
+                    if (liste.harHistoriskeSammenhengendePerioderMedEndring()) {
+                        val melding = String.format(
                             "Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd.%s",
                             if (liste.harForegående(periode)) " Direkte overgang fra Infotrygd; kontroller at sykepengegrunnlaget er riktig." else ""
                         )
+                        if (periodetype in listOf(FORLENGELSE, INFOTRYGDFORLENGELSE)) aktivitetslogg.info(melding)
+                        else aktivitetslogg.warn(melding)
+                    }
                     return aktivitetslogg
                 }
 
@@ -144,7 +151,10 @@ class Utbetalingshistorikk(
                         .filterIsInstance<Utbetalingsperiode>()
                         .any { it.periode.etterfølgesAv(periode) }
 
-                private fun List<Periode>.harForegåendeFraAnnenArbeidsgiver(periode: no.nav.helse.hendelser.Periode, organisasjonsnummer: String) =
+                private fun List<Periode>.harForegåendeFraAnnenArbeidsgiver(
+                    periode: no.nav.helse.hendelser.Periode,
+                    organisasjonsnummer: String
+                ) =
                     this
                         .filterIsInstance<Utbetalingsperiode>()
                         .filter { it.periode.etterfølgesAv(periode) }

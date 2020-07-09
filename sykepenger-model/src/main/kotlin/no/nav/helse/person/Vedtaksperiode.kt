@@ -349,7 +349,7 @@ internal class Vedtaksperiode private constructor(
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
             "Finner ikke inntekt for perioden $førsteFraværsdag"
         )
-        if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag).hasErrors().also {
+        if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag, periodetype()).hasErrors().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
@@ -560,7 +560,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode).hasErrors()) return vedtaksperiode.tilstand(
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype()).hasErrors()) return vedtaksperiode.tilstand(
                 utbetalingshistorikk,
                 TilInfotrygd
             ) {
@@ -787,7 +787,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                         .also { vedtaksperiode.trengerInntektsmelding() }
                 }
-                validerYtelser(vedtaksperiode.periode, ytelser)
+                validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
                     arbeidsgiver.addInntekt(ytelser)
@@ -1011,7 +1011,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                validerYtelser(vedtaksperiode.periode, ytelser)
+                validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {
                     arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.also { tilstøtendePeriode ->

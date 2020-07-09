@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Periodetype
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -24,10 +25,10 @@ class Vilkårsgrunnlag(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate): Aktivitetslogg {
-        inntektsvurdering.valider(aktivitetslogg, beregnetInntekt)
+    internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate, periodetype: Periodetype): Aktivitetslogg {
+        inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
         opptjeningvurdering.valider(aktivitetslogg, orgnummer, førsteFraværsdag)
-        medlemskapsvurdering.valider(aktivitetslogg)
+        medlemskapsvurdering.valider(aktivitetslogg, periodetype)
         if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else info("er ikke egen ansatt")
         grunnlagsdata = Grunnlagsdata(

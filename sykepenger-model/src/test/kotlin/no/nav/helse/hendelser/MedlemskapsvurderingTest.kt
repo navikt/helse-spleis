@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +20,7 @@ internal class MedlemskapsvurderingTest {
     fun `bruker er medlem`() {
         assertTrue(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
-                .valider(aktivitetslogg)
+                .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING)
                 .hasOnlyInfoAndNeeds()
         )
     }
@@ -27,7 +28,7 @@ internal class MedlemskapsvurderingTest {
     @Test
     fun `bruker er kanskje medlem`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke)
-            .valider(aktivitetslogg).also {
+            .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING).also {
                 assertTrue(it.hasWarnings())
                 assertFalse(aktivitetslogg.hasErrors())
             }
@@ -37,7 +38,7 @@ internal class MedlemskapsvurderingTest {
     fun `bruker er ikke medlem`() {
         assertTrue(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
-                .valider(aktivitetslogg)
+                .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING)
                 .hasErrors()
         )
     }

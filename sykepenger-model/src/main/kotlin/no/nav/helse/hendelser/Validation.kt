@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Periodetype
 import java.time.LocalDate
 
 internal class Validation private constructor(private val hendelse: ArbeidstakerHendelse) {
@@ -31,9 +32,10 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
 
 internal fun Validation.validerYtelser(
     periode: Periode,
-    ytelser: Ytelser
+    ytelser: Ytelser,
+    periodetype: Periodetype
 ) = valider {
-    !ytelser.valider(periode).hasErrors()
+    !ytelser.valider(periode, periodetype).hasErrors()
 }
 
 internal fun Validation.overlappende(

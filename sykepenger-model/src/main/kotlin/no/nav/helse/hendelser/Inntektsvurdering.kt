@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.YearMonth
@@ -20,9 +23,14 @@ class Inntektsvurdering(
         (sammenligningsgrunnlag * 100).roundToInt() / 100.0 // behold to desimaler
     internal fun avviksprosent() = avviksprosent
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal): Aktivitetslogg {
+    internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal, periodetype: Periodetype): Aktivitetslogg {
         if (antallPerioder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
-        if (flereVirksomheter()) aktivitetslogg.warn("Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen.")
+        if (flereVirksomheter()) {
+            val melding =
+                "Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
+            if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) aktivitetslogg.info(melding)
+            else aktivitetslogg.warn(melding)
+        }
         if (sammenligningsgrunnlag <= 0.0) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
         avviksprosent = avviksprosent(beregnetInntekt)
         if (avviksprosent > MAKSIMALT_TILLATT_AVVIK) aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)
