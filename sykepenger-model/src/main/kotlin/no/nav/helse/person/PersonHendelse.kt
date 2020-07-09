@@ -11,13 +11,11 @@ abstract class PersonHendelse protected constructor(
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String
 
-    override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return this.javaClass.canonicalName.split('.').last().let {
-            SpesifikkKontekst(it, mapOf(
-                "aktørId" to aktørId(),
-                "fødselsnummer" to fødselsnummer()
-            ) + kontekst())
-        }
+    override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
+        SpesifikkKontekst(it, mapOf(
+            "aktørId" to aktørId(),
+            "fødselsnummer" to fødselsnummer()
+        ) + kontekst())
     }
 
     protected open fun kontekst(): Map<String, String> = emptyMap()

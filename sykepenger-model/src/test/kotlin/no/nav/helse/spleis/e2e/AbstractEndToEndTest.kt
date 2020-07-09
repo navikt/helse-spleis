@@ -41,7 +41,10 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertTilstander(indeks: Int, vararg tilstander: TilstandType) {
-        val id = inspektør.vedtaksperiodeId(indeks)
+        assertTilstander(inspektør.vedtaksperiodeId(indeks), *tilstander)
+    }
+
+    protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
@@ -228,9 +231,19 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeIndex: Int,
         status: UtbetalingHendelse1.Oppdragstatus,
         orgnummer: String = ORGNUMMER
+    ) = utbetaling(
+        inspektør.vedtaksperiodeId(vedtaksperiodeIndex),
+        status,
+        orgnummer
+    )
+
+    protected fun utbetaling(
+        vedtaksperiodeId: UUID,
+        status: UtbetalingHendelse1.Oppdragstatus,
+        orgnummer: String = ORGNUMMER
     ) =
         UtbetalingHendelse1(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
@@ -475,9 +488,18 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeIndex: Int,
         simuleringOK: Boolean = true,
         orgnummer: String = ORGNUMMER
+    ) = simulering(
+        inspektør.vedtaksperiodeId(vedtaksperiodeIndex),
+        simuleringOK,
+        orgnummer
+    )
+    protected fun simulering(
+        vedtaksperiodeId: UUID,
+        simuleringOK: Boolean = true,
+        orgnummer: String = ORGNUMMER
     ) =
         no.nav.helse.hendelser.Simulering(
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
@@ -529,18 +551,26 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeIndex: Int,
         utbetalingGodkjent: Boolean,
         orgnummer: String
-    ): Utbetalingsgodkjenning {
-        return Utbetalingsgodkjenning(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(vedtaksperiodeIndex).toString(),
-            saksbehandler = "Ola Nordmann",
-            utbetalingGodkjent = utbetalingGodkjent,
-            godkjenttidspunkt = LocalDateTime.now()
-        ).apply {
-            hendelselogg = this
-        }
+    ) = utbetalingsgodkjenning(
+        inspektør.vedtaksperiodeId(vedtaksperiodeIndex),
+        utbetalingGodkjent,
+        orgnummer
+    )
+
+    protected fun utbetalingsgodkjenning(
+        vedtaksperiodeId: UUID,
+        utbetalingGodkjent: Boolean,
+        orgnummer: String
+    ) = Utbetalingsgodkjenning(
+        aktørId = AKTØRID,
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        saksbehandler = "Ola Nordmann",
+        utbetalingGodkjent = utbetalingGodkjent,
+        godkjenttidspunkt = LocalDateTime.now()
+    ).apply {
+        hendelselogg = this
     }
 
     private val vedtaksperioderIder = mutableMapOf<Pair<String, Int>, UUID>()
