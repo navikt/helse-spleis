@@ -127,7 +127,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         internal fun inOrder() = label + "\t" + this.toString()
 
-        override fun toString() = tidsstempel + "\t" + melding + meldingerString()
+        override fun toString() = label + "  \t" +  tidsstempel + "  \t" + melding + meldingerString()
 
         private fun meldingerString(): String {
             return kontekster.joinToString(separator = "") { " (${it.melding()})" }

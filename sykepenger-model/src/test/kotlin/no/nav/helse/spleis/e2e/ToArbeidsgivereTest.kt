@@ -8,6 +8,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
 
@@ -59,15 +60,7 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100), orgnummer = rød))
-        person.håndter(inntektsmelding(listOf(Periode(1.januar, 16.januar)), orgnummer = rød))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100), orgnummer = rød))
-        person.håndter(vilkårsgrunnlag(rød.id(0), INNTEKT, orgnummer = rød))
-        person.håndter(ytelser(rød.id(0), orgnummer = rød))
-        person.håndter(simulering(rød.id(0), orgnummer = rød))
-        person.håndter(utbetalingsgodkjenning(rød.id(0), true, orgnummer = rød))
-        person.håndter(utbetaling(rød.id(0), AKSEPTERT, orgnummer = rød))
-
+        prosessperiode(1.januar to 31.januar, rød)
         assertNoErrors(rødInspektør)
         assertTilstander(
             rød.id(0),
@@ -82,16 +75,8 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        person.håndter(sykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100), orgnummer = blå))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100), orgnummer = blå))
-        person.håndter(inntektsmelding(listOf(Periode(1.mars, 16.mars)), orgnummer = blå))
-        person.håndter(vilkårsgrunnlag(blå.id(0), INNTEKT, orgnummer = blå))
-        person.håndter(ytelser(blå.id(0), orgnummer = blå))
-        person.håndter(simulering(blå.id(0), orgnummer = blå))
-        person.håndter(utbetalingsgodkjenning(blå.id(0), true, orgnummer = blå))
-        person.håndter(utbetaling(blå.id(0), AKSEPTERT, orgnummer = blå))
-
-        assertNoErrors(rødInspektør)
+        prosessperiode(1.mars to 31.mars, blå)
+        assertNoErrors(blåInspektør)
         assertTilstander(
             blå.id(0),
             START,
@@ -105,4 +90,27 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
+    private fun prosessperiode(periode: Periode, orgnummer: String) {
+        person.håndter(sykmelding(
+            Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
+            orgnummer = orgnummer
+        ))
+        person.håndter(inntektsmelding(
+            listOf(Periode(periode.start, periode.start.plusDays(15))),
+            førsteFraværsdag = periode.start,
+            orgnummer = orgnummer
+        ))
+        person.håndter(søknad(
+            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100),
+            orgnummer = orgnummer
+        ))
+        person.håndter(vilkårsgrunnlag(orgnummer.id(0), INNTEKT, orgnummer = orgnummer))
+        person.håndter(ytelser(orgnummer.id(0), orgnummer = orgnummer))
+        person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
+        person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
+        person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))
+    }
+
+    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
 }
