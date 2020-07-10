@@ -1,12 +1,12 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: {{app}}
+  name: spenn
   namespace: tbd
   labels:
-    team: {{team}}
+    team: tbd
 spec:
-  image: {{image}}:{{tag}}
+  image: {{image}}
   port: 8080
   liveness:
     path: isalive

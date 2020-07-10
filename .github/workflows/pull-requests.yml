@@ -1,4 +1,4 @@
-name: Bygg
+name: Bygg pull request
 
 on: [pull_request]
 
