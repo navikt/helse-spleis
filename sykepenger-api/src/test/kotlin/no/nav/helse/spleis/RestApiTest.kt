@@ -106,7 +106,7 @@ internal class RestApiTest {
 
     @AfterAll
     internal fun `stop embedded environment`() {
-        app.stop(1L, 1L, SECONDS)
+        app.stop(1000L, 1000L)
         wireMockServer.stop()
         postgresConnection.close()
         embeddedPostgres.close()

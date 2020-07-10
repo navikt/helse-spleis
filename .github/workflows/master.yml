@@ -24,7 +24,7 @@ jobs:
     - uses: actions/checkout@v1
     - uses: actions/setup-java@v1
       with:
-        java-version: '12.x'
+        java-version: '14.x'
     - name: test and build
       run: ./gradlew test build
       env:

@@ -67,7 +67,7 @@ class SerialisertPerson(val json: String) {
         migrate(jsonNode)
 
         try {
-            val personData: PersonData = serdeObjectMapper.treeToValue(jsonNode)
+            val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
             return personData.createPerson()
         } catch (err: Exception) {
             throw RuntimeException("Feil under oversetting til modellobjekter: ${err.message}", err)

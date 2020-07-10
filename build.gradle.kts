@@ -4,7 +4,12 @@ plugins {
     kotlin("jvm") version "1.3.72"
 }
 
-val junitJupiterVersion = "5.6.0"
+val flywayVersion = "6.5.0"
+val hikariVersion = "3.4.5"
+val jacksonVersion = "2.10.4"
+val junitJupiterVersion = "5.6.2"
+val kotliqueryVersion = "1.3.1"
+val vaultJdbcVersion = "1.3.1"
 
 allprojects {
     group = "no.nav.helse"
@@ -14,33 +19,43 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
+        implementation("ch.qos.logback:logback-classic:1.2.3")
+        implementation("net.logstash.logback:logstash-logback-encoder:6.4") {
+            exclude("com.fasterxml.jackson.core")
+            exclude("com.fasterxml.jackson.dataformat")
+        }
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+        implementation("com.zaxxer:HikariCP:$hikariVersion")
+        implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
+        implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
+        implementation("org.flywaydb:flyway-core:$flywayVersion")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+
+        testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
     }
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_12
-        targetCompatibility = JavaVersion.VERSION_12
-    }
+    tasks {
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "12"
+        }
 
-    tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "12"
-    }
+        named<KotlinCompile>("compileTestKotlin") {
+            kotlinOptions.jvmTarget = "12"
+        }
 
-    tasks.named<KotlinCompile>("compileTestKotlin") {
-        kotlinOptions.jvmTarget = "12"
+        withType<Wrapper> {
+            gradleVersion = "6.5.1"
+        }
     }
-
-    tasks.withType<Wrapper> {
-        gradleVersion = "6.3"
-    }
-
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 val githubUser: String by project
@@ -50,7 +65,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             url = uri("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
             credentials {
