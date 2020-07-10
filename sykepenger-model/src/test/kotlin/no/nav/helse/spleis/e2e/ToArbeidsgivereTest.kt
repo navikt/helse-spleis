@@ -4,7 +4,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Test
@@ -91,7 +93,7 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun prosessperiode(periode: Periode, orgnummer: String) {
+    private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
         person.håndter(sykmelding(
             Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
             orgnummer = orgnummer
@@ -106,10 +108,26 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = orgnummer
         ))
         person.håndter(vilkårsgrunnlag(orgnummer.id(0), INNTEKT, orgnummer = orgnummer))
-        person.håndter(ytelser(orgnummer.id(0), orgnummer = orgnummer))
+        person.håndter(ytelser(orgnummer.id(0), utbetalinger = utbetalinger(sykedagstelling, orgnummer), orgnummer = orgnummer))
         person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
         person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
         person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))
+    }
+
+    private fun utbetalinger(dagTeller: Int, orgnummer: String): List<RefusjonTilArbeidsgiver> {
+        if (dagTeller == 0) return emptyList()
+        val førsteDato = 2.desember(2017).minusDays((
+            (dagTeller / 5 * 7) + dagTeller % 5
+            ).toLong())
+        return listOf(
+            RefusjonTilArbeidsgiver(
+                førsteDato,
+                1.desember(2017),
+                100,
+                100,
+                orgnummer
+            )
+        )
     }
 
     private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
