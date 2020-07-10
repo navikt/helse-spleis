@@ -1,18 +1,11 @@
-[![Actions Status](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/helse-spleis/actions)
+# Spleis
+![Bygg og deploy app](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy%20app/badge.svg)
+![Bygg og deploy api](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy%20api/badge.svg)
 
-# Sykepenger - spleis
-
+## Beskrivelse
 Tar i mot hendelser knytter til sykepengesaken for en person, for eksempel søknader og inntektsmeldinger.
 
 Håndterer vedtaksperiodene for en person, og sørger for å innhente informasjon vi trenger for å kunne foreslå en utbetaling.
-
-# Henvendelser
-
-Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
-
-## For NAV-ansatte
-
-Interne henvendelser kan sendes via Slack i kanalen #område-helse.
 
 ## Regler
 Dagturnering: https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
@@ -30,3 +23,8 @@ Legg inn tokenet i din `.gradle/gradle.properties` fil slik:
 githubUser=x-access-token
 githubPassword=<tokenet ditt>
 ```
+
+## Henvendelser
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
+### For NAV-ansatte
+Interne henvendelser kan sendes via Slack i kanalen #område-helse.
