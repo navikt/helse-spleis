@@ -11,6 +11,7 @@ import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
@@ -45,7 +46,10 @@ internal class Økonomi private constructor(
         }
 
         private fun maksbeløp(økonomiList: List<Økonomi>, dato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(dato) * sykdomsgrad(økonomiList).ratio()).roundToInt()
+            sykdomsgrad(økonomiList).let { grad ->
+                if (grad.erUnderGrensen()) 0
+                else (Grunnbeløp.`6G`.dagsats(dato) * grad.roundToInt() / 100.0).roundToInt()
+            }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -67,33 +71,38 @@ internal class Økonomi private constructor(
         }
 
         private fun justerPerson(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
+            juster(økonomiList, total, budsjett, { it -> it.personbeløp!! }, { it, beløp -> it.personbeløp = beløp })
+        }
+
+        private fun juster(
+            økonomiList: List<Økonomi>,
+            total: Int,
+            budsjett: Int,
+            get: (Økonomi) -> Int,
+            set: (Økonomi, Int) -> Unit
+        ) {
             val ratio = budsjett.toDouble() / total
-            økonomiList.forEach {
-                it.personbeløp = (it.personbeløp!! * ratio).toInt()
-            }
-            (budsjett - totalPerson(økonomiList)).also { remainder ->
+            val skalertTotal = økonomiList.onEach {
+                set(it, (get(it) * ratio).roundToInt())
+            }.sumBy(get)
+
+            val list = økonomiList.filter { get(it) > 0 }.sortedBy { get(it) }
+            (budsjett - skalertTotal).also { remainder ->
                 if (remainder == 0) return
-                (0 until remainder).forEach { index ->
-                    økonomiList[index].personbeløp =
-                        økonomiList[index].personbeløp!! + 1
+                val diff = remainder / remainder.absoluteValue
+                (0 until remainder.absoluteValue).forEach { index ->
+                    set(list[index], get(list[index]) + diff)
                 }
             }
-            require(budsjett == totalPerson(økonomiList))
         }
 
         private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
-            val ratio = budsjett.toDouble() / total
-            økonomiList.forEach {
-                it.arbeidsgiverbeløp = (it.arbeidsgiverbeløp!! * ratio).toInt()
-            }
-            (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
-                if (remainder == 0) return
-                (0 until remainder).forEach { index ->
-                    økonomiList[index].arbeidsgiverbeløp =
-                        økonomiList[index].arbeidsgiverbeløp!! + 1
-                }
-            }
-            require(budsjett == totalArbeidsgiver(økonomiList))
+            juster(
+                økonomiList,
+                total,
+                budsjett,
+                { it -> it.arbeidsgiverbeløp!! },
+                { it, beløp -> it.arbeidsgiverbeløp = beløp })
         }
 
         private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
@@ -154,6 +163,7 @@ internal class Økonomi private constructor(
         "grad" to grad.toDouble(),   // Must use instance value here
         "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.toDouble()
     )
+
     private fun inntektMap(): Map<String, Any> = mapOf(
         "dekningsgrunnlag" to dekningsgrunnlag!!,
         "aktuellDagsinntekt" to aktuellDagsinntekt!!
@@ -163,6 +173,7 @@ internal class Økonomi private constructor(
         "grad" to grad.roundToInt(),   // Must use instance value here
         "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.roundToInt()
     )
+
     private fun inntektIntMap(): Map<String, Int> = mapOf(
         "dekningsgrunnlag" to dekningsgrunnlag!!.roundToInt(),
         "aktuellDagsinntekt" to aktuellDagsinntekt!!.roundToInt()
@@ -175,10 +186,28 @@ internal class Økonomi private constructor(
     )
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt ?: 0.0, dekningsgrunnlag ?: 0.0, arbeidsgiverbeløp ?: 0, personbeløp ?: 0)
+        visitor.visit(
+            dag,
+            dato,
+            this,
+            grad,
+            aktuellDagsinntekt ?: 0.0,
+            dekningsgrunnlag ?: 0.0,
+            arbeidsgiverbeløp ?: 0,
+            personbeløp ?: 0
+        )
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: AvvistDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt ?: 0.0, dekningsgrunnlag ?: 0.0, arbeidsgiverbeløp ?: 0, personbeløp ?: 0)
+        visitor.visit(
+            dag,
+            dato,
+            this,
+            grad,
+            aktuellDagsinntekt ?: 0.0,
+            dekningsgrunnlag ?: 0.0,
+            arbeidsgiverbeløp ?: 0,
+            personbeløp ?: 0
+        )
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavHelgDag, dato: LocalDate) =
         visitor.visit(dag, dato, this, grad)
@@ -189,15 +218,44 @@ internal class Økonomi private constructor(
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: Arbeidsdag, dato: LocalDate) =
         visitor.visit(dag, dato, this, aktuellDagsinntekt ?: 0.0)
 
-    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.Arbeidsgiverdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.Arbeidsgiverdag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
-    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.ArbeidsgiverHelgedag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
-    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.Sykedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.Sykedag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
-    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.SykHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.SykHelgedag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
-    internal fun accept(visitor: SykdomstidslinjeVisitor, dag: Dag.ForeldetSykedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.ForeldetSykedag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
 
     internal sealed class Tilstand {
@@ -229,8 +287,11 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi på dette tidspunktet")
         }
 
-        internal fun toMap(økonomi: Økonomi): Map<String, Any> = prosentMap(økonomi) + inntektMap(økonomi) + beløpMap(økonomi)
-        internal fun toIntMap(økonomi: Økonomi): Map<String, Any> = prosentIntMap(økonomi) + inntektIntMap(økonomi) + beløpMap(økonomi)
+        internal fun toMap(økonomi: Økonomi): Map<String, Any> =
+            prosentMap(økonomi) + inntektMap(økonomi) + beløpMap(økonomi)
+
+        internal fun toIntMap(økonomi: Økonomi): Map<String, Any> =
+            prosentIntMap(økonomi) + inntektIntMap(økonomi) + beløpMap(økonomi)
 
         protected open fun prosentMap(økonomi: Økonomi): Map<String, Any> = økonomi.prosentMap()
         protected open fun inntektMap(økonomi: Økonomi): Map<String, Any> = emptyMap()

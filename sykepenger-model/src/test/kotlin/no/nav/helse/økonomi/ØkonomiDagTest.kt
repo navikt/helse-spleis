@@ -57,8 +57,8 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.ARB(1200))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg()).betal()
-        assertØkonomi(a, 721)
-        assertØkonomi(b, 720)
+        assertØkonomi(a, 724)
+        assertØkonomi(b, 724)
         assertØkonomi(c, 0)
     }
 
@@ -69,8 +69,8 @@ internal class ØkonomiDagTest {
         val c = tidslinjeOf(2.NAV(1200))
             .onEach { (it as NavDag).avvistDag(Begrunnelse.MinimumInntekt) }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg()).betal()
-        assertØkonomi(a, 721)
-        assertØkonomi(b, 720)
+        assertØkonomi(a, 724)
+        assertØkonomi(b, 724)
         assertØkonomi(c, 0)
     }
 
@@ -80,8 +80,8 @@ internal class ØkonomiDagTest {
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.AVV(1200, 100))
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg()).betal()
-        assertØkonomi(a, 721)
-        assertØkonomi(b, 720)
+        assertØkonomi(a, 724)
+        assertØkonomi(b, 724)
         assertØkonomi(c, 0)
     }
 
