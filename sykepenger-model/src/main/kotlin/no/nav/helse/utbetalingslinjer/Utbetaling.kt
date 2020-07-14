@@ -44,7 +44,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
-        status = if(utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
+        status = if (utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -61,13 +61,13 @@ internal class Utbetaling private constructor(
             utbetalinger: List<Utbetaling>
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, arbeidsgiverBeløp)
             .result()
-            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon)})
+            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon) })
             .also { oppdrag ->
                 utbetalinger.lastOrNull()?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
-                if (oppdrag.isEmpty())
-                    aktivitetslogg.info("Ingen utbetalingslinjer bygget")
-                else
-                    aktivitetslogg.info("Utbetalingslinjer bygget vellykket")
+                aktivitetslogg.info(
+                    if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
+                    else "Utbetalingslinjer bygget vellykket"
+                )
             }
 
         private fun buildPerson(        // TODO("To be completed when payments to employees is supported")

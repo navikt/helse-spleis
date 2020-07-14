@@ -71,7 +71,22 @@ internal class Økonomi private constructor(
         }
 
         private fun justerPerson(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
-            juster(økonomiList, total, budsjett, { it -> it.personbeløp!! }, { it, beløp -> it.personbeløp = beløp })
+            juster(
+                økonomiList,
+                total,
+                budsjett,
+                { it.personbeløp!! },
+                { it, beløp -> it.personbeløp = beløp }
+            )
+        }
+
+        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
+            juster(
+                økonomiList,
+                total,
+                budsjett,
+                { it.arbeidsgiverbeløp!! },
+                { it, beløp -> it.arbeidsgiverbeløp = beløp })
         }
 
         private fun juster(
@@ -86,7 +101,7 @@ internal class Økonomi private constructor(
                 set(it, (get(it) * ratio).roundToInt())
             }.sumBy(get)
 
-            val list = økonomiList.filter { get(it) > 0 }.sortedBy { get(it) }
+            val list = økonomiList.sortedBy { get(it) }
             (budsjett - skalertTotal).also { remainder ->
                 if (remainder == 0) return
                 val diff = remainder / remainder.absoluteValue
@@ -94,15 +109,6 @@ internal class Økonomi private constructor(
                     set(list[index], get(list[index]) + diff)
                 }
             }
-        }
-
-        private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Int, budsjett: Int) {
-            juster(
-                økonomiList,
-                total,
-                budsjett,
-                { it -> it.arbeidsgiverbeløp!! },
-                { it, beløp -> it.arbeidsgiverbeløp = beløp })
         }
 
         private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
