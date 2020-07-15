@@ -290,8 +290,9 @@ internal class Vedtaksperiode private constructor(
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
     ) {
+        println("*** Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} ***")
         println("Leaving ${tilstand.type} for $periode")
-        println("Entering ${nyTilstand.type} for $periode")
+        println("Entering ${nyTilstand.type} for $periode\n")
         if (tilstand == nyTilstand) return  // Already in this state => ignore
         tilstand.leaving(event)
 
@@ -433,8 +434,13 @@ internal class Vedtaksperiode private constructor(
         ytelser: Ytelser
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
-        if (vedtaksperioder.first() != this) tilstand(ytelser, AvventerArbeidsgivere)
-        vedtaksperioder.removeAt(0).forsøkUtbetaling(vedtaksperioder, engineForTimeline, ytelser)
+        vedtaksperioder.removeAt(0).also {
+            if (it == this) return it.forsøkUtbetaling(vedtaksperioder, engineForTimeline, ytelser)
+            if (it.tilstand == AvventerArbeidsgivere) {
+                this.tilstand(ytelser, AvventerArbeidsgivere)
+                it.tilstand(ytelser, AvventerHistorikk)
+            }
+        }
     }
 
     private fun forsøkUtbetaling(
