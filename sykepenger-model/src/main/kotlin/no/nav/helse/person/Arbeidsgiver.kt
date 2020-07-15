@@ -259,6 +259,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         vedtaksperioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
+        person.nåværendeVedtaksperioder().sortedBy { it.periode().endInclusive }.firstOrNull()?.gjentaHistorikk(hendelse)
     }
 
     internal class GjenopptaBehandling(internal val hendelse: ArbeidstakerHendelse)

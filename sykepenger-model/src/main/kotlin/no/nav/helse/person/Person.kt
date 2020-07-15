@@ -196,10 +196,6 @@ class Person private constructor(
             if(it) invaliderAllePerioder(arbeidstakerHendelse)
         }
 
-    internal fun kanJegBetale(vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver): Boolean {
-        return arbeidsgivere.size == 1
-    }
-
     internal fun nåværendeVedtaksperioder(): List<Vedtaksperiode> {
         return arbeidsgivere.map { it.nåværendeVedtaksperiode() }.filterNotNull()
     }

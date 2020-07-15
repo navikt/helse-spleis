@@ -18,7 +18,7 @@ internal class ArbeidsgiverUtbetalinger(
     private var maksdato: LocalDate? = null
     private var gjenståendeSykedager: Int? = null
     private var forbrukteSykedager: Int? = null
-    private lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
+    internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()

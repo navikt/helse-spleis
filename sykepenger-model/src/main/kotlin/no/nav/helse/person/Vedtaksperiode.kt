@@ -290,6 +290,8 @@ internal class Vedtaksperiode private constructor(
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
     ) {
+        println("Leaving ${tilstand.type} for $periode")
+        println("Entering ${nyTilstand.type} for $periode")
         if (tilstand == nyTilstand) return  // Already in this state => ignore
         tilstand.leaving(event)
 
@@ -427,7 +429,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forsøkUtbetaling(
-        engineForTimeline: ArbeidsgiverUtbetalinger,
+        engineForTimeline: MaksimumSykepengedagerfilter,
         ytelser: Ytelser
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
@@ -437,19 +439,19 @@ internal class Vedtaksperiode private constructor(
 
     private fun forsøkUtbetaling(
         vedtaksperioder: MutableList<Vedtaksperiode>,
-        engineForTimeline: ArbeidsgiverUtbetalinger,
-        ytelser: Ytelser
+        engineForTimeline: MaksimumSykepengedagerfilter,
+        hendelse: ArbeidstakerHendelse
     ) {
         if (vedtaksperioder
                 .filter { this.periode.overlapperMed(it.periode) }
                 .all { it.tilstand == AvventerArbeidsgivere })
-            høstingsresultater(engineForTimeline, ytelser)
-        else tilstand(ytelser, AvventerArbeidsgivere)
+            høstingsresultater(engineForTimeline, hendelse)
+        else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
     private fun høstingsresultater(
-        engineForTimeline: ArbeidsgiverUtbetalinger,
-        ytelser: Ytelser
+        engineForTimeline: MaksimumSykepengedagerfilter,
+        hendelse: ArbeidstakerHendelse
     ) {
         engineForTimeline.beregnGrenser(this.periode.endInclusive)
         maksdato = engineForTimeline.maksdato()
@@ -463,20 +465,20 @@ internal class Vedtaksperiode private constructor(
 
         when {
             utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds() -> {
-                tilstand(ytelser, AvsluttetUtenUtbetalingMedInntektsmelding) {
-                    ytelser.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
+                tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
+                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
             }
             !utbetalingstidslinje.harUtbetalinger() -> {
-                loggHvisForlengelse(ytelser)
-                tilstand(ytelser, AvventerGodkjenning) {
-                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                loggHvisForlengelse(hendelse)
+                tilstand(hendelse, AvventerGodkjenning) {
+                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
             else -> {
-                loggHvisForlengelse(ytelser)
-                tilstand(ytelser, AvventerSimulering) {
-                    ytelser.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
+                loggHvisForlengelse(hendelse)
+                tilstand(hendelse, AvventerSimulering) {
+                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
                 }
             }
         }
@@ -523,6 +525,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
+        if (tilstand == AvventerArbeidsgivere) tilstand(hendelse, AvventerHistorikk)
+    }
+
     internal fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
         if (sykdomstidslinje.toShortString() != arbeidsgiverSykdomstidslinje.subset(periode()).toShortString()) {
             log.warn("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
@@ -533,7 +539,6 @@ internal class Vedtaksperiode private constructor(
                     "periode=${periode()}")
         }
     }
-
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
 
     // Gang of four State pattern
@@ -1112,7 +1117,7 @@ internal class Vedtaksperiode private constructor(
                     !ytelser.hasErrors()
                 }
                 onSuccess {
-                    vedtaksperiode.forsøkUtbetaling(engineForTimeline, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(engineForTimeline.tidslinjeEngine, ytelser)
                 }
             }
         }

@@ -6,40 +6,41 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Disabled
 import java.time.LocalDate
 
-internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
+internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     internal companion object {
-        private const val rød = "rød"
-        private const val blå = "blå"
+        private const val a1 = "arbeidsgiver 1"
+        private const val a2 = "arbeidsgiver 2"
+        private const val a3 = "arbeidsgiver 3"
+        private const val a4 = "arbeidsgiver 4"
     }
 
-    private val rødInspektør get() = TestArbeidsgiverInspektør(person, rød)
-    private val blåInspektør get() = TestArbeidsgiverInspektør(person, blå)
+    private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
+    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
+    private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
+    private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
 
     @Test
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
-        gapPeriode(1.januar to 31.januar, rød)
-        gapPeriode(15.januar to 15.februar, blå)
-        assertNoErrors(rødInspektør)
-        assertNoErrors(blåInspektør)
+        gapPeriode(1.januar to 31.januar, a1)
+        gapPeriode(15.januar to 15.februar, a2)
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
 
-        betale(rød)
-        assertNoErrors(rødInspektør)
-        assertNoErrors(blåInspektør)
-        assertEquals(AVVENTER_ARBEIDSGIVERE, rødInspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, blåInspektør.sisteTilstand(0))
+        betale(a1)
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
 
         assertTilstander(
-            rød.id(0),
+            a1.id(0),
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -48,7 +49,7 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_ARBEIDSGIVERE
         )
         assertTilstander(
-            blå.id(0),
+            a2.id(0),
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -57,17 +58,16 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
-        prosessperiode(1.januar to 31.januar, rød)
-        assertNoErrors(rødInspektør)
-        assertEquals(AVSLUTTET, rødInspektør.sisteTilstand(0))
+        prosessperiode(1.januar to 31.januar, a1)
+        assertNoErrors(a1Inspektør)
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
         assertTilstander(
-            rød.id(0),
+            a1.id(0),
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -76,14 +76,14 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        prosessperiode(1.mars to 31.mars, blå)
-        assertNoErrors(blåInspektør)
-        assertEquals(AVSLUTTET, rødInspektør.sisteTilstand(0))
+        prosessperiode(1.mars to 31.mars, a2)
+        assertNoErrors(a2Inspektør)
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
         assertTilstander(
-            blå.id(0),
+            a2.id(0),
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -91,6 +91,58 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `Tre overlappende perioder med en ikke-overlappende periode` (){
+        gapPeriode(1.januar to 31.januar, a1)
+        gapPeriode(15.januar to 15.mars, a2)
+        gapPeriode(1.februar to 28.februar, a3)
+        gapPeriode(15.april to 15.mai, a4)
+
+        betale(a1)
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        betale(a3)
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        betale(a2)
+        vedta(a1)
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        betale(a3)  // Rekalkulerer a3
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_SIMULERING, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        vedta(a3)
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        betale(a2)  // Rekalkulerer a2
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_SIMULERING, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
+        vedta(a2)
+        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
+        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
+        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+
     }
 
     private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
