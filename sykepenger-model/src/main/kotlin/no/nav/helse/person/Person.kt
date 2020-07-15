@@ -200,4 +200,8 @@ class Person private constructor(
         return arbeidsgivere.size == 1
     }
 
+    internal fun nåværendeVedtaksperioder(): List<Vedtaksperiode> {
+        return arbeidsgivere.map { it.nåværendeVedtaksperiode() }.filterNotNull()
+    }
+
 }

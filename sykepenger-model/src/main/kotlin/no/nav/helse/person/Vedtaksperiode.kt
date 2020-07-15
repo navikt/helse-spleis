@@ -430,15 +430,20 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: ArbeidsgiverUtbetalinger,
         ytelser: Ytelser
     ) {
-        maksdato = engineForTimeline.maksdato()
-        gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
-        forbrukteSykedager = engineForTimeline.forbrukteSykedager()
-        personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
-        personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
-        arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
-        arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
+        val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
+        if (vedtaksperioder.first() != this) tilstand(ytelser, AvventerArbeidsgivere)
+        vedtaksperioder.removeAt(0).forsøkUtbetaling(vedtaksperioder, engineForTimeline, ytelser)
+    }
 
-        if(person.kanJegBetale(this, arbeidsgiver)) høstingsresultater(engineForTimeline, ytelser)
+    private fun forsøkUtbetaling(
+        vedtaksperioder: MutableList<Vedtaksperiode>,
+        engineForTimeline: ArbeidsgiverUtbetalinger,
+        ytelser: Ytelser
+    ) {
+        if (vedtaksperioder
+                .filter { this.periode.overlapperMed(it.periode) }
+                .all { it.tilstand == AvventerArbeidsgivere })
+            høstingsresultater(engineForTimeline, ytelser)
         else tilstand(ytelser, AvventerArbeidsgivere)
     }
 
@@ -446,6 +451,14 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: ArbeidsgiverUtbetalinger,
         ytelser: Ytelser
     ) {
+        engineForTimeline.beregnGrenser(this.periode.endInclusive)
+        maksdato = engineForTimeline.maksdato()
+        gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
+        forbrukteSykedager = engineForTimeline.forbrukteSykedager()
+        personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
+        personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
+        arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
+        arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
 
         when {
@@ -480,7 +493,7 @@ internal class Vedtaksperiode private constructor(
     private fun erFerdigBehandlet(other: Vedtaksperiode) =
         this.periode.start >= other.periode.start || erFerdigBehandlet()
 
-    private fun erFerdigBehandlet() =
+    internal fun erFerdigBehandlet() =
         this.tilstand.type in listOf(
             TIL_INFOTRYGD,
             AVSLUTTET,
@@ -510,7 +523,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
+    internal fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
         if (sykdomstidslinje.toShortString() != arbeidsgiverSykdomstidslinje.subset(periode()).toShortString()) {
             log.warn("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
             sikkerLogg.warn(

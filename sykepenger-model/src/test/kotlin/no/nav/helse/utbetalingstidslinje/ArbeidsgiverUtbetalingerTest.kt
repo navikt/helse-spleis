@@ -343,6 +343,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             fnr
         ).also {
             it.beregn()
+            it.beregnGrenser(31.desember(2019))
             maksdato = it.maksdato()
             gjenståendeSykedager = it.gjenståendeSykedager()
             forbrukteSykedager = it.forbrukteSykedager()

@@ -15,14 +15,10 @@ internal class ArbeidsgiverUtbetalinger(
     private val organisasjonsnummer: String,
     private val fødselsnummer: String
 ) {
-    init {
-        require(tidslinjer.size == 1) { "Flere arbeidsgivere er ikke støttet ennå" }
-    }
-
     private var maksdato: LocalDate? = null
     private var gjenståendeSykedager: Int? = null
     private var forbrukteSykedager: Int? = null
-    internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
+    private lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
@@ -31,9 +27,6 @@ internal class ArbeidsgiverUtbetalinger(
         MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)
-            maksdato = it.maksdato()                            // To early?
-            gjenståendeSykedager = it.gjenståendeSykedager()
-            forbrukteSykedager = it.forbrukteSykedager()
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
@@ -45,6 +38,13 @@ internal class ArbeidsgiverUtbetalinger(
                 aktivitetslogg
             )
         }
+    }
+
+    internal fun beregnGrenser(sisteDato: LocalDate) {
+        tidslinjeEngine.beregnGrenser(sisteDato)
+        maksdato = tidslinjeEngine.maksdato()
+        gjenståendeSykedager = tidslinjeEngine.gjenståendeSykedager()
+        forbrukteSykedager = tidslinjeEngine.forbrukteSykedager()
     }
 
     internal fun maksdato() = maksdato

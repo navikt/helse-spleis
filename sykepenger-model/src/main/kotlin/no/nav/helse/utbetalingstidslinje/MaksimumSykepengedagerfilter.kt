@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
-    arbeidsgiverRegler: ArbeidsgiverRegler,
+    private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val periode: Periode,
     private val aktivitetslogg: Aktivitetslogg
 ) : UtbetalingsdagVisitor {
@@ -23,8 +23,8 @@ internal class MaksimumSykepengedagerfilter(
 
     private lateinit var sisteUkedag: LocalDate
     private lateinit var sisteBetalteDag: LocalDate
-    private var state: State = State.Initiell
-    private val teller = UtbetalingTeller(alder, arbeidsgiverRegler)
+    private lateinit var state: State
+    private lateinit var teller: UtbetalingTeller
     private var opphold = 0
     private lateinit var sakensStartdato: LocalDate  // Date of first NAV payment in a new 248 period
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
@@ -38,8 +38,16 @@ internal class MaksimumSykepengedagerfilter(
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
         tidslinje = (tidslinjer + listOf(personTidslinje)).reduce(Utbetalingstidslinje::plus)
+        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
+        state = State.Initiell
         tidslinje.accept(this)
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
+    }
+
+    internal fun beregnGrenser(sisteDato: LocalDate) {
+        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
+        state = State.Initiell
+        tidslinje.kutt(sisteDato).accept(this)
 
         if (avvisteDatoer in periode)
             aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden")
