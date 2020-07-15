@@ -30,14 +30,14 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var dekrementerfom: LocalDate  // Three year boundary from first sick day after a work day
     private val avvisteDatoer = mutableListOf<LocalDate>()
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
+    private lateinit var tidslinje: Utbetalingstidslinje
 
     internal fun maksdato() = if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
     internal fun gjenståendeSykedager() = teller.gjenståendeSykedager(sisteBetalteDag)
     internal fun forbrukteSykedager() = teller.forbrukteDager()
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
-        require(tidslinjer.size == 1) { "Flere arbeidsgivere er ikke støttet enda" }
-        val tidslinje = (tidslinjer + listOf(personTidslinje)).reduce(Utbetalingstidslinje::plus)
+        tidslinje = (tidslinjer + listOf(personTidslinje)).reduce(Utbetalingstidslinje::plus)
         tidslinje.accept(this)
         tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
 

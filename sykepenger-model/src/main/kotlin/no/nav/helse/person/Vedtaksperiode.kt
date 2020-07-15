@@ -426,18 +426,27 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun høstingsresultater(
+    private fun forsøkUtbetaling(
         engineForTimeline: ArbeidsgiverUtbetalinger,
         ytelser: Ytelser
     ) {
         maksdato = engineForTimeline.maksdato()
         gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()
-        utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
         personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
         personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
         arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
         arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
+
+        if(person.kanJegBetale(this, arbeidsgiver)) høstingsresultater(engineForTimeline, ytelser)
+        else tilstand(ytelser, AvventerArbeidsgivere)
+    }
+
+    private fun høstingsresultater(
+        engineForTimeline: ArbeidsgiverUtbetalinger,
+        ytelser: Ytelser
+    ) {
+        utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
 
         when {
             utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds() -> {
@@ -823,6 +832,13 @@ internal class Vedtaksperiode private constructor(
 
     }
 
+    internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
+        override val type = AVVENTER_ARBEIDSGIVERE
+
+
+
+    }
+
     internal object AvventerInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
 
@@ -1017,7 +1033,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                overlappende(vedtaksperiode.periode, person, ytelser)
+         //       overlappende(vedtaksperiode.periode, person, ytelser)
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {
@@ -1083,7 +1099,7 @@ internal class Vedtaksperiode private constructor(
                     !ytelser.hasErrors()
                 }
                 onSuccess {
-                    vedtaksperiode.høstingsresultater(engineForTimeline, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(engineForTimeline, ytelser)
                 }
             }
         }

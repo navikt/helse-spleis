@@ -34,6 +34,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
     TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
     TilstandType.AVVENTER_SIMULERING,
+    TilstandType.AVVENTER_ARBEIDSGIVERE,
     TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet

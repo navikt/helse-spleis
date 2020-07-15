@@ -22,15 +22,16 @@ internal class ArbeidsgiverUtbetalinger(
     private var maksdato: LocalDate? = null
     private var gjenståendeSykedager: Int? = null
     private var forbrukteSykedager: Int? = null
+    internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
         val sykdomsgrader = Sykdomsgrader(tidslinjer)
         Sykdomsgradfilter(sykdomsgrader, tidslinjer, periode, aktivitetslogg).filter()
         MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
-        MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
+        tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)
-            maksdato = it.maksdato()
+            maksdato = it.maksdato()                            // To early?
             gjenståendeSykedager = it.gjenståendeSykedager()
             forbrukteSykedager = it.forbrukteSykedager()
         }

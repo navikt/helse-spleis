@@ -7,8 +7,10 @@ import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -23,23 +25,18 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
     private val blåInspektør get() = TestArbeidsgiverInspektør(person, blå)
 
     @Test
-    fun `overlappende arbeidsgivere sendt til infotrygd`() {
+    fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100), orgnummer = rød))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100), orgnummer = blå))
+        person.håndter(sykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100), orgnummer = blå))
 
         person.håndter(inntektsmelding(listOf(Periode(1.januar, 16.januar)), orgnummer = rød))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100), orgnummer = rød))
         person.håndter(vilkårsgrunnlag(rød.id(0), INNTEKT, orgnummer = rød))
         assertNoErrors(rødInspektør)
 
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100), orgnummer = blå))
-        person.håndter(inntektsmelding(listOf(Periode(1.januar, 16.januar)), orgnummer = blå))
-        person.håndter(vilkårsgrunnlag(blå.id(0), INNTEKT, orgnummer = blå))
-        assertNoErrors(blåInspektør)
-
         person.håndter(ytelser(rød.id(0), orgnummer = rød))
-        assertErrors(rødInspektør)
-        assertErrors(blåInspektør)
+        assertNoErrors(rødInspektør)
+        assertNoErrors(blåInspektør)
         assertTilstander(
             rød.id(0),
             START,
@@ -47,19 +44,16 @@ internal class ToArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_ARBEIDSGIVERE
         )
         assertTilstander(
             blå.id(0),
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            MOTTATT_SYKMELDING_FERDIG_GAP
         )
     }
 
+    @Disabled
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar to 31.januar, rød)
