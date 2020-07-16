@@ -1,0 +1,22 @@
+package no.nav.helse.spleis
+
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.spleis.db.HendelseRepository
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
+
+internal class ReplayMediator(
+    private val hendelseMediator: IHendelseMediator,
+    private val hendelseRepository: HendelseRepository
+    ): PersonObserver {
+
+    private val replays = mutableListOf<HendelseMessage>()
+
+    internal fun finalize() {
+        if(replays.isEmpty()) return
+        replays.removeAt(0).behandle(hendelseMediator)
+    }
+
+    override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
+        replays.addAll(event.hendelseIder.mapNotNull(hendelseRepository::gjennopprettMelding))
+    }
+}

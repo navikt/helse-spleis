@@ -5,16 +5,16 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
-internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packet) {
+internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

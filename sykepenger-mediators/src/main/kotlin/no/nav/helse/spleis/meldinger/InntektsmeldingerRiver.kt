@@ -6,6 +6,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.JsonMessageDelegate
+import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
 internal class InntektsmeldingerRiver(
@@ -39,5 +41,5 @@ internal class InntektsmeldingerRiver(
         packet.interestedIn("refusjon.beloepPrMnd", "arbeidsforholdId", "begrunnelseForReduksjonEllerIkkeUtbetalt")
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(packet)
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(JsonMessageDelegate(packet))
 }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.KansellerUtbetalingMessage
 
 internal class KansellerUtbetalingerRiver(
@@ -16,5 +17,5 @@ internal class KansellerUtbetalingerRiver(
         packet.requireKey("@id", "aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler")
     }
 
-    override fun createMessage(packet: JsonMessage) = KansellerUtbetalingMessage(packet)
+    override fun createMessage(packet: JsonMessage) = KansellerUtbetalingMessage(JsonMessageDelegate(packet))
 }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -222,7 +223,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             sykmelding(
                 Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
-                orgnummer = orgnummer
+                orgnummer = orgnummer,
+                mottatt = periode.endInclusive.atStartOfDay()
             )
         )
         person.håndter(

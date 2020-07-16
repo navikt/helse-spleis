@@ -240,10 +240,10 @@ internal class Vedtaksperiode private constructor(
         else -> Periodetype.FØRSTEGANGSBEHANDLING
     }
 
-    internal fun ferdig(hendelse: PersonHendelse) {
+    internal fun ferdig(hendelse: PersonHendelse, sendTilInfotrygd: Boolean) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if(skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
+        if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
         person.vedtaksperiodeForkastet(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 vedtaksperiodeId = id,
@@ -441,6 +441,16 @@ internal class Vedtaksperiode private constructor(
                 tom = this.periode.endInclusive
             )
         )
+    }
+
+    private fun replayHendelser() {
+        person.vedtaksperiodeReplay(PersonObserver.VedtaksperiodeReplayEvent(
+            vedtaksperiodeId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            hendelseIder = hendelseIder
+        ))
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -697,10 +707,10 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            vedtaksperiode.håndter(sykmelding) {
+            var replays: List<Vedtaksperiode> = emptyList()
+            vedtaksperiode.håndter(sykmelding) returnPoint@ {
                 if (vedtaksperiode.arbeidsgiver.harPerioderSomStarterEtter(vedtaksperiode)) {
-                    vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
-                    return@håndter TilInfotrygd
+                    replays=vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE_EXCLUSIVE, false)
                 }
                 val tilstøtende = vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode)
                 val forlengelse = tilstøtende != null
@@ -717,6 +727,9 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             sykmelding.info("Fullført behandling av sykmelding")
+            replays.forEach { periode ->
+                periode.replayHendelser()
+            }
         }
     }
 

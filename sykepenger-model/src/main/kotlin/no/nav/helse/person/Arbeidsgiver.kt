@@ -39,6 +39,7 @@ internal class Arbeidsgiver private constructor(
         internal val TIDLIGERE: VedtaksperioderSelector = Arbeidsgiver::tidligere
         internal val TIDLIGERE_OG_ETTERGØLGENDE: VedtaksperioderSelector = Arbeidsgiver::tidligereOgEtterfølgende
         internal val SENERE: VedtaksperioderSelector = Arbeidsgiver::senere
+        internal val SENERE_EXCLUSIVE: VedtaksperioderSelector = Arbeidsgiver::senereExclusive
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
@@ -226,16 +227,16 @@ internal class Arbeidsgiver private constructor(
     internal fun søppelbøtte(
         vedtaksperiode: Vedtaksperiode,
         hendelse: PersonHendelse,
-        block: VedtaksperioderSelector
-    ) {
-        if (vedtaksperiode !in vedtaksperioder) return
-        forkastet(vedtaksperiode, block)
-            .onEach { it.ferdig(hendelse) }
+        block: VedtaksperioderSelector,
+        sendTilInfotrygd: Boolean = true
+    ): List<Vedtaksperiode> {
+        if (vedtaksperiode !in vedtaksperioder) return listOf()
+        return forkastet(vedtaksperiode, block)
+            .onEach { it.ferdig(hendelse, sendTilInfotrygd) }
             .also {
-                if(vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
+                if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
                 else sykdomshistorikk.fjernTidligereDager(it.last().periode())
-            }
-        gjenopptaBehandling(hendelse)
+            }.also { gjenopptaBehandling(hendelse) }
     }
 
     private fun forkastet(vedtaksperiode: Vedtaksperiode, block: VedtaksperioderSelector) =
@@ -264,6 +265,15 @@ internal class Arbeidsgiver private constructor(
             it.sort()
             it.subList(
                 vedtaksperioder.indexOf(vedtaksperiode),
+                vedtaksperioder.size
+            ).toMutableList()
+        }
+
+    private fun senereExclusive(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.let {
+            it.sort()
+            it.subList(
+                minOf(vedtaksperioder.indexOf(vedtaksperiode)+1, vedtaksperioder.size),
                 vedtaksperioder.size
             ).toMutableList()
         }

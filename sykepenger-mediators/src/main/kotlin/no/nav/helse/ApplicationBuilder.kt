@@ -4,7 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
-import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 
@@ -14,7 +14,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
-    private val hendelseRecorder = HendelseRecorder(dataSource)
+    private val hendelseRepository = HendelseRepository(dataSource)
     private val personRepository = PersonPostgresRepository(dataSource)
     private val lagrePersonDao = LagrePersonDao(dataSource)
     private val rapidsConnection = RapidApplication.create(env)
@@ -22,6 +22,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = rapidsConnection,
         personRepository = personRepository,
+        hendelseRepository = hendelseRepository,
         lagrePersonDao = lagrePersonDao
     )
 
@@ -30,7 +31,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         MessageMediator(
             rapidsConnection = rapidsConnection,
             hendelseMediator = hendelseMediator,
-            hendelseRecorder = hendelseRecorder
+            hendelseRepository = hendelseRepository
         )
     }
 

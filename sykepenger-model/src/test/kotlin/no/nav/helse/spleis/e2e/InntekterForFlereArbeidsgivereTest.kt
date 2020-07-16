@@ -109,7 +109,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             sykmelding(
                 Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
-                orgnummer = orgnummer
+                orgnummer = orgnummer,
+                mottatt = periode.endInclusive.atStartOfDay()
             )
         )
         person.håndter(

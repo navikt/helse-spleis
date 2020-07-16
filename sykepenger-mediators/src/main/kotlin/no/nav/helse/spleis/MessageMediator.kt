@@ -2,7 +2,7 @@ package no.nav.helse.spleis
 
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.*
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
     private val hendelseMediator: IHendelseMediator,
-    private val hendelseRecorder: HendelseRecorder
+    private val hendelseRepository: HendelseRepository
 ) : IMessageMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(MessageMediator::class.java)
@@ -50,7 +50,7 @@ internal class MessageMediator(
         try {
             messageRecognized = true
             sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}:\n{}", message.id, message.fødselsnummer, message::class.simpleName, message.toJson())
-            hendelseRecorder.lagreMelding(message)
+            hendelseRepository.lagreMelding(message)
             hendelseMediator.behandle(message)
         } catch (err: Exception) {
             errorHandler(err, message)

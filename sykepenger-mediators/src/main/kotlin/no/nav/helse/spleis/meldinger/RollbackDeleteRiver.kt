@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.RollbackDeleteMessage
 
 internal class RollbackDeleteRiver(
@@ -16,5 +17,5 @@ internal class RollbackDeleteRiver(
         packet.requireKey("aktørId", "fødselsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = RollbackDeleteMessage(packet)
+    override fun createMessage(packet: JsonMessage) = RollbackDeleteMessage(JsonMessageDelegate(packet))
 }

@@ -58,6 +58,15 @@ internal class TestRapid : RapidsConnection() {
                     this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
                 }
             }
+
+        private val forkastedeVedtaksperiodeIder
+            get() = mutableMapOf<UUID, String>().apply {
+                events("vedtaksperiode_forkastet") {
+                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                    this[id] = it.path("tilstand").asText()
+                }
+            }
+
         private val tilstander
             get() = mutableMapOf<UUID, MutableList<String>>().apply {
                 events("vedtaksperiode_endret") {
@@ -65,6 +74,13 @@ internal class TestRapid : RapidsConnection() {
                     this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
                 }
             }
+
+        private val forkastedeTilstander
+            get() = tilstander.filter { it.key in forkastedeVedtaksperiodeIder }
+
+        private val tilstanderUtenForkastede
+            get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
+
         private val behov
             get() = mutableMapOf<UUID, MutableList<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, TilstandType>>>().apply {
                 events("behov") {
@@ -93,6 +109,8 @@ internal class TestRapid : RapidsConnection() {
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
+        fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
+        fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
 

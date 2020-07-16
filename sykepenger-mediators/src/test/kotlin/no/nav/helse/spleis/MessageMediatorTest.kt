@@ -104,7 +104,7 @@ internal class MessageMediatorTest {
         init {
             MessageMediator(
                 rapidsConnection = testRapid,
-                hendelseRecorder = mockk(relaxed = true),
+                hendelseRepository = mockk(relaxed = true),
                 hendelseMediator = hendelseMediator
             )
         }

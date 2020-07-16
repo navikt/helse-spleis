@@ -37,6 +37,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestOverstyrTidslinje = false
         private set
+    internal var lestReplayHendelser = false
+        private set
 
     fun reset() {
         lestNySøknad = false

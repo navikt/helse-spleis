@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 
 internal class PåminnelserRiver(
@@ -24,5 +25,5 @@ internal class PåminnelserRiver(
         packet.requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 
-    override fun createMessage(packet: JsonMessage) = PåminnelseMessage(packet)
+    override fun createMessage(packet: JsonMessage) = PåminnelseMessage(JsonMessageDelegate(packet))
 }

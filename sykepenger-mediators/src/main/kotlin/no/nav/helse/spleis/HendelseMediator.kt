@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.spleis.db.VedtaksperiodeIdTilstand
@@ -19,14 +20,15 @@ import java.util.*
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
+    hendelseRepository: HendelseRepository,
     private val lagrePersonDao: LagrePersonDao
-
 ) : IHendelseMediator {
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    private val personMediator = PersonMediator(rapidsConnection)
+    private val personMediator = PersonMediator(rapidsConnection, personRepository)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
+    private val replayMediator = ReplayMediator(this, hendelseRepository)
 
     override fun behandle(message: HendelseMessage) {
         try {
@@ -135,14 +137,19 @@ internal class HendelseMediator(
             personRepository.hentVedtaksperiodeIderMedTilstand(rollback.personVersjon())
 
         val vedtaksperioderEndretTilstand = vedtaksperiodeIderFørRollback - vedtaksperiodeIderEtterRollback
-        val vedtaksperioderSlettet = vedtaksperiodeIderFørRollback.map(VedtaksperiodeIdTilstand::id) - vedtaksperiodeIderEtterRollback.map(VedtaksperiodeIdTilstand::id)
+        val vedtaksperioderSlettet =
+            vedtaksperiodeIderFørRollback.map(VedtaksperiodeIdTilstand::id) - vedtaksperiodeIderEtterRollback.map(
+                VedtaksperiodeIdTilstand::id
+            )
 
         sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand)
 
         val rollbackPerson = personForId(rollback.personVersjon(), message, rollback)
         rollbackPerson.håndter(rollback)
-        val tilbakerulledePerioder = personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
-        sikkerLogg.info("Rullet tilbake {} person for {}, gikk fra {} til {}",
+        val tilbakerulledePerioder =
+            personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
+        sikkerLogg.info(
+            "Rullet tilbake {} person for {}, gikk fra {} til {}",
             keyValue("antallPersonIder", tilbakerulledePerioder),
             keyValue("fødselsnummer", rollback.fødselsnummer()),
             keyValue("forigePersonId", nyestePersonId),
@@ -161,7 +168,8 @@ internal class HendelseMediator(
         val person = Person(rollback.aktørId(), rollback.fødselsnummer())
         person.håndter(rollback)
         val tilbakerulledePerioder = personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), 0)
-        sikkerLogg.info("Resetter person {} perioder for {}, original {}",
+        sikkerLogg.info(
+            "Resetter person {} perioder for {}, original {}",
             keyValue("antallPersonIder", tilbakerulledePerioder),
             keyValue("fødselsnummer", rollback.fødselsnummer()),
             keyValue("forigePersonId", nyestePersonId)
@@ -200,7 +208,6 @@ internal class HendelseMediator(
         }
     }
 
-
     private fun <Hendelse : ArbeidstakerHendelse> håndter(
         message: HendelseMessage,
         hendelse: Hendelse,
@@ -227,6 +234,7 @@ internal class HendelseMediator(
 
     private fun initPerson(person: Person, message: HendelseMessage, hendelse: PersonHendelse): Person {
         personMediator.observer(person, message, hendelse)
+        person.addObserver(replayMediator)
         person.addObserver(VedtaksperiodeProbe)
         return person
     }
@@ -234,13 +242,14 @@ internal class HendelseMediator(
     private fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
         lagrePersonDao.lagrePerson(message, person, hendelse)
         personMediator.finalize(person, message, hendelse)
+        replayMediator.finalize()
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
         behovMediator.håndter(message, hendelse)
     }
 
-    private class PersonMediator(private val rapidsConnection: RapidsConnection) {
+    private class PersonMediator(private val rapidsConnection: RapidsConnection, private val personRepository: PersonRepository) {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val meldinger = mutableListOf<Pair<String, String>>()
 

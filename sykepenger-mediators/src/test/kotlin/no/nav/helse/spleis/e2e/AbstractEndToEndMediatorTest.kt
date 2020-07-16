@@ -10,7 +10,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestMessageFactory
-import no.nav.helse.spleis.db.HendelseRecorder
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.spleis.meldinger.TestRapid
@@ -63,13 +63,14 @@ internal abstract class AbstractEndToEndMediatorTest {
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
             personRepository = PersonPostgresRepository(dataSource),
+            hendelseRepository = HendelseRepository(dataSource),
             lagrePersonDao = LagrePersonDao(dataSource)
         )
 
         messageMediator = MessageMediator(
             rapidsConnection = testRapid,
             hendelseMediator = hendelseMediator,
-            hendelseRecorder = HendelseRecorder(dataSource)
+            hendelseRepository = HendelseRepository(dataSource)
         )
     }
 
@@ -108,7 +109,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, egenmeldinger))
     }
 
-    protected fun sendInnteksmelding(
+    protected fun sendInntektsmelding(
         vedtaksperiodeIndeks: Int,
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate
@@ -212,6 +213,31 @@ internal abstract class AbstractEndToEndMediatorTest {
             tilstand.toList(),
             testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
         )
+    }
+
+    protected fun assertIkkeForkastedeTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
+        assertEquals(
+            tilstand.toList(),
+            testRapid.inspektør.tilstanderUtenForkastede(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
+        )
+    }
+
+    protected fun assertForkastedeTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {
+        assertEquals(
+            tilstand.toList(),
+            testRapid.inspektør.forkastedeTilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
+        )
+    }
+
+    protected fun assertReplays(replays: List<Pair<String, Int>>) {
+        replays.forEach { (first, second) ->
+            val melding = testRapid.inspektør.melding(second)
+            assertEquals(first, melding.path("@forårsaket_av").path("event_name").asText())
+        }
+        replays.forEach { (first, second) ->
+            val melding = testRapid.inspektør.melding(second)
+            testRapid.sendTestMessage(melding.toString())
+        }
     }
 }
 

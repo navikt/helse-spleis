@@ -3,15 +3,15 @@ package no.nav.helse.spleis.meldinger.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.MessageDelegate
 import kotlin.math.max
 
 // Understands a JSON message representing a Søknad that is sent to NAV
-internal class SendtSøknadNavMessage(packet: JsonMessage) : SøknadMessage(packet) {
+internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(packet) {
     private val søknadTom = packet["tom"].asLocalDate()
     private val aktørId = packet["aktorId"].asText()
     private val orgnummer = packet["arbeidsgiver.orgnummer"].asText()

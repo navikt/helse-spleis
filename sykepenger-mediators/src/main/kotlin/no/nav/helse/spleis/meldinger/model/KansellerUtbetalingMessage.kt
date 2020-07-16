@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.KansellerUtbetaling
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.MessageDelegate
 
-internal class KansellerUtbetalingMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class KansellerUtbetalingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
 
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()

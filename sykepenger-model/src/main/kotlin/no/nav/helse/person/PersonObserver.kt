@@ -12,6 +12,14 @@ interface PersonObserver {
         val fødselsnummer: String
     )
 
+    data class VedtaksperiodeReplayEvent(
+        val vedtaksperiodeId: UUID,
+        val aktørId: String,
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val hendelseIder: List<UUID>
+    )
+
     data class VedtaksperiodeIkkeFunnetEvent(
         val vedtaksperiodeId: UUID,
         val aktørId: String,
@@ -92,6 +100,8 @@ interface PersonObserver {
         val fom: LocalDate,
         val tom: LocalDate
     )
+
+    fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 

@@ -14,7 +14,10 @@ internal class BehovMediator(
     private val sikkerLogg: Logger
 ) {
     internal fun håndter(message: HendelseMessage, hendelse: PersonHendelse) {
-        hendelse.kontekster().forEach { if (!it.hasErrors()) håndter(message, hendelse, it.behov()) }
+        hendelse.kontekster().forEach {
+            if (!it.hasErrors()){
+                håndter(message, hendelse, it.behov())
+            } }
     }
 
     private fun håndter(message: HendelseMessage, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {

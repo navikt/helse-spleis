@@ -246,10 +246,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `person med gammel sykmelding`() {
         // OBS: Disse kastes ikke ut fordi de er for gamle. De kastes ut fordi de kommer out of order
         håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 31.januar(2020), 100))
-        håndterSykmelding(Sykmeldingsperiode(9.februar(2017), 15.februar(2017), 100))
+        håndterSykmelding(Sykmeldingsperiode(9.februar(2017), 15.februar(2017), 100), mottatt = 31.januar(2020).atStartOfDay())
 
-        assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -949,20 +948,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
+    //TODO: WIP Testnavn reflekterer ikke replay
     fun `Out of order sykmeldinger blir kastet ut og tar med alt etterfølgende`() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100))
-        assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            3,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
-            TIL_INFOTRYGD
-        )
+
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test

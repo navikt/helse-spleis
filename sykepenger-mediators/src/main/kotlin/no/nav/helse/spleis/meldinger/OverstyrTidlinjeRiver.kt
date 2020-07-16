@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 
 internal class OverstyrTidlinjeRiver(
@@ -21,5 +22,5 @@ internal class OverstyrTidlinjeRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(packet)
+    override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(JsonMessageDelegate(packet))
 }

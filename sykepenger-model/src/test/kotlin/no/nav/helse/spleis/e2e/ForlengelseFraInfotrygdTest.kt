@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
-    internal fun `forlenger vedtaksperiode som har gått til infotrygd`() {
+    fun `forlenger vedtaksperiode som har gått til infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
         håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD
@@ -175,11 +175,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også (out of order)`() {
+    fun `når en periode går til Infotrygd avsluttes påfølgende, tilstøtende perioder også - out of order`() {
         håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(14.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterUtbetalingshistorikk(
             0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
@@ -191,8 +189,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )  // <-- TIL_INFOTRYGD
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -344,7 +342,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `setter forlengelse-flagget likt som forrige periode - forlengelse fra infotrygd`() {
+    fun `setter forlengelse-flagget likt som forrige periode - forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
         håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD

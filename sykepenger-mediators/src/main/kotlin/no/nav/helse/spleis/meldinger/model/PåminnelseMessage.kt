@@ -2,12 +2,12 @@ package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.spleis.MessageDelegate
 
 // Understands a JSON message representing a Påminnelse
-internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class PåminnelseMessage(packet: MessageDelegate) : HendelseMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
