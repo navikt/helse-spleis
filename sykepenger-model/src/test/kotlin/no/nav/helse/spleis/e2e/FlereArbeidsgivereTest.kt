@@ -5,11 +5,11 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Disabled
 import java.time.LocalDate
 
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -33,64 +33,22 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        betale(a1)
+        historikk(a1)
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-
-        assertTilstander(
-            a1.id(0),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_ARBEIDSGIVERE
-        )
-        assertTilstander(
-            a2.id(0),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK
-        )
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar to 31.januar, a1)
         assertNoErrors(a1Inspektør)
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertTilstander(
-            a1.id(0),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        assertTilstand(a1, AVSLUTTET)
 
         prosessperiode(1.mars to 31.mars, a2)
         assertNoErrors(a2Inspektør)
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertTilstander(
-            a2.id(0),
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        assertTilstand(a1, AVSLUTTET)
     }
 
     @Test
@@ -100,77 +58,77 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(1.februar to 28.februar, a3)
         gapPeriode(15.april to 15.mai, a4)
 
-        betale(a1) { "Try a1; can't continue" }
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a1) { "Try a1; can't continue" }
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a3) { "Try a3; can't continue; retry a1" }
-        assertEquals(AVVENTER_HISTORIKK, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a3) { "Try a3; can't continue; retry a1" }
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a1) { "Try a1 again; still can't continue" }
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a1) { "Try a1 again; still can't continue" }
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a2) { "Try a2; can't continue; retry a1" }
-        assertEquals(AVVENTER_HISTORIKK, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a2) { "Try a2; can't continue; retry a1" }
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a1) { "Try a1 again; it works now" }
-        assertEquals(AVVENTER_SIMULERING, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a1) { "Try a1 again; it works now" }
+        assertTilstand(a1, AVVENTER_SIMULERING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        vedta(a1) { "Finish a1; retry a3" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        betale(a1) { "Finish a1; retry a3" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a3) { "Try a3 again; it works!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_SIMULERING, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a3) { "Try a3 again; it works!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_SIMULERING)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        vedta(a3) { "Finish a3; retry a2" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        betale(a3) { "Finish a3; retry a2" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVSLUTTET)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a2) { "Try a2 again; it works!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_SIMULERING, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        historikk(a2) { "Try a2 again; it works!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertTilstand(a3, AVSLUTTET)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        vedta(a2) { "Finish a2; no one else ready" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a4Inspektør.sisteTilstand(0))
+        betale(a2) { "Finish a2; no one else ready" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVSLUTTET)
+        assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a4) { "Try a4; works first time!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_SIMULERING, a4Inspektør.sisteTilstand(0))
+        historikk(a4) { "Try a4; works first time!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVSLUTTET)
+        assertTilstand(a4, AVVENTER_SIMULERING)
 
-        vedta(a4) { "Finish a4; finished this Person for now" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a4Inspektør.sisteTilstand(0))
+        betale(a4) { "Finish a4; finished this Person for now" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVSLUTTET)
+        assertTilstand(a4, AVSLUTTET)
     }
 
     @Test
@@ -179,61 +137,69 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(1.januar to 31.januar, a2)
         gapPeriode(2.januar to 31.januar, a3)
 
-        betale(a1) { "Pay a1 - can't continue" }
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        historikk(a1) { "Pay a1 - can't continue" }
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        betale(a2) { "Pay a2 - can't continue; prompt a1" }
-        assertEquals(AVVENTER_HISTORIKK, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        historikk(a2) { "Pay a2 - can't continue; prompt a1" }
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        betale(a1) { "Pay a1 again - still can't continue" }
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        historikk(a1) { "Pay a1 again - still can't continue" }
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        betale(a3) { "Pay a3; prompt a1 to try" }
-        assertEquals(AVVENTER_HISTORIKK, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
+        historikk(a3) { "Pay a3; prompt a1 to try" }
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        betale(a1) { "Pay a1 again; works this time!" }
-        assertEquals(AVVENTER_SIMULERING, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
+        historikk(a1) { "Pay a1 again; works this time!" }
+        assertTilstand(a1, AVVENTER_SIMULERING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        vedta(a1) { "Complete a1; tickle a2 to try" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
+        betale(a1) { "Complete a1; tickle a2 to try" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        betale(a2) { "Pay a2 again; works this time!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_SIMULERING, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_ARBEIDSGIVERE, a3Inspektør.sisteTilstand(0))
+        historikk(a2) { "Pay a2 again; works this time!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_SIMULERING)
+        assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        vedta(a2) { "Complete a2; tickle a3 to try" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_HISTORIKK, a3Inspektør.sisteTilstand(0))
+        betale(a2) { "Complete a2; tickle a3 to try" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        betale(a3) { "Pay a3 again; works this time!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_SIMULERING, a3Inspektør.sisteTilstand(0))
+        historikk(a3) { "Pay a3 again; works this time!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVVENTER_SIMULERING)
 
-        vedta(a3) { "Complete a3; everyone happy!" }
-        assertEquals(AVSLUTTET, a1Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a2Inspektør.sisteTilstand(0))
-        assertEquals(AVSLUTTET, a3Inspektør.sisteTilstand(0))
+        betale(a3) { "Complete a3; everyone happy!" }
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
+        assertTilstand(a3, AVSLUTTET)
+    }
+
+    private fun assertTilstand(
+        orgnummer: String,
+        tilstand: TilstandType,
+        vedtaksperiodeIndeks: Int = 0
+    ) {
+        assertEquals(tilstand, TestArbeidsgiverInspektør(person, orgnummer).sisteTilstand(vedtaksperiodeIndeks))
     }
 
     private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
         gapPeriode(periode, orgnummer)
-        betale(orgnummer, sykedagstelling)
-        vedta(orgnummer)
+        historikk(orgnummer, sykedagstelling)
+        betale(orgnummer)
     }
 
     private fun forlengelsePeriode(periode: Periode, orgnummer: String) {
@@ -265,7 +231,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun betale(orgnummer: String, sykedagstelling: Int = 0, melding: () -> String = { "<no description>" }) {
+    private fun historikk(orgnummer: String, sykedagstelling: Int = 0, melding: () -> String = { "<no description>" }) {
         println(melding() + "\n")
         person.håndter(
             ytelser(
@@ -276,7 +242,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun vedta(orgnummer: String, melding: () -> String = { "<no description>" }) {
+    private fun betale(orgnummer: String, melding: () -> String = { "<no description>" }) {
         println(melding() + "\n")
         person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
         person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
