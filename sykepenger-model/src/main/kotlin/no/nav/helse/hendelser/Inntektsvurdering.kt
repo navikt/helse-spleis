@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt.Companion.nylig
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
@@ -7,11 +8,23 @@ import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 class Inntektsvurdering(
-    private val perioder: Map<YearMonth, List<Pair<String?, Double>>>
+    perioder: Map<YearMonth, List<Pair<String?, Double>>>
 ) {
+    private val inntekter: List<MånedligInntekt>
+    private val antallMåneder =
+        if(perioder.isEmpty()) 0
+        else perioder.map { it.key }.let { ChronoUnit.MONTHS.between(it.max(), it.min()) }
+
+    init {
+        inntekter = perioder.flatMap { entry ->
+            entry.value.map{ pair -> MånedligInntekt(entry.key, pair.first, pair.second) }
+        }
+    }
+
     private companion object {
         private const val MAKSIMALT_TILLATT_AVVIK = .25
     }
@@ -24,8 +37,8 @@ class Inntektsvurdering(
     internal fun avviksprosent() = avviksprosent
 
     internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal, periodetype: Periodetype): Aktivitetslogg {
-        if (antallPerioder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
-        if (flereVirksomheter()) {
+        if (antallMåneder > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
+        if (inntekter.kilder(3) > 1) {
             val melding =
                 "Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
             if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) aktivitetslogg.info(melding)
@@ -38,16 +51,6 @@ class Inntektsvurdering(
         return aktivitetslogg
     }
 
-    private fun flereVirksomheter(): Boolean {
-        val førsteMåned = perioder.maxBy { it.key }?.key?.minusMonths(2) ?: return false
-        return perioder
-            .filterKeys { it >= førsteMåned }
-            .flatMap { it.value }
-            .map { it.first }
-            .distinct().size > 1
-    }
-
-    private fun antallPerioder() = perioder.keys.size
     private fun avviksprosent(beregnetInntekt: BigDecimal) =
         sammenligningsgrunnlag.toBigDecimal().let { sammenligningsgrunnlag ->
             beregnetInntekt.omregnetÅrsinntekt()
@@ -57,4 +60,24 @@ class Inntektsvurdering(
         }.toDouble()
 
     private fun BigDecimal.omregnetÅrsinntekt() = this * 12.toBigDecimal()
+
+    private class MånedligInntekt(private val yearMonth: YearMonth, private val orgnummer: String?, inntekt: Double) {
+
+        companion object {
+            internal fun kilder(inntekter: List<MånedligInntekt>, antallMåneder: Int ) =
+                inntekter.nylig(antallMåneder).distinctBy { it.orgnummer }.size
+
+            private fun List<MånedligInntekt>.nylig(antallMåneder: Int): List<MånedligInntekt> {
+                return this.månedFørSlutt(antallMåneder)
+                    ?.let { førsteMåned -> this@nylig.filter { it.yearMonth >= førsteMåned } }
+                    ?: emptyList()
+            }
+
+            private fun List<MånedligInntekt>.månedFørSlutt(antallMåneder: Int) =
+                this.map { it.yearMonth }.max()?.minusMonths(antallMåneder.toLong() - 1)
+        }
+    }
+
+    private fun List<MånedligInntekt>.kilder(antallMåneder: Int) = MånedligInntekt.kilder(inntekter, antallMåneder)
+
 }

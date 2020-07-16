@@ -137,27 +137,27 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(1.januar to 31.januar, a2)
         gapPeriode(2.januar to 31.januar, a3)
 
-        historikk(a1) { "Pay a1 - can't continue" }
+        historikk(a1) { "Grab history a1 - can't continue" }
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a2) { "Pay a2 - can't continue; prompt a1" }
+        historikk(a2) { "Grab history a2 - can't continue; prompt a1" }
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a1) { "Pay a1 again - still can't continue" }
+        historikk(a1) { "Grab history a1 again - still can't continue" }
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Pay a3; prompt a1 to try" }
+        historikk(a3) { "Grab history a3; prompt a1 to try" }
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        historikk(a1) { "Pay a1 again; works this time!" }
+        historikk(a1) { "Grab history a1 again; works this time!" }
         assertTilstand(a1, AVVENTER_SIMULERING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
@@ -167,7 +167,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        historikk(a2) { "Pay a2 again; works this time!" }
+        historikk(a2) { "Grab history a2 again; works this time!" }
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
@@ -177,7 +177,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Pay a3 again; works this time!" }
+        historikk(a3) { "Grab history a3 again; works this time!" }
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVVENTER_SIMULERING)
