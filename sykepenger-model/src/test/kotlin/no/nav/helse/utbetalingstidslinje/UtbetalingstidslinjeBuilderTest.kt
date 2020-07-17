@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -385,7 +386,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.nU + 1.nF + 1.nU + 10.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                add(17.januar, hendelseId, 31000.toBigDecimal())
+                add(17.januar, hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
             }
         )
         assertNotEquals(0.0, inspektør.navdager.first().økonomi.toMap()["dekningsgrunnlag"])
@@ -397,7 +398,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed(1.januar(2020))
         (10.nU + 7.nF + 14.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                add(17.januar(2020), hendelseId, 31000.toBigDecimal())
+                add(17.januar(2020), hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
             }
         )
         assertEquals(31, inspektør.datoer.size)
@@ -408,9 +409,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private val inntekthistorikk = Inntekthistorikk().apply {
-        add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal())
-        add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal())
-        add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal())
+        add(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
+        add(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal(), INNTEKTSMELDING)
+        add(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal(), INNTEKTSMELDING)
     }
 
     private fun assertDagsats(dagsats: Int) {

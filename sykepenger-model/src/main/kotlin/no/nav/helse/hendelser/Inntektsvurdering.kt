@@ -14,23 +14,22 @@ import kotlin.math.roundToInt
 class Inntektsvurdering(
     perioder: Map<YearMonth, List<Pair<String?, Double>>>
 ) {
+    private companion object {
+        private const val MAKSIMALT_TILLATT_AVVIK = .25
+    }
+
     private val inntekter: List<MånedligInntekt>
     private val antallMåneder =
         if(perioder.isEmpty()) 0
         else perioder.map { it.key }.let { ChronoUnit.MONTHS.between(it.max(), it.min()) }
+    private val sammenligningsgrunnlag = perioder.flatMap { it.value }.sumByDouble { it.second }
+    private var avviksprosent = Double.POSITIVE_INFINITY
 
     init {
         inntekter = perioder.flatMap { entry ->
             entry.value.map{ pair -> MånedligInntekt(entry.key, pair.first, pair.second) }
         }
     }
-
-    private companion object {
-        private const val MAKSIMALT_TILLATT_AVVIK = .25
-    }
-
-    private val sammenligningsgrunnlag = perioder.flatMap { it.value }.sumByDouble { it.second }
-    private var avviksprosent = Double.POSITIVE_INFINITY
 
     internal fun sammenligningsgrunnlag(): Double =
         (sammenligningsgrunnlag * 100).roundToInt() / 100.0 // behold to desimaler

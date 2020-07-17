@@ -4,6 +4,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.INFOTRYGD
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -76,7 +77,8 @@ class Utbetalingshistorikk(
             inntekthistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
                 hendelseId,
-                inntektPerMåned.toBigDecimal()
+                inntektPerMåned.toBigDecimal(),
+                INFOTRYGD
             )
         }
     }

@@ -10,10 +10,12 @@ internal class InntektReflect(inntekt: Inntekthistorikk.Inntekt) {
     private val fom: LocalDate = inntekt["fom"]
     private val hendelseId: UUID = inntekt["hendelseId"]
     private val beløp: BigDecimal = inntekt["beløp"]
+    private val kilde: Inntekthistorikk.Inntekt.Kilde = inntekt["kilde"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,
         "hendelseId" to hendelseId,
-        "beløp" to beløp
+        "beløp" to beløp,
+        "kilde" to kilde.toString()
     )
 }

@@ -17,30 +17,30 @@ internal class InntektsvurderingTest {
 
     @Test
     internal fun `ugyldige verdier`() {
-        assertTrue(undersøke(inntektsvurdering(emptyMap()), 0.0))
-        assertTrue(undersøke(inntektsvurdering(mapOf(YearMonth.now() to listOf(ORGNR to 0.0))), 0.0))
+        assertTrue(hasErrors(inntektsvurdering(emptyMap()), 0.0))
+        assertTrue(hasErrors(inntektsvurdering(mapOf(YearMonth.now() to listOf(ORGNR to 0.0))), 0.0))
     }
 
     @Test
     internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
-        assertTrue(undersøke(inntektsvurdering, 1250.01))
-        assertTrue(undersøke(inntektsvurdering, 749.99))
-        assertFalse(undersøke(inntektsvurdering, 1000.00))
-        assertFalse(undersøke(inntektsvurdering, 1250.00))
-        assertFalse(undersøke(inntektsvurdering, 750.00))
+        assertTrue(hasErrors(inntektsvurdering, 1250.01))
+        assertTrue(hasErrors(inntektsvurdering, 749.99))
+        assertFalse(hasErrors(inntektsvurdering, 1000.00))
+        assertFalse(hasErrors(inntektsvurdering, 1250.00))
+        assertFalse(hasErrors(inntektsvurdering, 750.00))
     }
 
     @Test
     internal fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertFalse(undersøke(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT))
         assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(undersøke(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT))
         assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(undersøke(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT))
         assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(undersøke(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT))
         assertFalse(aktivitetslogg.hasWarnings())
     }
 
@@ -53,7 +53,7 @@ internal class InntektsvurderingTest {
                 this[periode] = this.getValue(periode).toMutableList().apply { add(inntekt) }
             }
 
-    private fun undersøke(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Double): Boolean {
+    private fun hasErrors(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Double): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,

@@ -178,7 +178,8 @@ internal data class PersonData(
         data class InntektData(
             private val fom: LocalDate,
             private val hendelseId: UUID,
-            private val beløp: BigDecimal
+            private val beløp: BigDecimal,
+            private val kilde: String
         ) {
             internal companion object {
                 internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
@@ -186,7 +187,8 @@ internal data class PersonData(
                         inntekthistorikk.add(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
-                            beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP)
+                            beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP),
+                            kilde = Inntekthistorikk.Inntekt.Kilde.valueOf(inntektData.kilde)
                         )
                     }
                 }

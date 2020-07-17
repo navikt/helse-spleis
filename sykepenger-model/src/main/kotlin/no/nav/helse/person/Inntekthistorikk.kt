@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -22,9 +23,9 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal) {
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal, kilde: Kilde) {
         inntekter.removeAll { it.fom() == fom }
-        inntekter.add(Inntekt(fom, hendelseId, beløp))
+        inntekter.add(Inntekt(fom, hendelseId, beløp, kilde))
         inntekter.sort()
     }
 
@@ -45,7 +46,8 @@ internal class Inntekthistorikk {
     internal class Inntekt(
         private val fom: LocalDate,
         private val hendelseId: UUID,
-        private val beløp: BigDecimal
+        private val beløp: BigDecimal,
+        private val kilde: Kilde
     ) : Comparable<Inntekt> {
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
@@ -70,6 +72,10 @@ internal class Inntekthistorikk {
             other is Inntekt
                 && other.fom == this.fom
                 && other.beløp == this.beløp
+        internal enum class Kilde {
+            INNTEKTSMELDING, INFOTRYGD, SKATT
+
+        }
     }
 
 }
