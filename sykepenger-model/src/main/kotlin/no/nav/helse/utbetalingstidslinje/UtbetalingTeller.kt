@@ -53,7 +53,13 @@ internal class UtbetalingTeller private constructor(
         var result = sisteUtbetalingsdag
         var teller = 0
         while (!clone.påGrensen(result)) {
-            result = result.plusDays(if (result.dayOfWeek == DayOfWeek.FRIDAY) 3 else 1)
+            result = result.plusDays(
+                when (result.dayOfWeek) {
+                    DayOfWeek.FRIDAY -> 3
+                    DayOfWeek.SATURDAY -> 2
+                    else -> 1
+                }
+            )
             teller += 1
             clone.inkrementer(result)
         }

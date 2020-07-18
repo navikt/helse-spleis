@@ -28,7 +28,9 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
     private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
+    private val gjenståendeSykedagerer = mutableMapOf<Int, Int>()
     private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
+    private val forkastetGjenståendeSykedagerer = mutableMapOf<Int, Int>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
@@ -175,6 +177,12 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
         else maksdatoer[vedtaksperiodeindeks] = maksdato
     }
 
+    override fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {
+        if(gjenståendeSykedager == null) return
+        if (!inGyldigePerioder) forkastetGjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
+        else gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
+    }
+
     override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
         this.inntektshistorikk = inntekthistorikk
     }
@@ -273,6 +281,14 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun forkastetGjenståendeSykedager(indeks: Int) = forkastetGjenståendeSykedagerer[indeks] ?: fail {
         "Missing collection initialization"
     }
 

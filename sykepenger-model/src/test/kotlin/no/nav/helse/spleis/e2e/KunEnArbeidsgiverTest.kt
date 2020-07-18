@@ -18,7 +18,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -58,7 +58,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  8.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100))
         assertNoWarnings(inspektør)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
@@ -83,15 +83,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader til arbeidsgiver før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 5.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 5.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100))
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100))
-        håndterSøknad(Sykdom(11.januar,  22.januar, 100))
+        håndterSøknad(Sykdom(11.januar, 22.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(1, INNTEKT)
 
@@ -132,13 +132,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  5.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 5.januar, 100))
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100))
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100))
-        håndterSøknad(Sykdom(11.januar,  22.januar, 100))
+        håndterSøknad(Sykdom(11.januar, 22.januar, 100))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
@@ -179,13 +179,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med to søknader (med gap mellom) til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 4.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  4.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 4.januar, 100))
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  10.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100))
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100))
-        håndterSøknad(Sykdom(11.januar,  22.januar, 100))
+        håndterSøknad(Sykdom(11.januar, 22.januar, 100))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 4.januar), Periode(8.januar, 21.januar)), førsteFraværsdag = 8.januar)
         håndterVilkårsgrunnlag(0, INNTEKT)
@@ -227,7 +227,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoWarnings(inspektør)
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar,  8.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
@@ -250,7 +250,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med Søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -284,7 +284,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad sendt etter 3 mnd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknad(Sykdom(3.januar,  26.januar, 100), sendtTilNav = 1.mai)
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100), sendtTilNav = 1.mai)
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -316,14 +316,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `gap historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-            1.desember(2017),
-            15.desember(2017),
-            15000,
-            100,
-            ORGNUMMER
-        ))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.desember(2017), 15.desember(2017), 15000, 100, ORGNUMMER))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -358,7 +352,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.desember(2017),
             16.desember(2017),
@@ -382,7 +376,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen nav utbetaling kreves, blir automatisk behandlet og avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  5.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 5.januar, 100))
         håndterYtelser(0)   // No history
         inspektør.also {
             assertNoErrors(it)
@@ -404,8 +398,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ikke automatisk behandling hvis warnings`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  5.januar, 100))
-        håndterSøknad(Sykdom(3.januar,  5.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 5.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 5.januar, 100))
         håndterYtelser(0)   // No history
         inspektør.also {
             assertNoErrors(it)
@@ -429,7 +423,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -438,7 +432,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
@@ -477,8 +471,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -533,8 +527,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -588,8 +582,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -627,7 +621,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -635,7 +629,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(1, INNTEKT)
         håndterYtelser(1)   // No history
         håndterSimulering(1)
@@ -748,7 +742,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
     }
@@ -757,7 +751,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         assertTilstander(
             0,
             START,
@@ -771,10 +765,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -827,7 +821,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `To forlengelser som forlenger utbetaling fra infotrygd skal ha samme maksdato`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
-        håndterSøknad(Sykdom(3.januar,  31.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100))
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
@@ -849,7 +843,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterSøknad(Sykdom(1.februar,  23.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
@@ -881,9 +875,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To tilstøtende perioder søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -925,8 +919,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
-        håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
 
@@ -966,7 +960,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar,  23.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 23.februar, 100))
 
         inspektør.also {
             assertNoErrors(it)
@@ -992,12 +986,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterUtbetalingsgodkjenning(0, true)
 
-        håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterUtbetalingsgodkjenning(1, true)
@@ -1037,14 +1031,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
             førsteFraværsdag = 3.januar
         )
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterUtbetalingsgodkjenning(1, true)
@@ -1073,7 +1067,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `To tilstøtende perioder der den første er utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -1082,7 +1076,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
         håndterUtbetalingsgodkjenning(1, true)
@@ -1111,9 +1105,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To tilstøtende perioder inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(8.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  7.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
 
@@ -1151,7 +1145,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -1160,7 +1154,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AVVIST)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
 
         assertNotNull(inspektør.maksdato(0))
         assertTilstander(
@@ -1212,7 +1206,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ignorer inntektsmeldinger på påfølgende perioder`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -1221,7 +1215,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar,  23.februar, 100))
+        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(1, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1)   // No history
         håndterSimulering(1)
@@ -1253,8 +1247,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar,  23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
@@ -1316,11 +1310,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar,  26.januar, 100))
-        håndterSøknad(Sykdom(3.januar,  26.januar, 100))
+        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterSøknad(Sykdom(3.januar,  26.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
@@ -1329,7 +1323,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterSøknad(Sykdom(3.januar,  26.januar, 100))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
         inspektør.also {
             assertNoErrors(it)
             assertWarnings(it)
@@ -1519,8 +1513,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `perioden henter vilkårsgrunnlag selv om tidligere periode har lest inntektsmelding når det er gap mellom periodene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar,  4.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(8.januar,  15.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 4.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
@@ -1539,5 +1533,41 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrors())
         assertEquals(1, inspektør.sykdomshistorikk.size)
+    }
+
+    @Test
+    fun `Maksdato og antall gjenstående dager beregnes riktig når det er ferie sist i perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
+        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100), Søknad.Søknadsperiode.Ferie(6.juli(2020), 11.juli(2020)))
+        håndterYtelser(0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(8.august(2019), 4.september(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.september(2019), 20.september(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(21.september(2019), 2.november(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.november(2019), 3.februar(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(4.februar(2020), 28.februar(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(7.august(2019), 50005.0, ORGNUMMER, true))
+        )
+        håndterVilkårsgrunnlag(0, 50005.0)
+        håndterYtelser(0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(8.august(2019), 4.september(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.september(2019), 20.september(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(21.september(2019), 2.november(2019), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.november(2019), 3.februar(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(4.februar(2020), 28.februar(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(7.august(2019), 50005.0, ORGNUMMER, true))
+        )
+        håndterSimulering(0)
+        assertEquals(10, inspektør.gjenståendeSykedager(0))
+        assertEquals(24.juli(2020), inspektør.maksdato(0))
     }
 }
