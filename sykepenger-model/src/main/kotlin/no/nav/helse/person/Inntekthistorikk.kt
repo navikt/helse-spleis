@@ -24,8 +24,9 @@ internal class Inntekthistorikk {
     }
 
     internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal, kilde: Kilde) {
-        inntekter.removeAll { it.fom() == fom }
-        inntekter.add(Inntekt(fom, hendelseId, beløp, kilde))
+        val nyInntekt = Inntekt(fom, hendelseId, beløp, kilde)
+        inntekter.removeAll { it.erRedundantMed(nyInntekt) }
+        inntekter.add(nyInntekt)
         inntekter.sort()
     }
 
@@ -65,16 +66,33 @@ internal class Inntekthistorikk {
             visitor.visitInntekt(this, hendelseId)
         }
 
-        override fun compareTo(other: Inntekt) = this.fom.compareTo(other.fom)
+        override fun compareTo(other: Inntekt) : Int {
 
-        override fun hashCode() = fom.hashCode() * 37 + beløp.hashCode()
+            val kildeCompare = this.kilde.compareTo(other.kilde)
+            return if(kildeCompare != 0) {
+                kildeCompare
+            } else {
+                this.fom.compareTo(other.fom)
+            }
+        }
+
+        override fun hashCode() =
+            fom.hashCode() * 37 * 37 +
+                kilde.hashCode() * 37 +
+                beløp.hashCode()
+
         override fun equals(other: Any?) =
             other is Inntekt
                 && other.fom == this.fom
                 && other.beløp == this.beløp
-        internal enum class Kilde {
-            INNTEKTSMELDING, INFOTRYGD, SKATT
+                && other.kilde == this.kilde
 
+        internal fun erRedundantMed(annenInntekt: Inntekt) =
+            annenInntekt.fom == fom && annenInntekt.kilde == kilde
+
+        //Order is significant, compare is used to prioritize records from various sources
+        internal enum class Kilde : Comparable<Kilde>{
+            SKATT, INFOTRYGD, INNTEKTSMELDING
         }
     }
 
