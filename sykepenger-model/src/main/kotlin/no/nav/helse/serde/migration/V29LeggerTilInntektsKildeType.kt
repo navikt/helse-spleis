@@ -8,11 +8,9 @@ internal class V29LeggerTilInntektsKildeType : JsonMigration(version = 29) {
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.path("inntektshistorikk").forEach { inntektshistorikk ->
-                inntektshistorikk.path("inntekter").forEach {inntekt ->
-                    inntekt as ObjectNode
-                    inntekt.put("kilde", "INNTEKTSMELDING")
-                }
+            arbeidsgiver.path("inntekthistorikk").path("inntekter").forEach { inntekt ->
+                inntekt as ObjectNode
+                inntekt.put("kilde", "INNTEKTSMELDING")
             }
         }
     }

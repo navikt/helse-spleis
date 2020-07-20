@@ -15,7 +15,7 @@ class V29LeggerTilInntektsKildeTypeTest {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Test
-    fun `kopier hendelsesIder fra sykdomshistorikk til vedtaksperiode`() {
+    fun `legger til inntektskildetype til inntekter`() {
         val migrated = listOf(V29LeggerTilInntektsKildeType()).migrate(objectMapper.readTree(originalJson))
         val expected = objectMapper.readTree(expectedJson)
 
@@ -29,98 +29,60 @@ private val originalJson = """
 {
   "arbeidsgivere": [
     {
-      "vedtaksperioder": [
-        {
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "c3aeddd6-39b2-47cd-9eb9-b948a370dda2"
-            },
-            {
-              "hendelseId": "15ea33b9-2d6e-4517-a0b3-2bc4f0f5a1fd"
-            },
-            {
-              "hendelseId": "e229a575-8c62-49f5-90e1-a8e027844135"
-            }
-          ]
-        },
-        {
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "9897347e-a1fe-4f24-8144-d5ce9fe07da0"
-            }
-          ]
-        }
-      ],
-      "forkastede": [
-        {
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "fdc14c73-7a6f-4f96-9972-c2e9dafd1026"
-            },
-            {
-              "hendelseId": "c1ceaafd-81ae-4bbe-8319-5f8d6919cc79"
-            }
-          ]
-        }
-      ]
+      "inntekthistorikk": {
+        "inntekter": [
+          {
+            "fom": "2017-12-31",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 31000.0
+          },
+          {
+            "fom": "2018-02-02",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 1000.0
+          },
+          {
+            "fom": "2019-01-31",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 2000.0
+          }
+        ]
+      }
     }
   ],
-  "skjemaVersjon": 27
+  "skjemaVersjon": 28
 }
 """
 
+@Language("JSON")
 private val expectedJson = """
 {
   "arbeidsgivere": [
     {
-      "vedtaksperioder": [
-        {
-          "hendelseIder": [
-            "e229a575-8c62-49f5-90e1-a8e027844135",
-            "15ea33b9-2d6e-4517-a0b3-2bc4f0f5a1fd",
-            "c3aeddd6-39b2-47cd-9eb9-b948a370dda2"
-          ],
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "c3aeddd6-39b2-47cd-9eb9-b948a370dda2"
-            },
-            {
-              "hendelseId": "15ea33b9-2d6e-4517-a0b3-2bc4f0f5a1fd"
-            },
-            {
-              "hendelseId": "e229a575-8c62-49f5-90e1-a8e027844135"
-            }
-          ]
-        },
-        {
-          "hendelseIder": [
-            "9897347e-a1fe-4f24-8144-d5ce9fe07da0"
-          ],
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "9897347e-a1fe-4f24-8144-d5ce9fe07da0"
-            }
-          ]
-        }
-      ],
-      "forkastede": [
-        {
-          "hendelseIder": [
-            "c1ceaafd-81ae-4bbe-8319-5f8d6919cc79",
-            "fdc14c73-7a6f-4f96-9972-c2e9dafd1026"
-          ],
-          "sykdomshistorikk": [
-            {
-              "hendelseId": "fdc14c73-7a6f-4f96-9972-c2e9dafd1026"
-            },
-            {
-              "hendelseId": "c1ceaafd-81ae-4bbe-8319-5f8d6919cc79"
-            }
-          ]
-        }
-      ]
+      "inntekthistorikk": {
+        "inntekter": [
+          {
+            "fom": "2017-12-31",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 31000.0,
+            "kilde": "INNTEKTSMELDING"
+          },
+          {
+            "fom": "2018-02-02",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 1000.0,
+            "kilde": "INNTEKTSMELDING"
+          },
+          {
+            "fom": "2019-01-31",
+            "hendelseId": "259645c2-4465-4c58-b466-505d9a87dfb1",
+            "beløp": 2000.0,
+            "kilde": "INNTEKTSMELDING"
+          }
+        ]
+      }
     }
   ],
-  "skjemaVersjon": 28
+  "skjemaVersjon": 29
 }
 """
