@@ -1,6 +1,5 @@
 package no.nav.helse.testhelpers
 
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -9,8 +8,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
     internal val dager = mutableMapOf<LocalDate, Dag>()

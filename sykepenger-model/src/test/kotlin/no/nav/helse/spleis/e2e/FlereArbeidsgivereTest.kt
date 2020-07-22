@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiv
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 

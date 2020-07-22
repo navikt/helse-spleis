@@ -1,7 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

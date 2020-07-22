@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AlderTest {

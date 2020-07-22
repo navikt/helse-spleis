@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag

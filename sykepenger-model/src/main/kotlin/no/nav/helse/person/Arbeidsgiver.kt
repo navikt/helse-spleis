@@ -7,7 +7,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 

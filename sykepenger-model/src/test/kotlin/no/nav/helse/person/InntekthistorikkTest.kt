@@ -7,10 +7,7 @@ import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 

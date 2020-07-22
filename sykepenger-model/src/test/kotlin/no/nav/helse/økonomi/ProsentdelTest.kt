@@ -1,7 +1,6 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

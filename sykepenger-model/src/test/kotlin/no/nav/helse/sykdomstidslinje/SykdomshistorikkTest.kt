@@ -6,8 +6,11 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.*
-import no.nav.helse.testhelpers.*
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSykmelding
+import no.nav.helse.testhelpers.TestSykdomstidslinje
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.jobbTil
+import no.nav.helse.testhelpers.sykTil
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
