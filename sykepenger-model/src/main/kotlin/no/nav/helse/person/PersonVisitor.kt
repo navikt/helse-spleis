@@ -208,7 +208,7 @@ internal interface SykdomstidslinjeVisitor {
 
 internal interface InntekthistorikkVisitor {
     fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
-    fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {}
+    fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
 }
 

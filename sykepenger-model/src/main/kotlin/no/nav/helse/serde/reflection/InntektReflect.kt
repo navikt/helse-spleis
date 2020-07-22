@@ -5,11 +5,11 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import java.time.LocalDate
 import java.util.*
 
-internal class InntektReflect(inntekt: Inntekthistorikk.Inntekt) {
-    private val fom: LocalDate = inntekt["fom"]
-    private val hendelseId: UUID = inntekt["hendelseId"]
-    private val beløp: Double = inntekt["beløp"]
-    private val kilde: Inntekthistorikk.Inntekt.Kilde = inntekt["kilde"]
+internal class InntektReflect(inntektsendring: Inntekthistorikk.Inntektsendring) {
+    private val fom: LocalDate = inntektsendring["fom"]
+    private val hendelseId: UUID = inntektsendring["hendelseId"]
+    private val beløp: Double = inntektsendring["beløp"]
+    private val kilde: Inntekthistorikk.Inntektsendring.Kilde = inntektsendring["kilde"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,

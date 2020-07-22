@@ -1,13 +1,13 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.INFOTRYGD
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class InntektReflectTest {
+internal class InntektsendringReflectTest {
     private val hendelseId = UUID.randomUUID()
 
     @Test
@@ -18,9 +18,9 @@ internal class InntektReflectTest {
         assertEquals(1.januar, map["fom"])
         assertEquals(hendelseId, map["hendelseId"])
         assertEquals(1000.0, map["beløp"])
-        assertEquals(INFOTRYGD, Inntekthistorikk.Inntekt.Kilde.valueOf(map["kilde"].toString()))
+        assertEquals(INFOTRYGD, Inntekthistorikk.Inntektsendring.Kilde.valueOf(map["kilde"].toString()))
     }
 
     internal val inntekt =
-        Inntekthistorikk.Inntekt(1.januar, hendelseId, 1000.0.toBigDecimal(), INFOTRYGD)
+        Inntekthistorikk.Inntektsendring(1.januar, hendelseId, 1000.0.toBigDecimal(), INFOTRYGD)
 }

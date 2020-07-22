@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.util.*

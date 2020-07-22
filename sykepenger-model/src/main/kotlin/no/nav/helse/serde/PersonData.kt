@@ -188,7 +188,7 @@ internal data class PersonData(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
                             beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP),
-                            kilde = Inntekthistorikk.Inntekt.Kilde.valueOf(inntektData.kilde)
+                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde)
                         )
                     }
                 }

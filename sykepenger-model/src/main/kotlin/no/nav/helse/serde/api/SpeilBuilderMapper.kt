@@ -61,7 +61,7 @@ internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     fødselsnummer: String,
-    inntekter: List<Inntekthistorikk.Inntekt>,
+    inntekter: List<Inntekthistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?,
     gruppeId: UUID
@@ -183,13 +183,13 @@ internal fun mapVilkår(
     fødselsnummer: String,
     dataForVilkårsvurdering: GrunnlagsdataDTO?,
     søknadNav: SøknadNavDTO?,
-    inntekter: List<Inntekthistorikk.Inntekt>,
+    inntekter: List<Inntekthistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
-    val sykepengegrunnlag = Inntekthistorikk.Inntekt.sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
-    val beregnetMånedsinntekt = Inntekthistorikk.Inntekt.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
+    val sykepengegrunnlag = Inntekthistorikk.Inntektsendring.sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
+    val beregnetMånedsinntekt = Inntekthistorikk.Inntektsendring.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = SpleisAlder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0

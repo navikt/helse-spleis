@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.Inntekthistorikk.Inntekt
-import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde
-import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.*
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -61,12 +61,12 @@ internal class InntekthistorikkTest {
         val `6GBeløp` = Grunnbeløp.`6G`.beløp(førsteFraværsdag)
 
         val årsinntektOver6G =
-            listOf(Inntekt(førsteFraværsdag, UUID.randomUUID(), 49929.01.toBigDecimal(), INFOTRYGD))
-        assertEquals(`6GBeløp`, Inntekthistorikk.Inntekt.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.toBigDecimal(), INFOTRYGD))
+        assertEquals(`6GBeløp`, Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
 
         val årsinntektUnder6G =
-            listOf(Inntekt(førsteFraværsdag, UUID.randomUUID(), 49928.toBigDecimal(), INFOTRYGD))
-        assertTrue(Inntekthistorikk.Inntekt.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`)
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.toBigDecimal(), INFOTRYGD))
+        assertTrue(Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`)
     }
 
     @Test
@@ -142,7 +142,7 @@ internal class InntekthistorikkTest {
             inntektTeller = 0
         }
 
-        override fun visitInntekt(inntekt: Inntekt, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektsendring, id: UUID) {
             inntektTeller += 1
         }
 

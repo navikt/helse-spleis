@@ -90,7 +90,7 @@ internal class JsonBuilder : PersonVisitor {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) = currentState.visitInntekt(inntekt, id)
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) = currentState.visitInntekt(inntektsendring, id)
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
     override fun preVisit(tidslinje: Utbetalingstidslinje) =
         currentState.preVisit(tidslinje)
@@ -455,11 +455,11 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     private inner class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
-            inntektMap.putAll(InntektReflect(inntekt).toMap())
+            inntektMap.putAll(InntektReflect(inntektsendring).toMap())
         }
 
         override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {

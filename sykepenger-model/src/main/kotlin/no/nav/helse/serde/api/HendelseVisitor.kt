@@ -25,7 +25,7 @@ internal class HendelseVisitor : PersonVisitor {
         hendelsereferanser.add(id)
     }
 
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
         hendelsereferanser.add(id)
     }
 }

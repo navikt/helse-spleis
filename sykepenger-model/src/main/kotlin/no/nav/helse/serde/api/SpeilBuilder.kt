@@ -117,8 +117,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
-        currentState.visitInntekt(inntekt, id)
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+        currentState.visitInntekt(inntektsendring, id)
     }
 
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
@@ -458,7 +458,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
         lateinit var utbetalinger: List<Utbetaling>
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
-        var inntekter = mutableListOf<Inntekthistorikk.Inntekt>()
+        var inntekter = mutableListOf<Inntekthistorikk.Inntektsendring>()
 
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             this.utbetalinger = utbetalinger
@@ -500,8 +500,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     .filter { it.tilstand == TilstandstypeDTO.Utbetalt }
         }
 
-        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
-            inntekter.add(inntekt)
+        override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+            inntekter.add(inntektsendring)
         }
 
         override fun preVisitVedtaksperiode(
@@ -546,7 +546,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val gruppeId: UUID,
         private val fødselsnummer: String,
-        private val inntekter: List<Inntekthistorikk.Inntekt>,
+        private val inntekter: List<Inntekthistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
         aktivitetslogg: List<AktivitetDTO>,
         private val hendelseIder: List<UUID>
