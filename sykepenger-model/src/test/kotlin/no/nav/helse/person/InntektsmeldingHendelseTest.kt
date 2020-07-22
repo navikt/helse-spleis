@@ -33,7 +33,7 @@ internal class InntektsmeldingHendelseTest {
         val inntekthistorikk = Inntekthistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
-        assertEquals(INNTEKT.toBigDecimal(), inntekthistorikk.inntekt(1.januar))
+        assertEquals(INNTEKT, inntekthistorikk.inntekt(1.januar))
     }
 
     @Test

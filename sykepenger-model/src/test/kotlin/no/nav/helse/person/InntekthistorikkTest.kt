@@ -1,9 +1,12 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.Inntekthistorikk.Inntekt
+import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde
 import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde.*
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -12,12 +15,19 @@ import java.time.LocalDate
 import java.util.*
 
 internal class InntekthistorikkTest {
-    private val tidligereInntekt = 1500.toBigDecimal()
-    private val nyInntekt = 2000.toBigDecimal()
+    private val tidligereInntekt = 1500.0
+    private val nyInntekt = 2000.0
+    private lateinit var historikk: Inntekthistorikk
+    private var inntektsbeløp = 0
+
+    @BeforeEach
+    fun setup() {
+        historikk = Inntekthistorikk()
+        inntektsbeløp = 1000
+    }
 
     @Test
     fun `Dupliser inntekt til fordel for nyere oppføring`() {
-        val historikk = Inntekthistorikk()
         historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
         historikk.add(3.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD)
         assertEquals(1, historikk.size)
@@ -28,109 +38,14 @@ internal class InntekthistorikkTest {
 
     @Test
     fun `Inntekt fra infotrygd blir ikke overstyrt av inntekt fra skatt`() {
-        val historikk = Inntekthistorikk()
         historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
         historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT)
         assertEquals(2, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(3.januar)) // Salary from infotrygd
     }
 
-    private data class inntekt(
-        val beløp: Double,
-        val kilde: Inntekthistorikk.Inntekt.Kilde,
-        val fom: LocalDate = 1.januar,
-        val uuid: UUID = UUID.randomUUID()
-    )
-
-    private data class args(
-        val label: String,
-        val a: inntekt,
-        val b: inntekt,
-        val forventetBeløp: Double
-    )
-
-    @TestFactory
-    fun `Prioritet mellom to inntektskilder for tredje januar`() = listOf(
-        args(
-            "Prioriter inntektsmelding over skatt1",
-            inntekt(1000.0, INNTEKTSMELDING),
-            inntekt(2000.0, SKATT),
-            1000.0
-        ),
-        args(
-            "Prioriter inntektsmelding over skatt2",
-            inntekt(1000.0, SKATT),
-            inntekt(2000.0, INNTEKTSMELDING),
-            2000.0
-        ),
-        args(
-            "Prioriter inntektsmelding over infotrygd1",
-            inntekt(1000.0, INNTEKTSMELDING),
-            inntekt(2000.0, INFOTRYGD),
-            1000.0
-        ),
-        args(
-            "Prioriter inntektsmelding over infotrygd2",
-            inntekt(1000.0, INFOTRYGD),
-            inntekt(2000.0, INNTEKTSMELDING),
-            2000.0
-        ),
-        args(
-            "Prioriter infotrygd over skatt1",
-            inntekt(1000.0, SKATT),
-            inntekt(2000.0, INFOTRYGD),
-            2000.0
-        ),
-        args(
-            "Prioriter infotrygd over skatt2",
-            inntekt(1000.0, INFOTRYGD),
-            inntekt(2000.0, SKATT),
-            1000.0
-        ),
-        args(
-            "??assumption?? inntekt gjelder bare fom dato",
-            inntekt(1000.0, SKATT, 1.januar),
-            inntekt(2000.0, INNTEKTSMELDING, 4.januar),
-            1000.0
-        ),
-        args(
-            "??assumption?? inntekt inkluderer fom dato",
-            inntekt(1000.0, SKATT, 1.januar),
-            inntekt(2000.0, INNTEKTSMELDING, 3.januar),
-            2000.0
-        ),
-        args(
-            "??assumption?? Når dato er før første fom dato, prioriter første1",
-            inntekt(1000.0, SKATT, 5.januar),
-            inntekt(2000.0, INNTEKTSMELDING, 6.januar),
-            1000.0
-        ),
-        args(
-            "??assumption?? Når dato er før første fom dato, prioriter første2",
-            inntekt(2000.0, INNTEKTSMELDING, 6.januar),
-            inntekt(1000.0, SKATT, 5.januar),
-            1000.0
-        ),
-        args(
-            "Prioriter rekkefølge hvis samme dato og kilde",
-            inntekt(1000.0, SKATT),
-            inntekt(2000.0, SKATT),
-            2000.0
-        )
-    )
-        .map {
-            DynamicTest.dynamicTest(it.label) {
-                val historikk = Inntekthistorikk()
-                historikk.add(it.a.fom, it.a.uuid, BigDecimal(it.a.beløp), it.a.kilde)
-                historikk.add(it.b.fom, it.b.uuid, BigDecimal(it.b.beløp), it.b.kilde)
-                assertEquals(it.forventetBeløp, historikk.inntekt(3.januar)?.toDouble()) // Salary from infotrygd
-            }
-        }
-
-
     @Test
     fun `gir eldste inntekt når vi ikke har nyere`() {
-        val historikk = Inntekthistorikk()
         historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
         assertEquals(1, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(1.januar))
@@ -138,28 +53,10 @@ internal class InntekthistorikkTest {
 
     @Test
     fun `tom inntekthistorikk`() {
-        val historikk = Inntekthistorikk()
         assertNull(historikk.inntekt(1.januar))
     }
 
-    @Test
-    fun likheter() {
-        val inntektA = Inntekthistorikk.Inntekt(1.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        val inntektB = Inntekthistorikk.Inntekt(1.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        val inntektC = Inntekthistorikk.Inntekt(1.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD)
-        val inntektD = Inntekthistorikk.Inntekt(2.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        assertEquals(inntektA, inntektB)
-        assertNotEquals(inntektA, inntektC)
-        assertNotEquals(inntektA, inntektD)
-        assertNotEquals(inntektA, null)
-    }
 
-    @Test
-    fun sammenligning() {
-        val inntektA = Inntekthistorikk.Inntekt(1.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        val inntektB = Inntekthistorikk.Inntekt(2.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD)
-        assertTrue(inntektA < inntektB)
-    }
 
     @Test
     fun `Sykepengegrunnlag er begrenset til 6G når inntekt er høyere enn 6G`() {
@@ -167,13 +64,73 @@ internal class InntekthistorikkTest {
         val `6GBeløp` = Grunnbeløp.`6G`.beløp(førsteFraværsdag)
 
         val årsinntektOver6G =
-            listOf(Inntekthistorikk.Inntekt(førsteFraværsdag, UUID.randomUUID(), 49929.01.toBigDecimal(), INFOTRYGD))
+            listOf(Inntekt(førsteFraværsdag, UUID.randomUUID(), 49929.01.toBigDecimal(), INFOTRYGD))
         assertEquals(`6GBeløp`, Inntekthistorikk.Inntekt.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
 
         val årsinntektUnder6G =
-            listOf(Inntekthistorikk.Inntekt(førsteFraværsdag, UUID.randomUUID(), 49928.toBigDecimal(), INFOTRYGD))
+            listOf(Inntekt(førsteFraværsdag, UUID.randomUUID(), 49928.toBigDecimal(), INFOTRYGD))
         assertTrue(Inntekthistorikk.Inntekt.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`)
     }
+
+    @Test
+    fun `Prioritert rekkefølge på kilde for lik dato`() {
+        assertEquals(INFOTRYGD, INFOTRYGD versus SKATT)
+        assertEquals(INNTEKTSMELDING, INFOTRYGD versus INNTEKTSMELDING)
+        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus INFOTRYGD)
+        assertEquals(INFOTRYGD, SKATT versus INFOTRYGD)
+        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus SKATT)
+        assertEquals(INNTEKTSMELDING, SKATT versus INNTEKTSMELDING)
+    }
+
+    @Test
+    fun `Prioritert rekkefølge på kilde for ulik dato`() {
+        assertTrue(3.januar.INNTEKTSMELDING beats 2.januar.INNTEKTSMELDING on 5.januar)
+        assertTrue(1.januar.SKATT beats 4.januar.INNTEKTSMELDING on 3.januar)
+        assertTrue(3.januar.INNTEKTSMELDING beats 1.januar.SKATT on 3.januar)
+        assertTrue(5.januar.INFOTRYGD beats 6.januar.INNTEKTSMELDING on 3.januar)
+        assertFalse(3.januar.SKATT beats 3.januar.SKATT on 3.januar) //Entry order decides
+    }
+
+    private infix fun Kilde.versus(other: Kilde): Kilde {
+        historikk = Inntekthistorikk()
+        historikk.add(1.januar, UUID.randomUUID(), 1000, this)
+        historikk.add(1.januar, UUID.randomUUID(), 2000, other)
+        return if (1000.0 == historikk.inntekt(3.januar)?.toDouble()) this else other
+    }
+
+    private inner class InntektCompetition(private val a: InntektArgs, private val b: InntektArgs) {
+        infix fun on(dato: LocalDate): Boolean {
+            fun assertInntekt(left : InntektArgs, right : InntektArgs, expected : Number) : Boolean {
+                historikk = Inntekthistorikk()
+                inntektsbeløp = 0
+                left.add()
+                right.add()
+                return expected.toDouble() == historikk.inntekt(dato)?.toDouble()
+            }
+            return assertInntekt(a,b,1000) && assertInntekt(b,a,2000)
+        }
+    }
+
+
+    private val LocalDate.INFOTRYGD get() = inntekt(this, Kilde.INFOTRYGD)
+
+    private val LocalDate.SKATT get() = inntekt(this, Kilde.SKATT)
+
+    private val LocalDate.INNTEKTSMELDING get() = inntekt(this, Kilde.INNTEKTSMELDING)
+
+    private inner class InntektArgs(private val dato: LocalDate, private val kilde: Kilde) {
+        fun add() {
+            inntektsbeløp += 1000
+            historikk.add(dato, UUID.randomUUID(), inntektsbeløp, kilde)
+        }
+
+        internal infix fun beats(other: InntektArgs) = InntektCompetition(this, other)
+    }
+
+    private fun inntekt(dato: LocalDate, kilde: Kilde) = InntektArgs(
+        dato,
+        kilde
+    )
 
     private val Inntekthistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
 
@@ -188,7 +145,7 @@ internal class InntekthistorikkTest {
             inntektTeller = 0
         }
 
-        override fun visitInntekt(inntekt: Inntekthistorikk.Inntekt, id: UUID) {
+        override fun visitInntekt(inntekt: Inntekt, id: UUID) {
             inntektTeller += 1
         }
 

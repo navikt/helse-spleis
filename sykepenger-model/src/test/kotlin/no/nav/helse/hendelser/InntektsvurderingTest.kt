@@ -57,7 +57,7 @@ internal class InntektsvurderingTest {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
-            beregnetInntekt.toBigDecimal(),
+            beregnetInntekt,
             Periodetype.FØRSTEGANGSBEHANDLING
         ).hasErrors()
     }

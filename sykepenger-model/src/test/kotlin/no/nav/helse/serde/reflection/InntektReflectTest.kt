@@ -17,7 +17,7 @@ internal class InntektReflectTest {
         assertEquals(4, map.size)
         assertEquals(1.januar, map["fom"])
         assertEquals(hendelseId, map["hendelseId"])
-        assertEquals(1000.0.toBigDecimal(), map["beløp"])
+        assertEquals(1000.0, map["beløp"])
         assertEquals(INFOTRYGD, Inntekthistorikk.Inntekt.Kilde.valueOf(map["kilde"].toString()))
     }
 

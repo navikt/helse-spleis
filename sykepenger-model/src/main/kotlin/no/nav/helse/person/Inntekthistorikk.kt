@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Inntekthistorikk.Inntekt.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 import kotlin.math.min
@@ -23,7 +22,7 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: BigDecimal, kilde: Kilde) {
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Number, kilde: Kilde) {
         val nyInntekt = Inntekt(fom, hendelseId, beløp, kilde)
         inntekter.removeAll { it.erRedundantMed(nyInntekt) }
         inntekter.add(nyInntekt)
@@ -47,9 +46,11 @@ internal class Inntekthistorikk {
     internal class Inntekt(
         private val fom: LocalDate,
         private val hendelseId: UUID,
-        private val beløp: BigDecimal,
+        beløp: Number,
         private val kilde: Kilde
     ) : Comparable<Inntekt> {
+        private val beløp = beløp.toDouble()
+
         companion object {
             internal fun inntekt(inntekter: List<Inntekt>, dato: LocalDate) =
                 (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
@@ -60,38 +61,21 @@ internal class Inntekthistorikk {
                 }
         }
 
-        internal fun fom() = fom
-
         fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntekt(this, hendelseId)
         }
 
-        override fun compareTo(other: Inntekt) : Int {
-
-            val kildeCompare = this.kilde.compareTo(other.kilde)
-            return if(kildeCompare != 0) {
-                kildeCompare
-            } else {
-                this.fom.compareTo(other.fom)
+        override fun compareTo(other: Inntekt) =
+            this.fom.compareTo(other.fom).let {
+                if (it == 0) this.kilde.compareTo(other.kilde)
+                else it
             }
-        }
-
-        override fun hashCode() =
-            fom.hashCode() * 37 * 37 +
-                kilde.hashCode() * 37 +
-                beløp.hashCode()
-
-        override fun equals(other: Any?) =
-            other is Inntekt
-                && other.fom == this.fom
-                && other.beløp == this.beløp
-                && other.kilde == this.kilde
 
         internal fun erRedundantMed(annenInntekt: Inntekt) =
             annenInntekt.fom == fom && annenInntekt.kilde == kilde
 
         //Order is significant, compare is used to prioritize records from various sources
-        internal enum class Kilde : Comparable<Kilde>{
+        internal enum class Kilde : Comparable<Kilde> {
             SKATT, INFOTRYGD, INNTEKTSMELDING
         }
     }

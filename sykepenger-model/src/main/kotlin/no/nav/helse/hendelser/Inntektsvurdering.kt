@@ -1,14 +1,12 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt.Companion.nylig
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
-import java.math.BigDecimal
-import java.math.MathContext
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class Inntektsvurdering(
@@ -20,22 +18,23 @@ class Inntektsvurdering(
 
     private val inntekter: List<MånedligInntekt>
     private val antallMåneder =
-        if(perioder.isEmpty()) 0
+        if (perioder.isEmpty()) 0
         else perioder.map { it.key }.let { ChronoUnit.MONTHS.between(it.max(), it.min()) }
     private val sammenligningsgrunnlag = perioder.flatMap { it.value }.sumByDouble { it.second }
     private var avviksprosent = Double.POSITIVE_INFINITY
 
     init {
         inntekter = perioder.flatMap { entry ->
-            entry.value.map{ pair -> MånedligInntekt(entry.key, pair.first, pair.second) }
+            entry.value.map { pair -> MånedligInntekt(entry.key, pair.first, pair.second) }
         }
     }
 
     internal fun sammenligningsgrunnlag(): Double =
         (sammenligningsgrunnlag * 100).roundToInt() / 100.0 // behold to desimaler
+
     internal fun avviksprosent() = avviksprosent
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: BigDecimal, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Double, periodetype: Periodetype): Aktivitetslogg {
         if (antallMåneder > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > 1) {
             val melding =
@@ -45,25 +44,26 @@ class Inntektsvurdering(
         }
         if (sammenligningsgrunnlag <= 0.0) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
         avviksprosent = avviksprosent(beregnetInntekt)
-        if (avviksprosent > MAKSIMALT_TILLATT_AVVIK) aktivitetslogg.error("Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK * 100)
-        else aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK * 100, avviksprosent * 100)
+        if (avviksprosent > MAKSIMALT_TILLATT_AVVIK) aktivitetslogg.error(
+            "Har mer enn %.0f %% avvik",
+            MAKSIMALT_TILLATT_AVVIK * 100
+        )
+        else aktivitetslogg.info(
+            "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
+            MAKSIMALT_TILLATT_AVVIK * 100,
+            avviksprosent * 100
+        )
         return aktivitetslogg
     }
 
-    private fun avviksprosent(beregnetInntekt: BigDecimal) =
-        sammenligningsgrunnlag.toBigDecimal().let { sammenligningsgrunnlag ->
-            beregnetInntekt.omregnetÅrsinntekt()
-                .minus(sammenligningsgrunnlag)
-                .abs()
-                .divide(sammenligningsgrunnlag, MathContext.DECIMAL128)
-        }.toDouble()
-
-    private fun BigDecimal.omregnetÅrsinntekt() = this * 12.toBigDecimal()
+    private fun avviksprosent(beregnetInntekt: Double) =
+            (beregnetInntekt * 12.0 - sammenligningsgrunnlag)
+                .absoluteValue / sammenligningsgrunnlag
 
     private class MånedligInntekt(private val yearMonth: YearMonth, private val orgnummer: String?, inntekt: Double) {
 
         companion object {
-            internal fun kilder(inntekter: List<MånedligInntekt>, antallMåneder: Int ) =
+            internal fun kilder(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
                 inntekter.nylig(antallMåneder).distinctBy { it.orgnummer }.size
 
             private fun List<MånedligInntekt>.nylig(antallMåneder: Int): List<MånedligInntekt> {

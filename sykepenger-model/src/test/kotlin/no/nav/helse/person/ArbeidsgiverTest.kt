@@ -36,8 +36,8 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.håndter(inntektsmelding)
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
-            120.00.toBigDecimal().setScale(2),
-            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)!!.setScale(2)
+            120.0,
+            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)!!
         )
     }
 

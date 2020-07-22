@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Periodetype
-import java.math.BigDecimal
 import java.time.LocalDate
 
 @Deprecated("inntektsvurdering, opptjeningvurdering, medlemskapsvurdering og erEgenAnsatt sendes som tre parametre til modellen")
@@ -25,7 +24,7 @@ class Vilkårsgrunnlag(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(beregnetInntekt: BigDecimal, førsteFraværsdag: LocalDate, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(beregnetInntekt: Double, førsteFraværsdag: LocalDate, periodetype: Periodetype): Aktivitetslogg {
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
         opptjeningvurdering.valider(aktivitetslogg, orgnummer, førsteFraværsdag)
         medlemskapsvurdering.valider(aktivitetslogg, periodetype)
