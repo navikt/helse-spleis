@@ -3,9 +3,10 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 import java.util.*
-import kotlin.math.min
 
 internal class Inntekthistorikk {
     private val inntekter = mutableListOf<Inntektsendring>()
@@ -22,7 +23,11 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Number, kilde: Kilde) {
+    @Deprecated("Use add(..) with Inntekt")
+    internal fun addMonthly(fom: LocalDate, hendelseId: UUID, beløp: Number, kilde: Kilde) =
+        add(fom, hendelseId, beløp.månedlig, kilde)
+
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde) {
         val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde)
         inntekter.removeAll { it.erRedundantMed(nyInntekt) }
         inntekter.add(nyInntekt)
@@ -33,31 +38,23 @@ internal class Inntekthistorikk {
 
     internal fun sykepengegrunnlag(dato: LocalDate) = Inntektsendring.sykepengegrunnlag(inntekter, dato)
 
-    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
-        aktuellDagsinntekt(dato) * regler.dekningsgrad()
-
-    internal fun aktuellDagsinntekt(dato: LocalDate) =
-        inntekt(dato)
-            ?.toDouble()
-            ?.times(12.0)
-            ?.div(260.0)
-            ?: 0.0
+    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Double =
+        inntekt(dato)?.times(regler.dekningsgrad())?.tilDagligDouble() ?: 0.0
 
     internal class Inntektsendring(
         private val fom: LocalDate,
         private val hendelseId: UUID,
-        beløp: Number,
+        private val beløp: Inntekt,
         private val kilde: Kilde
     ) : Comparable<Inntektsendring> {
-        private val beløp = beløp.toDouble()
 
         companion object {
             internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
                 (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
 
             internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Double? =
-                inntekt(inntekter, dato)?.toDouble()?.let {
-                    min(it * 12, Grunnbeløp.`6G`.beløp(dato))
+                inntekt(inntekter, dato)?.let {
+                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).min()?.tilÅrligDouble()
                 }
         }
 

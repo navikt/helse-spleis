@@ -16,10 +16,9 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -178,7 +177,7 @@ internal data class PersonData(
         data class InntektData(
             private val fom: LocalDate,
             private val hendelseId: UUID,
-            private val beløp: BigDecimal,
+            private val beløp: Double,
             private val kilde: String
         ) {
             internal companion object {
@@ -187,7 +186,7 @@ internal data class PersonData(
                         inntekthistorikk.add(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
-                            beløp = inntektData.beløp.setScale(1, RoundingMode.HALF_UP),
+                            beløp = inntektData.beløp.månedlig,
                             kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde)
                         )
                     }

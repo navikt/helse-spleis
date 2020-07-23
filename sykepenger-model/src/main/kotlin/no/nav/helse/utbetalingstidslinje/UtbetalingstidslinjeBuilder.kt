@@ -130,7 +130,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun oppdatereInntekt(dato: LocalDate) {
         dekningsgrunnlag = inntekthistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
-        aktuellDagsinntekt = inntekthistorikk.aktuellDagsinntekt(dato)
+        aktuellDagsinntekt = inntekthistorikk.inntekt(dato)?.tilDagligDouble() ?: 0.0
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {

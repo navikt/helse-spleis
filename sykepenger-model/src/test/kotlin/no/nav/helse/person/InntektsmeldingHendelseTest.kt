@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ internal class InntektsmeldingHendelseTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "12345"
         private const val ORGNR = "987654321"
-        private const val INNTEKT = 1234.0
+        private const val INNTEKT_PR_MÅNED = 12340.0
     }
 
     private lateinit var person: Person
@@ -31,9 +32,9 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntekthistorikk()
-        inntektsmelding(beregnetInntekt = INNTEKT, førsteFraværsdag = 1.januar)
+        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
-        assertEquals(INNTEKT, inntekthistorikk.inntekt(1.januar))
+        assertEquals(INNTEKT_PR_MÅNED.månedlig, inntekthistorikk.inntekt(1.januar))
     }
 
     @Test
@@ -105,12 +106,12 @@ internal class InntektsmeldingHendelseTest {
     internal fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT_PR_MÅNED, emptyList()),
             orgnummer = ORGNR,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = INNTEKT,
+            beregnetInntekt = INNTEKT_PR_MÅNED,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(Periode(16.januar, 31.januar)),
             arbeidsforholdId = null,

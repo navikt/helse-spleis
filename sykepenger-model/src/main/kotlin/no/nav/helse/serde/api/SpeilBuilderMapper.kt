@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -10,11 +9,11 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.utbetalingstidslinje.Alder as SpleisAlder
 
 internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (tilstand) {
     TilstandType.START,
@@ -189,11 +188,11 @@ internal fun mapVilkår(
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
     val sykepengegrunnlag = Inntekthistorikk.Inntektsendring.sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
-    val beregnetMånedsinntekt = Inntekthistorikk.Inntektsendring.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.toDouble()
+    val beregnetMånedsinntekt = Inntekthistorikk.Inntektsendring.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.tilMånedligDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
-    val personalder = SpleisAlder(fødselsnummer)
+    val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
-    val over67 = personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
+    personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
     val maksdato = (vedtaksperiodeMap["maksdato"] as LocalDate?) ?: LocalDate.MAX
     val gjenståendeDager = (vedtaksperiodeMap["gjenståendeSykedager"] as Int?) ?: 0
     val sykepengedager = SykepengedagerDTO(
@@ -225,9 +224,9 @@ internal fun mapVilkår(
     val sykepengegrunnlagDTO = førsteFraværsdag?.let {
         SykepengegrunnlagDTO(
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnbeløp = Grunnbeløp.`1G`.beløp(førsteFraværsdag).toInt(),
+            grunnbeløp = Grunnbeløp.`1G`.beløp(førsteFraværsdag).tilÅrligDouble().toInt(),
             oppfylt = sykepengegrunnlagOppfylt(
-                over67 = over67,
+                personalder = personalder,
                 beregnetMånedsinntekt = beregnetMånedsinntekt,
                 førsteFraværsdag = førsteFraværsdag
             )
@@ -237,11 +236,11 @@ internal fun mapVilkår(
 }
 
 private fun sykepengegrunnlagOppfylt(
-    over67: Boolean,
+    personalder: Alder,
     beregnetMånedsinntekt: Double?,
     førsteFraværsdag: LocalDate
 ) = beregnetMånedsinntekt?.times(12)?.let {
-    if (over67) it > Grunnbeløp.`2G`.beløp(førsteFraværsdag) else it > halvG.beløp(førsteFraværsdag)
+    it > personalder.minimumInntekt(førsteFraværsdag)
 }
 
 private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {

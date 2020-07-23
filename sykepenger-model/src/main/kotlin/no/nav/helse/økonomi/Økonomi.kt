@@ -46,10 +46,7 @@ internal class Økonomi private constructor(
         }
 
         private fun maksbeløp(økonomiList: List<Økonomi>, dato: LocalDate) =
-            sykdomsgrad(økonomiList).let { grad ->
-                if (grad.erUnderGrensen()) 0
-                else (Grunnbeløp.`6G`.dagsats(dato) * grad.roundToInt() / 100.0).roundToInt()
-            }
+            (Grunnbeløp.`6G`.dagsats(dato) * sykdomsgrad(økonomiList).ratio()).tilDagligInt()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 

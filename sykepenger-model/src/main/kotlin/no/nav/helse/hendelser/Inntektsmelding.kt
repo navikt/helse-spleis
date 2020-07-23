@@ -105,7 +105,7 @@ class Inntektsmelding(
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         if (førsteFraværsdag == null) return
-        inntekthistorikk.add(
+        inntekthistorikk.addMonthly(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt.toBigDecimal(),

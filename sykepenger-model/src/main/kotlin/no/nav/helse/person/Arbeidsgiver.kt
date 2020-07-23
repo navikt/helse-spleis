@@ -193,7 +193,7 @@ internal class Arbeidsgiver private constructor(
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(vedtaksperioder)
 
     internal fun inntekt(dato: LocalDate): Double? =
-        inntekthistorikk.inntekt(dato)
+        inntekthistorikk.inntekt(dato)?.tilMånedligDouble()
 
     internal fun sykepengegrunnlag(dato: LocalDate): Double? = inntekthistorikk.sykepengegrunnlag(dato)
 

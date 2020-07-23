@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -18,13 +19,13 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                beløpPrMåned = 120.0
+                beløpPrMåned = 12000.0
             ),
             orgnummer = "orgnr",
             fødselsnummer = "fnr",
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 120.0,
+            beregnetInntekt = 12000.0,
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
@@ -36,8 +37,8 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.håndter(inntektsmelding)
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
-            120.0,
-            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)!!
+            12000.månedlig,
+            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)
         )
     }
 

@@ -5,6 +5,8 @@ import no.nav.helse.person.Inntekthistorikk.Inntektsendring
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,8 +14,8 @@ import java.time.LocalDate
 import java.util.*
 
 internal class InntekthistorikkTest {
-    private val tidligereInntekt = 1500.0
-    private val nyInntekt = 2000.0
+    private val tidligereInntekt = 1500.daglig
+    private val nyInntekt = 2000.daglig
     private lateinit var historikk: Inntekthistorikk
     private var inntektsbeløp = 0
 
@@ -61,12 +63,12 @@ internal class InntekthistorikkTest {
         val `6GBeløp` = Grunnbeløp.`6G`.beløp(førsteFraværsdag)
 
         val årsinntektOver6G =
-            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.toBigDecimal(), INFOTRYGD))
-        assertEquals(`6GBeløp`, Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
+        assertEquals(`6GBeløp`.tilÅrligDouble(), Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
 
         val årsinntektUnder6G =
-            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.toBigDecimal(), INFOTRYGD))
-        assertTrue(Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`)
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
+        assertTrue(Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`.tilÅrligDouble())
     }
 
     @Test
@@ -90,9 +92,9 @@ internal class InntekthistorikkTest {
 
     private infix fun Kilde.versus(other: Kilde): Kilde {
         historikk = Inntekthistorikk()
-        historikk.add(1.januar, UUID.randomUUID(), 1000, this)
-        historikk.add(1.januar, UUID.randomUUID(), 2000, other)
-        return if (1000.0 == historikk.inntekt(3.januar)?.toDouble()) this else other
+        historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this)
+        historikk.add(1.januar, UUID.randomUUID(), 2000.daglig, other)
+        return if (1000.daglig == historikk.inntekt(3.januar)) this else other
     }
 
     private inner class InntektCompetition(private val a: InntektArgs, private val b: InntektArgs) {
@@ -102,7 +104,7 @@ internal class InntekthistorikkTest {
                 inntektsbeløp = 0
                 left.add()
                 right.add()
-                return expected.toDouble() == historikk.inntekt(dato)?.toDouble()
+                return expected.daglig == historikk.inntekt(dato)
             }
             return assertInntekt(a,b,1000) && assertInntekt(b,a,2000)
         }
@@ -118,7 +120,7 @@ internal class InntekthistorikkTest {
     private inner class InntektArgs(private val dato: LocalDate, private val kilde: Kilde) {
         fun add() {
             inntektsbeløp += 1000
-            historikk.add(dato, UUID.randomUUID(), inntektsbeløp, kilde)
+            historikk.add(dato, UUID.randomUUID(), inntektsbeløp.daglig, kilde)
         }
 
         internal infix fun beats(other: InntektArgs) = InntektCompetition(this, other)

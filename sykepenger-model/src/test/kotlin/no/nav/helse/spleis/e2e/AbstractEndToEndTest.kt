@@ -11,6 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
@@ -28,6 +29,7 @@ internal abstract class AbstractEndToEndTest {
         const val INNTEKT = 31000.00
     }
 
+    protected val INNTEKT_PR_MÅNED = INNTEKT.månedlig
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = TestArbeidsgiverInspektør(person)
