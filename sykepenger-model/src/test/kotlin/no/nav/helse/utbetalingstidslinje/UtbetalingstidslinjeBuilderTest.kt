@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
@@ -386,7 +387,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.nU + 1.nF + 1.nU + 10.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                addMonthly(17.januar, hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
+                add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
             }
         )
         assertNotEquals(0.0, inspektør.navdager.first().økonomi.toMap()["dekningsgrunnlag"])
@@ -398,7 +399,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed(1.januar(2020))
         (10.nU + 7.nF + 14.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                addMonthly(17.januar(2020), hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
+                add(17.januar(2020), hendelseId, 31000.månedlig, INNTEKTSMELDING)
             }
         )
         assertEquals(31, inspektør.datoer.size)
@@ -409,9 +410,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private val inntekthistorikk = Inntekthistorikk().apply {
-        addMonthly(1.januar.minusDays(1), hendelseId, 31000.toBigDecimal(), INNTEKTSMELDING)
-        addMonthly(1.februar.minusDays(1), hendelseId, 25000.toBigDecimal(), INNTEKTSMELDING)
-        addMonthly(1.mars.minusDays(1), hendelseId, 50000.toBigDecimal(), INNTEKTSMELDING)
+        add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
+        add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
+        add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
     }
 
     private fun assertDagsats(dagsats: Int) {

@@ -4,7 +4,6 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 import java.util.*
 
@@ -22,10 +21,6 @@ internal class Inntekthistorikk {
         inntekter.forEach { it.accept(visitor) }
         visitor.postVisitInntekthistorikk(this)
     }
-
-    @Deprecated("Use add(..) with Inntekt")
-    internal fun addMonthly(fom: LocalDate, hendelseId: UUID, beløp: Number, kilde: Kilde) =
-        add(fom, hendelseId, beløp.månedlig, kilde)
 
     internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde) {
         val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde)
