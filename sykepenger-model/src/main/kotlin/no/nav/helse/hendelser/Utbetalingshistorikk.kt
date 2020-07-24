@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -75,10 +76,10 @@ class Utbetalingshistorikk(
 
         internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
             if (organisasjonsnummer != orgnummer) return
-            inntekthistorikk.addMonthly(
+            inntekthistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
                 hendelseId,
-                inntektPerMåned.toBigDecimal(),
+                inntektPerMåned.månedlig,
                 INFOTRYGD
             )
         }

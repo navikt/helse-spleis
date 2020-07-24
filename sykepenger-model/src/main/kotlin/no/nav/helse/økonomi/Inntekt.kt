@@ -4,7 +4,6 @@ import kotlin.math.roundToInt
 
 internal class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt>{
 
-
     companion object {
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
             val total = parene.sumByDouble { it.second.årlig }
@@ -26,6 +25,8 @@ internal class Inntekt private constructor(private val årlig: Double) : Compara
     internal fun rundTilDaglig() = Inntekt((årlig / 260).roundToInt() * 260.0)
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
+
+    internal operator fun times(prosentdel: Prosentdel) = times(prosentdel.ratio())
 
     override fun hashCode() = årlig.hashCode()
 

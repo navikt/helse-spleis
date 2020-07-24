@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 import java.util.*
 
@@ -105,10 +106,10 @@ class Inntektsmelding(
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         if (førsteFraværsdag == null) return
-        inntekthistorikk.addMonthly(
+        inntekthistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
-            beregnetInntekt.toBigDecimal(),
+            beregnetInntekt.månedlig,
             INNTEKTSMELDING
         )
     }

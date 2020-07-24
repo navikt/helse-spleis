@@ -1,9 +1,12 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -90,6 +93,41 @@ internal class InntekthistorikkTest {
         assertFalse(3.januar.SKATT beats 3.januar.SKATT on 3.januar) //Entry order decides
     }
 
+    @Test
+    fun `Inntekt competition winners`() {
+        listOf(
+            "a" er 1.januar.SKATT,
+            "b" er 5.januar.INNTEKTSMELDING,
+            "c" er 5.januar.INFOTRYGD,
+            "d" er 10.januar.INFOTRYGD,
+            "e" er 10.januar.INNTEKTSMELDING
+        ).assertions { challengers ->
+            assertChampion("a" beats challengers, 1.desember(2017) to 4.januar)
+            assertChampion("b" beats challengers, 5.januar to 9.januar)
+            assertChampion("e" beats challengers, 10.januar to 28.februar)
+        }
+    }
+
+    private fun assertChampion(winner: Pair<String, List<Pair<String, InntektArgs>>>, periode: Periode) {
+        periode.forEach { dato ->
+            val indeks = historikk.inntekt(dato)?.tilDagligInt()?.div(1000)?.minus(1) ?: -1
+            assertEquals(winner.first, winner.second[indeks].first, "for date: $dato")
+        }
+    }
+
+    private infix fun String.beats(challengers: List<Pair<String, InntektArgs>>) = this to challengers
+
+    private infix fun String.er(args: InntektArgs) = this to args
+
+    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
+
+    private fun List<Pair<String, InntektArgs>>.assertions( block: (List<Pair<String, InntektArgs>>) -> Unit ) {
+        historikk = Inntekthistorikk()
+        inntektsbeløp = 0
+        this.forEach { it.second.also { args -> args.add(); args.merkelapp(it.first) } }
+        block(this)
+    }
+
     private infix fun Kilde.versus(other: Kilde): Kilde {
         historikk = Inntekthistorikk()
         historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this)
@@ -117,8 +155,14 @@ internal class InntekthistorikkTest {
 
     private val LocalDate.INNTEKTSMELDING get() = inntekt(this, Kilde.INNTEKTSMELDING)
 
-    private inner class InntektArgs(private val dato: LocalDate, private val kilde: Kilde) {
-        fun add() {
+    private fun inntekt(dato: LocalDate, kilde: Kilde) = InntektArgs(dato, kilde)
+
+    private open inner class InntektArgs(protected val dato: LocalDate, private val kilde: Kilde) {
+        internal lateinit var merkelapp: String
+
+        internal fun merkelapp(verdi: String) { merkelapp = verdi}
+
+        internal open fun add() {
             inntektsbeløp += 1000
             historikk.add(dato, UUID.randomUUID(), inntektsbeløp.daglig, kilde)
         }
@@ -126,10 +170,12 @@ internal class InntekthistorikkTest {
         internal infix fun beats(other: InntektArgs) = InntektCompetition(this, other)
     }
 
-    private fun inntekt(dato: LocalDate, kilde: Kilde) = InntektArgs(
-        dato,
-        kilde
-    )
+    private inner class AvsluttetArgs(dato: LocalDate, kilde: Kilde) : InntektArgs(dato, kilde) {
+        override fun add() {
+            inntektsbeløp += 1000
+            historikk.add(dato, UUID.randomUUID(), 0.daglig, SKATT)
+        }
+    }
 
     private val Inntekthistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
 
