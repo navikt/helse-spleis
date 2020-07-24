@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -274,12 +275,12 @@ class JsonBuilderTest {
             perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15)))
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
-            refusjon = Inntektsmelding.Refusjon(null, 31000.00, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,
             førsteFraværsdag = fom,
-            beregnetInntekt = 31000.00,
+            beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = perioder,
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

@@ -2,7 +2,7 @@ package no.nav.helse.økonomi
 
 import kotlin.math.roundToInt
 
-internal class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt>{
+class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt>{
 
     companion object {
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
@@ -11,7 +11,7 @@ internal class Inntekt private constructor(private val årlig: Double) : Compara
             return Prosentdel(parene.sumByDouble { it.first.ratio() * it.second.årlig } / total)
         }
 
-        internal val Number.månedlig get() = Inntekt(this.toDouble() * 12)
+        val Number.månedlig get() = Inntekt(this.toDouble() * 12)
         internal val Number.årlig get() = Inntekt(this.toDouble())
         internal val Number.daglig get() = Inntekt(this.toDouble() * 260)
     }

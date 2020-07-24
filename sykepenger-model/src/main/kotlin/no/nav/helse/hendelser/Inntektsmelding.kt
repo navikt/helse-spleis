@@ -9,7 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
 
@@ -20,7 +20,7 @@ class Inntektsmelding(
     private val fødselsnummer: String,
     private val aktørId: String,
     internal val førsteFraværsdag: LocalDate?,
-    internal val beregnetInntekt: Double,
+    internal val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
     private val arbeidsforholdId: String?,
@@ -109,7 +109,7 @@ class Inntektsmelding(
         inntekthistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
-            beregnetInntekt.månedlig,
+            beregnetInntekt,
             INNTEKTSMELDING
         )
     }
@@ -122,14 +122,14 @@ class Inntektsmelding(
 
     class Refusjon(
         private val opphørsdato: LocalDate?,
-        private val beløpPrMåned: Double?,
+        private val inntekt: Inntekt?,
         private val endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode, beregnetInntekt: Double): Aktivitetslogg {
+        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode, beregnetInntekt: Inntekt): Aktivitetslogg {
             when {
-                beløpPrMåned == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-                beløpPrMåned != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
+                inntekt == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
+                inntekt != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver opphører refusjon i perioden")
                 opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon")
                 endrerRefusjon(periode) -> aktivitetslogg.error("Arbeidsgiver endrer refusjon i perioden")

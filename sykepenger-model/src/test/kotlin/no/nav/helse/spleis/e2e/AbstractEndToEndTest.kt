@@ -11,6 +11,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -115,7 +116,7 @@ internal abstract class AbstractEndToEndTest {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
         ferieperioder: List<Periode> = emptyList(),
-        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList())
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
@@ -126,7 +127,7 @@ internal abstract class AbstractEndToEndTest {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
         ferieperioder: List<Periode> = emptyList(),
-        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList())
     ) {
         person.håndter(
             inntektsmelding(
@@ -315,9 +316,9 @@ internal abstract class AbstractEndToEndTest {
     protected fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
-        beregnetInntekt: Double = INNTEKT,
+        beregnetInntekt: Inntekt = INNTEKT_PR_MÅNED,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjon: Triple<LocalDate?, Double, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList()),
         orgnummer: String = ORGNUMMER
     ): Inntektsmelding {
         return Inntektsmelding(

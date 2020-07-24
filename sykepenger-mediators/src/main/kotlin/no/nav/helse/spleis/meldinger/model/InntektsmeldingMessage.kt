@@ -7,12 +7,13 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
 internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
     override val fødselsnummer = packet["arbeidstakerFnr"].asText()
     private val refusjon = Inntektsmelding.Refusjon(
-        beløpPrMåned = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble(),
+        inntekt = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
         endringerIRefusjon = packet["endringIRefusjoner"].map { it.path("endringsdato").asLocalDate() }
     )
@@ -32,7 +33,7 @@ internal class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(pac
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         førsteFraværsdag = førsteFraværsdag,
-        beregnetInntekt = beregnetInntekt,
+        beregnetInntekt = beregnetInntekt.månedlig,
         arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = ferieperioder,
         arbeidsforholdId = arbeidsforholdId,

@@ -5,6 +5,7 @@ import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
 import no.nav.helse.testhelpers.april
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -84,13 +85,13 @@ internal class VedtaksperiodeTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                beløpPrMåned = 1000.0
+                inntekt = 1000.månedlig
             ),
             orgnummer = organisasjonsnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktør,
             førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = 1000.månedlig,
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

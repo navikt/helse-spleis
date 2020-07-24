@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -213,12 +214,12 @@ class PåminnelserOgTimeoutTest {
     private fun inntektsmelding(vararg arbeidsgiverperiode: Periode = arrayOf(Periode(1.januar, 1.januar.plusDays(15))), førsteFraværsdag: LocalDate = 1.januar) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, 31000.0, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 31000.0,
+            beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

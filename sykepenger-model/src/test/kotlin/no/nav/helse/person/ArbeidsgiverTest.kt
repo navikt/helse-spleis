@@ -19,13 +19,13 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                beløpPrMåned = 12000.0
+                inntekt = 12000.månedlig
             ),
             orgnummer = "orgnr",
             fødselsnummer = "fnr",
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 12000.0,
+            beregnetInntekt = 12000.månedlig,
             arbeidsgiverperioder = listOf(Periode(10.september, 10.september.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

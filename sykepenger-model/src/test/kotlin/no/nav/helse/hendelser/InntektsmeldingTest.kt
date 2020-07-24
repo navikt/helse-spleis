@@ -3,6 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -244,8 +246,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(
             emptyList(),
             emptyList(),
-            refusjonBeløp = 100000.00,
-            beregnetInntekt = 10000.00
+            refusjonBeløp = 999999.månedlig,
+            beregnetInntekt = 10000.månedlig
         )
         assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
     }
@@ -324,8 +326,8 @@ internal class InntektsmeldingTest {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
-        refusjonBeløp: Double = 1000.00,
-        beregnetInntekt: Double = 1000.00,
+        refusjonBeløp: Inntekt = 1000.månedlig,
+        beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate? = 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<LocalDate> = emptyList(),

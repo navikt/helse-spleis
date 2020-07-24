@@ -7,6 +7,7 @@ import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -857,14 +858,14 @@ class SpeilBuilderTest {
             meldingsreferanseId = hendelseId,
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                beløpPrMåned = 31000.00,
+                inntekt = 31000.månedlig,
                 endringerIRefusjon = emptyList()
             ),
             orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,
             førsteFraværsdag = fom,
-            beregnetInntekt = 31000.00,
+            beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

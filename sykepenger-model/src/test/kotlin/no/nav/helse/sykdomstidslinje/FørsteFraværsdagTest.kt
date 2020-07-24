@@ -4,6 +4,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.perioder
 import no.nav.helse.testhelpers.*
 import no.nav.helse.tournament.dagturnering
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -178,8 +180,8 @@ internal class FørsteFraværsdagTest {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
-        refusjonBeløp: Double = INNTEKT,
-        beregnetInntekt: Double = INNTEKT,
+        refusjonBeløp: Inntekt = INNTEKT_PR_MÅNED,
+        beregnetInntekt: Inntekt = INNTEKT_PR_MÅNED,
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,  // Employer paid
         endringerIRefusjon: List<LocalDate> = emptyList()
@@ -204,6 +206,7 @@ internal class FørsteFraværsdagTest {
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
+        private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
 
         private fun assertDagenErUtgangspunktForBeregning(
             dagen: Dag,

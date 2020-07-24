@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -200,7 +201,7 @@ internal class YtelserHendelseTest {
     private fun inntektsmelding(
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(
             null,
-            31000.0,
+            31000.månedlig,
             emptyList()
         )
     ) =
@@ -211,7 +212,7 @@ internal class YtelserHendelseTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
-            beregnetInntekt = 31000.0,
+            beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

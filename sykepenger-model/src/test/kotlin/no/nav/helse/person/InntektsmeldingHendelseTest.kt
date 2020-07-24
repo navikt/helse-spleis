@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +18,7 @@ internal class InntektsmeldingHendelseTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "12345"
         private const val ORGNR = "987654321"
-        private const val INNTEKT_PR_MÅNED = 12340.0
+        private val INNTEKT_PR_MÅNED = 12340.månedlig
     }
 
     private lateinit var person: Person
@@ -34,7 +35,7 @@ internal class InntektsmeldingHendelseTest {
         val inntekthistorikk = Inntekthistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
-        assertEquals(INNTEKT_PR_MÅNED.månedlig, inntekthistorikk.inntekt(1.januar))
+        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
     }
 
     @Test
@@ -124,7 +125,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     private fun inntektsmelding(
-        beregnetInntekt: Double = 1000.00,
+        beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate = 1.januar,
         virksomhetsnummer: String = ORGNR
     ) =

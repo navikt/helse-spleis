@@ -7,6 +7,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -67,7 +69,7 @@ internal class VilkårsgrunnlagHendelseTest {
         val månedslønn = 1000.0
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
-            beregnetInntekt = månedslønn,
+            beregnetInntekt = månedslønn.månedlig,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
         )
@@ -93,7 +95,7 @@ internal class VilkårsgrunnlagHendelseTest {
         person.håndter(søknad(perioder = listOf(Søknad.Søknadsperiode.Sykdom(8.januar, 31.januar, 100))))
         person.håndter(
             inntektsmelding(
-                beregnetInntekt = 30000.0,
+                beregnetInntekt = 30000.månedlig,
                 arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
             )
         )
@@ -110,7 +112,7 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `ikke egen ansatt og mer enn 25 % avvik i inntekt`() {
         val månedslønn = 1000.0
-        val `25 % mer` = månedslønn * 1.25 + 1
+        val `25 % mer` = (månedslønn * 1.25 + 1).månedlig
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mer`,
@@ -125,7 +127,7 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `ikke egen ansatt og mindre enn 25 % avvik i inntekt`() {
         val månedslønn = 1000.0
-        val `25 % mindre` = månedslønn * 0.75 - 1
+        val `25 % mindre` = (månedslønn * 0.75 - 1).månedlig
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mindre`,
@@ -147,7 +149,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
-        beregnetInntekt: Double = 1000.0,
+        beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: Map<YearMonth, List<Pair<String?, Double>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
@@ -186,7 +188,7 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun inntektsmelding(
-        beregnetInntekt: Double,
+        beregnetInntekt: Inntekt,
         arbeidsgiverperioder: List<Periode> = listOf(Periode(1.januar, 16.januar))
     ) =
         Inntektsmelding(

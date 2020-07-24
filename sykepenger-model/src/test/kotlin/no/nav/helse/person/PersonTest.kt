@@ -9,6 +9,7 @@ import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.fredag
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.testhelpers.torsdag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -232,13 +233,13 @@ internal class PersonTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
-                beløpPrMåned = 1000.0
+                inntekt = 1000.månedlig
             ),
             orgnummer = virksomhetsnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = 1000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = emptyList(),
             arbeidsforholdId = null,

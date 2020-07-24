@@ -9,6 +9,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -210,12 +211,12 @@ internal class VilkårsgrunnlagTest {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT.månedlig, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 1000.0,
+            beregnetInntekt = INNTEKT.månedlig,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(),
             arbeidsforholdId = null,
