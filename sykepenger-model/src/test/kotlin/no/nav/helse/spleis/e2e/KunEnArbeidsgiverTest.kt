@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
@@ -58,7 +59,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
         inspektør.låstePerioder.also {
             assertEquals(1, it.size)
-            assertEquals(Periode(1.januar, 26.januar), it.first())
+            assertEquals(Periode(3.januar, 26.januar), it.first())
         }
     }
 
@@ -1038,8 +1039,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(38, it.dagtelling[Sykedag::class])
-            assertEquals(14, it.dagtelling[SykHelgedag::class])
+            assertEquals(4, it.dagtelling[Dag.Arbeidsgiverdag::class])
+            assertEquals(1, it.dagtelling[Dag.UkjentDag::class])
+            assertEquals(2, it.dagtelling[Dag.ArbeidsgiverHelgedag::class])
+            assertEquals(35, it.dagtelling[Sykedag::class])
+            assertEquals(12, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
             0,

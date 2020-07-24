@@ -720,9 +720,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             var replays: List<Vedtaksperiode> = emptyList()
             vedtaksperiode.håndter(sykmelding) returnPoint@ {
-                if (vedtaksperiode.arbeidsgiver.harPerioderSomStarterEtter(vedtaksperiode)) {
-                    replays=vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE_EXCLUSIVE, false)
-                }
+                replays=vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE_EXCLUSIVE, false)
                 val tilstøtende = vedtaksperiode.arbeidsgiver.finnForegåendePeriode(vedtaksperiode)
                 val forlengelse = tilstøtende != null
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
@@ -1450,7 +1448,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode())
+            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.opprinneligPeriode)
             vedtaksperiode.sendUtbetaltEvent()
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
