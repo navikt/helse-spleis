@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -47,7 +48,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     }.map { opplysning ->
         Utbetalingshistorikk.Inntektsopplysning(
             sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-            inntektPerMåned = opplysning["inntekt"].asDouble(),
+            inntektPerMåned = opplysning["inntekt"].asDouble().månedlig,
             orgnummer = opplysning["orgnummer"].asText(),
             refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
             refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()

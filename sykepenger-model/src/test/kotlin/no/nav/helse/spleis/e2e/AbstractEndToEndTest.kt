@@ -480,7 +480,7 @@ internal abstract class AbstractEndToEndTest {
     ) = if (inntektshistorikk == null) listOf(
         Inntektsopplysning(
             1.desember(2017),
-            INNTEKT,
+            INNTEKT_PR_MÅNED,
             orgnummer,
             true
         )

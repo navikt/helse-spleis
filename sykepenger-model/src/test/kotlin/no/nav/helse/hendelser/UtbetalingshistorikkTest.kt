@@ -6,6 +6,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
@@ -41,7 +42,7 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", false)
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, "123456789", false)
             )
         )
 
@@ -56,8 +57,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.0, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "987654321", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.månedlig, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, "987654321", true)
             )
         )
 
@@ -105,8 +106,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.0, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.månedlig, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, "123456789", true)
             )
         )
 
@@ -121,8 +122,8 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.0, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 1234.0, "987654321", true)
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, "123456789", true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 1234.månedlig, "987654321", true)
             )
         )
 

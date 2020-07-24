@@ -5,6 +5,7 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,5 +61,5 @@ internal class InntektsopplysningTest {
     }
 
     private fun inntektsopplysning(dato: LocalDate, orgnr: String, refusjonTom: LocalDate? = null) =
-        Utbetalingshistorikk.Inntektsopplysning(dato, 1000.0, orgnr, true, refusjonTom)
+        Utbetalingshistorikk.Inntektsopplysning(dato, 1000.månedlig, orgnr, true, refusjonTom)
 }

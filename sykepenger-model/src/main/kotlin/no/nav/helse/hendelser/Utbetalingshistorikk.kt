@@ -11,6 +11,7 @@ import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.prosent
@@ -46,7 +47,7 @@ class Utbetalingshistorikk(
 
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
-        private val inntektPerMåned: Double,
+        private val inntektPerMåned: Inntekt,
         private val orgnummer: String,
         private val refusjonTilArbeidsgiver: Boolean,
         private val refusjonTom: LocalDate? = null
@@ -79,7 +80,7 @@ class Utbetalingshistorikk(
             inntekthistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
                 hendelseId,
-                inntektPerMåned.månedlig,
+                inntektPerMåned,
                 INFOTRYGD
             )
         }

@@ -92,7 +92,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             0,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.mars(2020), 29.mars(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(13.mars(2020), INNTEKT, ORGNUMMER, true, 31.mars(2020))
+                Utbetalingshistorikk.Inntektsopplysning(13.mars(2020), INNTEKT_PR_MÅNED, ORGNUMMER, true, 31.mars(2020))
             )
         )
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
@@ -277,7 +277,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(5.mars(2020), INNTEKT, ORGNUMMER, true)
+                Utbetalingshistorikk.Inntektsopplysning(5.mars(2020), INNTEKT_PR_MÅNED, ORGNUMMER, true)
             )
         )
         håndterVilkårsgrunnlag(0, INNTEKT)
@@ -286,7 +286,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(5.mars(2020), INNTEKT, ORGNUMMER, true)
+                Utbetalingshistorikk.Inntektsopplysning(5.mars(2020), INNTEKT_PR_MÅNED, ORGNUMMER, true)
             )
         )
         håndterSimulering(0)
