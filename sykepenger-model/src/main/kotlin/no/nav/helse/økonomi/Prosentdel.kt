@@ -6,8 +6,6 @@ import kotlin.math.roundToLong
 
 internal class Prosentdel private constructor(private val brøkdel: Double): Comparable<Prosentdel> {
 
-    internal constructor(beløp: Number) : this(beløp.toDouble() / 100.0)
-
     init {
         require(brøkdel.toDouble() in 0.0..1.0) { "Må være prosent mellom 0 og 100" }
     }
@@ -19,9 +17,10 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Double>>): Prosentdel {
             val total = parene.sumByDouble { it.second }
-            if (total <= 0.0) return Prosentdel(0)
-            return Prosentdel(parene.sumByDouble { it.first.brøkdel * it.second } / total)
+            if (total <= 0.0) return fraRatio(0.0)
+            return Prosentdel(parene.sumByDouble { (it.first.brøkdel * it.second) } / total)
         }
+        internal fun fraRatio(ratio: Double) = Prosentdel(ratio)
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
@@ -50,4 +49,4 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
     internal fun erUnderGrensen() = this < GRENSE
 }
 
-internal val Number.prosent get() = Prosentdel(this)
+internal val Number.prosent get() = Prosentdel.fraRatio(this.toDouble() / 100.0)

@@ -8,10 +8,10 @@ import org.junit.jupiter.api.assertThrows
 internal class ProsentdelTest {
 
     @Test internal fun equality() {
-        assertEquals(Prosentdel(25.0), 25.0.prosent )
-        assertNotEquals(Prosentdel(25.0), 75.0.prosent )
-        assertNotEquals(Prosentdel(25.0), Any() )
-        assertNotEquals(Prosentdel(25.0), null )
+        assertEquals(Prosentdel.fraRatio(0.25), 25.0.prosent )
+        assertNotEquals(Prosentdel.fraRatio(0.25), 75.0.prosent )
+        assertNotEquals(Prosentdel.fraRatio(0.25), Any() )
+        assertNotEquals(Prosentdel.fraRatio(0.25), null )
     }
 
     @Test
