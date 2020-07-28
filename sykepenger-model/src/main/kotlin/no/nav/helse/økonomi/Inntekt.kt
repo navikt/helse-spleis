@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class Inntekt : Comparable<Inntekt>{
@@ -79,5 +80,12 @@ class Inntekt : Comparable<Inntekt>{
 
     override fun toString(): String {
         return "[Årlig: $årlig, Måndelig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
+    }
+
+    internal fun juster(block: (Int, Inntekt) -> Unit) {
+        tilDagligInt().absoluteValue.also {
+            if(it == 0) return
+            block(it, (tilDagligInt() / it).daglig)
+        }
     }
 }

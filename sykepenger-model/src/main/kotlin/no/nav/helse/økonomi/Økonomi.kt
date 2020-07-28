@@ -55,7 +55,7 @@ internal class Økonomi private constructor(
         }
 
         private fun maksbeløp(økonomiList: List<Økonomi>, dato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(dato) * sykdomsgrad(økonomiList))
+            (Grunnbeløp.`6G`.dagsats(dato) * sykdomsgrad(økonomiList)).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -77,14 +77,16 @@ internal class Økonomi private constructor(
         }
 
         private fun justerPerson(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
+            val sorterteØkonomier = økonomiList.sortedByDescending { it.personbeløp }
             val ratio = budsjett / total
-            økonomiList.forEach {
-                it.personbeløp = (it.personbeløp!! * ratio)
+            sorterteØkonomier.forEach {
+                it.personbeløp = (it.personbeløp!! * ratio).rundTilDaglig()
             }
-            (budsjett - totalPerson(økonomiList)).also { remainder ->
-                økonomiList.mapNotNull(personBeløp).fordele(remainder.rundTilDaglig()).also { inntekter ->
-                    økonomiList.forEachIndexed { index, økonomi ->
-                        økonomi.personbeløp = inntekter[index]
+            (budsjett - totalPerson(sorterteØkonomier)).also { remainder ->
+                remainder.juster {teller, justeringen ->
+                    (0 until teller).forEach { index ->
+                        sorterteØkonomier[index].personbeløp =
+                            sorterteØkonomier[index].personbeløp?.plus(justeringen)
                     }
                 }
             }
@@ -92,14 +94,16 @@ internal class Økonomi private constructor(
         }
 
         private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
+            val sorterteØkonomier = økonomiList.sortedByDescending { it.arbeidsgiverbeløp }
             val ratio = budsjett / total
-            økonomiList.forEach {
-                it.arbeidsgiverbeløp = it.arbeidsgiverbeløp!! * ratio
+            sorterteØkonomier.forEach {
+                it.arbeidsgiverbeløp = (it.arbeidsgiverbeløp!! * ratio).rundTilDaglig()
             }
-            (budsjett - totalArbeidsgiver(økonomiList)).also { remainder ->
-                økonomiList.mapNotNull{ it.arbeidsgiverbeløp }.fordele(remainder.rundTilDaglig()).also { inntekter ->
-                    økonomiList.forEachIndexed { index, økonomi ->
-                        økonomi.arbeidsgiverbeløp = inntekter[index]
+            (budsjett - totalArbeidsgiver(sorterteØkonomier)).also { remainder ->
+                remainder.juster {teller, justeringen ->
+                    (0 until teller).forEach { index ->
+                        sorterteØkonomier[index].arbeidsgiverbeløp =
+                            sorterteØkonomier[index].arbeidsgiverbeløp?.plus(justeringen)
                     }
                 }
             }
@@ -156,7 +160,7 @@ internal class Økonomi private constructor(
 
     private fun _betal() {
         val total = dekningsgrunnlag!! * grad().ratio()
-        (total * arbeidsgiverBetalingProsent.ratio()).also {
+        (total * arbeidsgiverBetalingProsent.ratio()).rundTilDaglig().also {
             arbeidsgiverbeløp = it
             personbeløp = total.rundTilDaglig() - it
         }
@@ -168,8 +172,8 @@ internal class Økonomi private constructor(
     )
 
     private fun inntektMap(): Map<String, Any> = mapOf(
-        "dekningsgrunnlag" to dekningsgrunnlag!!,
-        "aktuellDagsinntekt" to aktuellDagsinntekt!!
+        "dekningsgrunnlag" to dekningsgrunnlag!!.tilDagligDouble(),
+        "aktuellDagsinntekt" to aktuellDagsinntekt!!.tilDagligDouble()
     )
 
     private fun prosentIntMap(): Map<String, Int> = mapOf(
@@ -183,8 +187,8 @@ internal class Økonomi private constructor(
     )
 
     private fun utbetalingMap() = mapOf(
-        "arbeidsgiverbeløp" to arbeidsgiverbeløp!!,
-        "personbeløp" to personbeløp!!,
+        "arbeidsgiverbeløp" to arbeidsgiverbeløp!!.tilDagligInt(),
+        "personbeløp" to personbeløp!!.tilDagligInt(),
         "er6GBegrenset" to er6GBegrenset!!
     )
 
