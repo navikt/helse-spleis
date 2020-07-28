@@ -20,17 +20,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `forlenger vedtaksperiode som har gått til infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
-        håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingshistorikk(0, historikk)
-        håndterYtelser(0, historikk)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
-            0,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -50,21 +50,21 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     internal fun `forlenger ikke vedtaksperiode som har gått til infotrygd, der utbetaling ikke er gjort`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000, 100, ORGNUMMER)
-        håndterUtbetalingshistorikk(0, historikk)  // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)  // <-- TIL_INFOTRYGD
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterYtelser(0, historikk)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(2.vedtaksperiode, historikk)
         håndterInntektsmeldingMedValidering(
-            0,
+            2.vedtaksperiode,
             listOf(Periode(29.januar, 13.februar)),
             førsteFraværsdag = 29.januar
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
-            0,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -80,7 +80,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `forlengelsesperiode der refusjon opphører`() {
         håndterSykmelding(Sykmeldingsperiode(13.mars(2020), 29.mars(2020), 100))
         håndterInntektsmeldingMedValidering(
-            0,
+            1.vedtaksperiode,
             listOf(Periode(13.mars(2020), 28.mars(2020))),
             førsteFraværsdag = 13.mars(2020),
             refusjon = Triple(31.mars(2020), INNTEKT, emptyList())
@@ -89,15 +89,15 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.mars(2020), 29.mars(2020), 100))
         håndterSøknad(Sykdom(30.mars(2020), 14.april(2020), 100))
         håndterYtelser(
-            0,
+            2.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(13.mars(2020), 29.mars(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(13.mars(2020),
                     INNTEKT, ORGNUMMER, true, 31.mars(2020))
             )
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -106,7 +106,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
         håndterUtbetalingshistorikk(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 1000,
@@ -114,9 +114,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )  // <-- TIL_INFOTRYGD
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -124,7 +124,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
@@ -140,7 +140,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
@@ -155,7 +155,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
         håndterSøknad(Sykdom(14.mars, 31.mars, 100))
         håndterUtbetalingshistorikk(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 1000,
@@ -163,15 +163,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )  // <-- TIL_INFOTRYGD
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            TIL_INFOTRYGD
-        )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP)
     }
 
     @Test
@@ -180,7 +174,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterUtbetalingshistorikk(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 1000,
@@ -188,21 +182,21 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )  // <-- TIL_INFOTRYGD
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
     fun `tidligere utbetalinger i spleis som er forkastet blir tatt med som en del av utbetalingshistorikken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(1.januar, 16.januar)), 1.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 1.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(1.januar, 31.januar), it.first())
@@ -216,19 +210,19 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.Utbetaling(1.februar, 28.februar, 1000, 100, ORGNUMMER))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.Utbetaling(1.februar, 28.februar, 1000, 100, ORGNUMMER))
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterYtelser(3.vedtaksperiode, Utbetalingshistorikk.Periode.Utbetaling(1.februar, 28.februar, 1000, 100, ORGNUMMER))
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterYtelser(3.vedtaksperiode, Utbetalingshistorikk.Periode.Utbetaling(1.februar, 28.februar, 1000, 100, ORGNUMMER))
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
+        håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(1.mars, 31.mars), it.first())
         }
 
         assertForkastetPeriodeTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -239,9 +233,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
         assertTilstander(
-            0,
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -253,26 +247,31 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertEquals(inspektør.maksdato(0), inspektør.forkastetMaksdato(0))
+        assertEquals(inspektør.maksdato(3.vedtaksperiode), inspektør.forkastetMaksdato(0))
     }
 
     @Test
     fun `lager ikke ny arbeidsgiverperiode når det er tilstøtende historikk`() {
         håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 3.mars(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(18.februar(2020), 3.mars(2020), 100))
+
         håndterSykmelding(Sykmeldingsperiode(4.mars(2020), 17.mars(2020), 100))
         håndterSøknad(Sykdom(4.mars(2020), 17.mars(2020), 100))
+
         håndterSykmelding(Sykmeldingsperiode(18.mars(2020), 15.april(2020), 70))
         håndterSøknad(Sykdom(18.mars(2020), 15.april(2020), 70))
+
         håndterInntektsmelding(listOf(Periode(18.februar(2020), 4.mars(2020))), 18.februar(2020))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(1)
-        håndterSimulering(1)
-        håndterPåminnelse(1, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(3)) // <-- TIL_INFOTRYGD
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(3)) // <-- TIL_INFOTRYGD
+
         håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 50))
         håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 50))
-        håndterYtelser(
-            0,
+
+        håndterYtelser(4.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
@@ -280,9 +279,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                     INNTEKT, ORGNUMMER, true)
             )
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            0,
+            4.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
@@ -290,12 +289,12 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                     INNTEKT, ORGNUMMER, true)
             )
         )
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode, true)
+        håndterUtbetalt(4.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertForkastetPeriodeTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -303,7 +302,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertForkastetPeriodeTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -314,14 +313,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
         assertForkastetPeriodeTilstander(
-            2,
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TIL_INFOTRYGD
         )
         assertTilstander(
-            0,
+            4.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -345,25 +344,25 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `setter forlengelse-flagget likt som forrige periode - forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
-        håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingshistorikk(0, historikk)
-        håndterYtelser(0, historikk)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(24.februar, 28.februar, 100))
-        håndterYtelser(1, historikk)
+        håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100))
+        håndterYtelser(3.vedtaksperiode, historikk)
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
-            0,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -374,7 +373,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
         assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
         assertEquals(inspektør.forlengelseFraInfotrygd(0), inspektør.forlengelseFraInfotrygd(1))
@@ -384,33 +383,33 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `setter forlengelse-flagget likt som forrige periode - ikke forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000, 100, ORGNUMMER)
-        håndterUtbetalingshistorikk(0, historikk) // <-- TIL_INFOTRYGD
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingshistorikk(0, historikk)
-        håndterYtelser(0, historikk)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
+        håndterYtelser(2.vedtaksperiode, historikk)
         håndterInntektsmeldingMedValidering(
-            0,
+            2.vedtaksperiode,
             listOf(Periode(29.januar, 13.februar)),
             førsteFraværsdag = 29.januar
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(29.januar, 23.februar), it.first())
         }
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(24.februar, 28.februar, 100))
-        håndterYtelser(1, historikk)
+        håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100))
+        håndterYtelser(3.vedtaksperiode, historikk)
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
-            0,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -422,7 +421,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
         assertEquals(inspektør.forlengelseFraInfotrygd(0), inspektør.forlengelseFraInfotrygd(1))
@@ -434,23 +433,23 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(26.mai(2020), 2.juni(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(26.mai(2020), 2.juni(2020), 100))
         håndterInntektsmelding(listOf(Periode(26.mai(2020), 2.juni(2020))), førsteFraværsdag = 26.mai(2020))
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100))
         håndterYtelser(
-            1,
+            2.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
         )
-        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            1,
+            2.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
         )
         inspektør.apply {
-            assertTrue(etterspurteBehov(0, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+            assertTrue(etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(vedtaksperiodeId(0))
                     .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
@@ -463,27 +462,27 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.mai(2020), 2.juni(2020), 100))
         håndterSøknad(Sykdom(10.mai(2020), 2.juni(2020), 100))
         håndterInntektsmelding(listOf(Periode(10.mai(2020), 25.mai(2020))), førsteFraværsdag = 10.mai(2020))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100))
         håndterYtelser(
-            1,
+            2.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(10.mai(2020), INNTEKT, ORGNUMMER, true))
         )
-        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            1,
+            2.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(10.mai(2020), INNTEKT, ORGNUMMER, true))
         )
         assertForkastetPeriodeTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -495,7 +494,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            0,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -504,7 +503,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
         inspektør.apply {
-            assertTrue(etterspurteBehov(0, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+            assertTrue(etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(vedtaksperiodeId(0))
                     .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()

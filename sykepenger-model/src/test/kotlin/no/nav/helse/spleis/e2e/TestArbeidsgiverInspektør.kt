@@ -54,6 +54,7 @@ internal class TestArbeidsgiverInspektør(
     private var inVedtaksperiode = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val periodeIder = mutableMapOf<Int, UUID>()
+    private val hendelseIder = mutableMapOf<UUID, List<UUID>>()
 
     init {
         HentAktivitetslogg(person, orgnummer).also { results ->
@@ -125,9 +126,9 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiodeTeller += 1
         vedtaksperiodeindeks += 1
         periodeIder[vedtaksperiodeindeks] = id
+        this.hendelseIder[id] = hendelseIder
 
         if (!inGyldigePerioder) return
-
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
     }
 
@@ -165,8 +166,8 @@ internal class TestArbeidsgiverInspektør(
         this.nettoBeløp.add(nettoBeløp)
     }
 
-    internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.etterspurteBehovFinnes(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype)
+    internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
 
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
         if (!inGyldigePerioder || førsteFraværsdag == null) return
@@ -288,7 +289,7 @@ internal class TestArbeidsgiverInspektør(
         "Missing collection initialization"
     }
 
-    internal fun maksdato(indeks: Int) = maksdatoer[indeks] ?: fail {
+    internal fun maksdato(vedtaksperiodeId: UUID) = maksdatoer[vedtaksperiodeIder.entries.associate { (key, value) -> value to key }[vedtaksperiodeId]] ?: fail {
         "Missing collection initialization"
     }
 
@@ -329,6 +330,10 @@ internal class TestArbeidsgiverInspektør(
     }
 
     internal fun vedtaksperioder(indeks: Int) = vedtaksperioder[indeks] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun hendelseIder(vedtaksperiodeId: UUID) = hendelseIder[vedtaksperiodeId] ?: fail {
         "Missing collection initialization"
     }
 

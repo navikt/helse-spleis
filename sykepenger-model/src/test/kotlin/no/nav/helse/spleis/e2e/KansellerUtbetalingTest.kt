@@ -19,10 +19,11 @@ import java.time.LocalDate
 
 internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
-    var vedtaksperiodeCounter: Int = 0
+    private var vedtaksperiodeTeller: Int = 0
 
-    @BeforeEach internal fun setup() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar, vedtaksperiodeCounter)
+    @BeforeEach
+    internal fun setup() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
     }
 
     @Test fun `avvis hvis arbeidsgiver er ukjent`() {
@@ -98,7 +99,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     @Test
     fun `Annullering av én periode fører kun til at sammehengende perioder blir invalidert`() {
         forlengVedtak(27.januar, 30.januar, 100)
-        nyttVedtak(1.mars, 20.mars, 100, 1.mars,2)
+        nyttVedtak(1.mars, 20.mars, 100, 1.mars)
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
@@ -115,24 +116,28 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
     }
 
-    private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int, vedtaksperiodeIndex: Int = vedtaksperiodeCounter.inc()) {
+    private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        håndterSøknadMedValidering(vedtaksperiodeIndex, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterYtelser(vedtaksperiodeIndex)
-        håndterSimulering(vedtaksperiodeIndex)
-        håndterUtbetalingsgodkjenning(vedtaksperiodeIndex, true)
-        håndterUtbetalt(vedtaksperiodeIndex, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        vedtaksperiodeTeller += 1
+        val id = vedtaksperiodeTeller.vedtaksperiode
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterYtelser(id)
+        håndterSimulering(id)
+        håndterUtbetalingsgodkjenning(id, true)
+        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 
-    private fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int, førsteFraværsdag: LocalDate, vedtaksperiodeIndex: Int = vedtaksperiodeCounter.inc()) {
+    private fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int, førsteFraværsdag: LocalDate) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        håndterInntektsmeldingMedValidering(vedtaksperiodeIndex, listOf(Periode(fom, fom.plusDays(15))), førsteFraværsdag = førsteFraværsdag)
-        håndterSøknadMedValidering(vedtaksperiodeIndex, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterVilkårsgrunnlag(vedtaksperiodeIndex, INNTEKT)
-        håndterYtelser(vedtaksperiodeIndex)   // No history
-        håndterSimulering(vedtaksperiodeIndex)
-        håndterUtbetalingsgodkjenning(vedtaksperiodeIndex, true)
-        håndterUtbetalt(vedtaksperiodeIndex, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        vedtaksperiodeTeller += 1
+        val id = vedtaksperiodeTeller.vedtaksperiode
+        håndterInntektsmeldingMedValidering(id, listOf(Periode(fom, fom.plusDays(15))), førsteFraværsdag = førsteFraværsdag)
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterVilkårsgrunnlag(id, INNTEKT)
+        håndterYtelser(id)   // No history
+        håndterSimulering(id)
+        håndterUtbetalingsgodkjenning(id, true)
+        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {

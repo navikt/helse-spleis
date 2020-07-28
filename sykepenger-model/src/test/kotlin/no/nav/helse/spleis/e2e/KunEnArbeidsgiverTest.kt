@@ -25,16 +25,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -43,9 +43,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -56,7 +56,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(1.vedtaksperiode))
         inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(3.januar, 26.januar), it.first())
@@ -69,7 +69,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100))
         assertNoWarnings(inspektør)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -93,7 +93,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 5.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 5.januar)), førsteFraværsdag = 3.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(8.januar, 10.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 10.januar, 100))
@@ -101,7 +101,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 22.januar, 100))
         håndterSøknad(Sykdom(11.januar, 22.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -112,7 +112,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(14, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -120,7 +120,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVSLUTTET_UTEN_UTBETALING,
@@ -128,7 +128,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            2,
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -149,7 +149,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 22.januar, 100))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -160,7 +160,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(14, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -168,14 +168,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            2,
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -199,7 +199,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(3.januar, 4.januar), Periode(8.januar, 21.januar)),
             førsteFraværsdag = 8.januar
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -210,7 +210,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(13, it.dagtelling[Sykedag::class])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -218,14 +218,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
         )
         assertTilstander(
-            2,
+            3.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -239,7 +239,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoWarnings(inspektør)
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -249,7 +249,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(2, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -261,13 +261,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ingen historie med Søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -276,9 +276,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -289,17 +289,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(1.vedtaksperiode))
     }
 
     @Test
     fun `søknad sendt etter 3 mnd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100), sendtTilNav = 1.mai)
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterUtbetalingsgodkjenning(0, true)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -316,9 +316,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 assertEquals(1, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
             }
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
@@ -327,9 +327,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `gap historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.desember(2017),
                 15.desember(2017),
@@ -338,12 +338,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -352,9 +352,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(1.vedtaksperiode)
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -366,15 +366,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(1.vedtaksperiode))
     }
 
     @Test
     fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.desember(2017),
                 16.desember(2017),
                 15000,
@@ -392,27 +392,27 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
     }
 
     @Test
     fun `ingen nav utbetaling kreves, blir automatisk behandlet og avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 5.januar, 100))
-        håndterYtelser(0)   // No history
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 5.januar, 100))
+        håndterYtelser(1.vedtaksperiode)   // No history
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
         assertFalse(hendelselogg.hasErrors())
 
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
 
         assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -426,22 +426,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ikke automatisk behandling hvis warnings`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 5.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 5.januar, 100))
         håndterSøknad(Sykdom(3.januar, 5.januar, 100))
-        håndterYtelser(0)   // No history
+        håndterYtelser(1.vedtaksperiode)   // No history
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
         assertFalse(hendelselogg.hasErrors())
 
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
 
         assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -456,37 +456,37 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To perioder med opphold`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -504,32 +504,32 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kiler tilstand i uferdig venter for inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterYtelser(1)   // No history
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -541,7 +541,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -560,31 +560,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kilt etter søknad og inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -596,7 +596,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -614,31 +614,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kilt etter inntektsmelding og søknad`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -650,7 +650,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
@@ -668,31 +668,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kilt etter inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -704,7 +704,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
@@ -723,7 +723,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 INNTEKT_AS_INT,
@@ -731,7 +731,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             ), inntektshistorikk = emptyList()
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -739,7 +739,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 INNTEKT_AS_INT,
@@ -747,9 +747,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
                 INNTEKT_AS_INT,
@@ -757,10 +757,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterSimulering(0)
+        håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
@@ -774,9 +774,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 4.januar)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 4.januar)
         inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
     }
 
     @Test
@@ -784,31 +784,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(27.januar, 7.februar, 100))
         håndterInntektsmeldingMedValidering(
-            0,
+            1.vedtaksperiode,
             listOf(Periode(3.januar, 18.januar)),
             3.januar,
             listOf(Periode(27.januar, 27.januar))
         )
         inspektør.also { assertFalse(it.personLogg.hasWarnings()) }
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
     }
 
     @Test
     fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
     }
 
     @Test
     fun `første fraværsdato i inntektsmelding, før søknad, er utenfor perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 27.januar)
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 27.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -820,34 +820,34 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Sammenblandede hendelser fra forskjellige perioder med søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(1.februar, 16.februar)))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertNotNull(it.maksdato(0))
-            assertNotNull(it.maksdato(1))
+            assertNotNull(it.maksdato(1.vedtaksperiode))
+            assertNotNull(it.maksdato(2.vedtaksperiode))
             assertEquals(10_017, it.totalBeløp[0])
             assertEquals(10_017, it.nettoBeløp[0])
             assertEquals(34_344, it.totalBeløp[1])
             assertEquals(24_327, it.nettoBeløp[1])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -859,7 +859,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -878,7 +878,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100))
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 2.januar,
                 INNTEKT_AS_INT,
@@ -886,9 +886,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 2.januar,
                 INNTEKT_AS_INT,
@@ -896,15 +896,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterSimulering(0)
+        håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterYtelser(
-            1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+            2.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 2.januar,
                 INNTEKT_AS_INT,
@@ -912,11 +912,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 ORGNUMMER
             )
         )
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertEquals(inspektør.maksdato(0), inspektør.maksdato(1))
+        assertEquals(inspektør.maksdato(1.vedtaksperiode), inspektør.maksdato(2.vedtaksperiode))
     }
 
     @Test
@@ -924,12 +924,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100))
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
 
@@ -942,28 +942,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To tilstøtende perioder søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
 
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -975,7 +975,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -992,31 +992,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Venter å på bli kilt etter søknad og inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
-        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
 
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
@@ -1033,7 +1033,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `søknad til arbeidsgiver etter inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 23.februar, 100))
 
         inspektør.also {
@@ -1046,11 +1046,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(12, it.dagtelling[SykHelgedag::class])
         }
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
@@ -1062,31 +1062,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Venter på å bli kilt etter inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterUtbetalingsgodkjenning(0, true)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
-        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
@@ -1104,22 +1104,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterInntektsmeldingMedValidering(
-            vedtaksperiodeIndex = 0,
+            vedtaksperiodeId = 1.vedtaksperiode,
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
             førsteFraværsdag = 3.januar
         )
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
@@ -1127,15 +1127,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3.januar, it.førsteFraværsdag(0))
             assertEquals(3.januar, it.førsteFraværsdag(1))
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
@@ -1144,30 +1144,30 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `To tilstøtende perioder der den første er utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
@@ -1182,31 +1182,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To tilstøtende perioder inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(8.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 7.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
 
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -1222,25 +1222,25 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AVVIST)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
 
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
     }
@@ -1248,21 +1248,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingsgodkjenning(0, false)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
 
         assertForkastetPeriodeTilstander(
-            0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD
         )
         assertForkastetPeriodeTilstander(
-            1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD
         )
     }
@@ -1270,21 +1270,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke forlenge en periode som er gått TilInfotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, false) // går til TilInfotrygd
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, false) // går til TilInfotrygd
 
         assertForkastetPeriodeTilstander(
-            0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD
         )
         assertForkastetPeriodeTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -1295,36 +1295,36 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ignorer inntektsmeldinger på påfølgende perioder`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(1, Sykdom(29.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(3.januar, 18.januar)))
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
@@ -1335,22 +1335,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1362,12 +1362,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP
         )
 
         assertTilstander(
-            2,
+            3.vedtaksperiode,
             START, MOTTATT_SYKMELDING_UFERDIG_GAP
         )
     }
@@ -1375,20 +1375,20 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Sykmelding med gradering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 50, 50))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50, 50))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
@@ -1398,18 +1398,18 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `dupliserte hendelser produserer bare advarsler`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100))
@@ -1421,9 +1421,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
         }
-        assertNotNull(inspektør.maksdato(0))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
@@ -1434,54 +1434,54 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertTrue(observatør.utbetalteVedtaksperioder.contains(inspektør.vedtaksperiodeId(0)))
+        assertTrue(observatør.utbetalteVedtaksperioder.contains(1.vedtaksperiode))
     }
 
     @Test
     fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
         }
-        håndterSøknadMedValidering(0, Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterSimulering(0)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(1, listOf(Periode(16.januar, 16.februar))) // Touches prior periode
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(16.januar, 16.februar))) // Touches prior periode
         assertNoErrors(inspektør)
 
-        håndterSøknadMedValidering(1, Sykdom(1.februar, 23.februar, 100))
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
-        håndterUtbetalingsgodkjenning(1, true)
-        håndterUtbetalt(1, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertNoErrors(inspektør)
 
-        assertNotNull(inspektør.maksdato(0))
-        assertNotNull(inspektør.maksdato(1))
+        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
+        assertNotNull(inspektør.maksdato(2.vedtaksperiode))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
@@ -1491,10 +1491,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterYtelser(0)
+        håndterYtelser(1.vedtaksperiode)
 
         assertNoErrors(inspektør)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
@@ -1505,8 +1505,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
 
         assertNoErrors(inspektør)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
@@ -1517,8 +1517,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
 
         assertNoErrors(inspektør)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
@@ -1526,7 +1526,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `søknad med papirsykmelding`() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100), Søknad.Søknadsperiode.Papirsykmelding(1.januar, 20.januar))
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1534,7 +1534,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100, ORGNUMMER)
         ) // -> TIL_INFOTRYGD
 
@@ -1544,7 +1544,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperiode uten søknad som går til infotrygd ber ikke om inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100))
-        håndterPåminnelse(0, MOTTATT_SYKMELDING_FERDIG_GAP)
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
@@ -1553,24 +1553,24 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(
-            0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
+            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
                 14.januar,
                 INNTEKT, emptyList()
             )
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(
-            0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
+            1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(
                 null,
                 INNTEKT, listOf(14.januar)
             )
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1581,7 +1581,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         assertNotNull(inspektør.vilkårsgrunnlag(0))
         assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
@@ -1596,7 +1596,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
@@ -1620,10 +1620,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -1631,7 +1631,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
@@ -1655,8 +1655,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `ny sykmelding for tidligere periode håndteres`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
@@ -1664,18 +1664,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
-
-        håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar,100)) // Initierer replay av tidligere periode
         håndterSøknad(Sykdom(1.januar, 30.januar, 100))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
     }
 
     @Test
@@ -1686,7 +1685,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Ferie(6.juli(2020), 11.juli(2020))
         )
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 8.august(2019),
@@ -1736,9 +1735,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             )
         )
-        håndterVilkårsgrunnlag(0, 50005.månedlig)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, 50005.månedlig)
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 8.august(2019),
@@ -1788,17 +1787,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             )
         )
-        håndterSimulering(0)
+        håndterSimulering(1.vedtaksperiode)
         assertEquals(10, inspektør.gjenståendeSykedager(0))
-        assertEquals(24.juli(2020), inspektør.maksdato(0))
+        assertEquals(24.juli(2020), inspektør.maksdato(1.vedtaksperiode))
     }
 
     @Test
     fun `søknad med utenlandsopphold`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(
-            0,
+            1.vedtaksperiode,
             Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100),
             Søknad.Søknadsperiode.Utlandsopphold(22.januar, 25.januar)
         )
@@ -1819,13 +1818,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(9.juni, 30.juni))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100))
-        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+        håndterYtelser(2.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
 
         assertNoErrors(inspektør)
         assertTilstander(
@@ -1851,14 +1850,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Overlapp-scenario fra prod`() {
         håndterSykmelding(Sykmeldingsperiode(27.mai(2020), 14.juni(2020), 100))
         håndterSøknad(Sykdom(27.mai(2020), 14.juni(2020), 100))
-        håndterYtelser(
-            0,
+        håndterYtelser(1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER)
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
 
-        håndterPåminnelse(0, AVVENTER_SIMULERING, LocalDateTime.now().minusDays(200)) // <-- TIL_INFOTRYGD
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING, LocalDateTime.now().minusDays(200)) // <-- TIL_INFOTRYGD
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
 
         håndterSykmelding(Sykmeldingsperiode(29.mai(2020), 18.juni(2020), 100))
@@ -1871,7 +1869,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(15.juni(2020), 3.juli(2020), 100))
 
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER)
         )
@@ -1880,16 +1878,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(4.juli(2020), 20.juli(2020), 100))
 
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
         )
 
-        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterYtelser(
-            0,
+            1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
@@ -1902,7 +1900,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100))
         håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
 
-        håndterPåminnelse(0, AVVENTER_VILKÅRSPRØVING_GAP, LocalDateTime.now().minusDays(200))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_GAP, LocalDateTime.now().minusDays(200))
         assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().length())
     }
 }

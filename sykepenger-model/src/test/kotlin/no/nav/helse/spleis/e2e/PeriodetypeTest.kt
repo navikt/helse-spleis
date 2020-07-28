@@ -22,12 +22,12 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
@@ -35,7 +35,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -61,13 +61,13 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
-        håndterYtelser(1)
-        håndterSimulering(1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_GAP,
@@ -76,7 +76,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
@@ -97,15 +97,15 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingshistorikk(0, historikk)
-        håndterYtelser(0, historikk)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
-        håndterSimulering(0)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
+        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_GAP,
@@ -125,26 +125,26 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
-        håndterSøknadMedValidering(0, Sykdom(29.januar, 23.februar, 100))
-        håndterUtbetalingshistorikk(0, historikk)
-        håndterYtelser(0, historikk)
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, historikk)
-        håndterSimulering(0)
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
+        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterSimulering(1.vedtaksperiode)
 
         assertEquals(
             Periodetype.OVERGANG_FRA_IT.name,
             hendelselogg.behov().first().detaljer()["periodetype"]
         )
 
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100))
-        håndterSøknadMedValidering(1, Sykdom(26.februar, 15.april, 100))
-        håndterUtbetalingshistorikk(1, historikk)
-        håndterYtelser(1, historikk)
-        håndterSimulering(1)
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterSimulering(2.vedtaksperiode)
 
         assertEquals(
             Periodetype.INFOTRYGDFORLENGELSE.name,
@@ -162,14 +162,14 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar(2020), 4.februar(2020))),
             førsteFraværsdag = 20.januar(2020)
         )
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)   // No history
-        håndterUtbetalingsgodkjenning(0, true)
-        håndterYtelser(1)   // No history
-        håndterSimulering(1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_GAP,
@@ -179,7 +179,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.AVSLUTTET
         )
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,

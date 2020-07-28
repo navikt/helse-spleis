@@ -11,7 +11,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     internal fun `avdekker overlapp dobbelbehandlinger i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+        håndterUtbetalingshistorikk(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             3.januar,
             26.januar,
             1000,
@@ -20,7 +20,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         ))
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 26.februar, 100))
-        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+        håndterUtbetalingshistorikk(2.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             26.februar,
             26.mars,
             1000,
@@ -29,10 +29,10 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         ))
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100))
-        håndterUtbetalingshistorikk(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 1.mai, 1000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 1.mai, 1000, 100, ORGNUMMER))
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 }

@@ -108,6 +108,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun nyPeriode(periode: Periode, orgnummer: String) {
         person.håndter(
             sykmelding(
+                UUID.randomUUID(),
                 Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
                 orgnummer = orgnummer,
                 mottatt = periode.endInclusive.atStartOfDay()
@@ -115,12 +116,14 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         person.håndter(
             søknad(
+                UUID.randomUUID(),
                 Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100),
                 orgnummer = orgnummer
             )
         )
         person.håndter(
             inntektsmelding(
+                UUID.randomUUID(),
                 listOf(Periode(periode.start, periode.start.plusDays(15))),
                 førsteFraværsdag = periode.start,
                 orgnummer = orgnummer

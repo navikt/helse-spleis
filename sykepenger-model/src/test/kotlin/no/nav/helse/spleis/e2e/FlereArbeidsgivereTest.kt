@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.util.*
 
 @Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -212,6 +212,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun gapPeriode(periode: Periode, orgnummer: String) {
         nyPeriode(periode, orgnummer)
         person.håndter(inntektsmelding(
+            UUID.randomUUID(),
             listOf(Periode(periode.start, periode.start.plusDays(15))),
             førsteFraværsdag = periode.start,
             orgnummer = orgnummer
@@ -222,13 +223,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun nyPeriode(periode: Periode, orgnummer: String) {
         person.håndter(
             sykmelding(
+                UUID.randomUUID(),
                 Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
-                orgnummer = orgnummer,
-                mottatt = periode.endInclusive.atStartOfDay()
+                orgnummer = orgnummer
             )
         )
         person.håndter(
             søknad(
+                UUID.randomUUID(),
                 Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100),
                 orgnummer = orgnummer
             )

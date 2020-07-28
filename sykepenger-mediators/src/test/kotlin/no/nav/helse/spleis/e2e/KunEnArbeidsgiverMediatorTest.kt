@@ -10,7 +10,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
@@ -74,47 +73,24 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `enkel case`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.februar, tom = 15.februar)), førsteFraværsdag = 1.februar)
+    fun `Ny, tidligere sykmelding medfører replay av første periode`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        assertEquals("vedtaksperiode_forkastet", testRapid.inspektør.melding(5).path("@event_name").asText())
-        assertReplays(
-            listOf(
-                Pair("ny_søknad", 7),
-                Pair("sendt_søknad_nav", 8),
-                Pair("sendt_søknad_nav", 9),
-                Pair("inntektsmelding", 10)
-            )
-        )
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
-        assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
-        assertTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE", "AVVENTER_UFERDIG_FORLENGELSE")
+
+        assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP")
+        assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
+        assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP")
     }
 
-    @Disabled("Inntektsmelding med første fraværsdag gjør at sykmelding nr.2 anses som del av første, og behandling av denne blir dermed ignorert")
     @Test
     fun `Inntektsmelding med første fraværsdag 1 januar skal ikke gjøre at sykmelding nr 2 ikke blir behandlet`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.februar, tom = 15.februar)), førsteFraværsdag = 1.januar)
+        sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
+        sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 2.februar)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        assertReplays(
-            listOf(
-                Pair("ny_søknad", testRapid.inspektør.antall() - 3),
-                Pair("sendt_søknad_nav", testRapid.inspektør.antall() - 2),
-                Pair("inntektsmelding", testRapid.inspektør.antall() - 1)
-            )
-        )
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
-        assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
-        assertTilstander(
-            2,
-            "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE",
-            "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE",
-            "AVVENTER_UFERDIG_FORLENGELSE"
-        )
+        assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
+        assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_SØKNAD_FERDIG_GAP")
+        assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP", "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP", "AVVENTER_UFERDIG_GAP")
     }
 
     @Test
