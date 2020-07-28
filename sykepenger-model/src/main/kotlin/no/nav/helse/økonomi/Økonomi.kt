@@ -77,37 +77,41 @@ internal class Økonomi private constructor(
         }
 
         private fun justerPerson(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            val sorterteØkonomier = økonomiList.sortedByDescending { it.personbeløp }
-            val ratio = budsjett / total
-            sorterteØkonomier.forEach {
-                it.personbeløp = (it.personbeløp!! * ratio).rundTilDaglig()
-            }
-            (budsjett - totalPerson(sorterteØkonomier)).also { remainder ->
-                remainder.juster {teller, justeringen ->
-                    (0 until teller).forEach { index ->
-                        sorterteØkonomier[index].personbeløp =
-                            sorterteØkonomier[index].personbeløp?.plus(justeringen)
-                    }
-                }
-            }
-            require(budsjett == totalPerson(økonomiList))
+            juster(
+                økonomiList,
+                total,
+                budsjett,
+                { it.personbeløp!! },
+                { it, beløp -> it.personbeløp = beløp }
+            )
+            require(budsjett == totalPerson(økonomiList)){"budsjett: $budsjett != totalPerson: ${totalPerson(økonomiList)}"}
         }
 
         private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            val sorterteØkonomier = økonomiList.sortedByDescending { it.arbeidsgiverbeløp }
+            juster(
+                økonomiList,
+                total,
+                budsjett,
+                { it.arbeidsgiverbeløp!! },
+                { it, beløp -> it.arbeidsgiverbeløp = beløp }
+            )
+            require(budsjett == totalArbeidsgiver(økonomiList)){"budsjett: $budsjett != totalArbeidsgiver: ${totalArbeidsgiver(økonomiList)}"}
+        }
+
+        private fun juster(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt, get: (Økonomi) -> Inntekt, set: (Økonomi, Inntekt) -> Unit) {
+            val sorterteØkonomier = økonomiList.sortedByDescending { get(it) }
             val ratio = budsjett / total
-            sorterteØkonomier.forEach {
-                it.arbeidsgiverbeløp = (it.arbeidsgiverbeløp!! * ratio).rundTilDaglig()
-            }
-            (budsjett - totalArbeidsgiver(sorterteØkonomier)).also { remainder ->
+            val skalertTotal = sorterteØkonomier.onEach {
+                set(it, (get(it) * ratio).rundTilDaglig())
+            }.map(get).summer()
+
+            (budsjett - skalertTotal).also { remainder ->
                 remainder.juster {teller, justeringen ->
                     (0 until teller).forEach { index ->
-                        sorterteØkonomier[index].arbeidsgiverbeløp =
-                            sorterteØkonomier[index].arbeidsgiverbeløp?.plus(justeringen)
+                        set(sorterteØkonomier[index], get(sorterteØkonomier[index]) + justeringen)
                     }
                 }
             }
-            require(budsjett == totalArbeidsgiver(økonomiList)){"budsjett: $budsjett != totalArbeidsgiver: ${totalArbeidsgiver(økonomiList)}"}
         }
 
         private fun tilbakestillPerson(økonomiList: List<Økonomi>) =
