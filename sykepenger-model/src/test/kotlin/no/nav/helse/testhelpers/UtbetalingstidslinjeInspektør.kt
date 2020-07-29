@@ -3,7 +3,6 @@ package no.nav.helse.testhelpers
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -43,24 +42,17 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     override fun visit(
         dag: Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) { arbeidsdagTeller += 1 }
     override fun visit(
         dag: ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) { arbeidsgiverperiodeDagTeller += 1 }
     override fun visit(
         dag: AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) { avvistDagTeller += 1 }
     override fun visit(
         dag: Fridag,
@@ -70,22 +62,16 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         navDagTeller += 1
-        totalUtbetaling += arbeidsgiverbeløp
-        totalInntekt += aktuellDagsinntekt
+        totalUtbetaling += økonomi.toMap()["arbeidsgiverbeløp"] as Int? ?: 0
+        totalInntekt += økonomi.toMap()["aktuellDagsinntekt"] as Double? ?: 0.0
     }
     override fun visit(
         dag: NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) { navHelgDagTeller += 1 }
     override fun visit(
         dag: UkjentDag,

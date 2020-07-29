@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.roundToInt
 
 
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -130,47 +129,34 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) =
-        currentState.visit(dag, dato, økonomi, aktuellDagsinntekt)
+        currentState.visit(dag, dato, økonomi)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) =
-        currentState.visit(dag, dato, økonomi, aktuellDagsinntekt)
+        currentState.visit(dag, dato, økonomi)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) =
         currentState.visit(
             dag,
             dato,
-            økonomi,
-            grad,
-            aktuellDagsinntekt,
-            dekningsgrunnlag,
-            arbeidsgiverbeløp,
-            personbeløp
+            økonomi
         )
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) =
-        currentState.visit(dag, dato, økonomi, grad)
+        currentState.visit(dag, dato, økonomi)
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
@@ -182,22 +168,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) =
         currentState.visit(
             dag,
             dato,
-            økonomi,
-            grad,
-            aktuellDagsinntekt,
-            dekningsgrunnlag,
-            arbeidsgiverbeløp,
-            personbeløp
+            økonomi
         )
 
     override fun visit(
@@ -682,13 +658,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            aktuellDagsinntekt: Double
+            økonomi: Økonomi
         ) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.Arbeidsdag,
-                    inntekt = aktuellDagsinntekt.roundToInt(),
+                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
                     dato = dato
                 )
             )
@@ -697,13 +672,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            aktuellDagsinntekt: Double
+            økonomi: Økonomi
         ) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagDTO(
                     type = TypeDataDTO.ArbeidsgiverperiodeDag,
-                    inntekt = aktuellDagsinntekt.roundToInt(),
+                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
                     dato = dato
                 )
             )
@@ -712,37 +686,31 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double,
-            arbeidsgiverbeløp: Int,
-            personbeløp: Int
+            økonomi: Økonomi
         ) {
             utbetalingstidslinjeMap.add(
                 NavDagDTO(
                     type = TypeDataDTO.NavDag,
-                    inntekt = aktuellDagsinntekt.roundToInt(),
+                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
                     dato = dato,
-                    utbetaling = arbeidsgiverbeløp,
-                    grad = grad.toDouble()
+                    utbetaling = økonomi.toIntMap()["arbeidsgiverbeløp"] as Int,
+                    grad = økonomi.toMap()["grad"] as Double
                 )
             )
-            utbetalinger.add(arbeidsgiverbeløp)
+            utbetalinger.add(økonomi.toIntMap()["arbeidsgiverbeløp"] as Int)
         }
 
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel
+            økonomi: Økonomi
         ) {
             utbetalingstidslinjeMap.add(
                 UtbetalingsdagMedGradDTO(
                     type = TypeDataDTO.NavHelgDag,
                     inntekt = 0,   // Speil needs zero here
                     dato = dato,
-                    grad = grad.toDouble()
+                    grad = økonomi.toMap()["grad"] as Double
                 )
             )
         }
@@ -778,12 +746,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double,
-            arbeidsgiverbeløp: Int,
-            personbeløp: Int
+            økonomi: Økonomi
         ) {
             utbetalingstidslinjeMap.add(
                 AvvistDagDTO(

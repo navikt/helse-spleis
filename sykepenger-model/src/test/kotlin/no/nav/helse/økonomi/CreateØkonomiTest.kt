@@ -120,12 +120,7 @@ internal class CreateØkonomiTest {
             override fun visit(
                 dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
                 dato: LocalDate,
-                økonomi: Økonomi,
-                grad: Prosentdel,
-                aktuellDagsinntekt: Double,
-                dekningsgrunnlag: Double,
-                arbeidsgiverbeløp: Int,
-                personbeløp: Int
+                økonomi: Økonomi
             ) {
                 _økonomi = økonomi
             }

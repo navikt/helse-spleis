@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -20,12 +19,7 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         datoer[dato] = Utbetalingstidslinje.Utbetalingsdag.NavDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.NavDag::class)
@@ -34,8 +28,7 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class)
@@ -44,8 +37,7 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class)
@@ -63,8 +55,7 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class)
@@ -91,12 +82,7 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class
         inkrementer(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class)

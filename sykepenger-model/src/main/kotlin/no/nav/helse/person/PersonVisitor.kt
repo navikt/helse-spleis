@@ -74,30 +74,22 @@ internal interface UtbetalingsdagVisitor {
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
@@ -107,12 +99,7 @@ internal interface UtbetalingsdagVisitor {
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {}
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,

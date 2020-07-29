@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -247,12 +246,7 @@ internal class MaksimumSykepengedagerfilterTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double,
-            arbeidsgiverbeløp: Int,
-            personbeløp: Int
+            økonomi: Økonomi
         ) {
             datoer.add(dag.dato)
         }

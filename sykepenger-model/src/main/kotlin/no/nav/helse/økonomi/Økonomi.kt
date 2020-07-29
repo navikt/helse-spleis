@@ -154,6 +154,21 @@ internal class Økonomi private constructor(
 
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
 
+    internal fun mediatorDetails( block: (Double, Double, Double, Double, Int, Int, Boolean) -> Unit) {
+        toMap().also {
+                map ->
+            block(
+                map["grad"] as Double,
+                map["arbeidsgiverBetalingProsent"] as Double,
+                map["dekningsgrunnlag"] as Double,
+                map["aktuellDagsinntekt"] as Double,
+                map["arbeidsgiverbeløp"] as Int,
+                map["personbeløp"] as Int,
+                map["er6GBegrenset"] as Boolean
+            )
+        }
+    }
+
     private fun grad() = tilstand.grad(this)
 
     private fun betal() = this.also { tilstand.betal(this) }
@@ -195,28 +210,20 @@ internal class Økonomi private constructor(
             .toMutableMap<String, Any>()
             .also { it["er6GBegrenset"] = er6GBegrenset!! }
 
-    private fun utbetalingMap2() = mapOf(
-        "arbeidsgiverbeløp" to arbeidsgiverbeløp!!.tilDagligInt(),
-        "personbeløp" to personbeløp!!.tilDagligInt(),
-        "er6GBegrenset" to er6GBegrenset!!
-    )
-
-
-
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt?.tilDagligDouble() ?: 0.0, dekningsgrunnlag?.tilDagligDouble() ?: 0.0, arbeidsgiverbeløp?.tilDagligInt() ?: 0, personbeløp?.tilDagligInt() ?: 0)
+        visitor.visit(dag, dato, this)
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: AvvistDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad, aktuellDagsinntekt?.tilDagligDouble() ?: 0.0, dekningsgrunnlag?.tilDagligDouble() ?: 0.0, arbeidsgiverbeløp?.tilDagligInt() ?: 0, personbeløp?.tilDagligInt() ?: 0)
+        visitor.visit(dag, dato, this)
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavHelgDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, grad)
+        visitor.visit(dag, dato, this)
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: ArbeidsgiverperiodeDag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, aktuellDagsinntekt?.tilDagligDouble() ?: 0.0)
+        visitor.visit(dag, dato, this)
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: Arbeidsdag, dato: LocalDate) =
-        visitor.visit(dag, dato, this, aktuellDagsinntekt?.tilDagligDouble() ?: 0.0)
+        visitor.visit(dag, dato, this)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,

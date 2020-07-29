@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.erUnderInntekstgrensen
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -36,12 +35,7 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         addInntekt(dato, økonomi)
     }
@@ -49,8 +43,7 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         addInntekt(dato, økonomi)
     }
@@ -58,8 +51,7 @@ internal class MinimumInntektsfilter(
     override fun visit(
         dag: ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         addInntekt(dato, økonomi)
     }

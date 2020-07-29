@@ -6,7 +6,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
@@ -40,37 +39,34 @@ internal class OppdragBuilder(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
-        if (arbeisdsgiverLinjer.isEmpty()) return tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
-        if (grad.toDouble() == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag)))
-            tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
-        else
-            tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
+        økonomi.mediatorDetails { grad, _, _, aktuellDagsinntekt, _, _, _ ->
+            if (arbeisdsgiverLinjer.isEmpty()) return@mediatorDetails tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
+            if (grad == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag)))
+                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
+            else
+                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
+        }
     }
 
     override fun visit(
         dag: NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) {
-        if (arbeisdsgiverLinjer.isEmpty() || grad.toDouble() != linje.grad)
-            tilstand.nyLinje(dag, dato, grad)
-        else
-            tilstand.helgedag(dag, dato, grad)
+        økonomi.mediatorDetails { grad, _, _, aktuellDagsinntekt, _, _, _ ->
+            if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
+                tilstand.nyLinje(dag, dato, grad)
+            else
+                tilstand.helgedag(dag, dato, grad)
+        }
     }
 
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         tilstand.ikkeBetalingsdag()
     }
@@ -78,8 +74,7 @@ internal class OppdragBuilder(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         sisteArbeidsgiverdag?.let { sisteArbeidsgiverdag = dag.dato }
         tilstand = Avsluttet
@@ -88,12 +83,7 @@ internal class OppdragBuilder(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         tilstand.ikkeBetalingsdag()
     }
@@ -114,7 +104,7 @@ internal class OppdragBuilder(
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(dag: NavDag, dato: LocalDate, grad: Prosentdel, aktuellDagsinntekt: Double) {
+    private fun addLinje(dag: NavDag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
         arbeisdsgiverLinjer.add(
             0,
             Utbetalingslinje(
@@ -122,41 +112,41 @@ internal class OppdragBuilder(
                 dato,
                 dagStrategy(dag),
                 aktuellDagsinntekt.roundToInt(),
-                grad.toDouble(),
+                grad,
                 fagsystemId
             )
         )
     }
 
-    private fun addLinje(dag: NavHelgDag, dato: LocalDate, grad: Prosentdel) {
+    private fun addLinje(dag: NavHelgDag, dato: LocalDate, grad: Double) {
         arbeisdsgiverLinjer.add(
             0,
-            Utbetalingslinje(dato, dato, 0, 0, grad.toDouble(), fagsystemId)
+            Utbetalingslinje(dato, dato, 0, 0, grad, fagsystemId)
         )
     }
 
-    private interface Tilstand {
+    internal interface Tilstand {
         fun betalingsdag(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {}
         fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {}
         fun nyLinje(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {}
         fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {}
         fun ikkeBetalingsdag() {}
     }
@@ -165,7 +155,7 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -175,7 +165,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -185,7 +175,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             addLinje(dag, dato, grad)
             tilstand = LinjeUtenSats()
@@ -194,7 +184,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             addLinje(dag, dato, grad)
             tilstand = LinjeUtenSats()
@@ -209,7 +199,7 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             linje.fom = dag.dato
@@ -218,7 +208,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -227,7 +217,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             linje.fom = dag.dato
         }
@@ -235,7 +225,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             addLinje(dag, dato, grad)
             tilstand = LinjeUtenSats()
@@ -250,7 +240,7 @@ internal class OppdragBuilder(
         override fun betalingsdag(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             linje.beløp = dagStrategy(dag)
@@ -262,7 +252,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavDag,
             dato: LocalDate,
-            grad: Prosentdel,
+            grad: Double,
             aktuellDagsinntekt: Double
         ) {
             addLinje(dag, dato, grad, aktuellDagsinntekt)
@@ -272,7 +262,7 @@ internal class OppdragBuilder(
         override fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             linje.fom = dag.dato
         }
@@ -280,7 +270,7 @@ internal class OppdragBuilder(
         override fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
-            grad: Prosentdel
+            grad: Double
         ) {
             addLinje(dag, dato, grad)
         }

@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -69,12 +68,7 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: NavDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         if (dato >= alder.øvreAldersgrense) state(State.Karantene) else betalbarDager[dato] = dag
         state.betalbarDag(this, dato)
@@ -83,8 +77,7 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel
+        økonomi: Økonomi
     ) {
         oppholdsdag(dag.dato)
     }
@@ -92,8 +85,7 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         oppholdsdag(dag.dato)
     }
@@ -101,8 +93,7 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        aktuellDagsinntekt: Double
+        økonomi: Økonomi
     ) {
         oppholdsdag(dag.dato)
     }
@@ -118,12 +109,7 @@ internal class MaksimumSykepengedagerfilter(
     override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
-        økonomi: Økonomi,
-        grad: Prosentdel,
-        aktuellDagsinntekt: Double,
-        dekningsgrunnlag: Double,
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        økonomi: Økonomi
     ) {
         oppholdsdag(dag.dato)
     }

@@ -5,7 +5,6 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -211,8 +210,7 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            aktuellDagsinntekt: Double
+            økonomi: Økonomi
         ) {
             visitDag(dag)
         }
@@ -220,12 +218,7 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double,
-            arbeidsgiverbeløp: Int,
-            personbeløp: Int
+            økonomi: Økonomi
         ) {
             visitDag(dag)
         }
@@ -233,8 +226,7 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel
+            økonomi: Økonomi
         ) {
             visitDag(dag)
         }
@@ -242,8 +234,7 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            aktuellDagsinntekt: Double
+            økonomi: Økonomi
         ) {
             visitDag(dag)
         }
@@ -259,12 +250,7 @@ class UtbetalingshistorikkPeriodeTest {
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
             dato: LocalDate,
-            økonomi: Økonomi,
-            grad: Prosentdel,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double,
-            arbeidsgiverbeløp: Int,
-            personbeløp: Int
+            økonomi: Økonomi
         ) {
             visitDag(dag)
         }
