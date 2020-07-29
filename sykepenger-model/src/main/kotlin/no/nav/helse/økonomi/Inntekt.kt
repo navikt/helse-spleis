@@ -27,7 +27,7 @@ class Inntekt : Comparable<Inntekt>{
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
         internal val Number.årlig get() = Inntekt(this.toDouble())
-        internal val Number.daglig get() = Inntekt(this.toDouble() * 260)
+        val Number.daglig get() = Inntekt(this.toDouble() * 260)
 
         internal fun List<Inntekt>.summer(): Inntekt {
             return this.reduce { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }

@@ -206,8 +206,8 @@ internal class Utbetalingstidslinje private constructor(
             override val prioritet = 50
 
             companion object {
-                internal val arbeidsgiverBeløp = { dag: NavDag -> Økonomi.arbeidsgiverBeløp(dag.økonomi).tilDagligInt() }
-                internal val personBeløp = { dag: NavDag -> Økonomi.personBeløp(dag.økonomi).tilDagligInt() }
+                internal val arbeidsgiverBeløp = { dag: NavDag -> dag.økonomi.toMap()["arbeidsgiverbeløp"] as Int }
+                internal val personBeløp = { dag: NavDag -> dag.økonomi.toMap()["personbeløp"] as Int  }
             }
 
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)

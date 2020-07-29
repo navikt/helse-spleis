@@ -4,7 +4,7 @@ import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-internal class Prosentdel private constructor(private val brøkdel: Double): Comparable<Prosentdel> {
+class Prosentdel private constructor(private val brøkdel: Double): Comparable<Prosentdel> {
 
     init {
         require(brøkdel.toDouble() in 0.0..1.0) { "Må være prosent mellom 0 og 100" }
@@ -49,4 +49,4 @@ internal class Prosentdel private constructor(private val brøkdel: Double): Com
     internal fun erUnderGrensen() = this < GRENSE
 }
 
-internal val Number.prosent get() = Prosentdel.fraRatio(this.toDouble() / 100.0)
+val Number.prosent get() = Prosentdel.fraRatio(this.toDouble() / 100.0)
