@@ -8,11 +8,13 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.konverter
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
+import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
@@ -171,26 +173,35 @@ internal class Økonomi private constructor(
         "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.toDouble()
     )
 
-    private fun inntektMap(): Map<String, Any> = mapOf(
-        "dekningsgrunnlag" to dekningsgrunnlag!!.tilDagligDouble(),
-        "aktuellDagsinntekt" to aktuellDagsinntekt!!.tilDagligDouble()
-    )
+    private fun inntektMap(): Map<String, Double> = mapOf(
+        "dekningsgrunnlag" to dekningsgrunnlag!!,
+        "aktuellDagsinntekt" to aktuellDagsinntekt!!
+    ).konverter()
 
     private fun prosentIntMap(): Map<String, Int> = mapOf(
         "grad" to grad.roundToInt(),   // Must use instance value here
         "arbeidsgiverBetalingProsent" to arbeidsgiverBetalingProsent.roundToInt()
     )
 
-    private fun inntektIntMap(): Map<String, Int> = mapOf(
-        "dekningsgrunnlag" to dekningsgrunnlag!!.tilDagligInt(),
-        "aktuellDagsinntekt" to aktuellDagsinntekt!!.tilDagligInt()
-    )
+    private fun inntektIntMap(): Map<String, Int> = inntektMap().mapValues { it.value.roundToInt() }
 
-    private fun utbetalingMap() = mapOf(
+    private fun utbetalingMap() =
+        mapOf(
+            "arbeidsgiverbeløp" to arbeidsgiverbeløp!!,
+            "personbeløp" to personbeløp!!
+        )
+            .konverter()
+            .mapValues { it.value.roundToInt() }
+            .toMutableMap<String, Any>()
+            .also { it["er6GBegrenset"] = er6GBegrenset!! }
+
+    private fun utbetalingMap2() = mapOf(
         "arbeidsgiverbeløp" to arbeidsgiverbeløp!!.tilDagligInt(),
         "personbeløp" to personbeløp!!.tilDagligInt(),
         "er6GBegrenset" to er6GBegrenset!!
     )
+
+
 
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: NavDag, dato: LocalDate) =
         visitor.visit(dag, dato, this, grad, aktuellDagsinntekt?.tilDagligDouble() ?: 0.0, dekningsgrunnlag?.tilDagligDouble() ?: 0.0, arbeidsgiverbeløp?.tilDagligInt() ?: 0, personbeløp?.tilDagligInt() ?: 0)

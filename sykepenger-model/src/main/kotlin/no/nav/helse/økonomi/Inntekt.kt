@@ -33,16 +33,7 @@ class Inntekt : Comparable<Inntekt>{
             return this.reduce { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }
         }
 
-        internal fun Map<String, Any>.konverter(): Map<String, Any> {
-            return this
-                .toMutableMap()
-                .also {
-                    it.forEach { (key, value) ->
-                        if (value is Inntekt) it[key] = value.tilDagligDouble()
-                    }
-                }
-                .toMap()
-        }
+        internal fun Map<String, Inntekt>.konverter() = this.mapValues { it.value.tilDagligDouble() }
     }
 
     internal fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
