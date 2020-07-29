@@ -8,15 +8,11 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.fordele
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import java.time.LocalDate
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
@@ -128,7 +124,7 @@ internal class Økonomi private constructor(
                 .summer()
 
         internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
-            return økonomiList.map{ it.aktuellDagsinntekt!! }.summer() < alder.minimumInntekt(dato).daglig
+            return økonomiList.map{ it.aktuellDagsinntekt!! }.summer() < alder.minimumInntekt(dato)
         }
 
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =

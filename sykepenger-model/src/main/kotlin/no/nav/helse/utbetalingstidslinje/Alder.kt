@@ -36,7 +36,6 @@ internal class Alder(fødselsnummer: String) {
 
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdag, dato).toInt();
 
-    internal fun minimumInntekt(dato: LocalDate): Double {
-        return (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato).tilDagligInt().toDouble()
-    }
+    internal fun minimumInntekt(dato: LocalDate) =
+        (if (dato <= redusertYtelseAlder) Grunnbeløp.halvG else Grunnbeløp.`2G`).dagsats(dato)
 }

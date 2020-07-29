@@ -11,6 +11,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -239,7 +240,7 @@ private fun sykepengegrunnlagOppfylt(
     personalder: Alder,
     beregnetMånedsinntekt: Double?,
     førsteFraværsdag: LocalDate
-) = beregnetMånedsinntekt?.times(12)?.let {
+) = beregnetMånedsinntekt?.månedlig?.let {
     it > personalder.minimumInntekt(førsteFraværsdag)
 }
 

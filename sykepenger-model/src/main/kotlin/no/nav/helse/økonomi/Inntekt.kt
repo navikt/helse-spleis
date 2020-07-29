@@ -32,19 +32,18 @@ class Inntekt : Comparable<Inntekt>{
         internal fun List<Inntekt>.summer(): Inntekt {
             return this.reduce { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }
         }
-        internal fun List<Inntekt>.fordele(inntekt: Inntekt): List<Inntekt> {
-            if (inntekt.årlig == 0.0) return this
-            if (inntekt.årlig % 1.0 != 0.0) throw IllegalArgumentException("Inntekt som skal fordeles må være et rundt tall")
 
-            val nyeInnteker = mutableListOf<Inntekt>()
-            (0 until inntekt.årlig.toInt()).forEach { index ->
-                nyeInnteker.add(Inntekt(this[index % this.size].årlig + 1))
-            }
-            return nyeInnteker.toList()
+        internal fun Map<String, Any>.konverter(): Map<String, Any> {
+            return this
+                .toMutableMap()
+                .also {
+                    it.forEach { (key, value) ->
+                        if (value is Inntekt) it[key] = value.tilDagligDouble()
+                    }
+                }
+                .toMap()
         }
     }
-
-    // private constructor()
 
     internal fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
 
@@ -58,7 +57,7 @@ class Inntekt : Comparable<Inntekt>{
 
     internal operator fun div(prosentdel: Prosentdel) = Inntekt(this.årlig / prosentdel.ratio())
 
-    internal operator fun div(other: Inntekt) = Prosentdel.fraRatio(this.årlig / other.årlig)
+    internal operator fun div(other: Inntekt) = this.årlig / other.årlig
 
     internal operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
 
@@ -75,8 +74,6 @@ class Inntekt : Comparable<Inntekt>{
     override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
 
     internal fun tilDagligDouble() = årlig / 260.0
-
-    internal val erPositiv get() = årlig >= 0
 
     override fun toString(): String {
         return "[Årlig: $årlig, Måndelig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
