@@ -758,13 +758,13 @@ internal class JsonBuilder : PersonVisitor {
                     "type" to dag.toJsonType(),
                     "kilde" to kilde.toJson()
                 ).also { data ->
-                    økonomi?.mediatorDetails { grad,
-                                               arbeidsgiverBetalingProsent,
-                                               dekningsgrunnlag,
-                                               aktuellDagsinntekt,
-                                               arbeidsgiverbeløp,
-                                               personbeløp,
-                                               er6GBegrenset ->
+                    økonomi?.reflection { grad,
+                                          arbeidsgiverBetalingProsent,
+                                          dekningsgrunnlag,
+                                          aktuellDagsinntekt,
+                                          arbeidsgiverbeløp,
+                                          personbeløp,
+                                          er6GBegrenset ->
 
                         data.put("grad", grad)
                         data.put("arbeidsgiverBetalingProsent", arbeidsgiverBetalingProsent)

@@ -415,7 +415,11 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private fun assertDagsats(dagsats: Int) {
-        inspektør.navdager.forEach { assertEquals(dagsats, it.økonomi.toIntMap()["dekningsgrunnlag"]) }
+        inspektør.navdager.forEach {
+            it.økonomi.reflectionRounded { _, _, dekningsgrunnlag, _, _, _, _ ->
+                assertEquals(dagsats, dekningsgrunnlag)
+            }
+        }
     }
 
     private fun Sykdomstidslinje.utbetalingslinjer(

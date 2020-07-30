@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.roundToInt
 
 
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -660,13 +661,15 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            utbetalingstidslinjeMap.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.Arbeidsdag,
-                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
-                    dato = dato
+            økonomi.reflectionRounded { _, aktuellDagsinntekt ->
+                utbetalingstidslinjeMap.add(
+                    UtbetalingsdagDTO(
+                        type = TypeDataDTO.Arbeidsdag,
+                        inntekt = aktuellDagsinntekt!!,
+                        dato = dato
+                    )
                 )
-            )
+            }
         }
 
         override fun visit(
@@ -674,13 +677,15 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            utbetalingstidslinjeMap.add(
-                UtbetalingsdagDTO(
-                    type = TypeDataDTO.ArbeidsgiverperiodeDag,
-                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
-                    dato = dato
+            økonomi.reflectionRounded { _, aktuellDagsinntekt ->
+                utbetalingstidslinjeMap.add(
+                    UtbetalingsdagDTO(
+                        type = TypeDataDTO.ArbeidsgiverperiodeDag,
+                        inntekt = aktuellDagsinntekt!!,
+                        dato = dato
+                    )
                 )
-            )
+            }
         }
 
         override fun visit(
@@ -688,16 +693,24 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            utbetalingstidslinjeMap.add(
-                NavDagDTO(
-                    type = TypeDataDTO.NavDag,
-                    inntekt = økonomi.toIntMap()["aktuellDagsinntekt"] as Int,
-                    dato = dato,
-                    utbetaling = økonomi.toIntMap()["arbeidsgiverbeløp"] as Int,
-                    grad = økonomi.toMap()["grad"] as Double
+            økonomi.reflection { grad,
+                                 arbeidsgiverBetalingProsent,
+                                 dekningsgrunnlag,
+                                 aktuellDagsinntekt,
+                                 arbeidsgiverbeløp,
+                                 personbeløp,
+                                 er6GBegrenset ->
+                utbetalingstidslinjeMap.add(
+                    NavDagDTO(
+                        type = TypeDataDTO.NavDag,
+                        inntekt = aktuellDagsinntekt!!.roundToInt(),
+                        dato = dato,
+                        utbetaling = arbeidsgiverbeløp!!,
+                        grad = grad
+                    )
                 )
-            )
-            utbetalinger.add(økonomi.toIntMap()["arbeidsgiverbeløp"] as Int)
+                utbetalinger.add(arbeidsgiverbeløp)
+            }
         }
 
         override fun visit(
@@ -705,14 +718,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            utbetalingstidslinjeMap.add(
-                UtbetalingsdagMedGradDTO(
-                    type = TypeDataDTO.NavHelgDag,
-                    inntekt = 0,   // Speil needs zero here
-                    dato = dato,
-                    grad = økonomi.toMap()["grad"] as Double
+            økonomi.reflection { grad, _ ->
+                utbetalingstidslinjeMap.add(
+                    UtbetalingsdagMedGradDTO(
+                        type = TypeDataDTO.NavHelgDag,
+                        inntekt = 0,   // Speil needs zero here
+                        dato = dato,
+                        grad = grad
+                    )
                 )
-            )
+            }
         }
 
         override fun visit(

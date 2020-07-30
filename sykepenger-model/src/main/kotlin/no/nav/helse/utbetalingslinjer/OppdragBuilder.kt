@@ -16,7 +16,7 @@ internal class OppdragBuilder(
     private val orgnummer: String,
     private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
-    private val dagStrategy: UtbetalingStrategy = NavDag.arbeidsgiverBeløp
+    private val dagStrategy: UtbetalingStrategy = NavDag.reflectedArbeidsgiverBeløp
 ) : UtbetalingsdagVisitor {
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
@@ -41,9 +41,9 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.mediatorDetails { grad, aktuellDagsinntekt ->
-            if (arbeisdsgiverLinjer.isEmpty()) return@mediatorDetails tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag)))
+        økonomi.reflection { grad, aktuellDagsinntekt ->
+            if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+            if (grad == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -55,7 +55,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.mediatorDetails { grad, _ ->
+        økonomi.reflection { grad, _ ->
             if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else
@@ -110,7 +110,7 @@ internal class OppdragBuilder(
             Utbetalingslinje(
                 dato,
                 dato,
-                dagStrategy(dag),
+                dagStrategy(dag.økonomi),
                 aktuellDagsinntekt.roundToInt(),
                 grad,
                 fagsystemId
@@ -243,7 +243,7 @@ internal class OppdragBuilder(
             grad: Double,
             aktuellDagsinntekt: Double
         ) {
-            linje.beløp = dagStrategy(dag)
+            linje.beløp = dagStrategy(dag.økonomi)
             linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
             linje.fom = dag.dato
             tilstand = LinjeMedSats()

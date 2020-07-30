@@ -138,9 +138,7 @@ internal class Økonomi private constructor(
 
     internal fun toMap(): Map<String, Any> = tilstand.toMap(this)
 
-    internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
-
-    internal fun mediatorDetails( block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> Unit) {
+    internal fun reflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> Unit) {
         toMap().also {
                 map ->
             block(
@@ -155,14 +153,41 @@ internal class Økonomi private constructor(
         }
     }
 
-    internal fun mediatorDetails(block: (Double, Double?) -> Unit) {
-        mediatorDetails { grad: Double,
-                          arbeidsgiverBetalingProsent: Double,
-                          dekningsgrunnlag: Double?,
-                          aktuellDagsinntekt: Double?,
-                          arbeidsgiverbeløp: Int?,
-                          personbeløp: Int?,
-                          er6GBegrenset: Boolean? ->
+    internal fun <R> reflectionRounded(block: (Int, Int, Int?, Int?, Int?, Int?, Boolean?) -> R): R{
+        tilstand.toIntMap(this).let {
+                map ->
+           return block(
+                map["grad"] as Int,
+                map["arbeidsgiverBetalingProsent"] as Int,
+                map["dekningsgrunnlag"] as Int?,
+                map["aktuellDagsinntekt"] as Int?,
+                map["arbeidsgiverbeløp"] as Int?,
+                map["personbeløp"] as Int?,
+                map["er6GBegrenset"] as Boolean?
+            )
+        }
+    }
+
+    internal fun reflection(block: (Double, Double?) -> Unit) {
+        reflection { grad: Double,
+                     arbeidsgiverBetalingProsent: Double,
+                     dekningsgrunnlag: Double?,
+                     aktuellDagsinntekt: Double?,
+                     arbeidsgiverbeløp: Int?,
+                     personbeløp: Int?,
+                     er6GBegrenset: Boolean? ->
+            block(grad, aktuellDagsinntekt)
+        }
+    }
+
+    internal fun reflectionRounded(block: (Int, Int?) -> Unit) {
+        reflectionRounded { grad: Int,
+                            arbeidsgiverBetalingProsent: Int,
+                            dekningsgrunnlag: Int?,
+                            aktuellDagsinntekt: Int?,
+                            arbeidsgiverbeløp: Int?,
+                            personbeløp: Int?,
+                            er6GBegrenset: Boolean? ->
             block(grad, aktuellDagsinntekt)
         }
     }

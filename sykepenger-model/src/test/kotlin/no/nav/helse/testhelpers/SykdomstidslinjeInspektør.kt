@@ -30,8 +30,10 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     }
 
     private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        this.grader[dato] = økonomi.toIntMap().getValue("grad") as Int
-        set(dag, dato, kilde)
+        økonomi.reflectionRounded {
+            grad, _ -> this.grader[dato] = grad
+            set(dag, dato, kilde)
+        }
     }
 
     private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {

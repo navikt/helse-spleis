@@ -129,12 +129,14 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `toIntMap med dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig).toIntMap().apply {
-            assertEquals(80, this["grad"])
-            assertEquals(100, this["arbeidsgiverBetalingProsent"])
-            assertEquals(1200, this["dekningsgrunnlag"])
-        }
+    @Test
+    fun `toIntMap med dekningsgrunnlag`() {
+        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig)
+            .reflectionRounded { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _ ->
+                assertEquals(80, grad)
+                assertEquals(100, arbeidsgiverBetalingProsent)
+                assertEquals(1200, dekningsgrunnlag)
+            }
     }
 
     @Test fun `kan beregne betaling bare en gang`() {
@@ -146,19 +148,19 @@ internal class ØkonomiTest {
     @Test fun `Beregn utbetaling når mindre enn 6G`() {
         80.prosent.sykdomsgrad.inntekt(1200.daglig).also {
             listOf(it).betal(1.januar)
-            it.toMap().apply {
-                assertEquals(80.0, this["grad"])
-                assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
-                assertEquals(1200.0, this["dekningsgrunnlag"])
-                assertEquals(960, this["arbeidsgiverbeløp"])
-                assertEquals(0, this["personbeløp"])
+            it.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
+                assertEquals(80.0, grad)
+                assertEquals(100.0, arbeidsgiverBetalingProsent)
+                assertEquals(1200.0, dekningsgrunnlag)
+                assertEquals(960, arbeidsgiverbeløp)
+                assertEquals(0, personbeløp)
             }
-            it.toIntMap().apply {
-                assertEquals(80, this["grad"])
-                assertEquals(100, this["arbeidsgiverBetalingProsent"])
-                assertEquals(1200, this["dekningsgrunnlag"])
-                assertEquals(960, this["arbeidsgiverbeløp"])
-                assertEquals(0, this["personbeløp"])
+            it.reflectionRounded { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
+            assertEquals(80, grad)
+                assertEquals(100, arbeidsgiverBetalingProsent)
+                assertEquals(1200, dekningsgrunnlag)
+                assertEquals(960, arbeidsgiverbeløp)
+                assertEquals(0, personbeløp)
             }
         }
     }
@@ -166,12 +168,12 @@ internal class ØkonomiTest {
     @Test fun `arbeidsgiver og person splittes tilsvarer totalt`() {
         Økonomi.sykdomsgrad(100.prosent, 50.prosent).inntekt(999.daglig).also {
             listOf(it).betal(1.januar)
-            it.toMap().apply {
-                assertEquals(100.0, this["grad"])
-                assertEquals(50.0, this["arbeidsgiverBetalingProsent"])
-                assertEquals(999.0, this["dekningsgrunnlag"])
-                assertEquals(500, this["arbeidsgiverbeløp"])
-                assertEquals(499, this["personbeløp"])
+            it.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, arbeidsgiverbeløp, personbeløp, _ ->
+            assertEquals(100.0, grad)
+                assertEquals(50.0, arbeidsgiverBetalingProsent)
+                assertEquals(999.0, dekningsgrunnlag)
+                assertEquals(500, arbeidsgiverbeløp)
+                assertEquals(499, personbeløp)
             }
         }
     }
