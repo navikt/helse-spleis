@@ -41,12 +41,12 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.mediatorDetails { grad, _, _, aktuellDagsinntekt, _, _, _ ->
-            if (arbeisdsgiverLinjer.isEmpty()) return@mediatorDetails tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
+        økonomi.mediatorDetails { grad, aktuellDagsinntekt ->
+            if (arbeisdsgiverLinjer.isEmpty()) return@mediatorDetails tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
             if (grad == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag)))
-                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt)
+                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
-                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt)
+                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
         }
     }
 
@@ -55,7 +55,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        økonomi.mediatorDetails { grad, _, _, aktuellDagsinntekt, _, _, _ ->
+        økonomi.mediatorDetails { grad, _ ->
             if (arbeisdsgiverLinjer.isEmpty() || grad != linje.grad)
                 tilstand.nyLinje(dag, dato, grad)
             else

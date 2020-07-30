@@ -33,8 +33,8 @@ internal class Inntekthistorikk {
 
     internal fun sykepengegrunnlag(dato: LocalDate) = Inntektsendring.sykepengegrunnlag(inntekter, dato)
 
-    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Double =
-        inntekt(dato)?.times(regler.dekningsgrad())?.tilDagligDouble() ?: 0.0
+    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
+        inntekt(dato)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
 
     internal class Inntektsendring(
         private val fom: LocalDate,

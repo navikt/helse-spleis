@@ -90,8 +90,12 @@ internal class JsonBuilder : PersonVisitor {
         currentState.postVisitInntekthistorikk(inntekthistorikk)
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) = currentState.visitInntekt(inntektsendring, id)
-    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) = currentState.preVisitTidslinjer(tidslinjer)
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) =
+        currentState.visitInntekt(inntektsendring, id)
+
+    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
+        currentState.preVisitTidslinjer(tidslinjer)
+
     override fun preVisit(tidslinje: Utbetalingstidslinje) =
         currentState.preVisit(tidslinje)
 
@@ -154,10 +158,18 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisit(tidslinje: Utbetalingstidslinje) =
         currentState.postVisit(tidslinje)
 
-    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitPerioder(vedtaksperioder)
-    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitPerioder(vedtaksperioder)
-    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.preVisitForkastedePerioder(vedtaksperioder)
-    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) = currentState.postVisitForkastedePerioder(vedtaksperioder)
+    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
+        currentState.preVisitPerioder(vedtaksperioder)
+
+    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
+        currentState.postVisitPerioder(vedtaksperioder)
+
+    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+        currentState.preVisitForkastedePerioder(vedtaksperioder)
+
+    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+        currentState.postVisitForkastedePerioder(vedtaksperioder)
+
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -166,7 +178,14 @@ internal class JsonBuilder : PersonVisitor {
         periode: Periode,
         hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, hendelseIder)
+        currentState.preVisitVedtaksperiode(
+            vedtaksperiode,
+            id,
+            arbeidsgiverNettoBeløp,
+            personNettoBeløp,
+            periode,
+            hendelseIder
+        )
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -224,8 +243,10 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
+
     override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
+
     override fun visitDag(
         dag: Arbeidsgiverdag,
         dato: LocalDate,
@@ -235,10 +256,13 @@ internal class JsonBuilder : PersonVisitor {
         kilde: Hendelseskilde
     ) =
         currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
+
     override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
+
     override fun visitDag(
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
@@ -248,6 +272,7 @@ internal class JsonBuilder : PersonVisitor {
         kilde: Hendelseskilde
     ) =
         currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+
     override fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
@@ -257,6 +282,7 @@ internal class JsonBuilder : PersonVisitor {
         kilde: Hendelseskilde
     ) =
         currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+
     override fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
@@ -266,6 +292,7 @@ internal class JsonBuilder : PersonVisitor {
         kilde: Hendelseskilde
     ) =
         currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+
     override fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
@@ -275,6 +302,7 @@ internal class JsonBuilder : PersonVisitor {
         kilde: Hendelseskilde
     ) =
         currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
 
@@ -730,8 +758,23 @@ internal class JsonBuilder : PersonVisitor {
                     "type" to dag.toJsonType(),
                     "kilde" to kilde.toJson()
                 ).also { data ->
-                    økonomi?.let { data.putAll(økonomi.toMap())}
-                    melding?.let { data["melding"] = it }
+                    økonomi?.mediatorDetails { grad,
+                                               arbeidsgiverBetalingProsent,
+                                               dekningsgrunnlag,
+                                               aktuellDagsinntekt,
+                                               arbeidsgiverbeløp,
+                                               personbeløp,
+                                               er6GBegrenset ->
+
+                        data.put("grad", grad)
+                        data.put("arbeidsgiverBetalingProsent", arbeidsgiverBetalingProsent)
+                        dekningsgrunnlag?.also { data.put("dekningsgrunnlag", it) }
+                        aktuellDagsinntekt?.also { data.put("aktuellDagsinntekt", it) }
+                        arbeidsgiverbeløp?.also { data.put("arbeidsgiverbeløp", it) }
+                        personbeløp?.also { data.put("personbeløp", it) }
+                        er6GBegrenset?.also { data.put("er6GBegrenset", it) }
+                        melding?.let { data["melding"] = it }
+                    }
                 }
             )
         }

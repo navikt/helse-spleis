@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -29,7 +30,7 @@ internal class CreateØkonomiTest {
             }
             // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
-            assertDoesNotThrow { økonomi.inntekt(1200) }
+            assertDoesNotThrow { økonomi.inntekt(1200.daglig) }
         }
     }
 
@@ -47,7 +48,7 @@ internal class CreateØkonomiTest {
                 assertNull(map["er6GBegrenset"])
             }
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig) }
             assertDoesNotThrow { listOf(økonomi).betal(1.januar) }
         }
     }
@@ -66,7 +67,7 @@ internal class CreateØkonomiTest {
                 assertTrue(map["er6GBegrenset"] as Boolean)
             }
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig) }
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
         }
     }

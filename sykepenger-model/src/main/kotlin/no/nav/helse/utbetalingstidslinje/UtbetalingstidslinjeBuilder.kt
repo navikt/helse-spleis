@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -27,8 +28,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private var ikkeSykedager = 0
     private var fridager = 0
 
-    private var dekningsgrunnlag = 0.0
-    private var aktuellDagsinntekt = 0.0
+    private var dekningsgrunnlag = INGEN
+    private var aktuellDagsinntekt = INGEN
 
     private val tidslinje = Utbetalingstidslinje()
 
@@ -130,7 +131,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     private fun oppdatereInntekt(dato: LocalDate) {
         dekningsgrunnlag = inntekthistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
-        aktuellDagsinntekt = inntekthistorikk.inntekt(dato)?.tilDagligDouble() ?: 0.0
+        aktuellDagsinntekt = inntekthistorikk.inntekt(dato) ?: INGEN
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {
@@ -147,7 +148,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun håndterNAVHelgedag(dato: LocalDate, økonomi: Økonomi) {
-        tidslinje.addHelg(dato, økonomi.inntekt(0))
+        tidslinje.addHelg(dato, økonomi.inntekt(INGEN))
     }
 
     private fun håndterArbeidsdag(dato: LocalDate) {

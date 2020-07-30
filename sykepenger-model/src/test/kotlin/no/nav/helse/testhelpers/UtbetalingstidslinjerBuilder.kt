@@ -2,6 +2,7 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -12,7 +13,7 @@ internal fun tidslinjeOf(
 ) = Utbetalingstidslinje().apply {
     utbetalingsdager.fold(startDato){ startDato, (antallDager, utbetalingsdag, dekningsgrunnlag, grad) ->
         (0 until antallDager).forEach {
-            this.utbetalingsdag(startDato.plusDays(it.toLong()), Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag))
+            this.utbetalingsdag(startDato.plusDays(it.toLong()), Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
         }
         startDato.plusDays(antallDager.toLong())
     }

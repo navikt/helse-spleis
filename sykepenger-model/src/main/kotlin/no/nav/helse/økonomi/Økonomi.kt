@@ -7,30 +7,23 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.konverter
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
-import kotlin.Double.Companion.NEGATIVE_INFINITY
-import kotlin.Double.Companion.NaN
-import kotlin.Double.Companion.POSITIVE_INFINITY
 import kotlin.math.roundToInt
 
 internal class Økonomi private constructor(
     private val grad: Prosentdel,
     private val arbeidsgiverBetalingProsent: Prosentdel,
-    aktuellDagsinntekt: Double? = null,
-    dekningsgrunnlag: Double? = null,
-    arbeidsgiverbeløp: Int? = null,
-    personbeløp: Int? = null,
+    private var aktuellDagsinntekt: Inntekt? = null,
+    private var dekningsgrunnlag: Inntekt? = null,
+    private var arbeidsgiverbeløp: Inntekt? = null,
+    private var personbeløp: Inntekt? = null,
     private var er6GBegrenset: Boolean? = null,
     private var tilstand: Tilstand = Tilstand.KunGrad
 ) {
-
-    private var aktuellDagsinntekt: Inntekt? = aktuellDagsinntekt?.daglig
-    private var dekningsgrunnlag: Inntekt? = dekningsgrunnlag?.daglig
-    private var arbeidsgiverbeløp: Inntekt? = arbeidsgiverbeløp?.daglig
-    private var personbeløp: Inntekt? = personbeløp?.daglig
 
     companion object {
         internal val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
@@ -133,17 +126,10 @@ internal class Økonomi private constructor(
             økonomiList.any { it.er6GBegrenset() }
     }
 
-    internal fun inntekt(aktuellDagsinntekt: Number, dekningsgrunnlag: Number = aktuellDagsinntekt): Økonomi =
-        dekningsgrunnlag.toDouble().let {
-            require(it >= 0) { "dekningsgrunnlag kan ikke være negativ" }
-            require(
-                it !in listOf(
-                    POSITIVE_INFINITY,
-                    NEGATIVE_INFINITY,
-                    NaN
-                )
-            ) { "dekningsgrunnlag må være gyldig positivt nummer" }
-            tilstand.inntekt(this, aktuellDagsinntekt.toDouble(), it)
+    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt): Økonomi =
+        dekningsgrunnlag.let {
+            require(it >= INGEN) { "dekningsgrunnlag kan ikke være negativ" }
+            tilstand.inntekt(this, aktuellDagsinntekt, it)
         }
 
     internal fun lås() = tilstand.lås(this)
@@ -154,18 +140,30 @@ internal class Økonomi private constructor(
 
     internal fun toIntMap(): Map<String, Any> = tilstand.toIntMap(this)
 
-    internal fun mediatorDetails( block: (Double, Double, Double, Double, Int, Int, Boolean) -> Unit) {
+    internal fun mediatorDetails( block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> Unit) {
         toMap().also {
                 map ->
             block(
                 map["grad"] as Double,
                 map["arbeidsgiverBetalingProsent"] as Double,
-                map["dekningsgrunnlag"] as Double,
-                map["aktuellDagsinntekt"] as Double,
-                map["arbeidsgiverbeløp"] as Int,
-                map["personbeløp"] as Int,
-                map["er6GBegrenset"] as Boolean
+                map["dekningsgrunnlag"] as Double?,
+                map["aktuellDagsinntekt"] as Double?,
+                map["arbeidsgiverbeløp"] as Int?,
+                map["personbeløp"] as Int?,
+                map["er6GBegrenset"] as Boolean?
             )
+        }
+    }
+
+    internal fun mediatorDetails(block: (Double, Double?) -> Unit) {
+        mediatorDetails { grad: Double,
+                          arbeidsgiverBetalingProsent: Double,
+                          dekningsgrunnlag: Double?,
+                          aktuellDagsinntekt: Double?,
+                          arbeidsgiverbeløp: Int?,
+                          personbeløp: Int?,
+                          er6GBegrenset: Boolean? ->
+            block(grad, aktuellDagsinntekt)
         }
     }
 
@@ -271,8 +269,8 @@ internal class Økonomi private constructor(
 
         internal open fun inntekt(
             økonomi: Økonomi,
-            aktuellDagsinntekt: Double,
-            dekningsgrunnlag: Double
+            aktuellDagsinntekt: Inntekt,
+            dekningsgrunnlag: Inntekt
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt på dette tidspunktet")
         }
@@ -310,8 +308,8 @@ internal class Økonomi private constructor(
 
             override fun inntekt(
                 økonomi: Økonomi,
-                aktuellDagsinntekt: Double,
-                dekningsgrunnlag: Double
+                aktuellDagsinntekt: Inntekt,
+                dekningsgrunnlag: Inntekt
             ) =
                 Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag)
                     .also { other -> other.tilstand = HarInntekt }

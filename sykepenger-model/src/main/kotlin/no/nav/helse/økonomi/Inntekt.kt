@@ -34,6 +34,8 @@ class Inntekt : Comparable<Inntekt>{
         }
 
         internal fun Map<String, Inntekt>.konverter() = this.mapValues { it.value.tilDagligDouble() }
+
+        internal val INGEN = 0.daglig
     }
 
     internal fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()

@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -67,7 +68,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun addUkjentDag(dato: LocalDate) =
-        Økonomi.ikkeBetalt().inntekt(0).let { økonomi ->
+        Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN).let { økonomi ->
             if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
         }
 
@@ -161,7 +162,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal operator fun get(dato: LocalDate) =
         if (dato in førsteDato()..sisteDato()) utbetalingsdager.first { it.dato == dato }
-        else UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(0))
+        else UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN))
 
     override fun toString(): String {
         return utbetalingsdager.joinToString(separator = "") {

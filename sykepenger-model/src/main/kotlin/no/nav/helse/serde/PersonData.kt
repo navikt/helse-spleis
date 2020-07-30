@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -667,10 +668,10 @@ internal data class PersonData(
                 .call(
                     grad?.prosent,
                     arbeidsgiverBetalingProsent?.prosent,
-                    aktuellDagsinntekt,
-                    dekningsgrunnlag,
-                    arbeidsgiverbeløp,
-                    personbeløp,
+                    aktuellDagsinntekt.daglig,
+                    dekningsgrunnlag.daglig,
+                    arbeidsgiverbeløp?.daglig,
+                    personbeløp?.daglig,
                     er6GBegrenset,
                     when {
                         arbeidsgiverbeløp == null && type == TypeData.AvvistDag -> Økonomi.Tilstand.Låst
