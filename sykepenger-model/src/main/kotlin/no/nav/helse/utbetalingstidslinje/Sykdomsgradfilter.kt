@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class Sykdomsgradfilter(
@@ -12,21 +13,14 @@ internal class Sykdomsgradfilter(
 ) {
 
     internal fun filter() {
-        var harForLavSykdomsgrad = false
-        val avvisteDager = mutableListOf<LocalDate>()
-        var currentDate = periode.start
-        while (!currentDate.isAfter(periode.endInclusive)) {
-            if (harForLavSykdomsgrad || sykdomsgrader[currentDate] < 20.0) {
-                harForLavSykdomsgrad = true
-                avvisteDager.add(currentDate)
-            }
-            currentDate = currentDate.plusDays(1)
+        val avvisteDager = periode.filter{dato ->
+            Økonomi.sykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen()
         }
         tidslinjer.forEach { it.avvis(avvisteDager, Begrunnelse.MinimumSykdomsgrad) }
-        if (harForLavSykdomsgrad)
-            aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20%%")
-        else
+        if (avvisteDager.isEmpty())
             aktivitetslogg.info("Ingen avviste dager på grunn av 20%% samlet sykdomsgrad-regel")
+        else
+            aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20%%")
     }
 
 }
