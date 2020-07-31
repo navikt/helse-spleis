@@ -207,6 +207,19 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `fom og tom endres medfører implisit annullering av linjer etter tom hos Oppdrag`() {
+        val original = linjer(5.januar to 10.januar)
+        val recalculated = linjer(1.januar to 3.januar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(1.januar to 3.januar), actual)
+        assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(Endringskode.NY, actual[0].endringskode)
+        assertEquals(original[0].id + 1, actual[0].id)
+        assertEquals(original[0].id, actual[0].refId)
+    }
+
+    @Test
     internal fun `potpourri 3`() {
         val original = linjer(
             1.januar to 5.januar,

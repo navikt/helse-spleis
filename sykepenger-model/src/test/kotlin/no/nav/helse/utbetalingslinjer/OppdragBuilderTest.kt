@@ -141,6 +141,14 @@ internal class OppdragBuilderTest {
         assertLinje(1, 4.januar, 9.januar, sats = (1500 * 0.8).toInt(), grad = 80.0)
     }
 
+    @Test
+    fun `Utbetalingslinje kan starte og ende på helgedag`() {
+        opprett(1.AP, 1.FRI, 1.HELG, 5.NAV, 2.HELG)
+
+        assertEquals(1, oppdrag.size)
+        assertLinje(0, 3.januar, 10.januar, null)
+    }
+
     private fun assertLinje(
         index: Int,
         fom: LocalDate,

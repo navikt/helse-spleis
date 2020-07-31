@@ -43,6 +43,7 @@ internal class Sykdomshistorikk private constructor(
     internal fun fjernDager(periode: Periode) {
         // TODO: Remove size == 0 whenever migration is done
         if (size == 0 || sykdomstidslinje().length() == 0) return
+        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return
         elementer.add(0, Element.opprettReset(this, periode))
     }
 
