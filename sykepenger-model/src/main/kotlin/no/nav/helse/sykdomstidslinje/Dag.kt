@@ -22,6 +22,11 @@ internal sealed class Dag(
             )
         }
 
+        internal val override: BesteStrategy = { venstre: Dag, høyre: Dag ->
+            require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
+            høyre
+        }
+
         internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             ProblemDag(

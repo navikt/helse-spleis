@@ -212,6 +212,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode,
+        opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) {
         currentState.preVisitVedtaksperiode(
@@ -220,6 +221,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             periode,
+            opprinneligPeriode,
             hendelseIder
         )
     }
@@ -273,14 +275,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        opprinneligPeriode: Periode
     ) =
         currentState.postVisitVedtaksperiode(
             vedtaksperiode,
             id,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
-            periode
+            periode,
+            opprinneligPeriode
         )
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
@@ -487,6 +491,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode,
+            opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
         ) {
             pushState(
@@ -597,7 +602,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
-            periode: Periode
+            periode: Periode,
+            opprinneligPeriode: Periode
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
             vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()

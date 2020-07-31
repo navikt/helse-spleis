@@ -1434,7 +1434,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sykmelding i omvendt rekkefølge`() {
+    fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -1648,7 +1648,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ny sykmelding for tidligere periode kaster alle etterfølgende perioder i søppelkassa`() {
+    fun `ny sykmelding for tidligere periode håndteres`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -1656,30 +1656,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Test`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 28.mars, 100))
-        håndterInntektsmelding(listOf(Periode(1.mars, 16.mars)), førsteFraværsdag = 1.mars)
+    fun `Replay med gap hvor første periode er utbetalt skal opprette ny periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar,100)) //Initierer replay av tidligere periode
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars,100))
-        håndterSøknad(Sykdom(1.mars, 28.mars,100))
-        håndterInntektsmelding(listOf(Periode(1.mars, 16.mars)), førsteFraværsdag = 1.mars)
-
-        håndterSøknad(Sykdom(1.januar, 30.januar, 100))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-
-        håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0)
         håndterSimulering(0)
         håndterUtbetalingsgodkjenning(0, true)
-        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.OVERFØRT)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar,100)) // Initierer replay av tidligere periode
+        håndterSøknad(Sykdom(1.januar, 30.januar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
     }
 
     @Test

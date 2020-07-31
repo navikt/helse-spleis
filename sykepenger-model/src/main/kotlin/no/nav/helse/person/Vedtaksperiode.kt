@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.BistandSaksbehandler
@@ -51,6 +50,7 @@ internal class Vedtaksperiode private constructor(
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
     private var periode: Periode,
+    private var opprinneligPeriode: Periode,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
     private var personNettoBeløp: Int,
@@ -87,6 +87,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje = Sykdomstidslinje(),
         hendelseIder = mutableListOf(),
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
+        opprinneligPeriode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
         personNettoBeløp = 0,
@@ -95,7 +96,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, hendelseIder)
+        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder)
         sykdomstidslinje.accept(visitor)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
@@ -110,7 +111,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -230,7 +231,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun etterfølgesAv(other: Vedtaksperiode) = this.periode.etterfølgesAv(other.periode)
 
-    internal fun starterSenereEnn(other: Vedtaksperiode) = this.periode.start > other.periode.start
+    private fun starterSenereEnn(other: Vedtaksperiode) = this.opprinneligPeriode.start > other.opprinneligPeriode.start
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
@@ -290,6 +291,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun periode() = periode
+    internal fun opprinneligPeriode() = opprinneligPeriode
 
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
         if (hendelse.valider(periode).hasErrors())
@@ -302,8 +304,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(this.tilstand)
     }
 
-    private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) =
-        hendelse.erRelevant(this.periode())
+    private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.opprinneligPeriode)
 
     private fun tilstand(
         event: PersonHendelse,
@@ -349,6 +350,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: Sykmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.periode()
+        opprinneligPeriode = hendelse.periode()
         oppdaterHistorikk(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
@@ -592,6 +594,15 @@ internal class Vedtaksperiode private constructor(
         }
     }
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
+
+    internal fun erAvsluttetEllerTilUtbetaling() =
+        when (tilstand) {
+            TilUtbetaling,
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvsluttetUtenUtbetalingMedInntektsmelding -> true
+            else -> false
+        }
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {

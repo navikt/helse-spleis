@@ -155,6 +155,7 @@ internal class VilkårsgrunnlagTest {
                 arbeidsgiverNettoBeløp: Int,
                 personNettoBeløp: Int,
                 periode: Periode,
+                opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>
             ) {
                 _id = id

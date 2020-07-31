@@ -6,7 +6,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
+import no.nav.helse.sykdomstidslinje.Dag.Companion.override
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -338,4 +338,4 @@ internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdo
     if (this.isEmpty()) Sykdomstidslinje()
     else reduce { result, tidslinje -> result.merge(tidslinje, beste) }
 
-internal fun List<Sykdomstidslinje>.join() = merge(noOverlap)
+internal fun List<Sykdomstidslinje>.join() = merge(override)

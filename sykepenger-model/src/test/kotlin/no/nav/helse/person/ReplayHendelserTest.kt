@@ -1,37 +1,16 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
-class ReplayHendelserTest {
-    companion object {
-        private const val aktørId = "aktørId"
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val ORGNUMMER = "12345"
-        private lateinit var førsteSykedag: LocalDate
-        private lateinit var sisteSykedag: LocalDate
-    }
-
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-    private lateinit var hendelse: ArbeidstakerHendelse
-
-    private val replayEvents = mutableListOf<PersonObserver.VedtaksperiodeReplayEvent>()
-
-    private val replayObserver = object : PersonObserver {
-        override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
-            replayEvents.add(event)
-        }
-    }
+class ReplayHendelserTest : HendelseTestHelper() {
 
     @BeforeEach
     internal fun opprettPerson() {
@@ -42,20 +21,60 @@ class ReplayHendelserTest {
         person.addObserver(replayObserver)
     }
 
-    @Test
-    fun `test`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100)))
-        assertEquals(1, replayEvents.size)
+
+    private val replayEvents = mutableListOf<PersonObserver.VedtaksperiodeReplayEvent>()
+    private val hendelseIderMap = mutableMapOf<Int, List<UUID>>()
+    private val vedtaksperiodeTeller = 0
+
+    private val replayObserver = object : PersonObserver {
+        override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
+            replayEvents.add(event)
+        }
     }
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "12345",
-            orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
-        )
+    private val personVisitor = object : PersonVisitor {
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>
+        ) {
+            hendelseIderMap[vedtaksperiodeTeller] = hendelseIder
+            vedtaksperiodeTeller.inc()
+        }
+    }
+
+    @Test
+    fun `ny, tidligere sykmelding medfører umiddelbar replay av etterfølgende perioder som ikke er avsluttet eller til utbetaling`() {
+        person.håndter(sykmelding(1.mars, 31.mars))
+        person.håndter(søknad(1.mars, 31.mars))
+
+        håndterGodkjenning(0)
+        person.accept(personVisitor)
+
+        assertEquals(1, replayEvents.size)
+        assertEquals(replayEvents[0].hendelseIder[0], hendelseIderMap[0]?.get(0))
+        assertEquals(replayEvents[0].hendelseIder[1], hendelseIderMap[0]?.get(1))
+    }
+
+    @Test
+    fun `ny, tidligere sykmelding medfører replay av etterfølgende perioder som er avsluttet eller til utbetaling først når ny periode er utbetalt`() {
+        håndterGodkjenning(0, 2.februar, 28.februar)
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
+
+        håndterGodkjenning(0)
+        person.accept(personVisitor)
+
+        assertEquals(0, replayEvents.size)
+
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
+        person.accept(personVisitor)
+
+        assertEquals(1, replayEvents.size)
+        assertEquals(replayEvents[0].hendelseIder[0], hendelseIderMap[0]?.get(0))
+        assertEquals(replayEvents[0].hendelseIder[1], hendelseIderMap[0]?.get(1))
+    }
 }

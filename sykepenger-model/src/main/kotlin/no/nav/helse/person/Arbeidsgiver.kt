@@ -320,9 +320,6 @@ internal class Arbeidsgiver private constructor(
     internal fun finnPåfølgendePeriode(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.etterfølgesAv(other) }
 
-    internal fun harPerioderSomStarterEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.any { it.starterSenereEnn(vedtaksperiode) }
-
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 

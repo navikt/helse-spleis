@@ -118,6 +118,7 @@ internal class TestArbeidsgiverInspektør(
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode,
+        opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) {
         inVedtaksperiode = true
@@ -144,7 +145,8 @@ internal class TestArbeidsgiverInspektør(
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        opprinneligPeriode: Periode
     ) {
         inVedtaksperiode = false
     }

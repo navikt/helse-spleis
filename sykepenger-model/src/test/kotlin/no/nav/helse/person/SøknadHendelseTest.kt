@@ -100,7 +100,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `To søknader uten overlapp`() {
+    fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(6.januar,  10.januar, 100)))

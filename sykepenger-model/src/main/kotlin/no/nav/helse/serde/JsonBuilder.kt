@@ -176,15 +176,10 @@ internal class JsonBuilder : PersonVisitor {
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         periode: Periode,
+        opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(
-            vedtaksperiode,
-            id,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            periode,
-            hendelseIder
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder
         )
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
@@ -237,9 +232,10 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
-        periode: Periode
+        periode: Periode,
+        opprinneligPeriode: Periode
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode)
+        currentState.postVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode)
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -438,11 +434,14 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             periode: Periode,
+            opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeMap["fom"] = periode.start
             vedtaksperiodeMap["tom"] = periode.endInclusive
+            vedtaksperiodeMap["opprinneligFom"] = opprinneligPeriode.start
+            vedtaksperiodeMap["opprinneligTom"] = opprinneligPeriode.endInclusive
             vedtaksperiodeMap["hendelseIder"] = hendelseIder
             vedtaksperioder.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
@@ -602,7 +601,8 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
-            periode: Periode
+            periode: Periode,
+            opprinneligPeriode: Periode
         ) {
             popState()
         }

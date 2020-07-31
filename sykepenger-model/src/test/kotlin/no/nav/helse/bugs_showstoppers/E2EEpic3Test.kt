@@ -948,8 +948,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    //TODO: WIP Testnavn reflekterer ikke replay
-    fun `Out of order sykmeldinger blir kastet ut og tar med alt etterfølgende`() {
+    fun `Håndterer ny sykmelding som ligger tidligere i tid`() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))

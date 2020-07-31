@@ -603,7 +603,8 @@ internal abstract class AbstractEndToEndTest {
             id: UUID,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
-            periode: Periode
+            periode: Periode,
+            opprinneligPeriode: Periode
         ) {
             vedtaksperioderIder[orgnummer to indeks] = id
             indeks++
