@@ -22,11 +22,11 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5, 66.67)
         createØkonomi(data).also { økonomi ->
-            økonomi.toMap().also { map ->
-                assertEquals(79.5, map["grad"])
-                assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertNull(map["dekningsgrunnlag"])
-                assertNull(map["aktuellDagsinntekt"])
+            økonomi.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
+                assertEquals(79.5, grad)
+                assertEquals(66.67, arbeidsgiverBetalingProsent)
+                assertNull(dekningsgrunnlag)
+                assertNull(aktuellDagsinntekt)
             }
             // Indirect test of Økonomi state is KunGrad
             assertThrows<IllegalStateException> { listOf(økonomi).betal(1.januar) }
@@ -38,14 +38,21 @@ internal class CreateØkonomiTest {
     fun `opprette med bare inntekt`() {
         val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6)
         createØkonomi(data).also { økonomi ->
-            økonomi.toMap().also { map ->
-                assertEquals(79.5, map["grad"])
-                assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1500.0, map["aktuellDagsinntekt"])
-                assertEquals(1199.6, map["dekningsgrunnlag"])
-                assertNull(map["arbeidsgiverbeløp"])
-                assertNull(map["personbeløp"])
-                assertNull(map["er6GBegrenset"])
+            økonomi.reflection {
+                    grad,
+                    arbeidsgiverBetalingProsent,
+                    dekningsgrunnlag,
+                    aktuellDagsinntekt,
+                    arbeidsgiverbeløp,
+                    personbeløp,
+                    er6GBegrenset ->
+                assertEquals(79.5, grad)
+                assertEquals(66.67, arbeidsgiverBetalingProsent)
+                assertEquals(1500.0, aktuellDagsinntekt)
+                assertEquals(1199.6, dekningsgrunnlag)
+                assertNull(arbeidsgiverbeløp)
+                assertNull(personbeløp)
+                assertNull(er6GBegrenset)
             }
             // Indirect test of Økonomi state is HarLønn
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig) }
@@ -57,14 +64,21 @@ internal class CreateØkonomiTest {
     fun `har betalinger`() {
         val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640, 320, true)
         createØkonomi(data).also { økonomi ->
-            økonomi.toMap().also { map ->
-                assertEquals(79.5, map["grad"])
-                assertEquals(66.67, map["arbeidsgiverBetalingProsent"])
-                assertEquals(1500.0, map["aktuellDagsinntekt"])
-                assertEquals(1199.6, map["dekningsgrunnlag"])
-                assertEquals(640, map["arbeidsgiverbeløp"])
-                assertEquals(320, map["personbeløp"])
-                assertTrue(map["er6GBegrenset"] as Boolean)
+            økonomi.reflection {
+                    grad,
+                    arbeidsgiverBetalingProsent,
+                    dekningsgrunnlag,
+                    aktuellDagsinntekt,
+                    arbeidsgiverbeløp,
+                    personbeløp,
+                    er6GBegrenset ->
+                assertEquals(79.5, grad)
+                assertEquals(66.67, arbeidsgiverBetalingProsent)
+                assertEquals(1500.0, aktuellDagsinntekt)
+                assertEquals(1199.6, dekningsgrunnlag)
+                assertEquals(640, arbeidsgiverbeløp)
+                assertEquals(320, personbeløp)
+                assertTrue(er6GBegrenset as Boolean)
             }
             // Indirect test of Økonomi state
             assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig) }

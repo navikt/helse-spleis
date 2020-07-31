@@ -389,7 +389,14 @@ internal class UtbetalingstidslinjeBuilderTest {
                 add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
             }
         )
-        assertNotEquals(0.0, inspektør.navdager.first().økonomi.toMap()["dekningsgrunnlag"])
+        assertNotEquals(
+            0.0,
+            inspektør
+                .navdager
+                .first()
+                .økonomi
+                .reflection { _, _, dekningsgrunnlag, _, _, _, _ -> dekningsgrunnlag }
+        )
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
 

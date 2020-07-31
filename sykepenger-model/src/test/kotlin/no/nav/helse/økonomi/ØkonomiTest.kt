@@ -113,20 +113,24 @@ internal class ØkonomiTest {
         }
     }
 
-    @Test fun `toMap uten dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad.toMap().apply {
-            assertEquals(79.5, this["grad"])
-            assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
-            assertNull(this["dekningsgrunnlag"])
-        }
+    @Test
+    fun `toMap uten dekningsgrunnlag`() {
+        79.5.prosent.sykdomsgrad
+            .reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _ ->
+                assertEquals(79.5, grad)
+                assertEquals(100.0, arbeidsgiverBetalingProsent)
+                assertNull(dekningsgrunnlag)
+            }
     }
 
-    @Test fun `toMap med dekningsgrunnlag`() {
-        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig).toMap().apply {
-            assertEquals(79.5, this["grad"])
-            assertEquals(100.0, this["arbeidsgiverBetalingProsent"])
-            assertEquals(1200.4, this["dekningsgrunnlag"])
-        }
+    @Test
+    fun `toMap med dekningsgrunnlag`() {
+        79.5.prosent.sykdomsgrad.inntekt(1200.4.daglig)
+            .reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, _, _ ->
+                assertEquals(79.5, grad)
+                assertEquals(100.0, arbeidsgiverBetalingProsent)
+                assertEquals(1200.4, dekningsgrunnlag)
+            }
     }
 
     @Test
@@ -281,9 +285,9 @@ internal class ØkonomiTest {
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Int, expectedPerson: Int) {
-        økonomi.toMap().also { map ->
-            assertEquals(expectedArbeidsgiver, map["arbeidsgiverbeløp"], "arbeidsgiverbeløp problem")
-            assertEquals(expectedPerson, map["personbeløp"], "personbeløp problem")
+        økonomi.reflection { _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
+            assertEquals(expectedArbeidsgiver, arbeidsgiverbeløp, "arbeidsgiverbeløp problem")
+            assertEquals(expectedPerson, personbeløp, "personbeløp problem")
         }
     }
 }

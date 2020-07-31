@@ -99,9 +99,16 @@ internal class ØkonomiDagTest {
 
     private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Int, personbeløp: Int = 0) {
         tidslinje.forEach {
-            it.økonomi.toMap().also { map ->
-                assertEquals(arbeidsgiverbeløp, map["arbeidsgiverbeløp"])
-                assertEquals(personbeløp, map["personbeløp"])
+            it.økonomi.reflection {
+                    _,
+                    _,
+                    _,
+                    _,
+                    actualArbeidsgiverbeløp,
+                    actualPersonbeløp,
+                    _ ->
+                assertEquals(arbeidsgiverbeløp, actualArbeidsgiverbeløp)
+                assertEquals(personbeløp, actualPersonbeløp)
             }
         }
     }

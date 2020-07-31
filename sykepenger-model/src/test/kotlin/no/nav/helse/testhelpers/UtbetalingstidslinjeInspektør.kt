@@ -64,9 +64,11 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        navDagTeller += 1
-        totalUtbetaling += økonomi.toMap()["arbeidsgiverbeløp"] as Int? ?: 0
-        totalInntekt += økonomi.toMap()["aktuellDagsinntekt"] as Double? ?: 0.0
+        økonomi.reflection { _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+            navDagTeller += 1
+            totalUtbetaling += arbeidsgiverbeløp ?: 0
+            totalInntekt += aktuellDagsinntekt ?: 0.0
+        }
     }
     override fun visit(
         dag: NavHelgDag,
@@ -78,6 +80,7 @@ internal class UtbetalingstidslinjeInspektør(utbetalingstidslinje: Utbetalingst
         dato: LocalDate,
         økonomi: Økonomi
     ) { ukjentDagTeller += 1 }
+
     internal fun totalUtbetaling() = totalUtbetaling
     internal fun totalInntekt() = totalInntekt
 }
