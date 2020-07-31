@@ -233,12 +233,14 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperiode !in vedtaksperioder) return listOf()
         return forkastet(vedtaksperiode, block)
             .takeIf { it.isNotEmpty() }
-            ?.also {perioder ->
-                    perioder
-                        .onEach { it.ferdig(hendelse, sendTilInfotrygd) }
-                    if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
-                    else sykdomshistorikk.fjernTidligereDager(perioder.last().periode())
-                    gjenopptaBehandling(hendelse)
+            ?.also { perioder ->
+                perioder
+                    .onEach {
+                        it.ferdig(hendelse, sendTilInfotrygd)
+                        sykdomshistorikk.fjernDager(it.periode())
+                    }
+                if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
+                gjenopptaBehandling(hendelse)
             }
             ?: listOf()
     }

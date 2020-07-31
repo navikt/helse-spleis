@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSykmelding
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSøknad
 import no.nav.helse.testhelpers.TestSykdomstidslinje
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.jobbTil
@@ -37,10 +38,10 @@ internal class SykdomshistorikkTest {
         historikk.håndter(TestSykmelding((1.januar jobbTil 12.januar)))
         historikk.håndter(TestSykmelding((20.januar sykTil 25.januar)))
 
-        val søknad = TestEvent.TestSøknad((20.januar sykTil 25.januar))
+        val søknad = TestSøknad((20.januar sykTil 25.januar))
         historikk.håndter(søknad)
 
-        historikk.fjernTidligereDager(Periode(1.januar, 12.januar))
+        historikk.fjernDager(Periode(1.januar, 12.januar))
 
         assertEquals(0, tidslinje.filterIsInstance<Dag.Arbeidsdag>().size)
         assertEquals(0, tidslinje.filterIsInstance<Dag.FriskHelgedag>().size)
@@ -48,9 +49,9 @@ internal class SykdomshistorikkTest {
         assertEquals(4, tidslinje.filterIsInstance<Dag.Sykedag>().size)
         assertEquals(4, historikk.size)
 
-        historikk.fjernTidligereDager(Periode(13.januar, 19.januar))
+        historikk.fjernDager(Periode(13.januar, 19.januar))
 
-        assertEquals(4, historikk.size)
+        assertEquals(5, historikk.size)
     }
 
     @Test

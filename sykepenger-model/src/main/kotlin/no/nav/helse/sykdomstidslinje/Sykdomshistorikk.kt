@@ -40,13 +40,10 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprettTom())
     }
 
-    internal fun fjernTidligereDager(periode: Periode) {
+    internal fun fjernDager(periode: Periode) {
         // TODO: Remove size == 0 whenever migration is done
         if (size == 0 || sykdomstidslinje().length() == 0) return
-        periode.endInclusive.plusDays(1).also { førsteDagViBeholder ->
-            if (førsteDagViBeholder <= sykdomstidslinje().førsteDag()) return
-            elementer.add(0, Element.opprettReset(this, førsteDagViBeholder))
-        }
+        elementer.add(0, Element.opprettReset(this, periode))
     }
 
     internal fun accept(visitor: SykdomshistorikkVisitor) {
@@ -139,13 +136,13 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,
-                førsteDatoViBeholder: LocalDate
+                periode: Periode
             ) : Element {
                 return Element(
                     hendelseId = null,
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trimLeft(førsteDatoViBeholder)
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode)
                 )
             }
         }
