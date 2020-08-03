@@ -1652,32 +1652,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ny sykmelding for tidligere periode håndteres`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-    }
-
-    @Test
-    fun `Replay med gap hvor første periode er utbetalt skal opprette ny periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar,100)) // Initierer replay av tidligere periode
-        håndterSøknad(Sykdom(1.januar, 30.januar, 100))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
-    }
-
-    @Test
     fun `Maksdato og antall gjenstående dager beregnes riktig når det er ferie sist i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
         håndterSøknad(

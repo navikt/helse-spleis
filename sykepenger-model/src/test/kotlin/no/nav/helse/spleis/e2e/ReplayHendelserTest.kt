@@ -13,6 +13,13 @@ import org.junit.jupiter.api.Test
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Håndterer vi gap?`() {
+        val opprinnelig = håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        replaySykmelding(opprinnelig)
+    }
+
+    @Test
     fun `ny, tidligere sykmelding medfører umiddelbar replay av etterfølgende perioder som ikke er avsluttet eller til utbetaling`() {
         val opprinnelig = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 27.februar, 100))
@@ -56,5 +63,34 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(3.vedtaksperiode)   // No history
+    }
+
+    @Test
+    fun `ny sykmelding for tidligere periode håndteres`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+        )
+        assertTilstander(1.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
+    fun `Replay med gap hvor første periode er utbetalt skal opprette ny periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar,100)) // Initierer replay av tidligere periode
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 30.januar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
     }
 }

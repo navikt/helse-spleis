@@ -50,7 +50,7 @@ internal class Vedtaksperiode private constructor(
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
     private var periode: Periode,
-    private var opprinneligPeriode: Periode,
+    private var sykmeldingsperiode: Periode,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
     private var personNettoBeløp: Int,
@@ -87,7 +87,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje = Sykdomstidslinje(),
         hendelseIder = mutableListOf(),
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
-        opprinneligPeriode = Periode(LocalDate.MIN, LocalDate.MAX),
+        sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
         personNettoBeløp = 0,
@@ -96,7 +96,7 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder)
+        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, sykmeldingsperiode, hendelseIder)
         sykdomstidslinje.accept(visitor)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
@@ -111,7 +111,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitFørsteFraværsdag(førsteFraværsdag)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode)
+        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, sykmeldingsperiode)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -231,7 +231,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun etterfølgesAv(other: Vedtaksperiode) = this.periode.etterfølgesAv(other.periode)
 
-    private fun starterSenereEnn(other: Vedtaksperiode) = this.opprinneligPeriode.start > other.opprinneligPeriode.start
+    private fun starterSenereEnn(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
@@ -291,7 +291,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun periode() = periode
-    internal fun opprinneligPeriode() = opprinneligPeriode
+    internal fun opprinneligPeriode() = sykmeldingsperiode
 
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
         if (hendelse.valider(periode).hasErrors())
@@ -304,7 +304,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(this.tilstand)
     }
 
-    private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.opprinneligPeriode)
+    private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.sykmeldingsperiode)
 
     private fun tilstand(
         event: PersonHendelse,
@@ -350,7 +350,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: Sykmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.periode()
-        opprinneligPeriode = hendelse.periode()
+        sykmeldingsperiode = hendelse.periode()
         oppdaterHistorikk(hendelse)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
@@ -1448,7 +1448,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.opprinneligPeriode)
+            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
             vedtaksperiode.sendUtbetaltEvent()
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }

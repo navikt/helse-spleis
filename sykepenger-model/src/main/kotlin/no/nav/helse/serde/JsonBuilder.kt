@@ -440,8 +440,8 @@ internal class JsonBuilder : PersonVisitor {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeMap["fom"] = periode.start
             vedtaksperiodeMap["tom"] = periode.endInclusive
-            vedtaksperiodeMap["opprinneligFom"] = opprinneligPeriode.start
-            vedtaksperiodeMap["opprinneligTom"] = opprinneligPeriode.endInclusive
+            vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
+            vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
             vedtaksperiodeMap["hendelseIder"] = hendelseIder
             vedtaksperioder.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))

@@ -51,7 +51,7 @@ internal class SykdomshistorikkTest {
 
         historikk.fjernDager(Periode(13.januar, 19.januar))
 
-        assertEquals(5, historikk.size)
+        assertEquals(4, historikk.size)
     }
 
     @Test
