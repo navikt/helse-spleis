@@ -3,11 +3,14 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -26,7 +29,15 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0, historikk)
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
         assertEquals(3.januar, inspektør.førsteFraværsdag(0)) {
             "Første fraværsdag settes til den første utbetalte dagen fordi " +
                 "vi ikke er i stand til å regne den ut selv ennå. " +
@@ -52,7 +63,16 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(0, historikk)
 
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
     }
 
@@ -208,9 +228,31 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             assertEquals(Periode(1.mars, 31.mars), it.first())
         }
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
         assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
 
         assertEquals(inspektør.maksdato(0), inspektør.forkastetMaksdato(0))
     }
@@ -230,7 +272,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterPåminnelse(1, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(3)) // <-- TIL_INFOTRYGD
         håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 50))
         håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 50))
-        håndterYtelser(0,
+        håndterYtelser(
+            0,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
@@ -238,7 +281,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0,
+        håndterYtelser(
+            0,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.mars(2020), 17.mars(2020), 1000, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2020), 15.april(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(
@@ -246,13 +290,47 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         håndterSimulering(0)
-        håndterUtbetalingsgodkjenning(0,true)
+        håndterUtbetalingsgodkjenning(0, true)
         håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertForkastetPeriodeTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_INFOTRYGD
+        )
+        assertForkastetPeriodeTilstander(
+            2,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            TIL_INFOTRYGD
+        )
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
         inspektør.utbetalinger.utbetalte().also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
             UtbetalingstidslinjeInspektør(utbetalinger.first().utbetalingstidslinje()).also {
@@ -283,7 +361,18 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1, historikk)
 
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
         assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
@@ -319,11 +408,110 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1, historikk)
 
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
         assertTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
         assertEquals(inspektør.forlengelseFraInfotrygd(0), inspektør.forlengelseFraInfotrygd(1))
     }
 
+    @Test
+    fun `Forlengelse av søknad uten utbetaling med opphold betalt i Infotrygd`() {
+        // Inspirert av et case i P der en overlappende sykmelding ble kastet
+        håndterSykmelding(Sykmeldingsperiode(26.mai(2020), 2.juni(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(26.mai(2020), 2.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(26.mai(2020), 2.juni(2020))), førsteFraværsdag = 26.mai(2020))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
+        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100))
+        håndterYtelser(
+            1,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
+        )
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(
+            1,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
+        )
+        inspektør.apply {
+            assertTrue(etterspurteBehov(0, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+            assertTrue(
+                utbetalingstidslinjer(vedtaksperiodeId(0))
+                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
+            )
+        }
+    }
+
+    @Test
+    fun `Forlengelse av søknad med utbetaling med opphold betalt i Infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(10.mai(2020), 2.juni(2020), 100))
+        håndterSøknad(Sykdom(10.mai(2020), 2.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(10.mai(2020), 25.mai(2020))), førsteFraværsdag = 10.mai(2020))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+        håndterSimulering(0)
+        håndterUtbetalingsgodkjenning(0, true)
+        håndterUtbetalt(0, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
+        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100))
+        håndterYtelser(
+            1,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(10.mai(2020), INNTEKT, ORGNUMMER, true))
+        )
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterYtelser(
+            1,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(10.mai(2020), INNTEKT, ORGNUMMER, true))
+        )
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+        inspektør.apply {
+            assertTrue(etterspurteBehov(0, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+            assertTrue(
+                utbetalingstidslinjer(vedtaksperiodeId(0))
+                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
+            )
+            assertTrue(
+                utbetalingstidslinjer(forkastetVedtaksperiodeId(0))
+                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isNotEmpty()
+            )
+        }
+    }
 }

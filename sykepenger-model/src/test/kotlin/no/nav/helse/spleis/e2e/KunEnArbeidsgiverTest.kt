@@ -8,7 +8,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
@@ -1510,31 +1509,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertThrows<AssertionFailedError> {
             assertNull(inspektør.vilkårsgrunnlag(3))
         }
-    }
-
-    @Test
-    @Disabled
-    fun `ping pong`() {
-        /* I would assume that the first period here is supposed to be trashed so the second one can continue from infotrygd
-        * with a clean slate. But that seems to not be the case and I can't figure out why..
-        */
-        håndterSykmelding(Sykmeldingsperiode(26.mai(2020), 2.juni(2020), 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(26.mai(2020), 2.juni(2020), 100))
-        håndterInntektsmelding(listOf(Periode(26.mai(2020), 2.juni(2020))), førsteFraværsdag = 26.mai(2020))
-        håndterVilkårsgrunnlag(0, INNTEKT)
-
-        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100))
-        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100))
-        håndterYtelser(1,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020),INNTEKT, ORGNUMMER, true))
-        )
-        håndterVilkårsgrunnlag(1, INNTEKT)
-        håndterYtelser(1,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(26.mai(2020),INNTEKT, ORGNUMMER, true))
-        )
-        assertTrue(inspektør.utbetalingstidslinjer(1).filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty())
     }
 
     @Test

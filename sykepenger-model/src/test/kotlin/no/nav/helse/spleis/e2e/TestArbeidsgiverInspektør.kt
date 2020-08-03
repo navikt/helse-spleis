@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.etterspurtBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -46,7 +45,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
-    private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
+    private val utbetalingstidslinjer = mutableMapOf<UUID, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var inGyldigePerioder = false
     private var inVedtaksperiode = false
@@ -60,15 +59,18 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
         }
     }
 
-    private class HentAktivitetslogg(person: Person, private val valgfriArbeidsgiver: Arbeidsgiver?): PersonVisitor {
+    private class HentAktivitetslogg(person: Person, private val valgfriArbeidsgiver: Arbeidsgiver?) : PersonVisitor {
         internal lateinit var aktivitetslogg: Aktivitetslogg
         internal lateinit var arbeidsgiver: Arbeidsgiver
+
         init {
             person.accept(this)
         }
+
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             this.aktivitetslogg = aktivitetslogg
         }
+
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
             if (this.valgfriArbeidsgiver != null && this.arbeidsgiver != arbeidsgiver) {
                 this.arbeidsgiver = valgfriArbeidsgiver
@@ -128,7 +130,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
-        if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
+        if (inVedtaksperiode) utbetalingstidslinjer[periodeIder.getValue(vedtaksperiodeindeks)] = tidslinje
     }
 
     override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
@@ -163,9 +165,6 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     internal fun etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype)
 
-    internal inline fun <reified T> etterspurteBehov(vedtaksperiodeIndex: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, felt: String) =
-        personLogg.etterspurtBehov<T>(requireNotNull(vedtaksperiodeIder[vedtaksperiodeIndex]), behovtype, felt)
-
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
         if (!inGyldigePerioder || førsteFraværsdag == null) return
         førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
@@ -178,7 +177,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     }
 
     override fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {
-        if(gjenståendeSykedager == null) return
+        if (gjenståendeSykedager == null) return
         if (!inGyldigePerioder) forkastetGjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
         else gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
     }
@@ -201,7 +200,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
         lagreLås(sykdomshistorikk)
     }
 
-    private inner class LåsInspektør: SykdomstidslinjeVisitor {
+    private inner class LåsInspektør : SykdomstidslinjeVisitor {
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             this@TestArbeidsgiverInspektør.låstePerioder = låstePerioder
         }
@@ -232,6 +231,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
             arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
+
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(
@@ -242,6 +242,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
             arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
+
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
@@ -250,6 +251,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
             arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
+
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
@@ -258,6 +260,7 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
             arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
+
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
@@ -266,10 +269,12 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
             arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
+
         override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
-        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) = inkrementer(dag)
+        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
+            inkrementer(dag)
 
         private fun inkrementer(klasse: Dag) {
             dagtelling.compute(klasse::class) { _, value -> 1 + (value ?: 0) }
@@ -305,15 +310,18 @@ internal class TestArbeidsgiverInspektør(person: Person, arbeidsgiver: Arbeidsg
     internal fun sisteTilstand(indeks: Int) = tilstander[indeks] ?: fail {
         "Missing collection initialization"
     }
+
     internal fun sisteForkastetTilstand(indeks: Int) = forkastedeTilstander[indeks] ?: fail {
         "Missing collection initialization"
     }
 
-    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?:fail {
+    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?: fail {
         "Missing collection initialization"
     }
 
-    internal fun utbetalingstidslinjer(indeks: Int) = utbetalingstidslinjer[indeks] ?: fail {
+    internal fun utbetalingstidslinjer(indeks: Int) = utbetalingstidslinjer(vedtaksperiodeId(indeks))
+
+    internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = utbetalingstidslinjer[vedtaksperiodeId] ?: fail {
         "Missing collection initialization"
     }
 

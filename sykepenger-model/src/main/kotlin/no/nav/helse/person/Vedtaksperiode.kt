@@ -225,6 +225,12 @@ internal class Vedtaksperiode private constructor(
         forkast(hendelse)
     }
 
+    internal fun forkastHvisTidligere(other: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        if (this.periode.start >= other.periode.start) return
+        hendelse.warn("Forkaster perioden fordi vi har oppdaget utbetalinger i Infotrygd")
+        forkast(hendelse)
+    }
+
     internal fun forkast(hendelse: ArbeidstakerHendelse) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
@@ -1032,6 +1038,9 @@ internal class Vedtaksperiode private constructor(
                         }
 
                         vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
+
+                        arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
+                        ytelser.kontekst(vedtaksperiode)
 
                         //This will only happen if we come here from a blue state and previous period(s) were discarded during migration
                         if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =

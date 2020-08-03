@@ -67,14 +67,16 @@ internal class Arbeidsgiver private constructor(
         sisteDato: LocalDate,
         aktivitetslogg: Aktivitetslogg
     ) {
-        utbetalinger.add(Utbetaling(
-            fødselsnummer,
-            organisasjonsnummer,
-            utbetalingstidslinje,
-            sisteDato,
-            aktivitetslogg,
-            utbetalinger
-        ))
+        utbetalinger.add(
+            Utbetaling(
+                fødselsnummer,
+                organisasjonsnummer,
+                utbetalingstidslinje,
+                sisteDato,
+                aktivitetslogg,
+                utbetalinger
+            )
+        )
     }
 
     private fun validerSykdomstidslinjer() = vedtaksperioder.forEach {
@@ -189,8 +191,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
-//    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
-
     internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(vedtaksperioder)
 
     internal fun inntekt(dato: LocalDate): BigDecimal? =
@@ -218,6 +218,10 @@ internal class Arbeidsgiver private constructor(
     internal fun forkastAlleEtterfølgende(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         forkast(vedtaksperiode)
         vedtaksperioder.toList().forEach { it.forkastHvisEtterfølgende(vedtaksperiode, hendelse) }
+    }
+
+    internal fun forkastAlleTidligere(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+        vedtaksperioder.toList().forEach { it.forkastHvisTidligere(vedtaksperiode, hendelse) }
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
