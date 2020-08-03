@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test
 
 internal class SykdomstidslinjeTest {
 
-    @Test internal fun `tom tidslinje er gyldig`() {
+    @Test
+    internal fun `tom tidslinje er gyldig`() {
         assertEquals(0, Sykdomstidslinje().count())
     }
 
-    @Test internal fun `dager mellom to perioder blir UkjentDag`() {
+    @Test
+    internal fun `dager mellom to perioder blir UkjentDag`() {
         val tidslinje1 = Sykdomstidslinje.sykedager(
             1.mandag, 1.onsdag, 100.0, TestEvent.søknad)
         val tidslinje2 = Sykdomstidslinje.sykedager(
@@ -39,6 +41,16 @@ internal class SykdomstidslinjeTest {
         val aktivitetslogg = Aktivitetslogg()
         assertFalse(tidslinje.valider(aktivitetslogg))
         assertTrue(aktivitetslogg.hasErrors())
+    }
+
+    @Test
+    internal fun `overskriving av tidslinje`() {
+        val tidslinje1 = (Sykdomstidslinje.problemdager(1.mandag, 1.onsdag, TestEvent.sykmelding, "Yes")
+            + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.sykmelding))
+        val tidslinje2 = (Sykdomstidslinje.arbeidsdager(1.mandag, 1.onsdag, TestEvent.testkilde))
+
+        val merged = tidslinje1.merge(tidslinje2, Dag.replace)
+        assertEquals(" AAASS", merged.toShortString())
     }
 
 

@@ -25,10 +25,14 @@ internal sealed class Dag(
         internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             ProblemDag(
-                høyre.dato,
-                høyre.kilde,
+                høyre.dato, høyre.kilde,
                 "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})"
             )
+        }
+
+        internal val replace: BesteStrategy = { venstre: Dag, høyre: Dag ->
+            if (høyre is UkjentDag) venstre
+            else høyre
         }
     }
 
