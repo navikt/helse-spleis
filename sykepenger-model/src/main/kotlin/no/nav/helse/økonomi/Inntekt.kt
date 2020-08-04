@@ -38,7 +38,9 @@ class Inntekt : Comparable<Inntekt>{
         internal val INGEN = 0.daglig
     }
 
-    internal fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
+    private fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
+
+    private fun tilDagligDouble() = årlig / 260.0
 
     internal fun tilMånedligDouble() = årlig / 12.0
 
@@ -65,8 +67,6 @@ class Inntekt : Comparable<Inntekt>{
     private fun equals(other: Inntekt) = this.årlig == other.årlig
 
     override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
-
-    internal fun tilDagligDouble() = årlig / 260.0
 
     override fun toString(): String {
         return "[Årlig: $årlig, Måndelig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"

@@ -149,8 +149,8 @@ class UtbetalingshistorikkTest {
     @Test
     fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
         val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 30.april, Grunnbeløp.`6G`.dagsats(1.april).tilDagligInt(), 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai, 31.mai, Grunnbeløp.`6G`.dagsats(1.mai).tilDagligInt(), 100, ORGNUMMER)
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.april, 30.april, 2161, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai, 31.mai, 2236, 100, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,

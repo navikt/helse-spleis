@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.konverter
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.util.*
@@ -47,25 +50,26 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     private fun opprettØkonomi(dag: ObjectNode, inntekthistorikk: Inntekthistorikk) {
         when(dag["type"].textValue()) {
             "Arbeidsdag" -> opprettMedInntekt(dag)
-            "ArbeidsgiverperiodeDag" -> opprett(dag, dag.path("dagsats").asInt())
-            "AvvistDag" -> opprett(dag, dag.path("dagsats").asInt(), dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
+            "ArbeidsgiverperiodeDag" -> opprett(dag, dag.path("dagsats").asInt().daglig)
+            "AvvistDag" -> opprett(dag, dag.path("dagsats").asInt().daglig, dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
             "Fridag" -> opprettMedInntekt(dag)
             "ForeldetDag" -> opprettMedInntekt(dag)
-            "NavDag" -> opprett(dag, dag.path("dagsats").asInt(), dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
+            "NavDag" -> opprett(dag, dag.path("dagsats").asInt().daglig, dag.path("grad").asDouble(), dag.path("utbetaling").asInt())
             "NavHelgDag" -> opprett(dag, grad = dag.path("grad").asDouble())
             "UkjentDag" -> opprett(dag)
             else -> throw IllegalArgumentException("ukjent utbetalingsdagstype: ${dag.path("type").asText()}")
         }
     }
 
-    private fun opprett(dag: ObjectNode, dagsats: Number = 0, grad: Double = 0.0, utbetaling: Int = 0) {
+    private fun opprett(dag: ObjectNode, dagsats: Inntekt = INGEN, grad: Double = 0.0, utbetaling: Int = 0) {
+        val dagsatsDouble = mapOf("" to dagsats).konverter().values.first()
         dag.remove("dagsats")
         dag.remove("utbetaling")
         dag.remove("grad")
         dag.put("grad", grad.takeUnless(Double::isNaN) ?: 0.0)
         dag.put("arbeidsgiverBetalingProsent", 100.0)
-        dag.put("aktuellDagsinntekt", dagsats.toDouble())
-        dag.put("dekningsgrunnlag", dagsats.toDouble())
+        dag.put("aktuellDagsinntekt", dagsatsDouble)
+        dag.put("dekningsgrunnlag", dagsatsDouble)
         dag.put("arbeidsgiverbeløp", utbetaling)
         dag.put("personbeløp", 0)
         dag.put("er6GBegrenset", false)
@@ -75,7 +79,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0
-    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato)?.tilDagligDouble() ?: 0.0, grad, utbetaling)
+    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
 }
 
 private val ObjectNode.dato get() = LocalDate.parse(this["dato"].textValue(), ISO_DATE)

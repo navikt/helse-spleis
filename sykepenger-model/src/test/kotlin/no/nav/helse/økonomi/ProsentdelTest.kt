@@ -41,9 +41,4 @@ internal class ProsentdelTest {
         assertFalse(20.prosent.erUnderGrensen())
         assertTrue(15.prosent.erUnderGrensen())
     }
-
-    @Test fun `vektlagt gjennomsnitt`() {
-        assertEquals(0.prosent,
-        Prosentdel.vektlagtGjennomsnitt(listOf(50.prosent to 0.0, 75.prosent to 0.0)))
-    }
 }

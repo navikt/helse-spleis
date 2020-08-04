@@ -59,7 +59,6 @@ internal class InntekthistorikkTest {
     }
 
 
-
     @Test
     fun `Sykepengegrunnlag er begrenset til 6G når inntekt er høyere enn 6G`() {
         val førsteFraværsdag = 1.januar(2020)
@@ -67,11 +66,19 @@ internal class InntekthistorikkTest {
 
         val årsinntektOver6G =
             listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
-        assertEquals(`6GBeløp`.tilÅrligDouble(), Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag))
+        assertEquals(
+            `6GBeløp`.tilÅrligDouble(),
+            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
+        )
 
         val årsinntektUnder6G =
             listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
-        assertTrue(Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektUnder6G, førsteFraværsdag)!! < `6GBeløp`.tilÅrligDouble())
+        assertTrue(
+            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(
+                årsinntektUnder6G,
+                førsteFraværsdag
+            )!! < `6GBeløp`.tilÅrligDouble()
+        )
     }
 
     @Test
@@ -110,7 +117,9 @@ internal class InntekthistorikkTest {
 
     private fun assertChampion(winner: Pair<String, List<Pair<String, InntektArgs>>>, periode: Periode) {
         periode.forEach { dato ->
-            val indeks = historikk.inntekt(dato)?.tilDagligInt()?.div(1000)?.minus(1) ?: -1
+            val indeks = winner.second.foldIndexed(-1) { index, acc, _ ->
+                if (historikk.inntekt(dato)?.equals(((index + 1) * 1000).daglig) == true) index else acc
+            }
             assertEquals(winner.first, winner.second[indeks].first, "for date: $dato")
         }
     }
@@ -121,7 +130,7 @@ internal class InntekthistorikkTest {
 
     private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
 
-    private fun List<Pair<String, InntektArgs>>.assertions( block: (List<Pair<String, InntektArgs>>) -> Unit ) {
+    private fun List<Pair<String, InntektArgs>>.assertions(block: (List<Pair<String, InntektArgs>>) -> Unit) {
         historikk = Inntekthistorikk()
         inntektsbeløp = 0
         this.forEach { it.second.also { args -> args.add(); args.merkelapp(it.first) } }
@@ -137,14 +146,14 @@ internal class InntekthistorikkTest {
 
     private inner class InntektCompetition(private val a: InntektArgs, private val b: InntektArgs) {
         infix fun on(dato: LocalDate): Boolean {
-            fun assertInntekt(left : InntektArgs, right : InntektArgs, expected : Number) : Boolean {
+            fun assertInntekt(left: InntektArgs, right: InntektArgs, expected: Number): Boolean {
                 historikk = Inntekthistorikk()
                 inntektsbeløp = 0
                 left.add()
                 right.add()
                 return expected.daglig == historikk.inntekt(dato)
             }
-            return assertInntekt(a,b,1000) && assertInntekt(b,a,2000)
+            return assertInntekt(a, b, 1000) && assertInntekt(b, a, 2000)
         }
     }
 
@@ -160,7 +169,9 @@ internal class InntekthistorikkTest {
     private open inner class InntektArgs(protected val dato: LocalDate, private val kilde: Kilde) {
         internal lateinit var merkelapp: String
 
-        internal fun merkelapp(verdi: String) { merkelapp = verdi}
+        internal fun merkelapp(verdi: String) {
+            merkelapp = verdi
+        }
 
         internal open fun add() {
             inntektsbeløp += 1000

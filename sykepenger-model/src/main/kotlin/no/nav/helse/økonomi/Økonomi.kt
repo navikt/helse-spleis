@@ -136,7 +136,7 @@ internal class Økonomi private constructor(
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
-    internal fun toMap(): Map<String, Any> = tilstand.toMap(this)
+    private fun toMap(): Map<String, Any> = tilstand.toMap(this)
 
     internal fun reflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> Unit) {
         toMap().also {
