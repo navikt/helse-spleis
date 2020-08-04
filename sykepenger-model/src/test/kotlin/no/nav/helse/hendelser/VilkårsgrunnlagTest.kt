@@ -11,6 +11,8 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,8 +43,8 @@ internal class VilkårsgrunnlagTest {
     internal fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0.0, dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(12000.0, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(0.prosent, dataForVilkårsvurdering()?.avviksprosent)
+        assertEquals(12000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
@@ -51,8 +53,8 @@ internal class VilkårsgrunnlagTest {
             (1..12).map { YearMonth.of(2017, it) to (orgnummer to 1250.0.månedlig) }.groupBy({ it.first }) { it.second }
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0.20, dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(15000.00, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(20.prosent, dataForVilkårsvurdering()?.avviksprosent)
+        assertEquals(15000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(false, dataForVilkårsvurdering()?.erEgenAnsatt)
         assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)

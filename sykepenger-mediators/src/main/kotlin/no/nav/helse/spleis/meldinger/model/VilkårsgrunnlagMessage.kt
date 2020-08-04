@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.IHendelseMediator
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import java.time.LocalDate
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
@@ -26,7 +27,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
     private val inntekter = packet["@løsning.${Inntektsberegning.name}"].map {
         it["årMåned"].asYearMonth() to it["inntektsliste"].map {
-            it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble()
+            it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble().månedlig
         }
     }.associate { it }
     private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {

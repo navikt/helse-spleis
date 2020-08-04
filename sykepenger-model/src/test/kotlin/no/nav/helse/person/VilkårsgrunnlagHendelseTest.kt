@@ -127,7 +127,7 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `ikke egen ansatt og mindre enn 25 % avvik i inntekt`() {
         val månedslønn = 1000.0.månedlig
-        val `25 % mindre` = månedslønn * 0.76
+        val `25 % mindre` = månedslønn * 0.74
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mindre`,

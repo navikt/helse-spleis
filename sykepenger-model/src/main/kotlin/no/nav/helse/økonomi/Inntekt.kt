@@ -33,6 +33,11 @@ class Inntekt : Comparable<Inntekt> {
             return this.reduce { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }
         }
 
+        internal fun List<Inntekt>.avg(): Inntekt {
+            if (this.isEmpty()) return INGEN
+            return this.summer() / this.size
+        }
+
         internal fun Map<String, Inntekt>.konverter() = this.mapValues { it.value.tilDagligDouble() }
 
         internal val INGEN = 0.daglig
@@ -53,6 +58,8 @@ class Inntekt : Comparable<Inntekt> {
     internal operator fun div(prosentdel: Prosentdel) = Inntekt(this.årlig / prosentdel.ratio())
 
     internal operator fun div(other: Inntekt) = this.årlig / other.årlig
+
+    private operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
 
     internal operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
 

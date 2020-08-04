@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import no.nav.helse.person.Periodetype
@@ -19,8 +19,7 @@ class Inntektsvurdering(
     private val antallMåneder =
         if (perioder.isEmpty()) 0
         else perioder.map { it.key }.let { ChronoUnit.MONTHS.between(it.max(), it.min()) }
-    private val sammenligningsgrunnlag =
-        perioder.values.flatten().fold(Inntekt.INGEN) { acc, (_, inntekt) -> (inntekt.tilMånedligDouble() + acc.tilMånedligDouble()).månedlig }
+    private val sammenligningsgrunnlag = perioder.values.flatten().map { (_, inntekt) -> inntekt }.avg()
     private lateinit var avviksprosent: Prosentdel
 
     init {
@@ -56,7 +55,7 @@ class Inntektsvurdering(
     }
 
     private fun avviksprosent(beregnetInntekt: Inntekt) =
-        (beregnetInntekt*12).avviksprosent(sammenligningsgrunnlag)
+        beregnetInntekt.avviksprosent(sammenligningsgrunnlag)
 
     private class MånedligInntekt(private val yearMonth: YearMonth, private val orgnummer: String?, inntekt: Inntekt) {
 
