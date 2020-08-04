@@ -85,6 +85,9 @@ internal class TestArbeidsgiverInspektør(
     internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
     internal fun forkastetVedtaksperiodeId(index: Int) = requireNotNull(forkastedePerioderIder[index])
 
+    internal fun periodeErForkastet(id: UUID) = forkastedePerioderIder.containsValue(id)
+    internal fun periodeErIkkeForkastet(id: UUID) = vedtaksperiodeIder.containsValue(id)
+
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

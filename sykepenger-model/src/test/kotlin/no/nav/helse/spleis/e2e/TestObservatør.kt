@@ -14,7 +14,7 @@ internal class TestObservatør : PersonObserver {
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         vedtaksperioder.add(event.vedtaksperiodeId)
         tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
-        if(event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
+        if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {

@@ -19,7 +19,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import no.nav.helse.hendelser.UtbetalingHendelse
 
 internal abstract class AbstractEndToEndTest {
 
@@ -66,6 +65,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+        assertFalse(inspektør.periodeErForkastet(id))
+        assertTrue(inspektør.periodeErIkkeForkastet(id))
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
@@ -74,6 +75,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
+        assertTrue(inspektør.periodeErForkastet(id))
+        assertFalse(inspektør.periodeErIkkeForkastet(id))
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
