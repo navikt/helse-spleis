@@ -22,8 +22,7 @@ internal class ArbeidsgiverUtbetalinger(
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
-        val sykdomsgrader = Sykdomsgrader(tidslinjer)
-        Sykdomsgradfilter(sykdomsgrader, tidslinjer, periode, aktivitetslogg).filter()
+        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)

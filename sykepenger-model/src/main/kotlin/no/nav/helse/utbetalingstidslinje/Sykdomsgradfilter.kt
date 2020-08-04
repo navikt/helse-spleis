@@ -6,7 +6,6 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class Sykdomsgradfilter(
-    private val sykdomsgrader: Sykdomsgrader,
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
     private val aktivitetslogg: Aktivitetslogg

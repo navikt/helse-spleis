@@ -43,9 +43,8 @@ internal class SykdomsgradfilterTest {
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
-        val sykdomsgrader = Sykdomsgrader(tidslinjer)
         aktivitetslogg = Aktivitetslogg()
-        Sykdomsgradfilter(sykdomsgrader, tidslinjer, periode, aktivitetslogg).filter()
+        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         inspektør = UtbetalingstidslinjeInspektør(tidslinjer.first())
     }
 }
