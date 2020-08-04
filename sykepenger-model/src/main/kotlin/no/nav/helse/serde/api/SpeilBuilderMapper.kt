@@ -157,8 +157,8 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
     erEgenAnsatt = grunnlagsdata.erEgenAnsatt,
-    beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten,
-    avviksprosent = grunnlagsdata.avviksprosent,
+    beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.tilÅrligDouble(),
+    avviksprosent = grunnlagsdata.avviksprosent.ratio(),
     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
     harOpptjening = grunnlagsdata.harOpptjening,
     medlemskapstatus = when (grunnlagsdata.medlemskapstatus) {

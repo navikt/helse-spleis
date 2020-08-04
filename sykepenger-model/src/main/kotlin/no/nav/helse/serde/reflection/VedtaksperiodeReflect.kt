@@ -106,7 +106,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "førsteFraværsdag" to førsteFraværsdag,
-        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.toDouble() },
+        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntektAsDouble(it)?.toDouble() },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 }

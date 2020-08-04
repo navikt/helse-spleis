@@ -293,7 +293,7 @@ class JsonBuilderTest {
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0) }
+                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0.månedlig) }
                 .groupBy({ it.first }) { it.second }),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

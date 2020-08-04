@@ -36,7 +36,7 @@ internal class VilkårsgrunnlagHendelseTest {
     fun `egen ansatt`() {
         håndterVilkårsgrunnlag(
             egenAnsatt = true,
-            inntekter = tolvMånederMedInntekt(1000.0),
+            inntekter = tolvMånederMedInntekt(1000.0.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
 
@@ -56,7 +56,7 @@ internal class VilkårsgrunnlagHendelseTest {
     fun `avvik i inntekt`() {
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
-            inntekter = tolvMånederMedInntekt(1.0),
+            inntekter = tolvMånederMedInntekt(1.0.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
 
@@ -66,10 +66,10 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `ikke egen ansatt og ingen avvik i inntekt`() {
-        val månedslønn = 1000.0
+        val månedslønn = 1000.0.månedlig
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
-            beregnetInntekt = månedslønn.månedlig,
+            beregnetInntekt = månedslønn,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
         )
@@ -111,8 +111,8 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `ikke egen ansatt og mer enn 25 % avvik i inntekt`() {
-        val månedslønn = 1000.0
-        val `25 % mer` = (månedslønn * 1.25 + 1).månedlig
+        val månedslønn = 1000.0.månedlig
+        val `25 % mer` = månedslønn * 1.26
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mer`,
@@ -126,8 +126,8 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `ikke egen ansatt og mindre enn 25 % avvik i inntekt`() {
-        val månedslønn = 1000.0
-        val `25 % mindre` = (månedslønn * 0.75 - 1).månedlig
+        val månedslønn = 1000.0.månedlig
+        val `25 % mindre` = månedslønn * 0.76
         håndterVilkårsgrunnlag(
             egenAnsatt = false,
             beregnetInntekt = `25 % mindre`,
@@ -143,14 +143,14 @@ internal class VilkårsgrunnlagHendelseTest {
         listOf(Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Double) =
+    private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) =
         (1..12).map { YearMonth.of(2018, it) to (ORGNR to beregnetInntekt) }
             .groupBy({ it.first }) { it.second }
 
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        inntekter: Map<YearMonth, List<Pair<String?, Double>>>,
+        inntekter: Map<YearMonth, List<Pair<String?, Inntekt>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -209,7 +209,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: Map<YearMonth, List<Pair<String?, Double>>>,
+        inntekter: Map<YearMonth, List<Pair<String?, Inntekt>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(

@@ -235,7 +235,7 @@ class PåminnelserOgTimeoutTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0) }
+                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0.månedlig) }
                 .groupBy({ it.first }) { it.second }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

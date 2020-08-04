@@ -14,6 +14,9 @@ import org.opentest4j.AssertionFailedError
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
+    //FIXME: Fjernes når alle Doubles byttes ut med Inntekt
+    private val INNTEKT_AS_INT = 31000
+
     @Test
     fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
@@ -30,7 +33,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -65,7 +68,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -98,7 +101,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(8, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -146,7 +149,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -193,7 +196,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(13, it.dagtelling[Sykedag::class])
@@ -232,7 +235,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -260,7 +263,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -292,7 +295,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -327,7 +330,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -676,7 +679,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             31.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ), inntektshistorikk = emptyList())
@@ -690,7 +693,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             31.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ))
@@ -698,7 +701,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             31.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ))
@@ -825,7 +828,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ))
@@ -833,7 +836,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ))
@@ -847,7 +850,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
-            INNTEKT.toInt(),
+            INNTEKT_AS_INT,
             100,
             ORGNUMMER
         ))
@@ -862,9 +865,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `fortsettelse av Infotrygd-perioder skal ikke generere utbetalingslinjer for Infotrygd-periode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar,  31.januar, 100))
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER))
         håndterVilkårsgrunnlag(0, INNTEKT)
-        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT.toInt(), 100, ORGNUMMER))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER))
 
         inspektør.also {
             assertEquals(3.januar, it.arbeidsgiverOppdrag[0][0].fom)
@@ -1334,7 +1337,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertWarnings(it)
-            assertEquals(INNTEKT_PR_MÅNED, it.inntektshistorikk.inntekt(2.januar))
+            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -1467,14 +1470,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(14.januar, INNTEKT_PR_MÅNED, emptyList()))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(14.januar,
+            INNTEKT, emptyList()))
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 
     @Test
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null, INNTEKT_PR_MÅNED, listOf(14.januar)))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), refusjon = Triple(null,
+            INNTEKT, listOf(14.januar)))
         assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
     }
 

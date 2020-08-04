@@ -27,10 +27,9 @@ internal abstract class AbstractEndToEndTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
-        const val INNTEKT = 31000.00
+        val INNTEKT = 31000.00.månedlig
     }
 
-    protected val INNTEKT_PR_MÅNED = INNTEKT.månedlig
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = TestArbeidsgiverInspektør(person)
@@ -116,7 +115,7 @@ internal abstract class AbstractEndToEndTest {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
         ferieperioder: List<Periode> = emptyList(),
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList())
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
@@ -127,7 +126,7 @@ internal abstract class AbstractEndToEndTest {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = 1.januar,
         ferieperioder: List<Periode> = emptyList(),
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList())
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
         person.håndter(
             inntektsmelding(
@@ -141,7 +140,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterVilkårsgrunnlag(
         vedtaksperiodeIndex: Int,
-        inntekt: Double,
+        inntekt: Inntekt,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -316,9 +315,9 @@ internal abstract class AbstractEndToEndTest {
     protected fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
-        beregnetInntekt: Inntekt = INNTEKT_PR_MÅNED,
+        beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT_PR_MÅNED, emptyList()),
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         orgnummer: String = ORGNUMMER
     ): Inntektsmelding {
         return Inntektsmelding(
@@ -340,7 +339,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeIndex: Int,
-        inntekt: Double,
+        inntekt: Inntekt,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -356,7 +355,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        inntekt: Double,
+        inntekt: Inntekt,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -480,7 +479,7 @@ internal abstract class AbstractEndToEndTest {
     ) = if (inntektshistorikk == null) listOf(
         Inntektsopplysning(
             1.desember(2017),
-            INNTEKT_PR_MÅNED,
+            INNTEKT,
             orgnummer,
             true
         )

@@ -840,7 +840,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(2.mars(2020), 2.mars(2020)),
                 Periode(16.mars(2020), 29.mars(2020)),
                 Periode(30.mars(2020), 30.mars(2020))
-            ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT_PR_MÅNED, emptyList())
+            ), førsteFraværsdag = 30.mars(2020), refusjon = Triple(null, INNTEKT, emptyList())
         )
         håndterVilkårsgrunnlag(0, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
         assertForkastetPeriodeTilstander(
@@ -876,7 +876,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(
             0, listOf(
                 Periode(1.januar, 16.januar)
-            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT_PR_MÅNED, emptyList())
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
         )
         håndterVilkårsgrunnlag(
             0,
@@ -900,7 +900,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             0,
             listOf(Periode(16.mars(2020), 31.mars(2020))),
             førsteFraværsdag = 16.mars(2020),
-            refusjon = Triple(null, INNTEKT_PR_MÅNED, emptyList())
+            refusjon = Triple(null, INNTEKT, emptyList())
         )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100))
         håndterVilkårsgrunnlag(0, INNTEKT)

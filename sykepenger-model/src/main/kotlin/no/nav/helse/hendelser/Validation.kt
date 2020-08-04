@@ -58,5 +58,5 @@ internal fun Validation.harInntektshistorikk(
     arbeidsgiver: Arbeidsgiver,
     førsteDag: LocalDate
 ) = valider("Vi har ikke inntektshistorikken vi trenger") {
-    arbeidsgiver.inntekt(førsteDag) != null
+    arbeidsgiver.inntektAsDouble(førsteDag) != null
 }

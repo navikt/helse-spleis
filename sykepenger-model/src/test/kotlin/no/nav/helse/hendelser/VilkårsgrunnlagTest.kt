@@ -9,6 +9,7 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +23,7 @@ internal class VilkårsgrunnlagTest {
         private const val aktørId = "123"
         private const val fødselsnummer = "234"
         private const val orgnummer = "345"
-        private const val INNTEKT = 1000.0
+        private val INNTEKT = 1000.0.månedlig
     }
 
     private lateinit var person: Person
@@ -47,7 +48,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { YearMonth.of(2017, it) to (orgnummer to 1250.0) }.groupBy({ it.first }) { it.second }
+            (1..12).map { YearMonth.of(2017, it) to (orgnummer to 1250.0.månedlig) }.groupBy({ it.first }) { it.second }
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0.20, dataForVilkårsvurdering()?.avviksprosent)
@@ -161,7 +162,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: Map<YearMonth, List<Pair<String?, Double>>> = (1..12).map {
+        inntektsmåneder: Map<YearMonth, List<Pair<String?, Inntekt>>> = (1..12).map {
             YearMonth.of(2017, it) to (orgnummer to INNTEKT)
         }.groupBy({ it.first }) { it.second },
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
@@ -211,12 +212,12 @@ internal class VilkårsgrunnlagTest {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(null, INNTEKT.månedlig, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = INNTEKT.månedlig,
+            beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             ferieperioder = listOf(),
             arbeidsforholdId = null,
