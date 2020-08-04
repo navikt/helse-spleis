@@ -50,7 +50,7 @@ class Vilkårsgrunnlag(
     internal class Grunnlagsdata(
         internal val erEgenAnsatt: Boolean,
         internal val beregnetÅrsinntektFraInntektskomponenten: Inntekt,
-        internal val avviksprosent: Prosentdel,
+        internal val avviksprosent: Prosentdel?,
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean,
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
