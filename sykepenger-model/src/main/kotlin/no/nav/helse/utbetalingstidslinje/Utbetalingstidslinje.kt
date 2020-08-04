@@ -40,11 +40,15 @@ internal class Utbetalingstidslinje private constructor(
 
     internal fun gjøreKortere(fom: LocalDate) = subset(fom, sisteDato())
 
-    internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse) {
+    internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse): Boolean {
+        var result = false
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            if (utbetalingsdag is NavDag && utbetalingsdag.dato in avvisteDatoer)
+            if (utbetalingsdag is NavDag && utbetalingsdag.dato in avvisteDatoer) {
                 utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
+                result = true
+            }
         }
+        return result
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {

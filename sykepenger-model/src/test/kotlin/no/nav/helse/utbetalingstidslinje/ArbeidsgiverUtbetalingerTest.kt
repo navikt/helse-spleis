@@ -66,12 +66,13 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga minimun sykdomsgrad`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.HELG, 5.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.ARB, 5.NAV)
 
         assertEquals(12, inspektør.size)
-        assertEquals(10, inspektør.avvistDagTeller)
-        assertEquals(2, inspektør.navHelgDagTeller)
-        assertEquals(0, inspektør.totalUtbetaling())
+        assertEquals(5, inspektør.avvistDagTeller)
+        assertEquals(2, inspektør.arbeidsdagTeller)
+        assertEquals(5, inspektør.navDagTeller)
+        assertEquals(6000, inspektør.totalUtbetaling())
         assertTrue(aktivitetslogg.hasWarnings())
     }
 

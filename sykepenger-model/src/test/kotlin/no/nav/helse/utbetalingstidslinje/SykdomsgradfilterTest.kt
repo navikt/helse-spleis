@@ -12,7 +12,7 @@ internal class SykdomsgradfilterTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @Test
-    internal fun `sykdomsgrad over 20%`() {
+    fun `sykdomsgrad over 20%`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 50.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
