@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.mandag
 import no.nav.helse.tournament.dagturnering
-import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

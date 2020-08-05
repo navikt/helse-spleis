@@ -14,7 +14,7 @@ import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.aare
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.inntektsmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.sykmelding
 import no.nav.helse.tournament.TurneringsnøkkelTest.TestHendelse.Companion.søknad
-import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

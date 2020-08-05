@@ -12,7 +12,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -66,7 +65,6 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     @Test
-    @Disabled("Ved latterlig stort avvik mellom beregnetInntekt og inntekt fra inntektskomponenten blir avviksprosenten for stor for Prosentdel")
     fun `latterlig avvik i inntekt`() {
         håndterVilkårsgrunnlag(
             egenAnsatt = false,

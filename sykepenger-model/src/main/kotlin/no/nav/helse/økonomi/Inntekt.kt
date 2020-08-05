@@ -87,5 +87,5 @@ class Inntekt : Comparable<Inntekt> {
     }
 
     internal fun avviksprosent(other: Inntekt) =
-        Prosentdel.fraRatio((this.årlig - other.årlig).absoluteValue / other.årlig)
+        Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
 }

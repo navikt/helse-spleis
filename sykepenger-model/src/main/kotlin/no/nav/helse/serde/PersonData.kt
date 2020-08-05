@@ -19,8 +19,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.fraRatio
-import no.nav.helse.økonomi.prosent
+import no.nav.helse.økonomi.Prosent.Companion.ratio
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -420,7 +420,7 @@ internal data class PersonData(
                 ): Vilkårsgrunnlag.Grunnlagsdata = Vilkårsgrunnlag.Grunnlagsdata(
                         erEgenAnsatt = erEgenAnsatt,
                         beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
-                        avviksprosent = avviksprosent.fraRatio,
+                        avviksprosent = avviksprosent.ratio,
                         harOpptjening = harOpptjening,
                         antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
                         medlemskapstatus = when (medlemskapstatus) {

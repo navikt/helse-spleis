@@ -14,9 +14,10 @@ class Prosentdel private constructor(private val brøkdel: Double): Comparable<P
         private const val EPSILON = 0.000001
         private const val SIKKER_BRØK = 1.0
         private val GRENSE = 20.prosent
-        internal val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = 25.prosent
 
         internal fun fraRatio(ratio: Double) = Prosentdel(ratio)
+
+        val Number.prosent get() = fraRatio(this.toDouble() / 100.0)
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
@@ -44,7 +45,3 @@ class Prosentdel private constructor(private val brøkdel: Double): Comparable<P
 
     internal fun erUnderGrensen() = this < GRENSE
 }
-
-val Number.prosent get() = Prosentdel.fraRatio(this.toDouble() / 100.0)
-
-val Double.fraRatio get() = Prosentdel.fraRatio(this.toDouble())

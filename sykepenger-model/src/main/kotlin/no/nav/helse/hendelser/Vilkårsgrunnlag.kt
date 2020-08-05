@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.person.Periodetype
 import java.time.LocalDate
 
@@ -50,7 +50,7 @@ class Vilkårsgrunnlag(
     internal class Grunnlagsdata(
         internal val erEgenAnsatt: Boolean,
         internal val beregnetÅrsinntektFraInntektskomponenten: Inntekt,
-        internal val avviksprosent: Prosentdel?,
+        internal val avviksprosent: Prosent?,
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean,
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus

@@ -3,8 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.avg
-import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -21,7 +21,7 @@ class Inntektsvurdering(
 
     private val sammenligningsgrunnlag = inntekter.avg()
 
-    private var avviksprosent: Prosentdel? = null
+    private var avviksprosent: Prosent? = null
 
     internal fun sammenligningsgrunnlag() = sammenligningsgrunnlag
 
@@ -40,12 +40,12 @@ class Inntektsvurdering(
             avviksprosent = avvik
             if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) aktivitetslogg.error(
                 "Har mer enn %.0f %% avvik",
-                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toDouble()
+                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
             )
             else aktivitetslogg.info(
                 "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
-                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toDouble(),
-                avvik.toDouble()
+                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
+                avvik.prosent()
             )
         }
         return aktivitetslogg
