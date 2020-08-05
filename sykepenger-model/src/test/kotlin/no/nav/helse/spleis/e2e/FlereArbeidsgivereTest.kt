@@ -234,7 +234,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private fun historikk(orgnummer: String, sykedagstelling: Int = 0, melding: () -> String = { "<no description>" }) {
-        println(melding() + "\n")
         person.håndter(
             ytelser(
                 orgnummer.id(0),
@@ -245,7 +244,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private fun betale(orgnummer: String, melding: () -> String = { "<no description>" }) {
-        println(melding() + "\n")
         person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
         person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
         person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))

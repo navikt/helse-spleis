@@ -290,9 +290,6 @@ internal class Vedtaksperiode private constructor(
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
     ) {
-        println("*** Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} ***")
-        println("Leaving ${tilstand.type} for $periode")
-        println("Entering ${nyTilstand.type} for $periode\n")
         if (tilstand == nyTilstand) return  // Already in this state => ignore
         tilstand.leaving(event)
 

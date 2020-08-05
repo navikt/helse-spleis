@@ -194,7 +194,6 @@ internal class V26SykdomshistorikkMergeTest {
             ),
             skjemaVersjon = 26
         )
-        println(person)
         assertEquals(expected, migrated)
     }
 
