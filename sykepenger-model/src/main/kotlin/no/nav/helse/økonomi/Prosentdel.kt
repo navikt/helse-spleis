@@ -43,5 +43,7 @@ class Prosentdel private constructor(private val brøkdel: Double): Comparable<P
 
     internal fun roundToInt() = toDouble().roundToInt()
 
+    internal fun roundToTwoDecimalPlaces() = roundToInt() / 100.0
+
     internal fun erUnderGrensen() = this < GRENSE
 }

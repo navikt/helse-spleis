@@ -263,22 +263,9 @@ internal class ØkonomiTest {
         assertUtbetaling(c, 72, 54)
     }
 
-    @Test fun `ingen betaling ved sykdomsgrad under 20%`() {
-        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(4800.månedlig)
-        val b =  Økonomi.sykdomsgrad(20.prosent).inntekt(3200.månedlig)
-        val c =  Økonomi.sykdomsgrad(19.prosent).inntekt(8000.månedlig)
-        listOf(a, b, c).betal(1.januar).also {
-            assertEquals(19.5.prosent, it.sykdomsgrad())
-        }
-        assertUtbetaling(a, 0, 0)
-        assertUtbetaling(b, 0, 0)
-        assertUtbetaling(c, 0, 0)
-    }
-
-
     @Test fun `Sykdomdsgrad rundes opp`() {
-        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(10000.månedlig)
-        val b =  Økonomi.sykdomsgrad(21.prosent).inntekt(10000.månedlig)
+        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(10000.daglig)
+        val b =  Økonomi.sykdomsgrad(21.prosent).inntekt(10000.daglig)
         listOf(a, b).betal(1.januar).also {
             assertEquals(20.5.prosent, it.sykdomsgrad()) //dekningsgrunnlag 454
         }
