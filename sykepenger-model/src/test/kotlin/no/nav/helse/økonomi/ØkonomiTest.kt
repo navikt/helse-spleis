@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -231,9 +232,9 @@ internal class ØkonomiTest {
     }
 
     @Test fun `eksempel fra regneark`() {
-        val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).inntekt(21000*12/260.0)
-        val b =  Økonomi.sykdomsgrad(80.prosent, 90.prosent).inntekt(10000*12/260.0)
-        val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).inntekt(31000*12/260.0)
+        val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).inntekt(21000.månedlig)
+        val b =  Økonomi.sykdomsgrad(80.prosent, 90.prosent).inntekt(10000.månedlig)
+        val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).inntekt(31000.månedlig)
         listOf(a, b, c).betal(1.januar).also {
             assertEquals(39.838709677419345.prosent, it.sykdomsgrad())
             // grense = 864
@@ -247,9 +248,9 @@ internal class ØkonomiTest {
     }
 
     @Test fun `eksempel fra regneark modifisert for utbetaling til arbeidstaker`() {
-        val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).inntekt(21000*12/260.0)
-        val b =  Økonomi.sykdomsgrad(20.prosent, 20.prosent).inntekt(10000*12/260.0)
-        val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).inntekt(31000*12/260.0)
+        val a =  Økonomi.sykdomsgrad(50.prosent, 100.prosent).inntekt(21000.månedlig)
+        val b =  Økonomi.sykdomsgrad(20.prosent, 20.prosent).inntekt(10000.månedlig)
+        val c =  Økonomi.sykdomsgrad(20.prosent, 25.prosent).inntekt(31000.månedlig)
         listOf(a, b, c).betal(1.januar).also {
             assertEquals(30.16129032258064.prosent, it.sykdomsgrad())
             // grense = 864
@@ -263,9 +264,9 @@ internal class ØkonomiTest {
     }
 
     @Test fun `ingen betaling ved sykdomsgrad under 20%`() {
-        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(4800)
-        val b =  Økonomi.sykdomsgrad(20.prosent).inntekt(3200)
-        val c =  Økonomi.sykdomsgrad(19.prosent).inntekt(8000)
+        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(4800.månedlig)
+        val b =  Økonomi.sykdomsgrad(20.prosent).inntekt(3200.månedlig)
+        val c =  Økonomi.sykdomsgrad(19.prosent).inntekt(8000.månedlig)
         listOf(a, b, c).betal(1.januar).also {
             assertEquals(19.5.prosent, it.sykdomsgrad())
         }
@@ -276,8 +277,8 @@ internal class ØkonomiTest {
 
 
     @Test fun `Sykdomdsgrad rundes opp`() {
-        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(10000)
-        val b =  Økonomi.sykdomsgrad(21.prosent).inntekt(10000)
+        val a =  Økonomi.sykdomsgrad(20.prosent).inntekt(10000.månedlig)
+        val b =  Økonomi.sykdomsgrad(21.prosent).inntekt(10000.månedlig)
         listOf(a, b).betal(1.januar).also {
             assertEquals(20.5.prosent, it.sykdomsgrad()) //dekningsgrunnlag 454
         }
