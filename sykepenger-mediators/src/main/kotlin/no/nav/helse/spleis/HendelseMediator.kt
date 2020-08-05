@@ -306,7 +306,7 @@ internal class HendelseMediator(
                 )
             }
 
-            override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+            override fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
                 queueMessage(
                     "vedtaksperiode_forkastet", JsonMessage.newMessage(
                         mapOf(

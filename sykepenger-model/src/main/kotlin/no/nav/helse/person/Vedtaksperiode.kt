@@ -216,7 +216,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
         if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
         kontekst(kansellerUtbetaling)
-        kansellerUtbetaling.info("Invaliderer vedtaksperiode: %s på grunn av annullering", this.id.toString())
+        kansellerUtbetaling.info("Behandler kanseller utbetaling for vedtaksperiode: %s", this.id.toString())
         invaliderPeriode(kansellerUtbetaling)
     }
 
@@ -245,8 +245,8 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
-        person.vedtaksperiodeForkastet(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+        person.vedtaksperiodeAvbrutt(
+            PersonObserver.VedtaksperiodeAvbruttEvent(
                 vedtaksperiodeId = id,
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
@@ -1314,7 +1314,7 @@ internal class Vedtaksperiode private constructor(
         override val type = TIL_UTBETALING
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetaling")
+            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til utbetaling")
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -1416,7 +1416,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Invaliderer ikke en vedtaksperiode som er avsluttet med inntektsmelding")
+            hendelse.info("Tilbakestiller ikke en vedtaksperiode som er avsluttet med inntektsmelding")
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -1441,7 +1441,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Invaliderer ikke en vedtaksperiode som har gått til utbetalinger")
+            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til utbetalinger")
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =

@@ -66,7 +66,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En enkel periode som blir annullert blir også invalidert`() {
+    fun `En enkel periode som blir annullert blir også satt i tilstand TilInfotrygd`() {
         val behovTeller = inspektør.personLogg.behov().size
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
@@ -80,7 +80,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Annullering av én periode fører til at alle sammenhengende perioder blir invalidert`() {
+    fun `Annullering av én periode fører til at alle sammenhengende perioder blir satt i tilstand TilInfotrygd`() {
         forlengVedtak(27.januar, 30.januar, 100)
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
@@ -97,7 +97,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Annullering av én periode fører kun til at sammehengende perioder blir invalidert`() {
+    fun `Annullering av én periode fører kun til at sammehengende perioder blir satt i tilstand TilInfotrygd`() {
         forlengVedtak(27.januar, 30.januar, 100)
         nyttVedtak(1.mars, 20.mars, 100, 1.mars)
         inspektør.also {
