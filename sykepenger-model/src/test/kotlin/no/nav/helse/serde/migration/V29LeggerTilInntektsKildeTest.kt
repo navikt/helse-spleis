@@ -29,7 +29,6 @@ private val originalJson = """
 {
   "arbeidsgivere": [
     {
-      "inntekthistorikk": {
         "inntekter": [
           {
             "fom": "2017-12-31",
@@ -47,10 +46,8 @@ private val originalJson = """
             "beløp": 2000.0
           }
         ]
-      }
     },
     {
-      "inntekthistorikk": {
         "inntekter": [
           {
             "fom": "2017-12-31",
@@ -68,7 +65,6 @@ private val originalJson = """
             "beløp": 2000.0
           }
         ]
-      }
     }
   ],
   "skjemaVersjon": 28
@@ -80,7 +76,6 @@ private val expectedJson = """
 {
   "arbeidsgivere": [
     {
-      "inntekthistorikk": {
         "inntekter": [
           {
             "fom": "2017-12-31",
@@ -101,10 +96,8 @@ private val expectedJson = """
             "kilde": "INNTEKTSMELDING"
           }
         ]
-      }
     },
     {
-      "inntekthistorikk": {
         "inntekter": [
           {
             "fom": "2017-12-31",
@@ -125,7 +118,6 @@ private val expectedJson = """
             "kilde": "INNTEKTSMELDING"
           }
         ]
-      }
     }
   ],
   "skjemaVersjon": 29
