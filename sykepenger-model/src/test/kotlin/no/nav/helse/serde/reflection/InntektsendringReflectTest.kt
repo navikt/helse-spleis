@@ -15,7 +15,7 @@ internal class InntektsendringReflectTest {
     fun `mapper Inntekt til map`() {
         val map = InntektReflect(inntekt).toMap()
 
-        assertEquals(4, map.size)
+        assertEquals(5, map.size)
         assertEquals(1.januar, map["fom"])
         assertEquals(hendelseId, map["hendelseId"])
         assertEquals(1000.0, map["beløp"])

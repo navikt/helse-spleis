@@ -181,7 +181,8 @@ internal data class PersonData(
             private val fom: LocalDate,
             private val hendelseId: UUID,
             private val beløp: Double,
-            private val kilde: String
+            private val kilde: String,
+            private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
                 internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
@@ -190,7 +191,8 @@ internal data class PersonData(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
                             beløp = inntektData.beløp.månedlig,
-                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde)
+                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
+                            tidsstempel = inntektData.tidsstempel
                         )
                     }
                 }

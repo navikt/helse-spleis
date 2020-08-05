@@ -5,6 +5,7 @@ import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class Inntekthistorikk {
@@ -22,8 +23,8 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde) {
-        val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde)
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde, tidsstempel: LocalDateTime = LocalDateTime.now()) {
+        val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde, tidsstempel)
         inntekter.removeAll { it.erRedundantMed(nyInntekt) }
         inntekter.add(nyInntekt)
         inntekter.sort()
@@ -40,8 +41,9 @@ internal class Inntekthistorikk {
         private val fom: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
-        private val kilde: Kilde
-    ) : Comparable<Inntektsendring> {
+        private val kilde: Kilde,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+        ) : Comparable<Inntektsendring> {
 
         companion object {
             internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
