@@ -9,7 +9,7 @@ internal class V31LeggerTilInntektendringTidsstempel : JsonMigration(version = 3
     override fun doMigration(jsonNode: ObjectNode) {
         val tidsstempel = LocalDate.now().atStartOfDay().toString()
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.path("inntekthistorikk").path("inntekter").forEach { inntekt ->
+            arbeidsgiver.path("inntekter").forEach { inntekt ->
                 inntekt as ObjectNode
                 inntekt.put("tidsstempel", tidsstempel)
             }
