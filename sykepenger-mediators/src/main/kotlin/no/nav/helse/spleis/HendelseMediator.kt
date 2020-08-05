@@ -331,7 +331,8 @@ internal class HendelseMediator(
                             "tom" to event.tom,
                             "forbrukteSykedager" to event.forbrukteSykedager,
                             "gjenståendeSykedager" to event.gjenståendeSykedager,
-                            "opprettet" to event.opprettet
+                            "opprettet" to event.opprettet,
+                            "sykepengegrunnlag" to event.sykepengegrunnlag
                         )
                     )
                 )

@@ -39,7 +39,7 @@ private class UtbetaltEventBuilder(
     private val fødselnummer: String,
     private val orgnummer: String,
     private val hendelseIder: List<UUID>,
-    sykepengegrunnlag: Double,
+    private val sykepengegrunnlag: Double,
     utbetaling: Utbetaling,
     private val periode: Periode,
     private val forbrukteSykedager: Int,
@@ -65,7 +65,8 @@ private class UtbetaltEventBuilder(
             tom = periode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
-            opprettet = opprettet
+            opprettet = opprettet,
+            sykepengegrunnlag = sykepengegrunnlag
         )
     }
 
