@@ -34,7 +34,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-//        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
+        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -135,8 +135,8 @@ class Person private constructor(
 
     fun håndter(hendelse: KansellerUtbetaling) {
         hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse) ?:
-            hendelse.error("Finner ikke arbeidsgiver")
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 
     fun addObserver(observer: PersonObserver) {
@@ -193,7 +193,7 @@ class Person private constructor(
 
     internal fun arbeidsgiverOverlapper(periode: Periode, arbeidstakerHendelse: ArbeidstakerHendelse) =
         (arbeidsgivere.filter { it.overlapper(periode) }.size > 1).also {
-            if(it) invaliderAllePerioder(arbeidstakerHendelse)
+            if (it) invaliderAllePerioder(arbeidstakerHendelse)
         }
 
     internal fun nåværendeVedtaksperioder(): List<Vedtaksperiode> {

@@ -9,9 +9,11 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
+@Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     internal companion object {
