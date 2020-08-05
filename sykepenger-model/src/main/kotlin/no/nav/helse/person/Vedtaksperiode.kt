@@ -430,6 +430,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forsøkUtbetaling(
+        påminnelse: Påminnelse
+    ) {
+        val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
+        vedtaksperioder.removeAt(0).also {
+            if (it.tilstand == AvventerArbeidsgivere) it.tilstand(påminnelse, AvventerHistorikk)
+        }
+    }
+
+    private fun forsøkUtbetaling(
         engineForTimeline: MaksimumSykepengedagerfilter,
         ytelser: Ytelser
     ) {
@@ -859,8 +868,15 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
         override val type = AVVENTER_ARBEIDSGIVERE
 
+        override fun makstid(
+            vedtaksperiode: Vedtaksperiode,
+            tilstandsendringstidspunkt: LocalDateTime
+        ): LocalDateTime = tilstandsendringstidspunkt
+            .plusDays(15)
 
-
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.forsøkUtbetaling(påminnelse)
+        }
     }
 
     internal object AvventerInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
