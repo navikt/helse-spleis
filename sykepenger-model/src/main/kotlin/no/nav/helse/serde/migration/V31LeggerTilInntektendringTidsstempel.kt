@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
-internal class V30LeggerTilInntektendringTidsstempel : JsonMigration(version = 30) {
+internal class V31LeggerTilInntektendringTidsstempel : JsonMigration(version = 31) {
     override val description: String = "Legger til tidsstempel felt i inntektsendring"
 
     override fun doMigration(jsonNode: ObjectNode) {

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class V30LeggerTilInntektendringTidsstempelTest {
+class V31LeggerTilInntektendringTidsstempelTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -17,7 +17,7 @@ class V30LeggerTilInntektendringTidsstempelTest {
 
     @Test
     fun `legger til inntektskildetype til inntekter`() {
-        val migrated = listOf(V30LeggerTilInntektendringTidsstempel()).migrate(objectMapper.readTree(originalJson))
+        val migrated = listOf(V31LeggerTilInntektendringTidsstempel()).migrate(objectMapper.readTree(originalJson))
         val expected = objectMapper.readTree(expectedJson)
 
         assertEquals(expected, migrated)
@@ -142,6 +142,6 @@ private val expectedJson = """
       }
     }
   ],
-  "skjemaVersjon": 30
+  "skjemaVersjon": 31
 }
 """
