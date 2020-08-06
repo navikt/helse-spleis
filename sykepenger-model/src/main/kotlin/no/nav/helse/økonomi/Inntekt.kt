@@ -76,7 +76,7 @@ class Inntekt : Comparable<Inntekt> {
     override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
 
     override fun toString(): String {
-        return "[Årlig: $årlig, Måndelig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
+        return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
     }
 
     internal fun juster(block: (Int, Inntekt) -> Unit) {

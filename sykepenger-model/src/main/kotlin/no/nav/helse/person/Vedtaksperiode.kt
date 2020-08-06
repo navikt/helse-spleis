@@ -851,7 +851,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 valider("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger") {
                     vedtaksperiode.førsteFraværsdag
-                        ?.let { arbeidsgiver.inntektAsDouble(it) != null }
+                        ?.let { arbeidsgiver.inntekt(it) != null }
                         ?: true
                 }
                 onSuccess {
@@ -1208,7 +1208,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetslogg = hendelse,
                 periodeFom = vedtaksperiode.periode.start,
                 periodeTom = vedtaksperiode.periode.endInclusive,
-                sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntektAsDouble(vedtaksperiode.periode.start)!!.toDouble(),
+                sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode.start)!!.tilMånedligDouble(),
                 vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
                 periodetype = vedtaksperiode.periodetype()
             )
