@@ -191,7 +191,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
-    internal fun sykdomstidslinje() = Vedtaksperiode.sykdomstidslinje(vedtaksperioder)
+    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     @Deprecated("skal byttes ut med inntekt")
     internal fun inntektAsDouble(dato: LocalDate): Double? = inntekt(dato)?.tilMånedligDouble()

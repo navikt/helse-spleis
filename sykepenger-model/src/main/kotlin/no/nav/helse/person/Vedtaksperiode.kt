@@ -322,8 +322,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
-        arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        sykdomshistorikk.håndter(hendelse)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
@@ -542,12 +542,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
-        if (sykdomstidslinje.toShortString() != arbeidsgiverSykdomstidslinje.subset(periode()).toShortString()) {
+        if (sykdomshistorikk.sykdomstidslinje().toShortString() != arbeidsgiverSykdomstidslinje.subset(periode()).toShortString()) {
             log.warn("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
             sikkerLogg.warn(
                 "Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje."
                     + "vedtaksperiodeId=$id, aktørId=$aktørId, fødselsnummer=$fødselsnummer, " +
-                    "arbeidsgivertidslinje=[${arbeidsgiverSykdomstidslinje.subset(periode())}], vedtaksperiodetidslinje=[$sykdomstidslinje], " +
+                    "arbeidsgivertidslinje=[${arbeidsgiverSykdomstidslinje.subset(periode())}], vedtaksperiodetidslinje=[${sykdomshistorikk.sykdomstidslinje()}], " +
                     "periode=${periode()}")
         }
     }
