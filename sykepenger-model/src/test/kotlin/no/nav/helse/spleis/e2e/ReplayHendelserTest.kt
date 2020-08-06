@@ -16,6 +16,13 @@ import org.junit.jupiter.api.Test
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Replay av etterfølgende skjer umiddelbart når ny sykmelding kommer inn`() {
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100))
+        assertAntallReplays(1)
+    }
+
+    @Test
     @Disabled
     //WIP Jakob og Erlend disablet denne testen under rebase da den feilet i opprinnelig commit
     fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved forlengelse`() {
@@ -97,63 +104,27 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(3, tidslinjeInspektør.dagtelling[NavDag::class])
                 assertEquals(2, tidslinjeInspektør.dagtelling[NavHelgDag::class])
             }
+            // The rejected period
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(23, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(9, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(3, tidslinjeInspektør.dagtelling[Fridag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
+            }
+            // The replacement period
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(3.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(null, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(23, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(2, tidslinjeInspektør.dagtelling[Fridag::class])
+                assertEquals(5, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
+            }
         }
-    }
-
-    @Test
-    @Disabled
-    //WIP Jakob og Erlend disablet denne testen under rebase da den feilet i opprinnelig commit
-    fun `Alt 1 - Replay av etterfølgende først når ny sykmelding er utbetalt`() {
-        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
-        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 28.februar, 100))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 28.januar)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100))
-        assertAntallReplays(0)
-
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(1.januar, 26.januar)), førsteFraværsdag = 1.januar)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        assertAntallReplays(1)
-
-        replaySykmelding(sykmeldingId)
-        replaySøknad(søknadId)
-        replayInntektsmelding(inntektsmeldingId)
-    }
-
-    @Test
-    fun `Alt 2 - Replay av etterfølgende umiddelbart når ny sykmelding kommer inn`() {
-        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
-        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 28.februar, 100))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 28.januar)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100))
-        assertAntallReplays(1)
-
-        replaySykmelding(sykmeldingId)
-        replaySøknad(søknadId)
-        replayInntektsmelding(inntektsmeldingId)
     }
 }
