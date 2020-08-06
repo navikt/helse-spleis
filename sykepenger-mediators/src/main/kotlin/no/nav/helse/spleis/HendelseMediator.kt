@@ -327,7 +327,7 @@ internal class HendelseMediator(
                                     }
                                 )
                             },
-                            "ikkeUtbetalte" to event.ikkeUtbetalteDager.map {
+                            "ikkeUtbetalteDager" to event.ikkeUtbetalteDager.map {
                                 mapOf(
                                     "dato" to it.dato,
                                     "type" to it.type.name
