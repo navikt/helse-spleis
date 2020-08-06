@@ -327,6 +327,12 @@ internal class HendelseMediator(
                                     }
                                 )
                             },
+                            "ikkeUtbetalte" to event.ikkeUtbetalteDager.map {
+                                mapOf(
+                                    "dato" to it.dato,
+                                    "type" to it.type.name
+                                )
+                            },
                             "fom" to event.fom,
                             "tom" to event.tom,
                             "forbrukteSykedager" to event.forbrukteSykedager,

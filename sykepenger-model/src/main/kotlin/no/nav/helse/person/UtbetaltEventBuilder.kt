@@ -1,11 +1,15 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.PersonObserver.UtbetaltEvent
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -19,6 +23,7 @@ internal fun tilUtbetaltEvent(
     sykepengegrunnlag: Double,
     hendelseIder: List<UUID>,
     utbetaling: Utbetaling,
+    utbetalingstidslinje: Utbetalingstidslinje,
     periode: Periode,
     forbrukteSykedager: Int,
     gjenståendeSykedager: Int
@@ -29,6 +34,7 @@ internal fun tilUtbetaltEvent(
     hendelseIder = hendelseIder,
     sykepengegrunnlag = sykepengegrunnlag,
     utbetaling = utbetaling,
+    utbetalingstidslinje = utbetalingstidslinje,
     periode = periode,
     forbrukteSykedager = forbrukteSykedager,
     gjenståendeSykedager = gjenståendeSykedager
@@ -41,26 +47,30 @@ private class UtbetaltEventBuilder(
     private val hendelseIder: List<UUID>,
     private val sykepengegrunnlag: Double,
     utbetaling: Utbetaling,
+    utbetalingstidslinje: Utbetalingstidslinje,
     private val periode: Periode,
     private val forbrukteSykedager: Int,
     private var gjenståendeSykedager: Int
-) : ArbeidsgiverVisitor {
+) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
     private val dagsats = (sykepengegrunnlag / 260).roundToInt()
-    private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt>()
-    private val utbetalingslinjer = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje>()
+    private val oppdragListe = mutableListOf<UtbetaltEvent.Utbetalt>()
+    private val utbetalingslinjer = mutableListOf<UtbetaltEvent.Utbetalt.Utbetalingslinje>()
+    private val ikkeUtbetalteDager = finnIkkeUtbetalteDager(utbetalingstidslinje)
 
     init {
         utbetaling.accept(this)
+        utbetalingstidslinje.accept(this)
     }
 
-    internal fun result(): PersonObserver.UtbetaltEvent {
-        return PersonObserver.UtbetaltEvent(
+    internal fun result(): UtbetaltEvent {
+        return UtbetaltEvent(
             aktørId = aktørId,
             fødselsnummer = fødselnummer,
             organisasjonsnummer = orgnummer,
             hendelser = hendelseIder.toSet(),
             oppdrag = oppdragListe.toList(),
+            ikkeUtbetalteDager = ikkeUtbetalteDager,
             fom = periode.start,
             tom = periode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
@@ -80,7 +90,7 @@ private class UtbetaltEventBuilder(
 
     override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
-            PersonObserver.UtbetaltEvent.Utbetalt(
+            UtbetaltEvent.Utbetalt(
                 mottaker = orgnummer,
                 fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
@@ -96,7 +106,7 @@ private class UtbetaltEventBuilder(
 
     override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
         oppdragListe.add(
-            PersonObserver.UtbetaltEvent.Utbetalt(
+            UtbetaltEvent.Utbetalt(
                 mottaker = fødselnummer,
                 fagområde = oppdrag.fagområde().verdi,
                 fagsystemId = oppdrag.fagsystemId(),
@@ -121,7 +131,7 @@ private class UtbetaltEventBuilder(
     ) {
         if (linje.erOpphør()) return
         utbetalingslinjer.add(
-            PersonObserver.UtbetaltEvent.Utbetalt.Utbetalingslinje(
+            UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
                 dagsats = min(aktuellDagsinntekt, this.dagsats),
@@ -132,4 +142,27 @@ private class UtbetaltEventBuilder(
         )
     }
 
+    fun finnIkkeUtbetalteDager(utbetalingstidslinje: Utbetalingstidslinje): List<UtbetaltEvent.IkkeUtbetaltDag> {
+        val ikkeUtbetalteDager = mutableListOf<UtbetaltEvent.IkkeUtbetaltDag>()
+
+        utbetalingstidslinje.accept(object : UtbetalingsdagVisitor {
+            override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
+                ikkeUtbetalteDager.add(
+                    UtbetaltEvent.IkkeUtbetaltDag(
+                        dato, when (dag.begrunnelse) {
+                            Begrunnelse.SykepengedagerOppbrukt -> UtbetaltEvent.IkkeUtbetaltDag.Type.SykepengedagerOppbrukt
+                            Begrunnelse.MinimumInntekt -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumInntekt
+                            Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> UtbetaltEvent.IkkeUtbetaltDag.Type.EgenmeldingUtenforArbeidsgiverperiode
+                            Begrunnelse.MinimumSykdomsgrad -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumSykdomsgrad
+                        }
+                    )
+                )
+            }
+
+            override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
+                ikkeUtbetalteDager.add(UtbetaltEvent.IkkeUtbetaltDag(dato, UtbetaltEvent.IkkeUtbetaltDag.Type.Fridag))
+            }
+        })
+        return ikkeUtbetalteDager
+    }
 }

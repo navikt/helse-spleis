@@ -46,6 +46,7 @@ interface PersonObserver {
         val organisasjonsnummer: String,
         val hendelser: Set<UUID>,
         val oppdrag: List<Utbetalt>,
+        val ikkeUtbetalteDager: List<IkkeUtbetaltDag>,
         val fom: LocalDate,
         val tom: LocalDate,
         val forbrukteSykedager: Int,
@@ -68,6 +69,19 @@ interface PersonObserver {
                 val grad: Double,
                 val sykedager: Int
             )
+        }
+
+        data class  IkkeUtbetaltDag(
+            val dato: LocalDate,
+            val type: Type
+        ) {
+            enum class Type {
+                SykepengedagerOppbrukt,
+                MinimumInntekt,
+                EgenmeldingUtenforArbeidsgiverperiode,
+                MinimumSykdomsgrad,
+                Fridag
+            }
         }
     }
 
