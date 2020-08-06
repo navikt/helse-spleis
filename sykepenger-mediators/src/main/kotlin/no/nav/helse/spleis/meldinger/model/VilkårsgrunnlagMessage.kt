@@ -27,9 +27,17 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
     private val inntekter = packet["@løsning.${Inntektsberegning.name}"].map {
         it["årMåned"].asYearMonth() to it["inntektsliste"].map {
-            it.path("orgnummer").takeIf(JsonNode::isTextual)?.asText() to it["beløp"].asDouble().månedlig
+            arbeidsgiver(it) to it["beløp"].asDouble().månedlig
         }
-    }.associate { it }
+    }.toMap()
+
+    private fun arbeidsgiver(node: JsonNode) = when {
+        node.path("orgnummer").isTextual -> node.path("orgnummer").asText()
+        node.path("fødselsnummer").isTextual -> node.path("fødselsnummer").asText()
+        node.path("aktørId").isTextual -> node.path("aktørId").asText()
+        else -> null
+    }
+
     private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
         Opptjeningvurdering.Arbeidsforhold(
             orgnummer = it["orgnummer"].asText(),

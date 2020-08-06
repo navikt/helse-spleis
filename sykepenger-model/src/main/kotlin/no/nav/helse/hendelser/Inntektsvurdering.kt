@@ -1,13 +1,13 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Periodetype.FORLENGELSE
-import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -16,7 +16,7 @@ class Inntektsvurdering(
 ) {
 
     private val inntekter: List<MånedligInntekt> = perioder.flatMap { (måned, inntektListe) ->
-        inntektListe.map { (orgnummer, inntekt) -> MånedligInntekt(måned, orgnummer, inntekt) }
+        inntektListe.map { (arbeidsgiver, inntekt) -> MånedligInntekt(måned, arbeidsgiver, inntekt) }
     }
 
     private val sammenligningsgrunnlag = inntekter.avg()
@@ -56,13 +56,13 @@ class Inntektsvurdering(
 
     private class MånedligInntekt(
         private val yearMonth: YearMonth,
-        private val orgnummer: String?,
+        private val arbeidsgiver: String?,
         private val inntekt: Inntekt
     ) {
 
         companion object {
             internal fun kilder(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
-                inntekter.nylig(antallMåneder).distinctBy { it.orgnummer }.size
+                inntekter.nylig(antallMåneder).distinctBy { it.arbeidsgiver }.size
 
             private fun List<MånedligInntekt>.nylig(antallMåneder: Int): List<MånedligInntekt> {
                 return this.månedFørSlutt(antallMåneder)
