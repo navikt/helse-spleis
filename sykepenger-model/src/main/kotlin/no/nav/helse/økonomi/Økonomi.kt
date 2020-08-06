@@ -55,10 +55,8 @@ internal class Økonomi private constructor(
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             when {
-                (totalArbeidsgiver + totalPerson <= grense).also {
-                    økonomiList.forEach { økonomi ->
-                        økonomi.er6GBegrenset = !it
-                    }
+                (totalArbeidsgiver + totalPerson <= grense).also { isUnlimited ->
+                    økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = !isUnlimited }
                 } -> return
                 totalArbeidsgiver <= grense -> justerPerson(økonomiList, totalPerson, grense - totalArbeidsgiver)
                 else -> {
@@ -98,7 +96,7 @@ internal class Økonomi private constructor(
             }.map(get).summer()
 
             (budsjett - skalertTotal).also { remainder ->
-                remainder.juster {teller, justeringen ->
+                remainder.juster { teller, justeringen ->
                     (0 until teller).forEach { index ->
                         set(sorterteØkonomier[index], get(sorterteØkonomier[index]) + justeringen)
                     }
