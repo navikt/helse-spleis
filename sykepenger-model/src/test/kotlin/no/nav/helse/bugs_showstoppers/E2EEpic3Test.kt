@@ -15,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class E2EEpic3Test : AbstractEndToEndTest() {
 
@@ -950,6 +951,35 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(0, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            3,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    @Disabled("WIP")
+    fun `Forkasting skal ikke påvirke tilstanden til AVSLUTTET_UTEN_UTBETALING`() {
+        håndterSykmelding(Sykmeldingsperiode(31.mars(2020), 13.april(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(31.mars(2020), 13.april(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(4.juni(2020), 11.juni(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(4.juni(2020), 11.juni(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(12.juni(2020), 25.juni(2020), 100))
+        håndterSøknad(Sykdom(12.juni(2020), 25.juni(2020), 100))
+        håndterInntektsmelding(
+            førsteFraværsdag = 4.juni(2020),
+            arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020)))
+        )
+        håndterVilkårsgrunnlag(1, INNTEKT)
+        håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 17.juli(2020), 100))
+        håndterSøknad(
+            Sykdom(26.juni(2020), 17.juli(2020), 100)
+        )
+        assertDoesNotThrow {
+            håndterPåminnelse(3, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(2))
+        }
     }
 }
