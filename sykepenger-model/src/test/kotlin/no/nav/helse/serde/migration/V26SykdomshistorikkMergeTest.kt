@@ -657,6 +657,14 @@ internal class V26SykdomshistorikkMergeTest {
         assertEquals(expectedPerson, merged)
     }
 
+    @Test
+    fun `kan migrere tom forkastet periode`() {
+        val original = objectMapper.readTree(personMedTomForkastetPeriode)
+        val expected = objectMapper.readTree(expectedpersonMedTomForkastetPeriode)
+
+        assertEquals(expected, listOf(V26SykdomshistorikkMerge()).migrate(original))
+    }
+
     fun historikk(
         vararg historikkElementer: String
     ) = historikkElementer.reversed().joinToJsonArray()
@@ -1018,4 +1026,42 @@ private val expectedPerson = """
   ],
   "skjemaVersjon": 26
 }
+"""
+
+@Language("JSON")
+private val personMedTomForkastetPeriode = """
+    {
+      "aktørId": "aktørId",
+      "fødselsnummer": "fnr",
+      "arbeidsgivere": [
+        {
+          "organisasjonsnummer": "orgnummer",
+          "id": "a8d9144d-7911-47b3-ac81-bf49867a5b4d",
+          "sykdomshistorikk": [],
+          "forkastede": [
+            {
+              "sykdomshistorikk": []
+            }
+          ]
+        }
+      ],
+      "skjemaVersjon": 25
+    }
+"""
+
+@Language("JSON")
+private val expectedpersonMedTomForkastetPeriode = """
+    {
+      "aktørId": "aktørId",
+      "fødselsnummer": "fnr",
+      "arbeidsgivere": [
+        {
+          "organisasjonsnummer": "orgnummer",
+          "id": "a8d9144d-7911-47b3-ac81-bf49867a5b4d",
+          "sykdomshistorikk": [],
+          "forkastede": []
+        }
+      ],
+      "skjemaVersjon": 26
+    }
 """

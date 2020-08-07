@@ -12,6 +12,20 @@ internal class V26SykdomshistorikkMerge : JsonMigration(version = 26) {
 
     override fun doMigration(jsonNode: ObjectNode) {
         val arbeidsgivere = jsonNode.path("arbeidsgivere")
+
+        // Check for trashed vedtaksperioder with no history. These can not be migrated and must be removed.
+        arbeidsgivere.forEach {
+            val arbeidsgiver = it as ObjectNode
+            val _forkastede = arbeidsgiver.path("forkastede").filter { forkastetPeriode ->
+                val harInnhold = !(forkastetPeriode.path("sykdomshistorikk").isEmpty)
+                if (!harInnhold) {
+                    log.warn("Fant tom sykdomshistorikk på vedtaksperiode: ${forkastetPeriode.path("id").asText()}")
+                }
+                harInnhold
+            }
+            arbeidsgiver.putArray("forkastede").addAll(_forkastede)
+        }
+
         for (arbeidsgiver in arbeidsgivere) {
             arbeidsgiver as ObjectNode
             val nullElementer =
@@ -84,7 +98,9 @@ internal class V26SykdomshistorikkMerge : JsonMigration(version = 26) {
     private fun fjernDatoerFraNeste(nåværende: JsonNode, neste: ObjectNode) {
         val datoerFraNeste = neste.dagerForTidslinje("beregnetSykdomstidslinje").map { it["dato"].asText() }
         (neste["beregnetSykdomstidslinje"] as ObjectNode).putArray("dager")
-            .addAll(nåværende.dagerForTidslinje("beregnetSykdomstidslinje").filterNot { it["dato"].asText() in datoerFraNeste })
+            .addAll(
+                nåværende.dagerForTidslinje("beregnetSykdomstidslinje")
+                    .filterNot { it["dato"].asText() in datoerFraNeste })
             .sortedBy { it["dato"].asText() }
     }
 

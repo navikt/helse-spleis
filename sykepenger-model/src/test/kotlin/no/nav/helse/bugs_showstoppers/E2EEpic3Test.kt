@@ -240,6 +240,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `person med gammel sykmelding`() {
+        // OBS: Disse kastes ikke ut fordi de er for gamle. De kastes ut fordi de kommer out of order
         håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 31.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(9.februar(2017), 15.februar(2017), 100))
 
