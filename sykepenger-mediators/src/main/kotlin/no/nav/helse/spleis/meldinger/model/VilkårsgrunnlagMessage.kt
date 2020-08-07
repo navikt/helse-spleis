@@ -35,7 +35,7 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
         node.path("orgnummer").isTextual -> node.path("orgnummer").asText()
         node.path("fødselsnummer").isTextual -> node.path("fødselsnummer").asText()
         node.path("aktørId").isTextual -> node.path("aktørId").asText()
-        else -> null
+        else -> error("Mangler arbeidsgiver for inntekt i hendelse $id")
     }
 
     private val arbeidsforhold = packet["@løsning.${Opptjening.name}"].map {
@@ -69,6 +69,7 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     }
 
     private val vilkårsgrunnlag get() = Vilkårsgrunnlag(
+        meldingsreferanseId = this.id,
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

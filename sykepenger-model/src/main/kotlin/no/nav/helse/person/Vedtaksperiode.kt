@@ -392,6 +392,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
+        lagreInntekter(vilkårsgrunnlag)
         val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             ?: periode.start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
@@ -595,6 +596,11 @@ internal class Vedtaksperiode private constructor(
                     "periode=${periode()}")
         }
     }
+
+    private fun lagreInntekter(vilkårsgrunnlag: Vilkårsgrunnlag){
+        vilkårsgrunnlag.lagreInntekter(person)
+    }
+
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
 
     // Gang of four State pattern

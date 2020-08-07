@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -13,7 +14,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class Inntektsvurdering(
-    perioder: Map<YearMonth, List<Pair<String?, Inntekt>>>
+    perioder: Map<YearMonth, List<Pair<String, Inntekt>>>
 ) {
 
     private val inntekter: List<MånedligInntekt> = perioder.flatMap { (måned, inntektListe) ->
@@ -28,7 +29,11 @@ class Inntektsvurdering(
 
     internal fun avviksprosent() = avviksprosent
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, beregnetInntekt: Inntekt, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(
+        aktivitetslogg: Aktivitetslogg,
+        beregnetInntekt: Inntekt,
+        periodetype: Periodetype
+    ): Aktivitetslogg {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > 1) {
             val melding =
@@ -55,9 +60,12 @@ class Inntektsvurdering(
     private fun avviksprosent(beregnetInntekt: Inntekt) =
         beregnetInntekt.avviksprosent(sammenligningsgrunnlag)
 
+    internal fun lagreInntekter(person: Person, vilkårsgrunnlag: Vilkårsgrunnlag) =
+        inntekter.lagreInntekter(person, vilkårsgrunnlag)
+
     private class MånedligInntekt(
         private val yearMonth: YearMonth,
-        private val arbeidsgiver: String?,
+        private val arbeidsgiver: String,
         private val inntekt: Inntekt
     ) {
 
@@ -89,10 +97,26 @@ class Inntektsvurdering(
 
             private fun List<MånedligInntekt>.minMonth() = map { it.yearMonth }.min()
             private fun List<MånedligInntekt>.maxMonth() = map { it.yearMonth }.max()
+
+            internal fun lagreInntekter(
+                inntekter: List<MånedligInntekt>,
+                person: Person,
+                vilkårsgrunnlag: Vilkårsgrunnlag
+            ) {
+                inntekter
+                    .groupBy { it.arbeidsgiver }
+                    .mapValues { (_, månedligeInntekter) ->
+                        månedligeInntekter.groupBy({ it.yearMonth }) { it.inntekt }
+                            .mapValues { (_, månedligInntekt) -> månedligInntekt.summer() }
+                    }
+                    .also { person.lagreInntekter(it, vilkårsgrunnlag) }
+            }
         }
     }
 
     private fun List<MånedligInntekt>.kilder(antallMåneder: Int) = MånedligInntekt.kilder(this, antallMåneder)
     private fun List<MånedligInntekt>.avg() = MånedligInntekt.avg(this)
     private fun List<MånedligInntekt>.antallMåneder() = MånedligInntekt.antallMåneder(this)
+    private fun List<MånedligInntekt>.lagreInntekter(person: Person, vilkårsgrunnlag: Vilkårsgrunnlag) =
+        MånedligInntekt.lagreInntekter(this, person, vilkårsgrunnlag)
 }

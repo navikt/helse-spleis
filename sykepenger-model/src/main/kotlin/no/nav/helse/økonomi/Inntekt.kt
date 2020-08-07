@@ -3,12 +3,9 @@ package no.nav.helse.økonomi
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
-class Inntekt : Comparable<Inntekt> {
+class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
 
-    private val årlig: Double
-
-    private constructor(årlig: Double) {
-        this.årlig = årlig
+    init {
         require(
             this.årlig !in listOf(
                 Double.POSITIVE_INFINITY,
@@ -34,7 +31,7 @@ class Inntekt : Comparable<Inntekt> {
         internal val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
         internal fun List<Inntekt>.summer(): Inntekt {
-            return this.fold(INGEN) { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }
+            return this.fold(INGEN) { acc, inntekt -> acc + inntekt }
         }
 
         internal fun List<Inntekt>.avg(): Inntekt {

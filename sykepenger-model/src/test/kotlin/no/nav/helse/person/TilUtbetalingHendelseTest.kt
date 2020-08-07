@@ -208,6 +208,7 @@ internal class TilUtbetalingHendelseTest {
 
     private fun vilkårsgrunnlag(index: Int) =
         Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,

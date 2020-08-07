@@ -165,7 +165,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: Map<YearMonth, List<Pair<String?, Inntekt>>> = (1..12).map {
+        inntektsmåneder: Map<YearMonth, List<Pair<String, Inntekt>>> = (1..12).map {
             YearMonth.of(2017, it) to (orgnummer to INNTEKT)
         }.groupBy({ it.first }) { it.second },
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
@@ -178,6 +178,7 @@ internal class VilkårsgrunnlagTest {
         arbeidsavklaringspenger: List<Periode> = emptyList()
 
     ) = Vilkårsgrunnlag(
+        meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId(),
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,

@@ -162,7 +162,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        inntekter: Map<YearMonth, List<Pair<String?, Inntekt>>>,
+        inntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -221,10 +221,11 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: Map<YearMonth, List<Pair<String?, Inntekt>>>,
+        inntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,

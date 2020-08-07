@@ -24,10 +24,74 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
+    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
+    private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
+    private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
+
+    @Test
+    fun ` `() {
+        nyPeriode(1.januar til 31.januar, a1)
+        assertNoErrors(a1Inspektør)
+
+        person.håndter(vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 25000
+                }
+            }
+        ))
+
+        assertNoErrors(a1Inspektør)
+
+        assertEquals(25000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+    }
+
+    @Test
+    fun `Inntekter fra flere arbeidsgivere`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
+
+        person.håndter(
+            vilkårsgrunnlag(
+                a1.id(0),
+                orgnummer = a1,
+                inntekter = inntektperioder {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt 15000
+                    }
+                    1.januar(2017) til 1.juni(2017) inntekter {
+                        a2 inntekt 5000
+                        a3 inntekt 3000
+                        a4 inntekt 2000
+                    }
+                    1.juli(2017) til 1.desember(2017) inntekter {
+                        a3 inntekt 7500
+                        a4 inntekt 2500
+                    }
+                }
+            ))
+
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
+
+        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+
+        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
+    }
 
     @Test
     fun `Flere inntekter fra samme arbeidsgiver på samme måned`() {
         nyPeriode(1.januar til 31.januar, a1)
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
 
         person.håndter(
             vilkårsgrunnlag(
@@ -50,6 +114,16 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                     }
                 }
             ))
+
+        assertNoErrors(a1Inspektør)
+        assertNoErrors(a2Inspektør)
+
+        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
@@ -80,28 +154,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             internal fun toList() = liste.toList()
 
             infix fun String.inntekt(inntekt: Int) = liste.add(this to inntekt.månedlig)
-        }
-
-        internal infix fun String.inntekt(inntekt: Int) = this to inntekt.månedlig
-
-        internal infix fun Pair<String, Inntekt>.perioder(block: Perioder.() -> Unit) =
-            Perioder(block)
-                .toList()
-                .flatten()
-                .map(YearMonth::from)
-                .distinct()
-                .forEach { yearMonth -> map.getOrPut(yearMonth) { mutableListOf() }.add(this) }
-
-        internal class Perioder(block: Perioder.() -> Unit) {
-            private val perioder = mutableListOf<Periode>()
-
-            init {
-                block()
-            }
-
-            internal fun toList() = perioder.toList()
-
-            internal infix fun LocalDate.til(til: LocalDate) = perioder.add(Periode(this, til))
         }
     }
 
@@ -140,6 +192,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         inntekter: Map<YearMonth, List<Pair<String, Inntekt>>>
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,

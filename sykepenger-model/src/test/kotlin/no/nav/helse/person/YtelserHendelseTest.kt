@@ -221,6 +221,7 @@ internal class YtelserHendelseTest {
 
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,

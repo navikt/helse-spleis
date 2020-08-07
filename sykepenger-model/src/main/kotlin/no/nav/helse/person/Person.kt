@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.økonomi.Inntekt
+import java.time.YearMonth
 import java.util.*
 
 class Person private constructor(
@@ -212,7 +214,24 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(): MutableList<Vedtaksperiode> {
-        return arbeidsgivere.map { it.nåværendeVedtaksperiode() }.filterNotNull().toMutableList().also { it.sort() }
+        return arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.toMutableList().also { it.sort() }
     }
 
+    internal fun lagreInntekter(
+        inntekter: Map<String, Map<YearMonth, Inntekt>>,
+        vilkårsgrunnlag: Vilkårsgrunnlag
+    ) {
+        inntekter
+            .mapKeys { (arbeidsgiverId, _) -> finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag) }
+            .forEach { (arbeidsgiver, månedligeInntekter) ->
+                arbeidsgiver.lagreInntekt(månedligeInntekter, vilkårsgrunnlag)
+            }
+    }
+
+    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, vilkårsgrunnlag: Vilkårsgrunnlag): Arbeidsgiver {
+        return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
+            vilkårsgrunnlag.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
+            Arbeidsgiver(this, arbeidsgiver)
+        }
+    }
 }

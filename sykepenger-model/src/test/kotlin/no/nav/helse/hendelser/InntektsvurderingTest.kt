@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Periodetype
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.person.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -66,7 +66,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: Map<YearMonth, List<Pair<String?, Inntekt>>> = (1..12).map {
+        inntektsmåneder: Map<YearMonth, List<Pair<String, Inntekt>>> = (1..12).map {
             YearMonth.of(2017, it) to (ORGNR to INNTEKT)
         }.groupBy({ it.first }) { it.second }
     ) = Inntektsvurdering(inntektsmåneder)

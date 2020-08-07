@@ -315,6 +315,7 @@ class JsonBuilderTest {
         )
 
         internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,

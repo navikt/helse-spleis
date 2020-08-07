@@ -441,6 +441,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,

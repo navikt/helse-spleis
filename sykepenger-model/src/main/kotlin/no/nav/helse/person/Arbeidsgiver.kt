@@ -10,6 +10,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -46,11 +47,11 @@ internal class Arbeidsgiver private constructor(
 
         internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
             arbeidsgivere.fold(listOf<Periode>()) { resultater, arbeidsgiver ->
-                    Periode.merge(
-                        resultater,
-                        arbeidsgiver.vedtaksperioder.map { it.periode() }
-                    )
-                }.map { it.start.minusDays(1) }
+                Periode.merge(
+                    resultater,
+                    arbeidsgiver.vedtaksperioder.map { it.periode() }
+                )
+            }.map { it.start.minusDays(1) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -246,6 +247,27 @@ internal class Arbeidsgiver private constructor(
 
     internal fun inntekt(dato: LocalDate): Inntekt? = inntekthistorikk.inntekt(dato)
 
+    internal fun addInntekt(inntektsmelding: Inntektsmelding) {
+        inntektsmelding.addInntekt(inntekthistorikk)
+    }
+
+    internal fun addInntekt(ytelser: Ytelser) {
+        ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
+    }
+
+    internal fun lagreInntekt(månedligeInntekter: Map<YearMonth, Inntekt>, vilkårsgrunnlag: Vilkårsgrunnlag) {
+        månedligeInntekter
+            .mapKeys { (måned, _) -> måned.atDay(1) }
+            .forEach { (måned, inntekt) ->
+                inntekthistorikk.add(
+                    måned,
+                    vilkårsgrunnlag.meldingsreferanseId(),
+                    inntekt,
+                    Inntekthistorikk.Inntektsendring.Kilde.SKATT
+                )
+            }
+    }
+
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)
 
     internal fun søppelbøtte(hendelse: PersonHendelse) {
@@ -326,14 +348,6 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1], hendelse, TIDLIGERE)
     }
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntekthistorikk)
-    }
-
-    internal fun addInntekt(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
-    }
-
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
@@ -365,7 +379,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
-
     internal class TilbakestillBehandling(
         internal val organisasjonsnummer: String,
         internal val hendelse: PersonHendelse
@@ -373,6 +386,7 @@ internal class Arbeidsgiver private constructor(
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()
+
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
