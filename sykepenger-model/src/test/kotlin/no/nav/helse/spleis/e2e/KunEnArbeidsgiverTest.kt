@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -9,6 +10,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
@@ -1583,4 +1585,39 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(10, inspektør.gjenståendeSykedager(0))
         assertEquals(24.juli(2020), inspektør.maksdato(0))
     }
+
+    @Disabled
+    @Test
+    fun `Perioder hvor søknaden har dannet gap (friskmeldt) skal ikke regnes som gap`() {
+        // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
+        // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
+        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
+        håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(9.juni, 30.juni))
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+
+        håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
+        håndterSøknad(Sykdom(1.juli, 31.juli, 100))
+        håndterYtelser(1, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+
+        assertNoErrors(inspektør)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP
+        )
+    }
+
 }
