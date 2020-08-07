@@ -955,13 +955,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             3,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
             TIL_INFOTRYGD
         )
     }
 
     @Test
-    @Disabled("WIP")
     fun `Forkasting skal ikke påvirke tilstanden til AVSLUTTET_UTEN_UTBETALING`() {
         håndterSykmelding(Sykmeldingsperiode(31.mars(2020), 13.april(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(31.mars(2020), 13.april(2020), 100))
