@@ -154,7 +154,7 @@ class Utbetalingshistorikk(
                 private fun List<Periode>.harForegående(periode: no.nav.helse.hendelser.Periode) =
                     this
                         .filterIsInstance<Utbetalingsperiode>()
-                        .any { it.periode.etterfølgesAv(periode) }
+                        .any { it.periode.erRettFør(periode) }
 
                 private fun List<Periode>.harForegåendeFraAnnenArbeidsgiver(
                     periode: no.nav.helse.hendelser.Periode,
@@ -162,7 +162,7 @@ class Utbetalingshistorikk(
                 ) =
                     this
                         .filterIsInstance<Utbetalingsperiode>()
-                        .filter { it.periode.etterfølgesAv(periode) }
+                        .filter { it.periode.erRettFør(periode) }
                         .any { it.orgnr != organisasjonsnummer }
 
                 private fun List<Periode>.harHistoriskeSammenhengendePerioderMedEndring() =
@@ -172,7 +172,7 @@ class Utbetalingshistorikk(
                         .any { it }
 
                 private fun erTilstøtendeMedEndring(left: Utbetalingsperiode, right: Utbetalingsperiode) =
-                    left.periode.etterfølgesAv(right.periode) && left.ugradertBeløp != right.ugradertBeløp && !left.maksDagsats && !right.maksDagsats
+                    left.periode.erRettFør(right.periode) && left.ugradertBeløp != right.ugradertBeløp && !left.maksDagsats && !right.maksDagsats
             }
         }
 

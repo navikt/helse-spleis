@@ -19,14 +19,14 @@ internal class OldtidsutbetalingerFlereArbeidsgivereTest {
 
     @Test
     fun `Historisk tidlinje for person`() {
-        val oldtid = Oldtidsutbetalinger(Periode(7.januar, 18.januar))
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER1, tidslinjeOf(5.UTELATE, 19.FRI))
         oldtid.add(ORGNUMMER3, tidslinjeOf(7.UTELATE, 13.NAV))
         oldtid.add(ORGNUMMER2, tidslinjeOf(3.NAV))
         oldtid.add(ORGNUMMER2, tidslinjeOf(13.UTELATE, 2.NAV))
 
-        UtbetalingstidslinjeInspektør(oldtid.personTidslinje()).also { inspektør ->
+        UtbetalingstidslinjeInspektør(oldtid.personTidslinje(Periode(7.januar, 18.januar))).also { inspektør ->
             assertEquals(18, inspektør.size)
             assertEquals(14, inspektør.navDagTeller)
             assertEquals(2, inspektør.fridagTeller)

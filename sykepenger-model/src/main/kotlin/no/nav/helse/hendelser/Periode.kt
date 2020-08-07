@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.sykdomstidslinje.tilstøterKronologisk
+import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -46,7 +46,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
 
-    internal fun etterfølgesAv(other: Periode) = this.endInclusive.tilstøterKronologisk(other.start)
+    internal fun erRettFør(other: Periode) = this.endInclusive.erRettFør(other.start)
 
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive

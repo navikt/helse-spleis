@@ -7,6 +7,7 @@ import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class OldtidsutbetalingerEnArbeidsgiverTest {
     private companion object {
@@ -19,95 +20,105 @@ internal class OldtidsutbetalingerEnArbeidsgiverTest {
 
     @Test
     fun `sjekk tilstøtende for en enkelt periode`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(19.NAV))
 
-        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertTrue(oldtid.arbeidsgiverperiodeBetalt(ARBEIDSGIVER))
-        assertEquals(1.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).arbeidsgiverperiodeErBetalt(periode))
+        assertEquals(1.januar, oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode))
     }
 
     @Test
     fun `sammenhengende ferie mellom to perioder gir tilstøtende`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(1.NAV))
         oldtid.add(tidslinje = tidslinjeOf(1.UTELATE, 18.FRI))
 
-        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertEquals(1.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertEquals(1.januar, oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode))
     }
 
     @Test
-    fun `ferie før første nav dag blir ignorert`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+    fun `ferie før første Nav-dag blir ignorert`() {
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
         oldtid.add(tidslinje = tidslinjeOf(18.FRI))
 
-        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertEquals(19.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertEquals(19.januar, oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode))
     }
 
     @Test
-    fun `ferie mellom nav dager gir ikke gap`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+    fun `ferie mellom Nav-dager gir ikke gap`() {
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(1.NAV))
         oldtid.add(tidslinje = tidslinjeOf(1.UTELATE, 17.FRI))
         oldtid.add(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
 
-        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertEquals(1.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertEquals(1.januar, oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode))
     }
 
     @Test
     fun `ferie med gap dag foran blir ignorert`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(1.NAV))
         oldtid.add(tidslinje = tidslinjeOf(2.UTELATE, 16.FRI))
         oldtid.add(ORGNUMMER, tidslinjeOf(18.UTELATE, 1.NAV))
 
-        assertTrue(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertEquals(19.januar, oldtid.førsteUtbetalingsdag(ARBEIDSGIVER))
+        assertTrue(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertEquals(19.januar, oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode))
     }
 
     @Test
     fun `periode er ikke tilstøtende til kun feriedager`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(tidslinje = tidslinjeOf(19.FRI))
 
-        assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertThrows<IllegalArgumentException> { oldtid.førsteUtbetalingsdag(ARBEIDSGIVER) }
+        assertFalse(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertThrows<IllegalArgumentException> { oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode) }
     }
 
     @Test
     fun `ikke tilstøtende når det finnes et gap`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val periode = 22.januar til 31.januar
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(18.NAV))
 
-        assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
-        assertFalse(oldtid.arbeidsgiverperiodeBetalt(ARBEIDSGIVER))
-        assertThrows<IllegalArgumentException> { oldtid.førsteUtbetalingsdag(ARBEIDSGIVER) }
+        assertFalse(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(periode))
+        assertFalse(oldtid.utbetalingerInkludert(ARBEIDSGIVER).arbeidsgiverperiodeErBetalt(periode))
+        assertThrows<IllegalArgumentException> { oldtid.utbetalingerInkludert(ARBEIDSGIVER).førsteUtbetalingsdag(periode) }
     }
 
     @Test
     fun `tom utbetalingstidslinje er aldri tilstøtende`() {
-        val oldtid = Oldtidsutbetalinger(Periode(22.januar, 31.januar))
+        val oldtid = Oldtidsutbetalinger()
 
-        assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertFalse(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(22.januar til 31.januar))
     }
 
     @Test
     fun `tilstøtende sjekker bare mot utbetalinger tidligere enn periodeTom`() {
-        val oldtid = Oldtidsutbetalinger(Periode(1.januar, 12.januar))
+        val oldtid = Oldtidsutbetalinger()
 
         oldtid.add(ORGNUMMER, tidslinjeOf(12.UTELATE, 12.NAV))
 
-        assertFalse(oldtid.tilstøtende(ARBEIDSGIVER))
+        assertFalse(oldtid.utbetalingerInkludert(ARBEIDSGIVER).erRettFør(1.januar til 12.januar))
     }
 }
+
+private infix fun LocalDate.til(januar: LocalDate) = Periode(this, januar)
+

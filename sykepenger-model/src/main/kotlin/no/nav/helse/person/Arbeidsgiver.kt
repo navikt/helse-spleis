@@ -259,7 +259,7 @@ internal class Arbeidsgiver private constructor(
         var index = vedtaksperioder.indexOf(vedtaksperiode)
         val results = vedtaksperioder.subList(0, index + 1).toMutableList()
         while (vedtaksperioder.last() != results.last()) {
-            if (!vedtaksperioder[index].etterfølgesAv(vedtaksperioder[index + 1])) break
+            if (!vedtaksperioder[index].erRettFør(vedtaksperioder[index + 1])) break
             results.add(vedtaksperioder[index + 1])
             index++
         }
@@ -320,11 +320,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun finnForegåendePeriode(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> other.etterfølgesAv(vedtaksperiode) }
+    internal fun finnPeriodeRettFør(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other -> other.erRettFør(vedtaksperiode) }
 
-    internal fun finnPåfølgendePeriode(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> vedtaksperiode.etterfølgesAv(other) }
+    internal fun finnPeriodeRettEtter(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other -> vedtaksperiode.erRettFør(other) }
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)

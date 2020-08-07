@@ -455,7 +455,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
             vedtaksperioder.forEach { periode ->
-                gruppeIder[periode] = arbeidsgiver.finnForegåendePeriode(periode)
+                gruppeIder[periode] = arbeidsgiver.finnPeriodeRettFør(periode)
                     ?.let { foregående -> gruppeIder.getValue(foregående) }
                     ?: UUID.randomUUID()
             }
@@ -468,7 +468,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
             vedtaksperioder.forEach { periode ->
-                gruppeIder[periode] = arbeidsgiver.finnForegåendePeriode(periode)
+                gruppeIder[periode] = arbeidsgiver.finnPeriodeRettFør(periode)
                     ?.let { foregående -> gruppeIder.getValue(foregående) }
                     ?: UUID.randomUUID()
             }
