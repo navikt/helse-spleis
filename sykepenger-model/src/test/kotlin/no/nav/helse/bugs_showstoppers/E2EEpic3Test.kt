@@ -857,8 +857,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
-            TIL_INFOTRYGD
+            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
         )
         assertForkastetPeriodeTilstander(
             2,

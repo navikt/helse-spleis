@@ -171,8 +171,8 @@ internal data class PersonData(
                     this.organisasjonsnummer
                 )
             })
-            Vedtaksperiode.sorter(vedtaksperiodeliste)
-            Vedtaksperiode.sorter(forkastedeliste)
+            vedtaksperiodeliste.sort()
+            forkastedeliste.sort()
 
             return arbeidsgiver
         }

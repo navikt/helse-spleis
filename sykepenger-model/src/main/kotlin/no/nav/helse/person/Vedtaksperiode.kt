@@ -56,7 +56,7 @@ internal class Vedtaksperiode private constructor(
     private var arbeidsgiverFagsystemId: String?,
     private var arbeidsgiverNettoBeløp: Int,
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
-) : Aktivitetskontekst {
+) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     internal constructor(
         person: Person,
@@ -206,12 +206,19 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndter(hendelse: GjenopptaBehandling) {
+        kontekst(hendelse.hendelse)
+        tilstand.håndter(this, hendelse)
+    }
+
     internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
         if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
         kontekst(kansellerUtbetaling)
         kansellerUtbetaling.info("Invaliderer vedtaksperiode: %s på grunn av annullering", this.id.toString())
         invaliderPeriode(kansellerUtbetaling)
     }
+
+    override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
     internal fun forkastHvisPåfølgendeUnntattNy(forkastet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         if (this.periode.start > forkastet.periode.endInclusive && !forkastet.etterfølgesAv(this)) return
@@ -258,6 +265,19 @@ internal class Vedtaksperiode private constructor(
         harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
         else -> Periodetype.FØRSTEGANGSBEHANDLING
     }
+
+    internal fun ferdig(hendelse: ArbeidstakerHendelse){
+        if(!erIFerdigTilstand()) tilstand(hendelse, TilInfotrygd)
+    }
+
+    internal fun erIFerdigTilstand() =
+        this.tilstand in listOf(
+            TilInfotrygd,
+            Avsluttet,
+            AvsluttetUtenUtbetalingMedInntektsmelding,
+            AvsluttetUtenUtbetaling,
+            AvventerVilkårsprøvingArbeidsgiversøknad
+        )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
         arbeidsgiver.finnForegåendePeriode(vedtaksperiode)?.let {
@@ -429,7 +449,7 @@ internal class Vedtaksperiode private constructor(
     private fun forsøkUtbetaling(
         påminnelse: Påminnelse
     ) {
-        val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
+        val vedtaksperioder = person.nåværendeVedtaksperioder()
         vedtaksperioder.removeAt(0).also {
             if (it.tilstand == AvventerArbeidsgivere) it.tilstand(påminnelse, AvventerHistorikk)
         }
@@ -439,7 +459,7 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         ytelser: Ytelser
     ) {
-        val vedtaksperioder = person.nåværendeVedtaksperioder().sortedBy { it.periode.endInclusive }.toMutableList()
+        val vedtaksperioder = person.nåværendeVedtaksperioder()
         vedtaksperioder.removeAt(0).also {
             if (it == this) return it.forsøkUtbetaling(vedtaksperioder, engineForTimeline, ytelser)
             if (it.tilstand == AvventerArbeidsgivere) {
@@ -1402,8 +1422,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.forkastPåfølgendeUnntattNye(vedtaksperiode, hendelse)
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
+            vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse)
         }
 
         override fun håndter(
@@ -1424,10 +1443,6 @@ internal class Vedtaksperiode private constructor(
         internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
             .filterNot { it.tilstand == TilInfotrygd }
             .map { it.sykdomstidslinje }.join()
-
-        internal fun sorter(perioder: MutableList<Vedtaksperiode>) {
-            perioder.sortBy { it.periode.start }
-        }
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder.all { it.erFerdigBehandlet(vedtaksperiode) }

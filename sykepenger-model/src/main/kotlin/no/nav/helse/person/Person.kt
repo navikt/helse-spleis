@@ -196,8 +196,8 @@ class Person private constructor(
             if (it) invaliderAllePerioder(arbeidstakerHendelse)
         }
 
-    internal fun nåværendeVedtaksperioder(): List<Vedtaksperiode> {
-        return arbeidsgivere.map { it.nåværendeVedtaksperiode() }.filterNotNull()
+    internal fun nåværendeVedtaksperioder(): MutableList<Vedtaksperiode> {
+        return arbeidsgivere.map { it.nåværendeVedtaksperiode() }.filterNotNull().toMutableList().also { it.sort() }
     }
 
 }
