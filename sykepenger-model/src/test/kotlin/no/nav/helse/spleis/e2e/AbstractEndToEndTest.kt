@@ -187,7 +187,6 @@ internal abstract class AbstractEndToEndTest {
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Foreldrepenger))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Godkjenning))
         person.håndter(ytelser(
             vedtaksperiodeIndex,
             utbetalinger.toList(),

@@ -5,7 +5,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -25,19 +24,35 @@ internal class SaksbehandlerOverstyrerTidslinje : AbstractEndToEndTest() {
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFA", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
-    @Disabled
     @Test
     fun `vedtaksperiode rebehandler informasjon etter endring fra saksbehandler`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(0, listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        håndterSøknadMedValidering(0, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(0, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100))
         håndterVilkårsgrunnlag(0, INNTEKT)
         håndterYtelser(0)   // No history
         håndterSimulering(0)
-        håndterOverstyring(listOf(manuellArbeidsdag(3.januar), manuellArbeidsgiverdag(19.januar)))
+        håndterOverstyring(listOf(manuellArbeidsdag(2.januar), manuellArbeidsgiverdag(18.januar)))
 
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
-        assertEquals(20.januar, inspektør.utbetalinger.last().utbetalingstidslinje().førsteSykepengedag())
+
+        håndterYtelser(0)   // No history
+        håndterSimulering(0)
+
+        assertTilstander(
+            0,
+            TilstandType.START,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING
+        )
+        assertEquals(19.januar, inspektør.utbetalinger.last().utbetalingstidslinje().førsteSykepengedag())
     }
 
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)

@@ -1250,7 +1250,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyringSaksbehandler) {
-
+            vedtaksperiode.sykdomshistorikk.håndter(hendelse)
+            vedtaksperiode.sykdomstidslinje = vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
+            vedtaksperiode.hendelseIder.add(hendelse.meldingsreferanseId())
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
     }
 
