@@ -90,7 +90,7 @@ internal class Økonomi private constructor(
 
         private fun juster(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt, get: (Økonomi) -> Inntekt, set: (Økonomi, Inntekt) -> Unit) {
             val sorterteØkonomier = økonomiList.sortedByDescending { get(it) }
-            val ratio = budsjett / total
+            val ratio = budsjett ratio total
             val skalertTotal = sorterteØkonomier.onEach {
                 set(it, (get(it) * ratio).rundTilDaglig())
             }.map(get).summer()

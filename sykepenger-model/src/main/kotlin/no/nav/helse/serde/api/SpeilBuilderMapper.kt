@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Companion.inntekt
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Companion.sykepengegrunnlag
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
@@ -191,7 +192,8 @@ internal fun mapVilkår(
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
     val sykepengegrunnlag = sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
-    val beregnetMånedsinntekt = Inntekthistorikk.Inntektsendring.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.tilMånedligDouble()
+    val beregnetMånedsinntekt =
+        inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.reflection { _, månedlig, _, _ -> månedlig }
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0

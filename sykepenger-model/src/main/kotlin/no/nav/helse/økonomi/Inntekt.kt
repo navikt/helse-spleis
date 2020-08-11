@@ -19,6 +19,8 @@ class Inntekt : Comparable<Inntekt> {
     }
 
     companion object {
+        private const val ARBEIDSDAGER_PER_ÅR = 260
+
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
             val total = parene.sumByDouble { it.second.årlig }
             if (total <= 0.0) return Prosentdel.fraRatio(0.0)
@@ -26,8 +28,10 @@ class Inntekt : Comparable<Inntekt> {
         }
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
+
         internal val Number.årlig get() = Inntekt(this.toDouble())
-        val Number.daglig get() = Inntekt(this.toDouble() * 260)
+
+        val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
         internal fun List<Inntekt>.summer(): Inntekt {
             return this.reduce { acc, inntekt -> Inntekt(acc.årlig + inntekt.årlig) }
@@ -50,27 +54,27 @@ class Inntekt : Comparable<Inntekt> {
         tilDagligInt()
     )
 
-    private fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
+    private fun tilDagligInt() = (rundTilDaglig().årlig / ARBEIDSDAGER_PER_ÅR).roundToInt()
 
-    private fun tilDagligDouble() = årlig / 260.0
+    private fun tilDagligDouble() = årlig / ARBEIDSDAGER_PER_ÅR
 
-    internal fun tilMånedligDouble() = årlig / 12.0
+    private fun tilMånedligDouble() = årlig / 12
 
-    internal fun rundTilDaglig() = Inntekt((årlig / 260).roundToInt() * 260.0)
+    internal fun rundTilDaglig() = Inntekt((årlig / ARBEIDSDAGER_PER_ÅR).roundToInt() * ARBEIDSDAGER_PER_ÅR.toDouble())
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 
-    internal operator fun div(prosentdel: Prosentdel) = Inntekt(this.årlig / prosentdel.ratio())
-
-    internal operator fun div(other: Inntekt) = this.årlig / other.årlig
+    internal operator fun times(prosentdel: Prosentdel) = times(prosentdel.ratio())
 
     private operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
 
-    internal operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
+    internal operator fun div(prosentdel: Prosentdel) = this / prosentdel.ratio()
+
+    internal infix fun ratio(other: Inntekt) = this.årlig / other.årlig
 
     internal operator fun plus(other: Inntekt) = Inntekt(this.årlig + other.årlig)
 
-    internal operator fun times(prosentdel: Prosentdel) = times(prosentdel.ratio())
+    internal operator fun minus(other: Inntekt) = Inntekt(this.årlig - other.årlig)
 
     override fun hashCode() = årlig.hashCode()
 
