@@ -13,7 +13,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -192,8 +192,7 @@ internal fun mapVilkår(
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
     val sykepengegrunnlag = sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
-    val beregnetMånedsinntekt =
-        inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.reflection { _, månedlig, _, _ -> månedlig }
+    val beregnetMånedsinntekt = inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
@@ -245,11 +244,9 @@ internal fun mapVilkår(
 
 private fun sykepengegrunnlagOppfylt(
     personalder: Alder,
-    beregnetMånedsinntekt: Double?,
+    beregnetMånedsinntekt: Inntekt?,
     førsteFraværsdag: LocalDate
-) = beregnetMånedsinntekt?.månedlig?.let {
-    it > personalder.minimumInntekt(førsteFraværsdag)
-}
+) = beregnetMånedsinntekt?.let { it > personalder.minimumInntekt(førsteFraværsdag) }
 
 private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {
     val søknadSendtMåned = søknadNav.sendtNav.toLocalDate().withDayOfMonth(1)

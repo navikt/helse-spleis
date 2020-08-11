@@ -114,8 +114,8 @@ class Utbetalingshistorikk(
             private val grad: Int,
             private val orgnr: String
         ) : Periode(fom, tom) {
-            private val ugradertBeløp = ((beløp * 100) / grad.toDouble()).roundToInt()
-            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == ugradertBeløp.daglig
+            private val ugradertBeløp = ((beløp * 100) / grad.toDouble()).roundToInt().daglig
+            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == ugradertBeløp
 
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
@@ -123,7 +123,7 @@ class Utbetalingshistorikk(
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
                 if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(INGEN))
-                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(ugradertBeløp.daglig))
+                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(ugradertBeløp))
             }
 
             internal companion object {
