@@ -1248,6 +1248,10 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyringSaksbehandler) {
+
+        }
     }
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
