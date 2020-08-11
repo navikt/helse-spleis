@@ -4,8 +4,8 @@ import org.apache.commons.codec.binary.Base32
 import java.nio.ByteBuffer
 import java.util.*
 
-internal fun genererUtbetalingsreferanse(vedtaksperiodeId: UUID): String {
-    return vedtaksperiodeId.base32Encode()
+internal fun genererUtbetalingsreferanse(uuid: UUID): String {
+    return uuid.base32Encode()
 }
 
 private fun UUID.base32Encode(): String {

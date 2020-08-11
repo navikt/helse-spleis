@@ -710,8 +710,13 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             var replays: List<Vedtaksperiode> = emptyList()
+
             vedtaksperiode.håndter(sykmelding) returnPoint@ {
+                if(!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode)) {
+                    return@returnPoint TilInfotrygd
+                }
                 replays=vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE_EXCLUSIVE, false)
+
                 val periodeRettFør = vedtaksperiode.arbeidsgiver.finnPeriodeRettFør(vedtaksperiode)
                 val forlengelse = periodeRettFør != null
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)

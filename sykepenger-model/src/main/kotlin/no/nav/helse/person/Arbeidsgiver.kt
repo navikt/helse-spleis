@@ -358,6 +358,11 @@ internal class Arbeidsgiver private constructor(
     internal fun nåværendeVedtaksperiode(): Vedtaksperiode? {
         return vedtaksperioder.firstOrNull { !it.erFerdigBehandlet() }
     }
+
+    fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {
+        return finnPeriodeRettEtter(vedtaksperiode) == null
+            && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
+    }
 }
 
 internal fun List<Arbeidsgiver>.inntektsdatoer() = Arbeidsgiver.inntektsdatoer(this)

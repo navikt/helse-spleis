@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -101,25 +102,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder som bare har mottatt sykmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                31.januar,
-                1000,
-                100,
-                ORGNUMMER
-            )
-        )  // <-- TIL_INFOTRYGD
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, MOTTATT_SYKMELDING_FERDIG_GAP)
-    }
-
-    @Test
     fun `avdekker tilstøtende periode i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100))
@@ -152,8 +134,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(14.mars, 31.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(18.mars, 31.mars, 100))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
@@ -168,24 +150,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_GAP)
     }
 
-    @Test
-    fun `når en periode går til Infotrygd avsluttes påfølgende, tilstøtende perioder også - out of order`() {
-        håndterSykmelding(Sykmeldingsperiode(14.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterUtbetalingshistorikk(
-            3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                31.januar,
-                1000,
-                100,
-                ORGNUMMER
-            )
-        )  // <-- TIL_INFOTRYGD
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-    }
 
     @Test
     fun `tidligere utbetalinger i spleis som er forkastet blir tatt med som en del av utbetalingshistorikken`() {

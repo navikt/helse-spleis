@@ -1877,4 +1877,33 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_GAP, LocalDateTime.now().minusDays(200))
         assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().length())
     }
+
+    @Test
+    fun `Håndterer ny sykmelding som ligger tidligere i tid *med forlengelse*`() {
+        håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+
+        håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Håndterer ny sykmelding som ligger tidligere i tid *uten forlengelse*`() {
+        håndterSykmelding(Sykmeldingsperiode(24.mars(2020), 29.mars(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertReplayAv(1.vedtaksperiode, 2.vedtaksperiode, 3.vedtaksperiode)
+    }
 }

@@ -1,8 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SykdomstidslinjeTest {
@@ -15,9 +17,11 @@ internal class SykdomstidslinjeTest {
     @Test
     internal fun `dager mellom to perioder blir UkjentDag`() {
         val tidslinje1 = Sykdomstidslinje.sykedager(
-            1.mandag, 1.onsdag, 100.0, TestEvent.søknad)
+            1.mandag, 1.onsdag, 100.0, TestEvent.søknad
+        )
         val tidslinje2 = Sykdomstidslinje.sykedager(
-            2.onsdag, 2.fredag, 100.0, TestEvent.søknad)
+            2.onsdag, 2.fredag, 100.0, TestEvent.søknad
+        )
         val tidslinje = tidslinje1.merge(tidslinje2, konfliktsky)
         assertEquals(" SSS???? ??SSS", tidslinje.toShortString())
     }
@@ -54,10 +58,11 @@ internal class SykdomstidslinjeTest {
     }
 
 
-    private val konfliktsky = { venstre: Dag, høyre: Dag -> when {
-                venstre is Dag.UkjentDag -> høyre
-                høyre is Dag.UkjentDag -> venstre
-                else -> venstre.problem(høyre)
-            }
+    private val konfliktsky = { venstre: Dag, høyre: Dag ->
+        when {
+            venstre is Dag.UkjentDag -> høyre
+            høyre is Dag.UkjentDag -> venstre
+            else -> venstre.problem(høyre)
         }
+    }
 }

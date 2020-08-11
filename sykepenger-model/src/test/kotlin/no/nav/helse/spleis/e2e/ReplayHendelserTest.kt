@@ -18,13 +18,11 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
     @Test
     fun `Replay av etterfølgende skjer umiddelbart når ny sykmelding kommer inn`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 25.januar, 100))
         assertAntallReplays(1)
     }
 
     @Test
-    @Disabled
-    //WIP Jakob og Erlend disablet denne testen under rebase da den feilet i opprinnelig commit
     fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
@@ -33,9 +31,15 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
-    //WIP Jakob og Erlend disablet denne testen under rebase da den feilet i opprinnelig commit
-    fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved mer enn 16 dagers gap (ny arbeidsgiverperiode)`() {
+    fun `Støtter ikke replay for flere arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100), orgnummer="ANNET ORGNUMMER")
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+    }
+
+    @Test
+    fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved mer enn 16 dagers gap (ny arbeidsgiverperiode) da det ikke støttes ennå`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
@@ -122,8 +126,8 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
                 assertEquals(null, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(23, tidslinjeInspektør.dagtelling[NavDag::class])
                 assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(2, tidslinjeInspektør.dagtelling[Fridag::class])
-                assertEquals(5, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
+                assertEquals(1, tidslinjeInspektør.dagtelling[Fridag::class])
+                assertEquals(null, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
             }
         }
     }

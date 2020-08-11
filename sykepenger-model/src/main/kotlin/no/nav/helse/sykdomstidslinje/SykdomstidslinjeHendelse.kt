@@ -49,7 +49,7 @@ abstract class SykdomstidslinjeHendelse(
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
 
         return (forrigeTom?.let { sykdomstidslinje().subset(Periode(it.plusDays(1), tom)) }
-            ?: sykdomstidslinje().kutt(tom))
+            ?: sykdomstidslinje().kuttFremTilOgMed(tom))
             .also { trimLeft(tom) }
             .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
     }

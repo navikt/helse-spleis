@@ -80,8 +80,14 @@ internal abstract class AbstractEndToEndTest {
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
-    protected fun assertReplayAv(id: UUID) {
-        assertEquals(inspektør.hendelseIder(id), observatør.hendelserTilReplay[id])
+    protected fun assertReplayAv(vararg ids: UUID) {
+        assertEquals(
+            ids.map(this::vedtaksperiodeIndeks).toSet(),
+            observatør.hendelserTilReplay.keys.map(this::vedtaksperiodeIndeks).toSet()
+        )
+        ids.forEachIndexed { index, id ->
+            assertEquals(inspektør.hendelseIder(id), observatør.hendelserTilReplay[id], "index: $index")
+        }
     }
 
     protected fun assertAntallReplays(antall: Int) {
@@ -89,6 +95,11 @@ internal abstract class AbstractEndToEndTest {
     }
 
     private fun vedtaksperiodeId(indeks: Int) = observatør.vedtaksperioder.toList()[indeks]
+
+    private fun vedtaksperiodeIndeks(id: UUID) : String {
+        val index = observatør.vedtaksperioder.indexOf (id)
+        return "${index + 1}.vedtaksperiode"
+    }
 
     protected fun assertNoErrors(inspektør: TestArbeidsgiverInspektør) {
         assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
@@ -136,12 +147,14 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
         mottatt: LocalDateTime? = null,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        orgnummer: String = ORGNUMMER
     ): UUID {
         sykmelding(
             id,
             *sykeperioder,
-            mottatt = mottatt
+            mottatt = mottatt,
+            orgnummer = orgnummer
         ).also(person::håndter)
         sykmeldinger[id] = sykeperioder
         return id

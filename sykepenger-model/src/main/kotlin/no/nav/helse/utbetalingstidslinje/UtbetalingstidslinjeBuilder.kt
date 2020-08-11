@@ -35,7 +35,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         if (forlengelseStrategy(sykdomstidslinje)) sykedagerIArbeidsgiverperiode += 16
-        sykdomstidslinje.kutt(sisteDag).accept(this)
+        sykdomstidslinje.kuttFremTilOgMed(sisteDag).accept(this)
         return tidslinje
     }
 
