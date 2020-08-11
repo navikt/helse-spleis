@@ -135,37 +135,27 @@ internal class Økonomi private constructor(
 
     internal fun låsOpp() = tilstand.låsOpp(this)
 
-    private fun toMap(): Map<String, Any> = tilstand.toMap(this)
+    internal fun <R> reflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R) =
+        tilstand.reflection(this, block)
 
-    internal fun reflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> Unit) {
-        toMap().also {
-                map ->
+    internal fun <R> reflectionRounded(block: (Int, Int, Int?, Int?, Int?, Int?, Boolean?) -> R) =
+        reflection { grad: Double,
+                     arbeidsgiverBetalingProsent: Double,
+                     dekningsgrunnlag: Double?,
+                     aktuellDagsinntekt: Double?,
+                     arbeidsgiverbeløp: Int?,
+                     personbeløp: Int?,
+                     er6GBegrenset: Boolean? ->
             block(
-                map["grad"] as Double,
-                map["arbeidsgiverBetalingProsent"] as Double,
-                map["dekningsgrunnlag"] as Double?,
-                map["aktuellDagsinntekt"] as Double?,
-                map["arbeidsgiverbeløp"] as Int?,
-                map["personbeløp"] as Int?,
-                map["er6GBegrenset"] as Boolean?
+                grad.roundToInt(),
+                arbeidsgiverBetalingProsent.roundToInt(),
+                dekningsgrunnlag?.roundToInt(),
+                aktuellDagsinntekt?.roundToInt(),
+                arbeidsgiverbeløp,
+                personbeløp,
+                er6GBegrenset
             )
         }
-    }
-
-    internal fun <R> reflectionRounded(block: (Int, Int, Int?, Int?, Int?, Int?, Boolean?) -> R): R{
-        tilstand.toIntMap(this).let {
-                map ->
-           return block(
-                map["grad"] as Int,
-                map["arbeidsgiverBetalingProsent"] as Int,
-                map["dekningsgrunnlag"] as Int?,
-                map["aktuellDagsinntekt"] as Int?,
-                map["arbeidsgiverbeløp"] as Int?,
-                map["personbeløp"] as Int?,
-                map["er6GBegrenset"] as Boolean?
-            )
-        }
-    }
 
     internal fun reflection(block: (Double, Double?) -> Unit) {
         reflection { grad: Double,
@@ -190,6 +180,26 @@ internal class Økonomi private constructor(
             block(grad, aktuellDagsinntekt)
         }
     }
+
+    private fun <R> beløpReflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R) =
+        block(
+            grad.toDouble(),
+            arbeidsgiverBetalingProsent.toDouble(),
+            dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
+            aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
+            arbeidsgiverbeløp!!.reflection { _, _, _, daglig-> daglig },
+            personbeløp!!.reflection { _, _, _, daglig-> daglig },
+            er6GBegrenset
+        )
+
+    private fun <R> inntektReflection(block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R) =
+        block(
+            grad.toDouble(),
+            arbeidsgiverBetalingProsent.toDouble(),
+            dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
+            aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
+            null, null, null
+        )
 
     private fun grad() = tilstand.grad(this)
 
@@ -291,6 +301,11 @@ internal class Økonomi private constructor(
 
         internal open fun grad(økonomi: Økonomi) = økonomi.grad
 
+        internal abstract fun <R> reflection(
+            økonomi: Økonomi,
+            block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+        ): R
+
         internal open fun inntekt(
             økonomi: Økonomi,
             aktuellDagsinntekt: Inntekt,
@@ -316,18 +331,6 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse opp Økonomi på dette tidspunktet")
         }
 
-        internal fun toMap(økonomi: Økonomi): Map<String, Any> =
-            prosentMap(økonomi) + inntektMap(økonomi) + beløpMap(økonomi)
-
-        internal fun toIntMap(økonomi: Økonomi): Map<String, Any> =
-            prosentIntMap(økonomi) + inntektIntMap(økonomi) + beløpMap(økonomi)
-
-        protected open fun prosentMap(økonomi: Økonomi): Map<String, Any> = økonomi.prosentMap()
-        protected open fun inntektMap(økonomi: Økonomi): Map<String, Any> = emptyMap()
-        protected open fun beløpMap(økonomi: Økonomi): Map<String, Any> = emptyMap()
-        protected open fun prosentIntMap(økonomi: Økonomi): Map<String, Int> = økonomi.prosentIntMap()
-        protected open fun inntektIntMap(økonomi: Økonomi): Map<String, Int> = emptyMap()
-
         internal object KunGrad : Tilstand() {
 
             override fun inntekt(
@@ -337,6 +340,16 @@ internal class Økonomi private constructor(
             ) =
                 Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag)
                     .also { other -> other.tilstand = HarInntekt }
+
+            override fun <R> reflection(
+                økonomi: Økonomi,
+                block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+            ) =
+                block(
+                    økonomi.grad.toDouble(),
+                    økonomi.arbeidsgiverBetalingProsent.toDouble(),
+                    null, null, null, null, null
+                )
         }
 
         internal object HarInntekt : Tilstand() {
@@ -345,8 +358,10 @@ internal class Økonomi private constructor(
                 it.tilstand = Låst
             }
 
-            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
-            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
+            override fun <R> reflection(
+                økonomi: Økonomi,
+                block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+            ) = økonomi.inntektReflection(block)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()
@@ -358,9 +373,10 @@ internal class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
-            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
-            override fun beløpMap(økonomi: Økonomi) = økonomi.utbetalingMap()
-            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
+            override fun <R> reflection(
+                økonomi: Økonomi,
+                block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+            ) = økonomi.beløpReflection(block)
         }
 
         internal object Låst : Tilstand() {
@@ -373,8 +389,10 @@ internal class Økonomi private constructor(
 
             override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
-            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
-            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
+            override fun <R> reflection(
+                økonomi: Økonomi,
+                block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+            ) = økonomi.inntektReflection(block)
 
             override fun betal(økonomi: Økonomi) {
                 økonomi.arbeidsgiverbeløp = 0.daglig
@@ -395,9 +413,10 @@ internal class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = false
 
-            override fun inntektMap(økonomi: Økonomi) = økonomi.inntektMap()
-            override fun beløpMap(økonomi: Økonomi) = økonomi.utbetalingMap()
-            override fun inntektIntMap(økonomi: Økonomi) = økonomi.inntektIntMap()
+            override fun <R> reflection(
+                økonomi: Økonomi,
+                block: (Double, Double, Double?, Double?, Int?, Int?, Boolean?) -> R
+            ) = økonomi.beløpReflection(block)
         }
     }
 }

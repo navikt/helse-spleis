@@ -7,7 +7,6 @@ import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDIN
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.konverter
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.util.*
@@ -62,7 +61,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     }
 
     private fun opprett(dag: ObjectNode, dagsats: Inntekt = INGEN, grad: Double = 0.0, utbetaling: Int = 0) {
-        val dagsatsDouble = mapOf("" to dagsats).konverter().values.first()
+        val dagsatsDouble = dagsats.reflection { _, _, daglig, _ -> daglig}
         dag.remove("dagsats")
         dag.remove("utbetaling")
         dag.remove("grad")
