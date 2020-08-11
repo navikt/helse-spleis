@@ -49,9 +49,9 @@ internal class Inntekthistorikk {
             internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
                 (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
 
-            internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Double? =
+            internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Inntekt? =
                 inntekt(inntekter, dato)?.let {
-                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).min()?.tilÅrligDouble()
+                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).min()
                 }
         }
 

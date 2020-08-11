@@ -43,13 +43,18 @@ class Inntekt : Comparable<Inntekt> {
         internal val INGEN = 0.daglig
     }
 
+    internal fun <R> reflection(block: (Double, Double, Double, Int) -> R) = block(
+        årlig,
+        tilMånedligDouble(),
+        tilDagligDouble(),
+        tilDagligInt()
+    )
+
     private fun tilDagligInt() = (rundTilDaglig().årlig / 260).roundToInt()
 
     private fun tilDagligDouble() = årlig / 260.0
 
     internal fun tilMånedligDouble() = årlig / 12.0
-
-    internal fun tilÅrligDouble() = årlig
 
     internal fun rundTilDaglig() = Inntekt((årlig / 260).roundToInt() * 260.0)
 

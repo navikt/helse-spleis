@@ -69,7 +69,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val dataForVilkårsvurdering: Map<String, Any?>? = vedtaksperiode.get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
             "erEgenAnsatt" to it.erEgenAnsatt,
-            "beregnetÅrsinntektFraInntektskomponenten" to it.beregnetÅrsinntektFraInntektskomponenten.tilÅrligDouble(),
+            "beregnetÅrsinntektFraInntektskomponenten" to
+                it.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
             "avviksprosent" to it.avviksprosent?.ratio(),
             "antallOpptjeningsdagerErMinst" to it.antallOpptjeningsdagerErMinst,
             "harOpptjening" to it.harOpptjening,

@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class InntektReflect(inntektsendring: Inntekthistorikk.Inntektsendring) {
+internal class InntektsendringReflect(inntektsendring: Inntekthistorikk.Inntektsendring) {
     private val fom: LocalDate = inntektsendring["fom"]
     private val hendelseId: UUID = inntektsendring["hendelseId"]
     private val beløp: Inntekt = inntektsendring["beløp"]
@@ -17,7 +17,7 @@ internal class InntektReflect(inntektsendring: Inntekthistorikk.Inntektsendring)
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,
         "hendelseId" to hendelseId,
-        "beløp" to beløp.tilMånedligDouble(),
+        "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
         "kilde" to kilde.toString(),
         "tidsstempel" to tidsstempel
     )

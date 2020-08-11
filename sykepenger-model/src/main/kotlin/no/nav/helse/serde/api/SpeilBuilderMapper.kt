@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Companion.sykepengegrunnlag
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
@@ -157,7 +158,8 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
     erEgenAnsatt = grunnlagsdata.erEgenAnsatt,
-    beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.tilÅrligDouble(),
+    beregnetÅrsinntektFraInntektskomponenten =
+        grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
     avviksprosent = grunnlagsdata.avviksprosent?.ratio(),
     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
     harOpptjening = grunnlagsdata.harOpptjening,
@@ -188,7 +190,7 @@ internal fun mapVilkår(
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val førsteFraværsdag = vedtaksperiodeMap["førsteFraværsdag"] as? LocalDate
-    val sykepengegrunnlag = Inntekthistorikk.Inntektsendring.sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
+    val sykepengegrunnlag = sykepengegrunnlag(inntekter, førsteFraværsdag ?: LocalDate.MAX)
     val beregnetMånedsinntekt = Inntekthistorikk.Inntektsendring.inntekt(inntekter, førsteFraværsdag ?: LocalDate.MAX)?.tilMånedligDouble()
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
@@ -224,8 +226,11 @@ internal fun mapVilkår(
     }
     val sykepengegrunnlagDTO = førsteFraværsdag?.let {
         SykepengegrunnlagDTO(
-            sykepengegrunnlag = sykepengegrunnlag,
-            grunnbeløp = Grunnbeløp.`1G`.beløp(førsteFraværsdag).tilÅrligDouble().toInt(),
+            sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
+            grunnbeløp = (Grunnbeløp.`1G`
+                .beløp(førsteFraværsdag)
+                .reflection { årlig, _, _, _ -> årlig })
+                .toInt(),
             oppfylt = sykepengegrunnlagOppfylt(
                 personalder = personalder,
                 beregnetMånedsinntekt = beregnetMånedsinntekt,

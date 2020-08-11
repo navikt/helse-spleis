@@ -202,7 +202,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun inntekt(dato: LocalDate): Inntekt? = inntekthistorikk.inntekt(dato)
 
-    internal fun sykepengegrunnlag(dato: LocalDate): Double? = inntekthistorikk.sykepengegrunnlag(dato)
+    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)
 
     internal fun søppelbøtte(hendelse: PersonHendelse) {
         vedtaksperioder.firstOrNull()?.also { søppelbøtte(it, hendelse, ALLE) }

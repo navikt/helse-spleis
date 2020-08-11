@@ -13,7 +13,7 @@ internal class InntektsendringReflectTest {
 
     @Test
     fun `mapper Inntekt til map`() {
-        val map = InntektReflect(inntekt).toMap()
+        val map = InntektsendringReflect(inntekt).toMap()
 
         assertEquals(5, map.size)
         assertEquals(1.januar, map["fom"])

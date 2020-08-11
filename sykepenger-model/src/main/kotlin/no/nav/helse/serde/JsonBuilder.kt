@@ -474,7 +474,7 @@ internal class JsonBuilder : PersonVisitor {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
-            inntektMap.putAll(InntektReflect(inntektsendring).toMap())
+            inntektMap.putAll(InntektsendringReflect(inntektsendring).toMap())
         }
 
         override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {

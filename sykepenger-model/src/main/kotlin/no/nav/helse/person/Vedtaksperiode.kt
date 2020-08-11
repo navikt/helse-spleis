@@ -526,7 +526,7 @@ internal class Vedtaksperiode private constructor(
                 orgnummer = organisasjonsnummer,
                 utbetaling = utbetaling(),
                 utbetalingstidslinje = utbetalingstidslinje,
-                sykepengegrunnlag = sykepengegrunnlag,
+                sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
                 hendelseIder = hendelseIder,

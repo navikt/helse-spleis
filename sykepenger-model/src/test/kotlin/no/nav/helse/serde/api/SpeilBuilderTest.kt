@@ -404,7 +404,10 @@ class SpeilBuilderTest {
 
         val vilkår = vedtaksperiode.vilkår
         val sykepengegrunnlag = vilkår.sykepengegrunnlag
-        assertEquals(`1G`.beløp(fom).tilÅrligDouble().toInt(), sykepengegrunnlag!!.grunnbeløp)
+        assertEquals(
+            (`1G`.beløp(fom).reflection { årlig, _, _, _ -> årlig} as Double).toInt(),
+            sykepengegrunnlag!!.grunnbeløp
+        )
         assertTrue(sykepengegrunnlag.oppfylt!!)
         assertEquals(31000.0 * 12, sykepengegrunnlag.sykepengegrunnlag)
 

@@ -67,7 +67,7 @@ internal class InntekthistorikkTest {
         val årsinntektOver6G =
             listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
         assertEquals(
-            `6GBeløp`.tilÅrligDouble(),
+            `6GBeløp`,
             Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
         )
 
@@ -77,7 +77,7 @@ internal class InntekthistorikkTest {
             Inntekthistorikk.Inntektsendring.sykepengegrunnlag(
                 årsinntektUnder6G,
                 førsteFraværsdag
-            )!! < `6GBeløp`.tilÅrligDouble()
+            )!! < `6GBeløp`
         )
     }
 
