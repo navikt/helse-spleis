@@ -196,6 +196,11 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(hendelse)
     }
 
+    internal fun håndter(hendelse: OverstyringSaksbehandler) {
+        hendelse.kontekst(this)
+        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
+    }
+
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()

@@ -218,6 +218,12 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(kansellerUtbetaling)
     }
 
+    internal fun håndter(hendelse: OverstyringSaksbehandler) {
+        if(overlapperMed(hendelse)) {
+            tilstand.håndter(this, hendelse)
+        }
+    }
+
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
     internal fun etterfølgesAv(other: Vedtaksperiode) = this.periode.etterfølgesAv(other.periode)
@@ -647,6 +653,13 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandling: GjenopptaBehandling
         ) {
             gjenopptaBehandling.hendelse.info("Tidligere periode ferdig behandlet")
+        }
+
+        fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: OverstyringSaksbehandler
+        ) {
+            hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {}

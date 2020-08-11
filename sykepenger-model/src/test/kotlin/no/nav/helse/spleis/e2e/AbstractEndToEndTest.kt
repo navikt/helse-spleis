@@ -229,6 +229,16 @@ internal abstract class AbstractEndToEndTest {
         ))
     }
 
+    protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag>){
+        person.håndter(OverstyringSaksbehandler(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            aktørId = AKTØRID,
+            organisasjonsnummer = ORGNUMMER,
+            dager = overstyringsdager
+        ))
+    }
+
     private fun utbetaling(
         vedtaksperiodeIndex: Int,
         status: UtbetalingHendelse1.Oppdragstatus,
