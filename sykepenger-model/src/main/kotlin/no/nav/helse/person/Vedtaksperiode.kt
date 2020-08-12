@@ -1130,7 +1130,7 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = mapOf(
                             arbeidsgiver to utbetalingstidslinje(
                                 arbeidsgiver,
-                                vedtaksperiode,
+                                vedtaksperiode.periode.endInclusive,
                                 ytelser
                             )
                         ),
@@ -1154,11 +1154,11 @@ internal class Vedtaksperiode private constructor(
 
         private fun utbetalingstidslinje(
             arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
+            sisteDag: LocalDate,
             ytelser: Ytelser
         ): Utbetalingstidslinje {
             return UtbetalingstidslinjeBuilder(
-                sisteDag = vedtaksperiode.periode.endInclusive,
+                sisteDag = sisteDag,
                 inntekthistorikk = arbeidsgiver.inntektshistorikk(),
                 forlengelseStrategy = { sykdomstidslinje ->
                     Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
