@@ -17,7 +17,7 @@ enum class Dagtype {
     Sykedag, Feriedag, Egenmeldingsdag
 }
 
-class OverstyringSaksbehandler(
+class OverstyrTidslinje(
     meldingsreferanseId: UUID,
     private val fødselsnummer: String,
     private val aktørId: String,
@@ -29,7 +29,7 @@ class OverstyringSaksbehandler(
 
     init {
         sykdomstidslinje = dager.map {
-            val kilde = Hendelseskilde(OverstyringSaksbehandler::class, meldingsreferanseId)
+            val kilde = Hendelseskilde(OverstyrTidslinje::class, meldingsreferanseId)
             when (it.type) {
                 Dagtype.Sykedag -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,

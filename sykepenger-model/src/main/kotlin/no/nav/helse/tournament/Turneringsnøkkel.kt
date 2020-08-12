@@ -1,7 +1,7 @@
 package no.nav.helse.tournament
 
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.OverstyringSaksbehandler
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.sykdomstidslinje.Dag
@@ -35,12 +35,12 @@ internal enum class Turneringsnøkkel {
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
             dag is Arbeidsgiverdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
             dag is Arbeidsgiverdag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
-            dag is Arbeidsgiverdag && dag.kommerFra(OverstyringSaksbehandler::class) -> Saksbehandlerdag
+            dag is Arbeidsgiverdag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is ArbeidsgiverHelgedag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
             dag is ArbeidsgiverHelgedag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
             dag is Feriedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
             dag is Feriedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
-            dag is Feriedag && dag.kommerFra(OverstyringSaksbehandler::class) -> Saksbehandlerdag
+            dag is Feriedag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is FriskHelgedag && dag.kommerFra(Inntektsmelding::class) -> Feriedag_IM
             dag is FriskHelgedag && dag.kommerFra(Søknad::class) -> Feriedag_SØ
             dag is Dag.ForeldetSykedag -> ForeldetSykedag
@@ -50,7 +50,7 @@ internal enum class Turneringsnøkkel {
             dag is Dag.Studiedag -> Studiedag
             dag is Sykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
             dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
-            dag is Sykedag && dag.kommerFra(OverstyringSaksbehandler::class) -> Saksbehandlerdag
+            dag is Sykedag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is SykHelgedag && dag.kommerFra(Sykmelding::class) -> SykHelgedag_SM
             dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
             dag is Dag.UkjentDag -> UkjentDag

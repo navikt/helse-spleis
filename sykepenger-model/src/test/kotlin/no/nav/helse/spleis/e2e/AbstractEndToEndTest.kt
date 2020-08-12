@@ -229,7 +229,7 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterOverstyring(overstyringsdager: List<ManuellOverskrivingDag>){
-        person.håndter(OverstyringSaksbehandler(
+        person.håndter(OverstyrTidslinje(
             meldingsreferanseId = UUID.randomUUID(),
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,

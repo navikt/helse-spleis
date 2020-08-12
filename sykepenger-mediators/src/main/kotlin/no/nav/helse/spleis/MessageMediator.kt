@@ -34,6 +34,7 @@ internal class MessageMediator(
             KansellerUtbetalingerRiver(it, this)
             RollbackRiver(it, this)
             RollbackDeleteRiver(it, this)
+            OverstyrTidlinjeRiver(it, this)
         }
     }
 

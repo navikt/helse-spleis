@@ -104,7 +104,7 @@ class Person private constructor(
         hendelse.warn("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.")
     }
 
-    fun håndter(hendelse: OverstyringSaksbehandler) {
+    fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         arbeidsgivere.forEach {
             it.håndter(hendelse)

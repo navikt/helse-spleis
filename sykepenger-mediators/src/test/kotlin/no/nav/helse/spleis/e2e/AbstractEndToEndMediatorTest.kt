@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
@@ -200,6 +201,10 @@ internal abstract class AbstractEndToEndMediatorTest {
             it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"]
         }.asText()
         testRapid.sendTestMessage(meldingsfabrikk.lagKansellerUtbetaling(fagsystemId))
+    }
+
+    protected fun sendOverstyringTidslinje(dager: List<ManuellOverskrivingDag>) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringTidslinje(dager))
     }
 
     protected fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {

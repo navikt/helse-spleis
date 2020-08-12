@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
@@ -29,7 +31,17 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling(0)
 
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET")
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET"
+        )
     }
 
     @Test
@@ -45,6 +57,41 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendKansellerUtbetaling()
         assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling))
 
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING", "TIL_UTBETALING", "AVSLUTTET", "TIL_INFOTRYGD")
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
+            "TIL_INFOTRYGD"
+        )
     }
+
+    @Test
+    fun `overstyring fra saksbehandler fører til tilstandsendring`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInnteksmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenHistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendOverstyringTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
+
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "AVVENTER_HISTORIKK"
+        )
     }
+}
+
+

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -351,6 +352,22 @@ internal class TestMessageFactory(
                 "fødselsnummer" to fødselsnummer
             )
         )
+    }
+
+    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): String {
+        return nyHendelse(
+            "overstyr_tidslinje", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to dager.map {
+                    mapOf(
+                        "dato" to it.dato,
+                        "dagtype" to it.type,
+                        "grad" to it.grad
+                    )
+                }
+            ))
     }
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =

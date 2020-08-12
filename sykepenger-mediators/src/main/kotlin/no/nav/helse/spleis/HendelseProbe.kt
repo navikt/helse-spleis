@@ -64,6 +64,10 @@ object HendelseProbe {
         tell("KansellerUtbetaling")
     }
 
+    fun onOverstyrTidslinje() {
+        tell("OverstyrTidslinje")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

@@ -218,7 +218,7 @@ internal class Vedtaksperiode private constructor(
         invaliderPeriode(kansellerUtbetaling)
     }
 
-    internal fun håndter(hendelse: OverstyringSaksbehandler) {
+    internal fun håndter(hendelse: OverstyrTidslinje) {
         if(overlapperMed(hendelse)) {
             tilstand.håndter(this, hendelse)
         }
@@ -657,7 +657,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: OverstyringSaksbehandler
+            hendelse: OverstyrTidslinje
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
         }
@@ -1249,7 +1249,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyringSaksbehandler) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.sykdomshistorikk.håndter(hendelse)
             vedtaksperiode.sykdomstidslinje = vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
             vedtaksperiode.hendelseIder.add(hendelse.meldingsreferanseId())

@@ -170,6 +170,13 @@ internal class HendelseMediator(
         publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
     }
 
+    override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje) {
+        håndter(message, overstyrTidslinje) { person ->
+            HendelseProbe.onOverstyrTidslinje()
+            person.håndter(overstyrTidslinje)
+        }
+    }
+
     private fun publiserPersonRulletTilbake(
         rollback: PersonHendelse,
         message: HendelseMessage,
@@ -406,4 +413,5 @@ internal interface IHendelseMediator {
     fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
     fun behandle(message: RollbackMessage, rollback: Rollback)
     fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
+    fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)
 }
