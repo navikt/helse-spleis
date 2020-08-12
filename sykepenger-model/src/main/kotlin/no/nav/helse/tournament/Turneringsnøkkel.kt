@@ -33,7 +33,6 @@ internal enum class Turneringsnøkkel {
         fun fraDag(dag: Dag) = when {
             dag is Arbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ
-            dag is Arbeidsdag && dag.kommerFra(OverstyringSaksbehandler::class) -> Saksbehandlerdag
             dag is Arbeidsgiverdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsgiverdag_IM
             dag is Arbeidsgiverdag && dag.kommerFra(Søknad::class) -> Arbeidsgiverdag_SØ
             dag is Arbeidsgiverdag && dag.kommerFra(OverstyringSaksbehandler::class) -> Saksbehandlerdag

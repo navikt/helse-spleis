@@ -14,7 +14,7 @@ data class ManuellOverskrivingDag(
 )
 
 enum class Dagtype {
-    Sykedag, Arbeidsdag, Feriedag, Egenmeldingsdag
+    Sykedag, Feriedag, Egenmeldingsdag
 }
 
 class OverstyringSaksbehandler(
@@ -35,11 +35,6 @@ class OverstyringSaksbehandler(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = it.grad!!, // Sykedager må ha grad
-                    kilde = kilde
-                )
-                Dagtype.Arbeidsdag -> Sykdomstidslinje.arbeidsdager(
-                    førsteDato = it.dato,
-                    sisteDato = it.dato,
                     kilde = kilde
                 )
                 Dagtype.Feriedag -> Sykdomstidslinje.feriedager(
