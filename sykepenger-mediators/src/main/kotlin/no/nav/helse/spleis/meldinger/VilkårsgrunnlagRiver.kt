@@ -14,13 +14,13 @@ internal class VilkårsgrunnlagRiver(
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(
-        Inntektsberegning, EgenAnsatt, Opptjening,
+        InntekterForSammenligningsgrunnlag, EgenAnsatt, Opptjening,
         Dagpenger, Arbeidsavklaringspenger, Medlemskap
     )
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(packet: JsonMessage) {
-        packet.requireArray("@løsning.${Inntektsberegning.name}") {
+        packet.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
                 requireKey("beløp")

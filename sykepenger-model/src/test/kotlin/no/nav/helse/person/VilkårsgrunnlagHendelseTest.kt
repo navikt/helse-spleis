@@ -114,9 +114,9 @@ internal class VilkårsgrunnlagHendelseTest {
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
 
         val inntektsberegningStart =
-            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningStart")
+            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.InntekterForSammenligningsgrunnlag, "beregningStart")
         val inntektsberegningSlutt =
-            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.Inntektsberegning, "beregningSlutt")
+            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.InntekterForSammenligningsgrunnlag, "beregningSlutt")
         assertEquals("2017-01", inntektsberegningStart)
         assertEquals("2017-12", inntektsberegningSlutt)
     }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -162,18 +163,18 @@ internal class TestMessageFactory(
     ): String {
         return lagBehovMedLøsning(
             behov = listOf(
-                "Inntektsberegning",
-                "EgenAnsatt",
-                "Opptjening",
-                "Dagpenger",
-                "Arbeidsavklaringspenger",
-                "Medlemskap"
+                InntekterForSammenligningsgrunnlag.name,
+                EgenAnsatt.name,
+                Opptjening.name,
+                Dagpenger.name,
+                Arbeidsavklaringspenger.name,
+                Medlemskap.name
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             løsninger = mapOf(
-                "EgenAnsatt" to egenAnsatt,
-                "Inntektsberegning" to inntekter
+                EgenAnsatt.name to egenAnsatt,
+                InntekterForSammenligningsgrunnlag.name to inntekter
                     .groupBy { it.first }
                     .map {
                         mapOf(
@@ -187,20 +188,20 @@ internal class TestMessageFactory(
                             }
                         )
                     },
-                "Opptjening" to opptjening.map {
+                Opptjening.name to opptjening.map {
                     mapOf(
                         "orgnummer" to it.first,
                         "ansattSiden" to it.second,
                         "ansattTil" to it.third
                     )
                 },
-                "Dagpenger" to mapOf(
+                Dagpenger.name to mapOf(
                     "meldekortperioder" to emptyList<Any>()
                 ),
-                "Arbeidsavklaringspenger" to mapOf(
+                Arbeidsavklaringspenger.name to mapOf(
                     "meldekortperioder" to emptyList<Any>()
                 ),
-                "Medlemskap" to mapOf<String, Any>(
+                Medlemskap.name to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(
                         "svar" to when (medlemskapstatus) {
                             Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"

@@ -84,7 +84,7 @@ internal abstract class AbstractEndToEndTest {
         vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean = false
     ) {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, InntekterForSammenligningsgrunnlag))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
@@ -117,7 +117,7 @@ internal abstract class AbstractEndToEndTest {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, InntekterForSammenligningsgrunnlag))
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
     }
@@ -146,7 +146,7 @@ internal abstract class AbstractEndToEndTest {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Inntektsberegning))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, InntekterForSammenligningsgrunnlag))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, EgenAnsatt))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Behovtype.Dagpenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeIndex, Behovtype.Arbeidsavklaringspenger))

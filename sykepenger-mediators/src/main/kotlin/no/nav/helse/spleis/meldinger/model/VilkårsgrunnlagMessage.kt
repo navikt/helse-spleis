@@ -25,7 +25,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
-    private val inntekter = packet["@løsning.${Inntektsberegning.name}"].map {
+    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"].map {
         it["årMåned"].asYearMonth() to it["inntektsliste"].map {
             arbeidsgiver(it) to it["beløp"].asDouble().månedlig
         }

@@ -210,7 +210,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     beregningSlutt: YearMonth
                 ) {
                     aktivitetslogg.behov(
-                        Behovtype.Inntektsberegning, "Trenger inntektsberegning", mapOf(
+                        Behovtype.InntekterForSammenligningsgrunnlag, "Trenger inntekter for sammenligningsgrunnlag", mapOf(
                             "beregningStart" to beregningStart.toString(),
                             "beregningSlutt" to beregningSlutt.toString()
                         )
@@ -318,7 +318,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Godkjenning,
                 Simulering,
                 Utbetaling,
-                Inntektsberegning,
+                InntekterForSammenligningsgrunnlag,
                 Opptjening,
                 Dagpenger,
                 Arbeidsavklaringspenger,
