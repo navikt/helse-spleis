@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
+import java.time.LocalDateTime
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -1620,4 +1621,53 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
+    @Disabled("Håndtering av overlapp skal medføre at overlappende sykmeldinger blir delt opp i egne perioder")
+    @Test
+    fun `Overlapp-scenario fra prod`() {
+        håndterSykmelding(Sykmeldingsperiode(27.mai(2020), 14.juni(2020), 100))
+        håndterSøknad(Sykdom(27.mai(2020), 14.juni(2020), 100))
+        håndterYtelser(
+            0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER)
+        )
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+
+        håndterPåminnelse(0, AVVENTER_SIMULERING, LocalDateTime.now().minusDays(200)) // <-- TIL_INFOTRYGD
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+
+        håndterSykmelding(Sykmeldingsperiode(29.mai(2020), 18.juni(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(15.juni(2020), 3.juli(2020), 100))
+
+        // Håndtering av overlapp skal medføre at sykmelding fra 15.juni til 3.juli blir en ny vedtaksperiode og at den foregående sykmeldingen blir trimmet
+        // Blir p.t. ignorert
+        assertEquals(3, inspektør.vedtaksperiodeTeller)
+
+        håndterSøknad(Sykdom(15.juni(2020), 3.juli(2020), 100))
+
+        håndterYtelser(
+            0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(4.juli(2020), 20.juli(2020), 100))
+        håndterSøknad(Sykdom(4.juli(2020), 20.juli(2020), 100))
+
+        håndterYtelser(
+            0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
+        )
+
+        håndterVilkårsgrunnlag(0, INNTEKT)
+
+        håndterYtelser(
+            0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
+        )
+    }
 }
