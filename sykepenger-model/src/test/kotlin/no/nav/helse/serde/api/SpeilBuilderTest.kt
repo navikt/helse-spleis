@@ -179,7 +179,7 @@ class SpeilBuilderTest {
 
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
-        val utbetalinger = vedtaksperioder[1].utbetalinger
+        val utbetalinger = vedtaksperioder[1].utbetalteUtbetalinger
 
         // Sjekker at ubetalte utbetalinger er filtrert vekk
         val utbetalteUtbetalinger = utbetalingsliste.filter { it.erUtbetalt() }

@@ -37,6 +37,7 @@ data class VedtaksperiodeDTO(
     val utbetalingsreferanse: String?,
     val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
     val utbetalinger: UtbetalingerDTO,
+    val utbetalteUtbetalinger: UtbetalingerDTO,
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val godkjentAv: String?,
     val godkjenttidspunkt: LocalDateTime?,

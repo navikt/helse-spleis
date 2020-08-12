@@ -600,7 +600,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             periode: Periode
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
-            vedtaksperiodeMap["utbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
+            vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
             if (fullstendig) {
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
