@@ -181,10 +181,12 @@ class SpeilBuilderTest {
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
         val utbetalinger = vedtaksperioder[1].utbetalinger
 
-        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
-        assertEquals(utbetalingsliste[1].personOppdrag().fagsystemId(), utbetalinger.personUtbetaling!!.fagsystemId)
-        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().førstedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom)
-        assertEquals(utbetalingsliste[1].arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom)
+        // Sjekker at ubetalte utbetalinger er filtrert vekk
+        val utbetalteUtbetalinger = utbetalingsliste.filter { it.erUtbetalt() }
+        assertEquals(utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId(), utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId)
+        assertNull(utbetalinger.personUtbetaling)
+        assertEquals(utbetalteUtbetalinger.last().arbeidsgiverOppdrag().førstedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom)
+        assertEquals(utbetalteUtbetalinger.last().arbeidsgiverOppdrag().sistedato, utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom)
     }
 
     @Test

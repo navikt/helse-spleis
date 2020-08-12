@@ -600,7 +600,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             periode: Periode
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
-            vedtaksperiodeMap["utbetalinger"] = byggUtbetalingerForPeriode()
+            vedtaksperiodeMap["utbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
             if (fullstendig) {
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
@@ -621,13 +621,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             }
         }
 
-        private fun byggUtbetalingerForPeriode(): UtbetalingerDTO =
+        private fun byggUtbetalteUtbetalingerForPeriode(): UtbetalingerDTO =
             UtbetalingerDTO(
-                utbetalinger.byggUtbetaling(
+                utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
                     arbeidsgiverFagsystemId,
                     Utbetaling::arbeidsgiverOppdrag
                 ),
-                utbetalinger.byggUtbetaling(
+                utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
                     personFagsystemId,
                     Utbetaling::personOppdrag
                 )
@@ -635,7 +635,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private fun List<Utbetaling>.byggUtbetaling(fagsystemId: String?, oppdragStrategy: (Utbetaling) -> Oppdrag) =
             fagsystemId?.let { fagsystemId ->
-                this.lastOrNull() { utbetaling ->
+                this.lastOrNull { utbetaling ->
                     oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
                 }?.let { utbetaling ->
                     val linjer = oppdragStrategy(utbetaling).linjerUtenOpphør().map { linje ->

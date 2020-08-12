@@ -20,7 +20,6 @@ internal class Utbetaling private constructor(
     private val tidsstempel: LocalDateTime,
     private var status: Status
 ) {
-
     internal constructor(
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -42,6 +41,8 @@ internal class Utbetaling private constructor(
         UTBETALING_FEILET,
         ANNULLERT;
     }
+
+    internal fun erUtbetalt() = status == UTBETALT
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         status = if (utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
