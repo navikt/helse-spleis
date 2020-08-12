@@ -6,6 +6,7 @@ import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.avg
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import java.time.YearMonth
@@ -73,7 +74,13 @@ class Inntektsvurdering(
             private fun List<MånedligInntekt>.månedFørSlutt(antallMåneder: Int) =
                 this.map { it.yearMonth }.max()?.minusMonths(antallMåneder.toLong() - 1)
 
-            internal fun avg(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.avg()
+            internal fun avg(inntekter: List<MånedligInntekt>): Inntekt =
+                inntekter
+                    .groupBy { it.yearMonth }
+                    .map { (_, månedsinntekter) -> summer(månedsinntekter) }
+                    .avg()
+
+            internal fun summer(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.summer()
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0

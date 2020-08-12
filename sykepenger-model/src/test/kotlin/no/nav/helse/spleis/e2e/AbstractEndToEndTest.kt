@@ -24,8 +24,8 @@ import no.nav.helse.hendelser.UtbetalingHendelse as UtbetalingHendelse1
 internal abstract class AbstractEndToEndTest {
 
     protected companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "42"
+        const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
     }
