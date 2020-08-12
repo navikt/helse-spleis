@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class SaksbehandlerOverstyrerTidslinje : AbstractEndToEndTest() {
+internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer sykedag på slutten av perioden`() {
