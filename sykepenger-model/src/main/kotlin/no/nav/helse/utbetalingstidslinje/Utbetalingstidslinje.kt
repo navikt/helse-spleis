@@ -26,6 +26,14 @@ internal class Utbetalingstidslinje private constructor(
             tidslinjer.map { it.førsteDato() }.min()!!,
             tidslinjer.map { it.sisteDato() }.max()!!
         )
+
+        internal fun perioder(tidslinjer: List<Utbetalingstidslinje>) =
+            tidslinjer.fold(listOf<Periode>()) { resultater, tidslinje ->
+                Periode.merge(
+                    resultater,
+                    listOf(tidslinje.periode())
+                )
+            }
     }
 
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
@@ -121,7 +129,10 @@ internal class Utbetalingstidslinje private constructor(
         maxOf(this.sisteDato(), other.sisteDato())
 
     internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
+
     internal fun sisteDato() = utbetalingsdager.last().dato
+
+    private fun periode() = Periode(førsteDato(), sisteDato())
 
     internal fun førsteSykepengedag() = utbetalingsdager.firstOrNull { it is NavDag }?.dato
 
