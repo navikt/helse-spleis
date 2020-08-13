@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
@@ -15,9 +14,6 @@ internal class ArbeidsgiverUtbetalinger(
     private val organisasjonsnummer: String,
     private val fødselsnummer: String
 ) {
-    private var maksdato: LocalDate? = null
-    private var gjenståendeSykedager: Int? = null
-    private var forbrukteSykedager: Int? = null
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
     internal fun beregn() {
@@ -39,14 +35,4 @@ internal class ArbeidsgiverUtbetalinger(
         }
     }
 
-    internal fun beregnGrenser(sisteDato: LocalDate) {
-        tidslinjeEngine.beregnGrenser(sisteDato)
-        maksdato = tidslinjeEngine.maksdato()
-        gjenståendeSykedager = tidslinjeEngine.gjenståendeSykedager()
-        forbrukteSykedager = tidslinjeEngine.forbrukteSykedager()
-    }
-
-    internal fun maksdato() = maksdato
-    internal fun gjenståendeSykedager() = gjenståendeSykedager
-    internal fun forbrukteSykedager() = forbrukteSykedager
 }

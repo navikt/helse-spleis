@@ -223,6 +223,17 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, vilkårsgrunnlag)
     }
 
+    internal fun sammenhengendePeriode(periode: Periode) =
+        arbeidsgivere.sammenhengendePerioder().first { it.overlapperMed(periode) }
+
+    internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser) =
+        arbeidsgivere.map { arbeidsgiver ->
+            arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
+                sammenhengendePeriode(periode),
+                ytelser
+            )
+        }.toMap()
+
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, vilkårsgrunnlag: Vilkårsgrunnlag): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             vilkårsgrunnlag.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)

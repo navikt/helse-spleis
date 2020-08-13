@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntekthistorikkVol2
 import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.sykdomstidslinje.Dag
@@ -133,9 +133,9 @@ class Inntektsmelding(
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
-    internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
         if (førsteFraværsdag == null) return
-        inntekthistorikk.add(
+        inntektshistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt,

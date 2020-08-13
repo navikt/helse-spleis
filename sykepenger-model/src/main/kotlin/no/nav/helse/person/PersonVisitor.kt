@@ -195,9 +195,9 @@ internal interface SykdomstidslinjeVisitor {
 }
 
 internal interface InntekthistorikkVisitor {
-    fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
-    fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {}
-    fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
+    fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
+    fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {}
+    fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 
     fun preVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {}
     fun visitInntektVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}

@@ -38,7 +38,7 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
             12000.månedlig,
-            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)
+            ArbeidsgiverTestVisitor.inntektshistorikk.inntekt(10.september)
         )
     }
 
@@ -54,9 +54,9 @@ internal class ArbeidsgiverTest {
     }
 
     private object ArbeidsgiverTestVisitor : ArbeidsgiverVisitor {
-        lateinit var inntekthistorikk: Inntekthistorikk
-        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
-            this.inntekthistorikk = inntekthistorikk
+        lateinit var inntektshistorikk: Inntektshistorikk
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+            this.inntektshistorikk = inntektshistorikk
         }
     }
 

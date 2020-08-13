@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -14,7 +14,7 @@ import java.util.*
 internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     override val description = "utvide økonomifelt i Utbetalingstidslinjer"
 
-    private lateinit var inntekthistorikk: Inntekthistorikk
+    private lateinit var inntektshistorikk: Inntektshistorikk
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
@@ -32,13 +32,13 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
 
     private fun opprettØkonomi(dager: JsonNode?) {
         if (dager == null) return
-        inntekthistorikk = inntekthistorikk(dager)
+        inntektshistorikk = inntekthistorikk(dager)
         dager.forEach { dag ->
             opprettØkonomi(dag as ObjectNode)
         }
     }
 
-    private fun inntekthistorikk(dager: JsonNode) = Inntekthistorikk().also { historikk ->
+    private fun inntekthistorikk(dager: JsonNode) = Inntektshistorikk().also { historikk ->
         dager.forEach { dag ->
             dag.path("dagsats").asInt().also { lønn ->
                 if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING)
@@ -78,7 +78,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0
-    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
+    ) = opprett(dag, inntektshistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
 }
 
 private val ObjectNode.dato get() = LocalDate.parse(this["dato"].textValue(), ISO_DATE)

@@ -133,7 +133,7 @@ internal data class PersonData(
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
     ) {
-        private val modelInntekthistorikk = Inntekthistorikk().apply {
+        private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -184,13 +184,13 @@ internal data class PersonData(
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
+                internal fun parseInntekter(inntekter: List<InntektData>, inntektshistorikk: Inntektshistorikk) {
                     inntekter.forEach { inntektData ->
-                        inntekthistorikk.add(
+                        inntektshistorikk.add(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
                             beløp = inntektData.beløp.månedlig,
-                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
+                            kilde = Inntektshistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
                             tidsstempel = inntektData.tidsstempel
                         )
                     }

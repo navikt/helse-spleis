@@ -83,14 +83,14 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
-    override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
-        currentState.preVisitInntekthistorikk(inntekthistorikk)
+    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) =
+        currentState.preVisitInntekthistorikk(inntektshistorikk)
 
-    override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
-        currentState.postVisitInntekthistorikk(inntekthistorikk)
+    override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+        currentState.postVisitInntekthistorikk(inntektshistorikk)
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) =
+    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) =
         currentState.visitInntekt(inntektsendring, id)
 
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
@@ -380,7 +380,7 @@ internal class JsonBuilder : PersonVisitor {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
-        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             val inntekter = mutableListOf<MutableMap<String, Any?>>()
             arbeidsgiverMap["inntekter"] = inntekter
             pushState(InntektHistorieState(inntekter))
@@ -474,14 +474,14 @@ internal class JsonBuilder : PersonVisitor {
     }
 
     private inner class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : JsonState {
-        override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
             inntektMap.putAll(InntektsendringReflect(inntektsendring).toMap())
         }
 
-        override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+        override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             popState()
         }
     }

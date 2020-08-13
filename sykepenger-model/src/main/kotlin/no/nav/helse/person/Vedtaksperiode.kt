@@ -1202,13 +1202,7 @@ internal class Vedtaksperiode private constructor(
                         }
 
                     engineForTimeline = ArbeidsgiverUtbetalinger(
-                        tidslinjer = mapOf(
-                            arbeidsgiver to utbetalingstidslinje(
-                                arbeidsgiver,
-                                vedtaksperiode.periode.endInclusive,
-                                ytelser
-                            )
-                        ),
+                        tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
                         personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
                         alder = Alder(vedtaksperiode.fødselsnummer),

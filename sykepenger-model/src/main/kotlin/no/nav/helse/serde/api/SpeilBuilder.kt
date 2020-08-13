@@ -102,8 +102,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
 
-    override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) =
-        currentState.preVisitInntekthistorikk(inntekthistorikk)
+    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) =
+        currentState.preVisitInntekthistorikk(inntektshistorikk)
 
     override fun preVisitHendelseSykdomstidslinje(
         tidslinje: Sykdomstidslinje,
@@ -113,11 +113,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.preVisitHendelseSykdomstidslinje(tidslinje, hendelseId, tidsstempel)
     }
 
-    override fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
-        currentState.postVisitInntekthistorikk(inntekthistorikk)
+    override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+        currentState.postVisitInntekthistorikk(inntektshistorikk)
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
         currentState.visitInntekt(inntektsendring, id)
     }
 
@@ -439,7 +439,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
         lateinit var utbetalinger: List<Utbetaling>
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
-        var inntekter = mutableListOf<Inntekthistorikk.Inntektsendring>()
+        var inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
 
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             this.utbetalinger = utbetalinger
@@ -481,7 +481,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     .filter { it.tilstand == TilstandstypeDTO.Utbetalt }
         }
 
-        override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
             inntekter.add(inntektsendring)
         }
 
@@ -528,7 +528,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val gruppeId: UUID,
         private val fødselsnummer: String,
-        private val inntekter: List<Inntekthistorikk.Inntektsendring>,
+        private val inntekter: List<Inntektshistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
         aktivitetslogg: List<AktivitetDTO>,
         private val hendelseIder: List<UUID>

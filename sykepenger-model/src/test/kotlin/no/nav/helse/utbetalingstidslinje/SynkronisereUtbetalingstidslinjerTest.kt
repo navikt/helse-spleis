@@ -4,16 +4,19 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.inntektsdatoer
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class SynkronisereUtbetalingstidslinjerTest {
+    private lateinit var person: Person
     private lateinit var arb1: Arbeidsgiver
     private lateinit var arb2: Arbeidsgiver
     private lateinit var arb3: Arbeidsgiver
@@ -39,9 +42,48 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         arb4.håndter(sykmelding(1.mai til 8.mai, "A4"))
     }
 
+
     @Test
-    fun `Inntektsdatoer for flere perioder`() {
-        assertEquals(listOf(31.desember(2017), 31.mars), listOf(arb1, arb2, arb3, arb4).inntektsdatoer())
+    fun `Sammenhengende periode for en spesifikk periode`() {
+        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(1.januar til  31.januar))
+        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(8.januar til 28.februar))
+        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(15.januar til 7.februar))
+        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(8.april til 31.mai))
+        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(1.juni til 30.juni))
+        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(1.april til 30.april))
+    }
+
+    @Test
+    fun `Utbetalingstidslinjer utvides til å overlappe med sammenhengende periode for person`() {
+        val tidslinjer = ArbeidsgiverUtbetalinger(
+            mapOf(
+                arb1 to tidslinjeOf(31.NAV),
+                arb2 to tidslinjeOf(24.NAV, 28.NAV, startDato = 8.januar),
+                arb3 to tidslinjeOf(17.NAV, 7.NAV, startDato = 15.januar),
+                arb4 to tidslinjeOf(30.NAV, startDato = 1.april)
+            ),
+            tidslinjeOf(),
+            1.januar til 31.januar,
+            Alder(UNG_PERSON_FNR_2018),
+            NormalArbeidstaker,
+            Aktivitetslogg(),
+            arb1.organisasjonsnummer(),
+            UNG_PERSON_FNR_2018
+        )
+
+    }
+
+    private fun arbeidsgiver(orgnummer: String): Arbeidsgiver {
+        class ArbeidsgiverFinder(person: Person): PersonVisitor {
+            lateinit var result: Arbeidsgiver
+            init {
+                person.accept(this)
+            }
+            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                if (orgnummer == organisasjonsnummer) result = arbeidsgiver
+            }
+        }
+        return ArbeidsgiverFinder(person).result
     }
 
     private fun sykmelding(periode: Periode, orgnummer: String): Sykmelding {

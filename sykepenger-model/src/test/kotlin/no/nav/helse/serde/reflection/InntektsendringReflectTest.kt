@@ -1,7 +1,7 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,9 +19,9 @@ internal class InntektsendringReflectTest {
         assertEquals(1.januar, map["fom"])
         assertEquals(hendelseId, map["hendelseId"])
         assertEquals(1000.0, map["beløp"])
-        assertEquals(INFOTRYGD, Inntekthistorikk.Inntektsendring.Kilde.valueOf(map["kilde"].toString()))
+        assertEquals(INFOTRYGD, Inntektshistorikk.Inntektsendring.Kilde.valueOf(map["kilde"].toString()))
     }
 
     internal val inntekt =
-        Inntekthistorikk.Inntektsendring(1.januar, hendelseId, 1000.månedlig, INFOTRYGD)
+        Inntektshistorikk.Inntektsendring(1.januar, hendelseId, 1000.månedlig, INFOTRYGD)
 }

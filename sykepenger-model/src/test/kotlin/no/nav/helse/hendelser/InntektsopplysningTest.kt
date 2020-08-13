@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -22,24 +22,24 @@ internal class InntektsopplysningTest {
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-    private lateinit var inntekthistorikk: Inntekthistorikk
+    private lateinit var inntektshistorikk: Inntektshistorikk
 
     @BeforeEach
     fun setup() {
         aktivitetslogg = Aktivitetslogg()
-        inntekthistorikk = Inntekthistorikk()
+        inntektshistorikk = Inntektshistorikk()
     }
 
     @Test
     fun `legger til inntekter for samme arbeidsgiver`() {
-        inntektsopplysning(DATO, ORGNR).addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNotNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
+        inntektsopplysning(DATO, ORGNR).addInntekter(HENDELSE, ORGNR, inntektshistorikk)
+        assertNotNull(inntektshistorikk.inntekt(DATO.minusDays(1)))
     }
 
     @Test
     fun `legger ikke til inntekter for annen arbeidsgiver`() {
-        inntektsopplysning(DATO, "987654321").addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
+        inntektsopplysning(DATO, "987654321").addInntekter(HENDELSE, ORGNR, inntektshistorikk)
+        assertNull(inntektshistorikk.inntekt(DATO.minusDays(1)))
     }
 
     @Test

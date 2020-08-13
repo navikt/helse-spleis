@@ -344,10 +344,10 @@ internal class ArbeidsgiverUtbetalingerTest {
             fnr
         ).also {
             it.beregn()
-            it.beregnGrenser(31.desember(2019))
-            maksdato = it.maksdato()
-            gjenståendeSykedager = it.gjenståendeSykedager()
-            forbrukteSykedager = it.forbrukteSykedager()
+            it.tidslinjeEngine.beregnGrenser(31.desember(2019))
+            maksdato = it.tidslinjeEngine.maksdato()
+            gjenståendeSykedager = it.tidslinjeEngine.gjenståendeSykedager()
+            forbrukteSykedager = it.tidslinjeEngine.forbrukteSykedager()
         }
         inspektør = UtbetalingstidslinjeInspektør(arbeidsgiver.nåværendeTidslinje())
     }

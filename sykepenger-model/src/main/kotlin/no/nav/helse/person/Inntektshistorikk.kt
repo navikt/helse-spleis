@@ -1,18 +1,18 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Inntekthistorikk {
+internal class Inntektshistorikk {
     private val inntekter = mutableListOf<Inntektsendring>()
 
-    internal fun clone(): Inntekthistorikk {
-        return Inntekthistorikk().also {
+    internal fun clone(): Inntektshistorikk {
+        return Inntektshistorikk().also {
             it.inntekter.addAll(this.inntekter)
         }
     }

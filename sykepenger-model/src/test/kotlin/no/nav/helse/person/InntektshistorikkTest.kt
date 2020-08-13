@@ -2,9 +2,9 @@ package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -16,15 +16,15 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class InntekthistorikkTest {
+internal class InntektshistorikkTest {
     private val tidligereInntekt = 1500.daglig
     private val nyInntekt = 2000.daglig
-    private lateinit var historikk: Inntekthistorikk
+    private lateinit var historikk: Inntektshistorikk
     private var inntektsbeløp = 0
 
     @BeforeEach
     fun setup() {
-        historikk = Inntekthistorikk()
+        historikk = Inntektshistorikk()
         inntektsbeløp = 1000
     }
 
@@ -68,13 +68,13 @@ internal class InntekthistorikkTest {
             listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
         assertEquals(
             `6GBeløp`,
-            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
+            Inntektshistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
         )
 
         val årsinntektUnder6G =
             listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
         assertTrue(
-            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(
+            Inntektshistorikk.Inntektsendring.sykepengegrunnlag(
                 årsinntektUnder6G,
                 førsteFraværsdag
             )!! < `6GBeløp`
@@ -131,14 +131,14 @@ internal class InntekthistorikkTest {
     private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
 
     private fun List<Pair<String, InntektArgs>>.assertions(block: (List<Pair<String, InntektArgs>>) -> Unit) {
-        historikk = Inntekthistorikk()
+        historikk = Inntektshistorikk()
         inntektsbeløp = 0
         this.forEach { it.second.also { args -> args.add(); args.merkelapp(it.first) } }
         block(this)
     }
 
     private infix fun Kilde.versus(other: Kilde): Kilde {
-        historikk = Inntekthistorikk()
+        historikk = Inntektshistorikk()
         historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this)
         historikk.add(1.januar, UUID.randomUUID(), 2000.daglig, other)
         return if (1000.daglig == historikk.inntekt(3.januar)) this else other
@@ -147,7 +147,7 @@ internal class InntekthistorikkTest {
     private inner class InntektCompetition(private val a: InntektArgs, private val b: InntektArgs) {
         infix fun on(dato: LocalDate): Boolean {
             fun assertInntekt(left: InntektArgs, right: InntektArgs, expected: Number): Boolean {
-                historikk = Inntekthistorikk()
+                historikk = Inntektshistorikk()
                 inntektsbeløp = 0
                 left.add()
                 right.add()
@@ -188,16 +188,16 @@ internal class InntekthistorikkTest {
         }
     }
 
-    private val Inntekthistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
+    private val Inntektshistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
 
-    private class Inntektsinspektør(historikk: Inntekthistorikk) : InntekthistorikkVisitor {
+    private class Inntektsinspektør(historikk: Inntektshistorikk) : InntekthistorikkVisitor {
         internal var inntektTeller = 0
 
         init {
             historikk.accept(this)
         }
 
-        override fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             inntektTeller = 0
         }
 

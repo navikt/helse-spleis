@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -25,7 +25,7 @@ internal class HendelseVisitor : PersonVisitor {
         hendelsereferanser.add(id)
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
         hendelsereferanser.add(id)
     }
 }

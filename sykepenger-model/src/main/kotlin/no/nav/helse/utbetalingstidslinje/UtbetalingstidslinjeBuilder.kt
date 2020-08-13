@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -18,7 +18,7 @@ import java.time.LocalDate
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val sisteDag: LocalDate,
-    private val inntekthistorikk: Inntekthistorikk,
+    private val inntektshistorikk: Inntektshistorikk,
     private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
@@ -130,8 +130,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun oppdatereInntekt(dato: LocalDate) {
-        dekningsgrunnlag = inntekthistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
-        aktuellDagsinntekt = inntekthistorikk.inntekt(dato) ?: INGEN
+        dekningsgrunnlag = inntektshistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
+        aktuellDagsinntekt = inntektshistorikk.inntekt(dato) ?: INGEN
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {

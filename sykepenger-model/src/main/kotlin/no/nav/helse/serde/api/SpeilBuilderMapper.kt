@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Companion.inntekt
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Companion.sykepengegrunnlag
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.inntekt
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.sykepengegrunnlag
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
@@ -63,7 +63,7 @@ internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     fødselsnummer: String,
-    inntekter: List<Inntekthistorikk.Inntektsendring>,
+    inntekter: List<Inntektshistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?,
     gruppeId: UUID
@@ -187,7 +187,7 @@ internal fun mapVilkår(
     fødselsnummer: String,
     dataForVilkårsvurdering: GrunnlagsdataDTO?,
     søknadNav: SøknadNavDTO?,
-    inntekter: List<Inntekthistorikk.Inntektsendring>,
+    inntekter: List<Inntektshistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
