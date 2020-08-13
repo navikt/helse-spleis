@@ -27,13 +27,13 @@ internal class Utbetalingstidslinje private constructor(
             tidslinjer.map { it.sisteDato() }.max()!!
         )
 
-        internal fun perioder(tidslinjer: List<Utbetalingstidslinje>) =
+        internal fun inntektsdatoer(tidslinjer: List<Utbetalingstidslinje>) =
             tidslinjer.fold(listOf<Periode>()) { resultater, tidslinje ->
                 Periode.merge(
                     resultater,
                     listOf(tidslinje.periode())
                 )
-            }
+            }.map { it.start.minusDays(1) }
     }
 
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =

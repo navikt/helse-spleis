@@ -40,6 +40,14 @@ internal class Arbeidsgiver private constructor(
         internal val SENERE: VedtaksperioderSelector = Arbeidsgiver::senere
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
+
+        internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
+            arbeidsgivere.fold(listOf<Periode>()) { resultater, arbeidsgiver ->
+                    Periode.merge(
+                        resultater,
+                        arbeidsgiver.vedtaksperioder.map { it.periode() }
+                    )
+                }.map { it.start.minusDays(1) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -331,5 +339,7 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.firstOrNull { !it.erFerdigBehandlet() }
     }
 }
+
+internal fun List<Arbeidsgiver>.inntektsdatoer() = Arbeidsgiver.inntektsdatoer(this)
 
 internal typealias VedtaksperioderSelector = (Arbeidsgiver, Vedtaksperiode) -> MutableList<Vedtaksperiode>

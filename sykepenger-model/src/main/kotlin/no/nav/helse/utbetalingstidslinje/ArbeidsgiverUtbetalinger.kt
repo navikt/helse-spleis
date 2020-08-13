@@ -49,7 +49,4 @@ internal class ArbeidsgiverUtbetalinger(
     internal fun maksdato() = maksdato
     internal fun gjenståendeSykedager() = gjenståendeSykedager
     internal fun forbrukteSykedager() = forbrukteSykedager
-
-    internal fun inntektsdatoer() =
-        Utbetalingstidslinje.perioder(tidslinjer.values.toList()).map { it.start.minusDays(1) }
 }
