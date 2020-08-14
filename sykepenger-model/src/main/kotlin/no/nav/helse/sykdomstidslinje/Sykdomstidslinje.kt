@@ -26,18 +26,14 @@ internal class Sykdomstidslinje private constructor(
     private val periode: Periode?
 
     init {
-        this.periode = periode ?: periode(dager)
+        this.periode = periode ?:
+            if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
     }
 
-    internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(
-        dager.toSortedMap()
-    )
+    internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
 
-    private constructor(dager: List<Pair<LocalDate, Dag>>) : this(
-        dager.fold(mutableMapOf<LocalDate, Dag>()) { acc, (date, dag) ->
-            acc.apply { put(date, dag) }
-        }
-    )
+    internal constructor(original: Sykdomstidslinje, spanningPeriode: Periode) :
+        this(original.dager, original.periode?.merge(spanningPeriode), original.låstePerioder)
 
     internal fun length() = count() // Added to limit number of changes when removing old sykdomstidlinje
     internal fun periode() = periode
@@ -193,13 +189,11 @@ internal class Sykdomstidslinje private constructor(
 
     internal companion object {
 
-        private fun periode(dager: SortedMap<LocalDate, Dag>) =
-            if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
-
         internal fun arbeidsdager(periode: Periode?, kilde: Hendelseskilde) =
             Sykdomstidslinje(
-                periode?.map { it to if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) }
-                    ?: emptyList<Pair<LocalDate, Dag>>()
+                (periode
+                    ?.map { it to if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) }
+                    ?: emptyList()).toMap()
             )
 
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
