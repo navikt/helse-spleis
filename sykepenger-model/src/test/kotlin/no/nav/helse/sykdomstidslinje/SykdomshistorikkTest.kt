@@ -53,6 +53,13 @@ internal class SykdomshistorikkTest {
         assertEquals(4, historikk.size)
     }
 
+    @Test
+    fun `Nytt element i sykdomshistorikk er tomt`() {
+        historikk.håndter(TestSykmelding(1.januar sykTil 15.januar))
+        historikk.tøm()
+        assertEquals(0, historikk.sykdomstidslinje().length())
+    }
+
     internal sealed class TestEvent(
         private val sykdomstidslinje: TestSykdomstidslinje,
         melding: Melding

@@ -980,4 +980,39 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             håndterPåminnelse(3, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(2))
         }
     }
+
+
+    @Test
+    fun `sykdomstidslinje tømmes helt når perioder blir forkastet, dersom det ikke finnes noen perioder igjen`() {
+        //(prod-case der to dager ble igjen etter forkastelse, som medførte wonky sykdomstidslinje senere i behandlingen)
+        håndterSykmelding(Sykmeldingsperiode(27.april(2020), 30.april(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.april(2020), 30.april(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.juni(2020), 21.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
+
+        håndterSykmelding(Sykmeldingsperiode(21.juni(2020), 11.juli(2020), 100))
+        håndterSøknad(Sykdom(21.juni(2020), 11.juli(2020), 100))
+
+        håndterPåminnelse(1, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, LocalDateTime.now().minusDays(200))
+
+        håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(+2020), 100))
+        håndterSøknad(Sykdom(12.juli(2020), 31.juli(2020), 100))
+
+        håndterYtelser(0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
+            )
+        )
+
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
+            )
+        )
+    }
 }

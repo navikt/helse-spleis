@@ -230,7 +230,10 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperiode !in vedtaksperioder) return
         forkastet(vedtaksperiode, block)
             .onEach { it.ferdig(hendelse) }
-            .also { sykdomshistorikk.fjernTidligereDager(it.last().periode()) }
+            .also {
+                if(vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
+                else sykdomshistorikk.fjernTidligereDager(it.last().periode())
+            }
         kil(hendelse)
     }
 

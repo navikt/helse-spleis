@@ -1864,4 +1864,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
         )
     }
+
+    @Test
+    fun `sykdomstidslinje tømmes helt når perioder blir forkastet, dersom det ikke finnes noen perioder igjen`() {
+        håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100))
+        håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100))
+        håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
+
+        håndterPåminnelse(0, AVVENTER_VILKÅRSPRØVING_GAP, LocalDateTime.now().minusDays(200))
+        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().length())
+    }
 }

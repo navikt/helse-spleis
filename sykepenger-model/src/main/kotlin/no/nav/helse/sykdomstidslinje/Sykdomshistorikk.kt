@@ -36,6 +36,10 @@ internal class Sykdomshistorikk private constructor(
         return sykdomstidslinje()
     }
 
+    internal fun tøm() {
+        elementer.add(0, Element.opprettTom())
+    }
+
     internal fun fjernTidligereDager(periode: Periode) {
         // TODO: Remove size == 0 whenever migration is done
         if (size == 0 || sykdomstidslinje().length() == 0) return
@@ -121,6 +125,15 @@ internal class Sykdomshistorikk private constructor(
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                     beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(hendelseSykdomstidslinje)
+                )
+            }
+
+            internal fun opprettTom() : Element {
+                return Element(
+                    hendelseId = null,
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = Sykdomstidslinje(),
+                    beregnetSykdomstidslinje = Sykdomstidslinje()
                 )
             }
 
