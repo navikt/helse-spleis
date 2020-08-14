@@ -52,14 +52,12 @@ internal class Sykdomshistorikk private constructor(
     }
 
     private fun sammenslåttTidslinje(
-        hendelse: SykdomstidslinjeHendelse,
         hendelseSykdomstidslinje: Sykdomstidslinje
     ): Sykdomstidslinje {
-        val tidslinje = if (elementer.isEmpty())
+        return if (elementer.isEmpty())
             hendelseSykdomstidslinje
         else
             sykdomstidslinje().merge(hendelseSykdomstidslinje, dagturnering::beste)
-        return tidslinje.also { it.valider(hendelse) }
     }
 
     internal class Element private constructor(
@@ -107,10 +105,7 @@ internal class Sykdomshistorikk private constructor(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        hendelse,
-                        hendelseSykdomstidslinje
-                    )
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(hendelseSykdomstidslinje)
                 )
             }
 
@@ -125,10 +120,7 @@ internal class Sykdomshistorikk private constructor(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        hendelse,
-                        hendelseSykdomstidslinje
-                    )
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(hendelseSykdomstidslinje)
                 )
             }
 

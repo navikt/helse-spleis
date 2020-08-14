@@ -79,6 +79,8 @@ internal class Sykdomstidslinje private constructor(
         }
     }
 
+    internal fun valider() = dager.values.filterIsInstance<ProblemDag>().none()
+
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         val problemmeldinger = mutableListOf<String>()
         val visitor = ProblemDagVisitor(problemmeldinger)

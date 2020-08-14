@@ -1,14 +1,27 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
+
+    @BeforeEach
+    fun setup() {
+        Toggles.problemdagerSkaperError = false
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.problemdagerSkaperError = true
+    }
 
     @Test
     fun `overstyrer sykedag på slutten av perioden`() {
@@ -114,6 +127,20 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.last().arbeidsgiverOppdrag().size)
         assertEquals(21.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[0].tom)
         assertEquals(23.januar, inspektør.utbetalinger.last().arbeidsgiverOppdrag()[1].fom)
+    }
+
+    @Test
+    fun `problemdag fra søknad blir fikset`() {
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100))
+        håndterInntektsmeldingMedValidering(0, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(0, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100), Søknad.Søknadsperiode.Utlandsopphold(22.januar, 25.januar))
+        håndterOverstyring(listOf(manuellFeriedag(22.januar), manuellFeriedag(23.januar), manuellFeriedag(24.januar), manuellFeriedag(25.januar)))
+        håndterVilkårsgrunnlag(0, INNTEKT)
+        håndterYtelser(0)
+        håndterSimulering(0)
+        håndterOverstyring(listOf(manuellFeriedag(22.januar)))
+
+        assertEquals("SSSSHH SSSSSHH SSSSSHH FFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
