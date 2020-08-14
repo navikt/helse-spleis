@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
@@ -13,9 +14,11 @@ import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class SynkronisereUtbetalingstidslinjerTest {
@@ -44,7 +47,6 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         arb4.håndter(sykmelding(1.april til 30.april, "A4"))
         arb4.håndter(sykmelding(1.mai til 8.mai, "A4"))
     }
-
 
     @Test
     fun `Sammenhengende periode for en spesifikk periode`() {
@@ -77,7 +79,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     @Test
-    fun ` Padding utbetalingstidslinjene til sammenhengendeperiode`(){
+    fun ` Padding utbetalingstidslinjene til sammenhengendeperiode`() {
         person.utbetalingstidslinjer(1.januar til 31.januar, ytelser("A1")).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
@@ -143,6 +145,24 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 aktivitetslogg
             ),
             aktivitetslogg = aktivitetslogg
+        )
+    }
+
+    private fun inntekt(arbeidsgiver: Arbeidsgiver, beløp: Number, dato: LocalDate) {
+        arbeidsgiver.addInntekt(
+            Inntektsmelding(
+                meldingsreferanseId = UUID.randomUUID(),
+                refusjon = Inntektsmelding.Refusjon(null, null),
+                orgnummer = arbeidsgiver.organisasjonsnummer(),
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                aktørId = AKTØRID,
+                førsteFraværsdag = dato,
+                beregnetInntekt = beløp.toDouble().daglig,
+                arbeidsgiverperioder = emptyList(),
+                ferieperioder = emptyList(),
+                arbeidsforholdId = null,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            )
         )
     }
 }
