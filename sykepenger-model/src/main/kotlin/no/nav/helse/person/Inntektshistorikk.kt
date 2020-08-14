@@ -8,8 +8,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Inntektshistorikk {
-    private val inntekter = mutableListOf<Inntektsendring>()
+internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendring> = mutableListOf()) {
+
 
     internal fun clone(): Inntektshistorikk {
         return Inntektshistorikk().also {
@@ -37,6 +37,12 @@ internal class Inntektshistorikk {
     internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
         inntekt(dato)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
 
+    internal fun subset(datoer: List<LocalDate>): Inntektshistorikk{
+        return Inntektshistorikk(datoer
+            .mapNotNull { dato -> Inntektsendring.inntektendring(inntekter, dato)?.clone(dato) }
+            .toMutableList())
+    }
+
     internal class Inntektsendring(
         private val fom: LocalDate,
         private val hendelseId: UUID,
@@ -46,8 +52,11 @@ internal class Inntektshistorikk {
         ) : Comparable<Inntektsendring> {
 
         companion object {
+            internal fun inntektendring(inntekter: List<Inntektsendring>, dato: LocalDate) =
+                (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())
+
             internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
-                (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
+                inntektendring(inntekter, dato)?.beløp
 
             internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Inntekt? =
                 inntekt(inntekter, dato)?.let {
@@ -67,6 +76,9 @@ internal class Inntektshistorikk {
 
         internal fun erRedundantMed(annenInntektsendring: Inntektsendring) =
             annenInntektsendring.fom == fom && annenInntektsendring.kilde == kilde
+
+        internal fun clone(dato: LocalDate) =
+            Inntektsendring(dato, hendelseId, beløp, kilde, tidsstempel)
 
         //Order is significant, compare is used to prioritize records from various sources
         internal enum class Kilde : Comparable<Kilde> {

@@ -424,10 +424,14 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.firstOrNull { !it.erFerdigBehandlet() }
     }
 
-    internal fun oppdatertUtbetalingstidslinje(sammenhengendePeriode: Periode, ytelser: Ytelser): Utbetalingstidslinje {
+    internal fun oppdatertUtbetalingstidslinje(
+        inntektDatoer: List<LocalDate>,
+        sammenhengendePeriode: Periode,
+        ytelser: Ytelser
+    ): Utbetalingstidslinje {
         return UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode,
-            inntektshistorikk = inntektshistorikk,
+            inntektshistorikk = inntektshistorikk.subset(inntektDatoer),
             forlengelseStrategy = { sykdomstidslinje ->
                 Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
                     ytelser.utbetalingshistorikk().append(oldtid)

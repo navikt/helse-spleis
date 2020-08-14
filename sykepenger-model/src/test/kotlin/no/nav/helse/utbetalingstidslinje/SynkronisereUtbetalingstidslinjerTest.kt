@@ -12,6 +12,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -35,17 +36,30 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @BeforeEach
     internal fun setup() {
-        val person = Person(AKTØRID, UNG_PERSON_FNR_2018)
-        arb1 = Arbeidsgiver(person, "A1")
-        arb2 = Arbeidsgiver(person, "A2")
-        arb3 = Arbeidsgiver(person, "A3")
-        arb4 = Arbeidsgiver(person, "A4")
-        arb1.håndter(sykmelding(1.januar til 31.januar, "A1"))
-        arb1.håndter(sykmelding(8.april til 31.mai, "A1"))
-        arb2.håndter(sykmelding(8.januar til 28.februar, "A2"))
-        arb3.håndter(sykmelding(15.januar til 7.februar, "A3"))
-        arb4.håndter(sykmelding(1.april til 30.april, "A4"))
-        arb4.håndter(sykmelding(1.mai til 8.mai, "A4"))
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018)
+        person.håndter(sykmelding(1.januar til 31.januar, "A1"))
+        person.håndter(sykmelding(8.april til 31.mai, "A1"))
+        person.håndter(sykmelding(1.juni til 30.juni, "A1"))
+        person.håndter(sykmelding(8.januar til 28.februar, "A2"))
+        person.håndter(sykmelding(15.januar til 7.februar, "A3"))
+        person.håndter(sykmelding(1.april til 30.april, "A4"))
+        person.håndter(sykmelding(1.mai til 8.mai, "A4"))
+        arb1 = arbeidsgiver("A1").also {
+            inntektsmelding(it, 1200, 1.januar)
+            inntektsmelding(it, 1300, 8.april)
+            skatt(it, 1400, 31.mars)
+        }
+        arb2 = arbeidsgiver("A2").also {
+            skatt(it, 1500, 31.desember(2017))
+            inntektsmelding(it, 1600, 8.januar)
+        }
+        arb3 = arbeidsgiver("A3").also {
+            skatt(it, 1700, 31.desember(2017))
+            inntektsmelding(it, 1800, 15.januar)
+        }
+        arb4 = arbeidsgiver("A4").also {
+            inntektsmelding(it, 1900, 1.april)
+        }
     }
 
     @Test
@@ -79,13 +93,20 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     @Test
-    fun ` Padding utbetalingstidslinjene til sammenhengendeperiode`() {
+    fun `Padding utbetalingstidslinjene til sammenhengendeperiode`() {
         person.utbetalingstidslinjer(1.januar til 31.januar, ytelser("A1")).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)
             assertEquals(59, it[arb3]?.size)
             assertEquals(120, it[arb4]?.size)
+            it[arb1]?.also { tidslinje ->
+                assertInntekt(1200, tidslinje[1.januar])
+                assertInntekt(1200, tidslinje[1.april]) // Fridag - ingen endring av inntekt
+                assertInntekt(1400, tidslinje[2.april])
+                assertInntekt(1400, tidslinje[8.april])
+                assertInntekt(1400, tidslinje[1.juni])
+            }
             it[arb3]?.also { tidslinje ->
                 TestTidslinjeInspektør(tidslinje).also { inspektør ->
                     assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
@@ -94,6 +115,8 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                     assertEquals(25, inspektør.dagtelling[Arbeidsdag::class])
                     assertEquals(10, inspektør.dagtelling[Fridag::class])
                 }
+                assertInntekt(1700, tidslinje[1.januar])
+                assertInntekt(1700, tidslinje[15.januar])
             }
         }
     }
@@ -148,7 +171,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         )
     }
 
-    private fun inntekt(arbeidsgiver: Arbeidsgiver, beløp: Number, dato: LocalDate) {
+    private fun inntektsmelding(arbeidsgiver: Arbeidsgiver, beløp: Number, førsteFraværsdag: LocalDate) {
         arbeidsgiver.addInntekt(
             Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -156,7 +179,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 orgnummer = arbeidsgiver.organisasjonsnummer(),
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 aktørId = AKTØRID,
-                førsteFraværsdag = dato,
+                førsteFraværsdag = førsteFraværsdag,
                 beregnetInntekt = beløp.toDouble().daglig,
                 arbeidsgiverperioder = emptyList(),
                 ferieperioder = emptyList(),
@@ -164,5 +187,12 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null
             )
         )
+    }
+
+    private fun skatt(arbeidsgiver: Arbeidsgiver, beløp: Number, dato: LocalDate)
+        = inntektsmelding(arbeidsgiver, beløp, dato.plusDays(1))
+
+    private fun assertInntekt(expected: Number, dag: Utbetalingsdag) {
+        assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, daglig, _, _, _ -> daglig })
     }
 }

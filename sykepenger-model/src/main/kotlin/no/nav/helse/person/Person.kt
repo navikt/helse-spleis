@@ -224,11 +224,15 @@ class Person private constructor(
     }
 
     internal fun sammenhengendePeriode(periode: Periode) =
-        arbeidsgivere.sammenhengendePerioder().first { it.overlapperMed(periode) }
+        sammenhengendePerioder().first { it.overlapperMed(periode) }
+
+    private fun sammenhengendePerioder() =
+        arbeidsgivere.sammenhengendePerioder()
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser) =
         arbeidsgivere.map { arbeidsgiver ->
             arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
+                sammenhengendePerioder().map { it.start.minusDays(1) },
                 sammenhengendePeriode(periode),
                 ytelser
             )
