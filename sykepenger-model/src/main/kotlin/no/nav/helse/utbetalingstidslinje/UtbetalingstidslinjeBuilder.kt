@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
@@ -17,7 +18,7 @@ import java.time.LocalDate
  */
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
-    private val sisteDag: LocalDate,
+    private val sammenhengendePeriode: Periode,
     private val inntektshistorikk: Inntektshistorikk,
     private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
@@ -35,7 +36,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         if (forlengelseStrategy(sykdomstidslinje)) sykedagerIArbeidsgiverperiode += 16
-        sykdomstidslinje.kuttFremTilOgMed(sisteDag).accept(this)
+        Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode).accept(this)
         return tidslinje
     }
 

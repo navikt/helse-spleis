@@ -19,7 +19,7 @@ internal fun resetSeed(frøDato: LocalDate = LocalDate.of(2018, 1, 1)) {
     dagensDato = frøDato
 }
 
-internal val Int.nS
+internal val Int.S
     get() = Sykdomstidslinje.sykedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
@@ -27,7 +27,7 @@ internal val Int.nS
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nU
+internal val Int.U
     get() = Sykdomstidslinje.arbeidsgiverdager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
@@ -35,7 +35,7 @@ internal val Int.nU
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nK
+internal val Int.K
     get() = Sykdomstidslinje.foreldetSykedag(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
@@ -43,7 +43,7 @@ internal val Int.nK
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nA
+internal val Int.A
     get() = Sykdomstidslinje.arbeidsdager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
@@ -54,32 +54,32 @@ internal val Int.n_
     get() = Sykdomstidslinje(
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nF
+internal val Int.F
     get() = Sykdomstidslinje.feriedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nEDU
+internal val Int.EDU
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap({ it }, { Studiedag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nH
+internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nP
+internal val Int.P
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.nUT
+internal val Int.UT
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Utenlandsdag(it, TestHendelse.kilde) }))

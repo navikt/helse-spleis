@@ -16,86 +16,86 @@ internal class FørsteFraværsdagTest {
 
     @Test
     internal fun `førsteFraværsdag er null for ugyldige situasjoner`() {
-        assertNull(1.nUT.førsteFraværsdag())
-        assertNull(1.nEDU.førsteFraværsdag())
-        assertNull(1.nF.førsteFraværsdag())
-        assertNull(1.nP.førsteFraværsdag())
+        assertNull(1.UT.førsteFraværsdag())
+        assertNull(1.EDU.førsteFraværsdag())
+        assertNull(1.F.førsteFraværsdag())
+        assertNull(1.P.førsteFraværsdag())
         assertNull(1.n_.førsteFraværsdag())
-        assertNull(1.nA.førsteFraværsdag())
+        assertNull(1.A.førsteFraværsdag())
     }
 
     @Test
     internal fun `utgangspunkt for beregning er sykedag, arbeidsgiverdag eller syk helgedag`() {
-        assertFørsteDagErUtgangspunktForBeregning(1.nS)
-        assertFørsteDagErUtgangspunktForBeregning(1.nU)
-        assertFørsteDagErUtgangspunktForBeregning(1.nH)
+        assertFørsteDagErUtgangspunktForBeregning(1.S)
+        assertFørsteDagErUtgangspunktForBeregning(1.U)
+        assertFørsteDagErUtgangspunktForBeregning(1.H)
     }
 
     @Test
     internal fun `utgangspunkt for beregning av ytelse er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
-        assertFørsteDagErUtgangspunktForBeregning(2.nS)
-        assertFørsteDagErUtgangspunktForBeregning(2.nU)
+        assertFørsteDagErUtgangspunktForBeregning(2.S)
+        assertFørsteDagErUtgangspunktForBeregning(2.U)
 
-        perioder(2.nS, 2.n_, 2.nS) { _, _, periode3 ->
+        perioder(2.S, 2.n_, 2.S) { _, _, periode3 ->
             assertFørsteDagErUtgangspunktForBeregning(periode3, this)
         }
-        perioder(2.nS, 2.nA, 2.nF, 2.nS) { _, _, _, periode4 ->
+        perioder(2.S, 2.A, 2.F, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErUtgangspunktForBeregning(periode4, this)
         }
-        perioder(2.nS, 2.nA, 2.nP, 2.nS) { _, _, _, periode4 ->
+        perioder(2.S, 2.A, 2.P, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErUtgangspunktForBeregning(periode4, this)
         }
-        perioder(2.nS, 2.nF, 2.nS) { periode1, _, _ ->
+        perioder(2.S, 2.F, 2.S) { periode1, _, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
-        perioder(2.nS, 2.nP, 2.nS) { periode1, _, _ ->
+        perioder(2.S, 2.P, 2.S) { periode1, _, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
-        perioder(2.nS, 2.n_, 1.nH) { _, _ , sisteSykedager ->
+        perioder(2.S, 2.n_, 1.H) { _, _, sisteSykedager ->
             assertFørsteDagErUtgangspunktForBeregning(sisteSykedager, this)
         }
-        perioder(2.nS, 2.n_, 1.nU) { _, _ , sisteSykedager ->
+        perioder(2.S, 2.n_, 1.U) { _, _, sisteSykedager ->
             assertFørsteDagErUtgangspunktForBeregning(sisteSykedager, this)
         }
-        perioder(2.nS, 2.nA, 2.nS, 2.nA) { _, _ , sisteSykedager, _ ->
+        perioder(2.S, 2.A, 2.S, 2.A) { _, _, sisteSykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sisteSykedager, this)
         }
     }
 
     @Test
     internal fun `tidslinjer som slutter med ignorerte dager`() {
-        perioder(2.nS, 2.nF) { periode1, _ ->
+        perioder(2.S, 2.F) { periode1, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
-        perioder(2.nS, 2.nP) { periode1, _ ->
+        perioder(2.S, 2.P) { periode1, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
     }
 
     @Test
     internal fun `ferie i framtiden`() {
-        perioder(2.nS, 2.n_, 2.nF) { sykedager, _, _ ->
+        perioder(2.S, 2.n_, 2.F) { sykedager, _, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
     internal fun `sykedager etterfulgt av arbeidsdager`() {
-        perioder(2.nS, 2.nA) { sykedager, _ ->
+        perioder(2.S, 2.A) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
     internal fun `sykedager etterfulgt av implisittdager`() {
-        perioder(2.nS, 2.n_) { sykedager, _ ->
+        perioder(2.S, 2.n_) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
     internal fun `søknad med arbeidgjenopptatt gir ikke feil`() {
-        perioder(2.nS, 2.n_) { sykedager, _ ->
+        perioder(2.S, 2.n_) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }

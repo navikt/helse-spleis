@@ -8,7 +8,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -426,7 +426,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdatertUtbetalingstidslinje(sammenhengendePeriode: Periode, ytelser: Ytelser): Utbetalingstidslinje {
         return UtbetalingstidslinjeBuilder(
-            sisteDag = sammenhengendePeriode.endInclusive,
+            sammenhengendePeriode = sammenhengendePeriode,
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { sykdomstidslinje ->
                 Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
@@ -436,7 +436,7 @@ internal class Arbeidsgiver private constructor(
                     oldtid.arbeidsgiverperiodeBetalt(this)
                 }
             },
-            arbeidsgiverRegler = ArbeidsgiverRegler.Companion.NormalArbeidstaker
+            arbeidsgiverRegler = NormalArbeidstaker
         ).result(sykdomstidslinje())
     }
 
