@@ -16,7 +16,7 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
         .map {
             ManuellOverskrivingDag(
                 dato = it["dato"].asLocalDate(),
-                type = Dagtype.valueOf(it["dagtype"].asText()),
+                type = Dagtype.valueOf(it["type"].asText()),
                 grad = it["grad"]?.intValue()
             )
         }

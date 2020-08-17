@@ -16,7 +16,7 @@ internal class OverstyrTidlinjeRiver(
         packet.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
         packet.requireArray("dager") {
             requireKey("dato")
-            requireKey("dagtype")
+            requireKey("type")
             interestedIn("grad")
         }
     }
