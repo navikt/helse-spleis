@@ -363,7 +363,7 @@ internal class TestMessageFactory(
                 "dager" to dager.map {
                     mapOf(
                         "dato" to it.dato,
-                        "dagtype" to it.type,
+                        "type" to it.type,
                         "grad" to it.grad
                     )
                 }
