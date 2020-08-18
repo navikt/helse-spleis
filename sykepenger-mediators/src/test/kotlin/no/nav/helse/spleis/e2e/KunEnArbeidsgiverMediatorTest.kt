@@ -91,6 +91,9 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
             "AVVENTER_HISTORIKK"
         )
+
+        val sisteMelding = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        assertTrue(sisteMelding.hasNonNull("vedtaksperiodeId"))
     }
 }
 

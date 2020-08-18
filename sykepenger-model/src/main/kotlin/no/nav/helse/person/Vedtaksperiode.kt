@@ -221,6 +221,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
         if(overlapperMed(hendelse)) {
+            kontekst(hendelse)
             tilstand.håndter(this, hendelse)
         }
     }
