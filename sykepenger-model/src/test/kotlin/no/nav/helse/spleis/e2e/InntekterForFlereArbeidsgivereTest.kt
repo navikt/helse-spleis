@@ -1,16 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
-import no.nav.helse.testhelpers.juni
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -128,35 +124,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
 
-    private fun inntektperioder(block: Inntektperioder.() -> Unit) = Inntektperioder(block).toMap()
-
-    private class Inntektperioder(block: Inntektperioder.() -> Unit) {
-        private val map = mutableMapOf<YearMonth, MutableList<Pair<String, Inntekt>>>()
-
-        init {
-            block()
-        }
-
-        internal fun toMap(): Map<YearMonth, List<Pair<String, Inntekt>>> = map
-
-        internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) =
-            this.map(YearMonth::from)
-                .distinct()
-                .forEach { yearMonth -> map.getOrPut(yearMonth) { mutableListOf() }.addAll(Inntekter(block).toList()) }
-
-        internal class Inntekter(block: Inntekter.() -> Unit) {
-            private val liste = mutableListOf<Pair<String, Inntekt>>()
-
-            init {
-                block()
-            }
-
-            internal fun toList() = liste.toList()
-
-            infix fun String.inntekt(inntekt: Int) = liste.add(this to inntekt.månedlig)
-        }
-    }
-
     private fun nyPeriode(periode: Periode, orgnummer: String) {
         person.håndter(
             sykmelding(
@@ -214,7 +181,4 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             hendelselogg = this
         }
     }
-
-
-    private infix fun LocalDate.til(other: LocalDate) = Periode(this, other)
 }

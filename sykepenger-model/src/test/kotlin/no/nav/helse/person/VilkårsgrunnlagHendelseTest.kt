@@ -6,6 +6,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -114,9 +116,17 @@ internal class VilkårsgrunnlagHendelseTest {
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
 
         val inntektsberegningStart =
-            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.InntekterForSammenligningsgrunnlag, "beregningStart")
+            hendelse.etterspurtBehov<String>(
+                vedtaksperiodeId,
+                Behovtype.InntekterForSammenligningsgrunnlag,
+                "beregningStart"
+            )
         val inntektsberegningSlutt =
-            hendelse.etterspurtBehov<String>(vedtaksperiodeId, Behovtype.InntekterForSammenligningsgrunnlag, "beregningSlutt")
+            hendelse.etterspurtBehov<String>(
+                vedtaksperiodeId,
+                Behovtype.InntekterForSammenligningsgrunnlag,
+                "beregningSlutt"
+            )
         assertEquals("2017-01", inntektsberegningStart)
         assertEquals("2017-12", inntektsberegningSlutt)
     }
@@ -155,9 +165,11 @@ internal class VilkårsgrunnlagHendelseTest {
         listOf(Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
 
 
-    private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) =
-        (1..12).map { YearMonth.of(2018, it) to (ORGNR to beregnetInntekt) }
-            .groupBy({ it.first }) { it.second }
+    private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioder {
+        1.januar(2017) til 1.desember(2017) inntekter {
+            ORGNR inntekt beregnetInntekt
+        }
+    }
 
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,

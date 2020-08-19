@@ -651,5 +651,4 @@ internal abstract class AbstractEndToEndTest {
         if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
         return requireNotNull(vedtaksperioderIder[this to indeks])
     }
-
 }
