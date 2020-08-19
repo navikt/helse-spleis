@@ -142,6 +142,8 @@ internal class Sykdomstidslinje private constructor(
                 }
         }
 
+    internal fun førsteSykedagEtter(dato:LocalDate) = dager.entries.firstOrNull { it.key >= dato && erEnSykedag(it.value) }?.key
+
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
     private fun fjernDagerEtterSisteSykedag(): Sykdomstidslinje = periode

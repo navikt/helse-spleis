@@ -73,6 +73,9 @@ class Inntektsmelding(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
+    override fun periode() =
+        super.periode().let { Periode(listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).max()!!, it.endInclusive) }
+
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {
         if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad

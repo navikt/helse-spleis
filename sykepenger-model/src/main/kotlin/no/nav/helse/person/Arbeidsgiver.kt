@@ -37,6 +37,7 @@ internal class Arbeidsgiver private constructor(
 
     internal companion object {
         internal val TIDLIGERE: VedtaksperioderSelector = Arbeidsgiver::tidligere
+        internal val TIDLIGERE_OG_ETTERGØLGENDE: VedtaksperioderSelector = Arbeidsgiver::tidligereOgEtterfølgende
         internal val SENERE: VedtaksperioderSelector = Arbeidsgiver::senere
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
@@ -234,7 +235,7 @@ internal class Arbeidsgiver private constructor(
                 if(vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
                 else sykdomshistorikk.fjernTidligereDager(it.last().periode())
             }
-        kil(hendelse)
+        gjenopptaBehandling(hendelse)
     }
 
     private fun forkastet(vedtaksperiode: Vedtaksperiode, block: VedtaksperioderSelector) =
@@ -244,7 +245,10 @@ internal class Arbeidsgiver private constructor(
             forkastede.sort()
         }
 
-    private fun tidligere(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
+    private fun tidligere(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.subList(0, vedtaksperioder.indexOf(vedtaksperiode) + 1).toMutableList()
+
+    private fun tidligereOgEtterfølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
         var index = vedtaksperioder.indexOf(vedtaksperiode)
         val results = vedtaksperioder.subList(0, index + 1).toMutableList()
         while (vedtaksperioder.last() != results.last()) {
@@ -268,8 +272,8 @@ internal class Arbeidsgiver private constructor(
 
     private fun alle(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.toMutableList()
 
-    private fun kil(hendelse: PersonHendelse) {
-        vedtaksperioder.firstOrNull { !it.erIFerdigTilstand() }?.also {
+    private fun gjenopptaBehandling(hendelse: PersonHendelse) {
+        vedtaksperioder.firstOrNull { it.skalGjenopptaBehandling() }?.also {
             it.håndter(GjenopptaBehandling(hendelse))
         }
     }

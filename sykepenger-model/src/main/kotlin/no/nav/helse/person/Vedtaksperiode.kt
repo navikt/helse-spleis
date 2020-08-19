@@ -243,7 +243,7 @@ internal class Vedtaksperiode private constructor(
     internal fun ferdig(hendelse: PersonHendelse) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if(!erIFerdigTilstand()) tilstand(hendelse, TilInfotrygd)
+        if(skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
         person.vedtaksperiodeForkastet(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 vedtaksperiodeId = id,
@@ -255,13 +255,28 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun erIFerdigTilstand() =
-        this.tilstand in listOf(
+    private fun skalBytteTilstandVedForkastelse() =
+        this.tilstand !in listOf(
             TilInfotrygd,
             Avsluttet,
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
             AvventerVilkårsprøvingArbeidsgiversøknad
+        )
+
+    internal fun skalGjenopptaBehandling() =
+        this.tilstand !in listOf(
+            TilInfotrygd,
+            Avsluttet,
+            AvsluttetUtenUtbetalingMedInntektsmelding,
+            AvsluttetUtenUtbetaling
+        )
+
+    internal fun erFerdigBehandlet() =
+        this.tilstand in listOf(
+            TilInfotrygd,
+            Avsluttet,
+            AvsluttetUtenUtbetalingMedInntektsmelding
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
@@ -527,16 +542,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
     }
-
-    private fun erFerdigBehandlet(other: Vedtaksperiode) =
-        this.periode.start >= other.periode.start || erFerdigBehandlet()
-
-    internal fun erFerdigBehandlet() =
-        this.tilstand.type in listOf(
-            TIL_INFOTRYGD,
-            AVSLUTTET,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
-        )
 
     private fun utbetaling() =
         arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
@@ -1445,7 +1450,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE)
+            vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE_OG_ETTERGØLGENDE)
         }
 
         override fun håndter(
@@ -1468,7 +1473,9 @@ internal class Vedtaksperiode private constructor(
             .map { it.sykdomstidslinje }.join()
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            perioder.all { it.erFerdigBehandlet(vedtaksperiode) }
+            perioder
+                .filterNot { it >= vedtaksperiode }
+                .all { it.erFerdigBehandlet() }
     }
 }
 
