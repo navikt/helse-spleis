@@ -91,11 +91,12 @@ interface VedtaksperiodeDTOBase {
 data class SykdomstidslinjedagDTO(
     val dagen: LocalDate,
     val type: SpeilDagtype,
-    val kilde: KildeDTO?,
+    val kilde: KildeDTO,
     val grad: Double? = null
 ) {
     data class KildeDTO(
-        val type: SpeilKildetype
+        val type: SpeilKildetype,
+        val kildeId: UUID? = null
     )
 }
 
