@@ -901,6 +901,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             erAvType(Inntektsmelding::class) -> SpeilKildetype.Inntektsmelding
             erAvType(Søknad::class) -> SpeilKildetype.Søknad
             erAvType(Sykmelding::class) -> SpeilKildetype.Sykmelding
+            erAvType(OverstyrTidslinje::class) -> SpeilKildetype.Saksbehandler
             else -> SpeilKildetype.Ukjent
         }
 

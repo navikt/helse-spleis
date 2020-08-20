@@ -35,5 +35,6 @@ enum class SpeilKildetype {
     Inntektsmelding,
     Søknad,
     Sykmelding,
+    Saksbehandler,
     Ukjent
 }
