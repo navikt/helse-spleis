@@ -52,13 +52,13 @@ internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(b
 internal fun MutableMap<String, Any?>.mapTilPersonDto() = PersonDTO(
     fødselsnummer = this["fødselsnummer"] as String,
     aktørId = this["aktørId"] as String,
-    arbeidsgivere = this["arbeidsgivere"] as List<ArbeidsgiverDTO>
+    arbeidsgivere = this["arbeidsgivere"].cast()
 )
 
 internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
     organisasjonsnummer = this["organisasjonsnummer"] as String,
     id = this["id"] as UUID,
-    vedtaksperioder = this["vedtaksperioder"] as List<VedtaksperiodeDTO>
+    vedtaksperioder = this["vedtaksperioder"].cast()
 )
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
@@ -68,9 +68,9 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     sisteSykepengedag: LocalDate?,
     gruppeId: UUID
 ): VedtaksperiodeDTO {
-    val sykdomstidslinje = this["sykdomstidslinje"] as List<SykdomstidslinjedagDTO>
+    val sykdomstidslinje: List<SykdomstidslinjedagDTO> = this["sykdomstidslinje"].cast()
     val dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO }
-    val hendelser = this["hendelser"] as List<HendelseDTO>
+    val hendelser: List<HendelseDTO> = this["hendelser"].cast()
     val søknad = hendelser.find { it.type == "SENDT_SØKNAD_NAV" } as? SøknadNavDTO
     val vilkår = mapVilkår(
         this,
@@ -90,7 +90,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         tilstand = this["tilstand"] as TilstandstypeDTO,
         fullstendig = true,
         utbetalingsreferanse = this["utbetalingsreferanse"] as String?,
-        utbetalingstidslinje = this["utbetalingstidslinje"] as List<UtbetalingstidslinjedagDTO>,
+        utbetalingstidslinje = this["utbetalingstidslinje"].cast(),
         sykdomstidslinje = sykdomstidslinje,
         godkjentAv = this["godkjentAv"] as String?,
         godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
@@ -101,7 +101,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         hendelser = hendelser,
         dataForVilkårsvurdering = dataForVilkårsvurdering,
         simuleringsdata = this["dataForSimulering"] as? SimuleringsdataDTO,
-        aktivitetslogg = this["aktivitetslogg"] as List<AktivitetDTO>,
+        aktivitetslogg = this["aktivitetslogg"].cast(),
         utbetalinger = this["utbetalteUtbetalinger"] as UtbetalingerDTO,
         utbetalteUtbetalinger = this["utbetalteUtbetalinger"] as UtbetalingerDTO,
         forlengelseFraInfotrygd = this["forlengelseFraInfotrygd"] as ForlengelseFraInfotrygd,
@@ -147,7 +147,7 @@ internal fun Simulering.SimuleringResultat.mapTilSimuleringsdataDto(): Simulerin
 }
 
 internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppeId: UUID): UfullstendigVedtaksperiodeDTO {
-    val sykdomstidslinje = this["sykdomstidslinje"] as List<SykdomstidslinjedagDTO>
+    val sykdomstidslinje: List<SykdomstidslinjedagDTO> = this["sykdomstidslinje"].cast()
     return UfullstendigVedtaksperiodeDTO(
         id = this["id"] as UUID,
         gruppeId = gruppeId,
@@ -259,3 +259,6 @@ private fun ikkeOppbruktSykepengedager(
     maksdato: LocalDate?,
     sisteSykepengedag: LocalDate
 ) = maksdato?.isAfter(sisteSykepengedag)
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any> Any?.cast() = this as List<T>

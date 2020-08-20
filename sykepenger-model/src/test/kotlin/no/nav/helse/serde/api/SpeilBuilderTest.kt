@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -400,7 +399,7 @@ class SpeilBuilderTest {
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
         assertEquals(31, sykdomstidslinje.size)
         assertEquals(SpeilDagtype.SYKEDAG, sykdomstidslinje.first().type)
-        assertEquals("Søknad", sykdomstidslinje.first().kilde?.type.toString())
+        assertEquals("Søknad", sykdomstidslinje.first().kilde.type.toString())
         assertEquals(1.januar, sykdomstidslinje.first().dagen)
 
         assertEquals("en_saksbehandler_ident", vedtaksperiode.godkjentAv)
@@ -408,7 +407,7 @@ class SpeilBuilderTest {
         val vilkår = vedtaksperiode.vilkår
         val sykepengegrunnlag = vilkår.sykepengegrunnlag
         assertEquals(
-            (`1G`.beløp(fom).reflection { årlig, _, _, _ -> årlig} as Double).toInt(),
+            `1G`.beløp(fom).reflection { årlig, _, _, _ -> årlig}.toInt(),
             sykepengegrunnlag!!.grunnbeløp
         )
         assertTrue(sykepengegrunnlag.oppfylt!!)
