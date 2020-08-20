@@ -7,7 +7,6 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Periodetype
 import java.util.*
 
-@Deprecated("Sykepengehistorikk og foreldrepenger sendes som to parametre til modellen")
 class Ytelser(
     private val meldingsreferanseId: UUID,
     private val aktørId: String,

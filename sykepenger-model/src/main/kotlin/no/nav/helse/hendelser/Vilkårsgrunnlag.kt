@@ -2,12 +2,11 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Periodetype
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import no.nav.helse.person.Periodetype
 import java.time.LocalDate
 
-@Deprecated("inntektsvurdering, opptjeningvurdering, medlemskapsvurdering og erEgenAnsatt sendes som tre parametre til modellen")
 class Vilkårsgrunnlag(
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
