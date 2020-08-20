@@ -879,7 +879,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             grad: Prosentdel = 0.prosent
         ) {
             sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dato, dag.toSpeilDagtype(), KildeDTO(kilde.toSpeilKildetype()), grad.toDouble())
+                SykdomstidslinjedagDTO(dato, dag.toSpeilDagtype(), KildeDTO(kilde.toSpeilKildetype(), kilde.meldingsreferanseId()), grad.toDouble())
             )
         }
 

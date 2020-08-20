@@ -96,7 +96,7 @@ data class SykdomstidslinjedagDTO(
 ) {
     data class KildeDTO(
         val type: SpeilKildetype,
-        val kildeId: UUID? = null
+        val kildeId: UUID
     )
 }
 

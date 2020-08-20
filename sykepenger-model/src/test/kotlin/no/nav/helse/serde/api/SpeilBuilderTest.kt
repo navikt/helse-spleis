@@ -506,12 +506,11 @@ class SpeilBuilderTest {
     }
 
     @Test
-    @Disabled
     fun `legger ved kildeId sammen med dag i tidslinja`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO
-        assertEquals(hendelser[1].id, vedtaksperiode.sykdomstidslinje[0].kilde?.kildeId)
+        assertEquals(UUID.fromString(hendelser[1].id), vedtaksperiode.sykdomstidslinje[0].kilde.kildeId)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
