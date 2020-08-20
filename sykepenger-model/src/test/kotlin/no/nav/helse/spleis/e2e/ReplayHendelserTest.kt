@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -10,10 +11,16 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
+    @BeforeEach
+    fun prepare () {
+        Toggles.replayEnabled = true
+    }
 
     @Test
     fun `Replay av etterfølgende skjer umiddelbart når ny sykmelding kommer inn`() {

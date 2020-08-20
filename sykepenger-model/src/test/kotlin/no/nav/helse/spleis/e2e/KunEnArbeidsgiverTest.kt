@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -1439,10 +1440,21 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet`() {
+        Toggles.replayEnabled = true
+
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+    }
+
+    @Test
+    fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet — uten replay`() {
+        Toggles.replayEnabled = false
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -1896,6 +1908,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Håndterer ny sykmelding som ligger tidligere i tid *uten forlengelse*`() {
+        Toggles.replayEnabled = true
+
         håndterSykmelding(Sykmeldingsperiode(24.mars(2020), 29.mars(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))

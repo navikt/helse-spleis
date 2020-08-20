@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.BistandSaksbehandler
@@ -231,7 +232,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun erRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode)
 
-    private fun starterSenereEnn(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
+    internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
@@ -711,11 +712,23 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             var replays: List<Vedtaksperiode> = emptyList()
 
-            vedtaksperiode.håndter(sykmelding) returnPoint@ {
-                if(!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode)) {
-                    return@returnPoint TilInfotrygd
+            vedtaksperiode.håndter(sykmelding) returnPoint@{
+                if (replayEnabled) {
+                    if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode)) {
+                        return@returnPoint TilInfotrygd
+                    }
+                    replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
+                        vedtaksperiode,
+                        sykmelding,
+                        Arbeidsgiver.SENERE_EXCLUSIVE,
+                        false
+                    )
+                } else {
+                    if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
+                        vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
+                        return@returnPoint TilInfotrygd
+                    }
                 }
-                replays=vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE_EXCLUSIVE, false)
 
                 val periodeRettFør = vedtaksperiode.arbeidsgiver.finnPeriodeRettFør(vedtaksperiode)
                 val forlengelse = periodeRettFør != null
@@ -732,8 +745,10 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             sykmelding.info("Fullført behandling av sykmelding")
-            replays.forEach { periode ->
-                periode.replayHendelser()
+            if (replayEnabled) {
+                replays.forEach { periode ->
+                    periode.replayHendelser()
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.person.Aktivitetslogg
@@ -75,6 +76,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Ny, tidligere sykmelding medfører replay av første periode`() {
+        Toggles.replayEnabled = true
+
         sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
 
@@ -85,6 +88,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Inntektsmelding med første fraværsdag 1 januar skal ikke gjøre at sykmelding nr 2 ikke blir behandlet`() {
+        Toggles.replayEnabled = true
+
         sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 2.februar)
