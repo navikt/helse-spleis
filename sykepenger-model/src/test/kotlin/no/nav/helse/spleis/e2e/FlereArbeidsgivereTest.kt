@@ -61,73 +61,73 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(1.februar to 28.februar, a3)
         gapPeriode(15.april to 15.mai, a4)
 
-        historikk(a1) { "Try a1; can't continue" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_HISTORIKK)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Try a3; can't continue; retry a1" }
+        historikk(a3)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a1) { "Try a1 again; still can't continue" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a2) { "Try a2; can't continue; retry a1" }
+        historikk(a2)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a1) { "Try a1 again; it works now" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_SIMULERING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a1) { "Finish a1; retry a3" }
+        betale(a1)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_HISTORIKK)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Try a3 again; it works!" }
+        historikk(a3)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_SIMULERING)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a3) { "Finish a3; retry a2" }
+        betale(a3)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVSLUTTET)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a2) { "Try a2 again; it works!" }
+        historikk(a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
         assertTilstand(a3, AVSLUTTET)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        betale(a2) { "Finish a2; no one else ready" }
+        betale(a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVSLUTTET)
         assertTilstand(a4, AVVENTER_HISTORIKK)
 
-        historikk(a4) { "Try a4; works first time!" }
+        historikk(a4)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVSLUTTET)
         assertTilstand(a4, AVVENTER_SIMULERING)
 
-        betale(a4) { "Finish a4; finished this Person for now" }
+        betale(a4)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVSLUTTET)
@@ -140,52 +140,52 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         gapPeriode(1.januar to 31.januar, a2)
         gapPeriode(2.januar to 31.januar, a3)
 
-        historikk(a1) { "Grab history a1 - can't continue" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a2) { "Grab history a2 - can't continue; prompt a1" }
+        historikk(a2)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a1) { "Grab history a1 again - still can't continue" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Grab history a3; prompt a1 to try" }
+        historikk(a3)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        historikk(a1) { "Grab history a1 again; works this time!" }
+        historikk(a1)
         assertTilstand(a1, AVVENTER_SIMULERING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        betale(a1) { "Complete a1; tickle a2 to try" }
+        betale(a1)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        historikk(a2) { "Grab history a2 again; works this time!" }
+        historikk(a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_SIMULERING)
         assertTilstand(a3, AVVENTER_ARBEIDSGIVERE)
 
-        betale(a2) { "Complete a2; tickle a3 to try" }
+        betale(a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        historikk(a3) { "Grab history a3 again; works this time!" }
+        historikk(a3)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVVENTER_SIMULERING)
 
-        betale(a3) { "Complete a3; everyone happy!" }
+        betale(a3)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
         assertTilstand(a3, AVSLUTTET)
@@ -237,7 +237,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun historikk(orgnummer: String, sykedagstelling: Int = 0, melding: () -> String = { "<no description>" }) {
+    private fun historikk(orgnummer: String, sykedagstelling: Int = 0) {
         person.håndter(
             ytelser(
                 orgnummer.id(0),
@@ -247,7 +247,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun betale(orgnummer: String, melding: () -> String = { "<no description>" }) {
+    private fun betale(orgnummer: String) {
         person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
         person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
         person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))

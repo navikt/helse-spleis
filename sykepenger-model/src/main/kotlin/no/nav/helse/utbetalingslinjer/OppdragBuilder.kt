@@ -118,7 +118,7 @@ internal class OppdragBuilder(
         )
     }
 
-    private fun addLinje(dag: NavHelgDag, dato: LocalDate, grad: Double) {
+    private fun addLinje(dato: LocalDate, grad: Double) {
         arbeisdsgiverLinjer.add(
             0,
             Utbetalingslinje(dato, dato, 0, 0, grad, fagsystemId)
@@ -177,7 +177,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            addLinje(dag, dato, grad)
+            addLinje(dato, grad)
             tilstand = LinjeUtenSats()
         }
 
@@ -186,7 +186,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            addLinje(dag, dato, grad)
+            addLinje(dato, grad)
             tilstand = LinjeUtenSats()
         }
     }
@@ -227,7 +227,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            addLinje(dag, dato, grad)
+            addLinje(dato, grad)
             tilstand = LinjeUtenSats()
         }
     }
@@ -272,7 +272,7 @@ internal class OppdragBuilder(
             dato: LocalDate,
             grad: Double
         ) {
-            addLinje(dag, dato, grad)
+            addLinje(dato, grad)
         }
     }
 

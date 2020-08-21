@@ -229,16 +229,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    protected fun assertReplays(replays: List<Pair<String, Int>>) {
-        replays.forEach { (first, second) ->
-            val melding = testRapid.inspektør.melding(second)
-            assertEquals(first, melding.path("@forårsaket_av").path("event_name").asText())
-        }
-        replays.forEach { (first, second) ->
-            val melding = testRapid.inspektør.melding(second)
-            testRapid.sendTestMessage(melding.toString())
-        }
-    }
 }
 
 internal fun createHikariConfig(jdbcUrl: String) =

@@ -21,8 +21,8 @@ internal class JsonMessageDelegate(private val jsonMessage: JsonMessage) : Messa
 internal class JsonNodeDelegate(private val jsonNode: JsonNode): MessageDelegate {
     override fun get(key: String): JsonNode {
         if (!key.contains(".")) return jsonNode.path(key)
-        return key.split(".").fold(jsonNode) { result, key ->
-            result.path(key)
+        return key.split(".").fold(jsonNode) { result, keyPart ->
+            result.path(keyPart)
         }
     }
 

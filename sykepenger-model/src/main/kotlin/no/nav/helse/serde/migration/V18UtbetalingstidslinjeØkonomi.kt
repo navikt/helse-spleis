@@ -34,7 +34,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         if (dager == null) return
         inntekthistorikk = inntekthistorikk(dager)
         dager.forEach { dag ->
-            opprettØkonomi(dag as ObjectNode, inntekthistorikk)
+            opprettØkonomi(dag as ObjectNode)
         }
     }
 
@@ -46,7 +46,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         }
     }
 
-    private fun opprettØkonomi(dag: ObjectNode, inntekthistorikk: Inntekthistorikk) {
+    private fun opprettØkonomi(dag: ObjectNode) {
         when(dag["type"].textValue()) {
             "Arbeidsdag" -> opprettMedInntekt(dag)
             "ArbeidsgiverperiodeDag" -> opprett(dag, dag.path("dagsats").asInt().daglig)

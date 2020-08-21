@@ -100,9 +100,9 @@ internal class UtbetalingReflectTest {
 
     private fun assertUtbetalingslinje(index: Int, expected: Any?, key: String) {
         assertEquals(
-            expected, ((map
-                ["arbeidsgiverOppdrag"] as Map<String, String>)
-                ["linjer"] as List<Map<String, String>>)
+            expected,
+            map["arbeidsgiverOppdrag"].castAsMap<String, String>()
+                ["linjer"].castAsList<Map<String, String>>()
                 [index]
                 [key]
         )
@@ -110,13 +110,16 @@ internal class UtbetalingReflectTest {
 
     private fun assertUtbetalingslinjer(expected: Any?, key: String) {
         assertEquals(
-            expected, ((map
-                ["arbeidsgiverOppdrag"] as Map<String, String>)
-                [key]
-                )
+            expected, map["arbeidsgiverOppdrag"].castAsMap<String, String>()[key]
         )
     }
 
     private fun tidslinjeMedDagsats(tidslinje: Utbetalingstidslinje) =
         tidslinje.onEach { if (it is NavDag) listOf(it.økonomi).betal(it.dato) }
 }
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any> Any?.castAsList() = this as List<T>
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any, U: Any> Any?.castAsMap() = this as Map<T,U>

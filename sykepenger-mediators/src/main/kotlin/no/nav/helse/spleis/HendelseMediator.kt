@@ -241,7 +241,7 @@ internal class HendelseMediator(
 
     private fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
         lagrePersonDao.lagrePerson(message, person, hendelse)
-        personMediator.finalize(person, message, hendelse)
+        personMediator.finalize(message, hendelse)
         replayMediator.finalize()
         if (!hendelse.hasMessages()) return
         if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
@@ -257,7 +257,7 @@ internal class HendelseMediator(
             person.addObserver(Observatør(message, hendelse))
         }
 
-        fun finalize(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
+        fun finalize(message: HendelseMessage, hendelse: PersonHendelse) {
             if (meldinger.isEmpty()) return
             sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} meldinger på rapid for fnr=${hendelse.fødselsnummer()}")
             meldinger.forEach { (fødselsnummer, melding) ->

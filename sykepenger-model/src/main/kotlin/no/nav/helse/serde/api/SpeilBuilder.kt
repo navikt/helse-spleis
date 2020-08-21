@@ -640,7 +640,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             )
 
         private fun List<Utbetaling>.byggUtbetaling(fagsystemId: String?, oppdragStrategy: (Utbetaling) -> Oppdrag) =
-            fagsystemId?.let { fagsystemId ->
+            fagsystemId?.let {
                 this.lastOrNull { utbetaling ->
                     oppdragStrategy(utbetaling).fagsystemId() == fagsystemId
                 }?.let { utbetaling ->
@@ -699,13 +699,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            økonomi.reflection { grad,
-                                 arbeidsgiverBetalingProsent,
-                                 dekningsgrunnlag,
-                                 aktuellDagsinntekt,
-                                 arbeidsgiverbeløp,
-                                 personbeløp,
-                                 er6GBegrenset ->
+            økonomi.reflection { grad, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
                 utbetalingstidslinjeMap.add(
                     NavDagDTO(
                         type = TypeDataDTO.NavDag,

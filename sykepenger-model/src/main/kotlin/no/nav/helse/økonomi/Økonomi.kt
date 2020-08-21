@@ -159,24 +159,24 @@ internal class Økonomi private constructor(
 
     internal fun reflection(block: (Double, Double?) -> Unit) {
         reflection { grad: Double,
-                     arbeidsgiverBetalingProsent: Double,
-                     dekningsgrunnlag: Double?,
+                     _: Double,
+                     _: Double?,
                      aktuellDagsinntekt: Double?,
-                     arbeidsgiverbeløp: Int?,
-                     personbeløp: Int?,
-                     er6GBegrenset: Boolean? ->
+                     _: Int?,
+                     _: Int?,
+                     _: Boolean? ->
             block(grad, aktuellDagsinntekt)
         }
     }
 
     internal fun reflectionRounded(block: (Int, Int?) -> Unit) {
         reflectionRounded { grad: Int,
-                            arbeidsgiverBetalingProsent: Int,
-                            dekningsgrunnlag: Int?,
+                            _: Int,
+                            _: Int?,
                             aktuellDagsinntekt: Int?,
-                            arbeidsgiverbeløp: Int?,
-                            personbeløp: Int?,
-                            er6GBegrenset: Boolean? ->
+                            _: Int?,
+                            _: Int?,
+                            _: Boolean? ->
             block(grad, aktuellDagsinntekt)
         }
     }

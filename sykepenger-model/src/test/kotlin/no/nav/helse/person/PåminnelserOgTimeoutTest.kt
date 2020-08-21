@@ -218,7 +218,7 @@ class PåminnelserOgTimeoutTest {
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            førsteFraværsdag = 1.januar,
+            førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             ferieperioder = emptyList(),

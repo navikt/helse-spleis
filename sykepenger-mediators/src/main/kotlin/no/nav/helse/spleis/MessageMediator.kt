@@ -41,7 +41,7 @@ internal class MessageMediator(
     private var messageRecognized = false
     private val riverErrors = mutableListOf<Pair<String, MessageProblems>>()
 
-    fun beforeRiverHandling(message: String) {
+    fun beforeRiverHandling() {
         messageRecognized = false
         riverErrors.clear()
     }
@@ -85,7 +85,7 @@ internal class MessageMediator(
 
         override fun onMessage(message: String, context: MessageContext) {
             try {
-                beforeRiverHandling(message)
+                beforeRiverHandling()
                 listeners.forEach { it.onMessage(message, context) }
                 afterRiverHandling(message)
             } catch (err: Exception) {

@@ -87,7 +87,7 @@ internal class Sykdomshistorikk private constructor(
             other.hendelseId,
             other.tidsstempel,
             other.hendelseSykdomstidslinje,
-            this.beregnetSykdomstidslinje.merge(other.beregnetSykdomstidslinje, { venstre: Dag, høyre: Dag -> høyre })
+            this.beregnetSykdomstidslinje.merge(other.beregnetSykdomstidslinje) { _: Dag, høyre: Dag -> høyre }
         )
 
         override fun toString() = beregnetSykdomstidslinje.toString()
