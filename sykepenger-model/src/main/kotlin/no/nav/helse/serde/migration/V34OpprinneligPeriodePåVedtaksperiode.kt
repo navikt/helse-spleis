@@ -2,10 +2,9 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-internal class V29OpprinneligPeriodePåVedtaksperiode : JsonMigration(version = 29) {
+internal class V34OpprinneligPeriodePåVedtaksperiode : JsonMigration(version = 34) {
     override val description: String = "Setter opprinneligPeriode = periode dersom nøkkel ikke eksisterer"
 
     override fun doMigration(jsonNode: ObjectNode) {

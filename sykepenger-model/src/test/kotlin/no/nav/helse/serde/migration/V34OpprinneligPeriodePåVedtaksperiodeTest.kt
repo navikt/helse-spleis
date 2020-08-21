@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.zaxxer.hikari.HikariConfig
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class V29OpprinneligPeriodePåVedtaksperiodeTest {
+internal class V34OpprinneligPeriodePåVedtaksperiodeTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -20,7 +18,7 @@ internal class V29OpprinneligPeriodePåVedtaksperiodeTest {
 
     @Test
     fun `kopiere fom og tom fra sykmeldingstidslinje til sykmeldingsperiode`() {
-        val migrated = listOf(V29OpprinneligPeriodePåVedtaksperiode())
+        val migrated = listOf(V34OpprinneligPeriodePåVedtaksperiode())
             .migrate(objectMapper.readTree(originalJson()))
         val expected = objectMapper.readTree(expectedJson())
 
@@ -29,7 +27,7 @@ internal class V29OpprinneligPeriodePåVedtaksperiodeTest {
 
     @Test
     fun `med flere vedtaksperioder`() {
-        val migrated = listOf(V29OpprinneligPeriodePåVedtaksperiode())
+        val migrated = listOf(V34OpprinneligPeriodePåVedtaksperiode())
             .migrate(objectMapper.readTree(originalJsonMedFlereVedtaksperioder()))
         val expected = objectMapper.readTree(expectedJsonMedFlereVedtaksperioder())
 
@@ -267,7 +265,7 @@ private fun expectedJson() =
       ]
     }
   ],
-  "skjemaVersjon": 29
+  "skjemaVersjon":34
 }
 """
 
@@ -705,7 +703,7 @@ private fun expectedJsonMedFlereVedtaksperioder() =
             ]
         }
     ],
-    "skjemaVersjon": 29
+    "skjemaVersjon": 34
 }
 """
 
