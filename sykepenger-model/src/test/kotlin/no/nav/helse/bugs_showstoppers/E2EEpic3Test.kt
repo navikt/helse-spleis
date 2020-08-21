@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -1036,6 +1037,61 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(0).periode())
             assertEquals(Periode(9.juli, 31.juli), it.vedtaksperioder(1).periode())
+        }
+    }
+
+    @Disabled("Forkasting fjerner ikke egen historikk fra sykdomshistorikken i arbeidsgiver")
+    @Test
+    fun `Forkastede vedtaksperioder må fjerne sin sykdomstidslinje fra sykdomshistorikken i arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(6.juli(2020), 20.juli(2020), 50))
+        håndterSykmelding(Sykmeldingsperiode(20.juli(2020), 3.august(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(4.august(2020), 19.august(2020), 100))
+
+        håndterSøknad(Sykdom(20.juli(2020), 3.august(2020), 100))
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(6.juli(2020), 21.juli(2020))),
+            førsteFraværsdag = 6.juli(2020),
+            beregnetInntekt = 70000.månedlig,
+            refusjon = Triple(null, 70000.månedlig, emptyList())
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, 70.månedlig)
+
+        håndterSøknad(Sykdom(4.august(2020), 19.august(2020), 100))
+        håndterYtelser(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
+            foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    22.juli(2020),
+                    70000.månedlig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode, 70000.månedlig)
+        håndterYtelser(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
+            foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    22.juli(2020),
+                    70000.månedlig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+
+        inspektør.also {
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertNull(tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+            }
         }
     }
 }

@@ -208,14 +208,16 @@ internal abstract class AbstractEndToEndTest {
         førsteFraværsdag: LocalDate = 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        beregnetInntekt: Inntekt = INNTEKT
     ): UUID {
         inntektsmelding(
             id,
             arbeidsgiverperioder,
             ferieperioder = ferieperioder,
             førsteFraværsdag = førsteFraværsdag,
-            refusjon = refusjon
+            refusjon = refusjon,
+            beregnetInntekt = beregnetInntekt
         ).also(person::håndter)
         inntektsmeldinger[id] = InntektsmeldingData(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, Triple(null, INNTEKT, emptyList()))
         return id
@@ -266,6 +268,7 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeId: UUID,
         vararg utbetalinger: Utbetalingshistorikk.Periode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
+        foreldrepenger: Periode? = null,
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk))
@@ -273,7 +276,8 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(ytelser(
             vedtaksperiodeId,
             utbetalinger.toList(),
-            inntektshistorikk(inntektshistorikk, orgnummer)
+            inntektshistorikk(inntektshistorikk, orgnummer),
+            foreldrepenger
         ))
     }
 
