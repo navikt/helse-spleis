@@ -575,7 +575,8 @@ internal class Vedtaksperiode private constructor(
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
                 hendelseIder = hendelseIder,
-                periode = periode
+                periode = periode,
+                maksdato = maksdato
             )
         )
     }

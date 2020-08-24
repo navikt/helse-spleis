@@ -60,7 +60,8 @@ interface PersonObserver {
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,
         val opprettet: LocalDateTime,
-        val sykepengegrunnlag: Double
+        val sykepengegrunnlag: Double,
+        val maksdato: LocalDate?
     ) {
         data class Utbetalt(
             val mottaker: String,
