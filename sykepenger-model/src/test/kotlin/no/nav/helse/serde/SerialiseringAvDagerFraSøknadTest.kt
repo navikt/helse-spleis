@@ -40,7 +40,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private class VedtaksperiodeMixin
 
     @Test
-    internal fun `perioder fra søknaden skal serialiseres og deserialiseres riktig - jackson`() {
+    fun `perioder fra søknaden skal serialiseres og deserialiseres riktig - jackson`() {
         val person = person
         val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()

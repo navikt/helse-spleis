@@ -200,10 +200,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
         currentState.postVisitPerioder(vedtaksperioder)
 
-    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+    override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
         currentState.preVisitForkastedePerioder(vedtaksperioder)
 
-    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+    override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
         currentState.postVisitForkastedePerioder(vedtaksperioder)
 
     override fun preVisitVedtaksperiode(
@@ -466,8 +466,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
         }
 
-        override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            vedtaksperioder.forEach { periode ->
+        override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+            vedtaksperioder.forEach { (periode, _) ->
                 gruppeIder[periode] = arbeidsgiver.finnPeriodeRettFør(periode)
                     ?.let { foregående -> gruppeIder.getValue(foregående) }
                     ?: UUID.randomUUID()
@@ -475,7 +475,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             this.vedtaksperioder.clear()
         }
 
-        override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+        override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
             arbeidsgiverMap["vedtaksperioder"] =
                 (arbeidsgiverMap["vedtaksperioder"] as List<Any?>) + this.vedtaksperioder.toList()
                     .filter { it.tilstand == TilstandstypeDTO.Utbetalt }

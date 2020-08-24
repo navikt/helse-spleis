@@ -164,10 +164,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
         currentState.postVisitPerioder(vedtaksperioder)
 
-    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+    override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
         currentState.preVisitForkastedePerioder(vedtaksperioder)
 
-    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) =
+    override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
         currentState.postVisitForkastedePerioder(vedtaksperioder)
 
     override fun preVisitVedtaksperiode(
@@ -410,22 +410,23 @@ internal class JsonBuilder : PersonVisitor {
             }
         }
 
-        private val vedtaksperioder = mutableListOf<MutableMap<String, Any?>>()
+        private val vedtaksperioderMap = mutableMapOf<Vedtaksperiode, MutableMap<String, Any?>>()
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            this.vedtaksperioder.clear()
+            vedtaksperioderMap.clear()
         }
 
         override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
+            arbeidsgiverMap["vedtaksperioder"] = vedtaksperioderMap.values.toList()
         }
 
-        override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            this.vedtaksperioder.clear()
+        override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+            vedtaksperioderMap.clear()
         }
 
-        override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            arbeidsgiverMap["forkastede"] = this.vedtaksperioder.toList()
+        override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+            arbeidsgiverMap["forkastede"] =
+                vedtaksperioder.map { (periode, årsak) -> vedtaksperioderMap[periode] to årsak }
         }
 
         override fun preVisitVedtaksperiode(
@@ -443,9 +444,8 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
             vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
             vedtaksperiodeMap["hendelseIder"] = hendelseIder
-            vedtaksperioder.add(vedtaksperiodeMap)
+            vedtaksperioderMap[vedtaksperiode] = vedtaksperiodeMap
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
-
         }
 
         override fun postVisitArbeidsgiver(

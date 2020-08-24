@@ -107,12 +107,12 @@ internal class TestArbeidsgiverInspektør(
         inGyldigePerioder = false
     }
 
-    override fun preVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+    override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
         vedtaksperiodeindeks = -1
         periodeIder.clear()
     }
 
-    override fun postVisitForkastedePerioder(vedtaksperioder: List<Vedtaksperiode>) {
+    override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
         forkastedePerioderIder.putAll(periodeIder)
     }
 

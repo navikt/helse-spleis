@@ -65,6 +65,11 @@ class JsonBuilderTest {
     }
 
     @Test
+    fun `med forkastede`() {
+        testSerialiseringAvPerson(forkastedeVedtaksperioderperson())
+    }
+
+    @Test
     fun `gjenoppbygd person med friske helgedager er lik opprinnelig person med friske helgedager`() {
         testSerialiseringAvPerson(friskeHelgedagerPerson())
     }
@@ -143,6 +148,26 @@ class JsonBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+            }
+
+        fun forkastedeVedtaksperioderperson(
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = 1.januar, tom = 9.januar))
+                håndter(
+                    søknad(
+                        fom = 1.januar,
+                        tom = 9.januar,
+                        sendtSøknad = sendtSøknad.atStartOfDay(),
+                        perioder = listOf(
+                            Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100),
+                            Søknad.Søknadsperiode.Permisjon(1.januar, 9.januar)
+                        ),
+                        hendelseId = søknadhendelseId
+                    )
+                )
             }
 
         internal fun friskeHelgedagerPerson(
@@ -246,13 +271,14 @@ class JsonBuilderTest {
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
-            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON)
+            sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
+            perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100))
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100)),
+            perioder = perioder,
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad,
             permittert = false

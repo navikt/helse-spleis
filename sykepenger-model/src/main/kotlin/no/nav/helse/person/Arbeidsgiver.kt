@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
+import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -18,7 +19,7 @@ internal class Arbeidsgiver private constructor(
     private val inntekthistorikk: Inntekthistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
-    private val forkastede: MutableList<Vedtaksperiode>,
+    private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
 
@@ -31,7 +32,7 @@ internal class Arbeidsgiver private constructor(
         inntekthistorikk = Inntekthistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
-        forkastede = mutableListOf(),
+        forkastede = sortedMapOf(),
         utbetalinger = mutableListOf()
     )
 
@@ -63,7 +64,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.forEach { it.accept(visitor) }
         visitor.postVisitPerioder(vedtaksperioder)
         visitor.preVisitForkastedePerioder(forkastede)
-        forkastede.forEach { it.accept(visitor) }
+        forkastede.forEach { it.key.accept(visitor) }
         visitor.postVisitForkastedePerioder(forkastede)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
@@ -254,10 +255,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun forkastet(vedtaksperiode: Vedtaksperiode, block: VedtaksperioderSelector) =
-        block(this, vedtaksperiode).also {
-            vedtaksperioder.removeAll(it)
-            forkastede.addAll(it)
-            forkastede.sort()
+        block(this, vedtaksperiode).also { selected ->
+            vedtaksperioder.removeAll(selected)
+            forkastede.putAll(selected.map { it to UKJENT })
         }
 
     private fun tidligere(vedtaksperiode: Vedtaksperiode) =
@@ -374,6 +374,13 @@ internal class Arbeidsgiver private constructor(
         return finnPeriodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
     }
+}
+
+internal enum class ForkastetÅrsak {
+    IKKE_STØTTET,
+    UKJENT,
+    ERSTATTES,
+    ANNULLERING
 }
 
 internal fun List<Arbeidsgiver>.inntektsdatoer() = Arbeidsgiver.inntektsdatoer(this)
