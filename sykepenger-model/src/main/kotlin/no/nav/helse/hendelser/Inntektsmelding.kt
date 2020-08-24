@@ -157,7 +157,7 @@ class Inntektsmelding(
         beingQualified = true
     }
 
-    fun isNotQualified() = !beingQualified
+    internal fun isNotQualified() = !beingQualified
 
     class Refusjon(
         private val opphørsdato: LocalDate?,
