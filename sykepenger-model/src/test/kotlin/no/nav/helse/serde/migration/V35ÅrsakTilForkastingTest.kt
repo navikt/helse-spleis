@@ -132,7 +132,8 @@ private fun originalUtenForkastedeJson() =
           "id": 111
         }
       ],
-      "forkastede": []    }
+      "forkastede": []
+    }
   ],
   "skjemaVersjon": 34
 }

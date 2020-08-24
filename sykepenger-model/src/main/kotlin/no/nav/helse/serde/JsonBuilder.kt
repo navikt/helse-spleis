@@ -426,7 +426,12 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
             arbeidsgiverMap["forkastede"] =
-                vedtaksperioder.map { (periode, årsak) -> vedtaksperioderMap[periode] to årsak }
+                vedtaksperioder.map { (periode, årsak) ->
+                    mapOf(
+                        "vedtaksperiode" to vedtaksperioderMap[periode],
+                        "årsak" to årsak
+                    )
+                }
         }
 
         override fun preVisitVedtaksperiode(

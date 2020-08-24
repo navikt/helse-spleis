@@ -130,7 +130,7 @@ internal data class PersonData(
         private val inntekter: List<InntektData>,
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
-        private val forkastede: List<Pair<VedtaksperiodeData, ForkastetÅrsak>>,
+        private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
     ) {
         private val modelInntekthistorikk = Inntekthistorikk().apply {
@@ -318,6 +318,10 @@ internal data class PersonData(
             }
         }
 
+        data class ForkastetVedtaksperiodeData(
+            val vedtaksperiode: VedtaksperiodeData,
+            val årsak: ForkastetÅrsak
+        )
         data class VedtaksperiodeData(
             private val id: UUID,
             private val maksdato: LocalDate?,
