@@ -249,7 +249,10 @@ internal class HendelseMediator(
         behovMediator.håndter(message, hendelse)
     }
 
-    private class PersonMediator(private val rapidsConnection: RapidsConnection, private val personRepository: PersonRepository) {
+    private class PersonMediator(
+        private val rapidsConnection: RapidsConnection,
+        private val personRepository: PersonRepository
+    ) {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val meldinger = mutableListOf<Pair<String, String>>()
 
@@ -355,7 +358,7 @@ internal class HendelseMediator(
                             "gjenståendeSykedager" to event.gjenståendeSykedager,
                             "opprettet" to event.opprettet,
                             "sykepengegrunnlag" to event.sykepengegrunnlag
-                        )
+                        ).maybeAdd("maksdato" to event.maksdato)
                     )
                 )
             }
@@ -400,6 +403,12 @@ internal class HendelseMediator(
 
             private fun queueMessage(event: String, outgoingMessage: JsonMessage) {
                 queueMessage(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
+            }
+
+            private fun Map<String, Any>.maybeAdd(pair: Pair<String, Any?>) = if (pair.second != null) {
+                this.plus(pair.first to pair.second!!)
+            } else {
+                this
             }
         }
     }
