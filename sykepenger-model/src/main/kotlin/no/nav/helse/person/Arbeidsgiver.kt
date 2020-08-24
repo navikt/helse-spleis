@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -181,24 +181,32 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
         // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
         kansellerUtbetaling.kontekst(this)
-        utbetalinger.reversed().firstOrNull {
+        val sisteUtbetaling = utbetalinger.reversed().firstOrNull {
             it.arbeidsgiverOppdrag().fagsystemId() == kansellerUtbetaling.fagsystemId
         }
-            ?.kansellerUtbetaling()
-            ?.also {
-                kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
-                utbetalinger.add(it)
-                utbetaling(
-                    aktivitetslogg = kansellerUtbetaling.aktivitetslogg,
-                    oppdrag = it.arbeidsgiverOppdrag(),
-                    saksbehandler = kansellerUtbetaling.saksbehandler
-                )
-                vedtaksperioder.toList().forEach { it.håndter(kansellerUtbetaling) }
-            }
-            ?: kansellerUtbetaling.error(
+        if (sisteUtbetaling == null){
+            kansellerUtbetaling.error(
                 "Avvis hvis vi ikke finner fagsystemId %s",
                 kansellerUtbetaling.fagsystemId
             )
+            return
+        }
+
+        if (sisteUtbetaling.erAnnullert()) {
+            kansellerUtbetaling.info("Forsøkte å kansellere en utbetaling som allerede er annullert")
+            return
+        }
+
+        val utbetaling = sisteUtbetaling.kansellerUtbetaling()
+
+        kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
+        utbetalinger.add(utbetaling)
+        sendUtbetalingsbehov(
+            aktivitetslogg = kansellerUtbetaling.aktivitetslogg,
+            oppdrag = utbetaling.arbeidsgiverOppdrag(),
+            saksbehandler = kansellerUtbetaling.saksbehandler
+        )
+        vedtaksperioder.toList().forEach { it.håndter(kansellerUtbetaling) }
     }
 
     internal fun håndter(hendelse: Rollback) {

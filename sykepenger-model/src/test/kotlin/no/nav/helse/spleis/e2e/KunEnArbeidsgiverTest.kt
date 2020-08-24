@@ -1923,7 +1923,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
     fun `gjentatt annullering av periode fører ikke til duplikate innslag i utbetalinger`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))

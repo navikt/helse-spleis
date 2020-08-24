@@ -13,7 +13,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsbere
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
@@ -1338,7 +1338,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            utbetaling(
+            sendUtbetalingsbehov(
                 hendelse,
                 vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
                 requireNotNull(vedtaksperiode.maksdato),

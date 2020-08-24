@@ -289,7 +289,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
-                internal fun utbetaling(
+                internal fun sendUtbetalingsbehov(
                     aktivitetslogg: IAktivitetslogg,
                     oppdrag: Oppdrag,
                     maksdato: LocalDate? = null,
