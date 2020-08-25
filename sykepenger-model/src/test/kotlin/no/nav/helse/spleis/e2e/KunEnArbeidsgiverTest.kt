@@ -4,6 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -1942,5 +1943,20 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         assertEquals(2, inspektør.utbetalinger.size)
+    }
+
+    @Test
+    fun `utbetalteventet får med seg arbeidsdager`() {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+            håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+            håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100), Arbeid(23.januar, 26.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+            håndterYtelser(1.vedtaksperiode)   // No history
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertEquals(4, observatør.utbetaltEventer[0].ikkeUtbetalteDager
+            .filter { it.type == PersonObserver.UtbetaltEvent.IkkeUtbetaltDag.Type.Arbeidsdag }.size)
     }
 }

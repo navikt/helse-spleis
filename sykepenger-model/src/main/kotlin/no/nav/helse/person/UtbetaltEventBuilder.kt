@@ -166,6 +166,17 @@ private class UtbetaltEventBuilder(
             override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
                 ikkeUtbetalteDager.add(UtbetaltEvent.IkkeUtbetaltDag(dato, UtbetaltEvent.IkkeUtbetaltDag.Type.Fridag))
             }
+
+            override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
+                if(!dato.isBefore(utbetalingstidslinje.førsteSykepengedag() ?: LocalDate.MIN)) {
+                    ikkeUtbetalteDager.add(
+                        UtbetaltEvent.IkkeUtbetaltDag(
+                            dato,
+                            UtbetaltEvent.IkkeUtbetaltDag.Type.Arbeidsdag
+                        )
+                    )
+                }
+            }
         })
         return ikkeUtbetalteDager
     }
