@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -55,35 +56,35 @@ internal class PeriodeTest {
 
     @Test
     internal fun `kan gjennomløpe tidslinjen`() {
-        val actual = (1.januar to 5.januar).merge(15.januar to 19.januar)
+        val actual = (1.januar til 5.januar).merge(15.januar til 19.januar)
         assertSize(19, actual)
     }
 
     @Test
     internal fun `slå sammen to lister som ikke overlapper med hverandre`() {
         assertEquals(
-            listOf(1.mars to 5.mars, 1.mai to 5.mai, 1.juli to 5.juli),
-            listOf(1.mars to 5.mars, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+            listOf(1.mars til 5.mars, 1.mai til 5.mai, 1.juli til 5.juli),
+            (listOf(1.mars til 5.mars, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
         )
         assertEquals(
-            listOf(1.mars to 5.mars, 1.juli to 5.juli) + listOf(1.mai to 5.mai),
-            listOf(1.mai to 5.mai) + listOf(1.mars to 5.mars, 1.juli to 5.juli)
+            (listOf(1.mars til 5.mars, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen(),
+            (listOf(1.mai til 5.mai) + listOf(1.mars til 5.mars, 1.juli til 5.juli)).slåSammen()
         )
     }
 
     @Test
     internal fun `ved å slå sammen to lister fjerner dubletter`() {
         assertEquals(
-            listOf(1.mai to 5.mai, 1.juli to 5.juli),
-            listOf(1.mai to 5.mai, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+            listOf(1.mai til 5.mai, 1.juli til 5.juli),
+            (listOf(1.mai til 5.mai, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
         )
     }
 
     @Test
     internal fun `slå sammen to lister med overlappende elementer`() {
         assertEquals(
-            listOf(1.mai to 7.mai, 1.juli to 5.juli),
-            listOf(3.mai to 7.mai, 1.juli to 5.juli) + listOf(1.mai to 5.mai)
+            listOf(1.mai til 7.mai, 1.juli til 5.juli),
+            (listOf(3.mai til 7.mai, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
         )
     }
 
@@ -98,7 +99,4 @@ internal class PeriodeTest {
         }
         assertEquals(expected, count)
     }
-
-    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
-
 }

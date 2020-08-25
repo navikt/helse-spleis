@@ -36,6 +36,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         arb2.håndter(sykmelding(8.januar to 28.februar, "A2"))
         arb3.håndter(sykmelding(15.januar to 7.februar, "A3"))
         arb4.håndter(sykmelding(1.april to 30.april, "A4"))
+        arb4.håndter(sykmelding(1.mai to 8.mai, "A4"))
     }
 
     @Test

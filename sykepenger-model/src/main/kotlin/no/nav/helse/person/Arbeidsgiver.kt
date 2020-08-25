@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -46,12 +47,11 @@ internal class Arbeidsgiver private constructor(
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
         internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
-            arbeidsgivere.fold(listOf<Periode>()) { resultater, arbeidsgiver ->
-                Periode.merge(
-                    resultater,
-                    arbeidsgiver.vedtaksperioder.map { it.periode() }
-                )
-            }.map { it.start.minusDays(1) }
+            arbeidsgivere
+                .flatMap { it.vedtaksperioder }
+                .map(Vedtaksperiode::periode)
+                .slåSammen()
+                .map { it.start.minusDays(1) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -186,7 +186,7 @@ internal class Arbeidsgiver private constructor(
         val sisteUtbetaling = utbetalinger.reversed().firstOrNull {
             it.arbeidsgiverOppdrag().fagsystemId() == kansellerUtbetaling.fagsystemId
         }
-        if (sisteUtbetaling == null){
+        if (sisteUtbetaling == null) {
             kansellerUtbetaling.error(
                 "Avvis hvis vi ikke finner fagsystemId %s",
                 kansellerUtbetaling.fagsystemId
@@ -328,7 +328,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.let {
             it.sort()
             it.subList(
-                minOf(vedtaksperioder.indexOf(vedtaksperiode)+1, vedtaksperioder.size),
+                minOf(vedtaksperioder.indexOf(vedtaksperiode) + 1, vedtaksperioder.size),
                 vedtaksperioder.size
             ).toMutableList()
         }

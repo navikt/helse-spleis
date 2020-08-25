@@ -19,22 +19,20 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
-        fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense)}
+        fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        internal fun merge(a: List<Periode>, b: List<Periode>): List<Periode> {
-            val result = a.toMutableList()
-                .also { it.addAll(b) }
-                .sortedBy { it.start }
-                .toMutableList()
-            result.toList().zipWithNext { venstre, høyre ->
-                if (venstre.overlapperMed(høyre)) {
-                    result.remove(venstre)
-                    result.remove(høyre)
-                    result.add(venstre.merge(høyre))
+        internal fun List<Periode>.slåSammen() =
+            sortedBy { it.start }
+                .fold(emptyList<Periode>()) { perioder, periode ->
+                    if (perioder.isEmpty()) return@fold listOf(periode)
+
+                    val siste = perioder.last()
+                    if (siste.overlapperMed(periode) || siste.erRettFør(periode)) {
+                        perioder.dropLast(1).plusElement(siste.merge(periode))
+                    } else {
+                        perioder.plusElement(periode)
+                    }
                 }
-            }
-            return result.sortedBy { it.start }
-        }
     }
 
     internal fun overlapperMed(other: Periode) =
@@ -83,7 +81,5 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 }
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
-
-internal operator fun List<Periode>.plus(other: List<Periode>) = Periode.merge(this, other)
 
 internal infix fun LocalDate.til(januar: LocalDate) = Periode(this, januar)

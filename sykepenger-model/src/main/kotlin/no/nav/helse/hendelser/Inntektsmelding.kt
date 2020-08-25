@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
@@ -19,7 +20,7 @@ class Inntektsmelding(
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
-    internal val førsteFraværsdag: LocalDate?,
+    førsteFraværsdag: LocalDate?,
     internal val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
@@ -28,6 +29,7 @@ class Inntektsmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
+    internal val førsteFraværsdag: LocalDate?
 
     private val beste = { venstre: Dag, høyre: Dag ->
         when {
@@ -54,6 +56,23 @@ class Inntektsmelding(
 
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
+        this.førsteFraværsdag =
+            slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder).slåSammen().lastOrNull()?.start
+                ?.takeIf { it.senereEnn(førsteFraværsdag) } ?: førsteFraværsdag
+    }
+
+    private fun slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder: List<Periode>): List<Periode> {
+        return arbeidsgiverperioder.map { arbeidsgiverperiode ->
+            ferieperioder.fold(arbeidsgiverperiode) { utvidetPeriode, ferie ->
+                if (utvidetPeriode.erRettFør(ferie)) utvidetPeriode.merge(ferie)
+                else utvidetPeriode
+            }
+        }
+    }
+
+    private fun LocalDate.senereEnn(other: LocalDate?): Boolean {
+        if (other == null) return false
+        return this > other
     }
 
     private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<Sykdomstidslinje> {
@@ -74,7 +93,12 @@ class Inntektsmelding(
     override fun sykdomstidslinje() = sykdomstidslinje
 
     override fun periode() =
-        super.periode().let { Periode(listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).max()!!, it.endInclusive) }
+        super.periode().let {
+            Periode(
+                listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).max()!!,
+                it.endInclusive
+            )
+        }
 
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {
@@ -93,7 +117,8 @@ class Inntektsmelding(
         if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             aktivitetslogg.warn(
-                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s. Vurder om dette har betydning for rett til sykepenger og beregning av arbeidsgiverperiode", it
+                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s. Vurder om dette har betydning for rett til sykepenger og beregning av arbeidsgiverperiode",
+                it
             )
         }
         return aktivitetslogg
@@ -109,6 +134,10 @@ class Inntektsmelding(
 
     internal fun addInntekt(inntekthistorikk: Inntekthistorikk) {
         if (førsteFraværsdag == null) return
+//        var førsteSykdomsdag = førsteFraværsdag
+//        if (førsteSykdomsdag.isBefore(arbeidsgiverperioder.lastOrNull()?.start)) {
+//            førsteSykdomsdag = arbeidsgiverperioder.last().start
+//        }
         inntekthistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
@@ -129,7 +158,11 @@ class Inntektsmelding(
         private val endringerIRefusjon: List<LocalDate> = emptyList()
     ) {
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode, beregnetInntekt: Inntekt): Aktivitetslogg {
+        internal fun valider(
+            aktivitetslogg: Aktivitetslogg,
+            periode: Periode,
+            beregnetInntekt: Inntekt
+        ): Aktivitetslogg {
             when {
                 inntekt == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 inntekt != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
