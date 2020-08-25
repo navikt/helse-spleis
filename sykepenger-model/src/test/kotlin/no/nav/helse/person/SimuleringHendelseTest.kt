@@ -4,15 +4,12 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 import java.util.*
 
 internal class SimuleringHendelseTest {
@@ -95,6 +92,7 @@ internal class SimuleringHendelseTest {
             hendelse = this
         }
     }
+
     private fun sykmelding() =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -113,7 +111,7 @@ internal class SimuleringHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag,  sisteSykedag, 100, null)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100, null)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false
@@ -145,9 +143,11 @@ internal class SimuleringHendelseTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0.månedlig) }
-                .groupBy({ it.first }) { it.second }),
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+            }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
@@ -187,7 +187,10 @@ internal class SimuleringHendelseTest {
                                         periode = Periode(17.januar, 31.januar),
                                         konto = "11111111111",
                                         beløp = dagsats * 11,
-                                        klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
+                                        klassekode = Simulering.Klassekode(
+                                            "SPREFAG-IOP",
+                                            "Sykepenger, Refusjon arbeidsgiver"
+                                        ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
@@ -210,7 +213,10 @@ internal class SimuleringHendelseTest {
                                         periode = Periode(1.februar, 28.februar),
                                         konto = "11111111111",
                                         beløp = dagsats * 20,
-                                        klassekode = Simulering.Klassekode("SPREFAG-IOP", "Sykepenger, Refusjon arbeidsgiver"),
+                                        klassekode = Simulering.Klassekode(
+                                            "SPREFAG-IOP",
+                                            "Sykepenger, Refusjon arbeidsgiver"
+                                        ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,

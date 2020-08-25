@@ -3,13 +3,14 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.YearMonth
 import java.util.*
 
 internal class YtelserHendelseTest {
@@ -192,7 +193,7 @@ internal class YtelserHendelseTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             orgnummer = ORGNR,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag,  sisteSykedag, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false
@@ -226,9 +227,11 @@ internal class YtelserHendelseTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
-            inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (ORGNR to 31000.0.månedlig) }
-                .groupBy({ it.first }) { it.second }),
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    ORGNR inntekt 31000.månedlig
+                }
+            }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(

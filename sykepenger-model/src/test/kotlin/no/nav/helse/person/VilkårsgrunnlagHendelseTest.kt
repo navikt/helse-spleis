@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagHendelseTest {
@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     @Test
     fun `ingen inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyMap(), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrors())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
@@ -174,7 +174,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        inntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
+        inntekter: List<MånedligInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -233,7 +233,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: Map<YearMonth, List<Pair<String, Inntekt>>>,
+        inntekter: List<MånedligInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(

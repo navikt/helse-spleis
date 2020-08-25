@@ -4,6 +4,8 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 class PåminnelserOgTimeoutTest {
@@ -86,7 +87,12 @@ class PåminnelserOgTimeoutTest {
         assertEquals(6, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Arbeidsavklaringspenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.InntekterForSammenligningsgrunnlag))
+        assertTrue(
+            hendelse.etterspurteBehov(
+                inspektør.vedtaksperiodeId(0),
+                Behovtype.InntekterForSammenligningsgrunnlag
+            )
+        )
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
     }
@@ -185,7 +191,15 @@ class PåminnelserOgTimeoutTest {
         assertTilstand(TilstandType.TIL_UTBETALING)
     }
 
-    private fun søknad(vararg perioder: Søknad.Søknadsperiode = arrayOf(Søknad.Søknadsperiode.Sykdom(1.januar,  20.januar, 100))) =
+    private fun søknad(
+        vararg perioder: Søknad.Søknadsperiode = arrayOf(
+            Søknad.Søknadsperiode.Sykdom(
+                1.januar,
+                20.januar,
+                100
+            )
+        )
+    ) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -199,7 +213,15 @@ class PåminnelserOgTimeoutTest {
             hendelse = this
         }
 
-    private fun sykmelding(vararg perioder: Sykmeldingsperiode = arrayOf(Sykmeldingsperiode(1.januar, 20.januar, 100))) =
+    private fun sykmelding(
+        vararg perioder: Sykmeldingsperiode = arrayOf(
+            Sykmeldingsperiode(
+                1.januar,
+                20.januar,
+                100
+            )
+        )
+    ) =
         Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -211,7 +233,10 @@ class PåminnelserOgTimeoutTest {
             hendelse = this
         }
 
-    private fun inntektsmelding(vararg arbeidsgiverperiode: Periode = arrayOf(Periode(1.januar, 1.januar.plusDays(15))), førsteFraværsdag: LocalDate = 1.januar) =
+    private fun inntektsmelding(
+        vararg arbeidsgiverperiode: Periode = arrayOf(Periode(1.januar, 1.januar.plusDays(15))),
+        førsteFraværsdag: LocalDate = 1.januar
+    ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
@@ -235,9 +260,11 @@ class PåminnelserOgTimeoutTest {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0.månedlig) }
-                .groupBy({ it.first }) { it.second }),
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+            }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(

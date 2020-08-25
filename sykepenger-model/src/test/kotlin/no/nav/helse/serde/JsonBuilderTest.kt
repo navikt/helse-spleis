@@ -9,9 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,7 +17,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.YearMonth
 import java.util.*
 
 class JsonBuilderTest {
@@ -320,9 +317,11 @@ class JsonBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (orgnummer to 31000.0.månedlig) }
-                .groupBy({ it.first }) { it.second }),
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+            }),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(

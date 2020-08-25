@@ -608,7 +608,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `helg i gap i arbeidsgiverperioden`() {
+    fun `helg i gap i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100))
         håndterInntektsmelding(listOf(Periode(3.januar, 4.januar), Periode(9.januar, 10.januar)), 3.januar)
         håndterSøknad(Sykdom(3.januar, 10.januar, 100))
@@ -627,7 +627,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
     }
 

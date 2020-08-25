@@ -794,7 +794,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         inspektør.also { assertFalse(it.personLogg.hasWarnings()) }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
-        assertTilstander(1, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
     }
 
     @Test
@@ -1001,7 +1001,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1016,7 +1015,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -1069,7 +1068,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 23.februar, 100))
         håndterYtelser(2.vedtaksperiode)   // No history
@@ -1086,7 +1084,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -1191,7 +1189,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1206,7 +1203,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
+            AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertTilstander(
             2.vedtaksperiode,

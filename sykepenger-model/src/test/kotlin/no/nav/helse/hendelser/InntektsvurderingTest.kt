@@ -2,6 +2,9 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -20,8 +23,22 @@ internal class InntektsvurderingTest {
 
     @Test
     internal fun `ugyldige verdier`() {
-        assertTrue(hasErrors(inntektsvurdering(emptyMap()), INGEN))
-        assertTrue(hasErrors(inntektsvurdering(mapOf(YearMonth.now() to listOf(ORGNR to INGEN))), INGEN))
+        assertTrue(hasErrors(inntektsvurdering(emptyList()), INGEN))
+        assertTrue(
+            hasErrors(
+                inntektsvurdering(
+                    listOf(
+                        Inntektsvurdering.MånedligInntekt(
+                            YearMonth.now(),
+                            ORGNR,
+                            INGEN,
+                            Inntektsvurdering.Inntekttype.LØNNSINNTEKT,
+                            Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                        )
+                    )
+                ), INGEN
+            )
+        )
     }
 
     @Test
@@ -48,13 +65,14 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
-        (1..12)
-            .map { YearMonth.of(2017, it) to (ORGNR to INNTEKT) }
-            .groupBy({ it.first }) { it.second }
-            .toMutableMap()
-            .apply {
-                this[periode] = this.getValue(periode).toMutableList().apply { add(inntekt) }
+        inntektperioder {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                ORGNR inntekt INNTEKT
             }
+            periode.atDay(1) til periode.atDay(1) inntekter {
+                inntekt.first inntekt inntekt.second
+            }
+        }
 
     private fun hasErrors(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Inntekt): Boolean {
         aktivitetslogg = Aktivitetslogg()
@@ -66,8 +84,10 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: Map<YearMonth, List<Pair<String, Inntekt>>> = (1..12).map {
-            YearMonth.of(2017, it) to (ORGNR to INNTEKT)
-        }.groupBy({ it.first }) { it.second }
+        inntektsmåneder: List<Inntektsvurdering.MånedligInntekt> = inntektperioder {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                ORGNR inntekt INNTEKT
+            }
+        }
     ) = Inntektsvurdering(inntektsmåneder)
 }

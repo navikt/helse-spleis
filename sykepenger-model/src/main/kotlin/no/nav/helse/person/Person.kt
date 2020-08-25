@@ -1,9 +1,8 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.økonomi.Inntekt
-import java.time.YearMonth
 import java.util.*
 
 class Person private constructor(
@@ -218,7 +217,7 @@ class Person private constructor(
     }
 
     internal fun lagreInntekter(
-        inntekter: Map<String, Map<YearMonth, Inntekt>>,
+        inntekter: Map<String, List<MånedligInntekt>>,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         inntekter

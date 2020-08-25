@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
 internal class TilUtbetalingHendelseTest {
@@ -213,9 +214,11 @@ internal class TilUtbetalingHendelseTest {
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            inntektsvurdering = Inntektsvurdering((1..12)
-                .map { YearMonth.of(2018, it) to (ORGNUMMER to 31000.0.månedlig) }
-                .groupBy({ it.first }) { it.second }),
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    ORGNUMMER inntekt 31000.månedlig
+                }
+            }),
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(

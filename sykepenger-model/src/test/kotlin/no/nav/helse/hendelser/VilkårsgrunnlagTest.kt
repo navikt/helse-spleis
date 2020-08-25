@@ -8,8 +8,8 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.prosent
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
@@ -50,7 +49,10 @@ internal class VilkårsgrunnlagTest {
     @Test
     internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            (1..12).map { YearMonth.of(2017, it) to (orgnummer to 1250.0.månedlig) }.groupBy({ it.first }) { it.second }
+            inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt 1250.månedlig
+                }}
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(20.prosent, dataForVilkårsvurdering()?.avviksprosent)
@@ -165,9 +167,11 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: Map<YearMonth, List<Pair<String, Inntekt>>> = (1..12).map {
-            YearMonth.of(2017, it) to (orgnummer to INNTEKT)
-        }.groupBy({ it.first }) { it.second },
+        inntektsmåneder: List<Inntektsvurdering.MånedligInntekt> = inntektperioder {
+            1.januar(2017) til 1.desember(2017) inntekter {
+                orgnummer inntekt INNTEKT
+            }
+        },
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = listOf(
             Opptjeningvurdering.Arbeidsforhold(
                 orgnummer,

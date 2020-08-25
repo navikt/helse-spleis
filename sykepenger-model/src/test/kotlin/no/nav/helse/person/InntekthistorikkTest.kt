@@ -41,7 +41,7 @@ internal class InntekthistorikkTest {
     @Test
     fun `Inntekt fra infotrygd blir ikke overstyrt av inntekt fra skatt`() {
         historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT_SAMMENLIGNINGSGRUNNLAG)
+        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT)
         assertEquals(2, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(3.januar)) // Salary from infotrygd
     }
@@ -51,13 +51,6 @@ internal class InntekthistorikkTest {
         historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
         assertEquals(1, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(1.januar))
-    }
-
-    @Test
-    fun ` `() {
-        historikk.add(3.januar, UUID.randomUUID(), 20000.månedlig, INNTEKTSMELDING)
-        historikk.add(3.januar, UUID.randomUUID(), 20000.månedlig, SKATT_SYKEPENGEGRUNNLAG)
-
     }
 
     @Test
@@ -90,12 +83,12 @@ internal class InntekthistorikkTest {
 
     @Test
     fun `Prioritert rekkefølge på kilde for lik dato`() {
-        assertEquals(INFOTRYGD, INFOTRYGD versus SKATT_SAMMENLIGNINGSGRUNNLAG)
+        assertEquals(INFOTRYGD, INFOTRYGD versus SKATT)
         assertEquals(INNTEKTSMELDING, INFOTRYGD versus INNTEKTSMELDING)
         assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus INFOTRYGD)
-        assertEquals(INFOTRYGD, SKATT_SAMMENLIGNINGSGRUNNLAG versus INFOTRYGD)
-        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus SKATT_SAMMENLIGNINGSGRUNNLAG)
-        assertEquals(INNTEKTSMELDING, SKATT_SAMMENLIGNINGSGRUNNLAG versus INNTEKTSMELDING)
+        assertEquals(INFOTRYGD, SKATT versus INFOTRYGD)
+        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus SKATT)
+        assertEquals(INNTEKTSMELDING, SKATT versus INNTEKTSMELDING)
     }
 
     @Test
@@ -167,7 +160,7 @@ internal class InntekthistorikkTest {
 
     private val LocalDate.INFOTRYGD get() = inntekt(this, Kilde.INFOTRYGD)
 
-    private val LocalDate.SKATT get() = inntekt(this, Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG)
+    private val LocalDate.SKATT get() = inntekt(this, Kilde.SKATT)
 
     private val LocalDate.INNTEKTSMELDING get() = inntekt(this, Kilde.INNTEKTSMELDING)
 
@@ -191,7 +184,7 @@ internal class InntekthistorikkTest {
     private inner class AvsluttetArgs(dato: LocalDate, kilde: Kilde) : InntektArgs(dato, kilde) {
         override fun add() {
             inntektsbeløp += 1000
-            historikk.add(dato, UUID.randomUUID(), 0.daglig, SKATT_SAMMENLIGNINGSGRUNNLAG)
+            historikk.add(dato, UUID.randomUUID(), 0.daglig, SKATT)
         }
     }
 

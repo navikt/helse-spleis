@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.juli
 import no.nav.helse.oktober
 import no.nav.helse.september
-import no.nav.helse.testhelpers.april
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -54,7 +53,7 @@ internal class VedtaksperiodeTest {
 
     @Test
     fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
-        val førsteFraværsdag = 20.april
+        val førsteFraværsdag = 20.oktober
         val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 

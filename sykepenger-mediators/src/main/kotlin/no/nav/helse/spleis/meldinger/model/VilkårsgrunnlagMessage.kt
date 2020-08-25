@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -25,16 +26,30 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
-    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"].map {
-        it["årMåned"].asYearMonth() to it["inntektsliste"].map {
-            arbeidsgiver(it) to it["beløp"].asDouble().månedlig
+    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"].flatMap { måned ->
+        måned["inntektsliste"].map { inntekt ->
+            Inntektsvurdering.MånedligInntekt(
+                måned["årMåned"].asYearMonth(),
+                inntekt.arbeidsgiver(),
+                inntekt["beløp"].asDouble().månedlig,
+                inntekt["inntektstype"].asInntekttype(),
+                SAMMENLIGNINGSGRUNNLAG
+            )
         }
-    }.toMap()
+    }
 
-    private fun arbeidsgiver(node: JsonNode) = when {
-        node.path("orgnummer").isTextual -> node.path("orgnummer").asText()
-        node.path("fødselsnummer").isTextual -> node.path("fødselsnummer").asText()
-        node.path("aktørId").isTextual -> node.path("aktørId").asText()
+    private fun JsonNode.asInntekttype() = when (this.asText()) {
+        "LOENNSINNTEKT" -> Inntektsvurdering.Inntekttype.LØNNSINNTEKT
+        "NAERINGSINNTEKT" -> Inntektsvurdering.Inntekttype.NÆRINGSINNTEKT
+        "PENSJON_ELLER_TRYGD" -> Inntektsvurdering.Inntekttype.PENSJON_ELLER_TRYGD
+        "YTELSE_FRA_OFFENTLIGE" -> Inntektsvurdering.Inntekttype.YTELSE_FRA_OFFENTLIGE
+        else -> error("Kunne ikke mappe Inntekttype")
+    }
+
+    private fun JsonNode.arbeidsgiver() = when {
+        path("orgnummer").isTextual -> path("orgnummer").asText()
+        path("fødselsnummer").isTextual -> path("fødselsnummer").asText()
+        path("aktørId").isTextual -> path("aktørId").asText()
         else -> error("Mangler arbeidsgiver for inntekt i hendelse $id")
     }
 
@@ -68,33 +83,39 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
             }
     }
 
-    private val vilkårsgrunnlag get() = Vilkårsgrunnlag(
-        meldingsreferanseId = this.id,
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        orgnummer = organisasjonsnummer,
-        inntektsvurdering = Inntektsvurdering(
-            perioder = inntekter
-        ),
-        opptjeningvurdering = Opptjeningvurdering(
-            arbeidsforhold = arbeidsforhold
-        ),
-        medlemskapsvurdering = Medlemskapsvurdering(
-            medlemskapstatus = medlemskapstatus
-        ),
-        erEgenAnsatt = erEgenAnsatt,
-        dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
-            Periode(
-                it.first,
-                it.second
-            )
-        }),
-        arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) })
-    ).also {
-        if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
-        if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
-    }
+    private val vilkårsgrunnlag
+        get() = Vilkårsgrunnlag(
+            meldingsreferanseId = this.id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            orgnummer = organisasjonsnummer,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntekter
+            ),
+            opptjeningvurdering = Opptjeningvurdering(
+                arbeidsforhold = arbeidsforhold
+            ),
+            medlemskapsvurdering = Medlemskapsvurdering(
+                medlemskapstatus = medlemskapstatus
+            ),
+            erEgenAnsatt = erEgenAnsatt,
+            dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
+            }),
+            arbeidsavklaringspenger = no.nav.helse.hendelser.Arbeidsavklaringspenger(arbeidsavklaringspenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
+            })
+        ).also {
+            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
+        }
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, vilkårsgrunnlag)

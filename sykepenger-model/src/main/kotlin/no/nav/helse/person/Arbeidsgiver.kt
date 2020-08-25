@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
@@ -11,7 +12,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -255,17 +255,18 @@ internal class Arbeidsgiver private constructor(
         ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
     }
 
-    internal fun lagreInntekt(månedligeInntekter: Map<YearMonth, Inntekt>, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        månedligeInntekter
-            .mapKeys { (måned, _) -> måned.atDay(1) }
-            .forEach { (måned, inntekt) ->
-                inntekthistorikk.add(
-                    måned,
-                    vilkårsgrunnlag.meldingsreferanseId(),
-                    inntekt,
-                    Inntekthistorikk.Inntektsendring.Kilde.SKATT
-                )
-            }
+    internal fun lagreInntekt(månedligeInntekter: List<MånedligInntekt>, vilkårsgrunnlag: Vilkårsgrunnlag) {
+        månedligeInntekter.lagreInntekter(inntekthistorikk, vilkårsgrunnlag)
+//            .mapKeys { (måned, _) -> måned.atDay(1) }
+//            .flatMap { (måned, inntekter) -> inntekter.map { måned to it } }
+//            .forEach { (måned, inntekt) ->
+//                inntekthistorikk.add(
+//                    måned,
+//                    vilkårsgrunnlag.meldingsreferanseId(),
+//                    inntekt,
+//                    Inntekthistorikk.Inntektsendring.Kilde.SKATT
+//                )
+//            }
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)

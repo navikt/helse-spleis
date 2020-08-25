@@ -1,6 +1,11 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
+import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -14,14 +19,9 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class Inntektsvurdering(
-    perioder: Map<YearMonth, List<Pair<String, Inntekt>>>
+    private val inntekter: List<MånedligInntekt>
 ) {
-
-    private val inntekter: List<MånedligInntekt> = perioder.flatMap { (måned, inntektListe) ->
-        inntektListe.map { (arbeidsgiver, inntekt) -> MånedligInntekt(måned, arbeidsgiver, inntekt) }
-    }
-
-    private val sammenligningsgrunnlag = inntekter.avg()
+    private val sammenligningsgrunnlag = this.inntekter.avg()
 
     private var avviksprosent: Prosent? = null
 
@@ -63,10 +63,12 @@ class Inntektsvurdering(
     internal fun lagreInntekter(person: Person, vilkårsgrunnlag: Vilkårsgrunnlag) =
         inntekter.lagreInntekter(person, vilkårsgrunnlag)
 
-    private class MånedligInntekt(
+    class MånedligInntekt(
         private val yearMonth: YearMonth,
         private val arbeidsgiver: String,
-        private val inntekt: Inntekt
+        private val inntekt: Inntekt,
+        private val type: Inntekttype,
+        private val inntektsgrunnlag: Inntektsgrunnlag
     ) {
 
         companion object {
@@ -105,18 +107,50 @@ class Inntektsvurdering(
             ) {
                 inntekter
                     .groupBy { it.arbeidsgiver }
-                    .mapValues { (_, månedligeInntekter) ->
-                        månedligeInntekter.groupBy({ it.yearMonth }) { it.inntekt }
-                            .mapValues { (_, månedligInntekt) -> månedligInntekt.summer() }
-                    }
                     .also { person.lagreInntekter(it, vilkårsgrunnlag) }
             }
+
+            internal fun lagreInntekter(
+                inntekter: List<MånedligInntekt>,
+                inntekthistorikk: Inntekthistorikk,
+                vilkårsgrunnlag: Vilkårsgrunnlag
+            ) {
+                inntekter
+                    .forEach {
+                        inntekthistorikk.add(
+                            it.yearMonth.atDay(1),
+                            vilkårsgrunnlag.meldingsreferanseId(),
+                            it.inntekt,
+                            when (it.inntektsgrunnlag) {
+                                SAMMENLIGNINGSGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
+                                SYKEPENGEGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
+                            }
+                        )
+                    }
+            }
         }
+    }
+
+    enum class Inntekttype {
+        LØNNSINNTEKT,
+        NÆRINGSINNTEKT,
+        PENSJON_ELLER_TRYGD,
+        YTELSE_FRA_OFFENTLIGE
+    }
+
+    enum class Inntektsgrunnlag {
+        SAMMENLIGNINGSGRUNNLAG, SYKEPENGEGRUNNLAG
     }
 
     private fun List<MånedligInntekt>.kilder(antallMåneder: Int) = MånedligInntekt.kilder(this, antallMåneder)
     private fun List<MånedligInntekt>.avg() = MånedligInntekt.avg(this)
     private fun List<MånedligInntekt>.antallMåneder() = MånedligInntekt.antallMåneder(this)
     private fun List<MånedligInntekt>.lagreInntekter(person: Person, vilkårsgrunnlag: Vilkårsgrunnlag) =
-        MånedligInntekt.lagreInntekter(this, person, vilkårsgrunnlag)
+        lagreInntekter(this, person, vilkårsgrunnlag)
 }
+
+internal fun List<MånedligInntekt>.lagreInntekter(
+    inntekthistorikk: Inntekthistorikk,
+    vilkårsgrunnlag: Vilkårsgrunnlag
+) =
+    lagreInntekter(this, inntekthistorikk, vilkårsgrunnlag)
