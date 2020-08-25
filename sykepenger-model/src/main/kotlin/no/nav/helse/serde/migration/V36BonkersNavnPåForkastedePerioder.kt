@@ -13,7 +13,7 @@ internal class V36BonkersNavnPåForkastedePerioder : JsonMigration(version = 36)
     }
 
     private fun endreNavnPåKeys(perioder: JsonNode) =
-        perioder.map { periode ->
+        perioder.filter{ it.hasNonNull("first") }.map { periode ->
             (periode as ObjectNode).apply {
                 replace("vedtaksperiode", periode["first"])
                 remove("first")
