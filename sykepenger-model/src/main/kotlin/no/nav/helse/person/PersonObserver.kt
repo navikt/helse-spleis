@@ -103,6 +103,22 @@ interface PersonObserver {
         val tom: LocalDate
     )
 
+    data class UtbetalingAnnullertEvent(
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+        val fagsystemId: String,
+        val utbetalingslinjer: List<Utbetalingslinje>,
+        val dato: LocalDate,
+        val saksbehandlerEpost: String
+    ) {
+        data class Utbetalingslinje(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val beløp: Int,
+            val grad: Double
+        )
+    }
+
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
@@ -118,4 +134,6 @@ interface PersonObserver {
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
 
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
+
+    fun annullering(event: UtbetalingAnnullertEvent) {}
 }

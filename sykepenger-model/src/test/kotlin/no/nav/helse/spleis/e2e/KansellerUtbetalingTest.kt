@@ -34,14 +34,16 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
     }
 
-    @Test fun `avvis hvis vi ikke finner fagsystemId`() {
+    @Test
+    fun `avvis hvis vi ikke finner fagsystemId`() {
         håndterKansellerUtbetaling(fagsystemId = "unknown")
         inspektør.also {
             assertTrue(it.personLogg.hasErrors(), it.personLogg.toString())
         }
     }
 
-    @Test fun `kanseller siste utbetaling`() {
+    @Test
+    fun `kanseller siste utbetaling`() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
@@ -115,6 +117,26 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
+    }
+
+    @Disabled
+    @Test
+    fun `publiserer et event ved annullering`() {
+        val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
+        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+
+        val annullering = observatør.annulleringer.lastOrNull()
+        assertNotNull(annullering)
+
+        assertEquals(fagsystemId, annullering!!.fagsystemId)
+        // 19.januar, 26.januar, 1431, 1431, 100.0
+        val utbetalingslinje = annullering.utbetalingslinjer.first()
+        assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
+        assertEquals(LocalDate.now(), annullering.dato)
+        assertEquals(19.januar, utbetalingslinje.fom)
+        assertEquals(26.januar, utbetalingslinje.tom)
+        assertEquals(1431, utbetalingslinje.beløp)
+        assertEquals(100.0, utbetalingslinje.grad)
     }
 
     private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int) {
