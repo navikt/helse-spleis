@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
@@ -255,18 +254,8 @@ internal class Arbeidsgiver private constructor(
         ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
     }
 
-    internal fun lagreInntekt(månedligeInntekter: List<MånedligInntekt>, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        månedligeInntekter.lagreInntekter(inntekthistorikk, vilkårsgrunnlag)
-//            .mapKeys { (måned, _) -> måned.atDay(1) }
-//            .flatMap { (måned, inntekter) -> inntekter.map { måned to it } }
-//            .forEach { (måned, inntekt) ->
-//                inntekthistorikk.add(
-//                    måned,
-//                    vilkårsgrunnlag.meldingsreferanseId(),
-//                    inntekt,
-//                    Inntekthistorikk.Inntektsendring.Kilde.SKATT
-//                )
-//            }
+    internal fun lagreInntekter(arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt, vilkårsgrunnlag: Vilkårsgrunnlag) {
+        arbeidsgiverInntekt.lagreInntekter(inntekthistorikk, vilkårsgrunnlag)
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)

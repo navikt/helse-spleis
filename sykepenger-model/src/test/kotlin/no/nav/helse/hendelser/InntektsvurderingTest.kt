@@ -28,12 +28,16 @@ internal class InntektsvurderingTest {
             hasErrors(
                 inntektsvurdering(
                     listOf(
-                        Inntektsvurdering.MånedligInntekt(
-                            YearMonth.now(),
+                        Inntektsvurdering.ArbeidsgiverInntekt(
                             ORGNR,
-                            INGEN,
-                            Inntektsvurdering.Inntekttype.LØNNSINNTEKT,
-                            Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                            listOf(
+                                Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
+                                    YearMonth.now(),
+                                    INGEN,
+                                    Inntektsvurdering.Inntekttype.LØNNSINNTEKT,
+                                    Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                                )
+                            )
                         )
                     )
                 ), INGEN
@@ -52,7 +56,7 @@ internal class InntektsvurderingTest {
     }
 
     @Test
-    internal fun `flere organisasjoner siste 3 måneder gir warning`() {
+    fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
         assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT))
         assertTrue(aktivitetslogg.hasWarnings())
@@ -84,7 +88,7 @@ internal class InntektsvurderingTest {
     }
 
     private fun inntektsvurdering(
-        inntektsmåneder: List<Inntektsvurdering.MånedligInntekt> = inntektperioder {
+        inntektsmåneder: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
             1.januar(2017) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
             }

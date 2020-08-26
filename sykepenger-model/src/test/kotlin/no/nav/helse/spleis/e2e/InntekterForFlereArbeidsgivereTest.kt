@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
+import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -157,7 +157,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntekter: List<MånedligInntekt>
+        inntekter: List<ArbeidsgiverInntekt>
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),

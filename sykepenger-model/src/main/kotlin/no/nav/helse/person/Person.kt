@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.util.*
 
@@ -217,14 +216,11 @@ class Person private constructor(
     }
 
     internal fun lagreInntekter(
-        inntekter: Map<String, List<MånedligInntekt>>,
+        arbeidsgiverId: String,
+        arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        inntekter
-            .mapKeys { (arbeidsgiverId, _) -> finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag) }
-            .forEach { (arbeidsgiver, månedligeInntekter) ->
-                arbeidsgiver.lagreInntekt(månedligeInntekter, vilkårsgrunnlag)
-            }
+        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, vilkårsgrunnlag)
     }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, vilkårsgrunnlag: Vilkårsgrunnlag): Arbeidsgiver {

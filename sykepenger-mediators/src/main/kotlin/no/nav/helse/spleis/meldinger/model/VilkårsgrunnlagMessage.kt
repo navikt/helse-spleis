@@ -26,17 +26,22 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
-    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"].flatMap { måned ->
-        måned["inntektsliste"].map { inntekt ->
-            Inntektsvurdering.MånedligInntekt(
-                måned["årMåned"].asYearMonth(),
-                inntekt.arbeidsgiver(),
-                inntekt["beløp"].asDouble().månedlig,
-                inntekt["inntektstype"].asInntekttype(),
-                SAMMENLIGNINGSGRUNNLAG
-            )
+    private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
+        .flatMap { måned ->
+            måned["inntektsliste"]
+                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                    Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
+                        måned["årMåned"].asYearMonth(),
+                        inntekt["beløp"].asDouble().månedlig,
+                        inntekt["inntektstype"].asInntekttype(),
+                        SAMMENLIGNINGSGRUNNLAG
+                    )
+                }.toList()
         }
-    }
+        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) -> inntekter }
+        .map { (arbeidsgiver, inntekter) ->
+            Inntektsvurdering.ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
+        }
 
     private fun JsonNode.asInntekttype() = when (this.asText()) {
         "LOENNSINNTEKT" -> Inntektsvurdering.Inntekttype.LØNNSINNTEKT

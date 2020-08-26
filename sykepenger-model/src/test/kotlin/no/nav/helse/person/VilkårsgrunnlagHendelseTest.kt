@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Inntektsvurdering.MånedligInntekt
+import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -174,7 +174,7 @@ internal class VilkårsgrunnlagHendelseTest {
     private fun håndterVilkårsgrunnlag(
         egenAnsatt: Boolean,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        inntekter: List<MånedligInntekt>,
+        inntekter: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) {
         person.håndter(sykmelding())
@@ -233,7 +233,7 @@ internal class VilkårsgrunnlagHendelseTest {
 
     private fun vilkårsgrunnlag(
         egenAnsatt: Boolean,
-        inntekter: List<MånedligInntekt>,
+        inntekter: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
         Vilkårsgrunnlag(

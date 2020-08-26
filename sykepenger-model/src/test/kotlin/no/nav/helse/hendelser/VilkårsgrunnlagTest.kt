@@ -167,7 +167,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun vilkårsgrunnlag(
-        inntektsmåneder: List<Inntektsvurdering.MånedligInntekt> = inntektperioder {
+        inntektsmåneder: List<Inntektsvurdering.ArbeidsgiverInntekt> = inntektperioder {
             1.januar(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt INNTEKT
             }
