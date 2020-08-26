@@ -149,7 +149,8 @@ class Inntektsvurdering(
                                 when (it.inntektsgrunnlag) {
                                     SAMMENLIGNINGSGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
                                     SYKEPENGEGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
-                                }
+                                },
+                                enumValueOf(it.type.name)
                             )
                         }
                 }

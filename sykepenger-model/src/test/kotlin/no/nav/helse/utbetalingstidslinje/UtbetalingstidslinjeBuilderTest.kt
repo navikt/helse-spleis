@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -386,7 +387,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.nU + 1.nF + 1.nU + 10.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
+                add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING, LØNNSINNTEKT)
             }
         )
         assertNotEquals(
@@ -405,7 +406,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed(1.januar(2020))
         (10.nU + 7.nF + 14.nS).utbetalingslinjer(
             inntektshistorikk = Inntekthistorikk().apply {
-                add(17.januar(2020), hendelseId, 31000.månedlig, INNTEKTSMELDING)
+                add(17.januar(2020), hendelseId, 31000.månedlig, INNTEKTSMELDING, LØNNSINNTEKT)
             }
         )
         assertEquals(31, inspektør.datoer.size)
@@ -416,9 +417,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private val inntekthistorikk = Inntekthistorikk().apply {
-        add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
-        add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
-        add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
+        add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING, LØNNSINNTEKT)
+        add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING, LØNNSINNTEKT)
+        add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING, LØNNSINNTEKT)
     }
 
     private fun assertDagsats(dagsats: Int) {
@@ -441,9 +442,9 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
 
-        internal val navdager = mutableListOf<NavDag>()
-        internal val dagtelling: MutableMap<KClass<out Utbetalingsdag>, Int> = mutableMapOf()
-        internal val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingsdag>>()
+        val navdager = mutableListOf<NavDag>()
+        val dagtelling: MutableMap<KClass<out Utbetalingsdag>, Int> = mutableMapOf()
+        val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingsdag>>()
 
         init {
             tidslinje.accept(this)

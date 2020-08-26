@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
 import no.nav.helse.testhelpers.desember
@@ -30,8 +31,8 @@ internal class InntekthistorikkTest {
 
     @Test
     fun `Dupliser inntekt til fordel for nyere oppføring`() {
-        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD)
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD, LØNNSINNTEKT)
+        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD, LØNNSINNTEKT)
         assertEquals(1, historikk.size)
         assertEquals(nyInntekt, historikk.inntekt(3.januar))
         assertEquals(nyInntekt, historikk.inntekt(5.januar))
@@ -40,15 +41,15 @@ internal class InntekthistorikkTest {
 
     @Test
     fun `Inntekt fra infotrygd blir ikke overstyrt av inntekt fra skatt`() {
-        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
-        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT)
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD, LØNNSINNTEKT)
+        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT, LØNNSINNTEKT)
         assertEquals(2, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(3.januar)) // Salary from infotrygd
     }
 
     @Test
     fun `gir eldste inntekt når vi ikke har nyere`() {
-        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD, LØNNSINNTEKT)
         assertEquals(1, historikk.size)
         assertEquals(tidligereInntekt, historikk.inntekt(1.januar))
     }
@@ -65,16 +66,16 @@ internal class InntekthistorikkTest {
         val `6GBeløp` = Grunnbeløp.`6G`.beløp(førsteFraværsdag)
 
         val årsinntektOver6G =
-            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD, LØNNSINNTEKT))
         assertEquals(
             `6GBeløp`,
-            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
+            Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
         )
 
         val årsinntektUnder6G =
-            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD, LØNNSINNTEKT))
         assertTrue(
-            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(
+            Inntektsendring.sykepengegrunnlag(
                 årsinntektUnder6G,
                 førsteFraværsdag
             )!! < `6GBeløp`
@@ -139,8 +140,8 @@ internal class InntekthistorikkTest {
 
     private infix fun Kilde.versus(other: Kilde): Kilde {
         historikk = Inntekthistorikk()
-        historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this)
-        historikk.add(1.januar, UUID.randomUUID(), 2000.daglig, other)
+        historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this, LØNNSINNTEKT)
+        historikk.add(1.januar, UUID.randomUUID(), 2000.daglig, other, LØNNSINNTEKT)
         return if (1000.daglig == historikk.inntekt(3.januar)) this else other
     }
 
@@ -167,31 +168,24 @@ internal class InntekthistorikkTest {
     private fun inntekt(dato: LocalDate, kilde: Kilde) = InntektArgs(dato, kilde)
 
     private open inner class InntektArgs(protected val dato: LocalDate, private val kilde: Kilde) {
-        internal lateinit var merkelapp: String
+        lateinit var merkelapp: String
 
-        internal fun merkelapp(verdi: String) {
+        fun merkelapp(verdi: String) {
             merkelapp = verdi
         }
 
-        internal open fun add() {
+        open fun add() {
             inntektsbeløp += 1000
-            historikk.add(dato, UUID.randomUUID(), inntektsbeløp.daglig, kilde)
+            historikk.add(dato, UUID.randomUUID(), inntektsbeløp.daglig, kilde, LØNNSINNTEKT)
         }
 
-        internal infix fun beats(other: InntektArgs) = InntektCompetition(this, other)
-    }
-
-    private inner class AvsluttetArgs(dato: LocalDate, kilde: Kilde) : InntektArgs(dato, kilde) {
-        override fun add() {
-            inntektsbeløp += 1000
-            historikk.add(dato, UUID.randomUUID(), 0.daglig, SKATT)
-        }
+        infix fun beats(other: InntektArgs) = InntektCompetition(this, other)
     }
 
     private val Inntekthistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
 
     private class Inntektsinspektør(historikk: Inntekthistorikk) : InntekthistorikkVisitor {
-        internal var inntektTeller = 0
+        var inntektTeller = 0
 
         init {
             historikk.accept(this)

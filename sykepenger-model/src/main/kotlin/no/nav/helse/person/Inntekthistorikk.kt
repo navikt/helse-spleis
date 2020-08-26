@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
@@ -23,8 +24,8 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde, tidsstempel: LocalDateTime = LocalDateTime.now()) {
-        val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde, tidsstempel)
+    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde, type: Inntekttype, tidsstempel: LocalDateTime = LocalDateTime.now()) {
+        val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde, type, tidsstempel)
         inntekter.removeAll { it.erRedundantMed(nyInntekt) }
         inntekter.add(nyInntekt)
         inntekter.sort()
@@ -42,8 +43,9 @@ internal class Inntekthistorikk {
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val kilde: Kilde,
+        private val type: Inntekttype,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Comparable<Inntektsendring> {
+    ) : Comparable<Inntektsendring> {
 
         companion object {
             internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
@@ -72,6 +74,13 @@ internal class Inntekthistorikk {
         internal enum class Kilde : Comparable<Kilde> {
             SKATT, INFOTRYGD, INNTEKTSMELDING
         }
-    }
 
+        internal enum class Inntekttype {
+            LØNNSINNTEKT,
+            NÆRINGSINNTEKT,
+            PENSJON_ELLER_TRYGD,
+            YTELSE_FRA_OFFENTLIGE,
+            VET_IKKE
+        }
+    }
 }

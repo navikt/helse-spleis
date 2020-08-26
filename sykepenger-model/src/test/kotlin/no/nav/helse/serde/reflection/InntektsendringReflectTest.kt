@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -23,5 +24,5 @@ internal class InntektsendringReflectTest {
     }
 
     internal val inntekt =
-        Inntekthistorikk.Inntektsendring(1.januar, hendelseId, 1000.månedlig, INFOTRYGD)
+        Inntekthistorikk.Inntektsendring(1.januar, hendelseId, 1000.månedlig, INFOTRYGD, LØNNSINNTEKT)
 }

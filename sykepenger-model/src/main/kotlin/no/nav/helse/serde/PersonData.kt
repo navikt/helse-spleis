@@ -181,6 +181,7 @@ internal data class PersonData(
             private val hendelseId: UUID,
             private val beløp: Double,
             private val kilde: String,
+            private val type: String,
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
@@ -190,7 +191,8 @@ internal data class PersonData(
                             fom = inntektData.fom,
                             hendelseId = inntektData.hendelseId,
                             beløp = inntektData.beløp.månedlig,
-                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
+                            kilde = enumValueOf(inntektData.kilde),
+                            type = enumValueOf(inntektData.type),
                             tidsstempel = inntektData.tidsstempel
                         )
                     }

@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -41,7 +42,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     private fun inntekthistorikk(dager: JsonNode) = Inntekthistorikk().also { historikk ->
         dager.forEach { dag ->
             dag.path("dagsats").asInt().also { lønn ->
-                if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING)
+                if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING, LØNNSINNTEKT)
             }
         }
     }
