@@ -27,7 +27,7 @@ internal class Inntekthistorikk {
         meldingsreferanseId: UUID,
         inntekt: Inntekt,
         kilde: Kilde,
-        tidsstempel: LocalDateTime= LocalDateTime.now()
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         inntekter.add(Inntektsendring(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
     }
@@ -41,9 +41,21 @@ internal class Inntekthistorikk {
         fordel: String,
         beskrivelse: String,
         tilleggsinformasjon: String?,
-        tidsstempel: LocalDateTime= LocalDateTime.now()
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        inntekter.add(Skatt(dato, meldingsreferanseId, inntekt, kilde, type, fordel, beskrivelse, tilleggsinformasjon, tidsstempel))
+        inntekter.add(
+            Skatt(
+                dato,
+                meldingsreferanseId,
+                inntekt,
+                kilde,
+                type,
+                fordel,
+                beskrivelse,
+                tilleggsinformasjon,
+                tidsstempel
+            )
+        )
     }
 
     internal fun add(
@@ -52,21 +64,27 @@ internal class Inntekthistorikk {
         inntekt: Inntekt,
         kilde: Kilde,
         begrunnelse: String,
-        tidsstempel: LocalDateTime= LocalDateTime.now()
+        tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         inntekter.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
     }
 
+    internal fun sykepengegrunnlag(dato: LocalDate) =
+        GrunnlagForSykepengegrunnlagVisitor(dato)
+            .also(this::accept)
+            .sykepengegrunnlag()
+
     internal open class Inntektsendring(
-        private val fom: LocalDate,
-        private val hendelseId: UUID,
+        protected val fom: LocalDate,
+        protected val hendelseId: UUID,
         private val beløp: Inntekt,
-        private val kilde: Kilde,
+        protected val kilde: Kilde,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
+        internal fun inntekt() = beløp
 
-        fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntekt(this, hendelseId)
+        open fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitInntekt(this, hendelseId, kilde, fom)
         }
 
         internal enum class Kilde {
@@ -97,16 +115,18 @@ internal class Inntekthistorikk {
             kilde,
             tidsstempel
         ) {
-
+            override fun accept(visitor: InntekthistorikkVisitor) {
+                visitor.visitInntektSkatt(this, hendelseId, kilde, fom)
+            }
         }
 
         internal class Saksbehandler(
-            private val fom: LocalDate,
-            private val hendelseId: UUID,
-            private val beløp: Inntekt,
-            private val kilde: Kilde,
+            fom: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            kilde: Kilde,
             private val begrunnelse: String,
-            private val tidsstempel: LocalDateTime = LocalDateTime.now()
+            tidsstempel: LocalDateTime = LocalDateTime.now()
         ) : Inntektsendring(
             fom,
             hendelseId,
@@ -114,10 +134,9 @@ internal class Inntekthistorikk {
             kilde,
             tidsstempel
         ) {
-
+            override fun accept(visitor: InntekthistorikkVisitor) {
+                visitor.visitInntektSaksbehandler(this, hendelseId, kilde, fom)
+            }
         }
-
     }
 }
-
-

@@ -255,7 +255,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreInntekter(arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        arbeidsgiverInntekt.lagreInntekter(inntekthistorikk, vilkårsgrunnlag)
+        arbeidsgiverInntekt.lagreInntekter(inntekthistorikk, vilkårsgrunnlag.meldingsreferanseId())
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = TODO()//inntekthistorikk.sykepengegrunnlag(dato)

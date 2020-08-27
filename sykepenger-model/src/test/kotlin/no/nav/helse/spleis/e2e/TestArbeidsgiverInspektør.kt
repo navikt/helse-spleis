@@ -193,7 +193,7 @@ internal class TestArbeidsgiverInspektør(
         this.inntektshistorikk = inntekthistorikk
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID, kilde: Inntekthistorikk.Inntektsendring.Kilde, fom: LocalDate) {
         inntekter.add(inntektsendring)
     }
 

@@ -16,6 +16,7 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 class Inntektsvurdering(
     private val inntekter: List<ArbeidsgiverInntekt>
@@ -66,8 +67,8 @@ class Inntektsvurdering(
         private val arbeidsgiver: String,
         private val inntekter: List<MånedligInntekt>
     ) {
-        internal fun lagreInntekter(inntekthistorikk: Inntekthistorikk, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            MånedligInntekt.lagreInntekter(inntekter, inntekthistorikk, vilkårsgrunnlag)
+        internal fun lagreInntekter(inntekthistorikk: Inntekthistorikk, meldingsreferanseId: UUID) {
+            MånedligInntekt.lagreInntekter(inntekter, inntekthistorikk, meldingsreferanseId)
         }
 
         private fun harInntekter() = inntekter.isNotEmpty()
@@ -138,13 +139,13 @@ class Inntektsvurdering(
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
                     inntekthistorikk: Inntekthistorikk,
-                    vilkårsgrunnlag: Vilkårsgrunnlag
+                    meldingsreferanseId: UUID
                 ) {
                     inntekter
                         .forEach {
                             inntekthistorikk.add(
                                 it.yearMonth.atDay(1),
-                                vilkårsgrunnlag.meldingsreferanseId(),
+                                meldingsreferanseId,
                                 it.inntekt,
                                 when (it.inntektsgrunnlag) {
                                     SAMMENLIGNINGSGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
