@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.testhelpers.*
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
@@ -41,7 +40,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertNoErrors(a1Inspektør)
 
-        assertEquals(25000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(25000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
     }
 
     @Test
@@ -73,12 +72,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        TODO()//assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        TODO()//assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
@@ -115,12 +114,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        TODO()//assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        TODO()//assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        TODO()//assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }

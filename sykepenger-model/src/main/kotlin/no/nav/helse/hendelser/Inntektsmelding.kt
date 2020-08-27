@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -139,8 +138,7 @@ class Inntektsmelding(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt,
-            INNTEKTSMELDING,
-            LØNNSINNTEKT
+            INNTEKTSMELDING
         )
     }
 

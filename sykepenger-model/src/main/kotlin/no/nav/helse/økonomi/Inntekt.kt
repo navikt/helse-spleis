@@ -63,7 +63,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     internal operator fun times(prosentdel: Prosentdel) = times(prosentdel.ratio())
 
-    private operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
+    internal operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
 
     internal operator fun div(prosentdel: Prosentdel) = this / prosentdel.ratio()
 

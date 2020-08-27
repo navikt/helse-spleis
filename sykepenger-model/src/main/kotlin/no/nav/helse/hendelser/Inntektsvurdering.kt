@@ -147,10 +147,13 @@ class Inntektsvurdering(
                                 vilkårsgrunnlag.meldingsreferanseId(),
                                 it.inntekt,
                                 when (it.inntektsgrunnlag) {
-                                    SAMMENLIGNINGSGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
-                                    SYKEPENGEGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT
+                                    SAMMENLIGNINGSGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
+                                    SYKEPENGEGRUNNLAG -> Inntekthistorikk.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG
                                 },
-                                enumValueOf(it.type.name)
+                                enumValueOf(it.type.name),
+                                "", //TODO: må hentes fra sparkel-inntekt
+                                "",
+                                ""
                             )
                         }
                 }

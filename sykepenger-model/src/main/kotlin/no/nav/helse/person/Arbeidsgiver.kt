@@ -244,7 +244,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
-    internal fun inntekt(dato: LocalDate): Inntekt? = inntekthistorikk.inntekt(dato)
+    internal fun inntekt(dato: LocalDate): Inntekt? = TODO()//inntekthistorikk.inntekt(dato)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
         inntektsmelding.addInntekt(inntekthistorikk)
@@ -258,7 +258,7 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverInntekt.lagreInntekter(inntekthistorikk, vilkårsgrunnlag)
     }
 
-    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)
+    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = TODO()//inntekthistorikk.sykepengegrunnlag(dato)
 
     internal fun søppelbøtte(hendelse: PersonHendelse) {
         vedtaksperioder.firstOrNull()?.also { søppelbøtte(it, hendelse, ALLE) }

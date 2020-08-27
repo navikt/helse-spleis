@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -36,10 +35,11 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100)))
         arbeidsgiver.håndter(inntektsmelding)
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
-        assertEquals(
-            12000.månedlig,
-            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)
-        )
+        TODO()
+//        assertEquals(
+//            12000.månedlig,
+//            ArbeidsgiverTestVisitor.inntekthistorikk.inntekt(10.september)
+//        )
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {

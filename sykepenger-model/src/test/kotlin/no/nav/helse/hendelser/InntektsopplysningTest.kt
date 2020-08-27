@@ -6,7 +6,8 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -33,13 +34,13 @@ internal class InntektsopplysningTest {
     @Test
     fun `legger til inntekter for samme arbeidsgiver`() {
         inntektsopplysning(DATO, ORGNR).addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNotNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
+        TODO()//assertNotNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
     }
 
     @Test
     fun `legger ikke til inntekter for annen arbeidsgiver`() {
         inntektsopplysning(DATO, "987654321").addInntekter(HENDELSE, ORGNR, inntekthistorikk)
-        assertNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
+        TODO()//assertNull(inntekthistorikk.inntekt(DATO.minusDays(1)))
     }
 
     @Test

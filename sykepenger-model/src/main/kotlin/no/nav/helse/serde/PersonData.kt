@@ -181,20 +181,51 @@ internal data class PersonData(
             private val hendelseId: UUID,
             private val beløp: Double,
             private val kilde: String,
-            private val type: String,
+            private val type: String?,
+            private val fordel: String?,
+            private val beskrivelse: String?,
+            private val begrunnelse: String?,
+            private val tilleggsinformasjon: String?,
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
                 internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
                     inntekter.forEach { inntektData ->
-                        inntekthistorikk.add(
-                            fom = inntektData.fom,
-                            hendelseId = inntektData.hendelseId,
-                            beløp = inntektData.beløp.månedlig,
-                            kilde = enumValueOf(inntektData.kilde),
-                            type = enumValueOf(inntektData.type),
-                            tidsstempel = inntektData.tidsstempel
-                        )
+                        when (enumValueOf<Inntekthistorikk.Inntektsendring.Kilde>(inntektData.kilde)) {
+                            Inntekthistorikk.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
+                            Inntekthistorikk.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
+                                inntekthistorikk.add(
+                                    dato = inntektData.fom,
+                                    meldingsreferanseId = inntektData.hendelseId,
+                                    inntekt = inntektData.beløp.månedlig,
+                                    kilde = enumValueOf(inntektData.kilde),
+                                    type = enumValueOf(requireNotNull(inntektData.type)),
+                                    fordel = requireNotNull(inntektData.fordel),
+                                    beskrivelse = requireNotNull(inntektData.beskrivelse),
+                                    tilleggsinformasjon = inntektData.tilleggsinformasjon,
+                                    tidsstempel = inntektData.tidsstempel
+                                )
+                            Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD,
+                            Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING ->
+                                inntekthistorikk.add(
+                                    dato = inntektData.fom,
+                                    meldingsreferanseId = inntektData.hendelseId,
+                                    inntekt = inntektData.beløp.månedlig,
+                                    kilde = enumValueOf(inntektData.kilde),
+                                    tidsstempel = inntektData.tidsstempel
+                                )
+                            Inntekthistorikk.Inntektsendring.Kilde.SAKSBEHANDLER ->
+                                inntekthistorikk.add(
+                                    dato = inntektData.fom,
+                                    meldingsreferanseId = inntektData.hendelseId,
+                                    inntekt = inntektData.beløp.månedlig,
+                                    kilde = enumValueOf(inntektData.kilde),
+                                    begrunnelse = requireNotNull(inntektData.begrunnelse),
+                                    tidsstempel = inntektData.tidsstempel
+                                )
+                        }
+
+
                     }
                 }
             }

@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -42,7 +41,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     private fun inntekthistorikk(dager: JsonNode) = Inntekthistorikk().also { historikk ->
         dager.forEach { dag ->
             dag.path("dagsats").asInt().also { lønn ->
-                if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING, LØNNSINNTEKT)
+                if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING)
             }
         }
     }
@@ -79,7 +78,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0
-    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
+    ):Unit = TODO()//opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
 }
 
 private val ObjectNode.dato get() = LocalDate.parse(this["dato"].textValue(), ISO_DATE)

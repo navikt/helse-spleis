@@ -35,7 +35,7 @@ internal class InntektsmeldingHendelseTest {
         val inntekthistorikk = Inntekthistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
-        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
+        TODO()//assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
     }
 
     @Test

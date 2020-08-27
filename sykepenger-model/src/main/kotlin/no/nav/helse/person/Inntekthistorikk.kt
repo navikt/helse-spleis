@@ -1,15 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Inntekttype
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.*
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class Inntekthistorikk {
+
     private val inntekter = mutableListOf<Inntektsendring>()
 
     internal fun clone(): Inntekthistorikk {
@@ -24,63 +22,102 @@ internal class Inntekthistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun add(fom: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde, type: Inntekttype, tidsstempel: LocalDateTime = LocalDateTime.now()) {
-        val nyInntekt = Inntektsendring(fom, hendelseId, beløp, kilde, type, tidsstempel)
-        inntekter.removeAll { it.erRedundantMed(nyInntekt) }
-        inntekter.add(nyInntekt)
-        inntekter.sort()
+    internal fun add(
+        dato: LocalDate,
+        meldingsreferanseId: UUID,
+        inntekt: Inntekt,
+        kilde: Kilde,
+        tidsstempel: LocalDateTime= LocalDateTime.now()
+    ) {
+        inntekter.add(Inntektsendring(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
     }
 
-    internal fun inntekt(dato: LocalDate) = Inntektsendring.inntekt(inntekter, dato)
+    internal fun add(
+        dato: LocalDate,
+        meldingsreferanseId: UUID,
+        inntekt: Inntekt,
+        kilde: Kilde,
+        type: Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tilleggsinformasjon: String?,
+        tidsstempel: LocalDateTime= LocalDateTime.now()
+    ) {
+        inntekter.add(Skatt(dato, meldingsreferanseId, inntekt, kilde, type, fordel, beskrivelse, tilleggsinformasjon, tidsstempel))
+    }
 
-    internal fun sykepengegrunnlag(dato: LocalDate) = Inntektsendring.sykepengegrunnlag(inntekter, dato)
+    internal fun add(
+        dato: LocalDate,
+        meldingsreferanseId: UUID,
+        inntekt: Inntekt,
+        kilde: Kilde,
+        begrunnelse: String,
+        tidsstempel: LocalDateTime= LocalDateTime.now()
+    ) {
+        inntekter.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
+    }
 
-    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
-        inntekt(dato)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
-
-    internal class Inntektsendring(
+    internal open class Inntektsendring(
         private val fom: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val kilde: Kilde,
-        private val type: Inntekttype,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Comparable<Inntektsendring> {
-
-        companion object {
-            internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
-                (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())?.beløp
-
-            internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Inntekt? =
-                inntekt(inntekter, dato)?.let {
-                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).min()
-                }
-        }
+    ) {
 
         fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntekt(this, hendelseId)
         }
 
-        override fun compareTo(other: Inntektsendring) =
-            this.fom.compareTo(other.fom).let {
-                if (it == 0) this.kilde.compareTo(other.kilde)
-                else it
-            }
-
-        internal fun erRedundantMed(annenInntektsendring: Inntektsendring) =
-            annenInntektsendring.fom == fom && annenInntektsendring.kilde == kilde
-
-        //Order is significant, compare is used to prioritize records from various sources
-        internal enum class Kilde : Comparable<Kilde> {
-            SKATT, INFOTRYGD, INNTEKTSMELDING
+        internal enum class Kilde {
+            SKATT_SAMMENLIGNINSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
         }
 
         internal enum class Inntekttype {
             LØNNSINNTEKT,
             NÆRINGSINNTEKT,
             PENSJON_ELLER_TRYGD,
-            YTELSE_FRA_OFFENTLIGE,
-            VET_IKKE
+            YTELSE_FRA_OFFENTLIGE
         }
+
+        internal class Skatt(
+            fom: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            kilde: Kilde,
+            private val type: Inntekttype,
+            private val fordel: String,
+            private val beskrivelse: String,
+            private val tilleggsinformasjon: String?,
+            tidsstempel: LocalDateTime = LocalDateTime.now()
+        ) : Inntektsendring(
+            fom,
+            hendelseId,
+            beløp,
+            kilde,
+            tidsstempel
+        ) {
+
+        }
+
+        internal class Saksbehandler(
+            private val fom: LocalDate,
+            private val hendelseId: UUID,
+            private val beløp: Inntekt,
+            private val kilde: Kilde,
+            private val begrunnelse: String,
+            private val tidsstempel: LocalDateTime = LocalDateTime.now()
+        ) : Inntektsendring(
+            fom,
+            hendelseId,
+            beløp,
+            kilde,
+            tidsstempel
+        ) {
+
+        }
+
     }
 }
+
+
