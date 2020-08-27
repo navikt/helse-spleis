@@ -31,7 +31,8 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
         "fødselsnummer": "08127411111",
         "organisasjonsnummer": "orgnummer",
         "fagsystemId": "ABCD1234",
-        "saksbehandler": "Ola Nordmann"
+        "saksbehandler": "Ola Nordmann",
+        "saksbehandlerEpost": "tbd@nav.no"
     }
 """.trimIndent()
 
@@ -45,7 +46,8 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
         "fødselsnummer": "08127411111",
         "organisasjonsnummer": "orgnummer",
         "fagsystemId": "ABCD1234",
-        "saksbehandler": "Ola Nordmann"
+        "saksbehandler": "Ola Nordmann",
+        "saksbehandlerEpost": "tbd@nav.no"
     }
 """.trimIndent()
 }

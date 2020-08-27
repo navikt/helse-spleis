@@ -197,10 +197,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagRollbackDelete())
     }
 
-    protected fun sendKansellerUtbetaling() {
-        val fagsystemId = testRapid.inspektør.let {
-            it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"]
-        }.asText()
+    protected fun sendKansellerUtbetaling(fagsystemId: String) {
         testRapid.sendTestMessage(meldingsfabrikk.lagKansellerUtbetaling(fagsystemId))
     }
 
@@ -228,7 +225,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             testRapid.inspektør.forkastedeTilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks))
         )
     }
-
 }
 
 internal fun createHikariConfig(jdbcUrl: String) =

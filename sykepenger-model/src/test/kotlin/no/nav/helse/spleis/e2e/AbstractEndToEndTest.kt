@@ -311,7 +311,9 @@ internal abstract class AbstractEndToEndTest {
             UNG_PERSON_FNR_2018,
             orgnummer,
             fagsystemId,
-            "Ola Nordmann"
+            "Ola Nordmann",
+            "tbd@nav.no",
+            LocalDateTime.now()
         ))
     }
 

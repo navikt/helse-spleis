@@ -105,10 +105,11 @@ interface PersonObserver {
 
     data class UtbetalingAnnullertEvent(
         val fødselsnummer: String,
+        val aktørId: String,
         val organisasjonsnummer: String,
         val fagsystemId: String,
         val utbetalingslinjer: List<Utbetalingslinje>,
-        val dato: LocalDate,
+        val annullertAvSaksbehandler: LocalDateTime,
         val saksbehandlerEpost: String
     ) {
         data class Utbetalingslinje(

@@ -111,6 +111,10 @@ class Person private constructor(
         }
     }
 
+    fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
+        observers.forEach { it.annullering(event) }
+    }
+
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
@@ -119,7 +120,6 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
     }
 
-    @Disabled
     @Test
     fun `publiserer et event ved annullering`() {
         val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
@@ -129,13 +129,12 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         assertNotNull(annullering)
 
         assertEquals(fagsystemId, annullering!!.fagsystemId)
-        // 19.januar, 26.januar, 1431, 1431, 100.0
+
         val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
-        assertEquals(LocalDate.now(), annullering.dato)
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
-        assertEquals(1431, utbetalingslinje.beløp)
+        assertEquals(8586, utbetalingslinje.beløp)
         assertEquals(100.0, utbetalingslinje.grad)
     }
 

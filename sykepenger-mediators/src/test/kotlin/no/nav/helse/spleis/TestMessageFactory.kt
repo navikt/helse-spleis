@@ -330,7 +330,8 @@ internal class TestMessageFactory(
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "fagsystemId" to fagsystemId,
-                "saksbehandler" to "Ola Nordmann"
+                "saksbehandler" to "Ola Nordmann",
+                "saksbehandlerEpost" to "tbd@nav.no"
             )
         )
     }

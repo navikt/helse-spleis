@@ -14,7 +14,7 @@ internal class KansellerUtbetalingerRiver(
     override val riverName = "Kanseller utbetaling"
 
     override fun validate(packet: JsonMessage) {
-        packet.requireKey("@id", "aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler")
+        packet.requireKey("@id", "aktørId", "fødselsnummer", "organisasjonsnummer", "fagsystemId", "saksbehandler", "saksbehandlerEpost")
     }
 
     override fun createMessage(packet: JsonMessage) = KansellerUtbetalingMessage(JsonMessageDelegate(packet))

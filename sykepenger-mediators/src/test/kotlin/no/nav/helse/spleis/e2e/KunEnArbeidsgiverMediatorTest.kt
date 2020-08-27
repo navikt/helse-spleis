@@ -9,10 +9,11 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -57,7 +58,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling(0)
-        sendKansellerUtbetaling()
+        val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
+        sendKansellerUtbetaling(fagsystemId)
         assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling))
 
         assertTilstander(
@@ -122,6 +124,33 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         val sisteMelding = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertTrue(sisteMelding.hasNonNull("vedtaksperiodeId"))
+    }
+
+    @Test
+    fun `Send annulleringsevent`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenHistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, true)
+        sendUtbetaling(0, true)
+
+        val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
+        sendKansellerUtbetaling(fagsystemId)
+
+        val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
+        val utbetalingAnnullert = requireNotNull(meldinger.firstOrNull { it["@event_name"]?.asText() == "utbetaling_annullert" })
+
+        assertEquals(fagsystemId, utbetalingAnnullert["fagsystemId"].asText())
+        assertEquals("tbd@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
+        assertNotNull(utbetalingAnnullert["annullertAvSaksbehandler"].asText())
+
+        assertEquals(19.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["fom"].asText())
+        assertEquals(26.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["tom"].asText())
+        assertEquals(8586, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
+        assertEquals(100, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
     }
 }
 

@@ -200,6 +200,25 @@ internal class Arbeidsgiver private constructor(
 
         val utbetaling = sisteUtbetaling.kansellerUtbetaling()
 
+        person.annullert(PersonObserver.UtbetalingAnnullertEvent(
+            fødselsnummer = kansellerUtbetaling.fødselsnummer(),
+            aktørId = kansellerUtbetaling.aktørId(),
+            organisasjonsnummer = kansellerUtbetaling.organisasjonsnummer(),
+            fagsystemId = kansellerUtbetaling.fagsystemId,
+            utbetalingslinjer = sisteUtbetaling?.let {
+                it.arbeidsgiverOppdrag().map {
+                    PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
+                        fom = it.fom,
+                        tom = it.tom,
+                        beløp = it.totalbeløp(),
+                        grad = it.grad
+                    )
+                }
+            },
+            annullertAvSaksbehandler = kansellerUtbetaling.opprettet,
+            saksbehandlerEpost = kansellerUtbetaling.saksbehandlerEpost
+        ))
+
         kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
         utbetalinger.add(utbetaling)
         sendUtbetalingsbehov(

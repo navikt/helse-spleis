@@ -1,5 +1,9 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
@@ -277,6 +281,10 @@ internal class HendelseMediator(
             private val message: HendelseMessage,
             private val hendelse: PersonHendelse
         ) : PersonObserver {
+            private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
             override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
                 queueMessage(
                     "vedtaksperiode_påminnet", JsonMessage.newMessage(
@@ -288,6 +296,14 @@ internal class HendelseMediator(
                             "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt(),
                             "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt()
                         )
+                    )
+                )
+            }
+
+            override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
+                queueMessage(
+                    "utbetaling_annullert", JsonMessage.newMessage(
+                        objectMapper.convertValue(event)
                     )
                 )
             }
