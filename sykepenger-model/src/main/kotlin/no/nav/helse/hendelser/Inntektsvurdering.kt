@@ -14,6 +14,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -67,8 +68,8 @@ class Inntektsvurdering(
         private val arbeidsgiver: String,
         private val inntekter: List<MånedligInntekt>
     ) {
-        internal fun lagreInntekter(inntekthistorikk: Inntekthistorikk, meldingsreferanseId: UUID) {
-            MånedligInntekt.lagreInntekter(inntekter, inntekthistorikk, meldingsreferanseId)
+        internal fun lagreInntekter(inntekthistorikk: Inntekthistorikk, meldingsreferanseId: UUID, tidsstempel: LocalDateTime = LocalDateTime.now()) {
+            MånedligInntekt.lagreInntekter(inntekter, inntekthistorikk, meldingsreferanseId, tidsstempel)
         }
 
         private fun harInntekter() = inntekter.isNotEmpty()
@@ -139,7 +140,8 @@ class Inntektsvurdering(
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
                     inntekthistorikk: Inntekthistorikk,
-                    meldingsreferanseId: UUID
+                    meldingsreferanseId: UUID,
+                    tidsstempel: LocalDateTime
                 ) {
                     inntekter
                         .forEach {
@@ -154,7 +156,8 @@ class Inntektsvurdering(
                                 enumValueOf(it.type.name),
                                 "", //TODO: må hentes fra sparkel-inntekt
                                 "",
-                                ""
+                                "",
+                                tidsstempel
                             )
                         }
                 }

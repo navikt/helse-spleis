@@ -2,12 +2,15 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class Inntekthistorikk {
 
+    //Hvordan løser vi as-is/as-of
     private val inntekter = mutableListOf<Inntektsendring>()
 
     internal fun clone(): Inntekthistorikk {
@@ -74,6 +77,9 @@ internal class Inntekthistorikk {
             .also(this::accept)
             .sykepengegrunnlag()
 
+    internal fun sammenligningsgrunnlag(dato: LocalDate) =
+        Inntektsendring.sammenligningsgrunnlag(dato, inntekter)
+
     internal open class Inntektsendring(
         protected val fom: LocalDate,
         protected val hendelseId: UUID,
@@ -82,9 +88,27 @@ internal class Inntekthistorikk {
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         internal fun inntekt() = beløp
+        internal fun isBefore(other: Inntektsendring) = this.tidsstempel.isBefore(other.tidsstempel)
+        internal fun isAfter(other: Inntektsendring) = this.tidsstempel.isAfter(other.tidsstempel)
 
         open fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntekt(this, hendelseId, kilde, fom)
+        }
+
+        companion object {
+            internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsendring>): Inntekt {
+                return inntekter
+                    .filter { it.kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG }
+                    .takeLatestBy { it.tidsstempel }
+                    .filter { YearMonth.from(it.fom) in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) } }
+                    .map { it.inntekt() }
+                    .summer() / 12
+            }
+
+            private fun <T, R : Comparable<R>> List<T>.takeLatestBy(selector: (T) -> R): List<T> {
+                val first = maxBy(selector) ?: return this
+                return this.filter { selector(first) == selector(it) }
+            }
         }
 
         internal enum class Kilde {

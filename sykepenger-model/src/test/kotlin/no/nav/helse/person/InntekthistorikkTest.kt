@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class InntekthistorikkTest {
@@ -89,6 +91,40 @@ internal class InntekthistorikkTest {
         }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
         assertEquals(22, inspektør.inntektTeller)
         assertEquals(INNTEKT / 4, historikk.sykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `Inntekt fra skatt skal bare brukes en gang`() {
+        repeat(3) { i ->
+            val meldingsreferanseId = UUID.randomUUID()
+            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
+            inntektperioder {
+                (1.desember(2016) til 1.desember(2017)) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+                1.desember(2016) til 1.august(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
+        }
+        assertEquals(22, inspektør.inntektTeller)
+        assertEquals(INNTEKT / 4, historikk.sykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `Inntekt fra skatt skal bare brukes en gang i beregning av sammenligningsgrunnlag`() {
+        repeat(3) { i ->
+            val meldingsreferanseId = UUID.randomUUID()
+            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2016) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
+        }
+        assertEquals(22, inspektør.inntektTeller)
+        assertEquals(INNTEKT, historikk.sammenligningsgrunnlag(31.desember(2017)))
     }
 
     private class Inntektsinspektør(historikk: Inntekthistorikk) : InntekthistorikkVisitor {

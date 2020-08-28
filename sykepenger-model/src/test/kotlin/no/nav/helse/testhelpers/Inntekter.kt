@@ -2,7 +2,6 @@ package no.nav.helse.testhelpers
 
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
 import no.nav.helse.hendelser.Inntektsvurdering.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.hendelser.Periode
@@ -14,6 +13,7 @@ internal fun inntektperioder(block: Inntektperioder.() -> Unit) = Inntektperiode
 
 internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
     private val liste = mutableListOf<ArbeidsgiverInntekt>()
+    internal var inntektsgrunnlag: Inntektsvurdering.Inntektsgrunnlag = SYKEPENGEGRUNNLAG
 
     init {
         block()
@@ -21,11 +21,7 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
 
     internal fun inntekter(): List<ArbeidsgiverInntekt> = liste.toList()
 
-    internal infix fun Periode.inntekterSammenligningsgrunnlag(block: Inntekter.() -> Unit) =
-        inntekter(SAMMENLIGNINGSGRUNNLAG, block)
-
-    internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) = inntekter(SYKEPENGEGRUNNLAG, block)
-    private fun Periode.inntekter(inntektsgrunnlag: Inntektsvurdering.Inntektsgrunnlag, block: Inntekter.() -> Unit) =
+    internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) =
         this.map(YearMonth::from)
             .distinct()
             .flatMap { yearMonth ->

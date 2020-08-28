@@ -60,6 +60,7 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         kilde: Inntektsendring.Kilde,
         fom: LocalDate
     ) {
+        if (fom != dato) return
         tilstand.addSaksbehandlerinntekt(this, inntektsendring)
     }
 
@@ -126,12 +127,14 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
 
         object SkatteinntektTilstand : Tilstand() {
             override fun sykepengegrunnlag(visitor: GrunnlagForSykepengegrunnlagVisitor) =
-                visitor.inntekter.map { it.inntekt() }.summer() / 12
+                visitor.inntekter.map { it.inntekt() }.summer() / 3
 
             override fun addSkatteinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
                 inntektsendring: Inntektsendring.Skatt
             ) {
+                if (inntektsendring.isBefore(visitor.inntekter.last())) return
+                if (inntektsendring.isAfter(visitor.inntekter.last())) visitor.clear()
                 visitor.addInntekt(inntektsendring)
             }
 
