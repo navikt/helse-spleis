@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -10,20 +11,37 @@ import java.util.*
 
 internal class Inntekthistorikk {
 
-    //Hvordan løser vi as-is/as-of
-    private val inntekter = mutableListOf<Inntektsendring>()
+    private val endringer = mutableListOf<InntektshistorikkEndring>()
 
-    internal fun clone(): Inntekthistorikk {
-        return Inntekthistorikk().also {
-            it.inntekter.addAll(this.inntekter)
-        }
+    private val endring get() =
+        if(erIendring) endringer.first()
+        else (endringer.firstOrNull()?.clone() ?: InntektshistorikkEndring())
+            .also { endringer.add(0, it) }
+
+
+    private var erIendring = false
+
+    internal fun endring(block: Inntekthistorikk.() -> Unit) {
+        require(!erIendring)
+        endring
+        erIendring = true
+        block()
+        erIendring = false
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
         visitor.preVisitInntekthistorikk(this)
-        inntekter.forEach { it.accept(visitor) }
+        endringer.firstOrNull()?.accept(visitor)
         visitor.postVisitInntekthistorikk(this)
     }
+
+    internal fun sykepengegrunnlag(dato: LocalDate) =
+        GrunnlagForSykepengegrunnlagVisitor(dato)
+            .also(this::accept)
+            .sykepengegrunnlag()
+
+    internal fun sammenligningsgrunnlag(dato: LocalDate) =
+        endringer.first().sammenligningsgrunnlag(dato)
 
     internal fun add(
         dato: LocalDate,
@@ -32,7 +50,7 @@ internal class Inntekthistorikk {
         kilde: Kilde,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        inntekter.add(Inntektsendring(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
+        endring.add(Inntektsendring(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
     }
 
     internal fun add(
@@ -46,7 +64,7 @@ internal class Inntekthistorikk {
         tilleggsinformasjon: String?,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        inntekter.add(
+        endring.add(
             Skatt(
                 dato,
                 meldingsreferanseId,
@@ -69,16 +87,34 @@ internal class Inntekthistorikk {
         begrunnelse: String,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        inntekter.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
+        endring.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
     }
 
-    internal fun sykepengegrunnlag(dato: LocalDate) =
-        GrunnlagForSykepengegrunnlagVisitor(dato)
-            .also(this::accept)
-            .sykepengegrunnlag()
+    internal fun clone() = Inntekthistorikk().also {
+        it.endringer.addAll(this.endringer.map(InntektshistorikkEndring::clone))
+    }
 
-    internal fun sammenligningsgrunnlag(dato: LocalDate) =
-        Inntektsendring.sammenligningsgrunnlag(dato, inntekter)
+    private class InntektshistorikkEndring {
+
+        private val inntekter = mutableListOf<Inntektsendring>()
+
+        fun accept(visitor: InntekthistorikkVisitor) {
+            inntekter.forEach { it.accept(visitor) }
+        }
+
+        fun clone() = InntektshistorikkEndring().also {
+            it.inntekter.addAll(this.inntekter)
+        }
+
+        fun add(inntektsendring: Inntektsendring) {
+            inntekter.removeIf { it.skalErstattesAv(inntektsendring) }
+            inntekter.add(inntektsendring)
+        }
+
+        fun sammenligningsgrunnlag(dato: LocalDate) =
+            Inntektsendring.sammenligningsgrunnlag(dato, inntekter)
+
+    }
 
     internal open class Inntektsendring(
         protected val fom: LocalDate,
@@ -95,12 +131,16 @@ internal class Inntekthistorikk {
             visitor.visitInntekt(this, hendelseId, kilde, fom)
         }
 
+        internal fun skalErstattesAv(other: Inntektsendring) = this.fom == other.fom && this.kilde == other.kilde
+
         companion object {
             internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsendring>): Inntekt {
                 return inntekter
                     .filter { it.kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG }
                     .takeLatestBy { it.tidsstempel }
-                    .filter { YearMonth.from(it.fom) in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) } }
+                    .filter {
+                        YearMonth.from(it.fom) in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) }
+                    }
                     .map { it.inntekt() }
                     .summer() / 12
             }
