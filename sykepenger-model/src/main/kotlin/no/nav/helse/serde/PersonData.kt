@@ -133,7 +133,7 @@ internal data class PersonData(
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
     ) {
-        private val modelInntekthistorikk = InntekthistorikkVol2().apply {
+        private val modelInntekthistorikk = Inntekthistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -181,6 +181,28 @@ internal data class PersonData(
             private val hendelseId: UUID,
             private val beløp: Double,
             private val kilde: String,
+            private val tidsstempel: LocalDateTime
+        ) {
+            internal companion object {
+                internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
+                    inntekter.forEach { inntektData ->
+                        inntekthistorikk.add(
+                            fom = inntektData.fom,
+                            hendelseId = inntektData.hendelseId,
+                            beløp = inntektData.beløp.månedlig,
+                            kilde = Inntekthistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
+                            tidsstempel = inntektData.tidsstempel
+                        )
+                    }
+                    }
+                }
+            }
+
+        data class InntektDataVol2(
+            private val fom: LocalDate,
+            private val hendelseId: UUID,
+            private val beløp: Double,
+            private val kilde: String,
             private val type: String?,
             private val fordel: String?,
             private val beskrivelse: String?,
@@ -189,7 +211,7 @@ internal data class PersonData(
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: InntekthistorikkVol2) {
+                internal fun parseInntekter(inntekter: List<InntektDataVol2>, inntekthistorikk: InntekthistorikkVol2) {
                     inntekter.forEach { inntektData ->
                         when (enumValueOf<InntekthistorikkVol2.Inntektsendring.Kilde>(inntektData.kilde)) {
                             InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,

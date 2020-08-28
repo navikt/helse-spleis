@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.InntekthistorikkVol2
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -14,7 +14,7 @@ import java.util.*
 internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     override val description = "utvide økonomifelt i Utbetalingstidslinjer"
 
-    private lateinit var inntekthistorikk: InntekthistorikkVol2
+    private lateinit var inntekthistorikk: Inntekthistorikk
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
@@ -38,7 +38,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         }
     }
 
-    private fun inntekthistorikk(dager: JsonNode) = InntekthistorikkVol2().also { historikk ->
+    private fun inntekthistorikk(dager: JsonNode) = Inntekthistorikk().also { historikk ->
         dager.forEach { dag ->
             dag.path("dagsats").asInt().also { lønn ->
                 if (lønn > 0) historikk.add((dag as ObjectNode).dato, UUID.randomUUID(), lønn.daglig, INNTEKTSMELDING)
@@ -78,7 +78,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
         dag: ObjectNode,
         grad: Double = 0.0,
         utbetaling: Int = 0
-    ):Unit = TODO()//opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
+    ) = opprett(dag, inntekthistorikk.inntekt(dag.dato) ?: INGEN, grad, utbetaling)
 }
 
 private val ObjectNode.dato get() = LocalDate.parse(this["dato"].textValue(), ISO_DATE)

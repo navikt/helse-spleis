@@ -89,7 +89,7 @@ internal class InntekthistorikkVol2Test {
                 ORGNUMMER inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
-        assertEquals(22, inspektør.inntektTeller)
+        assertEquals(13, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
     }
 
@@ -107,7 +107,7 @@ internal class InntekthistorikkVol2Test {
                 }
             }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
         }
-        assertEquals(66, inspektør.inntektTeller)
+        assertEquals(13, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
     }
 
@@ -123,7 +123,7 @@ internal class InntekthistorikkVol2Test {
                 }
             }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
         }
-        assertEquals(39, inspektør.inntektTeller)
+        assertEquals(13, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.sammenligningsgrunnlag(31.desember(2017)))
     }
 

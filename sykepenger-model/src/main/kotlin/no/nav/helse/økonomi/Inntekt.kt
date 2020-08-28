@@ -30,9 +30,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         internal val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
-        internal fun List<Inntekt>.summer(): Inntekt {
-            return this.fold(INGEN) { acc, inntekt -> acc + inntekt }
-        }
+        internal fun List<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 
         internal fun List<Inntekt>.avg(): Inntekt {
             if (this.isEmpty()) return INGEN

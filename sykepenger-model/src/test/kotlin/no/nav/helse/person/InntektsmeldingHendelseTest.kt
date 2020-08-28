@@ -32,10 +32,10 @@ internal class InntektsmeldingHendelseTest {
 
     @Test
     internal fun `legger inn beregnet inntekt i inntekthistorikk`() {
-        val inntekthistorikk = InntekthistorikkVol2()
+        val inntekthistorikk = Inntekthistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
-        TODO()//assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
+        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
     }
 
     @Test

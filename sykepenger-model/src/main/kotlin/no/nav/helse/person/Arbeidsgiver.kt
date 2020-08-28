@@ -17,12 +17,14 @@ internal class Arbeidsgiver private constructor(
     private val person: Person,
     private val organisasjonsnummer: String,
     private val id: UUID,
-    private val inntekthistorikk: InntekthistorikkVol2,
+    private val inntekthistorikk: Inntekthistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
+    //FIXME: Erstatter inntektshistorikk
+    private val inntekthistorikkVol2 = InntekthistorikkVol2()
 
     internal fun inntektshistorikk() = inntekthistorikk.clone()
 
@@ -30,7 +32,7 @@ internal class Arbeidsgiver private constructor(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
-        inntekthistorikk = InntekthistorikkVol2(),
+        inntekthistorikk = Inntekthistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
@@ -200,24 +202,26 @@ internal class Arbeidsgiver private constructor(
 
         val utbetaling = sisteUtbetaling.kansellerUtbetaling()
 
-        person.annullert(PersonObserver.UtbetalingAnnullertEvent(
-            fødselsnummer = kansellerUtbetaling.fødselsnummer(),
-            aktørId = kansellerUtbetaling.aktørId(),
-            organisasjonsnummer = kansellerUtbetaling.organisasjonsnummer(),
-            fagsystemId = kansellerUtbetaling.fagsystemId,
-            utbetalingslinjer = sisteUtbetaling?.let {
-                it.arbeidsgiverOppdrag().map {
-                    PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                        fom = it.fom,
-                        tom = it.tom,
-                        beløp = it.totalbeløp(),
-                        grad = it.grad
-                    )
-                }
-            },
-            annullertAvSaksbehandler = kansellerUtbetaling.opprettet,
-            saksbehandlerEpost = kansellerUtbetaling.saksbehandlerEpost
-        ))
+        person.annullert(
+            PersonObserver.UtbetalingAnnullertEvent(
+                fødselsnummer = kansellerUtbetaling.fødselsnummer(),
+                aktørId = kansellerUtbetaling.aktørId(),
+                organisasjonsnummer = kansellerUtbetaling.organisasjonsnummer(),
+                fagsystemId = kansellerUtbetaling.fagsystemId,
+                utbetalingslinjer = sisteUtbetaling?.let {
+                    it.arbeidsgiverOppdrag().map {
+                        PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
+                            fom = it.fom,
+                            tom = it.tom,
+                            beløp = it.totalbeløp(),
+                            grad = it.grad
+                        )
+                    }
+                },
+                annullertAvSaksbehandler = kansellerUtbetaling.opprettet,
+                saksbehandlerEpost = kansellerUtbetaling.saksbehandlerEpost
+            )
+        )
 
         kansellerUtbetaling.info("Annullerer utbetalinger med fagsystemId ${kansellerUtbetaling.fagsystemId}")
         utbetalinger.add(utbetaling)
@@ -244,7 +248,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
-    internal fun inntekt(dato: LocalDate): Inntekt? = TODO()//inntekthistorikk.inntekt(dato)
+    internal fun inntekt(dato: LocalDate): Inntekt? = inntekthistorikk.inntekt(dato)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
         inntektsmelding.addInntekt(inntekthistorikk)
@@ -254,11 +258,22 @@ internal class Arbeidsgiver private constructor(
         ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
     }
 
-    internal fun lagreInntekter(arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        arbeidsgiverInntekt.lagreInntekter(inntekthistorikk, vilkårsgrunnlag.meldingsreferanseId())
+    internal fun addInntektVol2(inntektsmelding: Inntektsmelding) {
+        inntektsmelding.addInntekt(inntekthistorikkVol2)
     }
 
-    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = TODO()//inntekthistorikk.sykepengegrunnlag(dato)
+    internal fun addInntektVol2(ytelser: Ytelser) {
+        ytelser.addInntekt(organisasjonsnummer, inntekthistorikkVol2)
+    }
+
+    internal fun lagreInntekter(
+        arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
+        vilkårsgrunnlag: Vilkårsgrunnlag
+    ) {
+        arbeidsgiverInntekt.lagreInntekter(inntekthistorikkVol2, vilkårsgrunnlag.meldingsreferanseId())
+    }
+
+    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntekthistorikk.sykepengegrunnlag(dato)
 
     internal fun søppelbøtte(hendelse: PersonHendelse) {
         vedtaksperioder.firstOrNull()?.also { søppelbøtte(it, hendelse, ALLE) }
@@ -369,6 +384,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
+
     internal class TilbakestillBehandling(
         internal val organisasjonsnummer: String,
         internal val hendelse: PersonHendelse
@@ -376,7 +392,6 @@ internal class Arbeidsgiver private constructor(
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()
-
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

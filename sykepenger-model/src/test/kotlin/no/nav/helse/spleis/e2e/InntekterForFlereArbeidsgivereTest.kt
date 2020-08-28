@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
@@ -23,26 +24,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
     private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
 
-    @Test
-    fun ` `() {
-        nyPeriode(1.januar til 31.januar, a1)
-        assertNoErrors(a1Inspektør)
-
-        person.håndter(vilkårsgrunnlag(
-            a1.id(0),
-            orgnummer = a1,
-            inntekter = inntektperioder {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 25000
-                }
-            }
-        ))
-
-        assertNoErrors(a1Inspektør)
-
-        TODO()//assertEquals(25000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-    }
-
+    @Disabled("Henting av inntekter er ikke implementert riktig")
     @Test
     fun `Inntekter fra flere arbeidsgivere`() {
         nyPeriode(1.januar til 31.januar, a1)
@@ -72,12 +54,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        TODO()//assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        TODO()//assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
@@ -114,12 +96,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        TODO()//assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        TODO()//assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        TODO()//assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
+        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }

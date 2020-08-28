@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.testhelpers.desember
@@ -11,6 +12,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 
 internal class InntektsvurderingTest {
@@ -27,19 +29,12 @@ internal class InntektsvurderingTest {
         assertTrue(
             hasErrors(
                 inntektsvurdering(
-                    listOf(
-                        Inntektsvurdering.ArbeidsgiverInntekt(
-                            ORGNR,
-                            listOf(
-                                Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
-                                    YearMonth.now(),
-                                    INGEN,
-                                    Inntektsvurdering.Inntekttype.LØNNSINNTEKT,
-                                    Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                                )
-                            )
-                        )
-                    )
+                    inntektperioder {
+                        inntektsgrunnlag = SAMMENLIGNINGSGRUNNLAG
+                        LocalDate.now() til LocalDate.now() inntekter {
+                            ORGNR inntekt INGEN
+                        }
+                    }
                 ), INGEN
             )
         )

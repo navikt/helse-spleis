@@ -12,8 +12,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
@@ -392,7 +392,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        lagreInntekter(vilkårsgrunnlag)
+        //FIXME: Kommentert ut inntil InntektshistorikkVol2 skal benyttes
+        // lagreInntekter(vilkårsgrunnlag)
         val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             ?: periode.start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(

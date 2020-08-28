@@ -1,10 +1,7 @@
 package no.nav.helse.hendelser
 
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.InntekthistorikkVol2
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import java.util.*
 
 class Ytelser(
@@ -23,6 +20,10 @@ class Ytelser(
 
     internal fun valider(periode: Periode, periodetype: Periodetype) =
         utbetalingshistorikk.valider(periode, periodetype)
+
+    internal fun addInntekt(organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
+        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntekthistorikk)
+    }
 
     internal fun addInntekt(organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
         utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntekthistorikk)
