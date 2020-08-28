@@ -1959,4 +1959,27 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(4, observatør.utbetaltEventer[0].ikkeUtbetalteDager
             .filter { it.type == PersonObserver.UtbetaltEvent.IkkeUtbetaltDag.Type.Arbeidsdag }.size)
     }
+
+    @Test
+    @Disabled
+    fun `annullerer bare utbetalte utbetalingslinjer`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 15.februar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 15.februar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        val fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId()
+        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+
+        assertEquals(26.januar, observatør.utbetaltEventer[0].tom)
+        assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
+    }
 }
