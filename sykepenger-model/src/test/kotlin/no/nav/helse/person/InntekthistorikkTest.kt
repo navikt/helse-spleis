@@ -1,183 +1,197 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.til
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntekthistorikk.Inntektsendring
-import no.nav.helse.testhelpers.august
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde
+import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
 import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class InntekthistorikkTest {
-
+    private val tidligereInntekt = 1500.daglig
+    private val nyInntekt = 2000.daglig
     private lateinit var historikk: Inntekthistorikk
-    private val inspektør get() = Inntektsinspektør(historikk)
-
-    private companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
-        const val AKTØRID = "42"
-        const val ORGNUMMER = "987654321"
-        val INNTEKT = 31000.00.månedlig
-    }
+    private var inntektsbeløp = 0
 
     @BeforeEach
     fun setup() {
         historikk = Inntekthistorikk()
+        inntektsbeløp = 1000
     }
 
     @Test
-    fun `Inntekt fra inntektsmelding blir lagt til i inntektshistorikk`() {
-        inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.inntektTeller)
+    fun `Dupliser inntekt til fordel for nyere oppføring`() {
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
+        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, INFOTRYGD)
+        assertEquals(1, historikk.size)
+        assertEquals(nyInntekt, historikk.inntekt(3.januar))
+        assertEquals(nyInntekt, historikk.inntekt(5.januar))
+        assertEquals(nyInntekt, historikk.inntekt(1.januar)) // Using rule that first salary is used
     }
 
     @Test
-    fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
-        inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+    fun `Inntekt fra infotrygd blir ikke overstyrt av inntekt fra skatt`() {
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
+        historikk.add(3.januar, UUID.randomUUID(), nyInntekt, SKATT)
+        assertEquals(2, historikk.size)
+        assertEquals(tidligereInntekt, historikk.inntekt(3.januar)) // Salary from infotrygd
     }
 
     @Test
-    fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
-        inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INGEN, historikk.sykepengegrunnlag(1.januar))
+    fun `gir eldste inntekt når vi ikke har nyere`() {
+        historikk.add(3.januar, UUID.randomUUID(), tidligereInntekt, INFOTRYGD)
+        assertEquals(1, historikk.size)
+        assertEquals(tidligereInntekt, historikk.inntekt(1.januar))
     }
 
     @Test
-    fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
-        assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+    fun `tom inntekthistorikk`() {
+        assertNull(historikk.inntekt(1.januar))
+    }
+
+
+    @Test
+    fun `Sykepengegrunnlag er begrenset til 6G når inntekt er høyere enn 6G`() {
+        val førsteFraværsdag = 1.januar(2020)
+        val `6GBeløp` = Grunnbeløp.`6G`.beløp(førsteFraværsdag)
+
+        val årsinntektOver6G =
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
+        assertEquals(
+            `6GBeløp`,
+            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, førsteFraværsdag)
+        )
+
+        val årsinntektUnder6G =
+            listOf(Inntektsendring(førsteFraværsdag, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
+        assertTrue(
+            Inntekthistorikk.Inntektsendring.sykepengegrunnlag(
+                årsinntektUnder6G,
+                førsteFraværsdag
+            )!! < `6GBeløp`
+        )
     }
 
     @Test
-    fun `Bruker inntekt fra inntektsmelding fremfor inntekt fra infotrygd for å beregne sykepengegrunnlaget`() {
-        inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk)
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
-        assertEquals(2, inspektør.inntektTeller)
-        assertEquals(20000.månedlig, historikk.sykepengegrunnlag(31.desember(2017)))
+    fun `Prioritert rekkefølge på kilde for lik dato`() {
+        assertEquals(INFOTRYGD, INFOTRYGD versus SKATT)
+        assertEquals(INNTEKTSMELDING, INFOTRYGD versus INNTEKTSMELDING)
+        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus INFOTRYGD)
+        assertEquals(INFOTRYGD, SKATT versus INFOTRYGD)
+        assertEquals(INNTEKTSMELDING, INNTEKTSMELDING versus SKATT)
+        assertEquals(INNTEKTSMELDING, SKATT versus INNTEKTSMELDING)
     }
 
     @Test
-    fun `Inntekt fra skatt siste tre måneder brukes til å beregne sykepengegrunnlaget`() {
-        inntektperioder {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-            1.desember(2016) til 1.august(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
-        assertEquals(22, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+    fun `Prioritert rekkefølge på kilde for ulik dato`() {
+        assertTrue(3.januar.INNTEKTSMELDING beats 2.januar.INNTEKTSMELDING on 5.januar)
+        assertTrue(1.januar.SKATT beats 4.januar.INNTEKTSMELDING on 3.januar)
+        assertTrue(3.januar.INNTEKTSMELDING beats 1.januar.SKATT on 3.januar)
+        assertTrue(5.januar.INFOTRYGD beats 6.januar.INNTEKTSMELDING on 3.januar)
+        assertFalse(3.januar.SKATT beats 3.januar.SKATT on 3.januar) //Entry order decides
     }
 
     @Test
-    fun `Inntekt fra skatt skal bare brukes en gang`() {
-        repeat(3) { i ->
-            val meldingsreferanseId = UUID.randomUUID()
-            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
-            inntektperioder {
-                (1.desember(2016) til 1.desember(2017)) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-                1.desember(2016) til 1.august(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
+    fun `Inntekt competition winners`() {
+        listOf(
+            "a" er 1.januar.SKATT,
+            "b" er 5.januar.INNTEKTSMELDING,
+            "c" er 5.januar.INFOTRYGD,
+            "d" er 10.januar.INFOTRYGD,
+            "e" er 10.januar.INNTEKTSMELDING
+        ).assertions { challengers ->
+            assertChampion("a" beats challengers, 1.desember(2017) to 4.januar)
+            assertChampion("b" beats challengers, 5.januar to 9.januar)
+            assertChampion("e" beats challengers, 10.januar to 28.februar)
         }
-        assertEquals(66, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
     }
 
-    @Test
-    fun `Inntekt fra skatt skal bare brukes en gang i beregning av sammenligningsgrunnlag`() {
-        repeat(3) { i ->
-            val meldingsreferanseId = UUID.randomUUID()
-            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
-            inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.desember(2016) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
-        }
-        assertEquals(39, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sammenligningsgrunnlag(31.desember(2017)))
-    }
-
-    @Test
-    fun `Inntekt for samme dato og samme kilde erstatter eksisterende`() {
-        inntektsmelding().addInntekt(historikk)
-        inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.inntektTeller)
-    }
-
-    @Test
-    fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
-        inntektsmelding().addInntekt(historikk)
-        inntektsmelding(førsteFraværsdag = 2.januar).addInntekt(historikk)
-        assertEquals(2, inspektør.inntektTeller)
-    }
-
-    @Test
-    fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
-        inntektsmelding().addInntekt(historikk)
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
-        assertEquals(2, inspektør.inntektTeller)
-    }
-
-    @Test
-    fun `Inntekt for flere datoer og samme kilde erstatter ikke hverandre`() {
-        inntektperioder {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
+    private fun assertChampion(winner: Pair<String, List<Pair<String, InntektArgs>>>, periode: Periode) {
+        periode.forEach { dato ->
+            val indeks = winner.second.foldIndexed(-1) { index, acc, _ ->
+                if (historikk.inntekt(dato)?.equals(((index + 1) * 1000).daglig) == true) index else acc
             }
-        }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
-        assertEquals(13, inspektør.inntektTeller)
-    }
-
-    @Test
-    fun `Onehsot add skatt`(){
-        historikk.endring {
-            inntektperioder {
-                1.desember(2016) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach {
-
-                it.lagreInntekter(this, UUID.randomUUID()) }
+            assertEquals(winner.first, winner.second[indeks].first, "for date: $dato")
         }
-        assertEquals(13, inspektør.inntektTeller)
     }
+
+    private infix fun String.beats(challengers: List<Pair<String, InntektArgs>>) = this to challengers
+
+    private infix fun String.er(args: InntektArgs) = this to args
+
+    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
+
+    private fun List<Pair<String, InntektArgs>>.assertions(block: (List<Pair<String, InntektArgs>>) -> Unit) {
+        historikk = Inntekthistorikk()
+        inntektsbeløp = 0
+        this.forEach { it.second.also { args -> args.add(); args.merkelapp(it.first) } }
+        block(this)
+    }
+
+    private infix fun Kilde.versus(other: Kilde): Kilde {
+        historikk = Inntekthistorikk()
+        historikk.add(1.januar, UUID.randomUUID(), 1000.daglig, this)
+        historikk.add(1.januar, UUID.randomUUID(), 2000.daglig, other)
+        return if (1000.daglig == historikk.inntekt(3.januar)) this else other
+    }
+
+    private inner class InntektCompetition(private val a: InntektArgs, private val b: InntektArgs) {
+        infix fun on(dato: LocalDate): Boolean {
+            fun assertInntekt(left: InntektArgs, right: InntektArgs, expected: Number): Boolean {
+                historikk = Inntekthistorikk()
+                inntektsbeløp = 0
+                left.add()
+                right.add()
+                return expected.daglig == historikk.inntekt(dato)
+            }
+            return assertInntekt(a, b, 1000) && assertInntekt(b, a, 2000)
+        }
+    }
+
+
+    private val LocalDate.INFOTRYGD get() = inntekt(this, Kilde.INFOTRYGD)
+
+    private val LocalDate.SKATT get() = inntekt(this, Kilde.SKATT)
+
+    private val LocalDate.INNTEKTSMELDING get() = inntekt(this, Kilde.INNTEKTSMELDING)
+
+    private fun inntekt(dato: LocalDate, kilde: Kilde) = InntektArgs(dato, kilde)
+
+    private open inner class InntektArgs(protected val dato: LocalDate, private val kilde: Kilde) {
+        internal lateinit var merkelapp: String
+
+        internal fun merkelapp(verdi: String) {
+            merkelapp = verdi
+        }
+
+        internal open fun add() {
+            inntektsbeløp += 1000
+            historikk.add(dato, UUID.randomUUID(), inntektsbeløp.daglig, kilde)
+        }
+
+        internal infix fun beats(other: InntektArgs) = InntektCompetition(this, other)
+    }
+
+    private inner class AvsluttetArgs(dato: LocalDate, kilde: Kilde) : InntektArgs(dato, kilde) {
+        override fun add() {
+            inntektsbeløp += 1000
+            historikk.add(dato, UUID.randomUUID(), 0.daglig, SKATT)
+        }
+    }
+
+    private val Inntekthistorikk.size: Int get() = Inntektsinspektør(this).inntektTeller
 
     private class Inntektsinspektør(historikk: Inntekthistorikk) : InntekthistorikkVisitor {
-        var inntektTeller = 0
+        internal var inntektTeller = 0
 
         init {
             historikk.accept(this)
@@ -187,58 +201,10 @@ internal class InntekthistorikkTest {
             inntektTeller = 0
         }
 
-        override fun visitInntekt(
-            inntektsendring: Inntektsendring,
-            id: UUID,
-            kilde: Inntektsendring.Kilde,
-            fom: LocalDate
-        ) {
+        override fun visitInntekt(inntektsendring: Inntektsendring, id: UUID) {
             inntektTeller += 1
         }
 
-        override fun visitInntektSkatt(
-            inntektsendring: Inntektsendring.Skatt,
-            id: UUID,
-            kilde: Inntektsendring.Kilde,
-            fom: LocalDate
-        ) {
-            inntektTeller += 1
-        }
-
-        override fun visitInntektSaksbehandler(
-            inntektsendring: Inntektsendring.Saksbehandler,
-            id: UUID,
-            kilde: Inntektsendring.Kilde,
-            fom: LocalDate
-        ) {
-            inntektTeller += 1
-        }
     }
-
-    private fun inntektsmelding(
-        beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = 1.januar
-    ) = Inntektsmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
-        orgnummer = ORGNUMMER,
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        aktørId = AKTØRID,
-        førsteFraværsdag = førsteFraværsdag,
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = listOf(1.januar til 16.januar),
-        ferieperioder = emptyList(),
-        arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    )
-
-    private fun utbetalingshistorikk(inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning>) =
-        Utbetalingshistorikk(
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            utbetalinger = emptyList(),
-            inntektshistorikk = inntektshistorikk
-        )
 }
+

@@ -133,7 +133,7 @@ internal data class PersonData(
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>
     ) {
-        private val modelInntekthistorikk = Inntekthistorikk().apply {
+        private val modelInntekthistorikk = InntekthistorikkVol2().apply {
             InntektData.parseInntekter(inntekter, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -189,11 +189,11 @@ internal data class PersonData(
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: Inntekthistorikk) {
+                internal fun parseInntekter(inntekter: List<InntektData>, inntekthistorikk: InntekthistorikkVol2) {
                     inntekter.forEach { inntektData ->
-                        when (enumValueOf<Inntekthistorikk.Inntektsendring.Kilde>(inntektData.kilde)) {
-                            Inntekthistorikk.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
-                            Inntekthistorikk.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
+                        when (enumValueOf<InntekthistorikkVol2.Inntektsendring.Kilde>(inntektData.kilde)) {
+                            InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
+                            InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
                                 inntekthistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
@@ -205,8 +205,8 @@ internal data class PersonData(
                                     tilleggsinformasjon = inntektData.tilleggsinformasjon,
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD,
-                            Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING ->
+                            InntekthistorikkVol2.Inntektsendring.Kilde.INFOTRYGD,
+                            InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING ->
                                 inntekthistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
@@ -214,7 +214,7 @@ internal data class PersonData(
                                     kilde = enumValueOf(inntektData.kilde),
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            Inntekthistorikk.Inntektsendring.Kilde.SAKSBEHANDLER ->
+                            InntekthistorikkVol2.Inntektsendring.Kilde.SAKSBEHANDLER ->
                                 inntekthistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,

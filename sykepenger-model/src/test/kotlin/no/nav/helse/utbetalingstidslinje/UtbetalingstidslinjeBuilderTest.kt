@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.InntekthistorikkVol2
+import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -385,7 +385,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.nU + 1.nF + 1.nU + 10.nS).utbetalingslinjer(
-            inntektshistorikk = Inntekthistorikk().apply {
+            inntektshistorikk = InntekthistorikkVol2().apply {
                 add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
             }
         )
@@ -404,7 +404,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     fun `feriedag før siste arbeidsgiverperiodedag med påfølgende helg`() {
         resetSeed(1.januar(2020))
         (10.nU + 7.nF + 14.nS).utbetalingslinjer(
-            inntektshistorikk = Inntekthistorikk().apply {
+            inntektshistorikk = InntekthistorikkVol2().apply {
                 add(17.januar(2020), hendelseId, 31000.månedlig, INNTEKTSMELDING)
             }
         )
@@ -415,7 +415,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(NavDag::class, inspektør.datoer[20.januar(2020)])
     }
 
-    private val inntekthistorikk = Inntekthistorikk().apply {
+    private val inntekthistorikk = InntekthistorikkVol2().apply {
         add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
         add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
         add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
@@ -431,7 +431,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun Sykdomstidslinje.utbetalingslinjer(
         sisteDag: LocalDate = this.periode()?.endInclusive ?: 1.januar,
-        inntektshistorikk: Inntekthistorikk = inntekthistorikk
+        inntektshistorikk: InntekthistorikkVol2 = inntekthistorikk
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             sisteDag = sisteDag,

@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.*
+import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring
+import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -33,7 +33,7 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         this.tilstand = tilstand
     }
 
-    override fun visitInntekt(
+    override fun visitInntektVol2(
         inntektsendring: Inntektsendring,
         id: UUID,
         kilde: Inntektsendring.Kilde,
@@ -44,7 +44,7 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         if (kilde == INNTEKTSMELDING) return tilstand.addInntektsmeldinginntekt(this, inntektsendring)
     }
 
-    override fun visitInntektSkatt(
+    override fun visitInntektSkattVol2(
         inntektsendring: Inntektsendring.Skatt,
         id: UUID,
         kilde: Inntektsendring.Kilde,
@@ -54,7 +54,7 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         if (kilde == SKATT_SYKEPENGEGRUNNLAG) return tilstand.addSkatteinntekt(this, inntektsendring)
     }
 
-    override fun visitInntektSaksbehandler(
+    override fun visitInntektSaksbehandlerVol2(
         inntektsendring: Inntektsendring.Saksbehandler,
         id: UUID,
         kilde: Inntektsendring.Kilde,

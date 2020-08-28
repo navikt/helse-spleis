@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.InntekthistorikkVol2
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -23,12 +23,12 @@ internal class InntektsopplysningTest {
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-    private lateinit var inntekthistorikk: Inntekthistorikk
+    private lateinit var inntekthistorikk: InntekthistorikkVol2
 
     @BeforeEach
     fun setup() {
         aktivitetslogg = Aktivitetslogg()
-        inntekthistorikk = Inntekthistorikk()
+        inntekthistorikk = InntekthistorikkVol2()
     }
 
     @Test

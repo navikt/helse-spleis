@@ -4,7 +4,6 @@ import no.nav.helse.person.Inntekthistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -26,7 +25,7 @@ internal class HendelseVisitor : PersonVisitor {
         hendelsereferanser.add(id)
     }
 
-    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID, kilde: Inntekthistorikk.Inntektsendring.Kilde, fom: LocalDate) {
+    override fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {
         hendelsereferanser.add(id)
     }
 }

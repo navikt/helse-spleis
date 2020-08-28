@@ -196,10 +196,14 @@ internal interface SykdomstidslinjeVisitor {
 
 internal interface InntekthistorikkVisitor {
     fun preVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
-    fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID, kilde: Inntekthistorikk.Inntektsendring.Kilde, fom: LocalDate) {}
-    fun visitInntektSkatt(inntektsendring: Inntekthistorikk.Inntektsendring.Skatt, id: UUID, kilde: Inntekthistorikk.Inntektsendring.Kilde, fom: LocalDate) {}
-    fun visitInntektSaksbehandler(inntektsendring: Inntekthistorikk.Inntektsendring.Saksbehandler, id: UUID, kilde: Inntekthistorikk.Inntektsendring.Kilde, fom: LocalDate) {}
+    fun visitInntekt(inntektsendring: Inntekthistorikk.Inntektsendring, id: UUID) {}
     fun postVisitInntekthistorikk(inntekthistorikk: Inntekthistorikk) {}
+
+    fun preVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {}
+    fun visitInntektVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
+    fun visitInntektSkattVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring.Skatt, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
+    fun visitInntektSaksbehandlerVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring.Saksbehandler, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
+    fun postVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {}
 }
 
 internal interface UtbetalingVisitor: UtbetalingsdagVisitor, OppdragVisitor {

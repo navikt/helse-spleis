@@ -3,8 +3,8 @@ package no.nav.helse.hendelser
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntekthistorikk
-import no.nav.helse.person.Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD
+import no.nav.helse.person.InntekthistorikkVol2
+import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INFOTRYGD
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -41,7 +41,7 @@ class Utbetalingshistorikk(
         return aktivitetslogg
     }
 
-    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
+    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntekthistorikk) }
     }
 
@@ -75,7 +75,7 @@ class Utbetalingshistorikk(
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
         }
 
-        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: Inntekthistorikk) {
+        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
             if (organisasjonsnummer != orgnummer) return
             inntekthistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag

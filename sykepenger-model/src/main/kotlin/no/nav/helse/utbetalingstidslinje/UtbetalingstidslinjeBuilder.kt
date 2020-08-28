@@ -1,6 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.person.Inntekthistorikk
+import no.nav.helse.person.InntekthistorikkVol2
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -18,7 +18,7 @@ import java.time.LocalDate
 
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val sisteDag: LocalDate,
-    private val inntekthistorikk: Inntekthistorikk,
+    private val inntekthistorikk: InntekthistorikkVol2,
     private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
