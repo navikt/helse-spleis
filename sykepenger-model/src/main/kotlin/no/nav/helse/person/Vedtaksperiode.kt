@@ -1220,28 +1220,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-
-        private fun utbetalingstidslinje(
-            arbeidsgiver: Arbeidsgiver,
-            sisteDag: LocalDate,
-            ytelser: Ytelser
-        ): Utbetalingstidslinje {
-            return UtbetalingstidslinjeBuilder(
-                sisteDag = sisteDag,
-                inntekthistorikk = arbeidsgiver.inntektshistorikk(),
-                forlengelseStrategy = { sykdomstidslinje ->
-                    Oldtidsutbetalinger().let { oldtid ->
-                        ytelser.utbetalingshistorikk().append(oldtid)
-                        arbeidsgiver.utbetalteUtbetalinger()
-                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
-                        oldtid
-                            .utbetalingerInkludert(arbeidsgiver)
-                            .arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
-                    }
-                },
-                arbeidsgiverRegler = NormalArbeidstaker
-            ).result(arbeidsgiver.sykdomstidslinje())
-        }
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {

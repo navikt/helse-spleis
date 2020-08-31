@@ -64,11 +64,11 @@ internal class PeriodeTest {
     internal fun `slå sammen to lister som ikke overlapper med hverandre`() {
         assertEquals(
             listOf(1.mars til 5.mars, 1.mai til 5.mai, 1.juli til 5.juli),
-            (listOf(1.mars til 5.mars, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
+            (listOf(1.mars til 5.mars, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
         )
         assertEquals(
-            (listOf(1.mars til 5.mars, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen(),
-            (listOf(1.mai til 5.mai) + listOf(1.mars til 5.mars, 1.juli til 5.juli)).slåSammen()
+            (listOf(1.mars til 5.mars, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen(),
+            (listOf(1.mai til 5.mai, 1.mars til 5.mars, 1.juli til 5.juli)).slåSammen()
         )
     }
 
@@ -76,15 +76,15 @@ internal class PeriodeTest {
     internal fun `ved å slå sammen to lister fjerner dubletter`() {
         assertEquals(
             listOf(1.mai til 5.mai, 1.juli til 5.juli),
-            (listOf(1.mai til 5.mai, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
+            (listOf(1.mai til 5.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
         )
     }
 
     @Test
     fun `sammenslåing av tilstøtende periode`() {
         assertEquals(
-            listOf(1.mai to 10.mai),
-            listOf(1.mai to 5.mai) + listOf(6.mai to 10.mai)
+            listOf(1.mai til 10.mai),
+            listOf(1.mai til 5.mai, 6.mai til 10.mai).slåSammen()
         )
     }
 
@@ -92,15 +92,15 @@ internal class PeriodeTest {
     internal fun `slå sammen to lister med overlappende elementer`() {
         assertEquals(
             listOf(1.mai til 7.mai, 1.juli til 5.juli),
-            (listOf(3.mai til 7.mai, 1.juli til 5.juli) + listOf(1.mai til 5.mai)).slåSammen()
+            (listOf(3.mai til 7.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
         )
     }
 
     @Test
     fun `strekk en periode for å dekke en annen periode`() {
         assertEquals(
-            1.januar to 31.januar,
-            (15.januar to 31.januar).merge(1.januar to 20.januar)
+            1.januar til 31.januar,
+            (15.januar til 31.januar).merge(1.januar til 20.januar)
         )
     }
 

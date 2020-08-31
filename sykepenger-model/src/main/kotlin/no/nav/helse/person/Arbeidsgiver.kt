@@ -51,15 +51,13 @@ internal class Arbeidsgiver private constructor(
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
         internal fun sammenhengendePerioder(arbeidsgivere: List<Arbeidsgiver>) =
-            arbeidsgivere.fold(listOf<Periode>()) { resultater, arbeidsgiver ->
-                resultater + arbeidsgiver.vedtaksperioder.map { it.periode() }
-            }
-
-        internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
             arbeidsgivere
                 .flatMap { it.vedtaksperioder }
                 .map(Vedtaksperiode::periode)
                 .slåSammen()
+
+        internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
+            sammenhengendePerioder(arbeidsgivere)
                 .map { it.start.minusDays(1) }
     }
 
@@ -259,11 +257,11 @@ internal class Arbeidsgiver private constructor(
     internal fun inntekt(dato: LocalDate): Inntekt? = inntektshistorikk.inntekt(dato)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntekthistorikk)
+        inntektsmelding.addInntekt(inntektshistorikk)
     }
 
     internal fun addInntekt(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntekthistorikk)
+        ytelser.addInntekt(organisasjonsnummer, inntektshistorikk)
     }
 
     internal fun addInntektVol2(inntektsmelding: Inntektsmelding) {
@@ -361,14 +359,6 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1], hendelse, TIDLIGERE)
     }
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntektshistorikk)
-    }
-
-    internal fun addInntekt(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntektshistorikk)
-    }
-
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
@@ -433,11 +423,11 @@ internal class Arbeidsgiver private constructor(
             sammenhengendePeriode = sammenhengendePeriode,
             inntektshistorikk = inntektshistorikk.subset(inntektDatoer),
             forlengelseStrategy = { sykdomstidslinje ->
-                Oldtidsutbetalinger(requireNotNull(sykdomstidslinje.periode())).let { oldtid ->
+                Oldtidsutbetalinger().let { oldtid ->
                     ytelser.utbetalingshistorikk().append(oldtid)
                     utbetalteUtbetalinger()
                         .forEach { it.append(organisasjonsnummer, oldtid) }
-                    oldtid.arbeidsgiverperiodeBetalt(this)
+                    oldtid.utbetalingerInkludert(this).arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
                 }
             },
             arbeidsgiverRegler = NormalArbeidstaker

@@ -1,10 +1,7 @@
 package no.nav.helse.hendelser
 
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import java.util.*
 
 class Ytelser(

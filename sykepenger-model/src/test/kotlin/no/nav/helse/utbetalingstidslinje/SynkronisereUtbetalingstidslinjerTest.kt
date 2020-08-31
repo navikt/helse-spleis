@@ -1,27 +1,24 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
+@Disabled("Venter på flere arbeidsgivere")
 internal class SynkronisereUtbetalingstidslinjerTest {
     private lateinit var person: Person
     private lateinit var arb1: Arbeidsgiver
@@ -64,12 +61,12 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Sammenhengende periode for en spesifikk periode`() {
-        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(1.januar til  31.januar))
-        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(8.januar til 28.februar))
-        assertEquals(1.januar to 28.februar, person.sammenhengendePeriode(15.januar til 7.februar))
-        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(8.april til 31.mai))
-        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(1.juni til 30.juni))
-        assertEquals(1.april to 30.juni, person.sammenhengendePeriode(1.april til 30.april))
+        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(1.januar til  31.januar))
+        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(8.januar til 28.februar))
+        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(15.januar til 7.februar))
+        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(8.april til 31.mai))
+        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(1.juni til 30.juni))
+        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(1.april til 30.april))
     }
 
     @Test
@@ -99,7 +96,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)
             assertEquals(59, it[arb3]?.size)
-            assertEquals(120, it[arb4]?.size)
+            assertEquals(128, it[arb4]?.size)
             it[arb1]?.also { tidslinje ->
                 assertInntekt(1200, tidslinje[1.januar])
                 assertInntekt(1200, tidslinje[1.april]) // Fridag - ingen endring av inntekt

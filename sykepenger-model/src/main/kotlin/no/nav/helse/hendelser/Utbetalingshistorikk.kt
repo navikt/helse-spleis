@@ -1,10 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INFOTRYGD
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -45,8 +42,8 @@ class Utbetalingshistorikk(
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
     }
 
-    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
-        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntekthistorikk) }
+    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: InntekthistorikkVol2) {
+        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
     }
 
     class Inntektsopplysning(
@@ -81,15 +78,15 @@ class Utbetalingshistorikk(
 
         internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
             if (organisasjonsnummer != orgnummer) return
-            inntekthistorikk.add(
+            inntektshistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
                 hendelseId,
                 inntektPerMåned,
-                Inntekthistorikk.Inntektsendring.Kilde.INFOTRYGD
+                Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
             )
         }
 
-        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
+        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: InntekthistorikkVol2) {
             if (organisasjonsnummer != orgnummer) return
             inntektshistorikk.add(
                 sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
