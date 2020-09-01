@@ -199,11 +199,13 @@ internal interface InntekthistorikkVisitor {
     fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {}
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 
-    fun preVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {}
-    fun visitInntektVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
-    fun visitInntektSkattVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring.Skatt, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
-    fun visitInntektSaksbehandlerVol2(inntektsendring: InntekthistorikkVol2.Inntektsendring.Saksbehandler, id: UUID, kilde: InntekthistorikkVol2.Inntektsendring.Kilde, fom: LocalDate) {}
-    fun postVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {}
+    fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
+    fun preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
+    fun visitInntektVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektSkattVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektSaksbehandlerVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun postVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
+    fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
 }
 
 internal interface UtbetalingVisitor: UtbetalingsdagVisitor, OppdragVisitor {

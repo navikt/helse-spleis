@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt.MånedligInn
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.InntekthistorikkVol2
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -68,8 +68,8 @@ class Inntektsvurdering(
         private val arbeidsgiver: String,
         private val inntekter: List<MånedligInntekt>
     ) {
-        internal fun lagreInntekter(inntekthistorikk: InntekthistorikkVol2, meldingsreferanseId: UUID, tidsstempel: LocalDateTime = LocalDateTime.now()) {
-            MånedligInntekt.lagreInntekter(inntekter, inntekthistorikk, meldingsreferanseId, tidsstempel)
+        internal fun lagreInntekter(inntektshistorikk: InntektshistorikkVol2, meldingsreferanseId: UUID, tidsstempel: LocalDateTime = LocalDateTime.now()) {
+            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, meldingsreferanseId, tidsstempel)
         }
 
         private fun harInntekter() = inntekter.isNotEmpty()
@@ -139,19 +139,19 @@ class Inntektsvurdering(
 
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
-                    inntekthistorikk: InntekthistorikkVol2,
+                    inntektshistorikk: InntektshistorikkVol2,
                     meldingsreferanseId: UUID,
                     tidsstempel: LocalDateTime
                 ) {
                     inntekter
                         .forEach {
-                            inntekthistorikk.add(
+                            inntektshistorikk.add(
                                 it.yearMonth.atDay(1),
                                 meldingsreferanseId,
                                 it.inntekt,
                                 when (it.inntektsgrunnlag) {
-                                    SAMMENLIGNINGSGRUNNLAG -> InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
-                                    SYKEPENGEGRUNNLAG -> InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG
+                                    SAMMENLIGNINGSGRUNNLAG -> InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
+                                    SYKEPENGEGRUNNLAG -> InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG
                                 },
                                 enumValueOf(it.type.name),
                                 "", //TODO: må hentes fra sparkel-inntekt

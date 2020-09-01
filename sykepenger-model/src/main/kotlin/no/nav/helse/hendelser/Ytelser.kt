@@ -25,8 +25,8 @@ class Ytelser(
         utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntektshistorikk)
     }
 
-    internal fun addInntekt(organisasjonsnummer: String, inntekthistorikk: InntekthistorikkVol2) {
-        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntekthistorikk)
+    internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: InntektshistorikkVol2) {
+        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntektshistorikk)
     }
 
     override fun aktørId(): String {

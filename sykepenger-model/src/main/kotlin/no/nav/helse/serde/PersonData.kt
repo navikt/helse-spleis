@@ -43,7 +43,13 @@ internal data class PersonData(
         .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg)
 
     internal fun createPerson(): Person {
-        arbeidsgivereliste.addAll(this.arbeidsgivere.map { it.konverterTilArbeidsgiver(person, this.aktørId, this.fødselsnummer) })
+        arbeidsgivereliste.addAll(this.arbeidsgivere.map {
+            it.konverterTilArbeidsgiver(
+                person,
+                this.aktørId,
+                this.fødselsnummer
+            )
+        })
         return person
     }
 
@@ -128,6 +134,7 @@ internal data class PersonData(
         private val organisasjonsnummer: String,
         private val id: UUID,
         private val inntekter: List<InntektData>,
+        private val inntekterVol2: List<InntektDataVol2>,
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
@@ -135,6 +142,9 @@ internal data class PersonData(
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
+        }
+        private val modelInntekthistorikkVol2 = InntektshistorikkVol2().apply {
+            InntektDataVol2.parseInntekter(inntekterVol2, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
@@ -150,7 +160,17 @@ internal data class PersonData(
         ): Arbeidsgiver {
             val arbeidsgiver = Arbeidsgiver::class.primaryConstructor!!
                 .apply { isAccessible = true }
-                .call(person, organisasjonsnummer, id, modelInntekthistorikk, modelSykdomshistorikk, vedtaksperiodeliste, forkastedeliste, modelUtbetalinger)
+                .call(
+                    person,
+                    organisasjonsnummer,
+                    id,
+                    modelInntekthistorikk,
+                    modelInntekthistorikkVol2,
+                    modelSykdomshistorikk,
+                    vedtaksperiodeliste,
+                    forkastedeliste,
+                    modelUtbetalinger
+                )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
                 it.createVedtaksperiode(
@@ -194,11 +214,28 @@ internal data class PersonData(
                             tidsstempel = inntektData.tidsstempel
                         )
                     }
+                }
+            }
+        }
+
+        data class InntektDataVol2(
+            val endringer: List<InntektendringData>
+        ) {
+            internal companion object {
+                internal fun parseInntekter(
+                    inntekter: List<InntektDataVol2>,
+                    inntektshistorikk: InntektshistorikkVol2
+                ) {
+                    inntekter.reversed().forEach {
+                        inntektshistorikk.endring {
+                            InntektendringData.parseInntekter(it.endringer, this)
+                        }
                     }
                 }
             }
+        }
 
-        data class InntektDataVol2(
+        data class InntektendringData(
             private val fom: LocalDate,
             private val hendelseId: UUID,
             private val beløp: Double,
@@ -206,17 +243,20 @@ internal data class PersonData(
             private val type: String?,
             private val fordel: String?,
             private val beskrivelse: String?,
-            private val begrunnelse: String?,
+            private val begrunnelse: String? = null,
             private val tilleggsinformasjon: String?,
             private val tidsstempel: LocalDateTime
         ) {
             internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektDataVol2>, inntekthistorikk: InntekthistorikkVol2) {
+                internal fun parseInntekter(
+                    inntekter: List<InntektendringData>,
+                    inntektshistorikk: InntektshistorikkVol2
+                ) {
                     inntekter.forEach { inntektData ->
-                        when (enumValueOf<InntekthistorikkVol2.Inntektsendring.Kilde>(inntektData.kilde)) {
-                            InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
-                            InntekthistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                inntekthistorikk.add(
+                        when (enumValueOf<InntektshistorikkVol2.Inntektsendring.Kilde>(inntektData.kilde)) {
+                            InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
+                            InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
+                                inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
@@ -227,17 +267,17 @@ internal data class PersonData(
                                     tilleggsinformasjon = inntektData.tilleggsinformasjon,
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            InntekthistorikkVol2.Inntektsendring.Kilde.INFOTRYGD,
-                            InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING ->
-                                inntekthistorikk.add(
+                            InntektshistorikkVol2.Inntektsendring.Kilde.INFOTRYGD,
+                            InntektshistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING ->
+                                inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
                                     kilde = enumValueOf(inntektData.kilde),
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            InntekthistorikkVol2.Inntektsendring.Kilde.SAKSBEHANDLER ->
-                                inntekthistorikk.add(
+                            InntektshistorikkVol2.Inntektsendring.Kilde.SAKSBEHANDLER ->
+                                inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
@@ -246,8 +286,6 @@ internal data class PersonData(
                                     tidsstempel = inntektData.tidsstempel
                                 )
                         }
-
-
                     }
                 }
             }
@@ -287,18 +325,19 @@ internal data class PersonData(
                         dager.map { it.dato to it.parseDag() }.toMap(sortedMapOf())
                 }
 
-                private val økonomi get() = Økonomi::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        grad.prosent,
-                        arbeidsgiverBetalingProsent.prosent,
-                        aktuellDagsinntekt,
-                        dekningsgrunnlag,
-                        arbeidsgiverbeløp,
-                        personbeløp,
-                        er6GBegrenset,
-                        Økonomi.Tilstand.KunGrad
-                    )
+                private val økonomi
+                    get() = Økonomi::class.primaryConstructor!!
+                        .apply { isAccessible = true }
+                        .call(
+                            grad.prosent,
+                            arbeidsgiverBetalingProsent.prosent,
+                            aktuellDagsinntekt,
+                            dekningsgrunnlag,
+                            arbeidsgiverbeløp,
+                            personbeløp,
+                            er6GBegrenset,
+                            Økonomi.Tilstand.KunGrad
+                        )
 
                 private val hendelseskilde get() = kilde.parseKilde()
 
@@ -377,6 +416,7 @@ internal data class PersonData(
             val vedtaksperiode: VedtaksperiodeData,
             val årsak: ForkastetÅrsak
         )
+
         data class VedtaksperiodeData(
             private val id: UUID,
             private val maksdato: LocalDate?,
@@ -481,17 +521,17 @@ internal data class PersonData(
             ) {
                 internal fun parseDataForVilkårsvurdering(
                 ): Vilkårsgrunnlag.Grunnlagsdata = Vilkårsgrunnlag.Grunnlagsdata(
-                        erEgenAnsatt = erEgenAnsatt,
-                        beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
-                        avviksprosent = avviksprosent.ratio,
-                        harOpptjening = harOpptjening,
-                        antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-                        medlemskapstatus = when (medlemskapstatus) {
-                            JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
-                            JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
-                            else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
-                        }
-                    )
+                    erEgenAnsatt = erEgenAnsatt,
+                    beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
+                    avviksprosent = avviksprosent.ratio,
+                    harOpptjening = harOpptjening,
+                    antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                    medlemskapstatus = when (medlemskapstatus) {
+                        JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                        JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                        else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                    }
+                )
             }
 
             data class DataForSimuleringData(
@@ -531,7 +571,7 @@ internal data class PersonData(
                                 navn = utbetalesTil.navn
                             ),
                             feilkonto = feilkonto,
-                            detaljer = detaljer.map { it.parseDetaljer()}
+                            detaljer = detaljer.map { it.parseDetaljer() }
                         )
                     }
                 }
@@ -728,23 +768,24 @@ internal data class PersonData(
             private val personbeløp: Int?,
             private val er6GBegrenset: Boolean?
         ) {
-            private val økonomi get() = Økonomi::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    grad?.prosent,
-                    arbeidsgiverBetalingProsent?.prosent,
-                    aktuellDagsinntekt.daglig,
-                    dekningsgrunnlag.daglig,
-                    arbeidsgiverbeløp?.daglig,
-                    personbeløp?.daglig,
-                    er6GBegrenset,
-                    when {
-                        arbeidsgiverbeløp == null && type == TypeData.AvvistDag -> Økonomi.Tilstand.Låst
-                        arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
-                        type == TypeData.AvvistDag -> Økonomi.Tilstand.LåstMedBeløp
-                        else -> Økonomi.Tilstand.HarBeløp
-                    }
-                )
+            private val økonomi
+                get() = Økonomi::class.primaryConstructor!!
+                    .apply { isAccessible = true }
+                    .call(
+                        grad?.prosent,
+                        arbeidsgiverBetalingProsent?.prosent,
+                        aktuellDagsinntekt.daglig,
+                        dekningsgrunnlag.daglig,
+                        arbeidsgiverbeløp?.daglig,
+                        personbeløp?.daglig,
+                        er6GBegrenset,
+                        when {
+                            arbeidsgiverbeløp == null && type == TypeData.AvvistDag -> Økonomi.Tilstand.Låst
+                            arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
+                            type == TypeData.AvvistDag -> Økonomi.Tilstand.LåstMedBeløp
+                            else -> Økonomi.Tilstand.HarBeløp
+                        }
+                    )
 
             internal fun parseDag() =
                 when (type) {

@@ -2,6 +2,8 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.serde.reflection.ReflectClass.Companion.getReflectClass
 import kotlin.reflect.KClass
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -11,7 +13,8 @@ internal class ReflectClass private constructor(
     private val kClass: KClass<*>
 ) {
     internal operator fun <R> get(instance: Any, property: String): R =
-        kClass.memberProperties
+        (kClass.memberProperties + kClass.allSuperclasses.flatMap { it.memberProperties }
+            .filter { it.visibility == KVisibility.PRIVATE })
             .single { it.name == property }
             .also {
                 it.isAccessible = true

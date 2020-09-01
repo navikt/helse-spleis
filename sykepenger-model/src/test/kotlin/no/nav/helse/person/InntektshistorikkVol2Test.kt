@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
@@ -14,14 +14,16 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class InntekthistorikkVol2Test {
+@Disabled("Inntil InntektshistorikkVol2 skal benyttes")
+internal class InntektshistorikkVol2Test {
 
-    private lateinit var historikk: InntekthistorikkVol2
+    private lateinit var historikk: InntektshistorikkVol2
     private val inspektør get() = Inntektsinspektør(historikk)
 
     private companion object {
@@ -33,7 +35,7 @@ internal class InntekthistorikkVol2Test {
 
     @BeforeEach
     fun setup() {
-        historikk = InntekthistorikkVol2()
+        historikk = InntektshistorikkVol2()
     }
 
     @Test
@@ -46,14 +48,14 @@ internal class InntekthistorikkVol2Test {
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding().addInntekt(historikk)
         assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
         inntektsmelding().addInntekt(historikk)
         assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INGEN, historikk.sykepengegrunnlag(1.januar))
+        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
     @Test
@@ -64,7 +66,7 @@ internal class InntekthistorikkVol2Test {
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
         assertEquals(1, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -76,7 +78,7 @@ internal class InntekthistorikkVol2Test {
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
         assertEquals(2, inspektør.inntektTeller)
-        assertEquals(20000.månedlig, historikk.sykepengegrunnlag(31.desember(2017)))
+        assertEquals(20000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -90,7 +92,7 @@ internal class InntekthistorikkVol2Test {
             }
         }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
         assertEquals(13, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -108,7 +110,7 @@ internal class InntekthistorikkVol2Test {
             }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
         }
         assertEquals(13, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sykepengegrunnlag(31.desember(2017)))
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -124,7 +126,7 @@ internal class InntekthistorikkVol2Test {
             }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
         }
         assertEquals(13, inspektør.inntektTeller)
-        assertEquals(INNTEKT, historikk.sammenligningsgrunnlag(31.desember(2017)))
+        assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -163,7 +165,7 @@ internal class InntekthistorikkVol2Test {
     }
 
     @Test
-    fun `Onehsot add skatt`(){
+    fun `Onehsot add skatt`() {
         historikk.endring {
             inntektperioder {
                 1.desember(2016) til 1.desember(2017) inntekter {
@@ -171,19 +173,20 @@ internal class InntekthistorikkVol2Test {
                 }
             }.forEach {
 
-                it.lagreInntekter(this, UUID.randomUUID()) }
+                it.lagreInntekter(this, UUID.randomUUID())
+            }
         }
         assertEquals(13, inspektør.inntektTeller)
     }
 
-    private class Inntektsinspektør(historikk: InntekthistorikkVol2) : InntekthistorikkVisitor {
+    private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {
         var inntektTeller = 0
 
         init {
             historikk.accept(this)
         }
 
-        override fun preVisitInntekthistorikkVol2(inntekthistorikk: InntekthistorikkVol2) {
+        override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
             inntektTeller = 0
         }
 
@@ -191,7 +194,8 @@ internal class InntekthistorikkVol2Test {
             inntektsendring: Inntektsendring,
             id: UUID,
             kilde: Inntektsendring.Kilde,
-            fom: LocalDate
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
         ) {
             inntektTeller += 1
         }
@@ -200,7 +204,8 @@ internal class InntekthistorikkVol2Test {
             inntektsendring: Inntektsendring.Skatt,
             id: UUID,
             kilde: Inntektsendring.Kilde,
-            fom: LocalDate
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
         ) {
             inntektTeller += 1
         }
@@ -209,7 +214,8 @@ internal class InntekthistorikkVol2Test {
             inntektsendring: Inntektsendring.Saksbehandler,
             id: UUID,
             kilde: Inntektsendring.Kilde,
-            fom: LocalDate
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
         ) {
             inntektTeller += 1
         }

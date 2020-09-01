@@ -392,8 +392,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        //FIXME: Kommentert ut inntil InntektshistorikkVol2 skal benyttes
-        // lagreInntekter(vilkårsgrunnlag)
+        vilkårsgrunnlag.lagreInntekter(person)
         val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             ?: periode.start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
@@ -596,10 +595,6 @@ internal class Vedtaksperiode private constructor(
                     "arbeidsgivertidslinje=[${arbeidsgiverSykdomstidslinje.subset(periode())}], vedtaksperiodetidslinje=[${sykdomshistorikk.sykdomstidslinje()}], " +
                     "periode=${periode()}")
         }
-    }
-
-    private fun lagreInntekter(vilkårsgrunnlag: Vilkårsgrunnlag){
-        vilkårsgrunnlag.lagreInntekter(person)
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"

@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.*
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class InntekthistorikkVol2 {
+internal class InntektshistorikkVol2 {
 
     private val endringer = mutableListOf<InntektshistorikkEndring>()
 
@@ -21,7 +21,7 @@ internal class InntekthistorikkVol2 {
 
     private var erIendring = false
 
-    internal fun endring(block: InntekthistorikkVol2.() -> Unit) {
+    internal fun endring(block: InntektshistorikkVol2.() -> Unit) {
         require(!erIendring)
         endring
         erIendring = true
@@ -31,16 +31,16 @@ internal class InntekthistorikkVol2 {
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
         visitor.preVisitInntekthistorikkVol2(this)
-        endringer.firstOrNull()?.accept(visitor)
+        endringer.forEach{ it.accept(visitor) }
         visitor.postVisitInntekthistorikkVol2(this)
     }
 
-    internal fun sykepengegrunnlag(dato: LocalDate) =
+    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
         GrunnlagForSykepengegrunnlagVisitor(dato)
             .also(this::accept)
             .sykepengegrunnlag()
 
-    internal fun sammenligningsgrunnlag(dato: LocalDate) =
+    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         endringer.first().sammenligningsgrunnlag(dato)
 
     internal fun add(
@@ -90,16 +90,18 @@ internal class InntekthistorikkVol2 {
         endring.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
     }
 
-    internal fun clone() = InntekthistorikkVol2().also {
+    internal fun clone() = InntektshistorikkVol2().also {
         it.endringer.addAll(this.endringer.map(InntektshistorikkEndring::clone))
     }
 
-    private class InntektshistorikkEndring {
+    internal class InntektshistorikkEndring {
 
         private val inntekter = mutableListOf<Inntektsendring>()
 
         fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.preVisitInntekthistorikkEndringVol2(this)
             inntekter.forEach { it.accept(visitor) }
+            visitor.postVisitInntekthistorikkEndringVol2(this)
         }
 
         fun clone() = InntektshistorikkEndring().also {
@@ -121,14 +123,14 @@ internal class InntekthistorikkVol2 {
         protected val hendelseId: UUID,
         private val beløp: Inntekt,
         protected val kilde: Kilde,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+        protected val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         internal fun inntekt() = beløp
         internal fun isBefore(other: Inntektsendring) = this.tidsstempel.isBefore(other.tidsstempel)
         internal fun isAfter(other: Inntektsendring) = this.tidsstempel.isAfter(other.tidsstempel)
 
         open fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntektVol2(this, hendelseId, kilde, fom)
+            visitor.visitInntektVol2(this, hendelseId, kilde, fom, tidsstempel)
         }
 
         internal fun skalErstattesAv(other: Inntektsendring) = this.fom == other.fom && this.kilde == other.kilde
@@ -180,7 +182,7 @@ internal class InntekthistorikkVol2 {
             tidsstempel
         ) {
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitInntektSkattVol2(this, hendelseId, kilde, fom)
+                visitor.visitInntektSkattVol2(this, hendelseId, kilde, fom, tidsstempel)
             }
         }
 
@@ -199,7 +201,7 @@ internal class InntekthistorikkVol2 {
             tidsstempel
         ) {
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitInntektSaksbehandlerVol2(this, hendelseId, kilde, fom)
+                visitor.visitInntektSaksbehandlerVol2(this, hendelseId, kilde, fom, tidsstempel)
             }
         }
     }

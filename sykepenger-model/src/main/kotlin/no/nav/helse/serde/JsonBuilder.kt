@@ -18,6 +18,9 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 fun Person.serialize(): SerialisertPerson {
     val jsonBuilder = JsonBuilder()
@@ -92,6 +95,49 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) =
         currentState.visitInntekt(inntektsendring, id)
+
+    override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) =
+        currentState.preVisitInntekthistorikkVol2(inntektshistorikk)
+
+    override fun preVisitInntekthistorikkEndringVol2(
+        inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring
+    ) =
+        currentState.preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring)
+
+    override fun visitInntektVol2(
+        inntektsendring: InntektshistorikkVol2.Inntektsendring,
+        id: UUID,
+        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitInntektVol2(inntektsendring, id, kilde, fom, tidsstempel)
+
+    override fun visitInntektSkattVol2(
+        inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt,
+        id: UUID,
+        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitInntektSkattVol2(inntektsendring, id, kilde, fom, tidsstempel)
+
+    override fun visitInntektSaksbehandlerVol2(
+        inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler,
+        id: UUID,
+        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitInntektSaksbehandlerVol2(inntektsendring, id, kilde, fom, tidsstempel)
+
+    override fun postVisitInntekthistorikkEndringVol2(
+        inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring
+    ) =
+        currentState.postVisitInntekthistorikkEndringVol2(inntektshistorikkEndring)
+
+    override fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) =
+        currentState.postVisitInntekthistorikkVol2(inntektshistorikk)
 
     override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
         currentState.preVisitTidslinjer(tidslinjer)
@@ -179,7 +225,8 @@ internal class JsonBuilder : PersonVisitor {
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder
+        currentState.preVisitVedtaksperiode(
+            vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder
         )
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
@@ -235,7 +282,14 @@ internal class JsonBuilder : PersonVisitor {
         periode: Periode,
         opprinneligPeriode: Periode
     ) =
-        currentState.postVisitVedtaksperiode(vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode)
+        currentState.postVisitVedtaksperiode(
+            vedtaksperiode,
+            id,
+            arbeidsgiverNettoBeløp,
+            personNettoBeløp,
+            periode,
+            opprinneligPeriode
+        )
 
     override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -386,6 +440,12 @@ internal class JsonBuilder : PersonVisitor {
             pushState(InntektHistorieState(inntekter))
         }
 
+        override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+            val endringer = mutableListOf<MutableMap<String, Any?>>()
+            arbeidsgiverMap["inntekterVol2"] = endringer
+            pushState(InntektshistorikkVol2State(endringer))
+        }
+
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             val sykdomshistorikkList = mutableListOf<MutableMap<String, Any?>>()
             arbeidsgiverMap["sykdomshistorikk"] = sykdomshistorikkList
@@ -482,6 +542,73 @@ internal class JsonBuilder : PersonVisitor {
         }
 
         override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+            popState()
+        }
+    }
+
+    private inner class InntektshistorikkVol2State(private val endringer: MutableList<MutableMap<String, Any?>>) :
+        JsonState {
+        override fun preVisitInntekthistorikkEndringVol2(
+            inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring
+        ) {
+            val inntekter = mutableListOf<MutableMap<String, Any?>>()
+            endringer.add(
+                mutableMapOf(
+                    "endringer" to inntekter
+                )
+            )
+            pushState(InntektsendringVol2State(inntekter))
+        }
+
+        override fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+            popState()
+        }
+    }
+
+    private inner class InntektsendringVol2State(private val inntekter: MutableList<MutableMap<String, Any?>>) :
+        JsonState {
+        override fun visitInntektVol2(
+            inntektsendring: InntektshistorikkVol2.Inntektsendring,
+            id: UUID,
+            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
+            val inntektMap = mutableMapOf<String, Any?>()
+            inntekter.add(inntektMap)
+
+            inntektMap.putAll(InntektsendringVol2Reflect(inntektsendring).toMap())
+        }
+
+        override fun visitInntektSkattVol2(
+            inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt,
+            id: UUID,
+            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
+            val inntektMap = mutableMapOf<String, Any?>()
+            inntekter.add(inntektMap)
+
+            inntektMap.putAll(InntektsendringSkattVol2Reflect(inntektsendring).toMap())
+        }
+
+        override fun visitInntektSaksbehandlerVol2(
+            inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler,
+            id: UUID,
+            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            fom: LocalDate,
+            tidsstempel: LocalDateTime
+        ) {
+            val inntektMap = mutableMapOf<String, Any?>()
+            inntekter.add(inntektMap)
+
+            inntektMap.putAll(InntektsendringSaksbehandlerVol2Reflect(inntektsendring).toMap())
+        }
+
+        override fun postVisitInntekthistorikkEndringVol2(
+            inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring
+        ) {
             popState()
         }
     }

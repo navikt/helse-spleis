@@ -21,13 +21,12 @@ internal class Arbeidsgiver private constructor(
     private val organisasjonsnummer: String,
     private val id: UUID,
     private val inntektshistorikk: Inntektshistorikk,
+    private val inntektshistorikkVol2: InntektshistorikkVol2,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
-    //FIXME: Erstatter inntektshistorikk
-    private val inntekthistorikkVol2 = InntekthistorikkVol2()
 
     internal fun inntekthistorikk() = inntektshistorikk.clone()
 
@@ -36,6 +35,7 @@ internal class Arbeidsgiver private constructor(
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
         inntektshistorikk = Inntektshistorikk(),
+        inntektshistorikkVol2 = InntektshistorikkVol2(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
@@ -64,6 +64,7 @@ internal class Arbeidsgiver private constructor(
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntektshistorikk.accept(visitor)
+        inntektshistorikkVol2.accept(visitor)
         sykdomshistorikk.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
@@ -265,18 +266,20 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun addInntektVol2(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntekthistorikkVol2)
+        inntektsmelding.addInntekt(inntektshistorikkVol2)
     }
 
     internal fun addInntektVol2(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntekthistorikkVol2)
+        ytelser.addInntekt(organisasjonsnummer, inntektshistorikkVol2)
     }
 
     internal fun lagreInntekter(
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        arbeidsgiverInntekt.lagreInntekter(inntekthistorikkVol2, vilkårsgrunnlag.meldingsreferanseId())
+        inntektshistorikkVol2.endring {
+            arbeidsgiverInntekt.lagreInntekter(this, vilkårsgrunnlag.meldingsreferanseId())
+        }
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntektshistorikk.sykepengegrunnlag(dato)

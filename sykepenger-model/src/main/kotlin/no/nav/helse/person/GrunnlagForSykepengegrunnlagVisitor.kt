@@ -1,11 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.*
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.Kilde.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
@@ -37,7 +38,8 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         inntektsendring: Inntektsendring,
         id: UUID,
         kilde: Inntektsendring.Kilde,
-        fom: LocalDate
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
     ) {
         if (fom != dato) return
         if (kilde == INFOTRYGD) return tilstand.addInfotrygdinntekt(this, inntektsendring)
@@ -48,7 +50,8 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         inntektsendring: Inntektsendring.Skatt,
         id: UUID,
         kilde: Inntektsendring.Kilde,
-        fom: LocalDate
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
     ) {
         if (YearMonth.from(fom) !in YearMonth.from(dato).let { it.minusMonths(3)..it.minusMonths(1) }) return
         if (kilde == SKATT_SYKEPENGEGRUNNLAG) return tilstand.addSkatteinntekt(this, inntektsendring)
@@ -58,7 +61,8 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         inntektsendring: Inntektsendring.Saksbehandler,
         id: UUID,
         kilde: Inntektsendring.Kilde,
-        fom: LocalDate
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
     ) {
         if (fom != dato) return
         tilstand.addSaksbehandlerinntekt(this, inntektsendring)

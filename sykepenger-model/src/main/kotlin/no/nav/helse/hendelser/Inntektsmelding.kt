@@ -3,9 +3,9 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.InntekthistorikkVol2
-import no.nav.helse.person.InntekthistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -143,9 +143,9 @@ class Inntektsmelding(
         )
     }
 
-    internal fun addInntekt(inntekthistorikk: InntekthistorikkVol2) {
+    internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2) {
         if (førsteFraværsdag == null) return
-        inntekthistorikk.add(
+        inntektshistorikk.add(
             førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt,
