@@ -24,12 +24,12 @@ internal class InntektsendringReflect(inntektsendring: Inntektshistorikk.Inntekt
     )
 }
 
-internal class InntektsendringVol2Reflect(inntektsendring: InntektshistorikkVol2.Inntektsendring) {
-    private val fom: LocalDate = inntektsendring["fom"]
-    private val hendelseId: UUID = inntektsendring["hendelseId"]
-    private val beløp: Inntekt = inntektsendring["beløp"]
-    private val kilde: InntektshistorikkVol2.Inntektsendring.Kilde = inntektsendring["kilde"]
-    private val tidsstempel: LocalDateTime = inntektsendring["tidsstempel"]
+internal class InntektsendringVol2Reflect(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning) {
+    private val fom: LocalDate = inntektsopplysning["fom"]
+    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
+    private val beløp: Inntekt = inntektsopplysning["beløp"]
+    private val kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde = inntektsopplysning["kilde"]
+    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,
@@ -40,16 +40,16 @@ internal class InntektsendringVol2Reflect(inntektsendring: InntektshistorikkVol2
     )
 }
 
-internal class InntektsendringSkattVol2Reflect(inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt) {
-    private val fom: LocalDate = inntektsendring["fom"]
-    private val hendelseId: UUID = inntektsendring["hendelseId"]
-    private val beløp: Inntekt = inntektsendring["beløp"]
-    private val kilde: InntektshistorikkVol2.Inntektsendring.Kilde = inntektsendring["kilde"]
-    private val type: InntektshistorikkVol2.Inntektsendring.Inntekttype = inntektsendring["type"]
-    private val fordel: String = inntektsendring["fordel"]
-    private val beskrivelse: String = inntektsendring["beskrivelse"]
-    private val tilleggsinformasjon: String? = inntektsendring["tilleggsinformasjon"]
-    private val tidsstempel: LocalDateTime = inntektsendring["tidsstempel"]
+internal class InntektsendringSkattVol2Reflect(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt) {
+    private val fom: LocalDate = inntektsopplysning["fom"]
+    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
+    private val beløp: Inntekt = inntektsopplysning["beløp"]
+    private val kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde = inntektsopplysning["kilde"]
+    private val type: InntektshistorikkVol2.Inntektsopplysning.Inntekttype = inntektsopplysning["type"]
+    private val fordel: String = inntektsopplysning["fordel"]
+    private val beskrivelse: String = inntektsopplysning["beskrivelse"]
+    private val tilleggsinformasjon: String? = inntektsopplysning["tilleggsinformasjon"]
+    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,
@@ -64,13 +64,13 @@ internal class InntektsendringSkattVol2Reflect(inntektsendring: Inntektshistorik
     )
 }
 
-internal class InntektsendringSaksbehandlerVol2Reflect(inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler) {
-    private val fom: LocalDate = inntektsendring["fom"]
-    private val hendelseId: UUID = inntektsendring["hendelseId"]
-    private val beløp: Inntekt = inntektsendring["beløp"]
-    private val kilde: InntektshistorikkVol2.Inntektsendring.Kilde = inntektsendring["kilde"]
-    private val begrunnelse: String = inntektsendring["begrunnelse"]
-    private val tidsstempel: LocalDateTime = inntektsendring["tidsstempel"]
+internal class InntektsendringSaksbehandlerVol2Reflect(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler) {
+    private val fom: LocalDate = inntektsopplysning["fom"]
+    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
+    private val beløp: Inntekt = inntektsopplysning["beløp"]
+    private val kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde = inntektsopplysning["kilde"]
+    private val begrunnelse: String = inntektsopplysning["begrunnelse"]
+    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
         "fom" to fom,

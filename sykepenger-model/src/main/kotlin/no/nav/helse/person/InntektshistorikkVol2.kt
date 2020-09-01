@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.*
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -50,7 +50,7 @@ internal class InntektshistorikkVol2 {
         kilde: Kilde,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        endring.add(Inntektsendring(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
+        endring.add(Inntektsopplysning(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
     }
 
     internal fun add(
@@ -96,7 +96,7 @@ internal class InntektshistorikkVol2 {
 
     internal class InntektshistorikkEndring {
 
-        private val inntekter = mutableListOf<Inntektsendring>()
+        private val inntekter = mutableListOf<Inntektsopplysning>()
 
         fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitInntekthistorikkEndringVol2(this)
@@ -108,17 +108,17 @@ internal class InntektshistorikkVol2 {
             it.inntekter.addAll(this.inntekter)
         }
 
-        fun add(inntektsendring: Inntektsendring) {
-            inntekter.removeIf { it.skalErstattesAv(inntektsendring) }
-            inntekter.add(inntektsendring)
+        fun add(inntektsopplysning: Inntektsopplysning) {
+            inntekter.removeIf { it.skalErstattesAv(inntektsopplysning) }
+            inntekter.add(inntektsopplysning)
         }
 
         fun sammenligningsgrunnlag(dato: LocalDate) =
-            Inntektsendring.sammenligningsgrunnlag(dato, inntekter)
+            Inntektsopplysning.sammenligningsgrunnlag(dato, inntekter)
 
     }
 
-    internal open class Inntektsendring(
+    internal open class Inntektsopplysning(
         protected val fom: LocalDate,
         protected val hendelseId: UUID,
         private val beløp: Inntekt,
@@ -126,17 +126,17 @@ internal class InntektshistorikkVol2 {
         protected val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         internal fun inntekt() = beløp
-        internal fun isBefore(other: Inntektsendring) = this.tidsstempel.isBefore(other.tidsstempel)
-        internal fun isAfter(other: Inntektsendring) = this.tidsstempel.isAfter(other.tidsstempel)
+        internal fun isBefore(other: Inntektsopplysning) = this.tidsstempel.isBefore(other.tidsstempel)
+        internal fun isAfter(other: Inntektsopplysning) = this.tidsstempel.isAfter(other.tidsstempel)
 
         open fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektVol2(this, hendelseId, kilde, fom, tidsstempel)
         }
 
-        internal fun skalErstattesAv(other: Inntektsendring) = this.fom == other.fom && this.kilde == other.kilde
+        internal fun skalErstattesAv(other: Inntektsopplysning) = this.fom == other.fom && this.kilde == other.kilde
 
         companion object {
-            internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsendring>): Inntekt {
+            internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsopplysning>): Inntekt {
                 return inntekter
                     .filter { it.kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG }
                     .takeLatestBy { it.tidsstempel }
@@ -174,7 +174,7 @@ internal class InntektshistorikkVol2 {
             private val beskrivelse: String,
             private val tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Inntektsendring(
+        ) : Inntektsopplysning(
             fom,
             hendelseId,
             beløp,
@@ -193,7 +193,7 @@ internal class InntektshistorikkVol2 {
             kilde: Kilde,
             private val begrunnelse: String,
             tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Inntektsendring(
+        ) : Inntektsopplysning(
             fom,
             hendelseId,
             beløp,

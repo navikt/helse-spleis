@@ -105,31 +105,31 @@ internal class JsonBuilder : PersonVisitor {
         currentState.preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring)
 
     override fun visitInntektVol2(
-        inntektsendring: InntektshistorikkVol2.Inntektsendring,
+        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
         id: UUID,
-        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) =
-        currentState.visitInntektVol2(inntektsendring, id, kilde, fom, tidsstempel)
+        currentState.visitInntektVol2(inntektsopplysning, id, kilde, fom, tidsstempel)
 
     override fun visitInntektSkattVol2(
-        inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt,
+        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt,
         id: UUID,
-        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) =
-        currentState.visitInntektSkattVol2(inntektsendring, id, kilde, fom, tidsstempel)
+        currentState.visitInntektSkattVol2(inntektsopplysning, id, kilde, fom, tidsstempel)
 
     override fun visitInntektSaksbehandlerVol2(
-        inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler,
+        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler,
         id: UUID,
-        kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+        kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) =
-        currentState.visitInntektSaksbehandlerVol2(inntektsendring, id, kilde, fom, tidsstempel)
+        currentState.visitInntektSaksbehandlerVol2(inntektsopplysning, id, kilde, fom, tidsstempel)
 
     override fun postVisitInntekthistorikkEndringVol2(
         inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring
@@ -568,42 +568,42 @@ internal class JsonBuilder : PersonVisitor {
     private inner class InntektsendringVol2State(private val inntekter: MutableList<MutableMap<String, Any?>>) :
         JsonState {
         override fun visitInntektVol2(
-            inntektsendring: InntektshistorikkVol2.Inntektsendring,
+            inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
             id: UUID,
-            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
-            inntektMap.putAll(InntektsendringVol2Reflect(inntektsendring).toMap())
+            inntektMap.putAll(InntektsendringVol2Reflect(inntektsopplysning).toMap())
         }
 
         override fun visitInntektSkattVol2(
-            inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt,
+            inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt,
             id: UUID,
-            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
-            inntektMap.putAll(InntektsendringSkattVol2Reflect(inntektsendring).toMap())
+            inntektMap.putAll(InntektsendringSkattVol2Reflect(inntektsopplysning).toMap())
         }
 
         override fun visitInntektSaksbehandlerVol2(
-            inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler,
+            inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler,
             id: UUID,
-            kilde: InntektshistorikkVol2.Inntektsendring.Kilde,
+            kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
-            inntektMap.putAll(InntektsendringSaksbehandlerVol2Reflect(inntektsendring).toMap())
+            inntektMap.putAll(InntektsendringSaksbehandlerVol2Reflect(inntektsopplysning).toMap())
         }
 
         override fun postVisitInntekthistorikkEndringVol2(

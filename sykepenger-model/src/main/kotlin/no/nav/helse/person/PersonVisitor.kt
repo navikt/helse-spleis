@@ -201,9 +201,9 @@ internal interface InntekthistorikkVisitor {
 
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
-    fun visitInntektVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun visitInntektSkattVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring.Skatt, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun visitInntektSaksbehandlerVol2(inntektsendring: InntektshistorikkVol2.Inntektsendring.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsendring.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektSkattVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektSaksbehandlerVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
 }

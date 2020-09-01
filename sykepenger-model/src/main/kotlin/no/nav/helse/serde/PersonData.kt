@@ -253,9 +253,9 @@ internal data class PersonData(
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
                     inntekter.forEach { inntektData ->
-                        when (enumValueOf<InntektshistorikkVol2.Inntektsendring.Kilde>(inntektData.kilde)) {
-                            InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
-                            InntektshistorikkVol2.Inntektsendring.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
+                        when (enumValueOf<InntektshistorikkVol2.Inntektsopplysning.Kilde>(inntektData.kilde)) {
+                            InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
+                            InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
                                 inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
@@ -267,8 +267,8 @@ internal data class PersonData(
                                     tilleggsinformasjon = inntektData.tilleggsinformasjon,
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            InntektshistorikkVol2.Inntektsendring.Kilde.INFOTRYGD,
-                            InntektshistorikkVol2.Inntektsendring.Kilde.INNTEKTSMELDING ->
+                            InntektshistorikkVol2.Inntektsopplysning.Kilde.INFOTRYGD,
+                            InntektshistorikkVol2.Inntektsopplysning.Kilde.INNTEKTSMELDING ->
                                 inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,
@@ -276,7 +276,7 @@ internal data class PersonData(
                                     kilde = enumValueOf(inntektData.kilde),
                                     tidsstempel = inntektData.tidsstempel
                                 )
-                            InntektshistorikkVol2.Inntektsendring.Kilde.SAKSBEHANDLER ->
+                            InntektshistorikkVol2.Inntektsopplysning.Kilde.SAKSBEHANDLER ->
                                 inntektshistorikk.add(
                                     dato = inntektData.fom,
                                     meldingsreferanseId = inntektData.hendelseId,

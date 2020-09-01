@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
 import no.nav.helse.testhelpers.august
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
@@ -20,7 +20,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@Disabled("Inntil InntektshistorikkVol2 skal benyttes")
 internal class InntektshistorikkVol2Test {
 
     private lateinit var historikk: InntektshistorikkVol2
@@ -41,9 +40,11 @@ internal class InntektshistorikkVol2Test {
     @Test
     fun `Inntekt fra inntektsmelding blir lagt til i inntektshistorikk`() {
         inntektsmelding().addInntekt(historikk)
+        assertEquals(1, inspektør.endringTeller)
         assertEquals(1, inspektør.inntektTeller)
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding().addInntekt(historikk)
@@ -51,6 +52,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
         inntektsmelding().addInntekt(historikk)
@@ -58,6 +60,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
         utbetalingshistorikk(
@@ -69,6 +72,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Bruker inntekt fra inntektsmelding fremfor inntekt fra infotrygd for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk)
@@ -81,6 +85,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(20000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra skatt siste tre måneder brukes til å beregne sykepengegrunnlaget`() {
         inntektperioder {
@@ -95,6 +100,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra skatt skal bare brukes en gang`() {
         repeat(3) { i ->
@@ -113,6 +119,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Inntekt fra skatt skal bare brukes en gang i beregning av sammenligningsgrunnlag`() {
         repeat(3) { i ->
@@ -129,6 +136,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
     }
 
+    @Disabled
     @Test
     fun `Inntekt for samme dato og samme kilde erstatter eksisterende`() {
         inntektsmelding().addInntekt(historikk)
@@ -136,6 +144,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(1, inspektør.inntektTeller)
     }
 
+    @Disabled
     @Test
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk)
@@ -143,6 +152,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller)
     }
 
+    @Disabled
     @Test
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk)
@@ -154,6 +164,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller)
     }
 
+    @Disabled
     @Test
     fun `Inntekt for flere datoer og samme kilde erstatter ikke hverandre`() {
         inntektperioder {
@@ -164,6 +175,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(13, inspektør.inntektTeller)
     }
 
+    @Disabled
     @Test
     fun `Onehsot add skatt`() {
         historikk.endring {
@@ -180,6 +192,7 @@ internal class InntektshistorikkVol2Test {
     }
 
     private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {
+        var endringTeller = 0
         var inntektTeller = 0
 
         init {
@@ -187,13 +200,18 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+            endringTeller = 0
             inntektTeller = 0
         }
 
+        override fun preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {
+            endringTeller += 1
+        }
+
         override fun visitInntektVol2(
-            inntektsendring: Inntektsendring,
+            inntektsopplysning: Inntektsopplysning,
             id: UUID,
-            kilde: Inntektsendring.Kilde,
+            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
@@ -201,9 +219,9 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektSkattVol2(
-            inntektsendring: Inntektsendring.Skatt,
+            inntektsopplysning: Inntektsopplysning.Skatt,
             id: UUID,
-            kilde: Inntektsendring.Kilde,
+            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
@@ -211,9 +229,9 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektSaksbehandlerVol2(
-            inntektsendring: Inntektsendring.Saksbehandler,
+            inntektsopplysning: Inntektsopplysning.Saksbehandler,
             id: UUID,
-            kilde: Inntektsendring.Kilde,
+            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {

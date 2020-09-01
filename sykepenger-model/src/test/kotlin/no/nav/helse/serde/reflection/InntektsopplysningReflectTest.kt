@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class InntektsendringReflectTest {
+internal class InntektsopplysningReflectTest {
     private val hendelseId = UUID.randomUUID()
 
     @Test

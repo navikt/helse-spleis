@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.Kilde.*
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.Kilde.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -12,12 +12,12 @@ import java.util.*
 
 internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) : InntekthistorikkVisitor {
     private var tilstand: Tilstand = Tilstand.Start
-    private val inntekter = mutableListOf<Inntektsendring>()
+    private val inntekter = mutableListOf<Inntektsopplysning>()
 
     internal fun sykepengegrunnlag() = tilstand.sykepengegrunnlag(this)
 
-    private fun addInntekt(inntektsendring: Inntektsendring) {
-        inntekter.add(inntektsendring)
+    private fun addInntekt(inntektsopplysning: Inntektsopplysning) {
+        inntekter.add(inntektsopplysning)
     }
 
     private fun clear() {
@@ -28,44 +28,44 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         this.tilstand = tilstand
     }
 
-    private fun tilstand(tilstand: Tilstand, inntektsendring: Inntektsendring) {
+    private fun tilstand(tilstand: Tilstand, inntektsopplysning: Inntektsopplysning) {
         clear()
-        addInntekt(inntektsendring)
+        addInntekt(inntektsopplysning)
         this.tilstand = tilstand
     }
 
     override fun visitInntektVol2(
-        inntektsendring: Inntektsendring,
+        inntektsopplysning: Inntektsopplysning,
         id: UUID,
-        kilde: Inntektsendring.Kilde,
+        kilde: Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) {
         if (fom != dato) return
-        if (kilde == INFOTRYGD) return tilstand.addInfotrygdinntekt(this, inntektsendring)
-        if (kilde == INNTEKTSMELDING) return tilstand.addInntektsmeldinginntekt(this, inntektsendring)
+        if (kilde == INFOTRYGD) return tilstand.addInfotrygdinntekt(this, inntektsopplysning)
+        if (kilde == INNTEKTSMELDING) return tilstand.addInntektsmeldinginntekt(this, inntektsopplysning)
     }
 
     override fun visitInntektSkattVol2(
-        inntektsendring: Inntektsendring.Skatt,
+        inntektsopplysning: Inntektsopplysning.Skatt,
         id: UUID,
-        kilde: Inntektsendring.Kilde,
+        kilde: Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) {
         if (YearMonth.from(fom) !in YearMonth.from(dato).let { it.minusMonths(3)..it.minusMonths(1) }) return
-        if (kilde == SKATT_SYKEPENGEGRUNNLAG) return tilstand.addSkatteinntekt(this, inntektsendring)
+        if (kilde == SKATT_SYKEPENGEGRUNNLAG) return tilstand.addSkatteinntekt(this, inntektsopplysning)
     }
 
     override fun visitInntektSaksbehandlerVol2(
-        inntektsendring: Inntektsendring.Saksbehandler,
+        inntektsopplysning: Inntektsopplysning.Saksbehandler,
         id: UUID,
-        kilde: Inntektsendring.Kilde,
+        kilde: Inntektsopplysning.Kilde,
         fom: LocalDate,
         tidsstempel: LocalDateTime
     ) {
         if (fom != dato) return
-        tilstand.addSaksbehandlerinntekt(this, inntektsendring)
+        tilstand.addSaksbehandlerinntekt(this, inntektsopplysning)
     }
 
     private sealed class Tilstand {
@@ -73,58 +73,58 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
 
         open fun addSkatteinntekt(
             visitor: GrunnlagForSykepengegrunnlagVisitor,
-            inntektsendring: Inntektsendring.Skatt
+            inntektsopplysning: Inntektsopplysning.Skatt
         ) {
         }
 
         open fun addInfotrygdinntekt(
             visitor: GrunnlagForSykepengegrunnlagVisitor,
-            inntektsendring: Inntektsendring
+            inntektsopplysning: Inntektsopplysning
         ) {
         }
 
         open fun addInntektsmeldinginntekt(
             visitor: GrunnlagForSykepengegrunnlagVisitor,
-            inntektsendring: Inntektsendring
+            inntektsopplysning: Inntektsopplysning
         ) {
         }
 
         open fun addSaksbehandlerinntekt(
             visitor: GrunnlagForSykepengegrunnlagVisitor,
-            inntektsendring: Inntektsendring
+            inntektsopplysning: Inntektsopplysning
         ) {
         }
 
         object Start : Tilstand() {
             override fun addSkatteinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring.Skatt
+                inntektsopplysning: Inntektsopplysning.Skatt
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
                 visitor.tilstand(SkatteinntektTilstand)
             }
 
             override fun addInfotrygdinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
                 visitor.tilstand(InfotrygdinntektTilstand)
             }
 
             override fun addInntektsmeldinginntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
                 visitor.tilstand(InntektsmeldinginntektTilstand)
             }
 
             override fun addSaksbehandlerinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
                 visitor.tilstand(SaksbehandlerinntektTilstand)
             }
         }
@@ -135,32 +135,32 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
 
             override fun addSkatteinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring.Skatt
+                inntektsopplysning: Inntektsopplysning.Skatt
             ) {
-                if (inntektsendring.isBefore(visitor.inntekter.last())) return
-                if (inntektsendring.isAfter(visitor.inntekter.last())) visitor.clear()
-                visitor.addInntekt(inntektsendring)
+                if (inntektsopplysning.isBefore(visitor.inntekter.last())) return
+                if (inntektsopplysning.isAfter(visitor.inntekter.last())) visitor.clear()
+                visitor.addInntekt(inntektsopplysning)
             }
 
             override fun addInfotrygdinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(InfotrygdinntektTilstand, inntektsendring)
+                visitor.tilstand(InfotrygdinntektTilstand, inntektsopplysning)
             }
 
             override fun addInntektsmeldinginntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(InntektsmeldinginntektTilstand, inntektsendring)
+                visitor.tilstand(InntektsmeldinginntektTilstand, inntektsopplysning)
             }
 
             override fun addSaksbehandlerinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsendring)
+                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsopplysning)
             }
         }
 
@@ -170,23 +170,23 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
 
             override fun addInfotrygdinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
             }
 
             override fun addInntektsmeldinginntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(InntektsmeldinginntektTilstand, inntektsendring)
+                visitor.tilstand(InntektsmeldinginntektTilstand, inntektsopplysning)
             }
 
             override fun addSaksbehandlerinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsendring)
+                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsopplysning)
             }
         }
 
@@ -196,25 +196,25 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
 
             override fun addInntektsmeldinginntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
             }
 
             override fun addSaksbehandlerinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsendring)
+                visitor.tilstand(SaksbehandlerinntektTilstand, inntektsopplysning)
             }
         }
 
         object SaksbehandlerinntektTilstand : Tilstand() {
             override fun addSaksbehandlerinntekt(
                 visitor: GrunnlagForSykepengegrunnlagVisitor,
-                inntektsendring: Inntektsendring
+                inntektsopplysning: Inntektsopplysning
             ) {
-                visitor.addInntekt(inntektsendring)
+                visitor.addInntekt(inntektsopplysning)
             }
         }
     }

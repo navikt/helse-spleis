@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.*
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsendring.Kilde.INFOTRYGD
+import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.Kilde.INFOTRYGD
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.sykdomstidslinje.erHelg
