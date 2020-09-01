@@ -134,7 +134,7 @@ internal data class PersonData(
         private val organisasjonsnummer: String,
         private val id: UUID,
         private val inntekter: List<InntektData>,
-        private val inntekterVol2: List<InntektDataVol2> = listOf(),
+        private val inntektshistorikk: List<InntektshistorikkInnslagData> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
@@ -144,7 +144,7 @@ internal data class PersonData(
             InntektData.parseInntekter(inntekter, this)
         }
         private val modelInntekthistorikkVol2 = InntektshistorikkVol2().apply {
-            InntektDataVol2.parseInntekter(inntekterVol2, this)
+            InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
@@ -218,24 +218,24 @@ internal data class PersonData(
             }
         }
 
-        data class InntektDataVol2(
-            val endringer: List<InntektendringData>
+        data class InntektshistorikkInnslagData(
+            val inntektsopplysninger: List<InntektsopplysningData>
         ) {
             internal companion object {
                 internal fun parseInntekter(
-                    inntekter: List<InntektDataVol2>,
+                    inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
                     inntekter.reversed().forEach {
                         inntektshistorikk.endring {
-                            InntektendringData.parseInntekter(it.endringer, this)
+                            InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
                         }
                     }
                 }
             }
         }
 
-        data class InntektendringData(
+        data class InntektsopplysningData(
             private val fom: LocalDate,
             private val hendelseId: UUID,
             private val beløp: Double,
@@ -249,10 +249,10 @@ internal data class PersonData(
         ) {
             internal companion object {
                 internal fun parseInntekter(
-                    inntekter: List<InntektendringData>,
+                    inntektsopplysninger: List<InntektsopplysningData>,
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
-                    inntekter.forEach { inntektData ->
+                    inntektsopplysninger.forEach { inntektData ->
                         when (enumValueOf<InntektshistorikkVol2.Inntektsopplysning.Kilde>(inntektData.kilde)) {
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG ->

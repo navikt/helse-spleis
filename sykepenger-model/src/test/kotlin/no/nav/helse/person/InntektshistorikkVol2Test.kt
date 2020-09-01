@@ -204,7 +204,7 @@ internal class InntektshistorikkVol2Test {
             inntektTeller = 0
         }
 
-        override fun preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {
+        override fun preVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {
             endringTeller += 1
         }
 

@@ -11,19 +11,19 @@ import java.util.*
 
 internal class InntektshistorikkVol2 {
 
-    private val endringer = mutableListOf<InntektshistorikkEndring>()
+    private val historikk = mutableListOf<Innslag>()
 
-    private val endring get() =
-        if(erIendring) endringer.first()
-        else (endringer.firstOrNull()?.clone() ?: InntektshistorikkEndring())
-            .also { endringer.add(0, it) }
+    private val innslag get() =
+        if(erIendring) historikk.first()
+        else (historikk.firstOrNull()?.clone() ?: Innslag())
+            .also { historikk.add(0, it) }
 
 
     private var erIendring = false
 
     internal fun endring(block: InntektshistorikkVol2.() -> Unit) {
         require(!erIendring)
-        endring
+        innslag
         erIendring = true
         block()
         erIendring = false
@@ -31,7 +31,7 @@ internal class InntektshistorikkVol2 {
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
         visitor.preVisitInntekthistorikkVol2(this)
-        endringer.forEach{ it.accept(visitor) }
+        historikk.forEach{ it.accept(visitor) }
         visitor.postVisitInntekthistorikkVol2(this)
     }
 
@@ -41,7 +41,7 @@ internal class InntektshistorikkVol2 {
             .sykepengegrunnlag()
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-        endringer.first().sammenligningsgrunnlag(dato)
+        historikk.first().sammenligningsgrunnlag(dato)
 
     internal fun add(
         dato: LocalDate,
@@ -50,7 +50,7 @@ internal class InntektshistorikkVol2 {
         kilde: Kilde,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        endring.add(Inntektsopplysning(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
+        innslag.add(Inntektsopplysning(dato, meldingsreferanseId, inntekt, kilde, tidsstempel))
     }
 
     internal fun add(
@@ -64,7 +64,7 @@ internal class InntektshistorikkVol2 {
         tilleggsinformasjon: String?,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        endring.add(
+        innslag.add(
             Skatt(
                 dato,
                 meldingsreferanseId,
@@ -87,14 +87,14 @@ internal class InntektshistorikkVol2 {
         begrunnelse: String,
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
-        endring.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
+        innslag.add(Saksbehandler(dato, meldingsreferanseId, inntekt, kilde, begrunnelse, tidsstempel))
     }
 
     internal fun clone() = InntektshistorikkVol2().also {
-        it.endringer.addAll(this.endringer.map(InntektshistorikkEndring::clone))
+        it.historikk.addAll(this.historikk.map(Innslag::clone))
     }
 
-    internal class InntektshistorikkEndring {
+    internal class Innslag {
 
         private val inntekter = mutableListOf<Inntektsopplysning>()
 
@@ -104,7 +104,7 @@ internal class InntektshistorikkVol2 {
             visitor.postVisitInntekthistorikkEndringVol2(this)
         }
 
-        fun clone() = InntektshistorikkEndring().also {
+        fun clone() = Innslag().also {
             it.inntekter.addAll(this.inntekter)
         }
 

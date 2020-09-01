@@ -200,11 +200,11 @@ internal interface InntekthistorikkVisitor {
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
-    fun preVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
+    fun preVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {}
     fun visitInntektVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun visitInntektSkattVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun visitInntektSaksbehandlerVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun postVisitInntekthistorikkEndringVol2(inntektshistorikkEndring: InntektshistorikkVol2.InntektshistorikkEndring) {}
+    fun postVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
 }
 
