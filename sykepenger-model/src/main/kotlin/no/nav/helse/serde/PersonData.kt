@@ -134,7 +134,7 @@ internal data class PersonData(
         private val organisasjonsnummer: String,
         private val id: UUID,
         private val inntekter: List<InntektData>,
-        private val inntekterVol2: List<InntektDataVol2>,
+        private val inntekterVol2: List<InntektDataVol2> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
