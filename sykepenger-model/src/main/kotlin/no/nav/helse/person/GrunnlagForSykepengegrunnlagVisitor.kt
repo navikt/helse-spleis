@@ -51,9 +51,11 @@ internal class GrunnlagForSykepengegrunnlagVisitor(private val dato: LocalDate) 
         id: UUID,
         kilde: Inntektsopplysning.Kilde,
         fom: LocalDate,
+        måned: YearMonth,
         tidsstempel: LocalDateTime
     ) {
-        if (YearMonth.from(fom) !in YearMonth.from(dato).let { it.minusMonths(3)..it.minusMonths(1) }) return
+        if (fom != dato) return
+        if (YearMonth.from(måned) !in YearMonth.from(dato).let { it.minusMonths(3)..it.minusMonths(1) }) return
         if (kilde == SKATT_SYKEPENGEGRUNNLAG) return tilstand.addSkatteinntekt(this, inntektsopplysning)
     }
 

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import java.time.LocalDate
 import java.util.*
 
 class Person private constructor(
@@ -218,9 +219,10 @@ class Person private constructor(
     internal fun lagreInntekter(
         arbeidsgiverId: String,
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
+        førsteFraværsdag: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, vilkårsgrunnlag)
+        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, førsteFraværsdag, vilkårsgrunnlag)
     }
 
     internal fun sammenhengendePeriode(periode: Periode) =

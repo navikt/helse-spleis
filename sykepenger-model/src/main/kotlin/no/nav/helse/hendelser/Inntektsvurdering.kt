@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -61,15 +61,19 @@ class Inntektsvurdering(
     private fun avviksprosent(beregnetInntekt: Inntekt) =
         beregnetInntekt.avviksprosent(sammenligningsgrunnlag)
 
-    internal fun lagreInntekter(person: Person, vilkårsgrunnlag: Vilkårsgrunnlag) =
-        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, vilkårsgrunnlag)
+    internal fun lagreInntekter(person: Person, førsteFraværsdag: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =
+        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, førsteFraværsdag, vilkårsgrunnlag)
 
     class ArbeidsgiverInntekt(
         private val arbeidsgiver: String,
         private val inntekter: List<MånedligInntekt>
     ) {
-        internal fun lagreInntekter(inntektshistorikk: InntektshistorikkVol2, meldingsreferanseId: UUID, tidsstempel: LocalDateTime = LocalDateTime.now()) {
-            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, meldingsreferanseId, tidsstempel)
+        internal fun lagreInntekter(
+            inntektshistorikk: InntektshistorikkVol2,
+            førsteFraværsdag: LocalDate,
+            meldingsreferanseId: UUID
+        ) {
+            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, førsteFraværsdag, meldingsreferanseId)
         }
 
         private fun harInntekter() = inntekter.isNotEmpty()
@@ -78,9 +82,10 @@ class Inntektsvurdering(
             fun lagreInntekter(
                 inntekter: List<ArbeidsgiverInntekt>,
                 person: Person,
+                førsteFraværsdag: LocalDate,
                 vilkårsgrunnlag: Vilkårsgrunnlag
             ) {
-                inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, vilkårsgrunnlag) }
+                inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, førsteFraværsdag, vilkårsgrunnlag) }
             }
 
             internal fun kilder(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
@@ -140,26 +145,28 @@ class Inntektsvurdering(
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
                     inntektshistorikk: InntektshistorikkVol2,
-                    meldingsreferanseId: UUID,
-                    tidsstempel: LocalDateTime
+                    førsteFraværsdag: LocalDate,
+                    meldingsreferanseId: UUID
                 ) {
-                    inntekter
-                        .forEach {
-                            inntektshistorikk.add(
-                                it.yearMonth.atDay(1),
-                                meldingsreferanseId,
-                                it.inntekt,
-                                when (it.inntektsgrunnlag) {
-                                    SAMMENLIGNINGSGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
-                                    SYKEPENGEGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG
-                                },
-                                enumValueOf(it.type.name),
-                                "", //TODO: må hentes fra sparkel-inntekt
-                                "",
-                                "",
-                                tidsstempel
-                            )
-                        }
+                    inntektshistorikk {
+                        inntekter
+                            .forEach {
+                                add(
+                                    førsteFraværsdag.minusDays(1),
+                                    meldingsreferanseId,
+                                    it.inntekt,
+                                    when (it.inntektsgrunnlag) {
+                                        SAMMENLIGNINGSGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
+                                        SYKEPENGEGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG
+                                    },
+                                    it.yearMonth,
+                                    enumValueOf(it.type.name),
+                                    "", //TODO: må hentes fra sparkel-inntekt
+                                    "",
+                                    ""
+                                )
+                            }
+                    }
                 }
             }
         }

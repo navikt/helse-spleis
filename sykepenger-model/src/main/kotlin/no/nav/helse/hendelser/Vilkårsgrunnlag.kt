@@ -29,7 +29,11 @@ class Vilkårsgrunnlag(
     override fun organisasjonsnummer() = orgnummer
     fun meldingsreferanseId() = meldingsreferanseId
 
-    internal fun valider(beregnetInntekt: Inntekt, førsteFraværsdag: LocalDate, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate,
+        periodetype: Periodetype
+    ): Aktivitetslogg {
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
         opptjeningvurdering.valider(aktivitetslogg, orgnummer, førsteFraværsdag)
         medlemskapsvurdering.valider(aktivitetslogg, periodetype)
@@ -48,8 +52,8 @@ class Vilkårsgrunnlag(
         return aktivitetslogg
     }
 
-    internal fun lagreInntekter(person: Person){
-        inntektsvurdering.lagreInntekter(person, this)
+    internal fun lagreInntekter(person: Person, førsteFraværsdag: LocalDate) {
+        inntektsvurdering.lagreInntekter(person, førsteFraværsdag, this)
     }
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }

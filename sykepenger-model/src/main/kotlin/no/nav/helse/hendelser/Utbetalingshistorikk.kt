@@ -86,14 +86,20 @@ class Utbetalingshistorikk(
             )
         }
 
-        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: InntektshistorikkVol2) {
+        internal fun addInntekter(
+            hendelseId: UUID,
+            organisasjonsnummer: String,
+            inntektshistorikk: InntektshistorikkVol2
+        ) {
             if (organisasjonsnummer != orgnummer) return
-            inntektshistorikk.add(
-                sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
-                hendelseId,
-                inntektPerMåned,
-                INFOTRYGD
-            )
+            inntektshistorikk.invoke {
+                add(
+                    sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
+                    hendelseId,
+                    inntektPerMåned,
+                    INFOTRYGD
+                )
+            }
         }
     }
 

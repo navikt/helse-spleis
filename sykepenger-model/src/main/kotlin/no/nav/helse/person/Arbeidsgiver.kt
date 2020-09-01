@@ -275,11 +275,14 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagreInntekter(
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
+        førsteFraværsdag: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        inntektshistorikkVol2.endring {
-            arbeidsgiverInntekt.lagreInntekter(this, vilkårsgrunnlag.meldingsreferanseId())
-        }
+        arbeidsgiverInntekt.lagreInntekter(
+            inntektshistorikkVol2,
+            førsteFraværsdag,
+            vilkårsgrunnlag.meldingsreferanseId()
+        )
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntektshistorikk.sykepengegrunnlag(dato)
@@ -432,7 +435,8 @@ internal class Arbeidsgiver private constructor(
                     ytelser.utbetalingshistorikk().append(oldtid)
                     utbetalteUtbetalinger()
                         .forEach { it.append(organisasjonsnummer, oldtid) }
-                    oldtid.utbetalingerInkludert(this).arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
+                    oldtid.utbetalingerInkludert(this)
+                        .arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
                 }
             },
             arbeidsgiverRegler = NormalArbeidstaker

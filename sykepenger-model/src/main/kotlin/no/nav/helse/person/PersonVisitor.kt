@@ -17,6 +17,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
@@ -202,7 +203,14 @@ internal interface InntekthistorikkVisitor {
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun preVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {}
     fun visitInntektVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun visitInntektSkattVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    fun visitInntektSkattVol2(
+        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt,
+        id: UUID,
+        kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
+        fom: LocalDate,
+        måned: YearMonth,
+        tidsstempel: LocalDateTime
+    ) {}
     fun visitInntektSaksbehandlerVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}

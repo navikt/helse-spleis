@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class InntektshistorikkVol2Test {
@@ -40,27 +41,26 @@ internal class InntektshistorikkVol2Test {
     @Test
     fun `Inntekt fra inntektsmelding blir lagt til i inntektshistorikk`() {
         inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.endringTeller)
+        assertEquals(1, inspektør.innslagTeller)
         assertEquals(1, inspektør.inntektTeller)
     }
 
-    @Disabled
     @Test
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
-        inntektsmelding().addInntekt(historikk)
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
+        assertEquals(1, inspektør.innslagTeller)
         assertEquals(1, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
-    @Disabled
     @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
-        inntektsmelding().addInntekt(historikk)
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
+        assertEquals(1, inspektør.innslagTeller)
         assertEquals(1, inspektør.inntektTeller)
         assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
-    @Disabled
     @Test
     fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
         utbetalingshistorikk(
@@ -68,11 +68,11 @@ internal class InntektshistorikkVol2Test {
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        assertEquals(1, inspektør.innslagTeller)
         assertEquals(1, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
-    @Disabled
     @Test
     fun `Bruker inntekt fra inntektsmelding fremfor inntekt fra infotrygd for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk)
@@ -81,11 +81,11 @@ internal class InntektshistorikkVol2Test {
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
-        assertEquals(2, inspektør.inntektTeller)
+        assertEquals(2, inspektør.innslagTeller)
+        assertEquals(3, inspektør.inntektTeller)
         assertEquals(20000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
-    @Disabled
     @Test
     fun `Inntekt fra skatt siste tre måneder brukes til å beregne sykepengegrunnlaget`() {
         inntektperioder {
@@ -95,9 +95,45 @@ internal class InntektshistorikkVol2Test {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
-        assertEquals(13, inspektør.inntektTeller)
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        assertEquals(1, inspektør.innslagTeller)
+        assertEquals(22, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `Inntekter med forskjellig dato konflikterer ikke`() {
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        inntektperioder {
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 15.januar(2018), UUID.randomUUID()) }
+        assertEquals(2, inspektør.innslagTeller)
+        assertEquals(35, inspektør.inntektTeller)
+        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(14.januar(2018)))
+    }
+
+    @Test
+    fun `Senere inntekter for samme dato overskriver eksisterende inntekter`() {
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        inntektperioder {
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        assertEquals(2, inspektør.innslagTeller)
+        assertEquals(22, inspektør.inntektTeller)
+        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
     @Disabled
@@ -105,7 +141,6 @@ internal class InntektshistorikkVol2Test {
     fun `Inntekt fra skatt skal bare brukes en gang`() {
         repeat(3) { i ->
             val meldingsreferanseId = UUID.randomUUID()
-            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
             inntektperioder {
                 (1.desember(2016) til 1.desember(2017)) inntekter {
                     ORGNUMMER inntekt INNTEKT
@@ -113,7 +148,7 @@ internal class InntektshistorikkVol2Test {
                 1.desember(2016) til 1.august(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
-            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
+            }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
         assertEquals(13, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
@@ -124,13 +159,12 @@ internal class InntektshistorikkVol2Test {
     fun `Inntekt fra skatt skal bare brukes en gang i beregning av sammenligningsgrunnlag`() {
         repeat(3) { i ->
             val meldingsreferanseId = UUID.randomUUID()
-            val tidsstempel = LocalDateTime.now().plusDays(i % 2L)
             inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.desember(2016) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
-            }.forEach { it.lagreInntekter(historikk, meldingsreferanseId, tidsstempel) }
+            }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
         assertEquals(13, inspektør.inntektTeller)
         assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
@@ -171,28 +205,23 @@ internal class InntektshistorikkVol2Test {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
-        }.forEach { it.lagreInntekter(historikk, UUID.randomUUID()) }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         assertEquals(13, inspektør.inntektTeller)
     }
 
     @Disabled
     @Test
     fun `Onehsot add skatt`() {
-        historikk.endring {
-            inntektperioder {
-                1.desember(2016) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }.forEach {
-
-                it.lagreInntekter(this, UUID.randomUUID())
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
             }
-        }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         assertEquals(13, inspektør.inntektTeller)
     }
 
     private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {
-        var endringTeller = 0
+        var innslagTeller = 0
         var inntektTeller = 0
 
         init {
@@ -200,12 +229,12 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
-            endringTeller = 0
+            innslagTeller = 0
             inntektTeller = 0
         }
 
         override fun preVisitInntekthistorikkEndringVol2(innslag: InntektshistorikkVol2.Innslag) {
-            endringTeller += 1
+            innslagTeller += 1
         }
 
         override fun visitInntektVol2(
@@ -223,6 +252,7 @@ internal class InntektshistorikkVol2Test {
             id: UUID,
             kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
+            måned: YearMonth,
             tidsstempel: LocalDateTime
         ) {
             inntektTeller += 1

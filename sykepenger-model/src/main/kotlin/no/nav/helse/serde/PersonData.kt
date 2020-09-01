@@ -24,6 +24,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -227,7 +228,7 @@ internal data class PersonData(
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
                     inntekter.reversed().forEach {
-                        inntektshistorikk.endring {
+                        inntektshistorikk.invoke {
                             InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
                         }
                     }
@@ -236,10 +237,12 @@ internal data class PersonData(
         }
 
         data class InntektsopplysningData(
-            private val fom: LocalDate,
+            private val fom: LocalDate? = null, //FIXME: Fjernes når migrering er klar
+            private val dato: LocalDate = fom!!, //FIXME: Fjerne default når migrering er klar
             private val hendelseId: UUID,
             private val beløp: Double,
             private val kilde: String,
+            private val måned: YearMonth = YearMonth.from(dato), //FIXME: Fjerne default når migrering er klar
             private val type: String?,
             private val fordel: String?,
             private val beskrivelse: String?,
@@ -250,17 +253,18 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntektsopplysninger: List<InntektsopplysningData>,
-                    inntektshistorikk: InntektshistorikkVol2
+                    innslagBuilder: InntektshistorikkVol2.InnslagBuilder
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
                         when (enumValueOf<InntektshistorikkVol2.Inntektsopplysning.Kilde>(inntektData.kilde)) {
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG,
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                inntektshistorikk.add(
-                                    dato = inntektData.fom,
+                                innslagBuilder.add(
+                                    dato = inntektData.dato,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
                                     kilde = enumValueOf(inntektData.kilde),
+                                    måned = inntektData.måned,
                                     type = enumValueOf(requireNotNull(inntektData.type)),
                                     fordel = requireNotNull(inntektData.fordel),
                                     beskrivelse = requireNotNull(inntektData.beskrivelse),
@@ -269,16 +273,16 @@ internal data class PersonData(
                                 )
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.INFOTRYGD,
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.INNTEKTSMELDING ->
-                                inntektshistorikk.add(
-                                    dato = inntektData.fom,
+                                innslagBuilder.add(
+                                    dato = inntektData.dato,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
                                     kilde = enumValueOf(inntektData.kilde),
                                     tidsstempel = inntektData.tidsstempel
                                 )
                             InntektshistorikkVol2.Inntektsopplysning.Kilde.SAKSBEHANDLER ->
-                                inntektshistorikk.add(
-                                    dato = inntektData.fom,
+                                innslagBuilder.add(
+                                    dato = inntektData.dato,
                                     meldingsreferanseId = inntektData.hendelseId,
                                     inntekt = inntektData.beløp.månedlig,
                                     kilde = enumValueOf(inntektData.kilde),

@@ -392,7 +392,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        vilkårsgrunnlag.lagreInntekter(person)
+        vilkårsgrunnlag.lagreInntekter(person, requireNotNull(førsteFraværsdag))
         val førsteFraværsdag = sykdomstidslinje.førsteFraværsdag()
             ?: periode.start
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(

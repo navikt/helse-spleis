@@ -17,6 +17,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -118,9 +119,10 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
         fom: LocalDate,
+        måned: YearMonth,
         tidsstempel: LocalDateTime
     ) =
-        currentState.visitInntektSkattVol2(inntektsopplysning, id, kilde, fom, tidsstempel)
+        currentState.visitInntektSkattVol2(inntektsopplysning, id, kilde, fom, måned, tidsstempel)
 
     override fun visitInntektSaksbehandlerVol2(
         inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler,
@@ -585,6 +587,7 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
             fom: LocalDate,
+            måned: YearMonth,
             tidsstempel: LocalDateTime
         ) {
             val inntektMap = mutableMapOf<String, Any?>()

@@ -12,14 +12,18 @@ import java.time.YearMonth
 internal fun inntektperioder(block: Inntektperioder.() -> Unit) = Inntektperioder(block).inntekter()
 
 internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
-    private val liste = mutableListOf<ArbeidsgiverInntekt>()
+    private val liste = mutableListOf<Pair<String, List<ArbeidsgiverInntekt.MånedligInntekt>>>()
     internal var inntektsgrunnlag: Inntektsvurdering.Inntektsgrunnlag = SYKEPENGEGRUNNLAG
 
     init {
         block()
     }
 
-    internal fun inntekter(): List<ArbeidsgiverInntekt> = liste.toList()
+    internal fun inntekter(): List<ArbeidsgiverInntekt> = liste
+        .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) ->
+            inntekter
+        }
+        .map { (arbeidsgiver, inntekter) -> ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten()) }
 
     internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) =
         this.map(YearMonth::from)
@@ -36,7 +40,7 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
             }
             .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekt) -> inntekt }
             .map { (arbeidsgiver, inntekter) ->
-                ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten())
+                arbeidsgiver to inntekter.flatten()
             }
             .also { liste.addAll(it) }
 
