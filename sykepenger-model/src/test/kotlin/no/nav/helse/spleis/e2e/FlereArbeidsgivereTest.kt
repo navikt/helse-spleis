@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType
@@ -55,7 +53,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Tre overlappende perioder med en ikke-overlappende periode` (){
+    fun `Tre overlappende perioder med en ikke-overlappende periode`() {
         gapPeriode(1.januar to 31.januar, a1)
         gapPeriode(15.januar to 15.mars, a2)
         gapPeriode(1.februar to 28.februar, a3)
@@ -135,7 +133,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Tre paralelle perioder` (){
+    fun `Tre paralelle perioder`() {
         gapPeriode(3.januar to 31.januar, a1)
         gapPeriode(1.januar to 31.januar, a2)
         gapPeriode(2.januar to 31.januar, a3)
@@ -211,13 +209,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun gapPeriode(periode: Periode, orgnummer: String) {
         nyPeriode(periode, orgnummer)
-        person.håndter(inntektsmelding(
-            UUID.randomUUID(),
-            listOf(Periode(periode.start, periode.start.plusDays(15))),
-            førsteFraværsdag = periode.start,
-            orgnummer = orgnummer
-        ))
-        person.håndter(vilkårsgrunnlag(orgnummer.id(0), INNTEKT, orgnummer = orgnummer))
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(Periode(periode.start, periode.start.plusDays(15))),
+                førsteFraværsdag = periode.start,
+                orgnummer = orgnummer
+            )
+        )
+        person.håndter(vilkårsgrunnlag(orgnummer.id(0), orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt INNTEKT
+                }
+            }
+        )))
     }
 
     private fun nyPeriode(periode: Periode, orgnummer: String) {
@@ -255,9 +261,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun utbetalinger(dagTeller: Int, orgnummer: String): List<RefusjonTilArbeidsgiver> {
         if (dagTeller == 0) return emptyList()
-        val førsteDato = 2.desember(2017).minusDays((
-            (dagTeller / 5 * 7) + dagTeller % 5
-            ).toLong())
+        val førsteDato = 2.desember(2017).minusDays(
+            (
+                (dagTeller / 5 * 7) + dagTeller % 5
+                ).toLong()
+        )
         return listOf(
             RefusjonTilArbeidsgiver(
                 førsteDato,

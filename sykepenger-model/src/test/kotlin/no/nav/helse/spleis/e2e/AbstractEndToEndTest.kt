@@ -231,11 +231,18 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        inntekt: Inntekt,
+        inntekt: Inntekt = INNTEKT,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    orgnummer inntekt inntekt
+                }
+            }
+        )
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, EgenAnsatt))
@@ -245,11 +252,11 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(
             vilkårsgrunnlag(
                 vedtaksperiodeId,
-                inntekt,
                 arbeidsforhold,
                 egenAnsatt,
                 medlemskapstatus,
-                orgnummer
+                orgnummer,
+                inntektsvurdering
             )
         )
     }
@@ -452,11 +459,11 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
-        inntekt: Inntekt,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        inntektsvurdering: Inntektsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -464,13 +471,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt inntekt
-                    }
-                }
-            ),
+            inntektsvurdering = inntektsvurdering,
             erEgenAnsatt = egenAnsatt,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(

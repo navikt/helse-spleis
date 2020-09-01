@@ -230,7 +230,9 @@ class Person private constructor(
         arbeidsgivere.sammenhengendePerioder()
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser) =
-        arbeidsgivere.map { arbeidsgiver ->
+        arbeidsgivere
+            .filter(Arbeidsgiver::harHistorikk)
+            .map { arbeidsgiver ->
             arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
                 sammenhengendePerioder().map { it.start.minusDays(1) },
                 sammenhengendePeriode(periode),
