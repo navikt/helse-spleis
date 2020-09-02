@@ -9,9 +9,9 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -127,9 +127,8 @@ internal class InntektshistorikkVol2Test {
         assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
-    @Disabled
     @Test
-    fun `intrikat test for skatteinntekter`() {
+    fun `intrikat test for sammenligningsgrunnlag der første fraværsdag er 1 januar`() {
         inntektperioder {
             inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
             1.desember(2016) til 1.desember(2016) inntekter {
@@ -156,7 +155,100 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(21500.månedlig, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
+        assertEquals(254000.årlig, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `intrikat test for sammenligningsgrunnlag der første fraværsdag er 2 januar`() {
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.desember(2016) til 1.desember(2016) inntekter {
+                ORGNUMMER inntekt 10000
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt 20000
+            }
+            1.oktober(2017) til 1.oktober(2017) inntekter {
+                ORGNUMMER inntekt 30000
+            }
+            1.november(2017) til 1.januar(2018) inntekter {
+                ORGNUMMER inntekt 12000
+                ORGNUMMER inntekt 22000
+            }
+        }.forEach { it.lagreInntekter(historikk, 2.januar, UUID.randomUUID()) }
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt 15000
+
+            }
+        }.forEach { it.lagreInntekter(historikk, 2.januar, UUID.randomUUID()) }
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(30, inspektør.inntektTeller.first())
+        assertEquals(17, inspektør.inntektTeller.last())
+        assertEquals(258000.årlig, historikk.grunnlagForSammenligningsgrunnlag(1.januar))
+    }
+
+    @Test
+    fun `intrikat test for sykepengegrunnlag der første fraværsdag er 1 januar`() {
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.desember(2016) til 1.desember(2016) inntekter {
+                ORGNUMMER inntekt 10000
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt 20000
+            }
+            1.oktober(2017) til 1.oktober(2017) inntekter {
+                ORGNUMMER inntekt 30000
+            }
+            1.november(2017) til 1.januar(2018) inntekter {
+                ORGNUMMER inntekt 12000
+                ORGNUMMER inntekt 22000
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt 15000
+
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(30, inspektør.inntektTeller.first())
+        assertEquals(17, inspektør.inntektTeller.last())
+        assertEquals(256000.årlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `intrikat test for sykepengegrunnlag der første fraværsdag er 2 januar`() {
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.desember(2016) til 1.desember(2016) inntekter {
+                ORGNUMMER inntekt 10000
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt 20000
+            }
+            1.oktober(2017) til 1.oktober(2017) inntekter {
+                ORGNUMMER inntekt 30000
+            }
+            1.november(2017) til 1.januar(2018) inntekter {
+                ORGNUMMER inntekt 12000
+                ORGNUMMER inntekt 22000
+            }
+        }.forEach { it.lagreInntekter(historikk, 2.januar, UUID.randomUUID()) }
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt 15000
+
+            }
+        }.forEach { it.lagreInntekter(historikk, 2.januar, UUID.randomUUID()) }
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(30, inspektør.inntektTeller.first())
+        assertEquals(17, inspektør.inntektTeller.last())
+        assertEquals(392000.årlig, historikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
     @Test
