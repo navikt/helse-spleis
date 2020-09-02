@@ -5,10 +5,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
-import no.nav.helse.testhelpers.august
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -86,6 +83,80 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
         assertEquals(20000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer først`() {
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        utbetalingshistorikk(
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
+            )
+        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(23, inspektør.inntektTeller.first())
+        assertEquals(22, inspektør.inntektTeller.last())
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Test
+    fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
+        utbetalingshistorikk(
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
+            )
+        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(23, inspektør.inntektTeller.first())
+        assertEquals(1, inspektør.inntektTeller.last())
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
+    }
+
+    @Disabled
+    @Test
+    fun `intrikat test for skatteinntekter`() {
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.desember(2016) til 1.desember(2016) inntekter {
+                ORGNUMMER inntekt 10000
+            }
+            1.desember(2016) til 1.august(2017) inntekter {
+                ORGNUMMER inntekt 20000
+            }
+            1.oktober(2017) til 1.oktober(2017) inntekter {
+                ORGNUMMER inntekt 30000
+            }
+            1.november(2017) til 1.januar(2018) inntekter {
+                ORGNUMMER inntekt 12000
+                ORGNUMMER inntekt 22000
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt 15000
+
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(30, inspektør.inntektTeller.first())
+        assertEquals(17, inspektør.inntektTeller.last())
+        assertEquals(21500.månedlig, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
     }
 
     @Test
@@ -176,23 +247,15 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
     }
 
-    @Disabled
-    @Test
-    fun `Inntekt for samme dato og samme kilde erstatter eksisterende`() {
-        inntektsmelding().addInntekt(historikk)
-        inntektsmelding().addInntekt(historikk)
-        assertEquals(1, inspektør.inntektTeller)
-    }
-
-    @Disabled
     @Test
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
-        inntektsmelding().addInntekt(historikk)
+        inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
         inntektsmelding(førsteFraværsdag = 2.januar).addInntekt(historikk)
-        assertEquals(2, inspektør.inntektTeller)
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(2, inspektør.inntektTeller.first())
+        assertEquals(1, inspektør.inntektTeller.last())
     }
 
-    @Disabled
     @Test
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk)
@@ -201,29 +264,9 @@ internal class InntektshistorikkVol2Test {
                 Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
-        assertEquals(2, inspektør.inntektTeller)
-    }
-
-    @Disabled
-    @Test
-    fun `Inntekt for flere datoer og samme kilde erstatter ikke hverandre`() {
-        inntektperioder {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        assertEquals(13, inspektør.inntektTeller)
-    }
-
-    @Disabled
-    @Test
-    fun `Onehsot add skatt`() {
-        inntektperioder {
-            1.desember(2016) til 1.desember(2017) inntekter {
-                ORGNUMMER inntekt INNTEKT
-            }
-        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        assertEquals(13, inspektør.inntektTeller)
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(2, inspektør.inntektTeller.first())
+        assertEquals(1, inspektør.inntektTeller.last())
     }
 
     private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {
