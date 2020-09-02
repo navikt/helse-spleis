@@ -100,10 +100,10 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) =
         currentState.preVisitInntekthistorikkVol2(inntektshistorikk)
 
-    override fun preVisitInntekthistorikkEndringVol2(
+    override fun preVisitInnslag(
         innslag: InntektshistorikkVol2.Innslag
     ) =
-        currentState.preVisitInntekthistorikkEndringVol2(innslag)
+        currentState.preVisitInnslag(innslag)
 
     override fun visitInntektVol2(
         inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
@@ -133,10 +133,10 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.visitInntektSaksbehandlerVol2(inntektsopplysning, id, kilde, fom, tidsstempel)
 
-    override fun postVisitInntekthistorikkEndringVol2(
+    override fun postVisitInnslag(
         innslag: InntektshistorikkVol2.Innslag
     ) =
-        currentState.postVisitInntekthistorikkEndringVol2(innslag)
+        currentState.postVisitInnslag(innslag)
 
     override fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) =
         currentState.postVisitInntekthistorikkVol2(inntektshistorikk)
@@ -550,7 +550,7 @@ internal class JsonBuilder : PersonVisitor {
 
     private inner class InntektshistorikkVol2State(private val inntekter: MutableList<MutableMap<String, Any?>>) :
         JsonState {
-        override fun preVisitInntekthistorikkEndringVol2(
+        override fun preVisitInnslag(
             innslag: InntektshistorikkVol2.Innslag
         ) {
             val inntektsopplysninger = mutableListOf<MutableMap<String, Any?>>()
@@ -609,7 +609,7 @@ internal class JsonBuilder : PersonVisitor {
             inntektMap.putAll(InntektsendringSaksbehandlerVol2Reflect(inntektsopplysning).toMap())
         }
 
-        override fun postVisitInntekthistorikkEndringVol2(
+        override fun postVisitInnslag(
             innslag: InntektshistorikkVol2.Innslag
         ) {
             popState()

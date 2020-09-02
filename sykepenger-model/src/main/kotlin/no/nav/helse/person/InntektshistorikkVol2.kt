@@ -108,9 +108,9 @@ internal class InntektshistorikkVol2 {
         private val inntekter = mutableListOf<Inntektsopplysning>()
 
         fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitInntekthistorikkEndringVol2(this)
+            visitor.preVisitInnslag(this)
             inntekter.forEach { it.accept(visitor) }
-            visitor.postVisitInntekthistorikkEndringVol2(this)
+            visitor.postVisitInnslag(this)
         }
 
         fun clone() = Innslag().also {
