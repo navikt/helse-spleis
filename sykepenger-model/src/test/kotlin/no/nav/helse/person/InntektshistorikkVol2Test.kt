@@ -161,9 +161,8 @@ internal class InntektshistorikkVol2Test {
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(31.desember(2017)))
     }
 
-    @Disabled
     @Test
-    fun `Inntekt fra skatt skal bare brukes en gang i beregning av sammenligningsgrunnlag`() {
+    fun `Inntekt fra skatt skal bare brukes én gang i beregning av sammenligningsgrunnlag`() {
         repeat(3) { i ->
             val meldingsreferanseId = UUID.randomUUID()
             inntektperioder {
@@ -173,7 +172,7 @@ internal class InntektshistorikkVol2Test {
                 }
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
-        assertEquals(13, inspektør.inntektTeller)
+        assertEquals(13, inspektør.inntektTeller.first())
         assertEquals(INNTEKT, historikk.grunnlagForSammenligningsgrunnlag(31.desember(2017)))
     }
 

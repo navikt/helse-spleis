@@ -3,6 +3,7 @@ package no.nav.helse.person
 
 import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -130,11 +131,12 @@ internal class InntektshistorikkVol2 {
     internal open class Inntektsopplysning(
         protected val dato: LocalDate,
         protected val hendelseId: UUID,
-        private val beløp: Inntekt,
+        protected val beløp: Inntekt,
         protected val kilde: Kilde,
         protected val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) {
         internal fun inntekt() = beløp
+        internal open fun inntektForSammenligningsgrunnlag(dato: LocalDate) = INGEN
         internal fun isBefore(other: Inntektsopplysning) = this.tidsstempel.isBefore(other.tidsstempel)
         internal fun isAfter(other: Inntektsopplysning) = this.tidsstempel.isAfter(other.tidsstempel)
 
@@ -148,19 +150,10 @@ internal class InntektshistorikkVol2 {
         companion object {
             internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsopplysning>): Inntekt {
                 return inntekter
-                    .filter { it.kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG }
-                    .takeLatestBy { it.tidsstempel }
-                    .filter {
-                        YearMonth.from(it.dato) in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) }
-                    }
-                    .map { it.inntekt() }
+                    .map { it.inntektForSammenligningsgrunnlag(dato) }
                     .summer() / 12
             }
 
-            private fun <T, R : Comparable<R>> List<T>.takeLatestBy(selector: (T) -> R): List<T> {
-                val first = maxBy(selector) ?: return this
-                return this.filter { selector(first) == selector(it) }
-            }
         }
 
         internal enum class Kilde {
@@ -195,6 +188,12 @@ internal class InntektshistorikkVol2 {
             override fun accept(visitor: InntekthistorikkVisitor) {
                 visitor.visitInntektSkattVol2(this, hendelseId, kilde, dato, måned, tidsstempel)
             }
+
+            override fun inntektForSammenligningsgrunnlag(dato: LocalDate) =
+                if (kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG && this.dato == dato
+                    && måned in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) }
+                ) beløp
+                else INGEN
         }
 
         internal class Saksbehandler(
