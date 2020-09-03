@@ -577,7 +577,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
             vedtaksperiodeMap["tilstand"] =
-                mapTilstander(tilstand = tilstand.type, utbetalt = (totalbeløpakkumulator.sum() > 0))
+                mapTilstander(
+                    tilstand = tilstand.type,
+                    utbetalt = totalbeløpakkumulator.sum() > 0,
+                    kunFerie = beregnetSykdomstidslinje.all { it.type == SpeilDagtype.FERIEDAG }
+                )
             if (tilstand.type in listOf(
                     TilstandType.AVSLUTTET,
                     TilstandType.AVVENTER_GODKJENNING,

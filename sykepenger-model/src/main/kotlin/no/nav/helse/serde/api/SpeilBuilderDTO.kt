@@ -250,6 +250,7 @@ enum class TilstandstypeDTO {
     Oppgaver,
     Venter,
     IngenUtbetaling,
+    KunFerie,
     Feilet,
     TilInfotrygd
 }

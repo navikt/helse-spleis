@@ -552,6 +552,14 @@ class SpeilBuilderTest {
         assertEquals(UUID.fromString(hendelser[1].id), vedtaksperiode.sykdomstidslinje[0].kilde.kildeId)
     }
 
+    @Test
+    fun `egen tilstandstype for perioder med kun feriedager`() {
+        val (person, hendelser) = andrePeriodeKunFerie()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as UfullstendigVedtaksperiodeDTO
+        assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -813,6 +821,51 @@ class SpeilBuilderTest {
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                }
+            }
+
+        private fun andrePeriodeKunFerie(
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = 1.januar, tom = 24.januar).also { (sykmelding, sykmeldingDto) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDto)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = 1.januar,
+                        tom = 24.januar
+                    ).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+
+                    sykmelding(fom = 25.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        fom = 25.januar,
+                        tom = 31.januar,
+                        andrePerioder = listOf(Søknad.Søknadsperiode.Ferie(25.januar, 31.januar))
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 }
             }
 

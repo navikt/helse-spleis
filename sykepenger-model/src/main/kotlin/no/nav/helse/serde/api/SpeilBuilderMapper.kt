@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (tilstand) {
+internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: Boolean) = when (tilstand) {
     TilstandType.START,
     TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
     TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
@@ -42,9 +42,15 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean) = when (ti
     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
     TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
-    TilstandType.AVSLUTTET -> if (utbetalt) TilstandstypeDTO.Utbetalt else TilstandstypeDTO.IngenUtbetaling
-    TilstandType.AVSLUTTET_UTEN_UTBETALING -> TilstandstypeDTO.IngenUtbetaling
-    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING -> TilstandstypeDTO.IngenUtbetaling
+    TilstandType.AVSLUTTET -> when {
+        utbetalt -> TilstandstypeDTO.Utbetalt
+        kunFerie -> TilstandstypeDTO.KunFerie
+        else -> TilstandstypeDTO.IngenUtbetaling
+    }
+    TilstandType.AVSLUTTET_UTEN_UTBETALING ->
+        if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
+    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING ->
+        if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
 }
 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)
