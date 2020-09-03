@@ -64,6 +64,34 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
 
+    @Test
+    fun `Sammenligningsgrunnlag når det finnes inntekter fra flere arbeidsgivere`() {
+        nyPeriode(1.januar til 31.januar, a1)
+
+        person.håndter(
+            vilkårsgrunnlag(
+                a1.id(0),
+                orgnummer = a1,
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.desember(2016) til 1.november(2017) inntekter {
+                        a1 inntekt 15000
+                    }
+                    1.desember(2016) til 1.mai(2017) inntekter {
+                        a2 inntekt 5000
+                        a3 inntekt 3000
+                        a4 inntekt 2000
+                    }
+                    1.juni(2017) til 1.november(2017) inntekter {
+                        a3 inntekt 7500
+                        a4 inntekt 2500
+                    }
+                }
+            ))
+
+        assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar til 31.januar))
+    }
+
     @Disabled("Henting av inntekter er ikke implementert riktig")
     @Test
     fun `Flere inntekter fra samme arbeidsgiver på samme måned`() {

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
 
@@ -223,6 +224,11 @@ class Person private constructor(
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, førsteFraværsdag, vilkårsgrunnlag)
+    }
+
+    internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
+        val dato = sammenhengendePeriode(periode).start.minusDays(1)
+        return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
     internal fun sammenhengendePeriode(periode: Periode) =

@@ -447,6 +447,10 @@ internal class Arbeidsgiver private constructor(
         return finnPeriodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
     }
+
+    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+        inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
+
 }
 
 internal enum class ForkastetÅrsak {
