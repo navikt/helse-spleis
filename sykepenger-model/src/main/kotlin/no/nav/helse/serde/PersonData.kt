@@ -258,7 +258,7 @@ internal data class PersonData(
                     innslagBuilder: InntektshistorikkVol2.InnslagBuilder
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
-                        when (inntektData.kilde?.let { enumValueOf<Kilde>(it) }) {
+                        when (inntektData.kilde?.let { if(it == "SKATT_SAMMENLIGNINSGRUNNLAG") Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG else enumValueOf(it) }) {
                             Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
                                 innslagBuilder.add(
                                     innslagBuilder.createSkattSammenligningsgrunnlag(
