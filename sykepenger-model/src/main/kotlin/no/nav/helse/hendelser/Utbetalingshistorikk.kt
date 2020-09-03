@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.*
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.Kilde.INFOTRYGD
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -94,10 +93,11 @@ class Utbetalingshistorikk(
             if (organisasjonsnummer != orgnummer) return
             inntektshistorikk.invoke {
                 add(
-                    sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
-                    hendelseId,
-                    inntektPerMåned,
-                    INFOTRYGD
+                    createInfotrygd(
+                        sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
+                        hendelseId,
+                        inntektPerMåned
+                    )
                 )
             }
         }

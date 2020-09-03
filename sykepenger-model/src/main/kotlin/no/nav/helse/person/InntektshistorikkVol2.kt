@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -15,9 +14,8 @@ internal class InntektshistorikkVol2 {
     private val historikk = mutableListOf<Innslag>()
 
     private val innslag
-        get() =
-            (historikk.firstOrNull()?.clone() ?: Innslag())
-                .also { historikk.add(0, it) }
+        get() = (historikk.firstOrNull()?.clone() ?: Innslag())
+            .also { historikk.add(0, it) }
 
 
     internal operator fun invoke(block: InnslagBuilder.() -> Unit) {
@@ -27,62 +25,77 @@ internal class InntektshistorikkVol2 {
     internal class InnslagBuilder(private val innslag: Innslag) {
         private val tidsstempel = LocalDateTime.now()
 
-        internal fun add(
+        internal fun createSaksbehandler(
             dato: LocalDate,
-            meldingsreferanseId: UUID,
-            inntekt: Inntekt,
-            kilde: Kilde,
+            hendelseId: UUID,
+            beløp: Inntekt,
             tidsstempel: LocalDateTime? = null
-        ) {
-            innslag.add(Inntektsopplysning(dato, meldingsreferanseId, inntekt, kilde, tidsstempel ?: this.tidsstempel))
-        }
+        ) = Saksbehandler(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
 
-        internal fun add(
+        internal fun createInntektsmelding(
             dato: LocalDate,
-            meldingsreferanseId: UUID,
-            inntekt: Inntekt,
-            kilde: Kilde,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime? = null
+        ) = Inntektsmelding(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
+
+        internal fun createInfotrygd(
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime? = null
+        ) = Infotrygd(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
+
+        internal fun createSkattSykepengegrunnlag(
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
             måned: YearMonth,
-            type: Inntekttype,
+            type: Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime? = null
-        ) {
-            innslag.add(
-                Skatt(
-                    dato,
-                    meldingsreferanseId,
-                    inntekt,
-                    kilde,
-                    måned,
-                    type,
-                    fordel,
-                    beskrivelse,
-                    tilleggsinformasjon,
-                    tidsstempel ?: this.tidsstempel
-                )
-            )
+        ) = Skatt.Sykepengegrunnlag(
+            dato,
+            hendelseId,
+            beløp,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tilleggsinformasjon,
+            tidsstempel ?: this.tidsstempel
+        )
+
+        internal fun createSkattSammenligningsgrunnlag(
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tilleggsinformasjon: String?,
+            tidsstempel: LocalDateTime? = null
+        ) = Skatt.Sammenligningsgrunnlag(
+            dato,
+            hendelseId,
+            beløp,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tilleggsinformasjon,
+            tidsstempel ?: this.tidsstempel
+        )
+
+        internal fun add(opplysning: Inntektsopplysning) {
+            innslag.add(opplysning)
         }
 
-        internal fun add(
-            dato: LocalDate,
-            meldingsreferanseId: UUID,
-            inntekt: Inntekt,
-            kilde: Kilde,
-            begrunnelse: String,
-            tidsstempel: LocalDateTime? = null
-        ) {
-            innslag.add(
-                Saksbehandler(
-                    dato,
-                    meldingsreferanseId,
-                    inntekt,
-                    kilde,
-                    begrunnelse,
-                    tidsstempel ?: this.tidsstempel
-                )
-            )
+        internal fun addAll(opplysninger: List<Skatt>) {
+            innslag.add(SkattComposite(opplysninger))
         }
     }
 
@@ -93,12 +106,10 @@ internal class InntektshistorikkVol2 {
     }
 
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-        GrunnlagForSykepengegrunnlagVisitor(dato)
-            .also { historikk.firstOrNull()?.accept(it) }
-            .sykepengegrunnlag()
+        historikk.first().grunnlagForSykepengegrunnlag(dato) ?: INGEN
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-        historikk.first().sammenligningsgrunnlag(dato)
+        historikk.first().grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
 
     internal fun clone() = InntektshistorikkVol2().also {
         it.historikk.addAll(this.historikk.map(Innslag::clone))
@@ -123,43 +134,126 @@ internal class InntektshistorikkVol2 {
             inntekter.add(inntektsopplysning)
         }
 
-        fun sammenligningsgrunnlag(dato: LocalDate) =
-            Inntektsopplysning.sammenligningsgrunnlag(dato, inntekter)
+        fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
+            inntekter
+                .sorted()
+                .mapNotNull { it.grunnlagForSykepengegrunnlag(dato) }
+                .firstOrNull()
+
+        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+            inntekter
+                .sorted()
+                .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
+                .firstOrNull()
 
     }
 
-    internal open class Inntektsopplysning(
+    internal interface Inntektsopplysning : Comparable<Inntektsopplysning> {
+        val prioritet: Int
+        fun accept(visitor: InntekthistorikkVisitor)
+        fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntekt? = null
+        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt? = null
+        fun skalErstattesAv(other: Inntektsopplysning): Boolean
+        override fun compareTo(other: Inntektsopplysning) = -this.prioritet.compareTo(other.prioritet)
+    }
+
+    internal class Saksbehandler(
+        private val dato: LocalDate,
+        private val hendelseId: UUID,
+        private val beløp: Inntekt,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : Inntektsopplysning {
+        override val prioritet = 100
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitSaksbehandler(this)
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+
+        override fun skalErstattesAv(other: Inntektsopplysning) =
+            other is Saksbehandler && this.dato == other.dato
+    }
+
+
+    internal class Inntektsmelding(
+        private val dato: LocalDate,
+        private val hendelseId: UUID,
+        private val beløp: Inntekt,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : Inntektsopplysning {
+        override val prioritet = 80
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitInntektsmelding(this)
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+
+        override fun skalErstattesAv(other: Inntektsopplysning) =
+            other is Inntektsmelding && this.dato == other.dato
+    }
+
+    internal class Infotrygd(
+        private val dato: LocalDate,
+        private val hendelseId: UUID,
+        private val beløp: Inntekt,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : Inntektsopplysning {
+        override val prioritet = 60
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitInfotrygd(this)
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+
+        override fun skalErstattesAv(other: Inntektsopplysning) =
+            other is Infotrygd && this.dato == other.dato
+    }
+
+    internal class SkattComposite(
+        private val inntektsopplysninger: List<Skatt> = listOf()
+    ) : Inntektsopplysning {
+
+        override val prioritet = inntektsopplysninger.map { it.prioritet }.max() ?: 0
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.preVisitSkatt()
+            inntektsopplysninger.forEach { it.accept(visitor) }
+            visitor.postVisitSkatt()
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
+            inntektsopplysninger
+                .mapNotNull { it.grunnlagForSykepengegrunnlag(dato) }
+                .takeIf { it.isNotEmpty() }
+                ?.summer()
+                ?.div(3)
+
+        override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+            inntektsopplysninger
+                .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
+                .takeIf { it.isNotEmpty() }
+                ?.summer()
+                ?.div(12)
+
+        override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
+            this.inntektsopplysninger.any { it.skalErstattesAv(other) }
+                || (other is SkattComposite && other.inntektsopplysninger.any { this.skalErstattesAv(it) })
+    }
+
+    internal sealed class Skatt(
         protected val dato: LocalDate,
         protected val hendelseId: UUID,
         protected val beløp: Inntekt,
-        protected val kilde: Kilde,
+        protected val måned: YearMonth,
+        protected val type: Inntekttype,
+        protected val fordel: String,
+        protected val beskrivelse: String,
+        protected val tilleggsinformasjon: String?,
         protected val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) {
-        internal fun inntekt() = beløp
-        internal open fun inntektForSammenligningsgrunnlag(dato: LocalDate) = INGEN
-        internal fun isBefore(other: Inntektsopplysning) = this.tidsstempel.isBefore(other.tidsstempel)
-        internal fun isAfter(other: Inntektsopplysning) = this.tidsstempel.isAfter(other.tidsstempel)
-
-        open fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntektVol2(this, hendelseId, kilde, dato, tidsstempel)
-        }
-
-        internal fun skalErstattesAv(other: Inntektsopplysning) =
-            this.dato == other.dato && this.kilde == other.kilde && this.tidsstempel != other.tidsstempel
-
-        companion object {
-            internal fun sammenligningsgrunnlag(dato: LocalDate, inntekter: List<Inntektsopplysning>): Inntekt {
-                return inntekter
-                    .map { it.inntektForSammenligningsgrunnlag(dato) }
-                    .summer() / 12
-            }
-
-        }
-
-        internal enum class Kilde {
-            SKATT_SAMMENLIGNINSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
-        }
-
+    ) : Inntektsopplysning {
         internal enum class Inntekttype {
             LØNNSINNTEKT,
             NÆRINGSINNTEKT,
@@ -167,52 +261,75 @@ internal class InntektshistorikkVol2 {
             YTELSE_FRA_OFFENTLIGE
         }
 
-        internal class Skatt(
+        internal class Sykepengegrunnlag(
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            kilde: Kilde,
-            private val måned: YearMonth,
-            private val type: Inntekttype,
-            private val fordel: String,
-            private val beskrivelse: String,
-            private val tilleggsinformasjon: String?,
+            måned: YearMonth,
+            type: Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Inntektsopplysning(
+        ) : Skatt(
             dato,
             hendelseId,
             beløp,
-            kilde,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tilleggsinformasjon,
             tidsstempel
         ) {
+            override val prioritet = 40
+
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitInntektSkattVol2(this, hendelseId, kilde, dato, måned, tidsstempel)
+                visitor.visitSkattSykepengegrunnlag(this)
             }
 
-            override fun inntektForSammenligningsgrunnlag(dato: LocalDate) =
-                if (kilde == Kilde.SKATT_SAMMENLIGNINSGRUNNLAG && this.dato == dato
-                    && måned in YearMonth.from(dato).let { it.minusMonths(12)..it.minusMonths(1) }
-                ) beløp
-                else INGEN
+            override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
+                if (this.dato == dato && måned.isWithinRangeOf(dato, 3)) beløp else null
+
+            override fun skalErstattesAv(other: Inntektsopplysning) =
+                other is Sykepengegrunnlag && this.dato == other.dato && this.tidsstempel != other.tidsstempel
         }
 
-        internal class Saksbehandler(
+        internal class Sammenligningsgrunnlag(
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
-            kilde: Kilde,
-            private val begrunnelse: String,
+            måned: YearMonth,
+            type: Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Inntektsopplysning(
+        ) : Skatt(
             dato,
             hendelseId,
             beløp,
-            kilde,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tilleggsinformasjon,
             tidsstempel
         ) {
+            override val prioritet = 20
+
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitInntektSaksbehandlerVol2(this, hendelseId, kilde, dato, tidsstempel)
+                visitor.visitSkattSammenligningsgrunnlag(this)
             }
+
+            override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+                if (this.dato == dato && måned.isWithinRangeOf(dato, 12)) beløp else null
+
+            override fun skalErstattesAv(other: Inntektsopplysning) =
+                other is Sammenligningsgrunnlag && this.dato == other.dato
         }
     }
 }
+
+private fun YearMonth.isWithinRangeOf(dato: LocalDate, måneder: Long) =
+    this in YearMonth.from(dato).let { it.minusMonths(måneder)..it.minusMonths(1) }

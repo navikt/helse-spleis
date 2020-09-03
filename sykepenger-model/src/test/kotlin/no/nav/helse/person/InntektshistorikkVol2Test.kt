@@ -305,7 +305,7 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Inntekt fra skatt skal bare brukes en gang`() {
-        repeat(3) { i ->
+        repeat(3) { _ ->
             val meldingsreferanseId = UUID.randomUUID()
             inntektperioder {
                 (1.desember(2016) til 1.desember(2017)) inntekter {
@@ -326,7 +326,7 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Inntekt fra skatt skal bare brukes én gang i beregning av sammenligningsgrunnlag`() {
-        repeat(3) { i ->
+        repeat(3) { _ ->
             val meldingsreferanseId = UUID.randomUUID()
             inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -379,7 +379,6 @@ internal class InntektshistorikkVol2Test {
         override fun visitInntektVol2(
             inntektsopplysning: Inntektsopplysning,
             id: UUID,
-            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
@@ -387,9 +386,7 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektSkattVol2(
-            inntektsopplysning: Inntektsopplysning.Skatt,
             id: UUID,
-            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             måned: YearMonth,
             tidsstempel: LocalDateTime
@@ -398,12 +395,30 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektSaksbehandlerVol2(
-            inntektsopplysning: Inntektsopplysning.Saksbehandler,
             id: UUID,
-            kilde: Inntektsopplysning.Kilde,
             fom: LocalDate,
             tidsstempel: LocalDateTime
         ) {
+            inntektTeller.add(inntektTeller.removeLast() + 1)
+        }
+
+        override fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {
+            inntektTeller.add(inntektTeller.removeLast() + 1)
+        }
+
+        override fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) {
+            inntektTeller.add(inntektTeller.removeLast() + 1)
+        }
+
+        override fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) {
+            inntektTeller.add(inntektTeller.removeLast() + 1)
+        }
+
+        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) {
+            inntektTeller.add(inntektTeller.removeLast() + 1)
+        }
+
+        override fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
     }

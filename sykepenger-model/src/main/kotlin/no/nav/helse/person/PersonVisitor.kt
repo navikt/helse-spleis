@@ -33,7 +33,9 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
-    ) {}
+    ) {
+    }
+
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
@@ -44,7 +46,8 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
         organisasjonsnummer: String
-    ) {}
+    ) {
+    }
 }
 
 internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, UtbetalingsdagVisitor {
@@ -56,7 +59,9 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
-    ) {}
+    ) {
+    }
+
     fun visitMaksdato(maksdato: LocalDate?) {}
     fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
@@ -68,7 +73,15 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}
     fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {}
-    fun postVisitVedtaksperiode(vedtaksperiode: Vedtaksperiode, id: UUID, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, periode: Periode, opprinneligPeriode: Periode) {}
+    fun postVisitVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        id: UUID,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        periode: Periode,
+        opprinneligPeriode: Periode
+    ) {
+    }
 }
 
 internal interface UtbetalingsdagVisitor {
@@ -77,42 +90,58 @@ internal interface UtbetalingsdagVisitor {
         dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
         dato: LocalDate,
         økonomi: Økonomi
-    ) {}
+    ) {
+    }
+
     fun postVisit(tidslinje: Utbetalingstidslinje) {}
 }
 
@@ -122,12 +151,16 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
         element: Sykdomshistorikk.Element,
         id: UUID?,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun preVisitHendelseSykdomstidslinje(
         tidslinje: Sykdomstidslinje,
         hendelseId: UUID?,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
     fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
@@ -135,7 +168,9 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
         element: Sykdomshistorikk.Element,
         id: UUID?,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
 }
 
@@ -143,7 +178,9 @@ internal interface SykdomstidslinjeVisitor {
     fun preVisitSykdomstidslinje(
         tidslinje: Sykdomstidslinje,
         låstePerioder: List<Periode>
-    ) {}
+    ) {
+    }
+
     fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(
@@ -153,7 +190,9 @@ internal interface SykdomstidslinjeVisitor {
         grad: Prosentdel,
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
-    ) {}
+    ) {
+    }
+
     fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(
@@ -163,7 +202,9 @@ internal interface SykdomstidslinjeVisitor {
         grad: Prosentdel,
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
-    ) {}
+    ) {
+    }
+
     fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
@@ -171,7 +212,9 @@ internal interface SykdomstidslinjeVisitor {
         grad: Prosentdel,
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
-    ) {}
+    ) {
+    }
+
     fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
@@ -179,7 +222,9 @@ internal interface SykdomstidslinjeVisitor {
         grad: Prosentdel,
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
-    ) {}
+    ) {
+    }
+
     fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
@@ -187,7 +232,9 @@ internal interface SykdomstidslinjeVisitor {
         grad: Prosentdel,
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
-    ) {}
+    ) {
+    }
+
     fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
@@ -202,21 +249,35 @@ internal interface InntekthistorikkVisitor {
 
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
-    fun visitInntektVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun visitInntektSkattVol2(
-        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Skatt,
+    fun visitInntektVol2(
+        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
         id: UUID,
-        kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde,
+        fom: LocalDate,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
+    fun visitInntektSkattVol2(
+        id: UUID,
         fom: LocalDate,
         måned: YearMonth,
         tidsstempel: LocalDateTime
-    ) {}
-    fun visitInntektSaksbehandlerVol2(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning.Saksbehandler, id: UUID, kilde: InntektshistorikkVol2.Inntektsopplysning.Kilde, fom: LocalDate, tidsstempel: LocalDateTime) {}
+    ) {
+    }
+
+    fun visitInntektSaksbehandlerVol2(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
+    fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {}
+    fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) {}
+    fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) {}
+    fun preVisitSkatt() {}
+    fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) {}
+    fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) {}
+    fun postVisitSkatt() {}
 }
 
-internal interface UtbetalingVisitor: UtbetalingsdagVisitor, OppdragVisitor {
+internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
     fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
@@ -241,6 +302,8 @@ internal interface OppdragVisitor {
         refFagsystemId: String?,
         endringskode: Endringskode,
         datoStatusFom: LocalDate?
-    ) {}
+    ) {
+    }
+
     fun postVisitOppdrag(oppdrag: Oppdrag) {}
 }

@@ -1,8 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Periodetype
@@ -150,22 +148,32 @@ class Inntektsvurdering(
                 ) {
                     inntektshistorikk {
                         inntekter
-                            .forEach {
-                                add(
-                                    førsteFraværsdag.minusDays(1),
-                                    meldingsreferanseId,
-                                    it.inntekt,
-                                    when (it.inntektsgrunnlag) {
-                                        SAMMENLIGNINGSGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SAMMENLIGNINSGRUNNLAG
-                                        SYKEPENGEGRUNNLAG -> InntektshistorikkVol2.Inntektsopplysning.Kilde.SKATT_SYKEPENGEGRUNNLAG
-                                    },
-                                    it.yearMonth,
-                                    enumValueOf(it.type.name),
-                                    "", //TODO: må hentes fra sparkel-inntekt
-                                    "",
-                                    ""
-                                )
+                            .map {
+                                when (it.inntektsgrunnlag) {
+                                    Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> createSkattSykepengegrunnlag(
+                                        førsteFraværsdag.minusDays(1),
+                                        meldingsreferanseId,
+                                        it.inntekt,
+                                        it.yearMonth,
+                                        enumValueOf(it.type.name),
+                                        "", //TODO: må hentes fra sparkel-inntekt
+                                        "",
+                                        ""
+                                    )
+                                    Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
+                                        createSkattSammenligningsgrunnlag(
+                                            førsteFraværsdag.minusDays(1),
+                                            meldingsreferanseId,
+                                            it.inntekt,
+                                            it.yearMonth,
+                                            enumValueOf(it.type.name),
+                                            "", //TODO: må hentes fra sparkel-inntekt
+                                            "",
+                                            ""
+                                        )
+                                }
                             }
+                            .also(this::addAll)
                     }
                 }
             }
@@ -183,7 +191,9 @@ class Inntektsvurdering(
         SAMMENLIGNINGSGRUNNLAG, SYKEPENGEGRUNNLAG
     }
 
-    private fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = ArbeidsgiverInntekt.kilder(this, antallMåneder)
+    private fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) =
+        ArbeidsgiverInntekt.kilder(this, antallMåneder)
+
     private fun List<ArbeidsgiverInntekt>.avg() = ArbeidsgiverInntekt.avg(this)
     private fun List<ArbeidsgiverInntekt>.antallMåneder() = ArbeidsgiverInntekt.antallMåneder(this)
 }
