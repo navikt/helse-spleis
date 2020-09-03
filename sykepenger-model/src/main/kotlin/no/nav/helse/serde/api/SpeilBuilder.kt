@@ -411,6 +411,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             organisasjonsnummer: String
         ) {
+            if (!arbeidsgiver.harHistorikk()) return
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
             pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere, aktivitetslogg))
         }

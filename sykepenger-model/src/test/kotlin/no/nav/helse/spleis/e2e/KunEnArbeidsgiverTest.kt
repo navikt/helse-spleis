@@ -24,6 +24,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     //FIXME: Fjernes når alle Doubles byttes ut med Inntekt
     private val INNTEKT_AS_INT = 31000
 
+    private val a2 = "arbeidsgiver 2"
+    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
+
     @Test
     fun `ingen historie med inntektsmelding først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
@@ -2038,6 +2041,82 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
+    }
+
+    @Test
+    fun `håndterer fler arbeidsgivere så lenge kun én har sykdomshistorikk`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+                1.januar(2017) til 1.januar(2017) inntekter {
+                    "123412344" inntekt 1
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)   // No history
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.mars, 28.mars, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.mars, 16.mars)))
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVVENTER_UFERDIG_GAP
+        )
+    }
+
+    @Test
+    fun `invaliderer perioder når det kommer sykmelding på en arbeidsgiver som hadde tom sykdomshistorikk`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+                1.januar(2017) til 1.januar(2017) inntekter {
+                    a2 inntekt 1
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)   // No history
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100), orgnummer = a2)
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            TIL_INFOTRYGD
+        )
+        assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
     }
 
     @Test

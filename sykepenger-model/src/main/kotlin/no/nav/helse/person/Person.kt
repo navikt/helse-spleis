@@ -35,7 +35,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
+        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }

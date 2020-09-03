@@ -560,6 +560,14 @@ class SpeilBuilderTest {
         assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
     }
 
+    @Test
+    fun `inkluderer ikke arbeidsgivere uten sykdomshistorikk`() {
+        val (person, hendelser) = personMedEkstraArbeidsgiverUtenSykdomshistorikk()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(1, personDTO.arbeidsgivere.size)
+        assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -585,6 +593,7 @@ class SpeilBuilderTest {
         private const val aktørId = "12345"
         private const val fnr = "12020052345"
         private const val orgnummer = "987654321"
+        private const val orgnummer2 = "1234"
         private lateinit var vedtaksperiodeId: String
         private lateinit var utbetalingsliste: List<Utbetaling>
 
@@ -616,6 +625,68 @@ class SpeilBuilderTest {
                         add(inntektsmeldingDTO)
                     }
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    fangeUtbetalinger()
+                    håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+
+                    påfølgendePerioder.forEach { periode ->
+                        sykmelding(
+                            fom = periode.start,
+                            tom = periode.endInclusive
+                        ).also { (sykmelding, sykmeldingDTO) ->
+                            håndter(sykmelding)
+                            add(sykmeldingDTO)
+                        }
+                        fangeVedtaksperiodeId()
+                        søknad(
+                            hendelseId = søknadhendelseId,
+                            fom = periode.start,
+                            tom = periode.endInclusive,
+                            sendtSøknad = periode.endInclusive.atStartOfDay()
+                        ).also { (søknad, søknadDTO) ->
+                            håndter(søknad)
+                            add(søknadDTO)
+                        }
+                        håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                        fangeUtbetalinger()
+                        håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                    }
+                }
+            }
+
+        private fun personMedEkstraArbeidsgiverUtenSykdomshistorikk(
+            fom: LocalDate = 1.januar,
+            tom: LocalDate = 31.januar,
+            sendtSøknad: LocalDate = 1.april,
+            søknadhendelseId: UUID = UUID.randomUUID(),
+            påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList()
+        ): Pair<Person, List<HendelseDTO>> =
+            Person(aktørId, fnr).run {
+                this to mutableListOf<HendelseDTO>().apply {
+                    sykmelding(fom = fom, tom = tom).also { (sykmelding, sykmeldingDTO) ->
+                        håndter(sykmelding)
+                        add(sykmeldingDTO)
+                    }
+                    fangeVedtaksperiodeId()
+                    søknad(
+                        hendelseId = søknadhendelseId,
+                        fom = fom,
+                        tom = tom,
+                        sendtSøknad = sendtSøknad.atStartOfDay()
+                    ).also { (søknad, søknadDTO) ->
+                        håndter(søknad)
+                        add(søknadDTO)
+                    }
+                    inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
+                        håndter(inntektsmelding)
+                        add(inntektsmeldingDTO)
+                    }
+                    håndter(vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -997,6 +1068,34 @@ class SpeilBuilderTest {
             inntektsvurdering = Inntektsvurdering(inntektperioder {
                 1.januar(2018) til 1.desember(2018) inntekter {
                     orgnummer inntekt 31000.månedlig
+                }
+            }),
+            opptjeningvurdering = Opptjeningvurdering(
+                listOf(
+                    Opptjeningvurdering.Arbeidsforhold(
+                        orgnummer,
+                        1.januar(2017)
+                    )
+                )
+            ),
+            erEgenAnsatt = false,
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+            dagpenger = Dagpenger(emptyList()),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+        )
+
+        private fun vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            inntektsvurdering = Inntektsvurdering(inntektperioder {
+                1.januar(2018) til 1.desember(2018) inntekter {
+                    orgnummer inntekt 31000.månedlig
+                }
+                1.januar(2017) til 1.januar(2017) inntekter {
+                    orgnummer2 inntekt 1
                 }
             }),
             opptjeningvurdering = Opptjeningvurdering(
