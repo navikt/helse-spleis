@@ -1327,6 +1327,10 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til utbetaling")
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             vedtaksperiode.utbetaling().håndter(utbetaling)
 
@@ -1369,6 +1373,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")
+        }
     }
 
     internal object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
@@ -1401,6 +1409,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
+        }
     }
 
     internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
@@ -1423,6 +1435,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet med inntektsmelding")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -1452,6 +1468,10 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet")
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
@@ -1475,6 +1495,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som er sendt til Infotrygd")
+        }
     }
 
     internal companion object {
