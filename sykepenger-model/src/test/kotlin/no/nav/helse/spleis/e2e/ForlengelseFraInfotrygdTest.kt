@@ -230,7 +230,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(3)) // <-- TIL_INFOTRYGD
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(5)) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(16.april(2020), 7.mai(2020), 50))
         håndterSøknad(Sykdom(16.april(2020), 7.mai(2020), 50))
