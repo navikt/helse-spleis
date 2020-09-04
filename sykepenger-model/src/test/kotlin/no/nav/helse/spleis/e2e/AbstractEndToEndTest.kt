@@ -242,7 +242,8 @@ internal abstract class AbstractEndToEndTest {
                     orgnummer inntekt inntekt
                 }
             }
-        )
+        ),
+        arbeidsavklaringspenger: List<Periode> = emptyList()
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, EgenAnsatt))
@@ -256,7 +257,8 @@ internal abstract class AbstractEndToEndTest {
                 egenAnsatt,
                 medlemskapstatus,
                 orgnummer,
-                inntektsvurdering
+                inntektsvurdering,
+                arbeidsavklaringspenger
             )
         )
     }
@@ -463,7 +465,8 @@ internal abstract class AbstractEndToEndTest {
         egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntektsvurdering: Inntektsvurdering
+        inntektsvurdering: Inntektsvurdering,
+        arbeidsavklaringspenger: List<Periode> = emptyList()
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -481,7 +484,7 @@ internal abstract class AbstractEndToEndTest {
                 else arbeidsforhold
             ),
             dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
         ).apply {
             hendelselogg = this
         }

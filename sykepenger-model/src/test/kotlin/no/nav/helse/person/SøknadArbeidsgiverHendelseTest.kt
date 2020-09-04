@@ -67,17 +67,16 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `ignorer andre sendt søknad`() {
+    internal fun `kaster ut ved overlappende søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
-
 
     @Test
     internal fun `ignorer andre søknad til arbeidsgiver`() {

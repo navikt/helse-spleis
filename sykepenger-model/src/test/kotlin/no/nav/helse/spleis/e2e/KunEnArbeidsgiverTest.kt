@@ -435,11 +435,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ikke automatisk behandling hvis warnings`() {
+    fun `perioden avsluttes ikke automatisk hvis warnings`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 5.januar, 100))
-        håndterSøknad(Sykdom(3.januar, 5.januar, 100))
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
@@ -447,8 +446,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertFalse(hendelselogg.hasErrors())
 
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            INNTEKT,
+            arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60))
+        ) // warning pga AAP
+        håndterYtelser(1.vedtaksperiode)
 
         assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
         assertTilstander(
@@ -1417,49 +1420,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING
         )
-    }
-
-    @Test
-    fun `dupliserte hendelser produserer bare advarsler`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100))
-        inspektør.also {
-            assertNoErrors(it)
-            assertWarnings(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
-            assertEquals(3, it.sykdomshistorikk.size)
-            assertEquals(18, it.dagtelling[Sykedag::class])
-            assertEquals(6, it.dagtelling[SykHelgedag::class])
-        }
-        assertNotNull(inspektør.maksdato(1.vedtaksperiode))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTrue(observatør.utbetalteVedtaksperioder.contains(1.vedtaksperiode))
     }
 
     @Test

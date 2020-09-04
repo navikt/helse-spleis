@@ -811,15 +811,17 @@ class SpeilBuilderTest {
                         hendelseId = UUID.randomUUID(), fom = fom, tom = tom, sendtSøknad = 1.april.atStartOfDay()
                     ).also { (søknad, søknadDTO) ->
                         håndter(søknad)
-                        håndter(søknad)
-                        håndter(søknad)
                         add(søknadDTO)
                     }
                     inntektsmelding(fom = fom).also { (inntektsmelding, inntektsmeldingDTO) ->
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
-                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlag(
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        // Fremprovoserer en warning
+                        arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60)))
+                    )
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -1059,7 +1061,10 @@ class SpeilBuilderTest {
             mottattDato = fom.atStartOfDay()
         )
 
-        private fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+        private fun vilkårsgrunnlag(
+            vedtaksperiodeId: String,
+            arbeidsavklaringspenger: List<Periode> = emptyList()
+        ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
@@ -1081,7 +1086,7 @@ class SpeilBuilderTest {
             erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
         )
 
         private fun vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId: String) = Vilkårsgrunnlag(

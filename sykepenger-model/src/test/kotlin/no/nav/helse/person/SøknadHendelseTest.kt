@@ -88,15 +88,13 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `andre søknad ugyldig`() {
+    fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrors())
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
     }
 
     @Test
