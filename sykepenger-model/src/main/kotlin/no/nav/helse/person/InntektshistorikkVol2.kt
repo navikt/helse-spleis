@@ -1,6 +1,9 @@
 package no.nav.helse.person
 
 
+import no.nav.helse.Appender
+import no.nav.helse.AppenderFeature
+import no.nav.helse.appender
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -17,86 +20,8 @@ internal class InntektshistorikkVol2 {
         get() = (historikk.firstOrNull()?.clone() ?: Innslag())
             .also { historikk.add(0, it) }
 
-
-    internal operator fun invoke(block: InnslagBuilder.() -> Unit) {
-        InnslagBuilder(innslag).apply(block)
-    }
-
-    internal class InnslagBuilder(private val innslag: Innslag) {
-        private val tidsstempel = LocalDateTime.now()
-
-        internal fun createSaksbehandler(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime? = null
-        ) = Saksbehandler(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
-
-        internal fun createInntektsmelding(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime? = null
-        ) = Inntektsmelding(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
-
-        internal fun createInfotrygd(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime? = null
-        ) = Infotrygd(dato, hendelseId, beløp, tidsstempel ?: this.tidsstempel)
-
-        internal fun createSkattSykepengegrunnlag(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tilleggsinformasjon: String?,
-            tidsstempel: LocalDateTime? = null
-        ) = Skatt.Sykepengegrunnlag(
-            dato,
-            hendelseId,
-            beløp,
-            måned,
-            type,
-            fordel,
-            beskrivelse,
-            tilleggsinformasjon,
-            tidsstempel ?: this.tidsstempel
-        )
-
-        internal fun createSkattSammenligningsgrunnlag(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tilleggsinformasjon: String?,
-            tidsstempel: LocalDateTime? = null
-        ) = Skatt.Sammenligningsgrunnlag(
-            dato,
-            hendelseId,
-            beløp,
-            måned,
-            type,
-            fordel,
-            beskrivelse,
-            tilleggsinformasjon,
-            tidsstempel ?: this.tidsstempel
-        )
-
-        internal fun add(opplysning: Inntektsopplysning) {
-            innslag.add(opplysning)
-        }
-
-        internal fun addAll(opplysninger: List<Skatt>) {
-            innslag.add(SkattComposite(opplysninger))
-        }
+    internal operator fun invoke(block: AppendMode.() -> Unit) {
+        appender(AppendMode, block)
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -305,17 +230,8 @@ internal class InntektshistorikkVol2 {
             beskrivelse: String,
             tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
-        ) : Skatt(
-            dato,
-            hendelseId,
-            beløp,
-            måned,
-            type,
-            fordel,
-            beskrivelse,
-            tilleggsinformasjon,
-            tidsstempel
-        ) {
+        ) :
+            Skatt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tilleggsinformasjon, tidsstempel) {
             override val prioritet = 20
 
             override fun accept(visitor: InntekthistorikkVisitor) {
@@ -327,6 +243,108 @@ internal class InntektshistorikkVol2 {
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato
+        }
+    }
+
+    internal class AppendMode private constructor(private val innslag: Innslag) : Appender {
+        companion object : AppenderFeature<InntektshistorikkVol2, AppendMode> {
+            override fun append(a: InntektshistorikkVol2, appender: AppendMode.() -> Unit) {
+                AppendMode(a.innslag).apply(appender).apply {
+                    skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(it)) }
+                }
+            }
+        }
+
+        private val tidsstempel = LocalDateTime.now()
+        private val skatt = mutableListOf<Skatt>()
+
+        internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
+            add(Saksbehandler(dato, hendelseId, beløp, tidsstempel))
+
+        internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
+            add(Inntektsmelding(dato, hendelseId, beløp, tidsstempel))
+
+        internal fun addInfotrygd(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
+            add(Infotrygd(dato, hendelseId, beløp, tidsstempel))
+
+        internal fun addSkattSykepengegrunnlag(
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tilleggsinformasjon: String?
+        ) =
+            skatt.add(
+                Skatt.Sykepengegrunnlag(
+                    dato,
+                    hendelseId,
+                    beløp,
+                    måned,
+                    type,
+                    fordel,
+                    beskrivelse,
+                    tilleggsinformasjon,
+                    tidsstempel
+                )
+            )
+
+        internal fun addSkattSammenligningsgrunnlag(
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tilleggsinformasjon: String?
+        ) =
+            skatt.add(
+                Skatt.Sammenligningsgrunnlag(
+                    dato,
+                    hendelseId,
+                    beløp,
+                    måned,
+                    type,
+                    fordel,
+                    beskrivelse,
+                    tilleggsinformasjon,
+                    tidsstempel
+                )
+            )
+
+        private fun add(opplysning: Inntektsopplysning) {
+            innslag.add(opplysning)
+        }
+    }
+
+    internal class RestoreJsonMode private constructor(private val inntektshistorikkVol2: InntektshistorikkVol2) : Appender {
+        companion object : AppenderFeature<InntektshistorikkVol2, RestoreJsonMode> {
+            override fun append(a: InntektshistorikkVol2, appender: RestoreJsonMode.() -> Unit) {
+                RestoreJsonMode(a).apply(appender)
+            }
+        }
+
+        internal fun innslag(block: InnslagAppender.() -> Unit) {
+            Innslag().also { InnslagAppender(it).apply(block) }.also { inntektshistorikkVol2.historikk.add(it) }
+        }
+
+        internal class InnslagAppender(private val innslag: Innslag) {
+            internal fun add(opplysning: Inntektsopplysning) = innslag.add(opplysning)
+
+            internal fun skatt(block: SkattAppender.() -> Unit) {
+                SkattAppender(this).apply(block).finalize()
+            }
+
+            internal class SkattAppender(private val innslagAppender: InnslagAppender) {
+                private val skatt = mutableListOf<Skatt>()
+                internal fun finalize() =
+                    skatt.takeIf { it.isNotEmpty() }?.apply { innslagAppender.innslag.add(SkattComposite(this)) }
+
+                internal fun add(skatt: Skatt) = this.skatt.add(skatt)
+            }
         }
     }
 }

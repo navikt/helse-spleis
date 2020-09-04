@@ -92,12 +92,10 @@ class Utbetalingshistorikk(
         ) {
             if (organisasjonsnummer != orgnummer) return
             inntektshistorikk.invoke {
-                add(
-                    createInfotrygd(
-                        sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
-                        hendelseId,
-                        inntektPerMåned
-                    )
+                addInfotrygd(
+                    sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
+                    hendelseId,
+                    inntektPerMåned
                 )
             }
         }

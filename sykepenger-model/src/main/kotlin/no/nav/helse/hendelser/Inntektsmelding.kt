@@ -145,12 +145,10 @@ class Inntektsmelding(
     internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2) {
         if (førsteFraværsdag == null) return
         inntektshistorikk {
-            add(
-                createInntektsmelding(
-                    førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
-                    meldingsreferanseId(),
-                    beregnetInntekt
-                )
+            addInntektsmelding(
+                førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
+                meldingsreferanseId(),
+                beregnetInntekt
             )
         }
     }

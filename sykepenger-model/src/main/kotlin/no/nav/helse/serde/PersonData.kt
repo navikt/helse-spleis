@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import no.nav.helse.appender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -228,9 +229,11 @@ internal data class PersonData(
                     inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
-                    inntekter.reversed().forEach {
-                        inntektshistorikk {
-                            InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
+                    inntektshistorikk.appender(InntektshistorikkVol2.RestoreMode) {
+                        inntekter.forEach {
+                            innslag {
+                                InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
+                            }
                         }
                     }
                 }
@@ -255,96 +258,114 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntektsopplysninger: List<InntektsopplysningData>,
-                    innslagBuilder: InntektshistorikkVol2.InnslagBuilder
+                    innslag: InntektshistorikkVol2.RestoreMode.InnslagAppender
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
-                        when (inntektData.kilde?.let { if(it == "SKATT_SAMMENLIGNINSGRUNNLAG") Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG else enumValueOf(it) }) {
+                        when (inntektData.kilde?.let {
+                            if (it == "SKATT_SAMMENLIGNINSGRUNNLAG") Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG else enumValueOf(
+                                it
+                            )
+                        }) {
                             Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                innslagBuilder.add(
-                                    innslagBuilder.createSkattSammenligningsgrunnlag(
+                                innslag.skatt {
+                                    add(InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,
                                         måned = requireNotNull(inntektData.måned),
-                                        type = inntektData.type?.let { enumValueOf<InntektshistorikkVol2.Skatt.Inntekttype>(it) } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
+                                        type = inntektData.type?.let {
+                                            enumValueOf<InntektshistorikkVol2.Skatt.Inntekttype>(
+                                                it
+                                            )
+                                        } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
                                         fordel = inntektData.fordel ?: "",
-                                        beskrivelse = inntektData.beskrivelse  ?: "",
+                                        beskrivelse = inntektData.beskrivelse ?: "",
                                         tilleggsinformasjon = inntektData.tilleggsinformasjon,
-                                        tidsstempel = inntektData.tidsstempel
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
-                                )
+                                    )
+                                }
                             Kilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                innslagBuilder.add(
-                                    innslagBuilder.createSkattSykepengegrunnlag(
+                                innslag.skatt {
+                                    add(InntektshistorikkVol2.Skatt.Sykepengegrunnlag(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,
                                         måned = requireNotNull(inntektData.måned),
-                                        type = inntektData.type?.let { enumValueOf<InntektshistorikkVol2.Skatt.Inntekttype>(it) } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
+                                        type = inntektData.type?.let {
+                                            enumValueOf<InntektshistorikkVol2.Skatt.Inntekttype>(
+                                                it
+                                            )
+                                        } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
                                         fordel = inntektData.fordel ?: "",
-                                        beskrivelse = inntektData.beskrivelse  ?: "",
+                                        beskrivelse = inntektData.beskrivelse ?: "",
                                         tilleggsinformasjon = inntektData.tilleggsinformasjon,
-                                        tidsstempel = inntektData.tidsstempel
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
-                                )
+                                    )
+                                }
                             Kilde.INFOTRYGD ->
-                                innslagBuilder.add(
-                                    innslagBuilder.createInfotrygd(
+                                innslag.add(
+                                    InntektshistorikkVol2.Infotrygd(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,
-                                        tidsstempel = inntektData.tidsstempel
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
                                 )
                             Kilde.INNTEKTSMELDING ->
-                                innslagBuilder.add(
-                                    innslagBuilder.createInntektsmelding(
+                                innslag.add(
+                                    InntektshistorikkVol2.Inntektsmelding(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,
-                                        tidsstempel = inntektData.tidsstempel
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
                                 )
                             Kilde.SAKSBEHANDLER ->
-                                innslagBuilder.add(
-                                    innslagBuilder.createSaksbehandler(
+                                innslag.add(
+                                    InntektshistorikkVol2.Saksbehandler(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,
-                                        tidsstempel = inntektData.tidsstempel
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
                                 )
-                            null -> innslagBuilder.addAll(
+                            null -> innslag.skatt {
                                 requireNotNull(inntektData.skatteopplysninger).map { skatteData ->
                                     when (skatteData.kilde?.let { enumValueOf<Kilde>(it) }) {
                                         Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                            innslagBuilder.createSkattSammenligningsgrunnlag(
-                                                dato = requireNotNull(skatteData.dato),
-                                                hendelseId = requireNotNull(skatteData.hendelseId),
-                                                beløp = requireNotNull(skatteData.beløp).månedlig,
-                                                måned = requireNotNull(skatteData.måned),
-                                                type = enumValueOf(requireNotNull(skatteData.type)),
-                                                fordel = requireNotNull(skatteData.fordel),
-                                                beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                                tilleggsinformasjon = skatteData.tilleggsinformasjon,
-                                                tidsstempel = skatteData.tidsstempel
+                                            add(
+                                                InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag(
+                                                    dato = requireNotNull(skatteData.dato),
+                                                    hendelseId = requireNotNull(skatteData.hendelseId),
+                                                    beløp = requireNotNull(skatteData.beløp).månedlig,
+                                                    måned = requireNotNull(skatteData.måned),
+                                                    type = enumValueOf(requireNotNull(skatteData.type)),
+                                                    fordel = requireNotNull(skatteData.fordel),
+                                                    beskrivelse = requireNotNull(skatteData.beskrivelse),
+                                                    tilleggsinformasjon = skatteData.tilleggsinformasjon,
+                                                    tidsstempel = requireNotNull(skatteData.tidsstempel)
+                                                )
                                             )
                                         Kilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                            innslagBuilder.createSkattSykepengegrunnlag(
-                                                dato = requireNotNull(skatteData.dato),
-                                                hendelseId = requireNotNull(skatteData.hendelseId),
-                                                beløp = requireNotNull(skatteData.beløp).månedlig,
-                                                måned = requireNotNull(skatteData.måned),
-                                                type = enumValueOf(requireNotNull(skatteData.type)),
-                                                fordel = requireNotNull(skatteData.fordel),
-                                                beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                                tilleggsinformasjon = skatteData.tilleggsinformasjon,
-                                                tidsstempel = skatteData.tidsstempel
+                                            add(
+                                                InntektshistorikkVol2.Skatt.Sykepengegrunnlag(
+                                                    dato = requireNotNull(skatteData.dato),
+                                                    hendelseId = requireNotNull(skatteData.hendelseId),
+                                                    beløp = requireNotNull(skatteData.beløp).månedlig,
+                                                    måned = requireNotNull(skatteData.måned),
+                                                    type = enumValueOf(requireNotNull(skatteData.type)),
+                                                    fordel = requireNotNull(skatteData.fordel),
+                                                    beskrivelse = requireNotNull(skatteData.beskrivelse),
+                                                    tilleggsinformasjon = skatteData.tilleggsinformasjon,
+                                                    tidsstempel = requireNotNull(skatteData.tidsstempel)
+                                                )
                                             )
                                         else -> error("Kan kun være skatteopplysninger i SkattComposite")
                                     }
                                 }
-                            )
+                            }
                         }
                     }
                 }

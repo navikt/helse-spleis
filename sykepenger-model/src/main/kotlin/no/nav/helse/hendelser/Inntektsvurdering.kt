@@ -147,10 +147,9 @@ class Inntektsvurdering(
                     meldingsreferanseId: UUID
                 ) {
                     inntektshistorikk {
-                        inntekter
-                            .map {
+                        inntekter.forEach {
                                 when (it.inntektsgrunnlag) {
-                                    Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> createSkattSykepengegrunnlag(
+                                    Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
                                         førsteFraværsdag.minusDays(1),
                                         meldingsreferanseId,
                                         it.inntekt,
@@ -161,7 +160,7 @@ class Inntektsvurdering(
                                         ""
                                     )
                                     Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
-                                        createSkattSammenligningsgrunnlag(
+                                        addSkattSammenligningsgrunnlag(
                                             førsteFraværsdag.minusDays(1),
                                             meldingsreferanseId,
                                             it.inntekt,
@@ -173,7 +172,6 @@ class Inntektsvurdering(
                                         )
                                 }
                             }
-                            .also(this::addAll)
                     }
                 }
             }
