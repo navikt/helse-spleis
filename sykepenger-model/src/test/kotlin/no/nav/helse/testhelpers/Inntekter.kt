@@ -34,7 +34,9 @@ internal class Inntektperioder(block: Inntektperioder.() -> Unit) {
                         yearMonth,
                         inntekt,
                         LØNNSINNTEKT,
-                        inntektsgrunnlag
+                        inntektsgrunnlag,
+                        "kontantytelse",
+                        "fastloenn"
                     )
                 }.toList()
             }

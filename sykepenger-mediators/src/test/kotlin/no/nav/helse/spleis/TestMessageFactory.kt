@@ -184,7 +184,9 @@ internal class TestMessageFactory(
                                 mapOf(
                                     "beløp" to it.second,
                                     "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to organisasjonsnummer
+                                    "orgnummer" to organisasjonsnummer,
+                                    "fordel" to "kontantytelse",
+                                    "beskrivelse" to "fastloenn"
                                 )
                             }
                         )

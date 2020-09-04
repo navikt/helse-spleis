@@ -249,7 +249,6 @@ internal data class PersonData(
             private val fordel: String?,
             private val beskrivelse: String?,
             private val begrunnelse: String?,
-            private val tilleggsinformasjon: String?,
             private val tidsstempel: LocalDateTime?, //Require not null
             private val skatteopplysninger: List<InntektsopplysningData>?
         ) {
@@ -278,7 +277,6 @@ internal data class PersonData(
                                         } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
                                         fordel = inntektData.fordel ?: "",
                                         beskrivelse = inntektData.beskrivelse ?: "",
-                                        tilleggsinformasjon = inntektData.tilleggsinformasjon,
                                         tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
                                     )
@@ -297,7 +295,6 @@ internal data class PersonData(
                                         } ?: InntektshistorikkVol2.Skatt.Inntekttype.LØNNSINNTEKT,
                                         fordel = inntektData.fordel ?: "",
                                         beskrivelse = inntektData.beskrivelse ?: "",
-                                        tilleggsinformasjon = inntektData.tilleggsinformasjon,
                                         tidsstempel = requireNotNull(inntektData.tidsstempel)
                                     )
                                     )
@@ -342,7 +339,6 @@ internal data class PersonData(
                                                     type = enumValueOf(requireNotNull(skatteData.type)),
                                                     fordel = requireNotNull(skatteData.fordel),
                                                     beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                                    tilleggsinformasjon = skatteData.tilleggsinformasjon,
                                                     tidsstempel = requireNotNull(skatteData.tidsstempel)
                                                 )
                                             )
@@ -356,7 +352,6 @@ internal data class PersonData(
                                                     type = enumValueOf(requireNotNull(skatteData.type)),
                                                     fordel = requireNotNull(skatteData.fordel),
                                                     beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                                    tilleggsinformasjon = skatteData.tilleggsinformasjon,
                                                     tidsstempel = requireNotNull(skatteData.tidsstempel)
                                                 )
                                             )

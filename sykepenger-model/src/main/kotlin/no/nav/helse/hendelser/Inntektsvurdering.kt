@@ -111,7 +111,9 @@ class Inntektsvurdering(
             private val yearMonth: YearMonth,
             private val inntekt: Inntekt,
             private val type: Inntekttype,
-            private val inntektsgrunnlag: Inntektsgrunnlag
+            private val inntektsgrunnlag: Inntektsgrunnlag,
+            private val fordel: String,
+            private val beskrivelse: String
         ) {
 
             companion object {
@@ -148,30 +150,28 @@ class Inntektsvurdering(
                 ) {
                     inntektshistorikk {
                         inntekter.forEach {
-                                when (it.inntektsgrunnlag) {
-                                    Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
-                                        førsteFraværsdag,
-                                        meldingsreferanseId,
-                                        it.inntekt,
-                                        it.yearMonth,
-                                        enumValueOf(it.type.name),
-                                        "", //TODO: må hentes fra sparkel-inntekt
-                                        "",
-                                        ""
+                            when (it.inntektsgrunnlag) {
+                                Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
+                                    dato = førsteFraværsdag,
+                                    hendelseId = meldingsreferanseId,
+                                    beløp = it.inntekt,
+                                    måned = it.yearMonth,
+                                    type = enumValueOf(it.type.name),
+                                    fordel = it.fordel,
+                                    beskrivelse = it.beskrivelse
+                                )
+                                Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
+                                    addSkattSammenligningsgrunnlag(
+                                        dato = førsteFraværsdag,
+                                        hendelseId = meldingsreferanseId,
+                                        beløp = it.inntekt,
+                                        måned = it.yearMonth,
+                                        type = enumValueOf(it.type.name),
+                                        fordel = it.fordel,
+                                        beskrivelse = it.beskrivelse
                                     )
-                                    Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
-                                        addSkattSammenligningsgrunnlag(
-                                            førsteFraværsdag,
-                                            meldingsreferanseId,
-                                            it.inntekt,
-                                            it.yearMonth,
-                                            enumValueOf(it.type.name),
-                                            "", //TODO: må hentes fra sparkel-inntekt
-                                            "",
-                                            ""
-                                        )
-                                }
                             }
+                        }
                     }
                 }
             }

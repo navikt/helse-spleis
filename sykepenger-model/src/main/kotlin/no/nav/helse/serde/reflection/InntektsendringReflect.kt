@@ -82,7 +82,6 @@ internal class SykepengegrunnlagVol2Reflect(inntektsopplysning: Inntektshistorik
     private val type: InntektshistorikkVol2.Skatt.Inntekttype = inntektsopplysning["type"]
     private val fordel: String = inntektsopplysning["fordel"]
     private val beskrivelse: String = inntektsopplysning["beskrivelse"]
-    private val tilleggsinformasjon: String? = inntektsopplysning["tilleggsinformasjon"]
     private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
@@ -94,7 +93,6 @@ internal class SykepengegrunnlagVol2Reflect(inntektsopplysning: Inntektshistorik
         "type" to type,
         "fordel" to fordel,
         "beskrivelse" to beskrivelse,
-        "tilleggsinformasjon" to tilleggsinformasjon,
         "tidsstempel" to tidsstempel
     )
 }
@@ -107,7 +105,6 @@ internal class SammenligningsgrunnlagVol2Reflect(inntektsopplysning: Inntektshis
     private val type: InntektshistorikkVol2.Skatt.Inntekttype = inntektsopplysning["type"]
     private val fordel: String = inntektsopplysning["fordel"]
     private val beskrivelse: String = inntektsopplysning["beskrivelse"]
-    private val tilleggsinformasjon: String? = inntektsopplysning["tilleggsinformasjon"]
     private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal fun toMap(): Map<String, Any?> = mapOf(
@@ -119,7 +116,6 @@ internal class SammenligningsgrunnlagVol2Reflect(inntektsopplysning: Inntektshis
         "type" to type,
         "fordel" to fordel,
         "beskrivelse" to beskrivelse,
-        "tilleggsinformasjon" to tilleggsinformasjon,
         "tidsstempel" to tidsstempel
     )
 }

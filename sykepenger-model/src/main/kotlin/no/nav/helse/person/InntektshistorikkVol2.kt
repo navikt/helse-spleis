@@ -176,7 +176,6 @@ internal class InntektshistorikkVol2 {
         protected val type: Inntekttype,
         protected val fordel: String,
         protected val beskrivelse: String,
-        protected val tilleggsinformasjon: String?,
         protected val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
         internal enum class Inntekttype {
@@ -194,7 +193,6 @@ internal class InntektshistorikkVol2 {
             type: Inntekttype,
             fordel: String,
             beskrivelse: String,
-            tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) : Skatt(
             dato,
@@ -204,7 +202,6 @@ internal class InntektshistorikkVol2 {
             type,
             fordel,
             beskrivelse,
-            tilleggsinformasjon,
             tidsstempel
         ) {
             override val prioritet = 40
@@ -228,10 +225,9 @@ internal class InntektshistorikkVol2 {
             type: Inntekttype,
             fordel: String,
             beskrivelse: String,
-            tilleggsinformasjon: String?,
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) :
-            Skatt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tilleggsinformasjon, tidsstempel) {
+            Skatt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel) {
             override val prioritet = 20
 
             override fun accept(visitor: InntekthistorikkVisitor) {
@@ -274,8 +270,7 @@ internal class InntektshistorikkVol2 {
             måned: YearMonth,
             type: Skatt.Inntekttype,
             fordel: String,
-            beskrivelse: String,
-            tilleggsinformasjon: String?
+            beskrivelse: String
         ) =
             skatt.add(
                 Skatt.Sykepengegrunnlag(
@@ -286,7 +281,6 @@ internal class InntektshistorikkVol2 {
                     type,
                     fordel,
                     beskrivelse,
-                    tilleggsinformasjon,
                     tidsstempel
                 )
             )
@@ -298,8 +292,7 @@ internal class InntektshistorikkVol2 {
             måned: YearMonth,
             type: Skatt.Inntekttype,
             fordel: String,
-            beskrivelse: String,
-            tilleggsinformasjon: String?
+            beskrivelse: String
         ) =
             skatt.add(
                 Skatt.Sammenligningsgrunnlag(
@@ -310,7 +303,6 @@ internal class InntektshistorikkVol2 {
                     type,
                     fordel,
                     beskrivelse,
-                    tilleggsinformasjon,
                     tidsstempel
                 )
             )

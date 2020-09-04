@@ -26,7 +26,7 @@ internal class VilkårsgrunnlagRiver(
             requireArray("inntektsliste") {
                 requireKey("beløp")
                 requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
-                interestedIn("orgnummer", "fødselsnummer", "aktørId")
+                interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
             }
         }
         packet.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {

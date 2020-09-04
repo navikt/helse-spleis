@@ -31,10 +31,12 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
             måned["inntektsliste"]
                 .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
                     Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt(
-                        måned["årMåned"].asYearMonth(),
-                        inntekt["beløp"].asDouble().månedlig,
-                        inntekt["inntektstype"].asInntekttype(),
-                        SAMMENLIGNINGSGRUNNLAG
+                        yearMonth = måned["årMåned"].asYearMonth(),
+                        inntekt = inntekt["beløp"].asDouble().månedlig,
+                        type = inntekt["inntektstype"].asInntekttype(),
+                        inntektsgrunnlag = SAMMENLIGNINGSGRUNNLAG,
+                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
                     )
                 }.toList()
         }
