@@ -451,6 +451,31 @@ internal class Arbeidsgiver private constructor(
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
 
+    internal class JsonRestorer private constructor() {
+        internal companion object {
+            internal fun restore(
+                person: Person,
+                organisasjonsnummer: String,
+                id: UUID,
+                inntektshistorikk: Inntektshistorikk,
+                inntektshistorikkVol2: InntektshistorikkVol2,
+                sykdomshistorikk: Sykdomshistorikk,
+                vedtaksperioder: MutableList<Vedtaksperiode>,
+                forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
+                utbetalinger: MutableList<Utbetaling>
+            ) = Arbeidsgiver(
+                person,
+                organisasjonsnummer,
+                id,
+                inntektshistorikk,
+                inntektshistorikkVol2,
+                sykdomshistorikk,
+                vedtaksperioder,
+                forkastede,
+                utbetalinger
+            )
+        }
+    }
 }
 
 internal enum class ForkastetÅrsak {

@@ -161,19 +161,17 @@ internal data class PersonData(
             aktørId: String,
             fødselsnummer: String
         ): Arbeidsgiver {
-            val arbeidsgiver = Arbeidsgiver::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    person,
-                    organisasjonsnummer,
-                    id,
-                    modelInntekthistorikk,
-                    modelInntekthistorikkVol2,
-                    modelSykdomshistorikk,
-                    vedtaksperiodeliste,
-                    forkastedeliste,
-                    modelUtbetalinger
-                )
+            val arbeidsgiver = Arbeidsgiver.JsonRestorer.restore(
+                person,
+                organisasjonsnummer,
+                id,
+                modelInntekthistorikk,
+                modelInntekthistorikkVol2,
+                modelSykdomshistorikk,
+                vedtaksperiodeliste,
+                forkastedeliste,
+                modelUtbetalinger
+            )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
                 it.createVedtaksperiode(
@@ -229,7 +227,7 @@ internal data class PersonData(
                     inntekter: List<InntektshistorikkInnslagData>,
                     inntektshistorikk: InntektshistorikkVol2
                 ) {
-                    inntektshistorikk.appender(InntektshistorikkVol2.RestoreMode) {
+                    inntektshistorikk.appender(InntektshistorikkVol2.RestoreJsonMode) {
                         inntekter.forEach {
                             innslag {
                                 InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
@@ -258,7 +256,7 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntektsopplysninger: List<InntektsopplysningData>,
-                    innslag: InntektshistorikkVol2.RestoreMode.InnslagAppender
+                    innslag: InntektshistorikkVol2.RestoreJsonMode.InnslagAppender
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
                         when (inntektData.kilde?.let {
