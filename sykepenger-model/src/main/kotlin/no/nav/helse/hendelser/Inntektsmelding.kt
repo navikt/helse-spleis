@@ -146,7 +146,7 @@ class Inntektsmelding(
         if (førsteFraværsdag == null) return
         inntektshistorikk {
             addInntektsmelding(
-                førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
+                førsteFraværsdag,
                 meldingsreferanseId(),
                 beregnetInntekt
             )

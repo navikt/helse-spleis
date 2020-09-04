@@ -227,7 +227,7 @@ class Person private constructor(
     }
 
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        val dato = sammenhengendePeriode(periode).start.minusDays(1)
+        val dato = sammenhengendePeriode(periode).start
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 

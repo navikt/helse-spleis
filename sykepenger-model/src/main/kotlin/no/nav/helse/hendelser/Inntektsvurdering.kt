@@ -150,7 +150,7 @@ class Inntektsvurdering(
                         inntekter.forEach {
                                 when (it.inntektsgrunnlag) {
                                     Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
-                                        førsteFraværsdag.minusDays(1),
+                                        førsteFraværsdag,
                                         meldingsreferanseId,
                                         it.inntekt,
                                         it.yearMonth,
@@ -161,7 +161,7 @@ class Inntektsvurdering(
                                     )
                                     Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
                                         addSkattSammenligningsgrunnlag(
-                                            førsteFraværsdag.minusDays(1),
+                                            førsteFraværsdag,
                                             meldingsreferanseId,
                                             it.inntekt,
                                             it.yearMonth,

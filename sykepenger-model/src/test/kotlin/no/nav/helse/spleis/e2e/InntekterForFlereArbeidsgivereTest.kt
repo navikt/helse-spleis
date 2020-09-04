@@ -74,15 +74,15 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 orgnummer = a1,
                 inntekter = inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.desember(2016) til 1.november(2017) inntekter {
+                    1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                     }
-                    1.desember(2016) til 1.mai(2017) inntekter {
+                    1.januar(2017) til 1.juni(2017) inntekter {
                         a2 inntekt 5000
                         a3 inntekt 3000
                         a4 inntekt 2000
                     }
-                    1.juni(2017) til 1.november(2017) inntekter {
+                    1.juli(2017) til 1.desember(2017) inntekter {
                         a3 inntekt 7500
                         a4 inntekt 2500
                     }
