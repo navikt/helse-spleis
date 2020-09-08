@@ -26,8 +26,7 @@ internal class Sykdomstidslinje private constructor(
     private val periode: Periode?
 
     init {
-        this.periode = periode ?:
-            if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
+        this.periode = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
     }
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
@@ -142,7 +141,8 @@ internal class Sykdomstidslinje private constructor(
                 }
         }
 
-    internal fun førsteSykedagEtter(dato:LocalDate) = dager.entries.firstOrNull { it.key >= dato && erEnSykedag(it.value) }?.key
+    internal fun førsteSykedagEtter(dato: LocalDate) =
+        dager.entries.firstOrNull { it.key >= dato && erEnSykedag(it.value) }?.key
 
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
@@ -338,7 +338,7 @@ internal class Sykdomstidslinje private constructor(
             .zipWithNext()
             .any { erNyArbeidsgiverperiode(it.first, it.second) }
 
-    private fun erNyArbeidsgiverperiode(fra : LocalDate, til: LocalDate) =
+    private fun erNyArbeidsgiverperiode(fra: LocalDate, til: LocalDate) =
         fra.until(til, DAYS) > 16
 
     private fun kunSykedager() =
@@ -353,6 +353,8 @@ internal class Sykdomstidslinje private constructor(
         is ArbeidsgiverHelgedag -> true
         else -> false
     }
+
+    internal fun erSisteDagSykedag() = this.dager.values.lastOrNull()?.erSykedag()
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

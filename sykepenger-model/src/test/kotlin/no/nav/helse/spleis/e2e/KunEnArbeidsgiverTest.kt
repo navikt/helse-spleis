@@ -1799,9 +1799,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
-    @Disabled
     @Test
-    fun `Perioder hvor søknaden har dannet gap (friskmeldt) skal ikke regnes som gap`() {
+    fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) skal regnes som gap til påfølgende vedtaksperiode`() {
         // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
@@ -1838,7 +1837,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP
         )
     }
 

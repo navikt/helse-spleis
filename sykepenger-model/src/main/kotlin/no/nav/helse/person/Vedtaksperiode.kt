@@ -239,13 +239,13 @@ internal class Vedtaksperiode private constructor(
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
-    internal fun erRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode)
+    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode) && this.sykdomstidslinje.erSisteDagSykedag() ?: false
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
-            arbeidsgiver.finnPeriodeRettFør(this)?.run { Periodetype.INFOTRYGDFORLENGELSE }
+            arbeidsgiver.finnSykeperiodeRettFør(this)?.run { Periodetype.INFOTRYGDFORLENGELSE }
                 ?: Periodetype.OVERGANG_FRA_IT
         harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
         else -> Periodetype.FØRSTEGANGSBEHANDLING
@@ -291,7 +291,7 @@ internal class Vedtaksperiode private constructor(
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgiver.finnPeriodeRettFør(vedtaksperiode)?.let {
+        arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.let {
             it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()
         } == true
 
@@ -344,7 +344,7 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.førsteFraværsdag != null) {
             if (hendelse.førsteFraværsdag > periode.endInclusive)
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
-            if (arbeidsgiver.finnPeriodeRettFør(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje.førsteFraværsdag())
+            if (arbeidsgiver.finnSykeperiodeRettFør(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje.førsteFraværsdag())
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode")
         }
         hendelse.valider(periode)
@@ -420,7 +420,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun mottaVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) {
         dataForVilkårsvurdering = grunnlagsdata
-        arbeidsgiver.finnPeriodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
+        arbeidsgiver.finnSykeperiodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }
 
     private fun trengerYtelser(hendelse: PersonHendelse) {
@@ -751,7 +751,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
 
-                val periodeRettFør = vedtaksperiode.arbeidsgiver.finnPeriodeRettFør(vedtaksperiode)
+                val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                 val forlengelse = periodeRettFør != null
                 val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
                 if (periodeRettFør != null) {
@@ -1173,7 +1173,7 @@ internal class Vedtaksperiode private constructor(
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {
-                    arbeidsgiver.finnPeriodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
+                    arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
                         vedtaksperiode.førsteFraværsdag = tilstøtendePeriode.førsteFraværsdag
                         return@onSuccess
@@ -1412,7 +1412,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(
                 inntektsmelding,
-                if (inntektsmelding.isNotQualified() || vedtaksperiode.arbeidsgiver.finnPeriodeRettFør(vedtaksperiode) == null) {
+                if (inntektsmelding.isNotQualified() || vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) == null) {
                     inntektsmelding.beingQualified()
                     AvventerVilkårsprøvingArbeidsgiversøknad
                 } else

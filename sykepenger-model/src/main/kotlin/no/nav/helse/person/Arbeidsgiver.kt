@@ -325,7 +325,7 @@ internal class Arbeidsgiver private constructor(
         var index = vedtaksperioder.indexOf(vedtaksperiode)
         val results = vedtaksperioder.subList(0, index + 1).toMutableList()
         while (vedtaksperioder.last() != results.last()) {
-            if (!vedtaksperioder[index].erRettFør(vedtaksperioder[index + 1])) break
+            if (!vedtaksperioder[index].erSykeperiodeRettFør(vedtaksperioder[index + 1])) break
             results.add(vedtaksperioder[index + 1])
             index++
         }
@@ -378,11 +378,11 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun finnPeriodeRettFør(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> other.erRettFør(vedtaksperiode) }
+    internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
-    internal fun finnPeriodeRettEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other -> vedtaksperiode.erRettFør(other) }
+    internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
     internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
@@ -444,7 +444,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {
-        return finnPeriodeRettEtter(vedtaksperiode) == null
+        return finnSykeperiodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
     }
 
