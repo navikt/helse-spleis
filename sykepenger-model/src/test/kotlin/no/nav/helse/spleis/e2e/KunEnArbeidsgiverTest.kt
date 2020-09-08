@@ -18,6 +18,8 @@ import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters.firstDayOfMonth
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -2077,5 +2079,40 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
         assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
+    }
+
+    @Disabled("Et utbetalt event trigget av en periode helt etter maksdato har med utbetalt dager etter maksdato fra forrige periode")
+    @Test
+    fun `utbetalt event etter krysset maksdato inneholder kun utbetalte dager fra forrige periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
+        håndterSøknad(Sykdom(1.januar(2018), 31.januar(2018), gradFraSykmelding = 100), sendtTilNav = 1.januar(2018))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        repeat(11) {
+            val fom = 1.januar(2018).plusMonths(it + 1L).with(firstDayOfMonth())
+            val tom = fom.with(lastDayOfMonth())
+
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+            håndterSøknad(Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+            håndterYtelser((it + 2).vedtaksperiode)   // No history
+            håndterSimulering((it + 2).vedtaksperiode)
+            håndterUtbetalingsgodkjenning((it + 2).vedtaksperiode, true)
+            håndterUtbetalt((it + 2).vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100))
+        håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), gradFraSykmelding = 100), sendtTilNav = 31.januar(2019))
+        håndterYtelser(13.vedtaksperiode)   // No history
+        håndterUtbetalingsgodkjenning(13.vedtaksperiode, true)
+        håndterUtbetalt(13.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        val utbetaltEvent = observatør.utbetaltEventer.last()
+
+        assertEquals(30.desember, utbetaltEvent.oppdrag.first().utbetalingslinjer.first().tom)
     }
 }
