@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
@@ -100,6 +99,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
     }
 
+    @Disabled("Slik skal det virke etter at annullering trigger replay")
     @Test
     fun `Annullering av én periode fører kun til at sammehengende perioder blir satt i tilstand TilInfotrygd`() {
         forlengVedtak(27.januar, 30.januar, 100)

@@ -97,7 +97,15 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, sykmeldingsperiode, hendelseIder)
+        visitor.preVisitVedtaksperiode(
+            this,
+            id,
+            arbeidsgiverNettoBeløp,
+            personNettoBeløp,
+            periode,
+            sykmeldingsperiode,
+            hendelseIder
+        )
         sykdomstidslinje.accept(visitor)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
@@ -218,11 +226,12 @@ internal class Vedtaksperiode private constructor(
         if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
         kontekst(kansellerUtbetaling)
         kansellerUtbetaling.info("Behandler kanseller utbetaling for vedtaksperiode: %s", this.id.toString())
+        arbeidsgiver.søppelbøtte(this, kansellerUtbetaling, Arbeidsgiver.ALLE)
         invaliderPeriode(kansellerUtbetaling)
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
-        if(overlapperMed(hendelse)) {
+        if (overlapperMed(hendelse)) {
             kontekst(hendelse)
             tilstand.håndter(this, hendelse)
         }
@@ -449,13 +458,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun replayHendelser() {
-        person.vedtaksperiodeReplay(PersonObserver.VedtaksperiodeReplayEvent(
-            vedtaksperiodeId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            hendelseIder = hendelseIder
-        ))
+        person.vedtaksperiodeReplay(
+            PersonObserver.VedtaksperiodeReplayEvent(
+                vedtaksperiodeId = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                hendelseIder = hendelseIder
+            )
+        )
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -510,7 +521,8 @@ internal class Vedtaksperiode private constructor(
     ) {
         if (vedtaksperioder
                 .filter { this.periode.overlapperMed(it.periode) }
-                .all { it.tilstand == AvventerArbeidsgivere })
+                .all { it.tilstand == AvventerArbeidsgivere }
+        )
             høstingsresultater(engineForTimeline, hendelse)
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
@@ -588,13 +600,16 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
-        if (sykdomshistorikk.sykdomstidslinje().toShortString() != arbeidsgiverSykdomstidslinje.subset(periode()).toShortString()) {
+        if (sykdomshistorikk.sykdomstidslinje().toShortString() != arbeidsgiverSykdomstidslinje.subset(periode())
+                .toShortString()
+        ) {
             log.warn("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
             sikkerLogg.warn(
                 "Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje."
                     + "vedtaksperiodeId=$id, aktørId=$aktørId, fødselsnummer=$fødselsnummer, " +
                     "arbeidsgivertidslinje=[${arbeidsgiverSykdomstidslinje.subset(periode())}], vedtaksperiodetidslinje=[${sykdomshistorikk.sykdomstidslinje()}], " +
-                    "periode=${periode()}")
+                    "periode=${periode()}"
+            )
         }
     }
 
@@ -652,7 +667,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype()).hasErrors()) return vedtaksperiode.tilstand(
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype())
+                    .hasErrors()
+            ) return vedtaksperiode.tilstand(
                 utbetalingshistorikk,
                 TilInfotrygd
             ) {
@@ -1152,7 +1169,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-         //       overlappende(vedtaksperiode.periode, person, ytelser)
+                //       overlappende(vedtaksperiode.periode, person, ytelser)
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 onSuccess {
@@ -1180,7 +1197,8 @@ internal class Vedtaksperiode private constructor(
 
                         //This will only happen if we come here from a blue state and previous period(s) were discarded during migration
                         if (vedtaksperiode.førsteFraværsdag == null) vedtaksperiode.førsteFraværsdag =
-                            oldtid.utbetalingerInkludert(vedtaksperiode.arbeidsgiver).førsteUtbetalingsdag(vedtaksperiode.periode)
+                            oldtid.utbetalingerInkludert(vedtaksperiode.arbeidsgiver)
+                                .førsteUtbetalingsdag(vedtaksperiode.periode)
                     }
 
                     arbeidsgiver.addInntekt(ytelser)
@@ -1296,7 +1314,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.sykdomshistorikk.håndter(hendelse)
-            vedtaksperiode.sykdomstidslinje = vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
+            vedtaksperiode.sykdomstidslinje =
+                vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
             vedtaksperiode.hendelseIder.add(hendelse.meldingsreferanseId())
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }

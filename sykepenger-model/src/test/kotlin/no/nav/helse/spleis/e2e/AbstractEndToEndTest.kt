@@ -65,8 +65,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertFalse(inspektør.periodeErForkastet(id))
-        assertTrue(inspektør.periodeErIkkeForkastet(id))
+        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet" }
+        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
@@ -75,8 +75,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertTrue(inspektør.periodeErForkastet(id))
-        assertFalse(inspektør.periodeErIkkeForkastet(id))
+        assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
+        assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
@@ -334,8 +334,9 @@ internal abstract class AbstractEndToEndTest {
                 orgnummer,
                 fagsystemId,
                 "Ola Nordmann",
-            "tbd@nav.no",
-            LocalDateTime.now())
+                "tbd@nav.no",
+                LocalDateTime.now()
+            )
         )
     }
 
