@@ -176,6 +176,25 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(54, filter.forbrukteSykedager())
     }
 
+    @Test
+    fun `avviste dager i historikk failer som avviste dager`() {
+        val gjeldendePerioder = listOf(tidslinjeOf(255.NAV, startDato = 1.januar))
+        val historikk = tidslinjeOf(248.NAV, 1.AVV, startDato = 1.januar)
+        val filter = maksimumSykepengedagerfilter()
+            .also { it.filter(gjeldendePerioder, historikk) }
+        assertEquals(248, filter.forbrukteSykedager())
+        assertEquals(7, gjeldendePerioder.first().inspiser.avvisteDager)
+    }
+
+    private val Utbetalingstidslinje.inspiser get() = UtbetalingsTidslinjeInspektør().also { this.accept(it) }
+    private class UtbetalingsTidslinjeInspektør: UtbetalingsdagVisitor {
+        var avvisteDager = 0
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
+            avvisteDager += 1
+        }
+    }
+
     private fun maksimumSykepengedagerfilter() = MaksimumSykepengedagerfilter(
         Alder(UNG_PERSON_FNR_2018),
         NormalArbeidstaker,

@@ -2248,7 +2248,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
     }
 
-    @Disabled("Et utbetalt event trigget av en periode helt etter maksdato har med utbetalt dager etter maksdato fra forrige periode")
     @Test
     fun `utbetalt event etter krysset maksdato inneholder kun utbetalte dager fra forrige periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100))
@@ -2280,6 +2279,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         val utbetaltEvent = observatør.utbetaltEventer.last()
 
+        assertEquals(13, observatør.utbetaltEventer.size)
+        assertEquals(30.desember, observatør.utbetaltEventer[11].oppdrag.first().utbetalingslinjer.first().tom)
         assertEquals(30.desember, utbetaltEvent.oppdrag.first().utbetalingslinjer.first().tom)
     }
 }

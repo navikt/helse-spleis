@@ -111,7 +111,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        oppholdsdag(dag.dato)
+        state.betalbarDag(this, dag.dato)
     }
 
     override fun visit(
