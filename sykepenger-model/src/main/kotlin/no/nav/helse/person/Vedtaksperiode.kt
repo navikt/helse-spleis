@@ -239,7 +239,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
-    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode) && this.sykdomstidslinje.erSisteDagSykedag() ?: false
+    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag()
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 

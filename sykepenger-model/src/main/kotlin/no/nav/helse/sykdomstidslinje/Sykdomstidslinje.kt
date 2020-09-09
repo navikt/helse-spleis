@@ -354,7 +354,9 @@ internal class Sykdomstidslinje private constructor(
         else -> false
     }
 
-    internal fun erSisteDagSykedag() = this.dager.values.lastOrNull()?.erSykedag()
+    private fun Dag.erArbeidsdag() = this is Arbeidsdag || this is FriskHelgedag
+
+    internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?:true
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

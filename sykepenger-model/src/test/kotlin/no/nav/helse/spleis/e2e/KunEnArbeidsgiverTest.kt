@@ -1844,6 +1844,44 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Perioder hvor vedtaksperiode 1 avsluttes med ferie skal ikke regnes som gap til påfølgende vedtaksperiode`() {
+        // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
+        // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
+        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
+        håndterSøknad(Sykdom(9.juni, 30.juni, 100), Ferie(28.juni, 30.juni))
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
+        håndterSøknad(Sykdom(1.juli, 31.juli, 100))
+
+        assertNoErrors(inspektør)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+        )
+    }
+
     @Disabled("Håndtering av overlapp skal medføre at overlappende sykmeldinger blir delt opp i egne perioder")
     @Test
     fun `Overlapp-scenario fra prod`() {
