@@ -31,12 +31,18 @@ internal class MaksimumSykepengedagerfilter(
     private val betalbarDager = mutableMapOf<LocalDate, NavDag>()
     private lateinit var tidslinje: Utbetalingstidslinje
 
-    internal fun maksdato() = if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
+    internal fun maksdato() =
+        if (gjenståendeSykedager() == 0) teller.maksdato(sisteBetalteDag) else teller.maksdato(sisteUkedag)
+
     internal fun gjenståendeSykedager() = teller.gjenståendeSykedager(sisteBetalteDag)
     internal fun forbrukteSykedager() = teller.forbrukteDager()
 
     internal fun filter(tidslinjer: List<Utbetalingstidslinje>, personTidslinje: Utbetalingstidslinje) {
-        tidslinje = (tidslinjer + listOf(personTidslinje)).reduce(Utbetalingstidslinje::plus)
+        tidslinje = tidslinjer
+            .reduce(Utbetalingstidslinje::plus)
+            .plus(personTidslinje) { venstre, høyre ->
+                if (venstre !is Utbetalingstidslinje.Utbetalingsdag.UkjentDag) venstre else høyre
+            }
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         tidslinje.accept(this)
@@ -111,7 +117,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        state.betalbarDag(this, dag.dato)
+        oppholdsdag(dag.dato)
     }
 
     override fun visit(

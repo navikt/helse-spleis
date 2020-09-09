@@ -89,17 +89,25 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
+        return this.plus(other) { venstre, høyre -> maxOf(venstre, høyre) }
+    }
+
+    internal fun plus(
+        other: Utbetalingstidslinje,
+        plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
+    ): Utbetalingstidslinje {
         if (other.utbetalingsdager.isEmpty()) return this
         if (this.utbetalingsdager.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
+        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
     }
 
-    private fun binde(other: Utbetalingstidslinje) = Utbetalingstidslinje(
-        this.utbetalingsdager.zip(other.utbetalingsdager)
-            .map { (venstre: Utbetalingsdag, høyre: Utbetalingsdag) -> maxOf(venstre, høyre) }
-            .toMutableList()
+    private fun binde(
+        other: Utbetalingstidslinje,
+        strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
+    ) = Utbetalingstidslinje(
+        this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
     )
 
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
@@ -134,7 +142,8 @@ internal class Utbetalingstidslinje private constructor(
         val sisteDag = sisteSykepengedag() ?: return null
         var førsteDag = sisteDag
         for (challenger in kutt(sisteDag.minusDays(1)).reverse().utbetalingsdager) {
-            if (challenger is NavDag || challenger is NavHelgDag || challenger is ArbeidsgiverperiodeDag) førsteDag = challenger.dato else break
+            if (challenger is NavDag || challenger is NavHelgDag || challenger is ArbeidsgiverperiodeDag) førsteDag =
+                challenger.dato else break
         }
         return Periode(førsteDag, sisteDag)
     }
@@ -207,7 +216,7 @@ internal class Utbetalingstidslinje private constructor(
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 
-        internal class NavDag (
+        internal class NavDag(
             dato: LocalDate,
             økonomi: Økonomi
         ) : Utbetalingsdag(dato, økonomi) {
@@ -253,9 +262,11 @@ internal class Utbetalingstidslinje private constructor(
             init {
                 økonomi.lås()
             }
+
             override val prioritet = 60
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
-            internal fun navDag(): Utbetalingsdag = if(begrunnelse == EgenmeldingUtenforArbeidsgiverperiode) this else NavDag(dato, økonomi.låsOpp())
+            internal fun navDag(): Utbetalingsdag =
+                if (begrunnelse == EgenmeldingUtenforArbeidsgiverperiode) this else NavDag(dato, økonomi.låsOpp())
         }
 
         internal class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :

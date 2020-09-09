@@ -143,15 +143,15 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
         undersøke(
             PERSON_67_ÅR_FNR_2018,
-            tidslinjeOf(35.UTELATE, 50.NAV),
-            tidslinjeOf(7.UTELATE, 20.NAV)
+            tidslinjeOf(35.UTELATE, 50.NAVv2),
+            tidslinjeOf(7.UTELATE, 20.NAVv2)
         )
 
-        assertEquals(50, inspektør.size)
+        assertEquals(68, inspektør.size)
         assertEquals(40, inspektør.navDagTeller)
         assertEquals(10, inspektør.avvistDagTeller)
         assertEquals(40 * 1200, inspektør.totalUtbetaling())
-        assertEquals(16.mars, maksdato)
+        assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarnings())
         assertFalse(aktivitetslogg.hasErrors())
