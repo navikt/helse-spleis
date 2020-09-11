@@ -142,13 +142,21 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
-        valider(søknad) { tilstand.håndter(this, søknad) }
+        if (!this.skalBytteTilstandVedForkastelse()) {
+            tilstand.håndter(this, søknad)
+        } else {
+            valider(søknad) { tilstand.håndter(this, søknad) }
+        }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
-        valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
+        if (!this.skalBytteTilstandVedForkastelse()) {
+            tilstand.håndter(this, inntektsmelding)
+        } else {
+            valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
+        }
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
@@ -273,7 +281,8 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
-            AvventerVilkårsprøvingArbeidsgiversøknad
+            AvventerVilkårsprøvingArbeidsgiversøknad,
+            UtbetalingFeilet
         )
 
     internal fun skalGjenopptaBehandling() =
@@ -1438,7 +1447,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(
                 inntektsmelding,
-                if (inntektsmelding.isNotQualified() || vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) == null) {
+                if (inntektsmelding.isNotQualified() || vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(
+                        vedtaksperiode
+                    ) == null
+                ) {
                     inntektsmelding.beingQualified()
                     AvventerVilkårsprøvingArbeidsgiversøknad
                 } else
