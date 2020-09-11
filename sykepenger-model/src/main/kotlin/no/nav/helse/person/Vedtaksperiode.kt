@@ -239,7 +239,8 @@ internal class Vedtaksperiode private constructor(
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
-    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) = this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag()
+    internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
+        this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag()
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
@@ -812,7 +813,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val erFortsattForlengelse = periodeRettFør != null
+            if (erFortsattForlengelse) {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
+            } else {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigGap)
+            }
         }
     }
 
@@ -1015,7 +1022,13 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val erFortsattForlengelse = periodeRettFør != null
+            if (erFortsattForlengelse) {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+            } else {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerInntektsmeldingFerdigGap)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1031,7 +1044,14 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val erFortsattForlengelse = periodeRettFør != null
+            if (erFortsattForlengelse) {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk)
+            } else {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerVilkårsprøvingGap)
+            }
         }
     }
 
@@ -1045,7 +1065,13 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val erFortsattForlengelse = periodeRettFør != null
+            if (erFortsattForlengelse) {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, MottattSykmeldingFerdigForlengelse)
+            } else {
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerSøknadFerdigGap)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
