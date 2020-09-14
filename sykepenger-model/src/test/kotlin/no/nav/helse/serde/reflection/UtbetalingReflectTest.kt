@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class UtbetalingReflectTest {
 
@@ -55,6 +56,7 @@ internal class UtbetalingReflectTest {
             emptyList()
         ).also { utbetaling ->
             utbetaling.håndter(UtbetalingHendelse(
+                    meldingsreferanseId = UUID.randomUUID(),
                     vedtaksperiodeId = "ignore",
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,

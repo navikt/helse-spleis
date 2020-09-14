@@ -817,10 +817,12 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
-                    håndter(vilkårsgrunnlag(
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        // Fremprovoserer en warning
-                        arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60)))
+                    håndter(
+                        vilkårsgrunnlag(
+                            vedtaksperiodeId = vedtaksperiodeId,
+                            // Fremprovoserer en warning
+                            arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60))
+                        )
                     )
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
@@ -1131,6 +1133,7 @@ class SpeilBuilderTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
+                    meldingsreferanseId = hendelseId,
                     aktørId = aktørId,
                     fødselsnummer = fnr,
                     organisasjonsnummer = orgnummer,
@@ -1164,6 +1167,7 @@ class SpeilBuilderTest {
 
         private fun utbetalingsgodkjenning(vedtaksperiodeId: String, utbetalingGodkjent: Boolean = true) =
             Utbetalingsgodkjenning(
+                meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
@@ -1174,6 +1178,7 @@ class SpeilBuilderTest {
             )
 
         private fun simulering(vedtaksperiodeId: String) = Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -1220,6 +1225,7 @@ class SpeilBuilderTest {
         )
 
         private fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,

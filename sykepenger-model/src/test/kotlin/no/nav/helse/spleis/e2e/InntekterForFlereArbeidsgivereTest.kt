@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,6 +24,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
     private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
     private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
+
+    private val a1InntektInspektør get() = InntektshistorikkVol2Inspektør(person, a1)
+    private val a2InntektInspektør get() = InntektshistorikkVol2Inspektør(person, a2)
 
     @Disabled("Henting av inntekter er ikke implementert riktig")
     @Test
@@ -134,7 +138,41 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
 
-    private fun nyPeriode(periode: Periode, orgnummer: String) {
+    @Test
+    fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
+        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+
+        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.januar(2017) til 1.desember(2017) inntekter {
+                a1 inntekt 24000
+            }
+        }))
+
+        person.håndter(
+            ytelser(
+                a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
+                    Utbetalingshistorikk.Inntektsopplysning(1.januar, 24500.månedlig, a1, true),
+                    Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 5000.månedlig, a2, true)
+                )
+            )
+        )
+
+        assertEquals(3, a1InntektInspektør.antallInnslag)
+        assertEquals(1, a2InntektInspektør.antallInnslag)
+        assertEquals(5000.månedlig, a2InntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
+        assertEquals(24500.månedlig, a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+        assertEquals(
+            24000.månedlig,
+            a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
+        )
+        assertEquals(
+            25000.månedlig,
+            a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
+        )
+    }
+
+    private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {
         person.håndter(
             sykmelding(
                 UUID.randomUUID(),
@@ -155,7 +193,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 UUID.randomUUID(),
                 listOf(Periode(periode.start, periode.start.plusDays(15))),
                 førsteFraværsdag = periode.start,
-                orgnummer = orgnummer
+                orgnummer = orgnummer,
+                beregnetInntekt = inntekt
             )
         )
     }

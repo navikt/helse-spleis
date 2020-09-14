@@ -10,6 +10,6 @@ internal class RollbackDeleteMessage(val packet: MessageDelegate) : HendelseMess
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
 
     override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, RollbackDelete(aktørId, fødselsnummer))
+        mediator.behandle(this, RollbackDelete(id, aktørId, fødselsnummer))
     }
 }

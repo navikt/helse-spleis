@@ -329,13 +329,14 @@ internal abstract class AbstractEndToEndTest {
     ) {
         person.håndter(
             KansellerUtbetaling(
-                AKTØRID,
-                UNG_PERSON_FNR_2018,
-                orgnummer,
-                fagsystemId,
-                "Ola Nordmann",
-                "tbd@nav.no",
-                LocalDateTime.now()
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = orgnummer,
+                fagsystemId = fagsystemId,
+                saksbehandler = "Ola Nordmann",
+                saksbehandlerEpost = "tbd@nav.no",
+                opprettet = LocalDateTime.now()
             )
         )
     }
@@ -358,6 +359,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ) =
         UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -440,7 +442,7 @@ internal abstract class AbstractEndToEndTest {
         ferieperioder: List<Periode> = emptyList(),
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER
     ): Inntektsmelding {
         return Inntektsmelding(
@@ -498,6 +500,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ): Påminnelse {
         return Påminnelse(
+            meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
@@ -517,6 +520,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ): Utbetalingshistorikk {
         return Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
@@ -538,13 +542,15 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
+        val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
+                meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
@@ -583,6 +589,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER
     ) =
         no.nav.helse.hendelser.Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -636,6 +643,7 @@ internal abstract class AbstractEndToEndTest {
         utbetalingGodkjent: Boolean,
         orgnummer: String
     ) = Utbetalingsgodkjenning(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,

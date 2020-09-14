@@ -5,7 +5,7 @@ import no.nav.helse.person.*
 import java.util.*
 
 class Ytelser(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -13,7 +13,7 @@ class Ytelser(
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
 
     internal fun foreldrepenger() = foreldrepermisjon
@@ -22,11 +22,11 @@ class Ytelser(
         utbetalingshistorikk.valider(periode, periodetype)
 
     internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
-        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntektshistorikk)
+        utbetalingshistorikk().addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
     }
 
-    internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: InntektshistorikkVol2) {
-        utbetalingshistorikk().addInntekter(this.meldingsreferanseId, organisasjonsnummer, inntektshistorikk)
+    internal fun addInntekter(person: Person) {
+        utbetalingshistorikk.addInntekter(person, this)
     }
 
     override fun aktørId(): String {

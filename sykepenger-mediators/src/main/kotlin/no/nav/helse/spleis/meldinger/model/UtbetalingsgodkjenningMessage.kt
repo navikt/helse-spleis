@@ -15,15 +15,17 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
     private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
 
-    private val utbetalingsgodkjenning get() = Utbetalingsgodkjenning(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        saksbehandler = saksbehandler,
-        godkjenttidspunkt = godkjenttidspunkt,
-        utbetalingGodkjent = utbetalingGodkjent
-    )
+    private val utbetalingsgodkjenning
+        get() = Utbetalingsgodkjenning(
+            meldingsreferanseId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandler = saksbehandler,
+            godkjenttidspunkt = godkjenttidspunkt,
+            utbetalingGodkjent = utbetalingGodkjent
+        )
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, utbetalingsgodkjenning)

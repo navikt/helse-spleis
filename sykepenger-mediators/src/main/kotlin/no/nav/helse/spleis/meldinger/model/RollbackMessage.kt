@@ -11,5 +11,5 @@ internal class RollbackMessage(val packet: MessageDelegate) : HendelseMessage(pa
     private val personVersjon = packet["personVersjon"].asLong()
 
     override fun behandle(mediator: IHendelseMediator) =
-        mediator.behandle(this, Rollback(aktørId, fødselsnummer, personVersjon))
+        mediator.behandle(this, Rollback(id, aktørId, fødselsnummer, personVersjon))
 }

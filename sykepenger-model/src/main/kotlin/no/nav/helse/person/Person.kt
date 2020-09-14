@@ -226,6 +226,14 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, førsteFraværsdag, vilkårsgrunnlag)
     }
 
+    internal fun lagreInntekter(
+        arbeidsgiverId: String,
+        inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>,
+        ytelser: Ytelser
+    ) {
+        finnArbeidsgiverForInntekter(arbeidsgiverId, ytelser).addInntektVol2(inntektsopplysninger, ytelser)
+    }
+
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
         val dato = sammenhengendePeriode(periode).start
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
@@ -248,9 +256,9 @@ class Person private constructor(
             )
         }.toMap()
 
-    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, vilkårsgrunnlag: Vilkårsgrunnlag): Arbeidsgiver {
+    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
-            vilkårsgrunnlag.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
+            hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
             Arbeidsgiver(this, arbeidsgiver)
         }
     }

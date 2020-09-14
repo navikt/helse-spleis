@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -27,9 +28,6 @@ internal class Arbeidsgiver private constructor(
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>
 ) : Aktivitetskontekst {
-
-    internal fun inntekthistorikk() = inntektshistorikk.clone()
-
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
@@ -269,8 +267,8 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikkVol2)
     }
 
-    internal fun addInntektVol2(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntektshistorikkVol2)
+    internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, ytelser: Ytelser) {
+        inntektsopplysninger.lagreInntekter(inntektshistorikkVol2, ytelser.meldingsreferanseId())
     }
 
     internal fun lagreInntekter(
@@ -400,7 +398,7 @@ internal class Arbeidsgiver private constructor(
     internal class TilbakestillBehandling(
         internal val organisasjonsnummer: String,
         internal val hendelse: PersonHendelse
-    ) : ArbeidstakerHendelse(hendelse.aktivitetslogg) {
+    ) : ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()

@@ -13,10 +13,12 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -105,19 +107,71 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) =
         currentState.visitSaksbehandler(saksbehandler)
 
-    override fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) =
-        currentState.visitInntektsmelding(inntektsmelding)
+    override fun visitInntektsmelding(
+        inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitInntektsmelding(inntektsmelding, dato, hendelseId, beløp, tidsstempel)
 
-    override fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) = currentState.visitInfotrygd(infotrygd)
+    override fun visitInfotrygd(
+        infotrygd: InntektshistorikkVol2.Infotrygd,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) = currentState.visitInfotrygd(infotrygd, dato, hendelseId, beløp, tidsstempel)
 
-    override fun preVisitSkatt() = currentState.preVisitSkatt()
-    override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) =
-        currentState.visitSkattSykepengegrunnlag(sykepengegrunnlag)
+    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) = currentState.preVisitSkatt(skattComposite)
+    override fun visitSkattSykepengegrunnlag(
+        sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitSkattSykepengegrunnlag(
+            sykepengegrunnlag,
+            dato,
+            hendelseId,
+            beløp,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tidsstempel
+        )
 
-    override fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) =
-        currentState.visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag)
+    override fun visitSkattSammenligningsgrunnlag(
+        sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) =
+        currentState.visitSkattSammenligningsgrunnlag(
+            sammenligningsgrunnlag,
+            dato,
+            hendelseId,
+            beløp,
+            måned,
+            type,
+            fordel,
+            beskrivelse,
+            tidsstempel
+        )
 
-    override fun postVisitSkatt() = currentState.postVisitSkatt()
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) = currentState.postVisitSkatt(skattComposite)
 
     override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) =
         currentState.postVisitInnslag(innslag)
@@ -557,30 +611,62 @@ internal class JsonBuilder : PersonVisitor {
             inntektsopplysninger.add(SaksbehandlerVol2Reflect(saksbehandler).toMap())
         }
 
-        override fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) {
+        override fun visitInntektsmelding(
+            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektsopplysninger.add(InntektsmeldingVol2Reflect(inntektsmelding).toMap())
         }
 
-        override fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) {
+        override fun visitInfotrygd(
+            infotrygd: InntektshistorikkVol2.Infotrygd,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektsopplysninger.add(InfotrygdVol2Reflect(infotrygd).toMap())
         }
 
-        override fun preVisitSkatt() {
+        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
             this.inntektsopplysninger.add(mutableMapOf("skatteopplysninger" to skatteopplysninger))
             pushState(InntektsendringVol2State(skatteopplysninger))
         }
 
 
-        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) {
+        override fun visitSkattSykepengegrunnlag(
+            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
             inntektsopplysninger.add(SykepengegrunnlagVol2Reflect(sykepengegrunnlag).toMap())
         }
 
-        override fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) {
+        override fun visitSkattSammenligningsgrunnlag(
+            sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
             inntektsopplysninger.add(SammenligningsgrunnlagVol2Reflect(sammenligningsgrunnlag).toMap())
         }
 
-        override fun postVisitSkatt() = popState()
+        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) = popState()
         override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) = popState()
     }
 

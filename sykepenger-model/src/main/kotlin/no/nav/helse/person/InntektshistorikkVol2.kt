@@ -110,7 +110,7 @@ internal class InntektshistorikkVol2 {
         override val prioritet = 80
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntektsmelding(this)
+            visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
@@ -128,7 +128,7 @@ internal class InntektshistorikkVol2 {
         override val prioritet = 60
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInfotrygd(this)
+            visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
@@ -144,9 +144,9 @@ internal class InntektshistorikkVol2 {
         override val prioritet = inntektsopplysninger.map { it.prioritet }.max() ?: 0
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitSkatt()
+            visitor.preVisitSkatt(this)
             inntektsopplysninger.forEach { it.accept(visitor) }
-            visitor.postVisitSkatt()
+            visitor.postVisitSkatt(this)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
@@ -207,7 +207,17 @@ internal class InntektshistorikkVol2 {
             override val prioritet = 40
 
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitSkattSykepengegrunnlag(this)
+                visitor.visitSkattSykepengegrunnlag(
+                    this,
+                    dato,
+                    hendelseId,
+                    beløp,
+                    måned,
+                    type,
+                    fordel,
+                    beskrivelse,
+                    tidsstempel
+                )
             }
 
             override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
@@ -231,7 +241,17 @@ internal class InntektshistorikkVol2 {
             override val prioritet = 20
 
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitSkattSammenligningsgrunnlag(this)
+                visitor.visitSkattSammenligningsgrunnlag(
+                    this,
+                    dato,
+                    hendelseId,
+                    beløp,
+                    måned,
+                    type,
+                    fordel,
+                    beskrivelse,
+                    tidsstempel
+                )
             }
 
             override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
@@ -312,7 +332,8 @@ internal class InntektshistorikkVol2 {
         }
     }
 
-    internal class RestoreJsonMode private constructor(private val inntektshistorikkVol2: InntektshistorikkVol2) : Appender {
+    internal class RestoreJsonMode private constructor(private val inntektshistorikkVol2: InntektshistorikkVol2) :
+        Appender {
         companion object : AppenderFeature<InntektshistorikkVol2, RestoreJsonMode> {
             override fun append(a: InntektshistorikkVol2, appender: RestoreJsonMode.() -> Unit) {
                 RestoreJsonMode(a).apply(appender)

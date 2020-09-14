@@ -283,6 +283,7 @@ class PåminnelserOgTimeoutTest {
 
     private fun simulering() =
         Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -331,40 +332,45 @@ class PåminnelserOgTimeoutTest {
             hendelse = this
         }
 
-    private fun ytelser() = Ytelser(
-        meldingsreferanseId = UUID.randomUUID(),
-        aktørId = "aktørId",
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
-        utbetalingshistorikk = Utbetalingshistorikk(
+    private fun ytelser(): Ytelser {
+        val meldingsreferanseId = UUID.randomUUID()
+        return Ytelser(
+            meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
-            utbetalinger = listOf(
-                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                    17.januar(2017),
-                    20.januar(2017),
-                    1000,
-                    100,
-                    orgnummer
-                )
+            utbetalingshistorikk = Utbetalingshistorikk(
+                meldingsreferanseId = meldingsreferanseId,
+                aktørId = "aktørId",
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = orgnummer,
+                vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+                utbetalinger = listOf(
+                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                        17.januar(2017),
+                        20.januar(2017),
+                        1000,
+                        100,
+                        orgnummer
+                    )
+                ),
+                inntektshistorikk = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
             ),
-            inntektshistorikk = emptyList(),
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = null,
+                svangerskapsytelse = null,
+                aktivitetslogg = Aktivitetslogg()
+            ),
             aktivitetslogg = Aktivitetslogg()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = null,
-            svangerskapsytelse = null,
-            aktivitetslogg = Aktivitetslogg()
-        ),
-        aktivitetslogg = Aktivitetslogg()
-    ).apply {
-        hendelse = this
+        ).apply {
+            hendelse = this
+        }
     }
 
     private fun utbetalingsgodkjenning() = Utbetalingsgodkjenning(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
@@ -377,6 +383,7 @@ class PåminnelserOgTimeoutTest {
     }
 
     private fun påminnelse(tilstandType: TilstandType, indeks: Int = 0) = Påminnelse(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,

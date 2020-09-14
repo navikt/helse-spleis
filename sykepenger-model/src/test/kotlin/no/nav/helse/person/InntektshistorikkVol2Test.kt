@@ -406,19 +406,51 @@ internal class InntektshistorikkVol2Test {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) {
+        override fun visitInntektsmelding(
+            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) {
+        override fun visitInfotrygd(
+            infotrygd: InntektshistorikkVol2.Infotrygd,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) {
+        override fun visitSkattSykepengegrunnlag(
+            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) {
+        override fun visitSkattSammenligningsgrunnlag(
+            sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
     }
@@ -442,6 +474,7 @@ internal class InntektshistorikkVol2Test {
 
     private fun utbetalingshistorikk(inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning>) =
         Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,

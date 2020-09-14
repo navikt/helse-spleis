@@ -3,8 +3,10 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
+import java.util.*
 
 class Simulering(
+    meldingsreferanseId: UUID,
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
@@ -12,7 +14,7 @@ class Simulering(
     private val simuleringOK: Boolean,
     private val melding: String,
     internal val simuleringResultat: SimuleringResultat?
-) : ArbeidstakerHendelse() {
+) : ArbeidstakerHendelse(meldingsreferanseId) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

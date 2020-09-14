@@ -3,8 +3,10 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
+import java.util.*
 
 class KansellerUtbetaling(
+    meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -13,7 +15,7 @@ class KansellerUtbetaling(
     internal val saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
 
     override fun aktørId() = aktørId
 

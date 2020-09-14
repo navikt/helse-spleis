@@ -61,7 +61,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Sammenhengende periode for en spesifikk periode`() {
-        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(1.januar til  31.januar))
+        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(1.januar til 31.januar))
         assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(8.januar til 28.februar))
         assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(15.januar til 7.februar))
         assertEquals(1.april til 30.juni, person.sammenhengendePeriode(8.april til 31.mai))
@@ -119,11 +119,13 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     private fun arbeidsgiver(orgnummer: String): Arbeidsgiver {
-        class ArbeidsgiverFinder(person: Person): PersonVisitor {
+        class ArbeidsgiverFinder(person: Person) : PersonVisitor {
             lateinit var result: Arbeidsgiver
+
             init {
                 person.accept(this)
             }
+
             override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
                 if (orgnummer == organisasjonsnummer) result = arbeidsgiver
             }
@@ -144,13 +146,15 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     private fun ytelser(orgnummer: String): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
+        val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = "vedtaksperiode1",
             utbetalingshistorikk = Utbetalingshistorikk(
+                meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
@@ -186,8 +190,8 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         )
     }
 
-    private fun skatt(arbeidsgiver: Arbeidsgiver, beløp: Number, dato: LocalDate)
-        = inntektsmelding(arbeidsgiver, beløp, dato.plusDays(1))
+    private fun skatt(arbeidsgiver: Arbeidsgiver, beløp: Number, dato: LocalDate) =
+        inntektsmelding(arbeidsgiver, beløp, dato.plusDays(1))
 
     private fun assertInntekt(expected: Number, dag: Utbetalingsdag) {
         assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, daglig, _, _, _ -> daglig })

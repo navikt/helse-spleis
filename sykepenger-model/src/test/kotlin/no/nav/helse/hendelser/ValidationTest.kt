@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import java.util.*
 
 internal class ValidationTest {
 
@@ -42,7 +43,9 @@ internal class ValidationTest {
     private fun Validation.successBlock() = valider("feilmelding") { true }
     private fun Validation.failureBlock() = valider("feilmelding") { false }
 
-    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(aktivitetslogg) {
+    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(
+        meldingsreferanseId = UUID.randomUUID(), aktivitetslogg = aktivitetslogg
+    ) {
 
         override fun aktørId() = "aktørId"
 

@@ -13,14 +13,16 @@ internal class UtbetalingOverførtMessage(packet: MessageDelegate) : BehovMessag
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()
 
-    private val utbetaling get() = UtbetalingOverført(
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        orgnummer = organisasjonsnummer,
-        avstemmingsnøkkel = avstemmingsnøkkel,
-        overføringstidspunkt = overføringstidspunkt
-    )
+    private val utbetaling
+        get() = UtbetalingOverført(
+            meldingsreferanseId = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            orgnummer = organisasjonsnummer,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            overføringstidspunkt = overføringstidspunkt
+        )
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, utbetaling)

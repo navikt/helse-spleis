@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class ArbeidstakerHendelseTest {
 
@@ -9,6 +10,7 @@ internal class ArbeidstakerHendelseTest {
         private const val FØDSELSNUMMER = "fnr"
         private const val AKTØR = "aktørId"
         private const val ORGNR = "orgnr"
+        private val MELDINGSREFERANSE = UUID.randomUUID()
     }
 
     @Test
@@ -16,11 +18,12 @@ internal class ArbeidstakerHendelseTest {
         assertEquals(mapOf(
             "aktørId" to AKTØR,
             "fødselsnummer" to FØDSELSNUMMER,
-            "organisasjonsnummer" to ORGNR
+            "organisasjonsnummer" to ORGNR,
+            "id" to MELDINGSREFERANSE.toString()
         ), Testhendelse().toSpesifikkKontekst().kontekstMap)
     }
 
-    private class Testhendelse : ArbeidstakerHendelse() {
+    private class Testhendelse : ArbeidstakerHendelse(MELDINGSREFERANSE) {
         override fun aktørId() = AKTØR
         override fun fødselsnummer() = FØDSELSNUMMER
         override fun organisasjonsnummer() = ORGNR

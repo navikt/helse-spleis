@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -269,12 +270,44 @@ internal interface InntekthistorikkVisitor {
     fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {}
-    fun visitInntektsmelding(inntektsmelding: InntektshistorikkVol2.Inntektsmelding) {}
-    fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd) {}
-    fun preVisitSkatt() {}
-    fun visitSkattSykepengegrunnlag(sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag) {}
-    fun visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag) {}
-    fun postVisitSkatt() {}
+    fun visitInntektsmelding(
+        inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {}
+    fun visitInfotrygd(
+        infotrygd: InntektshistorikkVol2.Infotrygd,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {}
+    fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
+    fun visitSkattSykepengegrunnlag(
+        sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) {}
+    fun visitSkattSammenligningsgrunnlag(
+        sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) {}
+    fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {

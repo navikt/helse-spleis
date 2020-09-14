@@ -85,6 +85,7 @@ internal class GodkjenningHendelseTest {
     }
 
     private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
@@ -102,13 +103,15 @@ internal class GodkjenningHendelseTest {
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
+        val meldingsreferanseId = UUID.randomUUID()
         Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
+                meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
@@ -202,6 +205,7 @@ internal class GodkjenningHendelseTest {
 
     private fun simulering() =
         Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,

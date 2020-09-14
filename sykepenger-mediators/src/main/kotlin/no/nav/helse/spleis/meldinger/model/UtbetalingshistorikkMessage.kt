@@ -57,6 +57,7 @@ internal class UtbetalingshistorikkMessage(packet: MessageDelegate) : BehovMessa
 
     internal fun utbetalingshistorikk(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
         Utbetalingshistorikk(
+            meldingsreferanseId = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

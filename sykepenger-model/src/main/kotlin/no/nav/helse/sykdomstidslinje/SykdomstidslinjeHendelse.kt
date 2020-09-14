@@ -11,12 +11,12 @@ import kotlin.reflect.KClass
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     melding: Melding? = null
-) : ArbeidstakerHendelse() {
+) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var forrigeTom: LocalDate? = null
 
-    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId)
+    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId())
 
     internal class Hendelseskilde(private val type: String, private val meldingsreferanseId: UUID) {
         internal constructor(
@@ -35,11 +35,6 @@ abstract class SykdomstidslinjeHendelse(
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
     }
-
-    internal fun meldingsreferanseId() = meldingsreferanseId
-    override fun kontekst() = mapOf(
-        "id" to "$meldingsreferanseId"
-    )
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
@@ -68,5 +63,5 @@ abstract class SykdomstidslinjeHendelse(
     internal open fun padLeft(dato: LocalDate) {}
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
-        && this.meldingsreferanseId == other.meldingsreferanseId
+        && this.meldingsreferanseId() == other.meldingsreferanseId()
 }

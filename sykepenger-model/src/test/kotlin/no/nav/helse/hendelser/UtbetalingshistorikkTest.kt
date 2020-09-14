@@ -30,8 +30,20 @@ class UtbetalingshistorikkTest {
         aktivitetslogg = Aktivitetslogg()
     }
 
-    private fun utbetalingshistorikk(utbetalinger: List<Utbetalingshistorikk.Periode>, inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()) =
-        Utbetalingshistorikk(AKTØRID, UNG_PERSON_FNR_2018, ORGNUMMER, VEDTAKSPERIODEID, utbetalinger, inntektshistorikk, aktivitetslogg)
+    private fun utbetalingshistorikk(
+        utbetalinger: List<Utbetalingshistorikk.Periode>,
+        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()
+    ) =
+        Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = VEDTAKSPERIODEID,
+            utbetalinger = utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            aktivitetslogg = aktivitetslogg
+        )
 
     @Test
     fun `direkteutbetaling til bruker støttes ikke ennå`() {
@@ -45,7 +57,9 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertTrue(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -61,7 +75,9 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertTrue(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -72,7 +88,9 @@ class UtbetalingshistorikkTest {
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
-        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertFalse(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -83,7 +101,9 @@ class UtbetalingshistorikkTest {
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertTrue(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -94,7 +114,9 @@ class UtbetalingshistorikkTest {
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertTrue(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -110,7 +132,9 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertFalse(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -126,7 +150,9 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors())
+        assertFalse(
+            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), Periodetype.FØRSTEGANGSBEHANDLING).hasErrors()
+        )
     }
 
     @Test
@@ -166,7 +192,13 @@ class UtbetalingshistorikkTest {
         val gradering = .5
         val dagsats = 2468
         val utbetalinger = listOf(
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 31.januar, (dagsats*gradering).roundToInt(), (100*gradering).roundToInt(), ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                1.januar,
+                31.januar,
+                (dagsats * gradering).roundToInt(),
+                (100 * gradering).roundToInt(),
+                ORGNUMMER
+            ),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, dagsats, 100, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
@@ -351,7 +383,7 @@ class UtbetalingshistorikkTest {
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.Ukjent(1.januar,10.januar)
+            Utbetalingshistorikk.Periode.Ukjent(1.januar, 10.januar)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,

@@ -128,6 +128,7 @@ internal class VedtaksperiodeTest {
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = "",
         fødselsnummer = "",
         organisasjonsnummer = "",

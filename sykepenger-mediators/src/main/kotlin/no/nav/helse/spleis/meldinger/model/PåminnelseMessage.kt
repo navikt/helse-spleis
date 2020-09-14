@@ -19,17 +19,19 @@ internal class PåminnelseMessage(packet: MessageDelegate) : HendelseMessage(pac
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
 
-    private val påminnelse get() = Påminnelse(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
-        organisasjonsnummer = organisasjonsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
-        antallGangerPåminnet = antallGangerPåminnet,
-        tilstand = tilstand,
-        tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-        påminnelsestidspunkt = påminnelsestidspunkt,
-        nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
-    )
+    private val påminnelse
+        get() = Påminnelse(
+            meldingsreferanseId = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            antallGangerPåminnet = antallGangerPåminnet,
+            tilstand = tilstand,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            påminnelsestidspunkt = påminnelsestidspunkt,
+            nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
+        )
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, påminnelse)

@@ -4,8 +4,10 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.TilstandType
 import java.time.LocalDateTime
+import java.util.*
 
 class Påminnelse(
+    meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -15,7 +17,7 @@ class Påminnelse(
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(Aktivitetslogg()) {
+) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

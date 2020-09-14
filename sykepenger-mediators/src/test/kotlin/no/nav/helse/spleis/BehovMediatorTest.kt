@@ -68,9 +68,11 @@ class BehovMediatorTest {
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
-        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-            "historikkFom" to LocalDate.now()
-        ))
+        hendelse.behov(
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now()
+            )
+        )
         hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser")
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
         hendelse.kontekst(arbeidsgiver2)
@@ -116,43 +118,51 @@ class BehovMediatorTest {
     }
 
     @Test
-    fun `duplikatnøkler er ok når verdi er lik`(){
+    fun `duplikatnøkler er ok når verdi er lik`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
-        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-            "historikkFom" to LocalDate.now()
-        ))
-        hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-            "historikkFom" to LocalDate.now()
-        ))
+        hendelse.behov(
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now()
+            )
+        )
+        hendelse.behov(
+            Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
+                "historikkFom" to LocalDate.now()
+            )
+        )
 
         assertDoesNotThrow { behovMediator.håndter(message, hendelse) }
     }
 
     @Test
-    internal fun `sjekker etter duplikatverdier`(){
+    internal fun `sjekker etter duplikatverdier`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse.kontekst(vedtaksperiode1)
-        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-            "historikkFom" to LocalDate.now().minusDays(1)
-        ))
-        hendelse.behov(Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-            "historikkFom" to LocalDate.now()
-        ))
+        hendelse.behov(
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1)
+            )
+        )
+        hendelse.behov(
+            Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
+                "historikkFom" to LocalDate.now()
+            )
+        )
 
         assertThrows<IllegalArgumentException> { behovMediator.håndter(message, hendelse) }
     }
 
     @Test
-    internal fun `kan ikke produsere samme behov`(){
+    internal fun `kan ikke produsere samme behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -168,14 +178,14 @@ class BehovMediatorTest {
     private class TestKontekst(
         private val type: String,
         private val melding: String
-    ): Aktivitetskontekst {
+    ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }
 
     private class TestHendelse(
         private val melding: String,
         internal val logg: Aktivitetslogg
-    ): ArbeidstakerHendelse(logg), Aktivitetskontekst {
+    ) : ArbeidstakerHendelse(UUID.randomUUID(), logg), Aktivitetskontekst {
         init {
             logg.kontekst(this)
         }

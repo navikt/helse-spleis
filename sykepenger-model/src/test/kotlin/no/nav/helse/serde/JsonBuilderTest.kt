@@ -85,7 +85,7 @@ class JsonBuilderTest {
             assertTrue(it.hasNonNull("skjemaVersjon"))
             assertEquals(SerialisertPerson.gjeldendeVersjon(), it["skjemaVersjon"].intValue())
         }
-//        assertEquals(json, json2)
+        assertEquals(json, json2)
         assertDeepEquals(person, result)
     }
 
@@ -97,7 +97,7 @@ class JsonBuilderTest {
         private lateinit var tilstand: TilstandType
         private lateinit var sykdomstidslinje: Sykdomstidslinje
 
-        internal fun person(
+        fun person(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
@@ -125,7 +125,7 @@ class JsonBuilderTest {
                 fangeVedtaksperiode()
             }
 
-        internal fun ingenBetalingsperson(
+        fun ingenBetalingsperson(
             sendtSøknad: LocalDate = 1.april,
             søknadhendelseId: UUID = UUID.randomUUID()
         ): Person =
@@ -167,7 +167,7 @@ class JsonBuilderTest {
                 )
             }
 
-        internal fun friskeHelgedagerPerson(
+        fun friskeHelgedagerPerson(
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
@@ -193,29 +193,6 @@ class JsonBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
-            }
-
-        internal fun ingenutbetalingPåfølgendeBetaling(
-            søknadhendelseId: UUID = UUID.randomUUID()
-        ): Person =
-            Person(aktørId, fnr).apply {
-                håndter(sykmelding(fom = 1.januar, tom = 9.januar))
-                fangeVedtaksperiode()
-                håndter(
-                    søknadSendtTilArbeidsgiver(
-                        hendelseId = søknadhendelseId,
-                        fom = 1.januar,
-                        tom = 9.januar
-                    )
-                )
-                håndter(sykmelding(fom = 10.januar, tom = 25.januar))
-                håndter(søknad(fom = 10.januar, tom = 25.januar))
-                fangeVedtaksperiode()
-                håndter(inntektsmelding(fom = 16.januar))
-                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
@@ -251,7 +228,7 @@ class JsonBuilderTest {
             })
         }
 
-        internal fun sykmelding(
+        fun sykmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar
@@ -264,7 +241,7 @@ class JsonBuilderTest {
             mottatt = fom.plusMonths(3).atStartOfDay()
         )
 
-        internal fun søknad(
+        fun søknad(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
@@ -281,19 +258,7 @@ class JsonBuilderTest {
             permittert = false
         )
 
-        internal fun søknadSendtTilArbeidsgiver(
-            hendelseId: UUID = UUID.randomUUID(),
-            fom: LocalDate = 1.januar,
-            tom: LocalDate = 31.januar
-        ) = SøknadArbeidsgiver(
-            meldingsreferanseId = hendelseId,
-            fnr = fnr,
-            aktørId = aktørId,
-            orgnummer = orgnummer,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100, 100))
-        )
-
-        internal fun inntektsmelding(
+        fun inntektsmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate,
             perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15)))
@@ -311,7 +276,7 @@ class JsonBuilderTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
-        internal fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
+        fun vilkårsgrunnlag(vedtaksperiodeId: String) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
@@ -336,7 +301,7 @@ class JsonBuilderTest {
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )
 
-        internal fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
+        fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
@@ -344,6 +309,7 @@ class JsonBuilderTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = Utbetalingshistorikk(
+                    meldingsreferanseId = hendelseId,
                     aktørId = aktørId,
                     fødselsnummer = fnr,
                     organisasjonsnummer = orgnummer,
@@ -357,7 +323,9 @@ class JsonBuilderTest {
                             orgnummer = orgnummer
                         )
                     ),
-                    inntektshistorikk = emptyList(),
+                    inntektshistorikk = listOf(
+                        Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 25000.månedlig, orgnummer, true)
+                    ),
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
@@ -375,7 +343,8 @@ class JsonBuilderTest {
             )
         }
 
-        internal fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
+        fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -385,7 +354,8 @@ class JsonBuilderTest {
             godkjenttidspunkt = LocalDateTime.now()
         )
 
-        internal fun simulering(vedtaksperiodeId: String) = Simulering(
+        fun simulering(vedtaksperiodeId: String) = Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -395,7 +365,8 @@ class JsonBuilderTest {
             simuleringResultat = null
         )
 
-        internal fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
+        fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,

@@ -154,14 +154,16 @@ internal class PersonTest {
     fun `ytelser lager ikke ny periode, selv om det ikke finnes noen fra før`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             person.also {
+                val meldingsreferanseId = UUID.randomUUID()
                 it.håndter(
                     Ytelser(
-                        meldingsreferanseId = UUID.randomUUID(),
+                        meldingsreferanseId = meldingsreferanseId,
                         aktørId = aktørId,
                         fødselsnummer = fødselsnummer,
                         organisasjonsnummer = organisasjonsnummer,
                         vedtaksperiodeId = UUID.randomUUID().toString(),
                         utbetalingshistorikk = Utbetalingshistorikk(
+                            meldingsreferanseId = meldingsreferanseId,
                             aktørId = aktørId,
                             fødselsnummer = fødselsnummer,
                             organisasjonsnummer = organisasjonsnummer,
@@ -278,6 +280,7 @@ internal class PersonTest {
 
     private fun påminnelse(vedtaksperiodeId: UUID = vedtaksperiodeIdForPerson(), tilstandType: TilstandType) =
         Påminnelse(
+            meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

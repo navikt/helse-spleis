@@ -109,6 +109,7 @@ internal class TilUtbetalingHendelseTest {
 
     private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus, index: Int) =
         UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -121,6 +122,7 @@ internal class TilUtbetalingHendelseTest {
         }
 
     private fun utbetalingsgodkjenning(godkjent: Boolean, index: Int) = Utbetalingsgodkjenning(
+        meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
@@ -138,13 +140,15 @@ internal class TilUtbetalingHendelseTest {
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
+        val meldingsreferanseId = UUID.randomUUID()
         Ytelser(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = meldingsreferanseId,
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             utbetalingshistorikk = Utbetalingshistorikk(
+                meldingsreferanseId = meldingsreferanseId,
                 aktørId = aktørId,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
@@ -237,6 +241,7 @@ internal class TilUtbetalingHendelseTest {
 
     private fun simulering(index: Int) =
         Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
             aktørId = aktørId,
             fødselsnummer = UNG_PERSON_FNR_2018,

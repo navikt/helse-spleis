@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class UtbetalingTest {
 
@@ -122,6 +123,7 @@ internal class UtbetalingTest {
         tidligere?.let { listOf(tidligere) } ?: emptyList()
     ).also { utbetaling ->
         utbetaling.håndter(UtbetalingHendelse(
+            meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "ignore",
             aktørId = "ignore",
             fødselsnummer = UNG_PERSON_FNR_2018,

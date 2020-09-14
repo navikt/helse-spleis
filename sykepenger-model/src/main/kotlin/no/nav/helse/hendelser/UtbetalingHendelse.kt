@@ -1,8 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import java.util.*
 
 class UtbetalingHendelse(
+    meldingsreferanseId: UUID,
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
@@ -10,7 +12,7 @@ class UtbetalingHendelse(
     private val utbetalingsreferanse: String,
     private val status: Oppdragstatus,
     private val melding: String
-) : ArbeidstakerHendelse() {
+) : ArbeidstakerHendelse(meldingsreferanseId) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer

@@ -17,6 +17,7 @@ import java.util.*
 import kotlin.math.roundToInt
 
 class Utbetalingshistorikk(
+    meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
@@ -24,7 +25,7 @@ class Utbetalingshistorikk(
     utbetalinger: List<Periode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     private val utbetalinger = Periode.sorter(utbetalinger)
 
     override fun aktørId() = aktørId
@@ -43,6 +44,10 @@ class Utbetalingshistorikk(
 
     internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: InntektshistorikkVol2) {
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
+    }
+
+    fun addInntekter(person: Person, ytelser: Ytelser) {
+        Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
 
     class Inntektsopplysning(
@@ -66,6 +71,28 @@ class Utbetalingshistorikk(
                     .also {
                         if (it.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd innen 12 måneder fra perioden")
                     }
+            }
+
+            internal fun addInntekter(
+                person: Person,
+                ytelser: Ytelser,
+                inntektsopplysninger: List<Inntektsopplysning>
+            ) {
+                inntektsopplysninger.groupBy { it.orgnummer }
+                    .forEach { (orgnummer, opplysninger) ->
+                        person.lagreInntekter(orgnummer, opplysninger, ytelser)
+                    }
+            }
+
+            internal fun List<Inntektsopplysning>.lagreInntekter(
+                inntektshistorikk: InntektshistorikkVol2,
+                hendelseId: UUID
+            ) {
+                inntektshistorikk {
+                    forEach {
+                        addInfotrygd(it.sykepengerFom, hendelseId, it.inntektPerMåned)
+                    }
+                }
             }
         }
 

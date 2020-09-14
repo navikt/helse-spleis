@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.util.*
 
 class Vilkårsgrunnlag(
-    private val meldingsreferanseId: UUID,
+    meldingsreferanseId: UUID,
     internal val vedtaksperiodeId: String,
     private val aktørId: String,
     private val fødselsnummer: String,
@@ -21,13 +21,12 @@ class Vilkårsgrunnlag(
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val dagpenger: Dagpenger,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger
-) : ArbeidstakerHendelse() {
+) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var grunnlagsdata: Grunnlagsdata? = null
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
-    fun meldingsreferanseId() = meldingsreferanseId
 
     internal fun valider(
         beregnetInntekt: Inntekt,
