@@ -1436,6 +1436,34 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
+    @Disabled
+    @Test
+    fun `To tilstøtende perioder, inntektsmelding 2 med arbeidsdager i starten`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertMessages(it)
+        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
+            AVVENTER_SØKNAD_FERDIG_GAP
+        )
+    }
+
     @Test
     fun `To tilstøtende perioder der den første er i utbetaling feilet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))

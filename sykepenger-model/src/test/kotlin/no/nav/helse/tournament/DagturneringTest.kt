@@ -69,5 +69,15 @@ internal class DagturneringTest {
 
         assertTrue(tidslinje[1.mandag] is Arbeidsdag)
     }
+
+    @Test
+    internal fun `arbeidsdag fra inntektsmelding vinner over sykedag fra søknad`() {
+        val søknadSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, søknad)
+        val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
+
+        val tidslinje = søknadSykedag.merge(inntektsmeldingArbeidsdag, dagturnering::beste)
+
+        assertTrue(tidslinje[1.mandag] is Arbeidsdag)
+    }
 }
 
