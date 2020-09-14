@@ -260,7 +260,9 @@ internal class Vedtaksperiode private constructor(
         else -> Periodetype.FØRSTEGANGSBEHANDLING
     }
 
-    internal fun ferdig(hendelse: PersonHendelse, sendTilInfotrygd: Boolean) {
+    internal fun sykeperioder() = sykdomstidslinje.sykeperioder()
+
+        internal fun ferdig(hendelse: PersonHendelse, sendTilInfotrygd: Boolean) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)

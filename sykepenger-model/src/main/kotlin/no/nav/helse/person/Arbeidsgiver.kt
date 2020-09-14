@@ -48,14 +48,15 @@ internal class Arbeidsgiver private constructor(
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
-        internal fun sammenhengendePerioder(arbeidsgivere: List<Arbeidsgiver>) =
+        internal fun sammenhengendeSykeperioder(arbeidsgivere: List<Arbeidsgiver>) =
             arbeidsgivere
                 .flatMap { it.vedtaksperioder }
-                .map(Vedtaksperiode::periode)
+                .map(Vedtaksperiode::sykeperioder)
+                .flatten()
                 .slåSammen()
 
         internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
-            sammenhengendePerioder(arbeidsgivere)
+            sammenhengendeSykeperioder(arbeidsgivere)
                 .map { it.start.minusDays(1) }
     }
 
@@ -483,6 +484,6 @@ internal enum class ForkastetÅrsak {
     ANNULLERING
 }
 
-internal fun List<Arbeidsgiver>.sammenhengendePerioder() = Arbeidsgiver.sammenhengendePerioder(this)
+internal fun List<Arbeidsgiver>.sammenhengendeSykeperioder() = Arbeidsgiver.sammenhengendeSykeperioder(this)
 
 internal typealias VedtaksperioderSelector = (Arbeidsgiver, Vedtaksperiode) -> MutableList<Vedtaksperiode>

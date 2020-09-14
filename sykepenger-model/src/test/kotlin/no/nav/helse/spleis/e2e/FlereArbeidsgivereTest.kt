@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiv
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -26,6 +28,137 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
     private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
     private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
+
+    @Test
+    fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
+        val periodeA1 = 1.januar to 31.januar
+        nyPeriode(1.januar to 31.januar, a1)
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
+                beregnetInntekt = 30000.månedlig,
+                refusjon = Triple(null, 30000.månedlig, emptyList()),
+                førsteFraværsdag = periodeA1.start,
+                orgnummer = a1
+            )
+        )
+        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 5000.månedlig
+                }
+                1.august(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 17000.månedlig
+                    a2 inntekt 3500.månedlig
+                }
+            }
+        )))
+
+        val periodeA2 = 15.januar to 15.februar
+        nyPeriode(periodeA2, a2)
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                beregnetInntekt = 10000.månedlig,
+                refusjon = Triple(null, 10000.månedlig, emptyList()),
+                førsteFraværsdag = periodeA2.start,
+                orgnummer = a2
+            )
+        )
+
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar to 15.februar))
+    }
+
+    @Test
+    fun `Sammenligningsgrunnlag for flere arbeidsgivere med flere sykeperioder`() {
+        nyPeriode(15.januar to 5.februar, a1)
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(15.januar to 28.januar, 2.februar to 3.februar),
+                beregnetInntekt = 30000.månedlig,
+                refusjon = Triple(null, 30000.månedlig, emptyList()),
+                førsteFraværsdag = 2.februar,
+                orgnummer = a1
+            )
+        )
+        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 5000.månedlig
+                }
+                1.august(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 17000.månedlig
+                    a2 inntekt 3500.månedlig
+                }
+            }
+        )))
+
+        val periodeA2 = 2.februar to 20.februar
+        nyPeriode(periodeA2, a2)
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                beregnetInntekt = 10000.månedlig,
+                refusjon = Triple(null, 10000.månedlig, emptyList()),
+                førsteFraværsdag = periodeA2.start,
+                orgnummer = a2
+            )
+        )
+
+        assertEquals(282500.årlig, person.sammenligningsgrunnlag(15.januar to 5.februar))
+    }
+
+    @Test
+    fun `Sammenligningsgrunnlag for flere arbeidsgivere som overlapper hverandres sykeperioder`() {
+        nyPeriode(15.januar to 5.februar, a1)
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(15.januar to 28.januar, 2.februar to 3.februar),
+                beregnetInntekt = 30000.månedlig,
+                refusjon = Triple(null, 30000.månedlig, emptyList()),
+                førsteFraværsdag = 2.februar,
+                orgnummer = a1
+            )
+        )
+        val periodeA2 = 15.januar to 15.februar
+        nyPeriode(periodeA2, a2)
+
+        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 5000.månedlig
+                }
+                1.august(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 17000.månedlig
+                    a2 inntekt 3500.månedlig
+                }
+            }
+        )))
+
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                beregnetInntekt = 10000.månedlig,
+                refusjon = Triple(null, 10000.månedlig, emptyList()),
+                førsteFraværsdag = periodeA2.start,
+                orgnummer = a2
+            )
+        )
+
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar to 15.februar))
+    }
 
     @Test
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {

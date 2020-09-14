@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SykdomstidslinjeTest {
@@ -55,6 +54,18 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals(" AAASS", merged.toShortString())
+    }
+
+    @Test
+    fun `sykeperioder`() {
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.0, TestEvent.testkilde) +
+            Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.testkilde) +
+            Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.testkilde) +
+            Sykdomstidslinje.arbeidsdager(Periode(1.lørdag, 1.søndag), TestEvent.testkilde) +
+            Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.testkilde)
+        val aktivitetslogg = Aktivitetslogg()
+        assertTrue(tidslinje.valider(aktivitetslogg))
+        assertEquals(listOf(Periode(1.mandag, 1.tirsdag), Periode(1.torsdag, 1.fredag), Periode(2.mandag, 2.fredag)), tidslinje.sykeperioder())
     }
 
 

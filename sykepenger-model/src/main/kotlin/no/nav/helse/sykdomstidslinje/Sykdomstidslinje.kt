@@ -357,6 +357,17 @@ internal class Sykdomstidslinje private constructor(
     private fun Dag.erArbeidsdag() = this is Arbeidsdag || this is FriskHelgedag
 
     internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?:true
+
+    internal fun sykeperioder() =
+        dager.entries.filter { !it.value.erArbeidsdag() }.fold(listOf<Periode>()) { perioder, dag ->
+            if (perioder.isEmpty()) return@fold listOf(Periode(dag.key, dag.key))
+
+            val siste = perioder.last()
+            if (siste.endInclusive.isEqual(dag.key.minusDays(1))) {
+                perioder.dropLast(1).plusElement(Periode(siste.start, dag.key))
+            } else
+                perioder.plusElement(Periode(dag.key, dag.key))
+        }
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

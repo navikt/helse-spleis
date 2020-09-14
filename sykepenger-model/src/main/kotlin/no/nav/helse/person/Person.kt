@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -240,21 +241,26 @@ class Person private constructor(
     }
 
     internal fun sammenhengendePeriode(periode: Periode) =
-        sammenhengendePerioder().first { it.overlapperMed(periode) }
+        sammenhengendeSykeperioder().lastOrNull { it.overlapperMed(periode) } ?: periode
 
-    private fun sammenhengendePerioder() =
-        arbeidsgivere.sammenhengendePerioder()
+    private fun sammenhengendeSykeperioder() =
+        arbeidsgivere.sammenhengendeSykeperioder()
 
-    internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser) =
-        arbeidsgivere
+    internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
+        val sammenhengendeSykeperioder = sammenhengendeSykeperioder()
+        val sammenhengendePeriode = if (sammenhengendeSykeperioder.isEmpty()) periode else sammenhengendePeriode(periode)
+        val inntektsdatoer = listOf(sammenhengendePeriode.start.minusDays(1))
+
+        return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
             .map { arbeidsgiver ->
-            arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
-                sammenhengendePerioder().map { it.start.minusDays(1) },
-                sammenhengendePeriode(periode),
-                ytelser
-            )
-        }.toMap()
+                arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
+                    inntektsdatoer,
+                    sammenhengendePeriode,
+                    ytelser
+                )
+            }.toMap()
+    }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
