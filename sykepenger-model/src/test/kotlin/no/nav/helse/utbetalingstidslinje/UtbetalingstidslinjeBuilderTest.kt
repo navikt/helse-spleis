@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -401,10 +402,18 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(NavDag::class, inspektør.datoer[20.januar(2020)])
     }
 
-    private val inntekthistorikk = Inntektshistorikk().apply {
+    private val inntektshistorikk = Inntektshistorikk().apply {
         add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
         add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
         add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
+    }
+
+    private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+        invoke {
+            addInntektsmelding(1.januar, hendelseId, 31000.månedlig)
+            addInntektsmelding(1.februar, hendelseId, 25000.månedlig)
+            addInntektsmelding(1.mars, hendelseId, 50000.månedlig)
+        }
     }
 
     private fun assertDagsats(dagsats: Int) {
@@ -416,11 +425,13 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     private fun Sykdomstidslinje.utbetalingslinjer(
-        inntektshistorikk: Inntektshistorikk = inntekthistorikk
+        inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk,
+        inntektshistorikkVol2: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderTest.inntektshistorikkVol2
     ) {
         tidslinje = UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = this.periode()!!,
-            inntektshistorikk = inntektshistorikk
+            inntektshistorikk = inntektshistorikk,
+            inntektshistorikkVol2 = inntektshistorikkVol2
         ).result(this)
     }
 

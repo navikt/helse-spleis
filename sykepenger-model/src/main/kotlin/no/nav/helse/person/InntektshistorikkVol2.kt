@@ -4,6 +4,7 @@ package no.nav.helse.person
 import no.nav.helse.Appender
 import no.nav.helse.AppenderFeature
 import no.nav.helse.appender
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -35,6 +36,9 @@ internal class InntektshistorikkVol2 {
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         historikk.first().grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
+
+    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
+        grunnlagForSykepengegrunnlag(dato).times(regler.dekningsgrad())
 
     internal fun clone() = InntektshistorikkVol2().also {
         it.historikk.addAll(this.historikk.map(Innslag::clone))

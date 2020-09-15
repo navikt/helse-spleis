@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -283,6 +284,17 @@ internal class InntektshistorikkVol2Test {
         assertEquals(13, inspektør.inntektTeller.last())
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
         assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(15.januar(2018)))
+    }
+
+    @Test
+    fun dekningsgrunnlag() {
+        inntektperioder {
+            1.desember(2016) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
+        assertEquals(INNTEKT, historikk.dekningsgrunnlag(1.januar(2018), NormalArbeidstaker))
+        assertEquals(INGEN, historikk.dekningsgrunnlag(1.januar(2017), NormalArbeidstaker))
     }
 
     @Test

@@ -429,6 +429,7 @@ internal class Arbeidsgiver private constructor(
         return UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode,
             inntektshistorikk = inntektshistorikk.subset(inntektDatoer),
+            inntektshistorikkVol2 = inntektshistorikkVol2,
             forlengelseStrategy = { sykdomstidslinje ->
                 Oldtidsutbetalinger().let { oldtid ->
                     ytelser.utbetalingshistorikk().append(oldtid)

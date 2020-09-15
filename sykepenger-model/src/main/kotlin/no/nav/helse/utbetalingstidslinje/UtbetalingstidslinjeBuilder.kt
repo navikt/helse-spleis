@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -20,6 +21,7 @@ import java.time.LocalDate
 internal class UtbetalingstidslinjeBuilder internal constructor(
     private val sammenhengendePeriode: Periode,
     private val inntektshistorikk: Inntektshistorikk,
+    private val inntektshistorikkVol2: InntektshistorikkVol2,
     private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
