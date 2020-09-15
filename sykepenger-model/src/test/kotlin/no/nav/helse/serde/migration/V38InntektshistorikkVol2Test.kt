@@ -5,11 +5,11 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V37InntektshistorikkVol2Test {
+internal class V38InntektshistorikkVol2Test {
 
     @Test
     fun `migrerer inntekt til inntektshistorikk`() {
-        val resultat = listOf(V37InntektshistorikkVol2())
+        val resultat = listOf(V38InntektshistorikkVol2())
             .migrate(serdeObjectMapper.readTree(before))
         val expected = serdeObjectMapper.readTree(expected)
         assertEquals(expected, resultat)
@@ -17,7 +17,7 @@ internal class V37InntektshistorikkVol2Test {
 
     @Test
     fun `kan migrere tom inntekt`() {
-        val resultat = listOf(V37InntektshistorikkVol2())
+        val resultat = listOf(V38InntektshistorikkVol2())
             .migrate(serdeObjectMapper.readTree(tomInntekt))
         val expected = serdeObjectMapper.readTree(expectedTomInntekt)
         assertEquals(expected, resultat)
@@ -25,7 +25,7 @@ internal class V37InntektshistorikkVol2Test {
 
     @Test
     fun `kan migrere ingen inntekt`() {
-        val resultat = listOf(V37InntektshistorikkVol2())
+        val resultat = listOf(V38InntektshistorikkVol2())
             .migrate(serdeObjectMapper.readTree(ingenting))
         val expected = serdeObjectMapper.readTree(expectedIngenInntekt)
         assertEquals(expected, resultat)
@@ -370,7 +370,7 @@ private val before = """{
             ]
         }
     ],
-    "skjemaVersjon": 36
+    "skjemaVersjon": 37
 }
 """
 
@@ -437,14 +437,14 @@ private val expected = """{
                             "beløp": 31000.0,
                             "kilde": "INNTEKTSMELDING",
                             "tidsstempel": "2020-09-13T08:51:08.552656",
-                            "dato": "2017-12-31"
+                            "dato": "2018-01-01"
                         },
                         {
                             "hendelseId": "6c4ff2a8-f634-47b8-a8d5-143708a2c40f",
                             "beløp": 30000.0,
                             "kilde": "INFOTRYGD",
                             "tidsstempel": "2020-09-15T08:51:08.552656",
-                            "dato": "2017-12-31"
+                            "dato": "2018-01-01"
                         }
                     ]
                 },
@@ -455,14 +455,14 @@ private val expected = """{
                             "beløp": 31000.0,
                             "kilde": "INNTEKTSMELDING",
                             "tidsstempel": "2020-09-13T08:51:08.552656",
-                            "dato": "2017-12-31"
+                            "dato": "2018-01-01"
                         }
                     ]
                 }
             ]
         }
     ],
-    "skjemaVersjon": 37
+    "skjemaVersjon": 38
 }
 """
 
@@ -474,7 +474,7 @@ private val expectedTomInntekt = """{
             "inntektshistorikk": []
         }
     ],
-    "skjemaVersjon": 37
+    "skjemaVersjon": 38
 }
 """
 
@@ -485,6 +485,6 @@ private val expectedIngenInntekt = """{
             "inntektshistorikk": []
         }
     ],
-    "skjemaVersjon": 37
+    "skjemaVersjon": 38
 }
 """

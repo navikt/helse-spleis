@@ -2,9 +2,11 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDate
 
-internal class V37InntektshistorikkVol2 : JsonMigration(version = 37) {
-    override val description: String = "Vi migrerer inntektshistorikk fra v1 -> v2"
+internal class V38InntektshistorikkVol2 : JsonMigration(version = 38) {
+    override val description: String = "Andre forsøk på å migrere inntektshistorikk. Må shifte FOM med en dag for å " +
+        "korrigere for at vi tidligere har brukt feil dato"
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
@@ -16,7 +18,7 @@ internal class V37InntektshistorikkVol2 : JsonMigration(version = 37) {
                     .map { inntekt ->
                         inntekt.deepCopy<ObjectNode>()
                             .apply {
-                                set<ObjectNode>("dato", inntekt["fom"])
+                                put("dato", LocalDate.parse(inntekt["fom"].asText()).plusDays(1).toString())
                                 remove("fom")
                             }
                     }
