@@ -359,7 +359,7 @@ internal class Sykdomstidslinje private constructor(
     internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?:true
 
     internal fun sykeperioder() =
-        dager.entries.filter { !it.value.erArbeidsdag() }.fold(listOf<Periode>()) { perioder, dag ->
+        dager.entries.filterNot { it.value.erArbeidsdag() }.fold(listOf<Periode>()) { perioder, dag ->
             if (perioder.isEmpty()) return@fold listOf(Periode(dag.key, dag.key))
 
             val siste = perioder.last()

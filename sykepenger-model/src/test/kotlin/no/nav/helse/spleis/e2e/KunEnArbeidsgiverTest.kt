@@ -2021,6 +2021,54 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
+        håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(20.juni, 30.juni))
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
+        håndterSøknad(Sykdom(1.juli, 31.juli, 100))
+        håndterYtelser(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+        )
+
+        assertNoErrors(inspektør)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+        )
+    }
+
+    @Disabled("Foreløpig usikkert hvordan vi skal håndere sammenhengende perioder fra IT, og hva vi skal gjøre med perioder som er helt utenfor alle sammenhengende perioder")
+    @Test
+    fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) for hele perioden skal regnes som gap til påfølgende vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(9.juni, 30.juni))
         håndterYtelser(
             1.vedtaksperiode,

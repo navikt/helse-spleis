@@ -224,7 +224,11 @@ class Person private constructor(
         førsteFraværsdag: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(arbeidsgiverInntekt, førsteFraværsdag, vilkårsgrunnlag)
+        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(
+            arbeidsgiverInntekt,
+            førsteFraværsdag,
+            vilkårsgrunnlag
+        )
     }
 
     internal fun lagreInntekter(
@@ -248,8 +252,9 @@ class Person private constructor(
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val sammenhengendeSykeperioder = sammenhengendeSykeperioder()
-        val sammenhengendePeriode = if (sammenhengendeSykeperioder.isEmpty()) periode else sammenhengendePeriode(periode)
-        val inntektsdatoer = listOf(sammenhengendePeriode.start.minusDays(1))
+        val sammenhengendePeriode =
+            if (sammenhengendeSykeperioder.isEmpty()) periode else sammenhengendePeriode(periode)
+        val inntektsdatoer = sammenhengendeSykeperioder.map { it.start }
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
