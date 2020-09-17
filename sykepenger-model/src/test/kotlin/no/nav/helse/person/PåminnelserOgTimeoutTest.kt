@@ -355,7 +355,14 @@ class PåminnelserOgTimeoutTest {
                         orgnummer
                     )
                 ),
-                inntektshistorikk = emptyList(),
+                inntektshistorikk = listOf(
+                    Utbetalingshistorikk.Inntektsopplysning(
+                        1.januar(2017),
+                        31000.månedlig,
+                        orgnummer,
+                        true
+                    )
+                ),
                 aktivitetslogg = Aktivitetslogg()
             ),
             foreldrepermisjon = Foreldrepermisjon(

@@ -55,10 +55,6 @@ internal class Arbeidsgiver private constructor(
                 .map(Vedtaksperiode::sykeperioder)
                 .flatten()
                 .slåSammen()
-
-        internal fun inntektsdatoer(arbeidsgivere: List<Arbeidsgiver>) =
-            sammenhengendeSykeperioder(arbeidsgivere)
-                .map { it.start.minusDays(1) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

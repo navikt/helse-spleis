@@ -228,7 +228,8 @@ internal class TestArbeidsgiverInspektør(
     }
 
     private inner class Dagteller : SykdomstidslinjeVisitor {
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
+            inkrementer(dag)
         override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(
             dag: Arbeidsgiverdag,

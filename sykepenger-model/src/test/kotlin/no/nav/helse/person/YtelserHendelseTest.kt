@@ -61,6 +61,14 @@ internal class YtelserHendelseTest {
                     100,
                     ORGNR
                 )
+            ),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    sisteHistoriskeSykedag.minusDays(30),
+                    20000.månedlig,
+                    ORGNR,
+                    true
+                )
             )
         )
     }
@@ -119,6 +127,7 @@ internal class YtelserHendelseTest {
 
     private fun håndterYtelser(
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
+        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
         foreldrepengeytelse: Periode? = null,
         svangerskapsytelse: Periode? = null
     ) {
@@ -129,6 +138,7 @@ internal class YtelserHendelseTest {
         person.håndter(
             ytelser(
                 utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
                 foreldrepengeYtelse = foreldrepengeytelse,
                 svangerskapYtelse = svangerskapsytelse
             )
@@ -150,6 +160,7 @@ internal class YtelserHendelseTest {
     private fun ytelser(
         vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
+        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -167,7 +178,7 @@ internal class YtelserHendelseTest {
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 utbetalinger = utbetalinger,
-                inntektshistorikk = emptyList(),
+                inntektshistorikk = inntektshistorikk,
                 aktivitetslogg = it
             ),
             foreldrepermisjon = Foreldrepermisjon(

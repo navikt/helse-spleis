@@ -195,7 +195,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeId: UUID,
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = 1.januar,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.map { it.start }.max() ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
@@ -206,7 +206,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = 1.januar,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.map { it.start }.max() ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         id: UUID = UUID.randomUUID(),

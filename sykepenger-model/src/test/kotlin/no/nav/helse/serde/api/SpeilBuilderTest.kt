@@ -335,18 +335,18 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        inntektshistorikk = inntektshistorikk,
                         fom = førsteFraværsdagInfotrygd,
-                        tom = tom1Periode
+                        tom = tom1Periode,
+                        inntektshistorikk = inntektshistorikk
                     )
                 )
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = sisteVedtaksperiodeId))
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        inntektshistorikk = inntektshistorikk,
                         fom = førsteFraværsdagInfotrygd,
-                        tom = tom1Periode
+                        tom = tom1Periode,
+                        inntektshistorikk = inntektshistorikk
                     )
                 )
 
@@ -1122,9 +1122,16 @@ class SpeilBuilderTest {
         private fun ytelser(
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
-            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
             fom: LocalDate = 1.januar.minusYears(1),
-            tom: LocalDate = 31.januar.minusYears(1)
+            tom: LocalDate = 31.januar.minusYears(1),
+            inntektshistorikk: List<Inntektsopplysning> = listOf(
+                Inntektsopplysning(
+                    fom,
+                    31000.månedlig,
+                    orgnummer,
+                    true
+                )
+            )
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,

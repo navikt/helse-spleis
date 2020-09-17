@@ -317,10 +317,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertDoesNotThrow { it.arbeidsgiver.nåværendeTidslinje() }
             assertTrue(it.utbetalingslinjer(0).isEmpty())
             TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
-                assertEquals(7, tidslinjeInspektør.dagtelling[ForeldetDag::class])
+                assertEquals(6, tidslinjeInspektør.dagtelling[ForeldetDag::class])
                 assertEquals(2, tidslinjeInspektør.dagtelling[NavHelgDag::class])
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(1, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
             }
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
@@ -874,10 +873,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertMessages(it)
             assertNotNull(it.maksdato(1.vedtaksperiode))
             assertNotNull(it.maksdato(2.vedtaksperiode))
-            assertEquals(10_017, it.totalBeløp[0])
-            assertEquals(10_017, it.nettoBeløp[0])
-            assertEquals(34_344, it.totalBeløp[1])
-            assertEquals(24_327, it.nettoBeløp[1])
+            assertEquals(8586, it.totalBeløp[0])
+            assertEquals(8586, it.nettoBeløp[0])
+            assertEquals(32913, it.totalBeløp[1])
+            assertEquals(24327, it.nettoBeløp[1])
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -1258,8 +1257,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertMessages(it)
-            assertEquals(4, it.dagtelling[Dag.Arbeidsgiverdag::class])
-            assertEquals(1, it.dagtelling[Dag.UkjentDag::class])
+            assertEquals(3, it.dagtelling[Dag.Arbeidsgiverdag::class])
             assertEquals(2, it.dagtelling[Dag.ArbeidsgiverHelgedag::class])
             assertEquals(35, it.dagtelling[Sykedag::class])
             assertEquals(12, it.dagtelling[SykHelgedag::class])

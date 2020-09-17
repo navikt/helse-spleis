@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.utvid
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Companion.tilModellPerioder
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -12,9 +15,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 import kotlin.math.roundToInt
+import no.nav.helse.hendelser.Periode as ModellPeriode
 
 class Utbetalingshistorikk(
     meldingsreferanseId: UUID,
@@ -50,6 +55,11 @@ class Utbetalingshistorikk(
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
 
+    internal fun oppdaterSammenhengendePerioder(perioder: List<ModellPeriode>): List<ModellPeriode> {
+        val infotrygdperioder = utbetalinger.tilModellPerioder().utvid(inntektshistorikk)
+        return (infotrygdperioder + perioder).slåSammen()
+    }
+
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Inntekt,
@@ -59,6 +69,15 @@ class Utbetalingshistorikk(
     ) {
 
         internal companion object {
+            private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+            internal fun List<ModellPeriode>.utvid(perioder: List<Inntektsopplysning>) =
+                map { (it.start.nærmesteFom(perioder) ?: it.start) til it.endInclusive }
+
+            private fun LocalDate.nærmesteFom(perioder: List<Inntektsopplysning>) =
+                perioder.map { it.sykepengerFom }.sorted().lastOrNull { it <= this }
+                    .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for orgnumre ${perioder.map { it.orgnummer }}") }
+
             fun valider(
                 liste: List<Inntektsopplysning>,
                 aktivitetslogg: Aktivitetslogg,
@@ -137,9 +156,11 @@ class Utbetalingshistorikk(
     sealed class Periode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun sorter(liste: List<Periode>) = liste.sortedBy { it.periode.start }
+            internal fun List<Periode>.tilModellPerioder() =
+                map { it.periode }
         }
 
-        protected val periode = no.nav.helse.hendelser.Periode(fom, tom)
+        protected val periode = ModellPeriode(fom, tom)
 
         internal open fun tidslinje() = Utbetalingstidslinje()
 

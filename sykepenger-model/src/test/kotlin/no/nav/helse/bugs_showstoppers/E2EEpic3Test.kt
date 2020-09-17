@@ -65,7 +65,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `inntektsmelding starter etter sykmeldingsperioden`() {
+    fun `inntektsmelding starter etter sykmeldingsperioden`() {
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020), 100))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
@@ -87,6 +87,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 100,
                 100,
                 ORGNUMMER
+            ),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(18.mars(2019), INNTEKT, ORGNUMMER,true),
+                Utbetalingshistorikk.Inntektsopplysning(2.mars(2018), INNTEKT, ORGNUMMER,true),
+                Utbetalingshistorikk.Inntektsopplysning(28.oktober(2017), INNTEKT, ORGNUMMER,true)
             )
         )
         håndterSimulering(1.vedtaksperiode)
@@ -538,7 +543,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
-            førsteFraværsdag = 18.januar(2020)
+            førsteFraværsdag = 17.januar(2020)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
@@ -999,7 +1004,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, LocalDateTime.now().minusDays(200))
 
-        håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(+2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(2020), 100))
         håndterSøknad(Sykdom(12.juli(2020), 31.juli(2020), 100))
 
         håndterYtelser(

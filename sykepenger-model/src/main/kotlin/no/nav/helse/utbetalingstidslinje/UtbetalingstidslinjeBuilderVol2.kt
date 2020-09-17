@@ -42,7 +42,9 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         if (forlengelseStrategy(sykdomstidslinje)) sykedagerIArbeidsgiverperiode += 16
-        Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode).accept(this)
+        Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode)
+            .kuttFremTilOgMed(sammenhengendePeriode.endInclusive)
+            .accept(this)
         return tidslinje
     }
 
@@ -504,6 +506,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             dagen: LocalDate,
             økonomi: Økonomi
         ) {
+            splitter.oppdatereInntekt(dagen)
             splitter.håndterArbeidsgiverdag(dagen)
             splitter.state(ArbeidsgiverperiodeSykedager)
         }

@@ -2,8 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -480,10 +478,44 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.navdager.assertDekningsgrunnlag(17.januar(2020) til 25.januar(2020), 30000.månedlig)
     }
 
-    private val inntektshistorikk = Inntektshistorikk().apply {
-        add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
-        add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
-        add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
+    @Test
+    fun `Setter inntekt ved sykedag i helg etter opphold i arbeidsgiverperioden`() {
+        resetSeed(1.januar(2020))
+        (2.S + 1.A + 7.F + 17.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(11.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(11.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 2.januar(2020), null)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(3.januar(2020) til 3.januar(2020), null)
+        inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 10.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(11.januar(2020) til 24.januar(2020), 30000.månedlig)
+        inspektør.navHelgdager.assertDekningsgrunnlag(25.januar(2020) til 26.januar(2020), 0.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 30000.månedlig)
+    }
+
+    @Test
+    fun `Setter inntekt ved sykedag i helg etter opphold utenfor arbeidsgiverperioden`() {
+        resetSeed(1.januar(2020))
+        (20.S + 1.A + 3.F + 3.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar(2020), hendelseId, 30000.månedlig)
+                    addInntektsmelding(25.januar(2020), hendelseId, 31000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(1.januar(2020), 25.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(17.januar(2020) til 20.januar(2020), 30000.månedlig)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(21.januar(2020) til 21.januar(2020), 30000.månedlig)
+        inspektør.fridager.assertDekningsgrunnlag(22.januar(2020) til 26.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 31000.månedlig)
     }
 
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
@@ -526,6 +558,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
 
         val navdager = mutableListOf<NavDag>()
+        val navHelgdager = mutableListOf<NavHelgDag>()
         val arbeidsdager = mutableListOf<Arbeidsdag>()
         val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
         val fridager = mutableListOf<Fridag>()
@@ -562,6 +595,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             økonomi: Økonomi
         ) {
             datoer[dag.dato] = NavHelgDag::class
+            navHelgdager.add(dag)
             inkrementer(NavHelgDag::class)
         }
 

@@ -251,7 +251,8 @@ class Person private constructor(
         arbeidsgivere.sammenhengendeSykeperioder()
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        val sammenhengendeSykeperioder = sammenhengendeSykeperioder()
+        val sammenhengendeSykeperioder =
+            ytelser.utbetalingshistorikk().oppdaterSammenhengendePerioder(sammenhengendeSykeperioder())
         val sammenhengendePeriode =
             if (sammenhengendeSykeperioder.isEmpty()) periode else sammenhengendePeriode(periode)
         val inntektsdatoer = sammenhengendeSykeperioder.map { it.start }
