@@ -356,18 +356,24 @@ internal class Sykdomstidslinje private constructor(
 
     private fun Dag.erArbeidsdag() = this is Arbeidsdag || this is FriskHelgedag
 
-    internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?:true
+    internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?: true
 
     internal fun sykeperioder() =
-        dager.entries.filterNot { it.value.erArbeidsdag() }.fold(listOf<Periode>()) { perioder, dag ->
-            if (perioder.isEmpty()) return@fold listOf(Periode(dag.key, dag.key))
+        dager.entries
+            .filterNot { it.value.erArbeidsdag() }
+            .dropWhile { (_, dag) -> !(dag.erSykedag() || dag is ForeldetSykedag) }
+            .fold(listOf<Periode>()) { perioder, (dato, dag) ->
+                if (perioder.isEmpty()) return@fold listOf(Periode(dato, dato))
 
-            val siste = perioder.last()
-            if (siste.endInclusive.isEqual(dag.key.minusDays(1))) {
-                perioder.dropLast(1).plusElement(Periode(siste.start, dag.key))
-            } else
-                perioder.plusElement(Periode(dag.key, dag.key))
-        }
+                val siste = perioder.last()
+                when {
+                    siste.endInclusive.isEqual(dato.minusDays(1)) -> {
+                        perioder.dropLast(1).plusElement(Periode(siste.start, dato))
+                    }
+                    dag.erSykedag() || dag is ForeldetSykedag -> perioder.plusElement(Periode(dato, dato))
+                    else -> perioder
+                }
+            }
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

@@ -8,10 +8,10 @@ import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -57,7 +57,7 @@ internal class InntektshistorikkVol2Test {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(2.januar))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(2.januar))
     }
 
     @Test
@@ -283,7 +283,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(22, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
-        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(15.januar(2018)))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(15.januar(2018)))
     }
 
     @Test
@@ -294,7 +294,7 @@ internal class InntektshistorikkVol2Test {
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
         assertEquals(INNTEKT, historikk.dekningsgrunnlag(1.januar(2018), NormalArbeidstaker))
-        assertEquals(INGEN, historikk.dekningsgrunnlag(1.januar(2017), NormalArbeidstaker))
+        assertNull(historikk.dekningsgrunnlag(1.januar(2017), NormalArbeidstaker))
     }
 
     @Test
@@ -312,7 +312,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(9, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
-        assertEquals(INGEN, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
     }
 
     @Test

@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVol2
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -422,14 +423,13 @@ internal class Arbeidsgiver private constructor(
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
     internal fun oppdatertUtbetalingstidslinje(
-        inntektDatoer: List<LocalDate>,
+        inntektsdatoer: List<LocalDate>,
         sammenhengendePeriode: Periode,
         ytelser: Ytelser
     ): Utbetalingstidslinje {
-        return UtbetalingstidslinjeBuilder(
+        val vol1Linje = UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode,
-            inntektshistorikk = inntektshistorikk.subset(inntektDatoer.map { it.minusDays(1) }),
-            inntektshistorikkVol2 = inntektshistorikkVol2,
+            inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { sykdomstidslinje ->
                 Oldtidsutbetalinger().let { oldtid ->
                     ytelser.utbetalingshistorikk().append(oldtid)
@@ -441,6 +441,28 @@ internal class Arbeidsgiver private constructor(
             },
             arbeidsgiverRegler = NormalArbeidstaker
         ).result(sykdomstidslinje())
+
+        try {
+            val vol2Linje = UtbetalingstidslinjeBuilderVol2(
+                sammenhengendePeriode = sammenhengendePeriode,
+                inntektshistorikkVol2 = inntektshistorikkVol2,
+                inntektsdatoer = inntektsdatoer,
+                forlengelseStrategy = { sykdomstidslinje ->
+                    Oldtidsutbetalinger().let { oldtid ->
+                        ytelser.utbetalingshistorikk().append(oldtid)
+                        utbetalteUtbetalinger()
+                            .forEach { it.append(organisasjonsnummer, oldtid) }
+                        oldtid.utbetalingerInkludert(this)
+                            .arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
+                    }
+                },
+                arbeidsgiverRegler = NormalArbeidstaker
+            ).result(sykdomstidslinje())
+        } catch (e: Throwable) {
+
+        }
+
+        return vol1Linje
     }
 
     fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {

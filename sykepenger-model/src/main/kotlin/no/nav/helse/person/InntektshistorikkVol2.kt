@@ -32,13 +32,13 @@ internal class InntektshistorikkVol2 {
     }
 
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-        historikk.first().grunnlagForSykepengegrunnlag(dato) ?: INGEN
+        historikk.first().grunnlagForSykepengegrunnlag(dato)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         historikk.first().grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
 
     internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
-        grunnlagForSykepengegrunnlag(dato).times(regler.dekningsgrad())
+        grunnlagForSykepengegrunnlag(dato)?.times(regler.dekningsgrad())
 
     internal fun clone() = InntektshistorikkVol2().also {
         it.historikk.addAll(this.historikk.map(Innslag::clone))

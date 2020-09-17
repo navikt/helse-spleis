@@ -238,6 +238,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt inntekt
                 }

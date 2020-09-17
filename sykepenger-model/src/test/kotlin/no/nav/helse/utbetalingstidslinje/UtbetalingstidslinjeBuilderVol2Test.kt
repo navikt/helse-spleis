@@ -1,12 +1,16 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
@@ -16,7 +20,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class UtbetalingstidslinjeBuilderTest {
+internal class UtbetalingstidslinjeBuilderVol2Test {
     private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)
@@ -40,7 +44,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         (16.S + 4.S).utbetalingslinjer()
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertDagsats(1431)
+        assertInntekter(1431)
     }
 
     @Test
@@ -351,30 +355,22 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `riktig inntekt for riktig dag`() {
-        resetSeed(1.desember(2017))
-        20.S.utbetalingslinjer()
-        assertDagsats(1431)
-
         resetSeed(8.januar)
         20.S.utbetalingslinjer()
-        assertDagsats(1431)
+        assertInntekter(1431)
 
         resetSeed(8.januar)
         40.S.utbetalingslinjer()
-        assertDagsats(1431)
+        assertInntekter(1431)
 
         resetSeed(1.februar)
         40.S.utbetalingslinjer()
-        assertDagsats(1154)
+        assertInntekter(1154)
     }
 
     @Test
     fun `feriedag før siste arbeidsgiverperiodedag`() {
-        (15.U + 1.F + 1.U + 10.S).utbetalingslinjer(
-            inntektshistorikk = Inntektshistorikk().apply {
-                add(17.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
-            }
-        )
+        (15.U + 1.F + 1.U + 10.S).utbetalingslinjer()
         assertNotEquals(
             0.0,
             inspektør
@@ -389,16 +385,99 @@ internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun `feriedag før siste arbeidsgiverperiodedag med påfølgende helg`() {
         resetSeed(1.januar(2020))
-        (10.U + 7.F + 14.S).utbetalingslinjer(
-            inntektshistorikk = Inntektshistorikk().apply {
-                add(17.januar(2020), hendelseId, 31000.månedlig, INNTEKTSMELDING)
-            }
-        )
+        (10.U + 7.F + 14.S).utbetalingslinjer()
         assertEquals(31, inspektør.datoer.size)
         assertEquals(Fridag::class, inspektør.datoer[17.januar(2020)])
         assertEquals(NavHelgDag::class, inspektør.datoer[18.januar(2020)])
         assertEquals(NavHelgDag::class, inspektør.datoer[19.januar(2020)])
         assertEquals(NavDag::class, inspektør.datoer[20.januar(2020)])
+    }
+
+    @Test
+    fun `Setter inntekt basert på inntektsdatoer`() {
+        resetSeed(1.januar(2020))
+        (14.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                invoke {
+                    addInntektsmelding(1.januar(2020), hendelseId, 31000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(1.januar(2020))
+        )
+        inspektør.navdager.assertDekningsgrunnlag(1.januar(2020) til 31.januar(2020), 31000.månedlig)
+    }
+
+    @Test
+    fun `Setter inntekt basert på inntektsdato for siste del av arbeidsgiverperioden`() {
+        resetSeed(1.januar(2020))
+        (10.S + 10.A + 10.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                invoke {
+                    addInntektsmelding(21.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(21.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 10.januar(2020), null)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(11.januar(2020) til 20.januar(2020), null)
+        inspektør.navdager.assertDekningsgrunnlag(21.januar(2020) til 30.januar(2020), 30000.månedlig)
+    }
+
+    @Test
+    fun `Setter inntekt basert på inntektsdatoer med gap`() {
+        resetSeed(1.januar(2020))
+        (20.S + 10.A + 10.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                invoke {
+                    addInntektsmelding(1.januar(2020), hendelseId, 31000.månedlig)
+                    addInntektsmelding(31.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(1.januar(2020), 31.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 31000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(17.januar(2020) til 20.januar(2020), 31000.månedlig)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(21.januar(2020) til 30.januar(2020), 31000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(31.januar(2020) til 9.februar(2020), 30000.månedlig)
+    }
+
+    @Test
+    fun `Arbeidsgiverdager før frisk helg har ikke inntekt`() {
+        resetSeed(1.januar(2020))
+        (3.S + 2.A + 5.S + 2.A + 20.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                invoke {
+                    addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(13.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 3.januar(2020), null)
+        inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 5.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(6.januar(2020) til 10.januar(2020), null)
+        inspektør.fridager.assertDekningsgrunnlag(11.januar(2020) til 12.januar(2020), null)
+        inspektør.navdager.assertDekningsgrunnlag(13.januar(2020) til 1.februar(2020), 30000.månedlig)
+    }
+
+    @Test
+    fun `Endrer ikke inntekt ved ferie`() {
+        resetSeed(1.januar(2020))
+        (5.S + 5.F + 15.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(1.januar(2020))
+        )
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 5.januar(2020), 30000.månedlig)
+        inspektør.fridager.assertDekningsgrunnlag(6.januar(2020) til 10.januar(2020), 30000.månedlig)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(11.januar(2020) til 16.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(17.januar(2020) til 25.januar(2020), 30000.månedlig)
     }
 
     private val inntektshistorikk = Inntektshistorikk().apply {
@@ -407,26 +486,49 @@ internal class UtbetalingstidslinjeBuilderTest {
         add(1.mars.minusDays(1), hendelseId, 50000.månedlig, INNTEKTSMELDING)
     }
 
-    private fun assertDagsats(dagsats: Int) {
-        inspektør.navdager.forEach {
-            it.økonomi.reflectionRounded { _, _, dekningsgrunnlag, _, _, _, _ ->
-                assertEquals(dagsats, dekningsgrunnlag)
+    private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+        invoke {
+            addInntektsmelding(1.januar, hendelseId, 31000.månedlig)
+            addInntektsmelding(1.februar, hendelseId, 25000.månedlig)
+            addInntektsmelding(1.mars, hendelseId, 50000.månedlig)
+        }
+    }
+
+    private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
+        inspektør.navdager.forEach { navDag ->
+            navDag.økonomi.reflectionRounded { _, _, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
+                dekningsgrunnlaget?.let { assertEquals(it, dekningsgrunnlag) }
+                aktuelleDagsinntekten?.let { assertEquals(it, aktuellDagsinntekt) }
             }
         }
     }
 
+    private fun List<Utbetalingsdag>.assertDekningsgrunnlag(periode: Periode, dekningsgrunnlaget: Inntekt?) =
+        filter { it.dato in periode }
+            .forEach { utbetalingsdag ->
+                val daglig = dekningsgrunnlaget?.reflection { _, _, _, daglig -> daglig }
+                utbetalingsdag.økonomi.reflectionRounded { _, _, dekningsgrunnlag, _, _, _, _ ->
+                    assertEquals(daglig, dekningsgrunnlag)
+                }
+            }
+
     private fun Sykdomstidslinje.utbetalingslinjer(
-        inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk
+        inntektshistorikkVol2: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderVol2Test.inntektshistorikkVol2,
+        inntektsdatoer: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars)
     ) {
-        tidslinje = UtbetalingstidslinjeBuilder(
+        tidslinje = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = this.periode()!!,
-            inntektshistorikk = inntektshistorikk
+            inntektshistorikkVol2 = inntektshistorikkVol2,
+            inntektsdatoer = inntektsdatoer
         ).result(this)
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
 
         val navdager = mutableListOf<NavDag>()
+        val arbeidsdager = mutableListOf<Arbeidsdag>()
+        val arbeidsgiverdager = mutableListOf<ArbeidsgiverperiodeDag>()
+        val fridager = mutableListOf<Fridag>()
         val dagtelling: MutableMap<KClass<out Utbetalingsdag>, Int> = mutableMapOf()
         val datoer = mutableMapOf<LocalDate, KClass<out Utbetalingsdag>>()
 
@@ -450,6 +552,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             økonomi: Økonomi
         ) {
             datoer[dag.dato] = Arbeidsdag::class
+            arbeidsdager.add(dag)
             inkrementer(Arbeidsdag::class)
         }
 
@@ -477,6 +580,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             økonomi: Økonomi
         ) {
             datoer[dag.dato] = ArbeidsgiverperiodeDag::class
+            arbeidsgiverdager.add(dag)
             inkrementer(ArbeidsgiverperiodeDag::class)
         }
 
@@ -486,6 +590,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             økonomi: Økonomi
         ) {
             datoer[dag.dato] = Fridag::class
+            fridager.add(dag)
             inkrementer(Fridag::class)
         }
 

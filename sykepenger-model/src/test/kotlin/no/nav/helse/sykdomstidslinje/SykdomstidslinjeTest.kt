@@ -65,9 +65,36 @@ internal class SykdomstidslinjeTest {
             Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.testkilde)
         val aktivitetslogg = Aktivitetslogg()
         assertTrue(tidslinje.valider(aktivitetslogg))
-        assertEquals(listOf(Periode(1.mandag, 1.tirsdag), Periode(1.torsdag, 1.fredag), Periode(2.mandag, 2.fredag)), tidslinje.sykeperioder())
+        assertEquals(
+            listOf(Periode(1.mandag, 1.tirsdag), Periode(1.torsdag, 1.fredag), Periode(2.mandag, 2.fredag)),
+            tidslinje.sykeperioder()
+        )
     }
 
+    @Test
+    fun `sykeperioder starter bare med sykedag`() {
+        val tidslinje = Sykdomstidslinje.foreldetSykedag(1.mandag, 1.tirsdag, 100.0, TestEvent.testkilde) +
+            Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.testkilde) +
+            Sykdomstidslinje.feriedager(1.torsdag, 1.torsdag, TestEvent.testkilde) +
+            Sykdomstidslinje.foreldetSykedag(1.fredag, 1.fredag, 100.0, TestEvent.testkilde) +
+            Sykdomstidslinje.arbeidsdager(Periode(1.lørdag, 1.søndag), TestEvent.testkilde) +
+            Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.testkilde)
+        val aktivitetslogg = Aktivitetslogg()
+        assertTrue(tidslinje.valider(aktivitetslogg))
+        assertEquals(
+            listOf(Periode(1.mandag, 1.tirsdag), Periode(1.fredag, 1.fredag), Periode(2.mandag, 2.fredag)),
+            tidslinje.sykeperioder()
+        )
+    }
+
+    @Test
+    fun `første sykeperiode starter bare med sykedag`() {
+        val tidslinje = Sykdomstidslinje.feriedager(1.mandag, 1.tirsdag, TestEvent.testkilde) +
+            Sykdomstidslinje.sykedager(1.onsdag, 1.fredag, 100.0, TestEvent.testkilde)
+        val aktivitetslogg = Aktivitetslogg()
+        assertTrue(tidslinje.valider(aktivitetslogg))
+        assertEquals(listOf(Periode(1.onsdag, 1.fredag)), tidslinje.sykeperioder())
+    }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->
         when {
