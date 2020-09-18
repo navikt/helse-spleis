@@ -518,6 +518,23 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 31000.månedlig)
     }
 
+    @Test
+    fun `Setter inntekt ved sykedag i helg etter opphold rett etter arbeidsgiverperioden`() {
+        resetSeed(1.januar(2020))
+        (16.S + 2.A + 3.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(19.januar(2020), hendelseId, 30000.månedlig)
+                }
+            },
+            inntektsdatoer = listOf(19.januar(2020))
+        )
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), null)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 17.januar(2020), null)
+        inspektør.fridager.assertDekningsgrunnlag(18.januar(2020) til 18.januar(2020), null)
+        inspektør.navdager.assertDekningsgrunnlag(19.januar(2020) til 21.januar(2020), 30000.månedlig)
+    }
+
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
         invoke {
             addInntektsmelding(1.januar, hendelseId, 31000.månedlig)
