@@ -202,6 +202,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, utbetaling)
     }
 
+    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
+        if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
+        kontekst(kansellerUtbetaling)
+        tilstand.håndter(this, kansellerUtbetaling)
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
         if (!påminnelse.gjelderTilstand(tilstand.type)) return true
@@ -228,14 +234,6 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: GjenopptaBehandling) {
         kontekst(hendelse.hendelse)
         tilstand.håndter(this, hendelse)
-    }
-
-    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
-        if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
-        kontekst(kansellerUtbetaling)
-        kansellerUtbetaling.info("Behandler kanseller utbetaling for vedtaksperiode: %s", this.id.toString())
-        arbeidsgiver.søppelbøtte(this, kansellerUtbetaling, Arbeidsgiver.ALLE)
-        invaliderPeriode(kansellerUtbetaling)
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
@@ -672,6 +670,8 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {}
 
         fun håndter(
             person: Person,
@@ -1412,6 +1412,49 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
+    internal object TilAnnullering : Vedtaksperiodetilstand {
+        override val type = TIL_ANNULLERING
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
+            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til annullering")
+        }
+
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
+            LocalDateTime.MAX
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
+            utbetaling.info(
+                "Annulleringen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
+                    "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}"
+            )
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til annullering")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
+            if (utbetaling.valider().hasErrors()) {
+                utbetaling.warn("Annullering ble ikke gjennomført")
+            } else {
+                utbetaling.info("Behandler annullering for vedtaksperiode: %s", vedtaksperiode.id.toString())
+                vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, utbetaling, Arbeidsgiver.ALLE)
+                vedtaksperiode.invaliderPeriode(utbetaling)
+            }
+
+        }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk
+        ) {
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+    }
+
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
 
@@ -1527,6 +1570,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
+            if (vedtaksperiode.arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
+            vedtaksperiode.kontekst(kansellerUtbetaling)
+            vedtaksperiode.tilstand(kansellerUtbetaling, TilAnnullering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {

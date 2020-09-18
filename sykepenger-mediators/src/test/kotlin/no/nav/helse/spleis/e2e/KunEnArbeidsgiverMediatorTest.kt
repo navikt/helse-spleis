@@ -49,7 +49,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `perioder påvirket av "kanseller utbetaling"-event går til Infotrygd`() {
+    fun `perioder påvirket av "kanseller utbetaling"-event går til TilAnnullering`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -72,7 +72,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING",
             "AVSLUTTET",
-            "TIL_INFOTRYGD"
+            "TIL_ANNULLERING"
         )
     }
 

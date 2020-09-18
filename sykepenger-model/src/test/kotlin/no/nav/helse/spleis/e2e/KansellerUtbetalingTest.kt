@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -69,7 +70,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En enkel periode som blir annullert blir også satt i tilstand TilInfotrygd`() {
+    fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
         val behovTeller = inspektør.personLogg.behov().size
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
@@ -78,24 +79,59 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+        }
+    }
+
+    @Test
+    fun `Annullering av én periode fører til at alle avsluttede sammenhengende perioder blir satt i tilstand TilAnnullering`() {
+        forlengVedtak(27.januar, 31.januar, 100)
+        forlengPeriode(1.februar, 20.februar, 100)
+        inspektør.also {
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
+            assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
+        }
+        val behovTeller = inspektør.personLogg.behov().size
+        håndterKansellerUtbetaling()
+        inspektør.also {
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(1))
+            assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
+        }
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        inspektør.also {
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(2))
+        }
+    }
+
+    @Test
+    fun `Periode som håndterer godkjent annullering i TilAnnullering blir forkastet`() {
+        håndterKansellerUtbetaling()
+        inspektør.also {
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+        }
+        håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        inspektør.also {
+            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
         }
     }
 
     @Test
-    fun `Annullering av én periode fører til at alle sammenhengende perioder blir satt i tilstand TilInfotrygd`() {
-        forlengVedtak(27.januar, 30.januar, 100)
-        inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
-        }
-        val behovTeller = inspektør.personLogg.behov().size
+    fun `Periode som håndterer avvist annullering i TilAnnullering blir værende i TilAnnullering`() {
         håndterKansellerUtbetaling()
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
-            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+        }
+        håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
+        inspektør.also {
+            assertTrue(it.personLogg.hasErrors())
+            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
     }
 
@@ -136,6 +172,13 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         assertEquals(26.januar, utbetalingslinje.tom)
         assertEquals(8586, utbetalingslinje.beløp)
         assertEquals(100.0, utbetalingslinje.grad)
+    }
+
+    private fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+        vedtaksperiodeTeller += 1
+        val id = vedtaksperiodeTeller.vedtaksperiode
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
     }
 
     private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int) {

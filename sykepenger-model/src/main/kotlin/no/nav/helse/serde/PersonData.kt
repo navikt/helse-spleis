@@ -561,6 +561,7 @@ internal data class PersonData(
                 TilstandType.AVVENTER_GODKJENNING -> Vedtaksperiode.AvventerGodkjenning
                 TilstandType.AVVENTER_SIMULERING -> Vedtaksperiode.AvventerSimulering
                 TilstandType.TIL_UTBETALING -> Vedtaksperiode.TilUtbetaling
+                TilstandType.TIL_ANNULLERING -> Vedtaksperiode.TilAnnullering
                 TilstandType.AVSLUTTET -> Vedtaksperiode.Avsluttet
                 TilstandType.AVSLUTTET_UTEN_UTBETALING -> Vedtaksperiode.AvsluttetUtenUtbetaling
                 TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING -> Vedtaksperiode.AvsluttetUtenUtbetalingMedInntektsmelding

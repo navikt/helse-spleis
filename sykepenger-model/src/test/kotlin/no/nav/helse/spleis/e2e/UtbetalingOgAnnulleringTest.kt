@@ -103,6 +103,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(15.februar, 15.mars, 100))
@@ -136,8 +137,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+
+        val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
+        håndterKansellerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode,
             TilstandType.START,
@@ -149,6 +152,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
+            TilstandType.TIL_ANNULLERING,
             TilstandType.TIL_INFOTRYGD
         )
 

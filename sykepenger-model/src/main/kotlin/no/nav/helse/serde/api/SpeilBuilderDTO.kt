@@ -246,6 +246,7 @@ data class SykmeldingDTO(
 
 enum class TilstandstypeDTO {
     TilUtbetaling,
+    TilAnnullering,
     Utbetalt,
     Oppgaver,
     Venter,

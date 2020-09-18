@@ -41,6 +41,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
     TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
+    TilstandType.TIL_ANNULLERING -> TilstandstypeDTO.TilAnnullering
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
     TilstandType.AVSLUTTET -> when {
         utbetalt -> TilstandstypeDTO.Utbetalt
