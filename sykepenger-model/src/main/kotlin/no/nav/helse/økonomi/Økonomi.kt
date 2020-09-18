@@ -326,7 +326,6 @@ internal class Økonomi private constructor(
             throw IllegalStateException("Kan ikke låse Økonomi på dette tidspunktet")
         }
 
-
         internal open fun låsOpp(økonomi: Økonomi): Økonomi {
             throw IllegalStateException("Kan ikke låse opp Økonomi på dette tidspunktet")
         }
@@ -340,6 +339,8 @@ internal class Økonomi private constructor(
             ) =
                 Økonomi(økonomi.grad, økonomi.arbeidsgiverBetalingProsent, aktuellDagsinntekt, dekningsgrunnlag)
                     .also { other -> other.tilstand = HarInntekt }
+
+            override fun lås(økonomi: Økonomi) = økonomi
 
             override fun <R> reflection(
                 økonomi: Økonomi,
@@ -383,11 +384,11 @@ internal class Økonomi private constructor(
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
+            override fun lås(økonomi: Økonomi) = økonomi
+
             override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
                 tilstand = HarInntekt
             }
-
-            override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
 
             override fun <R> reflection(
                 økonomi: Økonomi,
@@ -405,7 +406,7 @@ internal class Økonomi private constructor(
 
             override fun grad(økonomi: Økonomi) = 0.prosent
 
-            override fun lås(økonomi: Økonomi) = økonomi // Okay to lock twice
+            override fun lås(økonomi: Økonomi) = økonomi
 
             override fun låsOpp(økonomi: Økonomi) = økonomi.apply {
                 tilstand = HarInntekt

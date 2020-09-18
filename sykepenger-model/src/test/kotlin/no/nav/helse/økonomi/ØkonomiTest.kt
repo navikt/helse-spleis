@@ -63,10 +63,6 @@ internal class ØkonomiTest {
         assertDoesNotThrow { 50.prosent.sykdomsgrad.inntekt(1200.daglig).lås().lås()}
     }
 
-    @Test fun `kan ikke låse uten dekningsgrunnlag`() {
-        assertThrows<IllegalStateException> { 50.prosent.sykdomsgrad.lås() }
-    }
-
     @Test fun `kan ikke låses etter betaling`() {
         50.prosent.sykdomsgrad.inntekt(1200.daglig).also { økonomi ->
             listOf(økonomi).betal(1.januar)
