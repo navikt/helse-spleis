@@ -15,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVol2
 import no.nav.helse.økonomi.Inntekt
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -42,6 +43,8 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         internal val TIDLIGERE: VedtaksperioderSelector = Arbeidsgiver::tidligere
         internal val TIDLIGERE_OG_ETTERGØLGENDE: VedtaksperioderSelector = Arbeidsgiver::tidligereOgEtterfølgende
         internal val SENERE: VedtaksperioderSelector = Arbeidsgiver::senere
@@ -141,6 +144,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         } else {
             validerSykdomstidslinjer()
+            addInntektVol2(inntektsmelding)
         }
     }
 
@@ -423,7 +427,7 @@ internal class Arbeidsgiver private constructor(
         sammenhengendePeriode: Periode,
         ytelser: Ytelser
     ): Utbetalingstidslinje {
-        val vol1Linje = UtbetalingstidslinjeBuilder(
+        val utbetalingstidslinje = UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode,
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { sykdomstidslinje ->
@@ -454,11 +458,41 @@ internal class Arbeidsgiver private constructor(
                 },
                 arbeidsgiverRegler = NormalArbeidstaker
             ).result(sykdomstidslinje())
-        } catch (e: Throwable) {
 
+            sammenlignGammelOgNyUtbetalingstidslinje(utbetalingstidslinje, vol2Linje, sammenhengendePeriode)
+
+        } catch (e: Throwable) {
+            sikkerLogg.info("Feilet ved bygging av utbetalingstidslinje på ny måte for ${ytelser.vedtaksperiodeId}", e)
         }
 
-        return vol1Linje
+        return utbetalingstidslinje
+    }
+
+    private fun sammenlignGammelOgNyUtbetalingstidslinje(
+        utbetalingstidslinje: Utbetalingstidslinje,
+        vol2Linje: Utbetalingstidslinje,
+        sammenhengendePeriode: Periode
+    ) {
+        val vol1Linje = utbetalingstidslinje.kutt(sammenhengendePeriode.endInclusive)
+
+        if (vol1Linje.size != vol2Linje.size)
+            sikkerLogg.info("Forskjellig lengde på utbetalingstidslinjer. Vol1 = ${vol1Linje.size}, Vol2 = ${vol2Linje.size}")
+
+        if (vol1Linje.toString() != vol2Linje.toString())
+            sikkerLogg.info("Forskjellig toString() på utbetalingstidslinjer.\nVol1 = $vol1Linje\nVol2 = $vol2Linje")
+
+        vol1Linje.zip(vol2Linje).mapNotNull { (vol1Dag, vol2Dag: Utbetalingstidslinje.Utbetalingsdag) ->
+            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+
+            if (vol1Dekning != vol2Dekning || vol1Dagsinntekt != vol2Dagsinntekt)
+                "Vol1: ${vol1Dag.dato} [$vol1Dekning, $vol1Dagsinntekt] != Vol2: ${vol2Dag.dato} [$vol2Dekning, $vol2Dagsinntekt]"
+            else
+                null
+        }
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(prefix = "\n", separator = "\n")
+            ?.also(sikkerLogg::info)
     }
 
     fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {

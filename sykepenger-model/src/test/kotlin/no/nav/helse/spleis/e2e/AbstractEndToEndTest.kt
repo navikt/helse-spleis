@@ -210,7 +210,7 @@ internal abstract class AbstractEndToEndTest {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         id: UUID = UUID.randomUUID(),
-        beregnetInntekt: Inntekt = INNTEKT
+        beregnetInntekt: Inntekt = refusjon.second
     ): UUID {
         inntektsmelding(
             id,
@@ -224,7 +224,7 @@ internal abstract class AbstractEndToEndTest {
             arbeidsgiverperioder,
             førsteFraværsdag,
             ferieperioder,
-            Triple(null, INNTEKT, emptyList())
+            refusjon
         )
         return id
     }

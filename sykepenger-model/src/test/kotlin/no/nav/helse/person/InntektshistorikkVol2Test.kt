@@ -53,6 +53,15 @@ internal class InntektshistorikkVol2Test {
     }
 
     @Test
+    fun `Inntekt fra andre inntektsmelding overskriver ikke inntekt fra første, gitt samme første fraværsdag`() {
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk)
+        inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk)
+        inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk)
+        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(31000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.februar(2018)))
+    }
+
+    @Test
     fun `Inntekt fra inntektsmelding brukes ikke til å beregne sykepengegrunnlaget på annen dato`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
         assertEquals(1, inspektør.inntektTeller.size)

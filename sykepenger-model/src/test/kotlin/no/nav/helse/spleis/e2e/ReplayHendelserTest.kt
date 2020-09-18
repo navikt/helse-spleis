@@ -10,15 +10,14 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
     @BeforeEach
-    fun prepare () {
+    fun prepare() {
         Toggles.replayEnabled = true
     }
 
@@ -40,7 +39,7 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
     @Test
     fun `Støtter ikke replay for flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100), orgnummer="ANNET ORGNUMMER")
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100), orgnummer = "ANNET ORGNUMMER")
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
@@ -71,7 +70,11 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
     fun `Korrekte tidslinjer ved replay av utbetalt vedtaksperiode`() {
         val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
         val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 28.februar, 100))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 28.januar)
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 28.januar,
+            refusjon = Triple(null, 30000.månedlig, emptyList())
+        )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -103,7 +106,11 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
         assertReplayAv(1.vedtaksperiode)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 1.januar,
+            refusjon = Triple(null, 29000.månedlig, emptyList())
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

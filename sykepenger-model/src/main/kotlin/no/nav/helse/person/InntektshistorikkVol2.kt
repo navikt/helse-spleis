@@ -59,8 +59,10 @@ internal class InntektshistorikkVol2 {
         }
 
         fun add(inntektsopplysning: Inntektsopplysning) {
-            inntekter.removeIf { it.skalErstattesAv(inntektsopplysning) }
-            inntekter.add(inntektsopplysning)
+            if (inntekter.all { it.kanLagres(inntektsopplysning) }) {
+                inntekter.removeIf { it.skalErstattesAv(inntektsopplysning) }
+                inntekter.add(inntektsopplysning)
+            }
         }
 
         fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
@@ -84,6 +86,7 @@ internal class InntektshistorikkVol2 {
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt? = null
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
         override fun compareTo(other: Inntektsopplysning) = -this.prioritet.compareTo(other.prioritet)
+        fun kanLagres(other: Inntektsopplysning) = true
     }
 
     internal class Saksbehandler(
@@ -121,6 +124,9 @@ internal class InntektshistorikkVol2 {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Inntektsmelding && this.dato == other.dato
+
+        override fun kanLagres(other: Inntektsopplysning) =
+            other !is Inntektsmelding || this.dato != other.dato
     }
 
     internal class Infotrygd(
