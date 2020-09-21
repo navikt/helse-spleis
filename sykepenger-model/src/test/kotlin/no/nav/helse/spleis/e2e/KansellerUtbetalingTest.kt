@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -39,7 +40,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     fun `avvis hvis vi ikke finner fagsystemId`() {
         håndterKansellerUtbetaling(fagsystemId = "unknown")
         inspektør.also {
-            assertTrue(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertEquals(TilstandType.AVSLUTTET, it.sisteTilstand(0))
         }
     }
 
@@ -47,6 +48,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     fun `kanseller siste utbetaling`() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
@@ -71,14 +73,12 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 
     @Test
     fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
-        val behovTeller = inspektør.personLogg.behov().size
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
-            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
     }
@@ -92,11 +92,9 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
             assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
         }
-        val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
         inspektør.also {
             assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
-            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(1))
             assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
@@ -106,6 +104,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(2))
+            assertEquals(Behovtype.Utbetaling, it.personLogg.behov().last().type)
         }
     }
 
@@ -160,6 +159,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     fun `publiserer et event ved annullering`() {
         val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         val annullering = observatør.annulleringer.lastOrNull()
         assertNotNull(annullering)

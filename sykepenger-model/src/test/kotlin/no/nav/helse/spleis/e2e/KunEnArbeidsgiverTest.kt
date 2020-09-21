@@ -2248,13 +2248,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar, 100))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.februar, 10.februar, 100))
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GAP, LocalDate.EPOCH.atStartOfDay())
+        håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.utbetalinger[0].erUtbetalt())
-        håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        assertTrue(inspektør.utbetalinger[1].erAnnullert())
+
         håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         assertEquals(2, inspektør.utbetalinger.size)

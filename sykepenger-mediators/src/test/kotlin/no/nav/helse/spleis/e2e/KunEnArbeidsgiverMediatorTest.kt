@@ -10,10 +10,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -60,7 +57,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling(0)
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendKansellerUtbetaling(fagsystemId)
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling))
 
         assertTilstander(
             0,
@@ -98,7 +94,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
         assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_SØKNAD_FERDIG_GAP")
-        assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP", "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP", "AVVENTER_UFERDIG_GAP")
+        assertIkkeForkastedeTilstander(
+            2,
+            "MOTTATT_SYKMELDING_UFERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP",
+            "AVVENTER_UFERDIG_GAP"
+        )
     }
 
     @Test
@@ -139,9 +140,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendKansellerUtbetaling(fagsystemId)
+        sendUtbetaling(0, true)
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
-        val utbetalingAnnullert = requireNotNull(meldinger.firstOrNull { it["@event_name"]?.asText() == "utbetaling_annullert" })
+        val utbetalingAnnullert =
+            requireNotNull(meldinger.firstOrNull { it["@event_name"]?.asText() == "utbetaling_annullert" })
 
         assertEquals(fagsystemId, utbetalingAnnullert["fagsystemId"].asText())
         assertEquals("tbd@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
