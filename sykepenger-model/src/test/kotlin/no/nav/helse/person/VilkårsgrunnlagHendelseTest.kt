@@ -7,11 +7,10 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -76,6 +75,25 @@ internal class VilkårsgrunnlagHendelseTest {
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+    }
+
+    @Test
+    fun `9 måneder med inntekt gir riktig sammenligningsgrunnlag`() {
+        håndterVilkårsgrunnlag(
+            egenAnsatt = false,
+            inntekter = inntektperioder {
+                1.januar(2017) til 1.april(2017) inntekter {
+                    ORGNR inntekt 12000.månedlig
+                }
+                1.mai(2017) til 1.september(2017) inntekter {
+                    ORGNR inntekt 20000.månedlig
+                }
+            },
+            arbeidsforhold = ansattSidenStart2017()
+        )
+
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(148000.årlig, inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test

@@ -8,8 +8,8 @@ import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.avg
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Inntekt.Companion.årligGjennomsnitt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
 import java.time.LocalDate
@@ -20,7 +20,7 @@ import java.util.*
 class Inntektsvurdering(
     private val inntekter: List<ArbeidsgiverInntekt>
 ) {
-    private val sammenligningsgrunnlag = this.inntekter.avg()
+    private val sammenligningsgrunnlag = this.inntekter.årligGjennomsnitt()
 
     private var avviksprosent: Prosent? = null
 
@@ -103,8 +103,8 @@ class Inntektsvurdering(
             internal fun antallMåneder(inntekter: List<ArbeidsgiverInntekt>) =
                 MånedligInntekt.antallMåneder(inntekter.flatMap { it.inntekter })
 
-            internal fun avg(inntekter: List<ArbeidsgiverInntekt>) =
-                MånedligInntekt.avg(inntekter.flatMap { it.inntekter })
+            internal fun årligGjennomsnitt(inntekter: List<ArbeidsgiverInntekt>) =
+                MånedligInntekt.årligGjennomsnitt(inntekter.flatMap { it.inntekter })
         }
 
         class MånedligInntekt(
@@ -126,11 +126,11 @@ class Inntektsvurdering(
                 internal fun månedFørSlutt(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
                     inntekter.map { it.yearMonth }.max()?.minusMonths(antallMåneder.toLong() - 1)
 
-                internal fun avg(inntekter: List<MånedligInntekt>): Inntekt =
+                internal fun årligGjennomsnitt(inntekter: List<MånedligInntekt>): Inntekt =
                     inntekter
                         .groupBy { it.yearMonth }
                         .map { (_, månedsinntekter) -> summer(månedsinntekter) }
-                        .avg()
+                        .årligGjennomsnitt()
 
                 internal fun summer(inntekter: List<MånedligInntekt>) = inntekter.map { it.inntekt }.summer()
 
@@ -192,6 +192,6 @@ class Inntektsvurdering(
     private fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) =
         ArbeidsgiverInntekt.kilder(this, antallMåneder)
 
-    private fun List<ArbeidsgiverInntekt>.avg() = ArbeidsgiverInntekt.avg(this)
+    private fun List<ArbeidsgiverInntekt>.årligGjennomsnitt() = ArbeidsgiverInntekt.årligGjennomsnitt(this)
     private fun List<ArbeidsgiverInntekt>.antallMåneder() = ArbeidsgiverInntekt.antallMåneder(this)
 }
