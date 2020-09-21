@@ -30,7 +30,7 @@ internal class MinimumInntektsfilterTest {
             Periode(1.januar, 31.desember),
             aktivitetslogg
         ).filter()
-        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
+        assertFalse(aktivitetslogg.hasWarnings())
     }
 
     @Test internal fun `ung person som oppfyller minstelønnskravet får ingen avviste dager`() {

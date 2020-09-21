@@ -551,7 +551,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
 
         when {
-            utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds() -> {
+            utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarnings() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
@@ -670,7 +670,8 @@ internal class Vedtaksperiode private constructor(
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
+        }
 
         fun håndter(
             person: Person,
@@ -1585,7 +1586,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet")
+            hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

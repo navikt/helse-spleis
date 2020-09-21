@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.UtbetalingsdagVisitor
@@ -168,7 +167,7 @@ class UtbetalingshistorikkTest {
         utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
             assertTrue(it.hasWarnings())
             assertFalse(it.hasErrors())
-            assertFalse(it.hasOnlyInfoAndNeeds())
+            assertTrue(it.hasWarnings())
         }
     }
 
@@ -183,7 +182,7 @@ class UtbetalingshistorikkTest {
             inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.juni, 30.juni), Periodetype.FØRSTEGANGSBEHANDLING).also {
-            assertTrue(it.hasOnlyInfoAndNeeds())
+            assertFalse(it.hasWarnings())
         }
     }
 
@@ -206,7 +205,7 @@ class UtbetalingshistorikkTest {
             inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
-            assertTrue(it.hasOnlyInfoAndNeeds())
+            assertFalse(it.hasWarnings())
         }
     }
 
@@ -223,7 +222,7 @@ class UtbetalingshistorikkTest {
         utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
             assertTrue(it.hasWarnings())
             assertFalse(it.hasErrors())
-            assertFalse(it.hasOnlyInfoAndNeeds())
+            assertTrue(it.hasWarnings())
         }
     }
 
@@ -238,7 +237,7 @@ class UtbetalingshistorikkTest {
             inntektshistorikk = emptyList()
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
-            assertTrue(it.hasOnlyInfoAndNeeds())
+            assertFalse(it.hasWarnings())
         }
     }
 
@@ -361,7 +360,6 @@ class UtbetalingshistorikkTest {
 
         utbetalingshistorikk.valider(Periode(28.januar, 28.januar), Periodetype.FØRSTEGANGSBEHANDLING)
         assertFalse(aktivitetslogg.hasWarnings())
-        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test
@@ -376,7 +374,6 @@ class UtbetalingshistorikkTest {
 
         utbetalingshistorikk.valider(Periode(29.januar, 29.januar), Periodetype.FØRSTEGANGSBEHANDLING)
         assertFalse(aktivitetslogg.hasWarnings())
-        assertTrue(aktivitetslogg.hasOnlyInfoAndNeeds())
     }
 
     @Test

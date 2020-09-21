@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
@@ -390,7 +389,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         inspektør.also {
             assertNoErrors(it)
-            assertTrue(it.personLogg.hasOnlyInfoAndNeeds())
+            assertFalse(it.personLogg.hasWarnings())
             assertMessages(it)
             assertFalse(it.inntekter.isEmpty())
             assertNotNull(it.inntektshistorikk.inntekt(2.januar))
@@ -422,7 +421,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
+        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarnings())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -454,7 +453,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         ) // warning pga AAP
         håndterYtelser(1.vedtaksperiode)
 
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasOnlyInfoAndNeeds())
+        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarnings())
         assertTilstander(
             1.vedtaksperiode,
             START,
