@@ -82,7 +82,7 @@ internal class SøknadHendelseTest {
     fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
-        assertTrue(inspektør.personLogg.hasBehov())
+        assertTrue(inspektør.personLogg.hasWarnings())
         assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
