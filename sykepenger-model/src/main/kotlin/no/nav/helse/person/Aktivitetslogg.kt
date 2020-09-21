@@ -53,7 +53,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
-    override fun hasMessages() = info().isNotEmpty() || hasWarnings()
+    override fun hasMessages() = info().isNotEmpty() || hasWarnings() || hasBehov()
 
     override fun hasWarnings() = warn().isNotEmpty() || hasErrors()
 
