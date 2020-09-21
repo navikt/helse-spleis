@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = mapOf<LocalDate, Inntekt>(
+        LocalDate.of(2020, 9, 21) to 101351.årlig,
         LocalDate.of(2019, 5, 1) to 99858.årlig,
         LocalDate.of(2018, 5, 1) to 96883.årlig,
         LocalDate.of(2017, 5, 1) to 93634.årlig,
