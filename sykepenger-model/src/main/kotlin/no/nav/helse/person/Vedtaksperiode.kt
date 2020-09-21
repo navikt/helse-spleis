@@ -355,6 +355,8 @@ internal class Vedtaksperiode private constructor(
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor sykmeldingsperioden")
             if (arbeidsgiver.finnSykeperiodeRettFør(this) == null && hendelse.førsteFraværsdag != sykdomstidslinje.førsteFraværsdag())
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er utenfor søknadsperioden. Kontroller at inntektsmeldingen er knyttet til riktig periode")
+            if (arbeidsgiver.finnSykeperiodeRettFør(this) != null && arbeidsgiver.finnSykeperiodeRettFør(this)?.førsteFraværsdag != hendelse.førsteFraværsdag)
+                hendelse.warn("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode")
         }
         hendelse.valider(periode)
         if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
