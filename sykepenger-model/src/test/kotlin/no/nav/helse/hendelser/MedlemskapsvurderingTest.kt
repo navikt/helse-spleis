@@ -18,10 +18,10 @@ internal class MedlemskapsvurderingTest {
 
     @Test
     fun `bruker er medlem`() {
-        assertTrue(
+        assertFalse(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
                 .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING)
-                .hasOnlyInfoAndNeeds()
+                .hasWarnings()
         )
     }
 

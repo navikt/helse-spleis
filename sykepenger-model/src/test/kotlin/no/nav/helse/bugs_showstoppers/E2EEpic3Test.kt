@@ -918,7 +918,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
-        assertTrue(inspektør.personLogg.hasOnlyInfoAndNeeds())
+        assertFalse(inspektør.personLogg.hasWarnings())
         assertTilstander(
             1.vedtaksperiode,
             START,

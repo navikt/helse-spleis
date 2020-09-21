@@ -551,7 +551,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
 
         when {
-            utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasOnlyInfoAndNeeds() -> {
+            utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarnings() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
