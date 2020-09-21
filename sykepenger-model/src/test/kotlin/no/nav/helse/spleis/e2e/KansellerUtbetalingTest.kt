@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -171,6 +170,34 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
         assertEquals(8586, utbetalingslinje.beløp)
+        assertEquals(100.0, utbetalingslinje.grad)
+    }
+
+    @Test
+    fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder`() {
+        val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
+        forlengVedtak(27.januar, 20.februar, 100)
+        assertEquals(2, observatør.vedtaksperioder.size)
+
+        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        val vedtaksperioderIder = observatør.vedtaksperioder.toList()
+        assertEquals(TilstandType.TIL_INFOTRYGD, observatør.tilstander[vedtaksperioderIder[0]]?.last())
+        assertEquals(TilstandType.TIL_INFOTRYGD, observatør.tilstander[vedtaksperioderIder[1]]?.last())
+
+        val annulleringer = observatør.annulleringer
+        assertEquals(1, annulleringer.size)
+        val annullering = annulleringer.lastOrNull()
+        assertNotNull(annullering)
+
+        assertEquals(fagsystemId, annullering!!.fagsystemId)
+
+        val utbetalingslinje = annullering.utbetalingslinjer.first()
+        assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
+        assertEquals(19.januar, utbetalingslinje.fom)
+        assertEquals(20.februar, utbetalingslinje.tom)
+        assertEquals(32913, utbetalingslinje.beløp)
         assertEquals(100.0, utbetalingslinje.grad)
     }
 
