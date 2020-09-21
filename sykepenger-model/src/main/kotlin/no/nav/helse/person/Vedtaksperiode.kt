@@ -670,7 +670,8 @@ internal class Vedtaksperiode private constructor(
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {}
+        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
+        }
 
         fun håndter(
             person: Person,
@@ -1585,7 +1586,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet")
+            hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
