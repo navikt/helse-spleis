@@ -1255,10 +1255,13 @@ internal class Vedtaksperiode private constructor(
                             oldtid.personTidslinje(periode)
                         }
 
+                    val førsteFraværsdag =
+                        requireNotNull(vedtaksperiode.førsteFraværsdag) { "Forventet førsteFraværsdag ved beregning av utbetalinger" }
                     engineForTimeline = ArbeidsgiverUtbetalinger(
                         tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
                         personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
+                        førsteFraværsdag = førsteFraværsdag,
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,

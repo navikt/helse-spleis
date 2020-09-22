@@ -182,7 +182,8 @@ internal class OppdragBuilderTest {
         val tidslinje = tidslinjeOf(*dager)
         MaksimumUtbetaling(
             listOf(tidslinje),
-            Aktivitetslogg()
+            Aktivitetslogg(),
+            1.januar
         ).betal()
         oppdrag = OppdragBuilder(
             tidslinje,

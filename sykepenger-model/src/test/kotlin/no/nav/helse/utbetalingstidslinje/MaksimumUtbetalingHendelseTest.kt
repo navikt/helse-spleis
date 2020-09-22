@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
+import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +21,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV)
         MaksimumUtbetaling(
             listOf(tidslinje),
-            aktivitetslogg
+            aktivitetslogg,
+            1.januar
         ).betal()
         undersøke(tidslinje)
         assertEquals(12000, inspektør.totalUtbetaling())
@@ -30,7 +32,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV(3500))
         MaksimumUtbetaling(
             listOf(tidslinje),
-            aktivitetslogg
+            aktivitetslogg,
+            1.januar
         ).betal()
         undersøke(tidslinje)
         assertEquals(21610, inspektør.totalUtbetaling())
@@ -40,8 +43,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV(3500), 10.NAV(1200))
         MaksimumUtbetaling(
             listOf(tidslinje),
-            aktivitetslogg
-
+            aktivitetslogg,
+            1.januar
         ).betal()
         undersøke(tidslinje)
         assertEquals(21610 + 12000, inspektør.totalUtbetaling())
@@ -53,7 +56,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV(3500, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
-            aktivitetslogg
+            aktivitetslogg,
+            1.januar
 
         ).betal()
         undersøke(tidslinje)
@@ -64,7 +68,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV(1200, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
-            aktivitetslogg
+                aktivitetslogg,
+            1.januar
 
         ).betal()
         undersøke(tidslinje)

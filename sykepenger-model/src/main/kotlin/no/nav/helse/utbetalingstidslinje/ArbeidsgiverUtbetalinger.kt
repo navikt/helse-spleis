@@ -3,11 +3,13 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val personTidslinje: Utbetalingstidslinje,
     private val periode: Periode,
+    private val førsteFraværsdag: LocalDate,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val aktivitetslogg: Aktivitetslogg,
@@ -23,7 +25,7 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)
         }
-        MaksimumUtbetaling(tidslinjer, aktivitetslogg).betal()
+        MaksimumUtbetaling(tidslinjer, aktivitetslogg, førsteFraværsdag).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.createUtbetaling(
                 fødselsnummer,

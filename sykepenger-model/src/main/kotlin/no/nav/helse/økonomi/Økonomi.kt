@@ -41,13 +41,13 @@ internal class Økonomi private constructor(
         internal fun sykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
 
-        internal fun betal(økonomiList: List<Økonomi>, dato: LocalDate): List<Økonomi> = økonomiList.also {
+        internal fun betal(økonomiList: List<Økonomi>, førsteFraværsdag: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
-            justereForGrense(it, maksbeløp(it, dato))
+            justereForGrense(it, maksbeløp(it, førsteFraværsdag))
         }
 
-        private fun maksbeløp(økonomiList: List<Økonomi>, dato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(dato) * sykdomsgrad(økonomiList).roundToTwoDecimalPlaces()).rundTilDaglig()
+        private fun maksbeløp(økonomiList: List<Økonomi>, førsteFraværsdag: LocalDate) =
+            (Grunnbeløp.`6G`.dagsats(førsteFraværsdag) * sykdomsgrad(økonomiList).roundToTwoDecimalPlaces()).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -424,7 +424,7 @@ internal class Økonomi private constructor(
 
 internal fun List<Økonomi>.sykdomsgrad(): Prosentdel = Økonomi.sykdomsgrad(this)
 
-internal fun List<Økonomi>.betal(dato: LocalDate) = Økonomi.betal(this, dato)
+internal fun List<Økonomi>.betal(førsteFraværsdag: LocalDate) = Økonomi.betal(this, førsteFraværsdag)
 
 internal fun List<Økonomi>.erUnderInntekstgrensen(
     alder: Alder,

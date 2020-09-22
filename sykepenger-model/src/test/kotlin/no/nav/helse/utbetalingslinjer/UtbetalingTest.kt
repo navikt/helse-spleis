@@ -104,7 +104,8 @@ internal class UtbetalingTest {
     private fun beregnUtbetalinger(vararg tidslinjer: Utbetalingstidslinje) =
         MaksimumUtbetaling(
             listOf(*tidslinjer),
-            aktivitetslogg
+            aktivitetslogg,
+            1.januar
         ).betal()
 
     private fun opprettUtbetaling(
