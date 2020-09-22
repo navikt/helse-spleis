@@ -45,8 +45,8 @@ internal class MaksimumUtbetalingHendelseTest {
         ).betal()
         undersøke(tidslinje)
         assertEquals(21610 + 12000, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasMessages())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
@@ -69,8 +69,8 @@ internal class MaksimumUtbetalingHendelseTest {
         ).betal()
         undersøke(tidslinje)
         assertEquals(6000, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasMessages())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
 

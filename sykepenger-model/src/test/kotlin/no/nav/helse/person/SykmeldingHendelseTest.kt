@@ -27,9 +27,9 @@ internal class SykmeldingHendelseTest {
     @Test
     internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasMessages())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(inspektør.personLogg.hasActivities())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
@@ -38,8 +38,8 @@ internal class SykmeldingHendelseTest {
     internal fun `En ny Sykmelding er ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
@@ -48,9 +48,9 @@ internal class SykmeldingHendelseTest {
     internal fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
-        assertTrue(inspektør.personLogg.hasMessages())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(inspektør.personLogg.hasActivities())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
@@ -60,8 +60,8 @@ internal class SykmeldingHendelseTest {
     internal fun `To søknader med overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
     }

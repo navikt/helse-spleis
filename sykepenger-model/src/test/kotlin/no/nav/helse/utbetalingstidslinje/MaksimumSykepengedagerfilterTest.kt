@@ -33,14 +33,14 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `stopper betaling etter 248 dager `() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 1.mars)))
-        assertTrue(aktivitetslogg.hasMessages())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `26 uker arbeid resetter utbetalingsgrense`() {

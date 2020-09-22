@@ -17,7 +17,7 @@ internal class ArbeidsavklaringspengerTest {
     @Test
     internal fun `ingen AAP`() {
         assertFalse(undersøke())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -26,7 +26,7 @@ internal class ArbeidsavklaringspengerTest {
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusMonths(6).minusDays(1)
         )))
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -35,12 +35,12 @@ internal class ArbeidsavklaringspengerTest {
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusMonths(6)
         )))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val aap = Arbeidsavklaringspenger(perioder.toList())
-        return aap.valider(aktivitetslogg, førsteFraværsdag).hasErrors()
+        return aap.valider(aktivitetslogg, førsteFraværsdag).hasErrorsOrWorse()
     }
 }

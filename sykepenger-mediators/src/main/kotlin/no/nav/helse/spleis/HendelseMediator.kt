@@ -247,8 +247,8 @@ internal class HendelseMediator(
         lagrePersonDao.lagrePerson(message, person, hendelse)
         personMediator.finalize(message, hendelse)
         replayMediator.finalize()
-        if (!hendelse.hasMessages()) return
-        if (hendelse.hasErrors()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
+        if (!hendelse.hasActivities()) return
+        if (hendelse.hasErrorsOrWorse()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
         behovMediator.håndter(message, hendelse)
     }

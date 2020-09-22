@@ -43,7 +43,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
@@ -78,7 +78,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
@@ -111,7 +111,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(8, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
@@ -159,7 +159,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
@@ -209,7 +209,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
@@ -248,7 +248,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
@@ -276,7 +276,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
@@ -308,7 +308,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
@@ -351,7 +351,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
@@ -389,8 +389,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         inspektør.also {
             assertNoErrors(it)
-            assertFalse(it.personLogg.hasWarnings())
-            assertMessages(it)
+            assertFalse(it.personLogg.hasWarningsOrWorse())
+            assertActivities(it)
             assertFalse(it.inntekter.isEmpty())
             assertNotNull(it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
@@ -413,15 +413,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
-        assertFalse(hendelselogg.hasErrors())
+        assertFalse(hendelselogg.hasErrorsOrWorse())
 
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarnings())
+        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarningsOrWorse())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -441,9 +441,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
-        assertFalse(hendelselogg.hasErrors())
+        assertFalse(hendelselogg.hasErrorsOrWorse())
 
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
         håndterVilkårsgrunnlag(
@@ -453,7 +453,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         ) // warning pga AAP
         håndterYtelser(1.vedtaksperiode)
 
-        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarnings())
+        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(0)).hasWarningsOrWorse())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -478,7 +478,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -489,7 +489,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -527,7 +527,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -538,7 +538,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -584,7 +584,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
@@ -593,7 +593,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -638,7 +638,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
@@ -647,7 +647,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -691,7 +691,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
@@ -701,7 +701,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -795,7 +795,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `første fraværsdato fra inntektsmelding er ulik utregnet første fraværsdato`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 4.januar)
-        inspektør.also { assertTrue(it.personLogg.hasWarnings()) }
+        inspektør.also { assertTrue(it.personLogg.hasWarningsOrWorse()) }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
     }
 
@@ -809,7 +809,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             3.januar,
             listOf(Periode(27.januar, 27.januar))
         )
-        inspektør.also { assertFalse(it.personLogg.hasWarnings()) }
+        inspektør.also { assertFalse(it.personLogg.hasWarningsOrWorse()) }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(
             2.vedtaksperiode,
@@ -861,7 +861,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         forventetEndringTeller++
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        assertTrue(hendelselogg.hasMessages(), hendelselogg.toString())
+        assertActivities(inspektør)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
@@ -869,7 +869,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertNotNull(it.maksdato(1.vedtaksperiode))
             assertNotNull(it.maksdato(2.vedtaksperiode))
             assertEquals(8586, it.totalBeløp[0])
@@ -989,7 +989,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -1036,7 +1036,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -1074,7 +1074,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1105,7 +1105,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1137,7 +1137,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1170,7 +1170,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1201,7 +1201,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1230,7 +1230,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1255,7 +1255,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(3, it.dagtelling[Dag.Arbeidsgiverdag::class])
             assertEquals(2, it.dagtelling[Dag.ArbeidsgiverHelgedag::class])
             assertEquals(35, it.dagtelling[Sykedag::class])
@@ -1291,7 +1291,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -1338,7 +1338,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
             assertEquals(3.januar, it.førsteFraværsdag(0))
             assertEquals(3.januar, it.førsteFraværsdag(1))
         }
@@ -1410,7 +1410,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -1445,7 +1445,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertTilstander(
             1.vedtaksperiode,
@@ -1556,7 +1556,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))
@@ -1588,7 +1588,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1626,7 +1626,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(it)
-            assertMessages(it)
+            assertActivities(it)
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1871,7 +1871,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `avvis sykmelding over 6 måneder gammel`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100))
         person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.sykdomshistorikk.size)
     }
 

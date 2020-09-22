@@ -2,8 +2,8 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
 import java.time.LocalDate
 
 internal class Validation private constructor(private val hendelse: ArbeidstakerHendelse) {
@@ -20,14 +20,14 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
     }
 
     internal fun valider(feilmelding: String? = null, isValid: () -> Boolean) {
-        if (hendelse.hasErrors()) return
+        if (hendelse.hasErrorsOrWorse()) return
         if (isValid()) return
         feilmelding?.also { hendelse.error(it) }
         errorBlock()
     }
 
     internal fun onSuccess(successBlock: () -> Unit) {
-        if (!hendelse.hasErrors()) successBlock()
+        if (!hendelse.hasErrorsOrWorse()) successBlock()
     }
 }
 
@@ -36,7 +36,7 @@ internal fun Validation.validerYtelser(
     ytelser: Ytelser,
     periodetype: Periodetype
 ) = valider {
-    !ytelser.valider(periode, periodetype).hasErrors()
+    !ytelser.valider(periode, periodetype).hasErrorsOrWorse()
 }
 
 internal fun Validation.overlappende(

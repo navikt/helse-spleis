@@ -17,7 +17,7 @@ class DagpengerTest {
     @Test
     internal fun `ingen Dagpenger`() {
         assertFalse(undersøke())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -26,7 +26,7 @@ class DagpengerTest {
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4).minusDays(1)
         )))
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -35,12 +35,12 @@ class DagpengerTest {
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4)
         )))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val dagpenger = Dagpenger(perioder.toList())
-        return dagpenger.valider(aktivitetslogg, førsteFraværsdag).hasErrors()
+        return dagpenger.valider(aktivitetslogg, førsteFraværsdag).hasErrorsOrWorse()
     }
 }

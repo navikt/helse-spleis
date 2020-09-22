@@ -314,7 +314,7 @@ internal class Vedtaksperiode private constructor(
     internal fun opprinneligPeriode() = sykmeldingsperiode
 
     private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
-        if (hendelse.valider(periode).hasErrors())
+        if (hendelse.valider(periode).hasErrorsOrWorse())
             return tilstand(hendelse, TilInfotrygd)
         block()
     }
@@ -359,7 +359,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.warn("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode")
         }
         hendelse.valider(periode)
-        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
         hendelse.info("Fullført behandling av inntektsmelding")
     }
@@ -374,14 +374,14 @@ internal class Vedtaksperiode private constructor(
         periode = hendelse.periode()
         sykmeldingsperiode = hendelse.periode()
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
     }
 
     private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
             .also { trengerInntektsmelding() }
 
         if (!sykdomshistorikk.sykdomstidslinje().valider()) {
@@ -401,14 +401,14 @@ internal class Vedtaksperiode private constructor(
             return
         }
 
-        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
     private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrors()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -419,7 +419,7 @@ internal class Vedtaksperiode private constructor(
         val beregnetInntekt = arbeidsgiver.inntekt(førsteFraværsdag) ?: vilkårsgrunnlag.severe(
             "Finner ikke inntekt for perioden $førsteFraværsdag"
         )
-        if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag, periodetype()).hasErrors().also {
+        if (vilkårsgrunnlag.valider(beregnetInntekt, førsteFraværsdag, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
@@ -553,7 +553,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
 
         when {
-            utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarnings() -> {
+            utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
@@ -682,7 +682,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
             if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype())
-                    .hasErrors()
+                    .hasErrorsOrWorse()
             ) return vedtaksperiode.tilstand(
                 utbetalingshistorikk,
                 TilInfotrygd
@@ -1267,7 +1267,7 @@ internal class Vedtaksperiode private constructor(
                     ).also { engine ->
                         engine.beregn()
                     }
-                    !ytelser.hasErrors()
+                    !ytelser.hasErrorsOrWorse()
                 }
                 onSuccess {
                     vedtaksperiode.forsøkUtbetaling(engineForTimeline.tidslinjeEngine, ytelser)
@@ -1293,7 +1293,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().removeUEND()).hasErrors()) {
+            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().removeUEND()).hasErrorsOrWorse()) {
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
@@ -1334,7 +1334,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            if (utbetalingsgodkjenning.valider().hasErrors()) return vedtaksperiode.tilstand(
+            if (utbetalingsgodkjenning.valider().hasErrorsOrWorse()) return vedtaksperiode.tilstand(
                 utbetalingsgodkjenning,
                 TilInfotrygd
             )
@@ -1394,7 +1394,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             vedtaksperiode.utbetaling().håndter(utbetaling)
 
-            if (utbetaling.valider().hasErrors()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+            if (utbetaling.valider().hasErrorsOrWorse()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
                 utbetaling.error("Utbetaling ble ikke gjennomført")
             }
 
@@ -1442,7 +1442,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            if (utbetaling.valider().hasErrors()) {
+            if (utbetaling.valider().hasErrorsOrWorse()) {
                 utbetaling.warn("Annullering ble ikke gjennomført")
             } else {
                 vedtaksperiode.arbeidsgiver.annullerUtbetaling(kansellerUtbetaling)

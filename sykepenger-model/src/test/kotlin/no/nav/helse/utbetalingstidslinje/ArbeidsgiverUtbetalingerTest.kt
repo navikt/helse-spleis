@@ -32,8 +32,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(12000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
         assertEquals(238, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasMessages())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -47,8 +47,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(6000, inspektør.totalUtbetaling())
         assertEquals(19.desember, maksdato)
         assertEquals(243, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -61,7 +61,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(10805 + 6000, inspektør.totalUtbetaling())
         assertEquals(12.desember, maksdato)
         assertEquals(238, gjenståendeSykedager)
-        assertFalse(aktivitetslogg.hasErrors()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasErrorsOrWorse()) { aktivitetslogg.toString() }
     }
 
     @Test
@@ -73,7 +73,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(2, inspektør.arbeidsdagTeller)
         assertEquals(5, inspektør.navDagTeller)
         assertEquals(6000, inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -103,8 +103,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(60 * 1200, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -135,8 +135,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals((50 * 1200) + (10 * 2161), inspektør.totalUtbetaling())
         assertEquals(6.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -153,8 +153,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(40 * 1200, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -162,8 +162,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(UNG_PERSON_FNR_2018, 16.AP, 3.NAV, 1.HELG)
         assertEquals(28.desember, maksdato) // 3 dager already paid, 245 left. So should be fredag!
         assertEquals(245, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasMessages())
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -270,8 +270,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -286,8 +286,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(10.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -302,8 +302,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -317,8 +317,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
         assertEquals(31.januar, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarnings())
-        assertFalse(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     private fun undersøke(fnr: String, vararg utbetalingsdager: Utbetalingsdager) {

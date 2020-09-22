@@ -21,7 +21,7 @@ internal class MedlemskapsvurderingTest {
         assertFalse(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
                 .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING)
-                .hasWarnings()
+                .hasWarningsOrWorse()
         )
     }
 
@@ -29,8 +29,8 @@ internal class MedlemskapsvurderingTest {
     fun `bruker er kanskje medlem`() {
         Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke)
             .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING).also {
-                assertTrue(it.hasWarnings())
-                assertFalse(aktivitetslogg.hasErrors())
+                assertTrue(it.hasWarningsOrWorse())
+                assertFalse(aktivitetslogg.hasErrorsOrWorse())
             }
     }
 
@@ -39,7 +39,7 @@ internal class MedlemskapsvurderingTest {
         assertTrue(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)
                 .valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING)
-                .hasErrors()
+                .hasErrorsOrWorse()
         )
     }
 }

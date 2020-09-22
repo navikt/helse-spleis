@@ -80,7 +80,7 @@ internal class OpptjeningvurderingTest {
     private fun undersøke(arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>, test: (Opptjeningvurdering) -> Unit): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val opptjeningvurdering = Opptjeningvurdering(arbeidsforhold)
-        return opptjeningvurdering.valider(aktivitetslogg, ORGNUMMER, FØRSTE_FRAVÆRSDAG).hasErrors().also {
+        return opptjeningvurdering.valider(aktivitetslogg, ORGNUMMER, FØRSTE_FRAVÆRSDAG).hasErrorsOrWorse().also {
             test(opptjeningvurdering)
         }
     }

@@ -32,11 +32,11 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje.count())
@@ -46,7 +46,7 @@ internal class SøknadHendelseTest {
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 50)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
     }
@@ -54,7 +54,7 @@ internal class SøknadHendelseTest {
     @Test
     internal fun `mangler Sykmelding`() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -62,7 +62,7 @@ internal class SøknadHendelseTest {
     internal fun `søknad kan ikke utvide sykdomstidslinje frem i tid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Egenmelding(9.januar, 10.januar)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje.count())
@@ -72,7 +72,7 @@ internal class SøknadHendelseTest {
     internal fun `søknad kan ikke utvide sykdomstidslinje tilbake i tid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje.count()) { inspektør.sykdomstidslinje.toString() }
@@ -82,8 +82,8 @@ internal class SøknadHendelseTest {
     fun `søknad med utdanning avvist`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
@@ -91,10 +91,10 @@ internal class SøknadHendelseTest {
     fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
     }
 
     @Test
@@ -103,7 +103,7 @@ internal class SøknadHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknad(Sykdom(6.januar,  10.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
@@ -115,8 +115,8 @@ internal class SøknadHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
     }

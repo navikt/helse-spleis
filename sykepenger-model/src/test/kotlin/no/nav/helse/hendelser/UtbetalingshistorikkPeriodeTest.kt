@@ -29,7 +29,7 @@ class UtbetalingshistorikkPeriodeTest {
         assertDoesNotThrow {
             Utbetalingshistorikk.Periode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE)
         }
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
@@ -38,7 +38,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
@@ -52,7 +52,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
@@ -65,7 +65,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
@@ -78,7 +78,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
@@ -91,7 +91,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, EN_PERIODE)
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertEquals(1.januar, inspektør.førsteDag)
@@ -104,7 +104,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -117,7 +117,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -130,7 +130,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -143,7 +143,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -156,7 +156,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -169,7 +169,7 @@ class UtbetalingshistorikkPeriodeTest {
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar))
         val tidslinje = periode.tidslinje()
 
-        assertFalse(aktivitetslogg.hasWarnings()) { aktivitetslogg.toString() }
+        assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
 
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -179,8 +179,8 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `Ukjent lager warning`() {
         Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar).valider(aktivitetslogg, Periode(1.januar, 1.januar))
-        assertFalse(aktivitetslogg.hasErrors())
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -195,7 +195,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `Ugyldig lager error`() {
         Utbetalingshistorikk.Periode.Ugyldig(1.januar, null).valider(aktivitetslogg, Periode(1.januar, 1.januar))
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     private class Inspektør : UtbetalingsdagVisitor {

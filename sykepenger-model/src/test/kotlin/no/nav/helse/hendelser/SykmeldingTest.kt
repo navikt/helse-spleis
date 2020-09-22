@@ -29,7 +29,7 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykdomsgrad under 100% støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50), Sykmeldingsperiode(12.januar, 16.januar, 100))
-        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
+        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
     }
 
     @Test
@@ -47,13 +47,13 @@ internal class SykmeldingTest {
     @Test
     internal fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 1.juli.atStartOfDay())
-        assertFalse(sykmelding.valider(sykmelding.periode()).hasErrors())
+        assertFalse(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     @Test
     internal fun `sykmelding eldre enn 6 måneder får error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 2.juli.atStartOfDay())
-        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrors())
+        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {

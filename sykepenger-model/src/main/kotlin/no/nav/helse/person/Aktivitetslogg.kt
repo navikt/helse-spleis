@@ -53,13 +53,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
-    override fun hasMessages() = info().isNotEmpty() || hasWarnings() || hasBehov()
+    override fun hasActivities() = info().isNotEmpty() || hasWarningsOrWorse() || behov().isNotEmpty()
 
-    override fun hasWarnings() = warn().isNotEmpty() || hasErrors()
+    override fun hasWarningsOrWorse() = warn().isNotEmpty() || hasErrorsOrWorse()
 
-    override fun hasBehov() = behov().isNotEmpty()
-
-    override fun hasErrors() = error().isNotEmpty() || severe().isNotEmpty()
+    override fun hasErrorsOrWorse() = error().isNotEmpty() || severe().isNotEmpty()
 
     override fun barn() = Aktivitetslogg(this)
 
@@ -366,10 +364,10 @@ interface IAktivitetslogg {
     fun error(melding: String, vararg params: Any?)
     fun severe(melding: String, vararg params: Any?): Nothing
 
-    fun hasMessages(): Boolean
-    fun hasWarnings(): Boolean
-    fun hasBehov(): Boolean
-    fun hasErrors(): Boolean
+    fun hasActivities(): Boolean
+    fun hasWarningsOrWorse(): Boolean
+    fun hasErrorsOrWorse(): Boolean
+
     fun aktivitetsteller(): Int
     fun behov(): List<Behov>
     fun barn(): Aktivitetslogg

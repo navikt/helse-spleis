@@ -54,13 +54,13 @@ internal class InntektsvurderingTest {
     fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
         assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT))
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT))
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun inntekter(periode: YearMonth, inntekt: Pair<String, Inntekt>) =
@@ -79,7 +79,7 @@ internal class InntektsvurderingTest {
             aktivitetslogg,
             beregnetInntekt,
             Periodetype.FØRSTEGANGSBEHANDLING
-        ).hasErrors()
+        ).hasErrorsOrWorse()
     }
 
     private fun inntektsvurdering(

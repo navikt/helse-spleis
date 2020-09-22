@@ -36,14 +36,14 @@ internal class AktivitetsloggTest {
 
     @Test
     internal fun `har ingen feil ved default`() {
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     internal fun `severe oppdaget og kaster exception`() {
         val melding = "Severe error"
         assertThrows<Aktivitetslogg.AktivitetException> { aktivitetslogg.severe(melding) }
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertSevere(melding)
     }
@@ -68,15 +68,15 @@ internal class AktivitetsloggTest {
         hendelse2.info("Infomelding")
 
         assertEquals(2, aktivitetslogg.kontekster().size)
-        assertTrue(aktivitetslogg.kontekster().first().hasBehov())
-        assertTrue(aktivitetslogg.kontekster().last().hasBehov())
+        assertTrue(aktivitetslogg.kontekster().first().behov().isNotEmpty())
+        assertTrue(aktivitetslogg.kontekster().last().behov().isNotEmpty())
     }
 
     @Test
     internal fun `error oppdaget`() {
         val melding = "Error"
         aktivitetslogg.error(melding)
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertError(melding)
     }
@@ -85,7 +85,7 @@ internal class AktivitetsloggTest {
     internal fun `warning oppdaget`() {
         val melding = "Warning explanation"
         aktivitetslogg.warn(melding)
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertWarn(melding)
     }

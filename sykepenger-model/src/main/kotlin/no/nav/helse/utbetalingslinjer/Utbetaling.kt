@@ -46,7 +46,7 @@ internal class Utbetaling private constructor(
     internal fun erAnnullert() = status == ANNULLERT
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
-        status = if (utbetaling.hasErrors()) UTBETALING_FEILET else UTBETALT
+        status = if (utbetaling.hasErrorsOrWorse()) UTBETALING_FEILET else UTBETALT
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag

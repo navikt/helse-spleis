@@ -25,8 +25,8 @@ internal class PåminnelseTest {
         val tilstand = Vedtaksperiode.Start
         val vedtaksperiode = vedtaksperiode()
         assertTrue(vedtaksperiode.håndter(påminnelse(tilstand.type)))
-        assertFalse(aktivitetslogg.hasWarnings())
-        assertTrue(aktivitetslogg.hasMessages())
+        assertTrue(aktivitetslogg.hasActivities())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class PåminnelseTest {
         val vedtaksperiode = vedtaksperiode()
         påminnelse(tilstand.type, UUID.randomUUID()).also {
             assertFalse(vedtaksperiode.håndter(it))
-            assertFalse(it.aktivitetslogg.hasMessages(), it.aktivitetslogg.toString())
+            assertFalse(it.aktivitetslogg.hasWarningsOrWorse(), it.aktivitetslogg.toString())
         }
     }
 

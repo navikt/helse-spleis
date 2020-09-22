@@ -102,23 +102,23 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun assertNoErrors(inspektør: TestArbeidsgiverInspektør) {
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
     }
 
     protected fun assertNoWarnings(inspektør: TestArbeidsgiverInspektør) {
-        assertFalse(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
+        assertFalse(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
     }
 
     protected fun assertWarnings(inspektør: TestArbeidsgiverInspektør) {
-        assertTrue(inspektør.personLogg.hasWarnings(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse(), inspektør.personLogg.toString())
     }
 
     protected fun assertErrors(inspektør: TestArbeidsgiverInspektør) {
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
     }
 
-    protected fun assertMessages(inspektør: TestArbeidsgiverInspektør) {
-        assertTrue(inspektør.personLogg.hasMessages(), inspektør.personLogg.toString())
+    protected fun assertActivities(inspektør: TestArbeidsgiverInspektør) {
+        assertTrue(inspektør.personLogg.hasActivities(), inspektør.personLogg.toString())
     }
 
     protected fun replaySykmelding(hendelseId: UUID) = håndterSykmelding(

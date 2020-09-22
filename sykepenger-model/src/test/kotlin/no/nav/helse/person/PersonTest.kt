@@ -59,7 +59,7 @@ internal class PersonTest {
         )
 
         person.also { it.håndter(påminnelse) }
-        assertTrue(påminnelse.hasErrors())
+        assertTrue(påminnelse.hasErrorsOrWorse())
 
         assertPersonIkkeEndret()
         assertVedtaksperiodeIkkeEndret()
@@ -92,8 +92,8 @@ internal class PersonTest {
         person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100))))
         sykmelding(perioder = listOf(Sykmeldingsperiode(10.juli, 22.juli, 100))).also {
             person.håndter(it)
-            assertTrue(it.hasWarnings())
-            assertFalse(it.hasErrors())
+            assertTrue(it.hasWarningsOrWorse())
+            assertFalse(it.hasErrorsOrWorse())
         }
     }
 
@@ -102,8 +102,8 @@ internal class PersonTest {
         person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 9.juli, 100))))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
-        assertTrue(inspektør.personLogg.hasMessages())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasActivities())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         søknad(
             perioder = listOf(
                 Søknad.Søknadsperiode.Sykdom(
@@ -115,12 +115,12 @@ internal class PersonTest {
             )
         ).also {
             person.håndter(it)
-            assertTrue(it.hasWarnings())
-            assertTrue(it.hasErrors())
+            assertTrue(it.hasWarningsOrWorse())
+            assertTrue(it.hasErrorsOrWorse())
         }
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
 
         assertPersonEndret()
         assertVedtaksperiodeEndret()
@@ -135,7 +135,7 @@ internal class PersonTest {
             )
         ).also {
             person.håndter(it)
-            assertFalse(it.hasErrors())
+            assertFalse(it.hasErrorsOrWorse())
         }
     }
 

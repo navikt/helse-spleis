@@ -33,7 +33,7 @@ internal class SimuleringHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
-        assertFalse(inspektør.personLogg.hasWarnings())
+        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
     }
 
     @Test

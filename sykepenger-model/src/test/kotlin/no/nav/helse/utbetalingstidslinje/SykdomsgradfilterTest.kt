@@ -18,7 +18,7 @@ internal class SykdomsgradfilterTest {
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, inspektør.navDagTeller)
-        assertFalse(aktivitetslogg.hasWarnings())
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -28,7 +28,7 @@ internal class SykdomsgradfilterTest {
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, inspektør.avvistDagTeller)
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -39,7 +39,7 @@ internal class SykdomsgradfilterTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, inspektør.avvistDagTeller)
         assertEquals(5, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarnings())
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {

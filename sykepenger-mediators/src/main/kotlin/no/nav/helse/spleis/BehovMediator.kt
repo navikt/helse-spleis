@@ -15,7 +15,7 @@ internal class BehovMediator(
 ) {
     internal fun håndter(message: HendelseMessage, hendelse: PersonHendelse) {
         hendelse.kontekster().forEach {
-            if (!it.hasErrors()){
+            if (!it.hasErrorsOrWorse()){
                 håndter(message, hendelse, it.behov())
             } }
     }

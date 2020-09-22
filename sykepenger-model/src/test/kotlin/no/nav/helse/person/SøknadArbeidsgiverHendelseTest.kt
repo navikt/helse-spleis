@@ -32,7 +32,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     internal fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(5, inspektør.sykdomstidslinje.count())
@@ -42,7 +42,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     internal fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 50)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
@@ -50,7 +50,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     @Test
     internal fun `mangler Sykmelding`() {
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -58,10 +58,10 @@ internal class SøknadArbeidsgiverHendelseTest {
     internal fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
@@ -70,10 +70,10 @@ internal class SøknadArbeidsgiverHendelseTest {
     internal fun `kaster ut ved overlappende søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertTrue(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
@@ -82,10 +82,10 @@ internal class SøknadArbeidsgiverHendelseTest {
     internal fun `ignorer andre søknad til arbeidsgiver`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
     }
@@ -97,7 +97,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
@@ -111,7 +111,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(15.januar, 19.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(15.januar, 19.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
@@ -124,7 +124,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
@@ -137,7 +137,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
         assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
@@ -150,7 +150,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1))
@@ -162,8 +162,8 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }

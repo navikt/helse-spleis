@@ -45,19 +45,19 @@ internal class InntektsopplysningTest {
     @Test
     fun `refusjon opphører før perioden`() {
         inntektsopplysning(DATO, ORGNR, 1.januar).valider(aktivitetslogg, PERIODE)
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     fun `refusjon opphører i perioden`() {
         inntektsopplysning(DATO, ORGNR, 15.februar).valider(aktivitetslogg, PERIODE)
-        assertTrue(aktivitetslogg.hasErrors())
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     fun `refusjon opphører etter perioden`() {
         inntektsopplysning(DATO, ORGNR, 1.mars).valider(aktivitetslogg, PERIODE)
-        assertFalse(aktivitetslogg.hasErrors())
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     private fun inntektsopplysning(dato: LocalDate, orgnr: String, refusjonTom: LocalDate? = null) =

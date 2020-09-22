@@ -31,7 +31,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     @Test fun `avvis hvis arbeidsgiver er ukjent`() {
         håndterKansellerUtbetaling(orgnummer = "999999")
         inspektør.also {
-            assertTrue(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertTrue(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
         }
     }
 
@@ -49,7 +49,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         håndterKansellerUtbetaling()
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
@@ -77,7 +77,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
         håndterKansellerUtbetaling()
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
     }
@@ -93,7 +93,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
         håndterKansellerUtbetaling()
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(1))
             assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
@@ -115,7 +115,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
         håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
         }
     }
@@ -128,7 +128,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         }
         håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
         inspektør.also {
-            assertTrue(it.personLogg.hasErrors())
+            assertTrue(it.personLogg.hasErrorsOrWorse())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
     }
@@ -146,7 +146,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
         inspektør.also {
-            assertFalse(it.personLogg.hasErrors(), it.personLogg.toString())
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))

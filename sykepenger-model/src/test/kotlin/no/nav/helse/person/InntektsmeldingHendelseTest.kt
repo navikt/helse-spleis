@@ -59,7 +59,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         person.håndter(inntektsmelding())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
     }
@@ -69,7 +69,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrors(), inspektør.personLogg.toString())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
     }
@@ -79,8 +79,8 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(sykmelding(Sykmeldingsperiode(19.januar, 30.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
@@ -88,7 +88,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     internal fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -97,8 +97,8 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personLogg.hasWarnings())
-        assertFalse(inspektør.personLogg.hasErrors())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
     }
@@ -118,7 +118,7 @@ internal class InntektsmeldingHendelseTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrors())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
