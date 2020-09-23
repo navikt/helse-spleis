@@ -59,6 +59,9 @@ class Inntektsmelding(
         this.førsteFraværsdag =
             slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder).slåSammen().lastOrNull()?.start
                 ?.takeIf { it.senereEnn(førsteFraværsdag) } ?: førsteFraværsdag
+        if (førsteFraværsdag != this.førsteFraværsdag) {
+            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+        }
     }
 
     private fun slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder: List<Periode>): List<Periode> {
