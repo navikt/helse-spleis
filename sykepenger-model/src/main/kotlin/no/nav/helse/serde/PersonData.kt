@@ -474,6 +474,10 @@ internal data class PersonData(
                         dato,
                         hendelseskilde
                     )
+                    JsonDagType.ANNULLERTDAG -> Dag.AnnullertDag(
+                        dato,
+                        hendelseskilde
+                    )
                 }
             }
 

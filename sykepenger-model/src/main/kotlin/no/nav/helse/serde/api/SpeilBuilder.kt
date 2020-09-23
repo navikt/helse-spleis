@@ -900,6 +900,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             is Studiedag -> SpeilDagtype.STUDIEDAG
             is Utenlandsdag -> SpeilDagtype.UTENLANDSDAG
             is ProblemDag -> SpeilDagtype.UBESTEMTDAG
+            is AnnullertDag -> SpeilDagtype.ANNULLERTDAG
         }
 
         private fun Hendelseskilde.toSpeilKildetype() = when {

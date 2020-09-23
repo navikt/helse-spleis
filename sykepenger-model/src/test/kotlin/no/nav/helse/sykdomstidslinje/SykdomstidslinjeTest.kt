@@ -1,8 +1,10 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
+import no.nav.helse.tournament.Dagturnering
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -57,7 +59,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    fun `sykeperioder`() {
+    fun sykeperioder() {
         val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.0, TestEvent.testkilde) +
             Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.testkilde) +
             Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.testkilde) +
@@ -94,6 +96,25 @@ internal class SykdomstidslinjeTest {
         val aktivitetslogg = Aktivitetslogg()
         assertTrue(tidslinje.valider(aktivitetslogg))
         assertEquals(listOf(Periode(1.onsdag, 1.fredag)), tidslinje.sykeperioder())
+    }
+
+    @Test
+    fun annullering() {
+        val dagturnering = Dagturnering("/dagturnering.csv")
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.0, TestEvent.søknad) +
+            Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.søknad) +
+            Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.søknad) +
+            Sykdomstidslinje.arbeidsdager(Periode(1.lørdag, 1.søndag), TestEvent.søknad) +
+            Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.søknad)
+        val actual = tidslinje.merge(Sykdomstidslinje.annullerteDager(1.onsdag til 2.fredag, TestEvent.søknad), dagturnering::beste)
+        val aktivitetslogg = Aktivitetslogg()
+        assertTrue(actual.valider(aktivitetslogg))
+        assertTrue(
+            actual.subset(1.mandag til 1.tirsdag).all { it is Dag.Sykedag }
+        )
+        assertTrue(
+            actual.subset(1.onsdag til 2.fredag).all { it is Dag.AnnullertDag }
+        )
     }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->

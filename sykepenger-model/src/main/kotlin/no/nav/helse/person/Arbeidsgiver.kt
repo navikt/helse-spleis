@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.appender
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
@@ -241,6 +242,11 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
         søppelbøtte(hendelse)
+    }
+
+    fun håndter(hendelse: Annullering) {
+        sykdomshistorikk.nyHåndter(hendelse)
+        vedtaksperioder.toList().forEach{it.håndter(hendelse)}
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
@@ -500,6 +506,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
+
 
     internal class JsonRestorer private constructor() {
         internal companion object {

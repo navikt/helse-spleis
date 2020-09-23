@@ -1,7 +1,9 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.Annullering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -314,6 +316,11 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
+
+        fun annullerteDager(periode: Periode, kilde: Hendelseskilde) = Sykdomstidslinje(
+            periode.start.datesUntil(periode.endInclusive.plusDays(1))
+                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AnnullertDag(it, kilde) }))
+        )
     }
 
     override operator fun iterator() = object : Iterator<Dag> {

@@ -109,9 +109,12 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        arbeidsgivere.forEach {
-            it.håndter(hendelse)
-        }
+        finnArbeidsgiver(hendelse).håndter(hendelse)
+    }
+
+    fun håndter(hendelse: Annullering) {
+        hendelse.kontekst(this)
+        finnArbeidsgiver(hendelse).håndter(hendelse)
     }
 
     fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {

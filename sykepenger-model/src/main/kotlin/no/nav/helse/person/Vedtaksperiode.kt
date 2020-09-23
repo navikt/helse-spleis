@@ -243,6 +243,13 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    fun håndter(annullering: Annullering) {
+        if(this.periode.endInclusive < annullering.fom) {
+            return
+        }
+        tilstand.håndter(this, annullering)
+    }
+
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
     internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
@@ -734,6 +741,11 @@ internal class Vedtaksperiode private constructor(
             hendelse: OverstyrTidslinje
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
+                vedtaksperiode.kontekst(annullering)
+                vedtaksperiode.tilstand(annullering, TilInfotrygd)
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {}
@@ -1415,6 +1427,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
+            vedtaksperiode.kontekst(annullering)
+            vedtaksperiode.tilstand(annullering, TilAnnullering)
+        }
     }
 
     internal object TilAnnullering : Vedtaksperiodetilstand {
@@ -1558,6 +1575,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+//        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
+//            vedtaksperiode.kontekst(annullering)
+//        }
+
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
@@ -1595,6 +1617,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
+            vedtaksperiode.kontekst(annullering)
+            vedtaksperiode.tilstand(annullering, TilAnnullering)
+        }
+
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {

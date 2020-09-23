@@ -64,6 +64,16 @@ internal sealed class Dag(
             visitor.visitDag(this, dato, kilde)
     }
 
+    internal class AnnullertDag(
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) : Dag(dato, kilde) {
+
+        override fun accept(visitor: SykdomstidslinjeVisitor) =
+            visitor.visitDag(this, dato, kilde)
+    }
+
+
     internal class Arbeidsdag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde

@@ -13,7 +13,8 @@ enum class JsonDagType {
     SYKEDAG,
     SYK_HELGEDAG,
     UTENLANDSDAG,
-    UKJENT_DAG
+    UKJENT_DAG,
+    ANNULLERTDAG
 }
 
 enum class SpeilDagtype {
@@ -28,7 +29,8 @@ enum class SpeilDagtype {
     SYKEDAG,
     SYK_HELGEDAG,
     UBESTEMTDAG,
-    UTENLANDSDAG
+    UTENLANDSDAG,
+    ANNULLERTDAG
 }
 
 enum class SpeilKildetype {

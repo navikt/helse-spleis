@@ -1,17 +1,17 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
@@ -31,11 +31,23 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 15.februar, 100))
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        person.håndter(
+            Annullering(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = ORGNUMMER,
+                fom = 27.januar,
+                tom = 15.februar,
+                saksbehandlerIdent = "Z999999",
+                saksbehandler = "Ola Nordmann",
+                saksbehandlerEpost = "tbd@nav.no",
+                opprettet = LocalDateTime.now()
+            )
+        )
 
-        assertEquals(26.januar, observatør.utbetaltEventer[0].tom)
-        assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
+        assertNotEquals(0, observatør.utbetaltEventer.last().oppdrag.last().utbetalingslinjer.first().beløp)
+        assertEquals(0, observatør.utbetaltEventer.last().oppdrag.last().utbetalingslinjer.last().beløp)
     }
 
     @Disabled("Slik skal det virke etter at annullering trigger replay")

@@ -988,4 +988,5 @@ private fun Dag.toJsonType() = when (this) {
     is Studiedag -> STUDIEDAG
     is Utenlandsdag -> UTENLANDSDAG
     is ProblemDag -> PROBLEMDAG
+    is AnnullertDag -> ANNULLERTDAG
 }
