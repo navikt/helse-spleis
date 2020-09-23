@@ -401,6 +401,22 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(NavDag::class, inspektør.datoer[20.januar(2020)])
     }
 
+    @Test
+    fun `frisk helgedag oppdaterer inntekt`() {
+        (4.U + 1.A + 2.R + 12.U + 4.S).utbetalingslinjer(
+            inntektshistorikk = Inntektshistorikk().apply {
+                add(7.januar, hendelseId, 31000.månedlig, INNTEKTSMELDING)
+                add(31.desember(2017), hendelseId, 10000.månedlig, INNTEKTSMELDING)
+            }
+        )
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+        assertDagsats(1431)
+    }
+
     private val inntektshistorikk = Inntektshistorikk().apply {
         add(1.januar.minusDays(1), hendelseId, 31000.månedlig, INNTEKTSMELDING)
         add(1.februar.minusDays(1), hendelseId, 25000.månedlig, INNTEKTSMELDING)
