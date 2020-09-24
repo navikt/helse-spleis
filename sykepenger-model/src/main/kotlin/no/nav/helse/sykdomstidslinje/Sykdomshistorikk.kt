@@ -62,6 +62,10 @@ internal class Sykdomshistorikk private constructor(
             sykdomstidslinje().merge(hendelseSykdomstidslinje, dagturnering::beste)
     }
 
+    internal fun fjernDagerFør(nyFørsteDag: LocalDate) {
+        elementer.add(0, Element.opprettUtenDagerFør(nyFørsteDag, this))
+    }
+
     internal class Element private constructor(
         private val hendelseId: UUID?,
         private val tidsstempel: LocalDateTime,
@@ -82,13 +86,6 @@ internal class Sykdomshistorikk private constructor(
         }
 
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
-
-        internal fun merge(other: Element) = Element(
-            other.hendelseId,
-            other.tidsstempel,
-            other.hendelseSykdomstidslinje,
-            this.beregnetSykdomstidslinje.merge(other.beregnetSykdomstidslinje) { _: Dag, høyre: Dag -> høyre }
-        )
 
         override fun toString() = beregnetSykdomstidslinje.toString()
 
@@ -144,6 +141,18 @@ internal class Sykdomshistorikk private constructor(
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = Sykdomstidslinje(),
                     beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode)
+                )
+            }
+
+            internal fun opprettUtenDagerFør(
+                fraOgMed: LocalDate,
+                historikk: Sykdomshistorikk
+            ) : Element {
+                return Element(
+                    hendelseId = null,
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = Sykdomstidslinje(),
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().kuttFraOgMed(fraOgMed)
                 )
             }
         }

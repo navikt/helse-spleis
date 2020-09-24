@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.appender
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
@@ -311,6 +310,7 @@ internal class Arbeidsgiver private constructor(
                         sykdomshistorikk.fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
+                else sykdomshistorikk.fjernDagerFør(vedtaksperioder.first().periode().start)
                 gjenopptaBehandling(hendelse)
             }
             ?: listOf()

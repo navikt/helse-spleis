@@ -1,9 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Annullering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -56,11 +54,10 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
-        val dager = mutableMapOf<LocalDate, Dag>()
-        this.dager.toMap(dager)
-        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> dager.merge(dato, dag, beste) }
+        val nyeDager = dager.toMap(mutableMapOf<LocalDate, Dag>())
+        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
         return Sykdomstidslinje(
-            dager.toSortedMap(),
+            nyeDager.toSortedMap(),
             this.periode?.merge(other.periode) ?: other.periode,
             this.låstePerioder.toMutableList()
         )
@@ -152,7 +149,6 @@ internal class Sykdomstidslinje private constructor(
         ?.findLast { erEnSykedag(this[it]) }
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
-
     private fun erEnSykedag(it: Dag) =
         it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag
 
@@ -218,6 +214,21 @@ internal class Sykdomstidslinje private constructor(
                                 }
 
                             }
+                        )
+                    ))
+
+        internal fun ukjent(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Number,
+            kilde: Hendelseskilde
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap<LocalDate, LocalDate, Dag>(
+                            { it },
+                            { UkjentDag(it, kilde) }
                         )
                     ))
 
@@ -381,6 +392,7 @@ internal class Sykdomstidslinje private constructor(
                     else -> perioder
                 }
             }
+
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

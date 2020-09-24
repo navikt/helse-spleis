@@ -3,8 +3,11 @@ package no.nav.helse.bugs_showstoppers
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.sykdomstidslinje.Dag
@@ -72,22 +75,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                29.november(2017),
-                3.desember(2017),
-                100,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                13.november(2017),
-                28.november(2017),
-                100,
-                100,
-                ORGNUMMER
-            ),
+            RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100, 100, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(18.mars(2019), INNTEKT, ORGNUMMER,true),
                 Utbetalingshistorikk.Inntektsopplysning(2.mars(2018), INNTEKT, ORGNUMMER,true),
@@ -591,13 +582,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100))
         håndterYtelser(
-            2.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                17.januar(2020),
-                31.januar(2020),
-                1400,
-                100,
-                ORGNUMMER
-            )
+            2.vedtaksperiode,
+            RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400, 100, ORGNUMMER)
         )   // Duplicate processing
 
         assertTilstander(
@@ -1009,7 +995,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterYtelser(
             3.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
             )
@@ -1018,7 +1004,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(
             3.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
             )
@@ -1065,7 +1051,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(4.august(2020), 19.august(2020), 100))
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
             foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
@@ -1079,7 +1065,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, 70000.månedlig)
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304, 100, ORGNUMMER),
             foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
@@ -1099,4 +1085,57 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
         }
     }
+
+    @Test
+    fun `uønskede ukjente dager`() {
+        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 6.september(2020), 100))
+        håndterSøknad(Sykdom(18.august(2020), 6.september(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(20.august(2020), 13.september(2020), 100)) // Denne blir ignorert
+        håndterSøknad(Sykdom(20.august(2020), 13.september(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(14.september(2020), 20.september(2020), 100)) // Dette fører til ukjent-dager i sykdomshistorikken mellom 6.9. og 14.9.
+        håndterSøknad(Sykdom(14.september(2020), 20.september(2020), 100))
+
+        person = SerialisertPerson(person.serialize().json).deserialize() // Må gjøre serde for å få gjenskapt at ukjent-dager blir *instansiert* i sykdomshistorikken
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GAP, LocalDateTime.now().minusDays(200)) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
+
+        val historikk = RefusjonTilArbeidsgiver(27.juli(2020), 13.september(2020), 1000, 100, ORGNUMMER)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
+
+        assertEquals(40, 248 - inspektør.gjenståendeSykedager(0))
+    }
+
+    @Test
+    fun `skal ikke lage ny arbeidsgiverperiode ved forkasting`() {
+        håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 14.august(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(30.juni(2020), 14.august(2020), 100))
+        håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100))
+
+        håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.august(2020))), førsteFraværsdag = 30.juni(2020))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+
+        håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 22.august(2020), 100))
+        håndterSøknad(Sykdom(30.juni(2020), 22.august(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(23.august(2020), 14.september(2020), 100))
+        håndterSøknad(Sykdom(23.august(2020), 14.september(2020), 100))
+
+        person = SerialisertPerson(person.serialize().json).deserialize()
+
+        val historikk = RefusjonTilArbeidsgiver(17.august(2020), 22.august(2020), 1000, 100, ORGNUMMER)
+        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode, historikk)
+
+        inspektør.also {
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertNull(tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+            }
+        }
+    }
+
 }

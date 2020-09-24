@@ -33,7 +33,9 @@ internal infix fun LocalDate.ferieTil(sisteDato: LocalDate) =
         Sykdomstidslinje.feriedager(første, siste, kilde)
     }
 
-internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::sykedager )
+internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::sykedager)
+
+internal infix fun LocalDate.ukjentTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::ukjent)
 
 internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager )
 

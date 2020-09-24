@@ -49,7 +49,7 @@ internal abstract class AbstractEndToEndTest {
 
     @BeforeEach
     internal fun abstractSetup() {
-        person = Person(UNG_PERSON_FNR_2018, AKTØRID)
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018)
         observatør = TestObservatør().also { person.addObserver(it) }
         sykmeldinger.clear()
         søknader.clear()

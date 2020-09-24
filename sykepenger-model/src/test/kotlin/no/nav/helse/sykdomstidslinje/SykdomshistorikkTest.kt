@@ -1,17 +1,11 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSykmelding
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkTest.TestEvent.TestSøknad
-import no.nav.helse.testhelpers.TestSykdomstidslinje
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.jobbTil
-import no.nav.helse.testhelpers.sykTil
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -55,11 +49,33 @@ internal class SykdomshistorikkTest {
     }
 
     @Test
+    fun `fjerner eventuelle dager før første aktive periode etter fjernDager, som kalles ifm forkasting`() {
+        historikk.håndter(TestSykmelding(1.januar sykTil 12.januar))
+        historikk.håndter(TestSykmelding(13.januar ukjentTil 19.januar)) // Gjenskap at serde vil instansiere ukjent-dager
+        historikk.håndter(TestSykmelding(20.januar sykTil 25.januar))
+        assertAntall<Dag.UkjentDag>(7)
+
+        historikk.fjernDager(1.januar til 12.januar)
+        historikk.fjernDagerFør(20.januar)
+
+        assertAntall<Dag.UkjentDag>(0)
+        assertSykedager(6)
+    }
+
+    @Test
     fun `Nytt element i sykdomshistorikk er tomt`() {
         historikk.håndter(TestSykmelding(1.januar sykTil 15.januar))
         historikk.tøm()
         assertEquals(0, historikk.sykdomstidslinje().length())
     }
+
+    internal inline fun <reified T> antallDager() = tidslinje.filterIsInstance<T>().size
+
+    internal inline fun <reified T> assertAntall(antall: Int) =
+        assertEquals(antall, antallDager<T>())
+
+    internal fun assertSykedager(antall: Int) =
+        assertEquals(antall, antallDager<Dag.SykHelgedag>() + antallDager<Dag.Sykedag>())
 
     internal sealed class TestEvent(
         private val sykdomstidslinje: TestSykdomstidslinje,
