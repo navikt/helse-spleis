@@ -669,7 +669,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
-            søknad.warn("Mottatt flere søknader - den første søknaden som ble mottatt er lagt til grunn.")
+            søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {

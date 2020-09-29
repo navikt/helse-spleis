@@ -60,34 +60,31 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
-    }
-
-    @Test
-    fun `kaster ut ved overlappende søknad`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
-    fun `ignorer andre søknad til arbeidsgiver`() {
+    fun `logger error ved overlappende søknad`() {
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
+        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0)) // bytter ikke tilstand pga den er avsluttet - men det burde den kanskje?
+    }
+
+    @Test
+    fun `søknad til arbeidsgiver som overlapper fører til utkasting`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
