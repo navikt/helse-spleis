@@ -234,6 +234,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkelpleiepenge",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkelpleiepenge",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
@@ -263,6 +271,10 @@
                 },
                 {
                     "member": "R154509",
+                    "role": "MANAGER"
+                },
+                {
+                    "member": "T141884",
                     "role": "MANAGER"
                 }
             ],
