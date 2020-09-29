@@ -92,8 +92,8 @@ internal class PersonTest {
         person.håndter(sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100))))
         sykmelding(perioder = listOf(Sykmeldingsperiode(10.juli, 22.juli, 100))).also {
             person.håndter(it)
-            assertTrue(it.hasWarningsOrWorse())
-            assertFalse(it.hasErrorsOrWorse())
+            assertTrue(it.hasErrorsOrWorse())
+            assertVedtaksperiodetilstand(TIL_INFOTRYGD)
         }
     }
 

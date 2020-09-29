@@ -75,17 +75,6 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    fun `Sykmelding med overlapp på en periode`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
-        person.håndter(inntektsmelding())
-        person.håndter(sykmelding(Sykmeldingsperiode(19.januar, 30.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
-    }
-
-    @Test
     fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())

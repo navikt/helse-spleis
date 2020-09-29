@@ -263,33 +263,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sykmeldinger som overlapper med gradering`() {
-        håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 28.januar(2020), 100)) // sykmelding A
-        håndterSykmelding(
-            Sykmeldingsperiode(13.januar(2020), 19.januar(2020), 80),
-            Sykmeldingsperiode(20.januar(2020), 26.januar(2020), 100)
-        ) // sykmelding B (ignored)
-        håndterSykmelding(Sykmeldingsperiode(27.januar(2020), 11.februar(2020), 100)) // sykmelding C (ignored)
-        håndterSykmelding(Sykmeldingsperiode(10.februar(2020), 29.februar(2020), 100)) // sykmelding D
-        håndterSøknad(Sykdom(27.januar(2020), 11.februar(2020), 100)) // søknad for sykemelding C (covers A & D actually)
-        assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(13.januar(2020), 28.januar(2020))
-            ),
-            førsteFraværsdag = 13.januar(2020)
-        )
-        håndterSøknad(Sykdom(10.februar(2020), 29.februar(2020), 100)) // søknad for sykmelding D (to Infotrygd as a result)
-        håndterSykmelding(Sykmeldingsperiode(1.mars(2020), 15.mars(2020), 100)) // sykmelding E
-        assertEquals(3, inspektør.vedtaksperiodeTeller)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
-        assertTilstander(3.vedtaksperiode, START,MOTTATT_SYKMELDING_FERDIG_GAP)
-    }
-
-    @Test
     fun `sykmeldinger som overlapper`() {
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 30.januar(2020), 100)) // sykmelding A, part 1
         håndterSykmelding(Sykmeldingsperiode(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
@@ -299,18 +272,19 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar(2020), 16.februar(2020), 100)) // sykmelding C
         håndterSøknad(Sykdom(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
         håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 8.mars(2020), 100)) // sykmelding D
-        assertEquals(3, inspektør.vedtaksperiodeTeller)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertEquals(4, inspektør.vedtaksperiodeTeller)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(15.januar(2020), 30.januar(2020))),
             førsteFraværsdag = 15.januar(2020)
         ) // does not currently affect anything, that should change with revurdering
-        håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test

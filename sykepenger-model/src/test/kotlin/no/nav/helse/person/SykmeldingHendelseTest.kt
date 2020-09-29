@@ -38,10 +38,9 @@ internal class SykmeldingHendelseTest {
     fun `En ny Sykmelding er ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     @Test
@@ -57,13 +56,12 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    fun `To søknader med overlapp`() {
+    fun `Overlappende sykmelding, går til Infotrygd`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 6.januar, 100)))
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =

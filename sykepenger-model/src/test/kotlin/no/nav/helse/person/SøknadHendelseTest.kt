@@ -113,12 +113,11 @@ internal class SøknadHendelseTest {
     @Test
     fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
+        person.håndter(søknad(Sykdom(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = "987654321") =
