@@ -12,6 +12,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
@@ -449,7 +450,7 @@ internal class Vedtaksperiode private constructor(
             Periode(arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode.endInclusive)
         )
         foreldrepenger(hendelse)
-//        pleiepenger(hendelse, periode) //FIXME: Kan ikke sende ut need før sparkel-pleiepenger får svart på det
+        pleiepenger(hendelse, periode)
     }
 
     private fun trengerKortHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {

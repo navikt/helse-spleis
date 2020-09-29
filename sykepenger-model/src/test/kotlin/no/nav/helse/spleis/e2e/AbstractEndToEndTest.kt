@@ -295,7 +295,7 @@ internal abstract class AbstractEndToEndTest {
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Foreldrepenger))
-//        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger)) //FIXME: Kan ikke sende ut need før sparkel-pleiepenger får svart på det
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
         person.håndter(
             ytelser(
                 vedtaksperiodeId = vedtaksperiodeId,
