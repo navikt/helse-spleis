@@ -418,6 +418,10 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
 
+    internal fun låsOpp(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
+    }
+
     internal fun overlapper(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
 
     internal fun nåværendeVedtaksperiode(): Vedtaksperiode? {

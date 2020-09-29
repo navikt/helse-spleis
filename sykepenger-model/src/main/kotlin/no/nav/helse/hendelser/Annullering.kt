@@ -1,8 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDate

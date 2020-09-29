@@ -517,7 +517,7 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun forsøkUtbetaling(
+    private fun tickleForArbeidsgiveravhengighet(
         påminnelse: Påminnelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder()
@@ -526,21 +526,24 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    /**
+     * Skedulering av utbetaling opp mot andre arbeidsgivere
+     */
     private fun forsøkUtbetaling(
         engineForTimeline: MaksimumSykepengedagerfilter,
-        ytelser: Ytelser
+        hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder()
         vedtaksperioder.removeAt(0).also {
-            if (it == this) return it.forsøkUtbetaling(vedtaksperioder, engineForTimeline, ytelser)
+            if (it == this) return it.forsøkUtbetalingSteg2(vedtaksperioder, engineForTimeline, hendelse)
             if (it.tilstand == AvventerArbeidsgivere) {
-                this.tilstand(ytelser, AvventerArbeidsgivere)
-                it.tilstand(ytelser, AvventerHistorikk)
+                this.tilstand(hendelse, AvventerArbeidsgivere)
+                it.tilstand(hendelse, AvventerHistorikk)
             }
         }
     }
 
-    private fun forsøkUtbetaling(
+    private fun forsøkUtbetalingSteg2(
         vedtaksperioder: MutableList<Vedtaksperiode>,
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
@@ -553,6 +556,7 @@ internal class Vedtaksperiode private constructor(
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
+    //Hent resultat fra beregning (harvest results). Savner Fred 😢
     private fun høstingsresultater(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
@@ -1011,7 +1015,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.forsøkUtbetaling(påminnelse)
+            vedtaksperiode.tickleForArbeidsgiveravhengighet(påminnelse)
         }
     }
 
@@ -1608,6 +1612,9 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
             vedtaksperiode.sendUtbetaltEvent()
+            if(vedtaksperiode.sykdomstidslinje.harAnnulerteDager()) {
+                vedtaksperiode.tilstand(hendelse, TilInfotrygd)
+            }
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
@@ -1633,7 +1640,13 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
             vedtaksperiode.kontekst(annullering)
-            vedtaksperiode.tilstand(annullering, TilAnnullering)
+            vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.sykmeldingsperiode)
+            vedtaksperiode.sykdomshistorikk.håndter(annullering)
+            vedtaksperiode.sykdomstidslinje =
+                vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
+            vedtaksperiode.hendelseIder.add(annullering.meldingsreferanseId())
+
+            vedtaksperiode.tilstand(annullering, AvventerHistorikk)
         }
 
     }

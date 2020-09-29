@@ -89,6 +89,7 @@ interface PersonObserver {
                 MinimumInntekt,
                 EgenmeldingUtenforArbeidsgiverperiode,
                 MinimumSykdomsgrad,
+                Annullering,
                 Fridag,
                 Arbeidsdag
             }

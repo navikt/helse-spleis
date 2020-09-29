@@ -180,6 +180,7 @@ internal class Sykdomstidslinje private constructor(
                     Feriedag::class -> "F"
                     FriskHelgedag::class -> "R"
                     ForeldetSykedag::class -> "K"
+                    AnnullertDag::class -> "!️"
                     else -> "*"
                 }
         } ?: "Tom tidslinje"
@@ -392,6 +393,8 @@ internal class Sykdomstidslinje private constructor(
                     else -> perioder
                 }
             }
+
+    fun harAnnulerteDager() = dager.any{it.value is AnnullertDag}
 
 }
 

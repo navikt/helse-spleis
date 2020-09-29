@@ -66,6 +66,7 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprettUtenDagerFør(nyFørsteDag, this))
     }
 
+
     internal class Element private constructor(
         private val hendelseId: UUID?,
         private val tidsstempel: LocalDateTime,

@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -18,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
 

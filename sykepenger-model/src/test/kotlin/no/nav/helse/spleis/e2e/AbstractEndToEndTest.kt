@@ -267,7 +267,7 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
-    protected fun håndterSimulering(vedtaksperiodeId: UUID) {
+    protected fun håndterSimulering(vedtaksperiodeId: UUID = 1.vedtaksperiode) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Simulering))
         person.håndter(simulering(vedtaksperiodeId))
     }
@@ -288,7 +288,7 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterYtelser(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
         vararg utbetalinger: Utbetalingshistorikk.Periode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
@@ -312,6 +312,27 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
+    protected fun håndterAnnullering(
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        fom: LocalDate = 3.januar,
+        tom: LocalDate = 26.januar
+    ) {
+        person.håndter(
+            Annullering(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = ORGNUMMER,
+                fom = fom,
+                tom = tom,
+                saksbehandlerIdent = "Z999999",
+                saksbehandler = "Ola Nordmann",
+                saksbehandlerEpost = "tbd@nav.no",
+                opprettet = LocalDateTime.now()
+            )
+        )
+    }
+
     protected fun håndterPåminnelse(
         vedtaksperiodeId: UUID,
         påminnetTilstand: TilstandType,
@@ -321,8 +342,8 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterUtbetalingsgodkjenning(
-        vedtaksperiodeId: UUID,
-        utbetalingGodkjent: Boolean,
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        utbetalingGodkjent: Boolean = true,
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false
     ) {
@@ -330,7 +351,10 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling))
     }
 
-    protected fun håndterUtbetalt(vedtaksperiodeId: UUID, status: UtbetalingHendelse.Oppdragstatus) {
+    protected fun håndterUtbetalt(
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+    ) {
         person.håndter(utbetaling(vedtaksperiodeId, status))
     }
 
