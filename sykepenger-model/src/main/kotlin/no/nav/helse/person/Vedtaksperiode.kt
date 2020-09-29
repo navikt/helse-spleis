@@ -324,6 +324,8 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.valider(periode).hasErrorsOrWorse())
             return tilstand(hendelse, TilInfotrygd)
         block()
+        if (hendelse.hasErrorsOrWorse())
+            return tilstand(hendelse, TilInfotrygd)
     }
 
     private fun kontekst(hendelse: PersonHendelse) {
