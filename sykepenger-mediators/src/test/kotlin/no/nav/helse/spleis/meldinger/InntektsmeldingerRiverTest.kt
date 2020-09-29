@@ -71,13 +71,13 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
     }
 
     @Test
-    internal fun `invalid messages`() {
+    fun `invalid messages`() {
         assertIgnored(InvalidJson)
         assertIgnored(UnknownJson)
     }
 
     @Test
-    internal fun `valid inntektsmelding`() {
+    fun `valid inntektsmelding`() {
         assertNoErrors(ValidInntektsmeldingWithUnknownFieldsJson)
         assertNoErrors(ValidInntektsmeldingJson)
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)

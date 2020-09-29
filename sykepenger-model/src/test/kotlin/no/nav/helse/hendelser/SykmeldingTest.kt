@@ -19,7 +19,7 @@ internal class SykmeldingTest {
     private lateinit var sykmelding: Sykmelding
 
     @Test
-    internal fun `sykdomsgrad som er 100% støttes`() {
+    fun `sykdomsgrad som er 100% støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100), Sykmeldingsperiode(12.januar, 16.januar, 100))
         assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
@@ -27,31 +27,31 @@ internal class SykmeldingTest {
     }
 
     @Test
-    internal fun `sykdomsgrad under 100% støttes`() {
+    fun `sykdomsgrad under 100% støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50), Sykmeldingsperiode(12.januar, 16.januar, 100))
         assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
     }
 
     @Test
-    internal fun `sykeperioder mangler`() {
+    fun `sykeperioder mangler`() {
         assertThrows<Aktivitetslogg.AktivitetException> { sykmelding() }
     }
 
     @Test
-    internal fun `overlappende sykeperioder`() {
+    fun `overlappende sykeperioder`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100), Sykmeldingsperiode(1.januar, 12.januar, 100))
         }
     }
 
     @Test
-    internal fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
+    fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 1.juli.atStartOfDay())
         assertFalse(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     @Test
-    internal fun `sykmelding eldre enn 6 måneder får error`() {
+    fun `sykmelding eldre enn 6 måneder får error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 2.juli.atStartOfDay())
         assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }

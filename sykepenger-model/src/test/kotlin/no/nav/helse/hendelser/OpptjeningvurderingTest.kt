@@ -18,7 +18,7 @@ internal class OpptjeningvurderingTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @Test
-    internal fun `27 dager opptjening gir ikke rett til opptjening`() {
+    fun `27 dager opptjening gir ikke rett til opptjening`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 5.desember(2017)))) {
             assertEquals(27, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
@@ -26,7 +26,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `arbeidsforhold nyere enn første fraværsdag`() {
+    fun `arbeidsforhold nyere enn første fraværsdag`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, FØRSTE_FRAVÆRSDAG.plusDays(1)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
@@ -34,7 +34,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `arbeidsforhold avsluttet før fraværsdag`() {
+    fun `arbeidsforhold avsluttet før fraværsdag`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, LocalDate.MIN, FØRSTE_FRAVÆRSDAG.minusDays(1)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
@@ -42,7 +42,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `28 dager opptjening fører til OK opptjening`() {
+    fun `28 dager opptjening fører til OK opptjening`() {
         assertFalse(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017)))) {
             assertEquals(28, it.opptjeningsdager(ORGNUMMER))
             assertTrue(it.harOpptjening(ORGNUMMER))
@@ -50,7 +50,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `flere arbeidsforhold i samme bedrift`() {
+    fun `flere arbeidsforhold i samme bedrift`() {
         assertFalse(undersøke(listOf(
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017)),
             Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 1.januar(2018)),
@@ -62,7 +62,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
+    fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold("eitAnnaOrgNummer", 4.januar(2017)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
@@ -70,7 +70,7 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    internal fun `ingen arbeidsforhold gir 0 opptjente dager`() {
+    fun `ingen arbeidsforhold gir 0 opptjente dager`() {
         assertTrue(undersøke(emptyList()) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))

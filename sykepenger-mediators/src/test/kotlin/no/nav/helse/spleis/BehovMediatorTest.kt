@@ -140,7 +140,7 @@ class BehovMediatorTest {
     }
 
     @Test
-    internal fun `sjekker etter duplikatverdier`() {
+    fun `sjekker etter duplikatverdier`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -162,7 +162,7 @@ class BehovMediatorTest {
     }
 
     @Test
-    internal fun `kan ikke produsere samme behov`() {
+    fun `kan ikke produsere samme behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")

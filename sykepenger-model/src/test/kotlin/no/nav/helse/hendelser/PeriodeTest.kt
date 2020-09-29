@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 internal class PeriodeTest {
     @Test
-    internal fun `overlapper med periode`() {
+    fun `overlapper med periode`() {
         assertTrue(Periode(1.juli, 10.juli).overlapperMed(Periode(20.juni, 10.juli)))
         assertTrue(Periode(1.juli, 10.juli).overlapperMed(Periode(20.juni, 1.juli)))
         assertTrue(Periode(1.juli, 10.juli).overlapperMed(Periode(2.juni, 7.juli)))
@@ -21,7 +21,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `overlapper ikke med periode`() {
+    fun `overlapper ikke med periode`() {
         assertFalse(Periode(1.juli, 10.juli).overlapperMed(Periode(1.april, 10.april)))
         assertFalse(Periode(1.juli, 10.juli).overlapperMed(Periode(1.april, 30.juni)))
         assertFalse(Periode(1.juli, 10.juli).overlapperMed(Periode(11.juli, 11.juli)))
@@ -29,7 +29,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `er utenfor en annen periode`() {
+    fun `er utenfor en annen periode`() {
         val other = Periode(3.juli, 4.juli)
         assertFalse(Periode(3.juli, 4.juli).utenfor(other))
         assertTrue(Periode(2.juli, 4.juli).utenfor(other))
@@ -39,7 +39,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `fom kan være lik tom, men ikke før tom`() {
+    fun `fom kan være lik tom, men ikke før tom`() {
         assertDoesNotThrow { Periode(1.juli, 1.juli) }
         assertThrows<IllegalArgumentException> {
             Periode(2.juli, 1.juli)
@@ -47,7 +47,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `periode på eller etter dato`() {
+    fun `periode på eller etter dato`() {
         assertFalse(listOf(Periode(1.juli, 2.juli)).slutterEtter(3.juli))
         assertTrue(listOf(Periode(1.juli, 2.juli)).slutterEtter(2.juli))
         assertTrue(listOf(Periode(1.juli, 2.juli)).slutterEtter(1.juli))
@@ -55,13 +55,13 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `kan gjennomløpe tidslinjen`() {
+    fun `kan gjennomløpe tidslinjen`() {
         val actual = (1.januar til 5.januar).merge(15.januar til 19.januar)
         assertSize(19, actual)
     }
 
     @Test
-    internal fun `slå sammen to lister som ikke overlapper med hverandre`() {
+    fun `slå sammen to lister som ikke overlapper med hverandre`() {
         assertEquals(
             listOf(1.mars til 5.mars, 1.mai til 5.mai, 1.juli til 5.juli),
             (listOf(1.mars til 5.mars, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
@@ -73,7 +73,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `ved å slå sammen to lister fjerner dubletter`() {
+    fun `ved å slå sammen to lister fjerner dubletter`() {
         assertEquals(
             listOf(1.mai til 5.mai, 1.juli til 5.juli),
             (listOf(1.mai til 5.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()
@@ -89,7 +89,7 @@ internal class PeriodeTest {
     }
 
     @Test
-    internal fun `slå sammen to lister med overlappende elementer`() {
+    fun `slå sammen to lister med overlappende elementer`() {
         assertEquals(
             listOf(1.mai til 7.mai, 1.juli til 5.juli),
             (listOf(3.mai til 7.mai, 1.juli til 5.juli, 1.mai til 5.mai)).slåSammen()

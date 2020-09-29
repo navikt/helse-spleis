@@ -15,13 +15,13 @@ internal class ArbeidsavklaringspengerTest {
     }
 
     @Test
-    internal fun `ingen AAP`() {
+    fun `ingen AAP`() {
         assertFalse(undersøke())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
-    internal fun `AAP eldre enn 6 måneder`() {
+    fun `AAP eldre enn 6 måneder`() {
         assertFalse(undersøke(Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusMonths(6).minusDays(1)
@@ -30,7 +30,7 @@ internal class ArbeidsavklaringspengerTest {
     }
 
     @Test
-    internal fun `AAP innenfor 6 måneder`() {
+    fun `AAP innenfor 6 måneder`() {
         assertFalse(undersøke(Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusMonths(6)

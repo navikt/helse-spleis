@@ -29,7 +29,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `søknad matcher sykmelding`() {
+    fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -39,7 +39,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `sykdomsgrad ikke 100`() {
+    fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 50)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -48,14 +48,14 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `mangler Sykmelding`() {
+    fun `mangler Sykmelding`() {
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
-    internal fun `andre søknad ugyldig`() {
+    fun `andre søknad ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -67,7 +67,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `kaster ut ved overlappende søknad`() {
+    fun `kaster ut ved overlappende søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -79,7 +79,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `ignorer andre søknad til arbeidsgiver`() {
+    fun `ignorer andre søknad til arbeidsgiver`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -91,7 +91,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `To søknader uten overlapp`() {
+    fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
@@ -105,7 +105,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `To søknader med opphold`() {
+    fun `To søknader med opphold`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertEquals(5, inspektør.sykdomstidslinje.count())
         person.håndter(sykmelding(Sykmeldingsperiode(15.januar, 19.januar, 100)))
@@ -119,7 +119,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `forlengelse etter avsluttet periode`() {
+    fun `forlengelse etter avsluttet periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
@@ -132,7 +132,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `gjenopptar første periode etter avslutting av avsluttet periode`() {
+    fun `gjenopptar første periode etter avslutting av avsluttet periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
@@ -145,7 +145,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `avslutter andre periode før første periode behandles`() {
+    fun `avslutter andre periode før første periode behandles`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(6.januar, 10.januar, 100)))
@@ -158,7 +158,7 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    internal fun `Sykmelding med overlapp på en periode`() {
+    fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))

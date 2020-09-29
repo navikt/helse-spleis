@@ -18,7 +18,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
+    fun `konverter enkel Utbetalingstidslinje til Utbetalingslinjer`() {
         opprett(1.AP, 4.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
@@ -27,7 +27,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `helg ved start og slutt i perioden utelates ikke`() {
+    fun `helg ved start og slutt i perioden utelates ikke`() {
         opprett(1.AP, 1.HELG(1200), 5.NAV(1200), 2.HELG(1200))
 
         assertEquals(1, oppdrag.size)
@@ -36,35 +36,35 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `kun helgedager`() {
+    fun `kun helgedager`() {
         opprett(1.AP, 2.HELG)
         assertEquals(0, oppdrag.antallDager)
         assertEquals(0, oppdrag.size)
     }
 
     @Test
-    internal fun `kun arbeidsdag`() {
+    fun `kun arbeidsdag`() {
         opprett(2.ARB)
 
         assertEquals(0, oppdrag.size)
     }
 
     @Test
-    internal fun `Blanding av dagtyper`() {
+    fun `Blanding av dagtyper`() {
         opprett(4.FRI, 2.NAV, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(1, oppdrag.size)
     }
 
     @Test
-    internal fun `kun helgedager med feriedager`() {
+    fun `kun helgedager med feriedager`() {
         opprett(4.FRI, 2.HELG, 4.FRI, 2.HELG, 4.FRI)
 
         assertEquals(0, oppdrag.size)
     }
 
     @Test
-    internal fun `gap-dag som første og siste dag i perioden`() {
+    fun `gap-dag som første og siste dag i perioden`() {
         opprett(1.ARB, 3.NAV, 1.ARB)
 
         assertEquals(1, oppdrag.size)
@@ -72,7 +72,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `grad endres i løpet av helgen`() {
+    fun `grad endres i løpet av helgen`() {
         opprett(5.NAV(1500), 1.HELG(1500), 1.HELG(1500, 80.0), 5.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)
@@ -81,7 +81,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `gap i vedtaksperiode`() {
+    fun `gap i vedtaksperiode`() {
         assertNyLinjeVedGap(1.ARB)
         assertNyLinjeVedGap(1.FRI)
         assertNyLinjeVedGap(1.AVV)
@@ -89,7 +89,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag`() {
+    fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag`() {
         opprett(2.NAV, 1.AP, 2.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
@@ -97,7 +97,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `Endring i sats`() {
+    fun `Endring i sats`() {
         opprett(3.NAV(1200), 2.NAV(1500), 2.HELG, 2.NAV(1500))
 
         assertEquals(2, oppdrag.size)
@@ -106,7 +106,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `Endring i utbetaling pga grad`() {
+    fun `Endring i utbetaling pga grad`() {
         opprett(3.NAV(1500, 100.0), 2.NAV(1500, 60.0), 2.HELG(1500, 60.0), 2.NAV(1500, 60.0))
 
         assertEquals(2, oppdrag.size)
@@ -115,7 +115,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
+    fun `Endring i utbetaling pga grad og inntekt, der utbetalingsbeløpet blir likt`() {
         opprett(3.NAV(1500, 100.0), 2.NAV(1875, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
 
         assertEquals(3, oppdrag.size)
@@ -133,7 +133,7 @@ internal class OppdragBuilderTest {
     }
 
     @Test
-    internal fun `Endring i sykdomsgrad`() {
+    fun `Endring i sykdomsgrad`() {
         opprett(3.NAV(1500, 100.0), 2.NAV(1500, 80.0), 2.HELG(1500, 80.0), 2.NAV(1500, 80.0))
 
         assertEquals(2, oppdrag.size)

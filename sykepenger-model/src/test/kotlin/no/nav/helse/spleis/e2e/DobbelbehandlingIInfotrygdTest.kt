@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
-    internal fun `avdekker overlapp dobbelbehandlinger i Infotrygd`() {
+    fun `avdekker overlapp dobbelbehandlinger i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterUtbetalingshistorikk(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             3.januar,

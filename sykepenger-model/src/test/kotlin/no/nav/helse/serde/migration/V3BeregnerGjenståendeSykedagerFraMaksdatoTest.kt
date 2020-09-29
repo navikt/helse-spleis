@@ -10,7 +10,7 @@ internal class V3BeregnerGjenståendeSykedagerFraMaksdatoTest {
     private val objectMapper = jacksonObjectMapper()
 
     @Test
-    internal fun `beregner gjenstående sykedager for flere vedtaksperioder`() {
+    fun `beregner gjenstående sykedager for flere vedtaksperioder`() {
         val json = objectMapper.readTree(personJson)
         listOf(V3BeregnerGjenståendeSykedagerFraMaksdato()).migrate(json)
 

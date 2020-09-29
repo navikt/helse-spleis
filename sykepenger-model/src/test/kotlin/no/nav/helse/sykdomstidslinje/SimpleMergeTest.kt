@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 
 internal class SimpleMergeTest {
     @Test
-    internal fun `ekspanderer tom tidslinje`() {
+    fun `ekspanderer tom tidslinje`() {
         val actual = Sykdomstidslinje().merge(1.januar jobbTil 5.januar)
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
@@ -16,7 +16,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `ekspanderer med tidslinje`() {
+    fun `ekspanderer med tidslinje`() {
         val actual = (1.januar jobbTil 5.januar).merge(Sykdomstidslinje())
 
         assertEquals(Periode(1.januar, 5.januar), actual.periode())
@@ -24,14 +24,14 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `ekspanderer tom tidslinje med tom tidslinje`() {
+    fun `ekspanderer tom tidslinje med tom tidslinje`() {
         val actual = Sykdomstidslinje().merge(Sykdomstidslinje())
 
         assertNull(actual.periode())
     }
 
     @Test
-    internal fun `legge sammen to perioder uten overlapp`() {
+    fun `legge sammen to perioder uten overlapp`() {
         val actual = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
         assertEquals(Periode(1.januar, 19.januar), actual.periode())
@@ -41,7 +41,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `kan subsette en tidslinje`() {
+    fun `kan subsette en tidslinje`() {
         val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
         Periode(3.januar, 17.januar).also {
             assertEquals(it, original.subset(it).periode())
@@ -65,7 +65,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `kan gjennomløpe tidslinjen`() {
+    fun `kan gjennomløpe tidslinjen`() {
         val actual = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
         assertSize(19, actual)
         assertSize(15, actual.subset(Periode(3.januar, 17.januar)))
@@ -75,7 +75,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `tidslinjen kan kuttes`() {
+    fun `tidslinjen kan kuttes`() {
         val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
         original.kuttFremTilOgMed(17.januar).also {
@@ -100,7 +100,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `kan merge arbeidsdager med feriedager`() {
+    fun `kan merge arbeidsdager med feriedager`() {
         val actual = (1.januar jobbTil 8.januar).merge(15.januar ferieTil 19.januar)
         assertSize(19, actual)
         assertEquals(6, actual.filterIsInstance<Arbeidsdag>().size)
@@ -110,7 +110,7 @@ internal class SimpleMergeTest {
     }
 
     @Test
-    internal fun `støtter sykedager`() {
+    fun `støtter sykedager`() {
         val actual = (1.januar sykTil 8.januar grad 50).merge(15.januar ferieTil 19.januar)
         assertSize(19, actual)
         assertEquals(6, actual.filterIsInstance<Sykedag>().size)

@@ -31,7 +31,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `legger inn beregnet inntekt i inntekthistorikk`() {
+    fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntektshistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk)
@@ -39,7 +39,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
+    fun `førsteFraværsdag settes i vedtaksperiode når inntektsmelding håndteres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -47,7 +47,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `inntektsmelding før søknad`() {
+    fun `inntektsmelding før søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -55,7 +55,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `inntektsmelding etter søknad`() {
+    fun `inntektsmelding etter søknad`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         person.håndter(inntektsmelding())
@@ -65,7 +65,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `søknad etter inntektsmelding`() {
+    fun `søknad etter inntektsmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
@@ -75,7 +75,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `Sykmelding med overlapp på en periode`() {
+    fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(sykmelding(Sykmeldingsperiode(19.januar, 30.januar, 100)))
@@ -86,14 +86,14 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `mangler sykmelding`() {
+    fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
-    internal fun `flere inntektsmeldinger`() {
+    fun `flere inntektsmeldinger`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
@@ -104,7 +104,7 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    internal fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
+    fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, INNTEKT_PR_MÅNED, emptyList()),

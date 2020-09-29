@@ -22,7 +22,7 @@ internal class MinimumInntektsfilterTest {
     }
 
     @Test
-    internal fun `sjekker ikke fridager`() {
+    fun `sjekker ikke fridager`() {
         val tidslinje = tidslinjeOf(1.FRI, 5.NAV)
         MinimumInntektsfilter(
             Alder(UNG_PERSON_FNR_2018),
@@ -33,7 +33,7 @@ internal class MinimumInntektsfilterTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
-    @Test internal fun `ung person som oppfyller minstelønnskravet får ingen avviste dager`() {
+    @Test fun `ung person som oppfyller minstelønnskravet får ingen avviste dager`() {
         val tidslinje = tidslinjeOf(5.NAV)
         MinimumInntektsfilter(
             Alder(UNG_PERSON_FNR_2018),
@@ -47,7 +47,7 @@ internal class MinimumInntektsfilterTest {
         assertEquals(0, inspektør.avvistDagTeller)
     }
 
-    @Test internal fun `dager under minstelønnskravet blir avvist`() {
+    @Test fun `dager under minstelønnskravet blir avvist`() {
         val tidslinje = tidslinjeOf(5.NAV(1200), 10.NAV(12))
         MinimumInntektsfilter(Alder(
             UNG_PERSON_FNR_2018),
@@ -63,7 +63,7 @@ internal class MinimumInntektsfilterTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse()) // Even though days rejected, the days were not in the periode
     }
 
-    @Test internal fun `dager under minstelønnskravet blir avvist i flere tidslinjer`() {
+    @Test fun `dager under minstelønnskravet blir avvist i flere tidslinjer`() {
         val tidslinje1 = tidslinjeOf(5.NAV, 10.NAV(12))
         val tidslinje2 = tidslinjeOf(5.UTELATE, 5.ARB, 10.NAV(12))
         MinimumInntektsfilter(
@@ -85,7 +85,7 @@ internal class MinimumInntektsfilterTest {
         assertEquals(5, inspektør.arbeidsdagTeller)
     }
 
-    @Test internal fun `total inntekt per dag avgjør minstelønnskravet`() {
+    @Test fun `total inntekt per dag avgjør minstelønnskravet`() {
         val tidslinje1 = tidslinjeOf(10.NAV(150))
         val tidslinje2 = tidslinjeOf(1.NAV(5), 9.NAV(150))
         MinimumInntektsfilter(
@@ -106,7 +106,7 @@ internal class MinimumInntektsfilterTest {
         assertEquals(1, inspektør.avvistDagTeller)
     }
 
-    @Test internal fun `total inntekt per dag avgjør minstelønnskravet for person som er 67 år`() {
+    @Test fun `total inntekt per dag avgjør minstelønnskravet for person som er 67 år`() {
         val tidslinje1 = tidslinjeOf(10.NAV(150), 10.NAV(400))
         val tidslinje2 =
             tidslinjeOf(1.NAV(5), 14.NAV(150), 5.NAV(400))

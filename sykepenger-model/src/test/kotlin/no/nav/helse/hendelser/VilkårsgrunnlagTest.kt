@@ -39,7 +39,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
+    fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
         assertEquals(0.prosent, dataForVilkårsvurdering()?.avviksprosent)
@@ -47,7 +47,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
+    fun `verdiene fra vurderingen blir lagret i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             inntektperioder {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -63,7 +63,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `27 dager opptjening fører til at vilkårsvurdering feiler`() {
+    fun `27 dager opptjening fører til at vilkårsvurdering feiler`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
@@ -74,7 +74,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `arbeidsforhold nyere enn første fraværsdag`() {
+    fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
         )
@@ -85,7 +85,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `28 dager opptjening fører til OK opptjening`() {
+    fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 4.desember(2017)))
         )
@@ -96,7 +96,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
+    fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
@@ -107,7 +107,7 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    internal fun `ingen arbeidsforhold gir 0 opptjente dager`() {
+    fun `ingen arbeidsforhold gir 0 opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = emptyList()
         )

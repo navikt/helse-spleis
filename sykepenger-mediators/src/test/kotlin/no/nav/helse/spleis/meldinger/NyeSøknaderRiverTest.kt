@@ -59,14 +59,14 @@ internal class NyeSøknaderRiverTest : RiverTest() {
     }
 
     @Test
-    internal fun `invalid messages`() {
+    fun `invalid messages`() {
         assertIgnored(InvalidJson)
         assertIgnored(UnknownJson)
         assertIgnored(ValidAvbruttSøknad)
     }
 
     @Test
-    internal fun `valid søknader`() {
+    fun `valid søknader`() {
         assertNoErrors(ValidNySøknadWithUnknownFieldsJson)
         assertNoErrors(ValidNySøknad)
         assertNoErrors(ValidNySøknadUtenPerioder)

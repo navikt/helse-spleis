@@ -100,35 +100,35 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     }
 
     @Test
-    internal fun `invalid messages`() {
+    fun `invalid messages`() {
         assertIgnored(invalidJson)
         assertIgnored(unknownJson)
         assertIgnored(validAvbruttSøknad)
     }
 
     @Test
-    internal fun `ukjent fraværskode`() {
+    fun `ukjent fraværskode`() {
         assertErrors(ukjentFraværskode)
     }
 
     @Test
-    internal fun `valid søknader`() {
+    fun `valid søknader`() {
         assertNoErrors(validSendtSøknadWithUnknownFieldsJson)
         assertNoErrors(validSendtSøknad)
     }
 
     @Test
-    internal fun `søknad med utlandsopphold`() {
+    fun `søknad med utlandsopphold`() {
         assertNoErrors(søknadMedUtlandsopphold)
     }
 
     @Test
-    internal fun `søknad med faktisk grad større enn 100 gir en gyldig sykdomsgrad`() {
+    fun `søknad med faktisk grad større enn 100 gir en gyldig sykdomsgrad`() {
         assertNoErrors(validSendtSøknadMedFaktiskGradStørreEnn100)
     }
 
     @Test
-    internal fun `parser søknad med permitteringer`() {
+    fun `parser søknad med permitteringer`() {
         assertNoErrors(validSøknad().copy(permitteringer = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(permitteringer = null).toJson())
         assertNoErrors(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, 31.januar))).toJson())

@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test
 internal class SykdomstidslinjeTest {
 
     @Test
-    internal fun `tom tidslinje er gyldig`() {
+    fun `tom tidslinje er gyldig`() {
         assertEquals(0, Sykdomstidslinje().count())
     }
 
     @Test
-    internal fun `dager mellom to perioder blir UkjentDag`() {
+    fun `dager mellom to perioder blir UkjentDag`() {
         val tidslinje1 = Sykdomstidslinje.sykedager(
             1.mandag, 1.onsdag, 100.0, TestEvent.søknad
         )
@@ -28,7 +28,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    internal fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
+    fun `to sykeperioder med mellomrom får riktig slutt og start dato`() {
         val tidslinje1 = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.0, TestEvent.søknad)
         val tidslinje2 = Sykdomstidslinje.sykedager(1.fredag, 2.mandag, 100.0, TestEvent.søknad)
 
@@ -41,7 +41,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    internal fun `tidslinje med problemdag er utenfor omfang`() {
+    fun `tidslinje med problemdag er utenfor omfang`() {
         val tidslinje = Sykdomstidslinje.problemdager(1.mandag, 1.mandag, TestEvent.testkilde, "Dette er en problemdag")
         val aktivitetslogg = Aktivitetslogg()
         assertFalse(tidslinje.valider(aktivitetslogg))
@@ -49,7 +49,7 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    internal fun `overskriving av tidslinje`() {
+    fun `overskriving av tidslinje`() {
         val tidslinje1 = (Sykdomstidslinje.problemdager(1.mandag, 1.onsdag, TestEvent.sykmelding, "Yes")
             + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.sykmelding))
         val tidslinje2 = (Sykdomstidslinje.arbeidsdager(1.mandag, 1.onsdag, TestEvent.testkilde))

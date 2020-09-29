@@ -26,7 +26,7 @@ internal class TurneringsnøkkelTest {
     private val økonomi = Økonomi.sykdomsgrad(100.prosent)
 
     @Test
-    internal fun turneringsnøkler() {
+    fun turneringsnøkler() {
         assertEquals(Arbeidsdag_IM, fraDag(Arbeidsdag(enDag, inntektsmelding)))
         assertEquals(Arbeidsdag_SØ, fraDag(Arbeidsdag(enDag, søknad)))
         assertEquals(Arbeidsgiverdag_IM, fraDag(Arbeidsgiverdag(enDag, økonomi, inntektsmelding)))

@@ -15,7 +15,7 @@ import java.util.*
 internal class FørsteFraværsdagTest {
 
     @Test
-    internal fun `førsteFraværsdag er null for ugyldige situasjoner`() {
+    fun `førsteFraværsdag er null for ugyldige situasjoner`() {
         assertNull(1.UT.førsteFraværsdag())
         assertNull(1.EDU.førsteFraværsdag())
         assertNull(1.F.førsteFraværsdag())
@@ -25,14 +25,14 @@ internal class FørsteFraværsdagTest {
     }
 
     @Test
-    internal fun `utgangspunkt for beregning er sykedag, arbeidsgiverdag eller syk helgedag`() {
+    fun `utgangspunkt for beregning er sykedag, arbeidsgiverdag eller syk helgedag`() {
         assertFørsteDagErUtgangspunktForBeregning(1.S)
         assertFørsteDagErUtgangspunktForBeregning(1.U)
         assertFørsteDagErUtgangspunktForBeregning(1.H)
     }
 
     @Test
-    internal fun `utgangspunkt for beregning av ytelse er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
+    fun `utgangspunkt for beregning av ytelse er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
         assertFørsteDagErUtgangspunktForBeregning(2.S)
         assertFørsteDagErUtgangspunktForBeregning(2.U)
 
@@ -63,7 +63,7 @@ internal class FørsteFraværsdagTest {
     }
 
     @Test
-    internal fun `tidslinjer som slutter med ignorerte dager`() {
+    fun `tidslinjer som slutter med ignorerte dager`() {
         perioder(2.S, 2.F) { periode1, _ ->
             assertFørsteDagErUtgangspunktForBeregning(periode1, this)
         }
@@ -73,35 +73,35 @@ internal class FørsteFraværsdagTest {
     }
 
     @Test
-    internal fun `ferie i framtiden`() {
+    fun `ferie i framtiden`() {
         perioder(2.S, 2.n_, 2.F) { sykedager, _, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
-    internal fun `sykedager etterfulgt av arbeidsdager`() {
+    fun `sykedager etterfulgt av arbeidsdager`() {
         perioder(2.S, 2.A) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
-    internal fun `sykedager etterfulgt av implisittdager`() {
+    fun `sykedager etterfulgt av implisittdager`() {
         perioder(2.S, 2.n_) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
-    internal fun `søknad med arbeidgjenopptatt gir ikke feil`() {
+    fun `søknad med arbeidgjenopptatt gir ikke feil`() {
         perioder(2.S, 2.n_) { sykedager, _ ->
             assertFørsteDagErUtgangspunktForBeregning(sykedager, this)
         }
     }
 
     @Test
-    internal fun `sykeperiode starter på første fraværsdag`() {
+    fun `sykeperiode starter på første fraværsdag`() {
         val sykmelding = sykmelding(Sykmeldingsperiode(4.februar(2020), 21.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(4.februar(2020),  21.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(
@@ -112,7 +112,7 @@ internal class FørsteFraværsdagTest {
     }
 
     @Test
-    internal fun `sykeperioden starter etter første fraværsdag`() {
+    fun `sykeperioden starter etter første fraværsdag`() {
         val sykmelding = sykmelding(Sykmeldingsperiode(29.januar(2020), 16.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(29.januar(2020),  16.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(
@@ -123,7 +123,7 @@ internal class FørsteFraværsdagTest {
     }
 
     @Test
-    internal fun `arbeidsgiverperiode med enkeltdager før første fraværsdag`() {
+    fun `arbeidsgiverperiode med enkeltdager før første fraværsdag`() {
         val sykmelding = sykmelding(Sykmeldingsperiode(12.februar(2020), 19.februar(2020), 100))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(12.februar(2020),  19.februar(2020), 100))
         val inntektsmelding = inntektsmelding(listOf(

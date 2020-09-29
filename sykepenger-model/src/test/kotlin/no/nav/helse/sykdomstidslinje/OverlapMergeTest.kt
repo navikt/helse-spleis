@@ -12,7 +12,7 @@ internal class OverlapMergeTest {
     private val inspektør get() = SykdomstidslinjeInspektør(tidslinje)
 
     @Test
-    internal fun `overlap av samme type`() {
+    fun `overlap av samme type`() {
         tidslinje = (1.januar jobbTil 12.januar).merge(7.januar jobbTil 19.januar)
 
         assertEquals(Periode(1.januar, 19.januar), tidslinje.periode())
@@ -25,7 +25,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `dagturnering`() {
+    fun `dagturnering`() {
         val actual =
             (1.januar ferieTil 12.januar).merge(7.januar betalingTil 19.januar).merge(17.januar ferieTil 26.januar)
 
@@ -37,7 +37,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `inntektsmelding uten ferie`() {
+    fun `inntektsmelding uten ferie`() {
         val actual = listOf(
             1.januar jobbTil 17.januar,
             2.januar betalingTil 4.januar,
@@ -52,7 +52,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `inntektsmelding med ferie`() {
+    fun `inntektsmelding med ferie`() {
         val actual = listOf(
             1.januar jobbTil 17.januar,
             2.januar betalingTil 4.januar,
@@ -69,7 +69,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `inntektsmelding med ferie i helg`() {
+    fun `inntektsmelding med ferie i helg`() {
         val actual = listOf(
             1.januar jobbTil 17.januar,
             2.januar betalingTil 4.januar,
@@ -86,7 +86,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `første fraværsdag`() {
+    fun `første fraværsdag`() {
         tidslinje = listOf(
             1.januar sykTil 1.januar grad 50,
             5.januar ferieTil 8.januar
@@ -102,7 +102,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    internal fun `problemdager med melding`() {
+    fun `problemdager med melding`() {
         tidslinje = listOf(1.januar sykTil 10.januar, 5.januar sykTil 15.januar).merge(testBeste)
 
         inspektør.also {

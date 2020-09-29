@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 internal class TidslinjefusjonTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
 
-    @Test internal fun `slå sammen tilstøtende betalingstider`() {
+    @Test fun `slå sammen tilstøtende betalingstider`() {
         undersøke(
             tidslinjeOf(10.NAV) + tidslinjeOf(
                 10.UTELATE,
@@ -18,7 +18,7 @@ internal class TidslinjefusjonTest {
         assertEquals(20, inspektør.navDagTeller)
     }
 
-    @Test internal fun `slå sammen betalingstidslinjer som ikke er tilstøtende`() {
+    @Test fun `slå sammen betalingstidslinjer som ikke er tilstøtende`() {
         undersøke(
             tidslinjeOf(15.NAV) + tidslinjeOf(
                 15.UTELATE,
@@ -31,7 +31,7 @@ internal class TidslinjefusjonTest {
         assertEquals(3, inspektør.ukjentDagTeller)
     }
 
-    @Test internal fun `slå sammen ikke-tilstøtende betalingstider med helger`() {
+    @Test fun `slå sammen ikke-tilstøtende betalingstider med helger`() {
         undersøke(
             tidslinjeOf(15.NAV) + tidslinjeOf(
                 15.UTELATE,
@@ -45,7 +45,7 @@ internal class TidslinjefusjonTest {
         assertEquals(2, inspektør.fridagTeller)
     }
 
-    @Test internal fun `bli med i flere utbetalingstidslinjer`() {
+    @Test fun `bli med i flere utbetalingstidslinjer`() {
         undersøke(
             tidslinjeOf(15.NAV) +
                     tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
@@ -59,7 +59,7 @@ internal class TidslinjefusjonTest {
 
     // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere
 
-    @Test internal fun `NAV-utbetalinger har prioritet`() {
+    @Test fun `NAV-utbetalinger har prioritet`() {
         undersøke(
             tidslinjeOf(15.ARB) + tidslinjeOf(
                 15.NAV
@@ -70,7 +70,7 @@ internal class TidslinjefusjonTest {
         assertEquals(0, inspektør.arbeidsdagTeller)
     }
 
-    @Test internal fun `NAV-utbetalinger for flere arbeidsgivere`() {
+    @Test fun `NAV-utbetalinger for flere arbeidsgivere`() {
         undersøke(
             tidslinjeOf(
                 15.NAV,
@@ -83,7 +83,7 @@ internal class TidslinjefusjonTest {
         assertEquals(0, inspektør.ukjentDagTeller)
     }
 
-    @Test internal fun `dagens forrang`() {
+    @Test fun `dagens forrang`() {
         undersøke(
             tidslinjeOf(1.FRI, 1.ARB, 1.AP, 1.HELG, 1.NAV) +
                     tidslinjeOf(
@@ -127,13 +127,13 @@ internal class TidslinjefusjonTest {
         assertEquals(1, inspektør.fridagTeller)
     }
 
-    @Test internal fun `legger til tom utbetalingstidslinje`() {
+    @Test fun `legger til tom utbetalingstidslinje`() {
         undersøke(tidslinjeOf(10.NAV) + tidslinjeOf())
         assertEquals(10, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
     }
 
-    @Test internal fun `legger utbetalingstidslinje til en tom tidslinje`() {
+    @Test fun `legger utbetalingstidslinje til en tom tidslinje`() {
         undersøke(
             tidslinjeOf() + tidslinjeOf(
                 10.NAV
@@ -143,7 +143,7 @@ internal class TidslinjefusjonTest {
         assertEquals(10, inspektør.navDagTeller)
     }
 
-    @Test internal fun `adderer to tomme utbetalingstidslinjer`() {
+    @Test fun `adderer to tomme utbetalingstidslinjer`() {
         undersøke(tidslinjeOf() + tidslinjeOf())
         assertEquals(0, inspektør.size)
     }

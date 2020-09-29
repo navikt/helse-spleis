@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class AlderTest {
 
     @Test
-    internal fun `alder på gitt dato`() {
+    fun `alder på gitt dato`() {
         val alder = Alder("12020052345")
         assertEquals(17, alder.alderPåDato(1.januar))
         assertEquals(18, alder.alderPåDato(12.februar))

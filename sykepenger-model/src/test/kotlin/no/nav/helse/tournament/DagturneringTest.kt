@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class DagturneringTest {
 
     @Test
-    internal fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
+    fun `Arbeidsdag fra søknad vinner over sykedag fra sykmelding`() {
         val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
         val søknadArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, søknad)
 
@@ -25,7 +25,7 @@ internal class DagturneringTest {
     }
 
     @Test
-    internal fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
+    fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
         val søknadSykedager = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.0, søknad)
         val søknadArbeidsdager = Sykdomstidslinje.arbeidsdager(1.torsdag, 1.fredag, søknad)
 
@@ -51,7 +51,7 @@ internal class DagturneringTest {
     }
 
     @Test
-    internal fun `arbeidsdag fra inntektsmelding vinner over egenmelding fra søknad`() {
+    fun `arbeidsdag fra inntektsmelding vinner over egenmelding fra søknad`() {
         val søknadArbeidsgiverdag = Sykdomstidslinje.arbeidsgiverdager(1.mandag, 1.mandag, 100.0, søknad)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
@@ -61,7 +61,7 @@ internal class DagturneringTest {
     }
 
     @Test
-    internal fun `arbeidsdag fra inntektsmelding vinner over sykedag fra sykmelding`() {
+    fun `arbeidsdag fra inntektsmelding vinner over sykedag fra sykmelding`() {
         val sykmeldingSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, sykmelding)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 
@@ -71,7 +71,7 @@ internal class DagturneringTest {
     }
 
     @Test
-    internal fun `arbeidsdag fra inntektsmelding vinner over sykedag fra søknad`() {
+    fun `arbeidsdag fra inntektsmelding vinner over sykedag fra søknad`() {
         val søknadSykedag = Sykdomstidslinje.sykedager(1.mandag, 1.mandag, 100.0, søknad)
         val inntektsmeldingArbeidsdag = Sykdomstidslinje.arbeidsdager(1.mandag, 1.mandag, inntektsmelding)
 

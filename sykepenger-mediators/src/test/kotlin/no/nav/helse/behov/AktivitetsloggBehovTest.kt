@@ -21,7 +21,7 @@ internal class AktivitetsloggBehovTest {
     }
 
     @Test
-    internal fun `kan hente ut behov`(){
+    fun `kan hente ut behov`(){
         val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")

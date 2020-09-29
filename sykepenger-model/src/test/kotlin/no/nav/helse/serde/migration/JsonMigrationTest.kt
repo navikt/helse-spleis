@@ -13,7 +13,7 @@ internal class JsonMigrationTest {
     private val objectMapper = jacksonObjectMapper()
 
     @Test
-    internal fun `kan migrere JSON uten skjemaversjon`() {
+    fun `kan migrere JSON uten skjemaversjon`() {
         val version = 1
         val expectedField = "field_1"
         val expectedValue = "value"
@@ -26,7 +26,7 @@ internal class JsonMigrationTest {
     }
 
     @Test
-    internal fun `kan migrere flere ganger`() {
+    fun `kan migrere flere ganger`() {
         val version1 = 1
         val version2 = 2
         val field1 = "field_1"
@@ -44,7 +44,7 @@ internal class JsonMigrationTest {
     }
 
     @Test
-    internal fun `kan ikke migrere til mindre versjoner`() {
+    fun `kan ikke migrere til mindre versjoner`() {
         val version1 = 1
         val version2 = 2
         val field1 = "field_1"
@@ -62,7 +62,7 @@ internal class JsonMigrationTest {
     }
 
     @Test
-    internal fun `migreringer kjøres i sortert rekkefølge`() {
+    fun `migreringer kjøres i sortert rekkefølge`() {
         val version1 = 1
         val version2 = 2
         val field1 = "field_1"
@@ -83,7 +83,7 @@ internal class JsonMigrationTest {
     }
 
     @Test
-    internal fun `versjoner må være unike`() {
+    fun `versjoner må være unike`() {
         val migrations = listOf(
             AddFieldMigration(1, "foo", "bar"),
             AddFieldMigration(1, "foo", "bar")

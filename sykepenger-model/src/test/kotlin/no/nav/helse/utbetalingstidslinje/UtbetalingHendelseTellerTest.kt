@@ -15,7 +15,7 @@ internal class UtbetalingHendelseTellerTest {
     private lateinit var grense: UtbetalingTeller
 
     @Test
-    internal fun `Person under 67 år får utbetalt 248 dager`() {
+    fun `Person under 67 år får utbetalt 248 dager`() {
         grense(UNG_PERSON_FNR_2018, 247)
         assertFalse(grense.påGrensen(31.desember))
         grense.inkrementer(31.desember)
@@ -23,7 +23,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
+    fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
         grense(PERSON_67_ÅR_FNR_2018, 15 + 59)
         assertFalse(grense.påGrensen(31.desember))
         grense.inkrementer(31.desember)
@@ -31,7 +31,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
+    fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
         grense(PERSON_70_ÅR_FNR_2018, 11)
         assertFalse(grense.påGrensen(11.januar))
         grense.inkrementer(12.januar)
@@ -39,7 +39,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `Person under 67 år får utbetalt 248 `() {
+    fun `Person under 67 år får utbetalt 248 `() {
         grense(UNG_PERSON_FNR_2018, 248)
         assertTrue(grense.påGrensen(31.desember))
         grense.resett(31.desember)
@@ -47,7 +47,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `Person under 67`() {
+    fun `Person under 67`() {
         grense(UNG_PERSON_FNR_2018, 247)
         assertFalse(grense.påGrensen(30.desember))
         grense.dekrementer(1.januar)
@@ -58,7 +58,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `Reset decrement impact`() {
+    fun `Reset decrement impact`() {
         grense(UNG_PERSON_FNR_2018, 247)
         assertFalse(grense.påGrensen(30.desember))
         grense.dekrementer(1.januar.minusDays(1))
@@ -67,7 +67,7 @@ internal class UtbetalingHendelseTellerTest {
     }
 
     @Test
-    internal fun `maksdato`() {
+    fun `maksdato`() {
         assertEquals(15.mai, UNG_PERSON_FNR_2018, 248, 15.mai)
         assertEquals(18.mai, UNG_PERSON_FNR_2018, 244, 14.mai)
         assertEquals(21.mai, UNG_PERSON_FNR_2018, 243, 14.mai)

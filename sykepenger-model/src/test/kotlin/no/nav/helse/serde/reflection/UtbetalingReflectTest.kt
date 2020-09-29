@@ -23,7 +23,7 @@ internal class UtbetalingReflectTest {
     private lateinit var map: MutableMap<String, Any?>
 
     @Test
-    internal fun `Reflect mapper riktige verdier`() {
+    fun `Reflect mapper riktige verdier`() {
         map = UtbetalingReflect(
             Utbetaling(
                 UNG_PERSON_FNR_2018,
@@ -46,7 +46,7 @@ internal class UtbetalingReflectTest {
     }
 
     @Test
-    internal fun `Reflect mapper riktige verdierm med opphør`() {
+    fun `Reflect mapper riktige verdierm med opphør`() {
         val tidligereUtbetaling = Utbetaling(
             UNG_PERSON_FNR_2018,
             ORGNUMMER,

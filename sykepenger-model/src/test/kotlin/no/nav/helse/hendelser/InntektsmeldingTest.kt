@@ -130,7 +130,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `sykdom med en antatt arbeidsdag`() {
+    fun `sykdom med en antatt arbeidsdag`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), emptyList())
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsdag::class, nyTidslinje[3.januar]::class)
@@ -141,7 +141,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidsgiverperiode med gap`() {
+    fun `arbeidsgiverperiode med gap`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)), førsteFraværsdag = 4.januar)
 
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
@@ -153,7 +153,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `ferieperiode med gap`() {
+    fun `ferieperiode med gap`() {
         inntektsmelding(
             listOf(Periode(1.januar, 1.januar)),
             listOf(Periode(2.januar, 3.januar), Periode(5.januar, 6.januar)),
@@ -169,7 +169,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `første fraværsdag etter arbeidsgiverperiode blir arbeidsgiverdag`() {
+    fun `første fraværsdag etter arbeidsgiverperiode blir arbeidsgiverdag`() {
         inntektsmelding(listOf(Periode(1.januar, 1.januar)), førsteFraværsdag = 3.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
@@ -178,7 +178,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidsgiverperiode og ferie med gap og første fraværsdag etterpå`() {
+    fun `arbeidsgiverperiode og ferie med gap og første fraværsdag etterpå`() {
         inntektsmelding(
             listOf(Periode(1.januar, 1.januar)),
             listOf(Periode(3.januar, 3.januar)),
@@ -193,7 +193,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `ferie i arbeidsgiverperioden uten overlapp`() {
+    fun `ferie i arbeidsgiverperioden uten overlapp`() {
         inntektsmelding(
             listOf(Periode(1.januar, 2.januar), Periode(5.januar, 6.januar)),
             listOf(Periode(3.januar, 4.januar)),
@@ -209,7 +209,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `overlapp i ferieperioder`() {
+    fun `overlapp i ferieperioder`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar)),
             ferieperioder = listOf(Periode(3.januar, 4.januar), Periode(3.januar, 4.januar)),
@@ -221,7 +221,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `førsteFraværsdag mellom ferie og arbeidsgiverperiode`() {
+    fun `førsteFraværsdag mellom ferie og arbeidsgiverperiode`() {
         inntektsmelding(
             listOf(Periode(4.januar, 5.januar)),
             listOf(Periode(1.januar, 2.januar)),
@@ -236,7 +236,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `førsteFraværsdag mellom arbeidsgiverperiode og ferie blir arbeidsgiverdag`() {
+    fun `førsteFraværsdag mellom arbeidsgiverperiode og ferie blir arbeidsgiverdag`() {
         inntektsmelding(
             listOf(Periode(1.januar, 2.januar)),
             listOf(Periode(4.januar, 5.januar)),
@@ -251,7 +251,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `ferieperiode før arbeidsgiverperiode`() {
+    fun `ferieperiode før arbeidsgiverperiode`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(4.januar, 5.januar)),
             ferieperioder = listOf(Periode(1.januar, 2.januar)),
@@ -266,13 +266,13 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
+    fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
         inntektsmelding(emptyList(), ferieperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)))
         assertEquals(1.januar, inntektsmelding.sykdomstidslinje().periode()?.start)
     }
 
     @Test
-    internal fun `arbeidgiverperioden kan ha overlappende perioder`() {
+    fun `arbeidgiverperioden kan ha overlappende perioder`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
@@ -284,7 +284,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidgiverdager vinner over feriedager`() {
+    fun `arbeidgiverdager vinner over feriedager`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(4.januar, 5.januar)),
             ferieperioder = listOf(Periode(3.januar, 4.januar))
@@ -301,7 +301,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `helg i opphold i arbeidsgiverperioden skal være helgedager`() {
+    fun `helg i opphold i arbeidsgiverperioden skal være helgedager`() {
         inntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 4.januar), Periode(9.januar, 10.januar))
         )
@@ -320,21 +320,21 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
+    fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), emptyList(), førsteFraværsdag = 2.januar)
 
         assertEquals(Periode(2.januar, 2.januar), inntektsmelding.sykdomstidslinje().periode())
     }
 
     @Test
-    internal fun `ferieperiode og arbeidsgiverperiode blir slått sammen`() {
+    fun `ferieperiode og arbeidsgiverperiode blir slått sammen`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), listOf(Periode(17.januar, 18.januar)))
 
         assertEquals(Periode(1.januar, 18.januar), inntektsmelding.sykdomstidslinje().periode())
     }
 
     @Test
-    internal fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
+    fun `inntektsmelding med refusjon beløp != beregnetInntekt er ikke gyldig`() {
         inntektsmelding(
             emptyList(),
             emptyList(),
@@ -345,7 +345,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `refusjon opphører før perioden`() {
+    fun `refusjon opphører før perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
@@ -356,7 +356,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `refusjon opphører etter perioden`() {
+    fun `refusjon opphører etter perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
@@ -367,7 +367,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `refusjon opphører i perioden`() {
+    fun `refusjon opphører i perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
@@ -378,7 +378,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `endring i refusjon i perioden`() {
+    fun `endring i refusjon i perioden`() {
         inntektsmelding(
             listOf(Periode(1.januar, 3.januar)),
             emptyList(),
@@ -389,7 +389,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `arbeidsgiverperiodeId i inntektsmelding gir warning`() {
+    fun `arbeidsgiverperiodeId i inntektsmelding gir warning`() {
         inntektsmelding(
             listOf(Periode(1.januar, 10.januar)),
             arbeidsforholdId = "1234"
@@ -398,7 +398,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding gir warning`() {
+    fun `begrunnelseForReduksjonEllerIkkeUtbetalt i inntektsmelding gir warning`() {
         inntektsmelding(
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
@@ -407,7 +407,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    internal fun `begrunnelseForReduksjonEllerIkkeUtbetalt som tom String i inntektsmelding gir ikke warning`() {
+    fun `begrunnelseForReduksjonEllerIkkeUtbetalt som tom String i inntektsmelding gir ikke warning`() {
         inntektsmelding(
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""

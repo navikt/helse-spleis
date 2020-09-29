@@ -30,7 +30,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `søknad matcher sykmelding`() {
+    fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -43,7 +43,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `sykdomsgrad ikke 100`() {
+    fun `sykdomsgrad ikke 100`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 50)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -52,14 +52,14 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `mangler Sykmelding`() {
+    fun `mangler Sykmelding`() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
-    internal fun `søknad kan ikke utvide sykdomstidslinje frem i tid`() {
+    fun `søknad kan ikke utvide sykdomstidslinje frem i tid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -69,7 +69,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `søknad kan ikke utvide sykdomstidslinje tilbake i tid`() {
+    fun `søknad kan ikke utvide sykdomstidslinje tilbake i tid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -111,7 +111,7 @@ internal class SøknadHendelseTest {
     }
 
     @Test
-    internal fun `Sykmelding med overlapp på en periode`() {
+    fun `Sykmelding med overlapp på en periode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))

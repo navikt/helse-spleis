@@ -15,13 +15,13 @@ class DagpengerTest {
     }
 
     @Test
-    internal fun `ingen Dagpenger`() {
+    fun `ingen Dagpenger`() {
         assertFalse(undersøke())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
-    internal fun `Dagpenger eldre enn 4 uker`() {
+    fun `Dagpenger eldre enn 4 uker`() {
         assertFalse(undersøke(Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4).minusDays(1)
@@ -30,7 +30,7 @@ class DagpengerTest {
     }
 
     @Test
-    internal fun `Dagpenger innenfor 4 uker`() {
+    fun `Dagpenger innenfor 4 uker`() {
         assertFalse(undersøke(Periode(
             fom = førsteFraværsdag.minusMonths(8),
             tom = førsteFraværsdag.minusWeeks(4)

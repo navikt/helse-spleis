@@ -22,7 +22,7 @@ internal class SykdomsgradfilterTest {
     }
 
     @Test
-    internal fun `alle dager fom første dag med total sykdomsgrad under 20% skal avvises`() {
+    fun `alle dager fom første dag med total sykdomsgrad under 20% skal avvises`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
@@ -32,7 +32,7 @@ internal class SykdomsgradfilterTest {
     }
 
     @Test
-    internal fun `kun dager i perioden blir avvist ved for lav sykdomsgrad`() {
+    fun `kun dager i perioden blir avvist ved for lav sykdomsgrad`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 10.NAV(1200, 19.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)

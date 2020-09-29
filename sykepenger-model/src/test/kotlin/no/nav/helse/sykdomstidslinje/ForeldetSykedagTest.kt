@@ -24,7 +24,7 @@ internal class ForeldetSykedagTest {
         private const val ORGNUMMER = "987654321"
     }
 
-    @Test internal fun `omgående innsending`() {
+    @Test fun `omgående innsending`() {
         undersøke(søknad(1.mars)).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(20, it.dagstypeTeller[Sykedag::class])
@@ -33,7 +33,7 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test internal fun `siste dag innlevering`() {
+    @Test fun `siste dag innlevering`() {
         undersøke(søknad(30.april)).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(20, it.dagstypeTeller[Sykedag::class])
@@ -42,7 +42,7 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test internal fun `Noen dager er ugyldige`() {
+    @Test fun `Noen dager er ugyldige`() {
         undersøke(søknad(1.mai)).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(10, it.dagstypeTeller[Sykedag::class])
@@ -51,7 +51,7 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test internal fun `Alle dager er ugyldige`() {
+    @Test fun `Alle dager er ugyldige`() {
         undersøke(søknad(1.juni)).also {
             assertEquals(28, it.dagerTeller)
             assertNull(it.dagstypeTeller[Sykedag::class])
@@ -60,7 +60,7 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    @Test internal fun `Søknad til arbeidsgiver lager Sykedager og SykHelgedag`() {
+    @Test fun `Søknad til arbeidsgiver lager Sykedager og SykHelgedag`() {
         undersøke(søknadArbeidsgiver()).also {
             assertEquals(28, it.dagerTeller)
             assertEquals(20, it.dagstypeTeller[Sykedag::class])

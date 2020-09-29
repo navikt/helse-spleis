@@ -14,7 +14,7 @@ internal class UtbetalingstidslinjeTest {
         private val UNG_PERSON_FNR_2018 = Alder("12020052345")
     }
 
-    @Test internal fun `avviste dager blir konvertert til Navdager med opprinnelig inntekt`() {
+    @Test fun `avviste dager blir konvertert til Navdager med opprinnelig inntekt`() {
         val tidslinje = tidslinjeOf(10.NAV(12), 5.NAV(1200))
         MinimumInntektsfilter(
             UNG_PERSON_FNR_2018,

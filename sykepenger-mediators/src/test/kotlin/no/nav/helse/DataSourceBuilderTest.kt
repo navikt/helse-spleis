@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 internal class DataSourceBuilderTest {
 
     @Test
-    internal fun `kaster ikke exception når tilkobling konfigureres riktig`() {
+    fun `kaster ikke exception når tilkobling konfigureres riktig`() {
         assertDoesNotThrow {
             DataSourceBuilder(mapOf(
                 "DATABASE_HOST" to "foobar",
@@ -43,7 +43,7 @@ internal class DataSourceBuilderTest {
     }
 
     @Test
-    internal fun `kaster exception ved mangende konfig`() {
+    fun `kaster exception ved mangende konfig`() {
         assertThrows<IllegalArgumentException> {
             DataSourceBuilder(emptyMap())
         }

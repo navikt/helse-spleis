@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
-    internal fun `gradert sykmelding først`() {
+    fun `gradert sykmelding først`() {
         // ugyldig sykmelding lager en tom vedtaksperiode uten tidslinje, som overlapper med alt
         håndterSykmelding(Sykmeldingsperiode(3.januar(2020), 3.januar(2020), 50))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
@@ -34,7 +34,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Ingen sykedager i tidslinjen - første fraværsdag bug`() {
+    fun `Ingen sykedager i tidslinjen - første fraværsdag bug`() {
         håndterSykmelding(Sykmeldingsperiode(6.januar(2020), 7.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar(2020), 10.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(27.januar(2020), 28.januar(2020), 100))
@@ -162,7 +162,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `enkeltstående sykedag i arbeidsgiverperiode-gap`() {
+    fun `enkeltstående sykedag i arbeidsgiverperiode-gap`() {
         håndterSykmelding(Sykmeldingsperiode(10.februar(2020), 12.februar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(14.februar(2020), 14.februar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(27.februar(2020), 28.februar(2020), 100))
@@ -218,7 +218,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `ignorerer egenmeldingsdag i søknaden langt tilbake i tid`() {
+    fun `ignorerer egenmeldingsdag i søknaden langt tilbake i tid`() {
         håndterSykmelding(Sykmeldingsperiode(6.januar(2020), 23.januar(2020), 100))
         håndterSøknad(
             Egenmelding(
@@ -249,7 +249,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
+    fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar(2020), 17.februar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(18.februar(2020), 1.mars(2020), 100))
         håndterInntektsmelding(
@@ -263,7 +263,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `sykmeldinger som overlapper med gradering`() {
+    fun `sykmeldinger som overlapper med gradering`() {
         håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 28.januar(2020), 100)) // sykmelding A
         håndterSykmelding(
             Sykmeldingsperiode(13.januar(2020), 19.januar(2020), 80),
@@ -290,7 +290,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `sykmeldinger som overlapper`() {
+    fun `sykmeldinger som overlapper`() {
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 30.januar(2020), 100)) // sykmelding A, part 1
         håndterSykmelding(Sykmeldingsperiode(31.januar(2020), 15.februar(2020), 100)) // sykmelding A, part 2
         håndterSykmelding(Sykmeldingsperiode(16.januar(2020), 31.januar(2020), 100)) // sykmelding B
@@ -424,7 +424,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
+    fun `Inntektsmelding, før søknad, overskriver sykedager før arbeidsgiverperiode med arbeidsdager`() {
         håndterSykmelding(Sykmeldingsperiode(7.januar, 28.januar, 100))
         // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
         håndterInntektsmelding(
@@ -443,7 +443,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `andre vedtaksperiode utbetalingslinjer dekker to perioder`() {
+    fun `andre vedtaksperiode utbetalingslinjer dekker to perioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(
@@ -559,7 +559,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    internal fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
+    fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100))
         håndterInntektsmelding(

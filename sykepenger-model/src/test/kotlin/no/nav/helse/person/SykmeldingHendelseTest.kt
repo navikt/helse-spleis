@@ -25,7 +25,7 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    internal fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
+    fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertTrue(inspektør.personLogg.hasActivities())
@@ -35,7 +35,7 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    internal fun `En ny Sykmelding er ugyldig`() {
+    fun `En ny Sykmelding er ugyldig`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarningsOrWorse())
@@ -45,7 +45,7 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    internal fun `To søknader uten overlapp`() {
+    fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -57,7 +57,7 @@ internal class SykmeldingHendelseTest {
     }
 
     @Test
-    internal fun `To søknader med overlapp`() {
+    fun `To søknader med overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasWarningsOrWorse())

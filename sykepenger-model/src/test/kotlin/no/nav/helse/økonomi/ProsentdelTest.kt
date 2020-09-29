@@ -8,7 +8,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ProsentdelTest {
 
-    @Test internal fun equality() {
+    @Test fun equality() {
         assertEquals(Prosentdel.fraRatio(0.25), 25.0.prosent )
         assertNotEquals(Prosentdel.fraRatio(0.25), 75.0.prosent )
         assertNotEquals(Prosentdel.fraRatio(0.25), Any() )
@@ -16,12 +16,12 @@ internal class ProsentdelTest {
     }
 
     @Test
-    internal fun `opprette med Int`() {
+    fun `opprette med Int`() {
         assertEquals(20.prosent, 20.0.prosent)
     }
 
     @Test
-    internal fun avrundingsfeil() {
+    fun avrundingsfeil() {
         val karakterMedAvrunding = (1 / 7.0).prosent
         assertEquals(karakterMedAvrunding, !!karakterMedAvrunding)
         assertNotEquals(
@@ -32,7 +32,7 @@ internal class ProsentdelTest {
     }
 
     @Test
-    internal fun `parameterskontroll av sykdomsgrad`() {
+    fun `parameterskontroll av sykdomsgrad`() {
         assertThrows<IllegalArgumentException> { (-0.001).prosent }
         assertThrows<IllegalArgumentException> { (100.001).prosent }
     }

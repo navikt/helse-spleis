@@ -24,7 +24,7 @@ internal class InntektsvurderingTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @Test
-    internal fun `ugyldige verdier`() {
+    fun `ugyldige verdier`() {
         assertTrue(hasErrors(inntektsvurdering(emptyList()), INGEN))
         assertTrue(
             hasErrors(
@@ -41,7 +41,7 @@ internal class InntektsvurderingTest {
     }
 
     @Test
-    internal fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
+    fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
         assertTrue(hasErrors(inntektsvurdering, 1250.01.månedlig))
         assertTrue(hasErrors(inntektsvurdering, 749.99.månedlig))
