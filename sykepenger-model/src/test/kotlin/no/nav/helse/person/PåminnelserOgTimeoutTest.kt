@@ -370,6 +370,10 @@ class PåminnelserOgTimeoutTest {
                 svangerskapsytelse = null,
                 aktivitetslogg = Aktivitetslogg()
             ),
+            pleiepenger = Pleiepenger(
+                perioder = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
+            ),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             hendelse = this

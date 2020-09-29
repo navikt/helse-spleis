@@ -200,6 +200,16 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
+                internal fun pleiepenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+                    aktivitetslogg.behov(
+                        Behovtype.Pleiepenger,
+                        "Trenger informasjon om pleiepengeytelser fra Infotrygd", mapOf(
+                            "pleiepengerFom" to periode.start.toString(),
+                            "pleiepengerTom" to periode.endInclusive.toString()
+                        )
+                    )
+                }
+
                 internal fun inntektsberegning(
                     aktivitetslogg: IAktivitetslogg,
                     beregningStart: YearMonth,
@@ -310,6 +320,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             enum class Behovtype {
                 Sykepengehistorikk,
                 Foreldrepenger,
+                Pleiepenger,
                 EgenAnsatt,
                 Godkjenning,
                 Simulering,

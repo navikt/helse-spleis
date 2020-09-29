@@ -449,6 +449,7 @@ internal class Vedtaksperiode private constructor(
             Periode(arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode.endInclusive)
         )
         foreldrepenger(hendelse)
+//        pleiepenger(hendelse, periode) //FIXME: Kan ikke sende ut need før sparkel-pleiepenger får svart på det
     }
 
     private fun trengerKortHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
@@ -1226,6 +1227,7 @@ internal class Vedtaksperiode private constructor(
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
+                overlappende(vedtaksperiode.periode, ytelser.pleiepenger())
                 onSuccess {
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd

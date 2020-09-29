@@ -169,6 +169,10 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 null,
                 aktivitetslogg
             ),
+            pleiepenger = Pleiepenger(
+                perioder = emptyList(),
+                aktivitetslogg = aktivitetslogg
+            ),
             aktivitetslogg = aktivitetslogg
         )
     }

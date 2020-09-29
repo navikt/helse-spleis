@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
@@ -289,16 +290,19 @@ internal abstract class AbstractEndToEndTest {
         vararg utbetalinger: Utbetalingshistorikk.Periode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
+        pleiepenger: List<Periode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Foreldrepenger))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Foreldrepenger))
+//        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger)) //FIXME: Kan ikke sende ut need før sparkel-pleiepenger får svart på det
         person.håndter(
             ytelser(
-                vedtaksperiodeId,
-                utbetalinger.toList(),
-                inntektshistorikk(inntektshistorikk, orgnummer),
-                foreldrepenger
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalinger = utbetalinger.toList(),
+                inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+                foreldrepenger = foreldrepenger,
+                pleiepenger = pleiepenger
             )
         )
     }
@@ -540,6 +544,7 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
+        pleiepenger: List<Periode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
@@ -561,9 +566,13 @@ internal abstract class AbstractEndToEndTest {
                 aktivitetslogg = aktivitetslogg
             ),
             foreldrepermisjon = Foreldrepermisjon(
-                foreldrepenger,
-                svangerskapspenger,
-                aktivitetslogg
+                foreldrepengeytelse = foreldrepenger,
+                svangerskapsytelse = svangerskapspenger,
+                aktivitetslogg = aktivitetslogg
+            ),
+            pleiepenger = Pleiepenger(
+                perioder = pleiepenger,
+                aktivitetslogg = aktivitetslogg
             ),
             aktivitetslogg = aktivitetslogg
         ).apply {

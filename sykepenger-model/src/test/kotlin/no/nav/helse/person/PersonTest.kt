@@ -173,6 +173,10 @@ internal class PersonTest {
                             aktivitetslogg = Aktivitetslogg()
                         ),
                         foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),
+                        pleiepenger = Pleiepenger(
+                            perioder = emptyList(),
+                            aktivitetslogg = Aktivitetslogg()
+                        ),
                         aktivitetslogg = Aktivitetslogg()
                     )
                 )

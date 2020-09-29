@@ -1168,6 +1168,10 @@ class SpeilBuilderTest {
                     ),
                     aktivitetslogg = it
                 ),
+                pleiepenger = Pleiepenger(
+                    perioder = emptyList(),
+                    aktivitetslogg = it
+                ),
                 aktivitetslogg = it
             )
         }

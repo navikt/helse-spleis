@@ -12,11 +12,14 @@ class Ytelser(
     internal val vedtaksperiodeId: String,
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
+    private val pleiepenger: Pleiepenger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
 
     internal fun foreldrepenger() = foreldrepermisjon
+
+    internal fun pleiepenger() = pleiepenger
 
     internal fun valider(periode: Periode, periodetype: Periodetype) =
         utbetalingshistorikk.valider(periode, periodetype)

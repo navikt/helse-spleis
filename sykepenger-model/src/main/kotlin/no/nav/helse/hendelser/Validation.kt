@@ -47,6 +47,13 @@ internal fun Validation.overlappende(
 }
 
 internal fun Validation.overlappende(
+    sykdomsperiode: Periode,
+    pleiepenger: Pleiepenger
+) = valider("Har overlappende pleiepengeytelse med syketilfelle") {
+    !pleiepenger.overlapper(sykdomsperiode)
+}
+
+internal fun Validation.overlappende(
     periode: Periode,
     person: Person,
     ytelser: Ytelser

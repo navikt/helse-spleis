@@ -186,6 +186,10 @@ internal class YtelserHendelseTest {
                 svangerskapsytelse = svangerskapYtelse,
                 aktivitetslogg = it
             ),
+            pleiepenger = Pleiepenger(
+                perioder = emptyList(),
+                aktivitetslogg = it
+            ),
             aktivitetslogg = it
         )
     }
