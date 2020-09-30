@@ -142,7 +142,11 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagYtelser(vedtaksperiodeId: UUID, tilstand: TilstandType): String {
+    fun lagYtelser(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        pleiepenger: List<Triple<LocalDate, LocalDate, Int>> = emptyList()
+    ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
@@ -150,7 +154,13 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
                 "Foreldrepenger" to emptyMap<String, String>(),
-                "Pleiepenger" to emptyList<Any>()
+                "Pleiepenger" to pleiepenger.map { (fom, tom, grad) ->
+                    mapOf(
+                        "fom" to fom,
+                        "tom" to tom,
+                        "grad" to grad
+                    )
+                }
             )
         )
     }

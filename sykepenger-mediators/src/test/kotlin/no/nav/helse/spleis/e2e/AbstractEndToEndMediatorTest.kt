@@ -133,13 +133,14 @@ internal abstract class AbstractEndToEndMediatorTest {
         ))
     }
 
-    protected fun sendYtelserUtenHistorikk(vedtaksperiodeIndeks: Int) {
+    protected fun sendYtelser(vedtaksperiodeIndeks: Int, pleiepenger: List<Triple<LocalDate, LocalDate, Int>> = emptyList()) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
         testRapid.sendTestMessage(meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk),
+            pleiepenger = pleiepenger
         ))
     }
 

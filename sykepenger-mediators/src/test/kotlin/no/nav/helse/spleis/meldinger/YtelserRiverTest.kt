@@ -165,9 +165,7 @@ private val ukjentPeriode = """
             ]
           }
         ],
-        "Pleiepenger": [
-          { }
-        ]
+        "Pleiepenger": [ ]
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -240,9 +238,7 @@ private val ugyldigPeriode = """
             ]
           }
         ],
-        "Pleiepenger": [
-          { }
-        ]
+        "Pleiepenger": [ ]
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
