@@ -136,6 +136,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendYtelserUtenHistorikk(vedtaksperiodeIndeks: Int) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
         testRapid.sendTestMessage(meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)

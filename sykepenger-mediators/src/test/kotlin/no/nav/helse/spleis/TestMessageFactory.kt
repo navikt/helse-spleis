@@ -146,10 +146,11 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
-            behov = listOf("Sykepengehistorikk", "Foreldrepenger"),
+            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger"),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
-                "Foreldrepenger" to emptyMap<String, String>()
+                "Foreldrepenger" to emptyMap<String, String>(),
+                "Pleiepenger" to emptyList<Any>()
             )
         )
     }
