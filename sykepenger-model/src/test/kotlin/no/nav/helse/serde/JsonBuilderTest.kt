@@ -343,6 +343,10 @@ class JsonBuilderTest {
                     perioder = emptyList(),
                     aktivitetslogg = it
                 ),
+                institusjonsopphold = Institusjonsopphold(
+                    perioder = emptyList(),
+                    aktivitetslogg = it
+                ),
                 aktivitetslogg = it
             )
         }

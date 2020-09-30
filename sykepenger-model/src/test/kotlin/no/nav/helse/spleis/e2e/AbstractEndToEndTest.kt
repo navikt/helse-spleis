@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
@@ -291,18 +292,21 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Foreldrepenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
+        //FIXME: assert Behovtype.Institusjonsopphold
         person.håndter(
             ytelser(
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalinger = utbetalinger.toList(),
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 foreldrepenger = foreldrepenger,
-                pleiepenger = pleiepenger
+                pleiepenger = pleiepenger,
+                institusjonsoppholdsperioder = institusjonsoppholdsperioder
             )
         )
     }
@@ -545,6 +549,7 @@ internal abstract class AbstractEndToEndTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
@@ -572,6 +577,10 @@ internal abstract class AbstractEndToEndTest {
             ),
             pleiepenger = Pleiepenger(
                 perioder = pleiepenger,
+                aktivitetslogg = aktivitetslogg
+            ),
+            institusjonsopphold = Institusjonsopphold(
+                perioder = institusjonsoppholdsperioder,
                 aktivitetslogg = aktivitetslogg
             ),
             aktivitetslogg = aktivitetslogg

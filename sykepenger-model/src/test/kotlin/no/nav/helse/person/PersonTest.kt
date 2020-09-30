@@ -177,6 +177,10 @@ internal class PersonTest {
                             perioder = emptyList(),
                             aktivitetslogg = Aktivitetslogg()
                         ),
+                        institusjonsopphold = Institusjonsopphold(
+                            perioder = emptyList(),
+                            aktivitetslogg = Aktivitetslogg()
+                        ),
                         aktivitetslogg = Aktivitetslogg()
                     )
                 )

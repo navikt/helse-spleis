@@ -1229,6 +1229,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 overlappende(vedtaksperiode.periode, ytelser.pleiepenger())
+                overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd

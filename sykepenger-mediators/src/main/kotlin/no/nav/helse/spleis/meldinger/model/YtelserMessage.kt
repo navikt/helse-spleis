@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Aktivitetslogg
@@ -35,6 +36,8 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val pleiepenger =
         Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asPeriode), aktivitetslogg)
 
+    private val institusjonsopphold = Institusjonsopphold(emptyList(), aktivitetslogg)
+
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = this.id,
@@ -45,6 +48,7 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
             pleiepenger = pleiepenger,
+            institusjonsopphold = institusjonsopphold,
             aktivitetslogg = aktivitetslogg
         )
 

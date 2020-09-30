@@ -166,6 +166,10 @@ internal class TilUtbetalingHendelseTest {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
+            institusjonsopphold = Institusjonsopphold(
+                perioder = emptyList(),
+                aktivitetslogg = it
+            ),
             aktivitetslogg = it
         ).apply {
             hendelse = this

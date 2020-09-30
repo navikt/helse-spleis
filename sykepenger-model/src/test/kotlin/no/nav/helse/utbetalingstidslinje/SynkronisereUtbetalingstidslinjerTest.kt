@@ -173,6 +173,10 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 perioder = emptyList(),
                 aktivitetslogg = aktivitetslogg
             ),
+            institusjonsopphold = Institusjonsopphold(
+                perioder = emptyList(),
+                aktivitetslogg = aktivitetslogg
+            ),
             aktivitetslogg = aktivitetslogg
         )
     }

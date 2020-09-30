@@ -376,6 +376,10 @@ class PåminnelserOgTimeoutTest {
                 perioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg()
             ),
+            institusjonsopphold = Institusjonsopphold(
+                perioder = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
+            ),
             aktivitetslogg = Aktivitetslogg()
         ).apply {
             hendelse = this

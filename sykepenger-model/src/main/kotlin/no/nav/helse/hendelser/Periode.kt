@@ -82,5 +82,5 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
 internal operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }
 
-internal infix fun LocalDate.til(januar: LocalDate) = Periode(this, januar)
+internal infix fun LocalDate.til(tom: LocalDate) = Periode(this, tom)
 
