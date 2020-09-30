@@ -30,6 +30,11 @@ internal class YtelserRiverTest : RiverTest() {
     fun `Ignorerer løsning uten pleiepenger`(){
         assertIgnored(utenPleiepenger)
     }
+
+    @Test
+    fun `Ignorerer løsning uten institujonsopphold`(){
+        assertIgnored(utenInstitusjonsopphold)
+    }
 }
 
 @Language("JSON")
@@ -42,7 +47,8 @@ private val json = """
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
-        "Pleiepenger"
+        "Pleiepenger",
+        "Institusjonsopphold"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -92,6 +98,14 @@ private val json = """
             "tom": "2019-04-12",
             "grad": "100"
           }
+        ],
+        "Institusjonsopphold": [
+          {
+            "startdato": "2019-03-11",
+            "faktiskSluttdato": "2019-04-12",
+            "institusjonstype": "FO",
+            "kategori": "S"
+          }
         ]
       },
       "@final": true,
@@ -109,7 +123,8 @@ private val ukjentPeriode = """
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
-        "Pleiepenger"
+        "Pleiepenger",
+        "Institusjonsopphold"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -165,7 +180,8 @@ private val ukjentPeriode = """
             ]
           }
         ],
-        "Pleiepenger": [ ]
+        "Pleiepenger": [],
+        "Institusjonsopphold": []
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -182,7 +198,8 @@ private val ugyldigPeriode = """
       "@behov": [
         "Sykepengehistorikk",
         "Foreldrepenger",
-        "Pleiepenger"
+        "Pleiepenger",
+        "Institusjonsopphold"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -238,7 +255,8 @@ private val ugyldigPeriode = """
             ]
           }
         ],
-        "Pleiepenger": [ ]
+        "Pleiepenger": [],
+        "Institusjonsopphold": []
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -254,7 +272,9 @@ private val utenPleiepenger = """
       "historikkTom": "2019-12-08",
       "@behov": [
         "Sykepengehistorikk",
-        "Foreldrepenger"
+        "Foreldrepenger",
+        "Pleiepenger",
+        "Institusjonsopphold"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -297,7 +317,70 @@ private val utenPleiepenger = """
               }
             ]
           }
-        ]
+        ],
+        "Institusjonsopphold": []
+      },
+      "@final": true,
+      "@besvart": "2020-01-24T11:25:00"
+    }
+"""
+
+@Language("JSON")
+private val utenInstitusjonsopphold = """
+  {
+      "@event_name": "behov",
+      "tilstand": "AVVENTER_HISTORIKK",
+      "historikkFom": "2014-12-08",
+      "historikkTom": "2019-12-08",
+      "@behov": [
+        "Sykepengehistorikk",
+        "Foreldrepenger",
+        "Pleiepenger",
+        "Institusjonsopphold"
+      ],
+      "@id": "${UUID.randomUUID()}",
+      "@opprettet": "2020-01-24T11:25:00",
+      "hendelse": "Ytelser",
+      "aktørId": "aktørId",
+      "fødselsnummer": "08127411111",
+      "organisasjonsnummer": "orgnummer",
+      "vedtaksperiodeId": "${UUID.randomUUID()}",
+      "@løsning": {
+        "Foreldrepenger": {
+          "Foreldrepengeytelse": null,
+          "Svangerskapsytelse": null
+        },
+        "Sykepengehistorikk": [
+          {
+            "fom": "2019-03-11",
+            "tom": "2019-04-12",
+            "grad": "100",
+            "inntektsopplysninger": [
+              {
+                "sykepengerFom": "2019-03-27",
+                "inntekt": 36000,
+                "orgnummer": "orgnummer",
+                "refusjonTom": null,
+                "refusjonTilArbeidsgiver": true
+              }
+            ],
+            "utbetalteSykeperioder": [
+              {
+                "fom": "2019-03-28",
+                "tom": "2019-04-12",
+                "utbetalingsGrad": "100",
+                "oppgjorsType": "",
+                "utbetalt": "2019-04-23",
+                "dagsats": 1400.0,
+                "typeKode": "5",
+                "typeTekst": "ArbRef",
+                "orgnummer": "orgnummer",
+                "inntektPerMåned": 36000
+              }
+            ]
+          }
+        ],
+        "Pleiepenger": []
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"

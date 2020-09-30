@@ -210,6 +210,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
+                internal fun institusjonsopphold(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(
+                        Behovtype.Institusjonsopphold,
+                        "Trenger informasjon om institusjonsopphold fra Inst2"
+                    )
+                }
+
                 internal fun inntektsberegning(
                     aktivitetslogg: IAktivitetslogg,
                     beregningStart: YearMonth,
@@ -321,6 +328,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Sykepengehistorikk,
                 Foreldrepenger,
                 Pleiepenger,
+                Institusjonsopphold,
                 EgenAnsatt,
                 Godkjenning,
                 Simulering,

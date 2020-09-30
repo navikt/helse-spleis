@@ -142,23 +142,45 @@ internal class TestMessageFactory(
         )
     }
 
+    class PleiepengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val grad: Int
+    )
+
+    class InstitusjonsoppholdTestdata(
+        val startdato: LocalDate,
+        val faktiskSluttdato: LocalDate?,
+        val institusjonstype: String,
+        val kategori: String
+    )
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
-        pleiepenger: List<Triple<LocalDate, LocalDate, Int>> = emptyList()
+        pleiepenger: List<PleiepengerTestdata> = emptyList(),
+        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList()
     ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
-            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger"),
+            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger", "Institusjonsopphold"),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
                 "Foreldrepenger" to emptyMap<String, String>(),
-                "Pleiepenger" to pleiepenger.map { (fom, tom, grad) ->
+                "Pleiepenger" to pleiepenger.map { data ->
                     mapOf(
-                        "fom" to fom,
-                        "tom" to tom,
-                        "grad" to grad
+                        "fom" to data.fom,
+                        "tom" to data.tom,
+                        "grad" to data.grad
+                    )
+                },
+                "Institusjonsopphold" to institusjonsoppholdsperioder.map { data ->
+                    mapOf(
+                        "startdato" to data.startdato,
+                        "faktiskSluttdato" to data.faktiskSluttdato,
+                        "institusjonstype" to data.institusjonstype,
+                        "kategori" to data.kategori
                     )
                 }
             )

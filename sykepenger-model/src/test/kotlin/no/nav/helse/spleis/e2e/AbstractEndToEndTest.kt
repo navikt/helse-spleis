@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering.*
@@ -298,7 +299,7 @@ internal abstract class AbstractEndToEndTest {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Foreldrepenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
-        //FIXME: assert Behovtype.Institusjonsopphold
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Institusjonsopphold))
         person.håndter(
             ytelser(
                 vedtaksperiodeId = vedtaksperiodeId,

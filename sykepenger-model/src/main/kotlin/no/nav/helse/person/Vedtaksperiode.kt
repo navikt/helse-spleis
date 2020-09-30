@@ -10,6 +10,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
@@ -451,6 +452,7 @@ internal class Vedtaksperiode private constructor(
         )
         foreldrepenger(hendelse)
         pleiepenger(hendelse, periode)
+        institusjonsopphold(hendelse)
     }
 
     private fun trengerKortHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
