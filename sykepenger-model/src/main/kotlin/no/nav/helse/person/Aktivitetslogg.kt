@@ -210,10 +210,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
-                internal fun institusjonsopphold(aktivitetslogg: IAktivitetslogg) {
+                internal fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                     aktivitetslogg.behov(
                         Behovtype.Institusjonsopphold,
-                        "Trenger informasjon om institusjonsopphold fra Inst2"
+                        "Trenger informasjon om institusjonsopphold fra Inst2", mapOf(
+                            "institusjonsoppholdFom" to periode.start.toString(),
+                            "institusjonsoppholdTom" to periode.endInclusive.toString()
+                        )
                     )
                 }
 

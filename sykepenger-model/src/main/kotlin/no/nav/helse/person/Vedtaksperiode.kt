@@ -452,7 +452,7 @@ internal class Vedtaksperiode private constructor(
         )
         foreldrepenger(hendelse)
         pleiepenger(hendelse, periode)
-        institusjonsopphold(hendelse)
+        institusjonsopphold(hendelse, periode)
     }
 
     private fun trengerKortHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
