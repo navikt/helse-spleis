@@ -261,7 +261,8 @@ data class VilkårDTO(
     val alder: AlderDTO,
     val opptjening: OpptjeningDTO?,
     val søknadsfrist: SøknadsfristDTO?,
-    val sykepengegrunnlag: SykepengegrunnlagDTO?
+    val sykepengegrunnlag: SykepengegrunnlagDTO?,
+    val medlemskapstatus: MedlemskapstatusDTO?
 )
 
 data class SykepengedagerDTO(

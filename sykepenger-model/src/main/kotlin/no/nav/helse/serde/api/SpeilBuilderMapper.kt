@@ -247,7 +247,8 @@ internal fun mapVilkår(
             )
         )
     }
-    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO)
+    val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus;
+    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO, medlemskapstatusDTO)
 }
 
 private fun sykepengegrunnlagOppfylt(

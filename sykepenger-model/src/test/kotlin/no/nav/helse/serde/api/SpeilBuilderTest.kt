@@ -474,6 +474,9 @@ class SpeilBuilderTest {
         assertEquals(tom, søknadsfrist?.søknadTom)
         assertTrue(søknadsfrist!!.oppfylt)
 
+        val medlemskapstatus = vilkår.medlemskapstatus
+        assertEquals(MedlemskapstatusDTO.JA, medlemskapstatus)
+
         assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
         assertEquals(3, vedtaksperiode.hendelser.size)
 
