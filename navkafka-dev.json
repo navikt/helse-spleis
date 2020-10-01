@@ -250,6 +250,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkeldkif",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvsparkeldkif",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
