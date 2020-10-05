@@ -17,6 +17,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
+    private val automatiskBehandling: Boolean? = vedtaksperiode["automatiskBehandling"]
     private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
@@ -89,6 +90,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
+        "automatiskBehandling" to automatiskBehandling,
         "førsteFraværsdag" to førsteFraværsdag,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
@@ -106,6 +108,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "forbrukteSykedager" to forbrukteSykedager,
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
+        "automatiskBehandling" to automatiskBehandling,
         "førsteFraværsdag" to førsteFraværsdag,
         "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.get<Double>("årlig")?.div(12.0) },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd

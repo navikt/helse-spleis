@@ -20,6 +20,7 @@ class Utbetalingsgodkjenning(
     internal fun vedtaksperiodeId() = vedtaksperiodeId
     internal fun saksbehandler() = saksbehandler
     internal fun godkjenttidspunkt() = godkjenttidspunkt
+    internal fun automatiskBehandling() = automatiskBehandling
 
     internal fun valider(): Aktivitetslogg {
         if (!utbetalingGodkjent) error("Utbetaling markert som ikke godkjent")

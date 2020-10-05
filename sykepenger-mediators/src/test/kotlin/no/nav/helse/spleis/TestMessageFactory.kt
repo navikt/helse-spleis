@@ -319,6 +319,7 @@ internal class TestMessageFactory(
                 "Godkjenning" to mapOf(
                     "godkjent" to utbetalingGodkjent,
                     "saksbehandlerIdent" to "en_saksbehandler",
+                    "automatiskBehandling" to false,
                     "godkjenttidspunkt" to LocalDateTime.now()
                 )
             )

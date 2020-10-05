@@ -46,6 +46,7 @@ internal class Vedtaksperiode private constructor(
     private var forbrukteSykedager: Int?,
     private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
+    private var automatiskBehandling: Boolean?,
     private var førsteFraværsdag: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
@@ -83,6 +84,7 @@ internal class Vedtaksperiode private constructor(
         forbrukteSykedager = null,
         godkjentAv = null,
         godkjenttidspunkt = null,
+        automatiskBehandling = null,
         førsteFraværsdag = null,
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
@@ -1367,10 +1369,13 @@ internal class Vedtaksperiode private constructor(
                 if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) Avsluttet else TilUtbetaling
             ) {
                 vedtaksperiode.godkjenttidspunkt = utbetalingsgodkjenning.godkjenttidspunkt()
-                vedtaksperiode.godkjentAv = utbetalingsgodkjenning.saksbehandler().also {
-                    utbetalingsgodkjenning.info(
-                        "Utbetaling markert som godkjent av saksbehandler $it ${vedtaksperiode.godkjenttidspunkt}"
-                    )
+                vedtaksperiode.godkjentAv = utbetalingsgodkjenning.saksbehandler()
+                vedtaksperiode.automatiskBehandling = utbetalingsgodkjenning.automatiskBehandling().also {
+                    if (it) {
+                        utbetalingsgodkjenning.info("Utbetaling markert som godkjent automatisk ${vedtaksperiode.godkjenttidspunkt}")
+                    } else {
+                        utbetalingsgodkjenning.info("Utbetaling markert som godkjent av saksbehandler ${vedtaksperiode.godkjentAv} ${vedtaksperiode.godkjenttidspunkt}")
+                    }
                 }
             }
         }
