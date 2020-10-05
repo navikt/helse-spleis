@@ -27,6 +27,7 @@ internal fun tilUtbetaltEvent(
     periode: Periode,
     forbrukteSykedager: Int,
     gjenståendeSykedager: Int,
+    automatiskBehandling: Boolean,
     maksdato: LocalDate?
 ) = UtbetaltEventBuilder(
     aktørId = aktørId,
@@ -39,6 +40,7 @@ internal fun tilUtbetaltEvent(
     periode = periode,
     forbrukteSykedager = forbrukteSykedager,
     gjenståendeSykedager = gjenståendeSykedager,
+    automatiskBehandling = automatiskBehandling,
     maksdato = maksdato
 ).result()
 
@@ -52,7 +54,8 @@ private class UtbetaltEventBuilder(
     utbetalingstidslinje: Utbetalingstidslinje,
     private val periode: Periode,
     private val forbrukteSykedager: Int,
-    private var gjenståendeSykedager: Int,
+    private val gjenståendeSykedager: Int,
+    private val automatiskBehandling: Boolean,
     private val maksdato: LocalDate?
 ) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
@@ -78,6 +81,7 @@ private class UtbetaltEventBuilder(
             tom = periode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
+            automatiskBehandling = automatiskBehandling,
             opprettet = opprettet,
             sykepengegrunnlag = sykepengegrunnlag,
             maksdato = maksdato

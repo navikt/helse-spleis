@@ -59,6 +59,7 @@ interface PersonObserver {
         val tom: LocalDate,
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,
+        val automatiskBehandling: Boolean,
         val opprettet: LocalDateTime,
         val sykepengegrunnlag: Double,
         val maksdato: LocalDate?
