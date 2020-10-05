@@ -388,7 +388,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun betale(orgnummer: String) {
         person.håndter(simulering(orgnummer.id(0), orgnummer = orgnummer))
-        person.håndter(utbetalingsgodkjenning(orgnummer.id(0), true, orgnummer = orgnummer))
+        person.håndter(
+            utbetalingsgodkjenning(
+                orgnummer.id(0),
+                true,
+                orgnummer = orgnummer,
+                automatiskBehandling = false
+            )
+        )
         person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))
     }
 

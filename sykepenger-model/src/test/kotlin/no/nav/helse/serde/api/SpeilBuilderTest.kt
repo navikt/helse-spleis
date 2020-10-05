@@ -1192,7 +1192,8 @@ class SpeilBuilderTest {
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = utbetalingGodkjent,
                 saksbehandler = "en_saksbehandler_ident",
-                godkjenttidspunkt = LocalDateTime.now()
+                godkjenttidspunkt = LocalDateTime.now(),
+                automatiskBehandling = false
             )
 
         private fun simulering(vedtaksperiodeId: String) = Simulering(

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
 
@@ -14,6 +15,9 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
     private val saksbehandler = packet["@løsning.${Godkjenning.name}.saksbehandlerIdent"].asText()
     private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
+    private val automatiskBehandling =
+        packet["@løsning.${Godkjenning.name}.automatiskBehandling"].takeUnless { it.isMissingOrNull() }?.booleanValue()
+            ?: false
 
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(
@@ -24,7 +28,8 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = saksbehandler,
             godkjenttidspunkt = godkjenttidspunkt,
-            utbetalingGodkjent = utbetalingGodkjent
+            utbetalingGodkjent = utbetalingGodkjent,
+            automatiskBehandling = automatiskBehandling
         )
 
     override fun behandle(mediator: IHendelseMediator) {

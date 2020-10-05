@@ -92,7 +92,8 @@ internal class GodkjenningHendelseTest {
         vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        godkjenttidspunkt = LocalDateTime.now()
+        godkjenttidspunkt = LocalDateTime.now(),
+        automatiskBehandling = false
     ).apply {
         hendelse = this
     }

@@ -323,10 +323,11 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         utbetalingGodkjent: Boolean,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        automatiskBehandling: Boolean = false
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Godkjenning))
-        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer))
+        person.håndter(utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling))
     }
 
     protected fun håndterUtbetalt(vedtaksperiodeId: UUID, status: UtbetalingHendelse.Oppdragstatus) {
@@ -661,7 +662,8 @@ internal abstract class AbstractEndToEndTest {
     protected fun utbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         utbetalingGodkjent: Boolean,
-        orgnummer: String
+        orgnummer: String,
+        automatiskBehandling: Boolean
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AKTØRID,
@@ -670,7 +672,8 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = utbetalingGodkjent,
-        godkjenttidspunkt = LocalDateTime.now()
+        godkjenttidspunkt = LocalDateTime.now(),
+        automatiskBehandling = automatiskBehandling
     ).apply {
         hendelselogg = this
     }

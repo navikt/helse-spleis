@@ -129,7 +129,8 @@ internal class TilUtbetalingHendelseTest {
         vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
-        godkjenttidspunkt = LocalDateTime.now()
+        godkjenttidspunkt = LocalDateTime.now(),
+        automatiskBehandling = false
     ).apply {
         hendelse = this
     }

@@ -359,7 +359,8 @@ class JsonBuilderTest {
             organisasjonsnummer = orgnummer,
             utbetalingGodkjent = true,
             saksbehandler = "en_saksbehandler_ident",
-            godkjenttidspunkt = LocalDateTime.now()
+            godkjenttidspunkt = LocalDateTime.now(),
+            automatiskBehandling = false
         )
 
         fun simulering(vedtaksperiodeId: String) = Simulering(

@@ -13,7 +13,8 @@ class Utbetalingsgodkjenning(
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val utbetalingGodkjent: Boolean,
-    private val godkjenttidspunkt: LocalDateTime
+    private val godkjenttidspunkt: LocalDateTime,
+    private val automatiskBehandling: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
     internal fun vedtaksperiodeId() = vedtaksperiodeId
