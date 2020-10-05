@@ -258,6 +258,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvriskmock",
+                    "role": "PRODUCER"
+                },
+                {
+                    "member": "srvriskmock",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
