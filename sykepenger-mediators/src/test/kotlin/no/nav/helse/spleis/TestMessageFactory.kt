@@ -309,7 +309,8 @@ internal class TestMessageFactory(
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
-        utbetalingGodkjent: Boolean
+        utbetalingGodkjent: Boolean,
+        automatiskBehandling: Boolean
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
@@ -319,7 +320,7 @@ internal class TestMessageFactory(
                 "Godkjenning" to mapOf(
                     "godkjent" to utbetalingGodkjent,
                     "saksbehandlerIdent" to "en_saksbehandler",
-                    "automatiskBehandling" to false,
+                    "automatiskBehandling" to automatiskBehandling,
                     "godkjenttidspunkt" to LocalDateTime.now()
                 )
             )

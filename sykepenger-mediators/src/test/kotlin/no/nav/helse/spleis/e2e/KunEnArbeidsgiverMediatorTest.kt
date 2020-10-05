@@ -154,6 +154,40 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(8586, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
         assertEquals(100, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
     }
+
+    @Test
+    fun `Utbetalingsevent har automatiskBehandling = true for automatiske behandlinger`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, automatiskBehandling = true)
+        sendUtbetaling(0, true)
+
+        val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
+
+        assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
+        assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
+    }
+
+    @Test
+    fun `Utbetalingsevent har automatiskBehandling = false for manuelle behandlinger`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, automatiskBehandling = false)
+        sendUtbetaling(0, true)
+
+        val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
+
+        assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
+        assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
+    }
 }
 
 

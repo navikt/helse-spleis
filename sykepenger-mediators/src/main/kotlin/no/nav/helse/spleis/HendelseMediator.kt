@@ -372,6 +372,7 @@ internal class HendelseMediator(
                             "tom" to event.tom,
                             "forbrukteSykedager" to event.forbrukteSykedager,
                             "gjenståendeSykedager" to event.gjenståendeSykedager,
+                            "automatiskBehandling" to event.automatiskBehandling,
                             "opprettet" to event.opprettet,
                             "sykepengegrunnlag" to event.sykepengegrunnlag
                         ).maybeAdd("maksdato" to event.maksdato)
