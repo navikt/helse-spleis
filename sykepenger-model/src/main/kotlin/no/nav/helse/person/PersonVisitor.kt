@@ -143,6 +143,13 @@ internal interface UtbetalingsdagVisitor {
     ) {
     }
 
+    fun visit(
+        dag: Utbetalingstidslinje.Utbetalingsdag.AnnullertDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+    }
+
     fun postVisit(tidslinje: Utbetalingstidslinje) {}
 }
 
@@ -196,7 +203,7 @@ internal interface SykdomstidslinjeVisitor {
 
     fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: AnnullertDag, dato: LocalDate, kilde: Hendelseskilde) {}
+    fun visitDag(dag: AnnullertDag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {}
     fun visitDag(
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,

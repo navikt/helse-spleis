@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
@@ -70,7 +71,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, kilde)
+            visitor.visitDag(this, dato, Økonomi.sykdomsgrad(100.prosent), kilde)
     }
 
 

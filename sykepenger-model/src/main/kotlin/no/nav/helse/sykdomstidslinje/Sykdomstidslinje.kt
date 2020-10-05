@@ -63,7 +63,7 @@ internal class Sykdomstidslinje private constructor(
         )
     }
 
-    private class ProblemDagVisitor(internal val problemmeldinger: MutableList<String>) : SykdomstidslinjeVisitor {
+    private class ProblemDagVisitor(val problemmeldinger: MutableList<String>) : SykdomstidslinjeVisitor {
         override fun visitDag(
             dag: ProblemDag,
             dato: LocalDate,
@@ -331,7 +331,12 @@ internal class Sykdomstidslinje private constructor(
 
         fun annullerteDager(periode: Periode, kilde: Hendelseskilde) = Sykdomstidslinje(
             periode.start.datesUntil(periode.endInclusive.plusDays(1))
-                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AnnullertDag(it, kilde) }))
+                .collect(
+                    toMap<LocalDate, LocalDate, Dag>(
+                        { it },
+                        { dag -> AnnullertDag(dag, kilde) }
+                    )
+                )
         )
     }
 
@@ -394,7 +399,7 @@ internal class Sykdomstidslinje private constructor(
                 }
             }
 
-    fun harAnnulerteDager() = dager.any{it.value is AnnullertDag}
+    fun harAnnulerteDager() = dager.any { it.value is AnnullertDag }
 
 }
 

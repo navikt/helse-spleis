@@ -254,6 +254,9 @@ internal class Økonomi private constructor(
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: ArbeidsgiverperiodeDag, dato: LocalDate) =
         visitor.visit(dag, dato, this)
 
+    internal fun accept(visitor: UtbetalingsdagVisitor, dag: AnnullertDag, dato: LocalDate) =
+        visitor.visit(dag, dato, this)
+
     internal fun accept(visitor: UtbetalingsdagVisitor, dag: Arbeidsdag, dato: LocalDate) =
         visitor.visit(dag, dato, this)
 
@@ -288,6 +291,14 @@ internal class Økonomi private constructor(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
         visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+
+    internal fun accept(
+        visitor: SykdomstidslinjeVisitor,
+        dag: Dag.AnnullertDag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
+        visitor.visitDag(dag, dato, this, kilde)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,

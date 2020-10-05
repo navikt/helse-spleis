@@ -59,6 +59,10 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.add(NavDag(dato, økonomi))
     }
 
+    internal fun addAnnullertDag(dato: LocalDate, økonomi: Økonomi) {
+        utbetalingsdager.add(AnnullertDag(dato, økonomi))
+    }
+
     internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
         utbetalingsdager.add(Arbeidsdag(dato, økonomi))
     }
@@ -174,7 +178,7 @@ internal class Utbetalingstidslinje private constructor(
         if (utbetalingsdager.isEmpty()) this
         else subset(førsteDato(), sisteDato)
 
-    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
+    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag || it is AnnullertDag }
 
     internal operator fun get(dato: LocalDate) =
         if (dato in førsteDato()..sisteDato()) utbetalingsdager.first { it.dato == dato }
@@ -246,6 +250,11 @@ internal class Utbetalingstidslinje private constructor(
 
         internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
             override val prioritet = 20
+            override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+        }
+
+        internal class AnnullertDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
+            override val prioritet = 70
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
         }
 

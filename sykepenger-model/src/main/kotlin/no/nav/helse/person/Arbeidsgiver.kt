@@ -244,6 +244,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun håndter(hendelse: Annullering) {
+        låsOpp(hendelse.fom til hendelse.tom)
         sykdomshistorikk.nyHåndter(hendelse)
         vedtaksperioder.toList().forEach{it.håndter(hendelse)}
     }

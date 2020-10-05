@@ -1641,7 +1641,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
             vedtaksperiode.kontekst(annullering)
-            vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.sykmeldingsperiode)
             vedtaksperiode.sykdomshistorikk.håndter(annullering)
             vedtaksperiode.sykdomstidslinje =
                 vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)

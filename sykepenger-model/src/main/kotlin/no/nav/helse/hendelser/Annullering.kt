@@ -33,5 +33,4 @@ class Annullering(
     }
 
     override fun organisasjonsnummer() = organisasjonsnummer
-
 }

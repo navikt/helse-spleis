@@ -90,8 +90,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
-    override fun visitDag(dag: Dag.AnnullertDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-     annullertDag(dato)
+    override fun visitDag(dag: Dag.AnnullertDag, dato: LocalDate,økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+     annullertDag(dato, økonomi)
 
 
     private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
@@ -140,8 +140,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tilstand.fridag(this, dagen)
     }
 
-    private fun annullertDag(dagen: LocalDate) {
-        tilstand.annullert(this, dagen)
+    private fun annullertDag(dagen: LocalDate, økonomi: Økonomi) {
+        tilstand.annullert(this, dagen, økonomi)
     }
 
     private fun oppdatereInntekt(dato: LocalDate) {
@@ -183,11 +183,11 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
 
-    private fun håndterAnnullertDag(dagen: LocalDate) {
+    private fun håndterAnnullertDag(dagen: LocalDate, økonomi: Økonomi) {
         inkrementerIkkeSykedager()
         //TODO: Skal annulerte dager oppdatere inntekt? Hva er oppdatere inntekt?
         //oppdatereInntekt(dagen)
-        tidslinje.addNAVdag(dagen, Økonomi.sykdomsgrad(100.prosent).inntekt(0.årlig))
+        tidslinje.addAnnullertDag(dagen, økonomi.inntekt(INGEN))
     }
 
     private fun håndterFriEgenmeldingsdag(dato: LocalDate) {
@@ -227,8 +227,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         )
 
         fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
-        fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterAnnullertDag(dagen)
+        fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
+            splitter.håndterAnnullertDag(dagen, økonomi)
         }
         fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
         fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
@@ -299,8 +299,8 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.håndterFridag(dagen)
         }
 
-        override fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
-            splitter.håndterAnnullertDag(dagen)
+        override fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi : Økonomi) {
+            splitter.håndterAnnullertDag(dagen, økonomi)
         }
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
