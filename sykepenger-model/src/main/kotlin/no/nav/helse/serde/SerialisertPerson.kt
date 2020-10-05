@@ -54,7 +54,8 @@ class SerialisertPerson(val json: String) {
             V35ÅrsakTilForkasting(),
             V36BonkersNavnPåForkastedePerioder(),
             V37None(),
-            V38InntektshistorikkVol2()
+            V38InntektshistorikkVol2(),
+            V39SetterAutomatiskBehandlingPåVedtaksperiode()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
