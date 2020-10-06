@@ -10,22 +10,44 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class AnnulleringTest : AbstractEndToEndTest() {
+internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
 
+    val fom = 3.januar
+    val tom = 26.januar
     private var vedtaksperiodeTeller: Int = 0
 
-    @Test
-    fun `Annullering oppdaterer sykdomstidslinje og utbetalingstidslinje`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+
+    private fun eventsFremTilUtbetaling() {
+        nyttVedtak(fom, tom, 100, fom)
         håndterAnnullering()
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
+    }
+
+    @Test
+    fun `Sykdomstidslinje har annullerte dager`() {
+        eventsFremTilUtbetaling()
 
         assertEquals(
-            Sykdomstidslinje.annullerteDager(3.januar til 26.januar, TestEvent.testkilde),
+            Sykdomstidslinje.annullerteDager(fom til tom, TestEvent.testkilde),
             inspektør.sykdomstidslinje
         )
+    }
+
+    @Test
+    fun `Ingen feil`() {
+        eventsFremTilUtbetaling()
+        håndterUtbetalt()
+
+        inspektør.also {
+            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
+        }
+    }
+
+    @Test
+    fun `Statusløp viser to godkjenninger og sender til infotrygd`() {
+        eventsFremTilUtbetaling()
         håndterUtbetalt()
 
         inspektør.also {
@@ -48,13 +70,42 @@ internal class AnnulleringTest : AbstractEndToEndTest() {
                 AVSLUTTET,
                 TIL_INFOTRYGD
             )
+        }
+    }
 
+    @Test
+    fun `Utbetalingslinje har annullerte dager`() {
+        eventsFremTilUtbetaling()
+        håndterUtbetalt()
+        inspektør.also {
             assertTrue(
                 inspektør.utbetalinger[1].utbetalingstidslinje().all{it is Utbetalingstidslinje.Utbetalingsdag.AnnullertDag}
             )
-
         }
+    }
 
+    @Test
+    fun `Oppdrag har nullbetaling`() {
+        eventsFremTilUtbetaling()
+        håndterUtbetalt()
+        inspektør.also {
+            var fagsystemId : String
+            it.arbeidsgiverOppdrag[0].let{oppdragFørAnnullering ->
+                assertEquals(1, oppdragFørAnnullering.size)
+                assertEquals(fom.plusDays(16), oppdragFørAnnullering.first().fom)
+                assertEquals(tom, oppdragFørAnnullering.first().tom)
+                assertEquals(8586, oppdragFørAnnullering.totalbeløp())
+                fagsystemId = oppdragFørAnnullering.fagsystemId()
+            }
+            it.arbeidsgiverOppdrag[1].let{oppdragEtterAnnullering ->
+                assertEquals(1, oppdragEtterAnnullering.size)
+                assertEquals(fom.plusDays(16), oppdragEtterAnnullering.first().fom)
+                assertEquals(tom, oppdragEtterAnnullering.first().tom)
+                assertEquals(fagsystemId, oppdragEtterAnnullering.fagsystemId())
+                assertEquals(0, oppdragEtterAnnullering.totalbeløp())
+                assertTrue(oppdragEtterAnnullering.dagSatser().all { it.second == 0 })
+            }
+        }
     }
 
 

@@ -75,7 +75,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
+    internal fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
 
     private fun dagSatser(resultat: Simulering.SimuleringResultat, fom: LocalDate, tom: LocalDate) =
         resultat.perioder.flatMap {
