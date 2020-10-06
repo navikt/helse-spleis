@@ -163,13 +163,14 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, automatiskBehandling = true)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, saksbehandlerIdent = "SYSTEM", automatiskBehandling = true)
         sendUtbetaling(0, true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 
         assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
         assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
+        assertEquals("SYSTEM", utbetaltEvent["godkjentAv"].textValue())
     }
 
     @Test
@@ -180,13 +181,14 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, automatiskBehandling = false)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, saksbehandlerIdent = "O123456", automatiskBehandling = false)
         sendUtbetaling(0, true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 
         assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
         assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
+        assertEquals("O123456", utbetaltEvent["godkjentAv"].textValue())
     }
 }
 

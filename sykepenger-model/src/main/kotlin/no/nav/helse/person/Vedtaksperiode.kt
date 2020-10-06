@@ -618,6 +618,7 @@ internal class Vedtaksperiode private constructor(
                 sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
+                godkjentAv = requireNotNull(godkjentAv),
                 automatiskBehandling = requireNotNull(automatiskBehandling),
                 hendelseIder = hendelseIder,
                 periode = periode,

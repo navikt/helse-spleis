@@ -84,6 +84,7 @@ internal class MessageMediatorTest {
             vedtaksperiodeId = UUID.randomUUID(),
             tilstand = TilstandType.START,
             utbetalingGodkjent = true,
+            saksbehandlerIdent = "en_saksbehandler",
             automatiskBehandling = false
         ))
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)

@@ -27,6 +27,7 @@ internal fun tilUtbetaltEvent(
     periode: Periode,
     forbrukteSykedager: Int,
     gjenståendeSykedager: Int,
+    godkjentAv: String,
     automatiskBehandling: Boolean,
     maksdato: LocalDate?
 ) = UtbetaltEventBuilder(
@@ -40,6 +41,7 @@ internal fun tilUtbetaltEvent(
     periode = periode,
     forbrukteSykedager = forbrukteSykedager,
     gjenståendeSykedager = gjenståendeSykedager,
+    godkjentAv = godkjentAv,
     automatiskBehandling = automatiskBehandling,
     maksdato = maksdato
 ).result()
@@ -55,6 +57,7 @@ private class UtbetaltEventBuilder(
     private val periode: Periode,
     private val forbrukteSykedager: Int,
     private val gjenståendeSykedager: Int,
+    private val godkjentAv: String,
     private val automatiskBehandling: Boolean,
     private val maksdato: LocalDate?
 ) : UtbetalingVisitor {
@@ -81,6 +84,7 @@ private class UtbetaltEventBuilder(
             tom = periode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
+            godkjentAv = godkjentAv,
             automatiskBehandling = automatiskBehandling,
             opprettet = opprettet,
             sykepengegrunnlag = sykepengegrunnlag,

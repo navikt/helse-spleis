@@ -19,6 +19,7 @@ internal class TilUtbetalingHendelseTest {
         private const val aktørId = "aktørId"
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "12345"
+        private const val SAKSBEHANDLER_IDENT = "O123456"
         private lateinit var førsteSykedag: LocalDate
         private lateinit var sisteSykedag: LocalDate
         private lateinit var sykmeldingHendelseId: UUID
@@ -52,7 +53,7 @@ internal class TilUtbetalingHendelseTest {
 
     @Test
     fun `utbetaling er godkjent av saksbehandler`() {
-        håndterGodkjenning(0)
+        håndterGodkjenning(0, SAKSBEHANDLER_IDENT, false)
         person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
         assertTilstand(TilstandType.AVSLUTTET, 0)
 
@@ -93,6 +94,7 @@ internal class TilUtbetalingHendelseTest {
             tom = sisteSykedag,
             forbrukteSykedager = 11,
             gjenståendeSykedager = 237,
+            godkjentAv = SAKSBEHANDLER_IDENT,
             automatiskBehandling = false,
             opprettet = utbetaltEvents.first().opprettet,
             sykepengegrunnlag = 372000.0,
@@ -104,7 +106,7 @@ internal class TilUtbetalingHendelseTest {
 
     @Test
     fun `utbetaling er godkjent automatisk`() {
-        håndterGodkjenning(0, true)
+        håndterGodkjenning(0, "SYSTEM", true)
         person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT, 0))
         assertTilstand(TilstandType.AVSLUTTET, 0)
 
@@ -145,6 +147,7 @@ internal class TilUtbetalingHendelseTest {
             tom = sisteSykedag,
             forbrukteSykedager = 11,
             gjenståendeSykedager = 237,
+            godkjentAv = "SYSTEM",
             automatiskBehandling = true,
             opprettet = utbetaltEvents.first().opprettet,
             sykepengegrunnlag = 372000.0,
@@ -169,14 +172,14 @@ internal class TilUtbetalingHendelseTest {
         )
     }
 
-    private fun håndterGodkjenning(index: Int, automatiskBehandling: Boolean = false) {
+    private fun håndterGodkjenning(index: Int, godkjentAv: String = SAKSBEHANDLER_IDENT, automatiskBehandling: Boolean = false) {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag(index))
         person.håndter(ytelser(index = index))
         person.håndter(simulering(index))
-        person.håndter(utbetalingsgodkjenning(index, true, automatiskBehandling))
+        person.håndter(utbetalingsgodkjenning(index, true, godkjentAv, automatiskBehandling))
     }
 
     private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus, index: Int) =
@@ -193,13 +196,13 @@ internal class TilUtbetalingHendelseTest {
             hendelse = this
         }
 
-    private fun utbetalingsgodkjenning(index: Int, godkjent: Boolean, automatiskBehandling: Boolean) = Utbetalingsgodkjenning(
+    private fun utbetalingsgodkjenning(index: Int, godkjent: Boolean, godkjentAv: String, automatiskBehandling: Boolean) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = inspektør.vedtaksperiodeId(index).toString(),
-        saksbehandler = "Ola Nordmann",
+        saksbehandler = godkjentAv,
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling
