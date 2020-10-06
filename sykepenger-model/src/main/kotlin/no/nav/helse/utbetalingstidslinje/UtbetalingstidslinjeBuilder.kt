@@ -9,9 +9,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -42,11 +40,21 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         return tidslinje
     }
 
-    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
-    override fun visitDag(dag: Dag.Studiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
-    override fun visitDag(dag: Dag.Utenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = implisittDag(dato)
-    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = arbeidsdag(dato)
+    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        implisittDag(dato)
+
+    override fun visitDag(dag: Dag.Studiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        implisittDag(dato)
+
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        fridag(dato)
+
+    override fun visitDag(dag: Dag.Utenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        implisittDag(dato)
+
+    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        arbeidsdag(dato)
+
     override fun visitDag(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
@@ -55,8 +63,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = fridag(dato)
-    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = friskHelgedag(dato)
+
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        fridag(dato)
+
+    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        friskHelgedag(dato)
+
     override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
@@ -65,6 +78,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
+
     override fun visitDag(
         dag: Dag.Sykedag,
         dato: LocalDate,
@@ -73,6 +87,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykedag(dato, økonomi)
+
     override fun visitDag(
         dag: Dag.ForeldetSykedag,
         dato: LocalDate,
@@ -81,6 +96,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = foreldetSykedag(dato, økonomi)
+
     override fun visitDag(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
@@ -89,17 +105,28 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
-    override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
-    override fun visitDag(dag: Dag.AnnullertDag, dato: LocalDate,økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-     annullertDag(dato, økonomi)
+
+    override fun visitDag(
+        dag: Dag.ProblemDag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        melding: String
+    ) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
+
+    override fun visitDag(
+        dag: Dag.AnnullertDag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) =
+        annullertDag(dato, økonomi)
 
 
     private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
         if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
             tilstand = UtbetalingSykedager
             tidslinje.addForeldetDag(dagen, økonomi.inntekt(aktuellDagsinntekt, dekningsgrunnlag))
-        }
-        else tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
+        } else tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
     }
 
     private fun egenmeldingsdag(dato: LocalDate) =
@@ -141,7 +168,10 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun annullertDag(dagen: LocalDate, økonomi: Økonomi) {
-        tilstand.annullert(this, dagen, økonomi)
+        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
+            tilstand.annullert(this, dagen, økonomi)
+        else
+            tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
     }
 
     private fun oppdatereInntekt(dato: LocalDate) {
@@ -184,7 +214,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
 
     private fun håndterAnnullertDag(dagen: LocalDate, økonomi: Økonomi) {
-        inkrementerIkkeSykedager()
         //TODO: Skal annulerte dager oppdatere inntekt? Hva er oppdatere inntekt?
         //oppdatereInntekt(dagen)
         tidslinje.addAnnullertDag(dagen, økonomi.inntekt(INGEN))
@@ -230,6 +259,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
             splitter.håndterAnnullertDag(dagen, økonomi)
         }
+
         fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
         fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
         fun sykHelgedagIArbeidsgiverperioden(
@@ -237,6 +267,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             dagen: LocalDate,
             økonomi: Økonomi
         )
+
         fun sykHelgedagEtterArbeidsgiverperioden(
             splitter: UtbetalingstidslinjeBuilder,
             dagen: LocalDate,
@@ -299,7 +330,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.håndterFridag(dagen)
         }
 
-        override fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi : Økonomi) {
+        override fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
             splitter.håndterAnnullertDag(dagen, økonomi)
         }
 

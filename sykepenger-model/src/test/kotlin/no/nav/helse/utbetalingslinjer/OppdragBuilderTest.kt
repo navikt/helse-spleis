@@ -154,7 +154,7 @@ internal class OppdragBuilderTest {
         fom: LocalDate,
         tom: LocalDate,
         refFagsystemId: String? = oppdrag.fagsystemId(),
-        sats: Int = oppdrag[index].beløp,
+        sats: Int? = oppdrag[index].beløp,
         grad: Double = oppdrag[index].grad,
         delytelseId: Int = oppdrag[index]["delytelseId"],
         refDelytelseId: Int? = oppdrag[index]["refDelytelseId"]

@@ -248,7 +248,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     fun håndter(annullering: Annullering) {
-        if(this.periode.endInclusive < annullering.fom) {
+        if (this.periode.endInclusive < annullering.fom) {
             return
         }
         tilstand.håndter(this, annullering)
@@ -271,7 +271,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun sykeperioder() = sykdomstidslinje.sykeperioder()
 
-        internal fun ferdig(hendelse: PersonHendelse, sendTilInfotrygd: Boolean) {
+    internal fun ferdig(hendelse: PersonHendelse, sendTilInfotrygd: Boolean) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
@@ -758,8 +758,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
-                vedtaksperiode.kontekst(annullering)
-                vedtaksperiode.tilstand(annullering, TilInfotrygd)
+            vedtaksperiode.kontekst(annullering)
+            vedtaksperiode.tilstand(annullering, TilInfotrygd)
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {}
@@ -1614,9 +1614,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
             vedtaksperiode.sendUtbetaltEvent()
-            if(vedtaksperiode.sykdomstidslinje.harAnnulerteDager()) {
-                vedtaksperiode.tilstand(hendelse, TilInfotrygd)
-            }
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 

@@ -132,7 +132,7 @@ private class UtbetaltEventBuilder(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        beløp: Int,
+        beløp: Int?,
         aktuellDagsinntekt: Int,
         grad: Double,
         delytelseId: Int,
@@ -147,7 +147,7 @@ private class UtbetaltEventBuilder(
                 fom = fom,
                 tom = tom,
                 dagsats = min(aktuellDagsinntekt, this.dagsats),
-                beløp = beløp,
+                beløp = beløp!!,
                 grad = grad,
                 sykedager = linje.filterNot { it.erHelg() }.count()
             )
@@ -176,7 +176,7 @@ private class UtbetaltEventBuilder(
             }
 
             override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
-                if(!dato.isBefore(utbetalingstidslinje.førsteSykepengedag() ?: LocalDate.MIN)) {
+                if (!dato.isBefore(utbetalingstidslinje.førsteSykepengedag() ?: LocalDate.MIN)) {
                     ikkeUtbetalteDager.add(
                         UtbetaltEvent.IkkeUtbetaltDag(
                             dato,

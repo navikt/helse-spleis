@@ -11,7 +11,7 @@ import kotlin.streams.toList
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,
     internal var tom: LocalDate,
-    internal var beløp: Int, //TODO: arbeidsgiverbeløp || personbeløp
+    internal var beløp: Int?, //TODO: arbeidsgiverbeløp || personbeløp
     internal var aktuellDagsinntekt: Int,
     internal val grad: Double,
     internal var refFagsystemId: String? = null,
@@ -20,7 +20,7 @@ internal class Utbetalingslinje internal constructor(
     private var endringskode: Endringskode = NY,
     private var klassekode: Klassekode = RefusjonIkkeOpplysningspliktig,
     private var datoStatusFom: LocalDate? = null
-): Iterable<LocalDate> {
+) : Iterable<LocalDate> {
 
     override operator fun iterator() = object : Iterator<LocalDate> {
         private val periodeIterator = Periode(fom, tom).iterator()
@@ -49,7 +49,7 @@ internal class Utbetalingslinje internal constructor(
         this.refDelytelseId = other.delytelseId
     }
 
-    internal fun totalbeløp() = beløp * antallDager()
+    internal fun totalbeløp() = beløp?.let { it * antallDager() } ?: 0
 
     internal fun dager() = fom
         .datesUntil(tom.plusDays(1))

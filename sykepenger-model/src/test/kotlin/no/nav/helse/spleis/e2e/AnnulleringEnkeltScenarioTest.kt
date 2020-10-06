@@ -5,7 +5,8 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.januar
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AnnullertDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -52,7 +53,7 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertForkastetPeriodeTilstander(
+            assertTilstander(
                 1.vedtaksperiode,
                 START,
                 MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -67,8 +68,7 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET,
-                TIL_INFOTRYGD
+                AVSLUTTET
             )
         }
     }
@@ -77,10 +77,9 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
     fun `Utbetalingslinje har annullerte dager`() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
-        inspektør.also {
-            assertTrue(
-                inspektør.utbetalinger[1].utbetalingstidslinje().all{it is Utbetalingstidslinje.Utbetalingsdag.AnnullertDag}
-            )
+        TestTidslinjeInspektør(inspektør.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+            assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+            assertEquals(8, tidslinjeInspektør.dagtelling[AnnullertDag::class])
         }
     }
 
@@ -89,22 +88,20 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
         inspektør.also {
-            var fagsystemId : String
-            it.arbeidsgiverOppdrag[0].let{oppdragFørAnnullering ->
-                assertEquals(1, oppdragFørAnnullering.size)
-                assertEquals(fom.plusDays(16), oppdragFørAnnullering.first().fom)
-                assertEquals(tom, oppdragFørAnnullering.first().tom)
-                assertEquals(8586, oppdragFørAnnullering.totalbeløp())
-                fagsystemId = oppdragFørAnnullering.fagsystemId()
-            }
-            it.arbeidsgiverOppdrag[1].let{oppdragEtterAnnullering ->
-                assertEquals(1, oppdragEtterAnnullering.size)
-                assertEquals(fom.plusDays(16), oppdragEtterAnnullering.first().fom)
-                assertEquals(tom, oppdragEtterAnnullering.first().tom)
-                assertEquals(fagsystemId, oppdragEtterAnnullering.fagsystemId())
-                assertEquals(0, oppdragEtterAnnullering.totalbeløp())
-                assertTrue(oppdragEtterAnnullering.dagSatser().all { it.second == 0 })
-            }
+            val førAnnullering = it.arbeidsgiverOppdrag[0]
+            assertEquals(1, førAnnullering.size)
+            assertEquals(fom.plusDays(16), førAnnullering.first().fom)
+            assertEquals(tom, førAnnullering.first().tom)
+            assertEquals(8586, førAnnullering.totalbeløp())
+            val fagsystemId = førAnnullering.fagsystemId()
+
+            val etterAnnullering = it.arbeidsgiverOppdrag[1]
+            assertEquals(1, etterAnnullering.size)
+            assertEquals(fom.plusDays(16), etterAnnullering.first().fom)
+            assertEquals(tom, etterAnnullering.first().tom)
+            assertEquals(fagsystemId, etterAnnullering.fagsystemId())
+            assertEquals(0, etterAnnullering.totalbeløp())
+            assertTrue(etterAnnullering.dagSatser().all { it.second == 0 })
         }
     }
 

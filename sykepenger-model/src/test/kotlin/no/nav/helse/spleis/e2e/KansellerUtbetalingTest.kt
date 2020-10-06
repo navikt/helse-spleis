@@ -1,11 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -17,10 +18,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
-internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
+internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
     private var vedtaksperiodeTeller: Int = 0
 
@@ -29,7 +28,8 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
     }
 
-    @Test fun `avvis hvis arbeidsgiver er ukjent`() {
+    @Test
+    fun `avvis hvis arbeidsgiver er ukjent`() {
         håndterKansellerUtbetaling(orgnummer = "999999")
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
@@ -224,7 +224,11 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         vedtaksperiodeTeller += 1
         val id = vedtaksperiodeTeller.vedtaksperiode
-        håndterInntektsmeldingMedValidering(id, listOf(Periode(fom, fom.plusDays(15))), førsteFraværsdag = førsteFraværsdag)
+        håndterInntektsmeldingMedValidering(
+            id,
+            listOf(Periode(fom, fom.plusDays(15))),
+            førsteFraværsdag = førsteFraværsdag
+        )
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterVilkårsgrunnlag(id, INNTEKT)
         håndterYtelser(id)   // No history
@@ -234,11 +238,11 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
     }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
-        internal val oppdrag = mutableListOf<Oppdrag>()
-        internal val linjer = mutableListOf<Utbetalingslinje>()
-        internal val endringskoder = mutableListOf<Endringskode>()
-        internal val fagsystemIder = mutableListOf<String?>()
-        internal val refFagsystemIder = mutableListOf<String?>()
+        val oppdrag = mutableListOf<Oppdrag>()
+        val linjer = mutableListOf<Utbetalingslinje>()
+        val endringskoder = mutableListOf<Endringskode>()
+        val fagsystemIder = mutableListOf<String?>()
+        val refFagsystemIder = mutableListOf<String?>()
 
         init {
             oppdrag.accept(this)
@@ -253,7 +257,7 @@ internal class KansellerUtbetalingTest: AbstractEndToEndTest() {
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
-            beløp: Int,
+            beløp: Int?,
             aktuellDagsinntekt: Int,
             grad: Double,
             delytelseId: Int,

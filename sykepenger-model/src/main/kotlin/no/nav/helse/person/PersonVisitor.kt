@@ -284,14 +284,18 @@ internal interface InntekthistorikkVisitor {
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun visitInfotrygd(
         infotrygd: InntektshistorikkVol2.Infotrygd,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
     fun visitSkattSykepengegrunnlag(
         sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
@@ -303,7 +307,9 @@ internal interface InntekthistorikkVisitor {
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun visitSkattSammenligningsgrunnlag(
         sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
         dato: LocalDate,
@@ -314,7 +320,9 @@ internal interface InntekthistorikkVisitor {
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
 }
 
@@ -335,7 +343,7 @@ internal interface OppdragVisitor {
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        beløp: Int,
+        beløp: Int?,
         aktuellDagsinntekt: Int,
         grad: Double,
         delytelseId: Int,

@@ -51,7 +51,21 @@ internal class UtbetalingTest {
     @Test
     fun `separate utbetalinger`() {
         val tidslinje = tidslinjeOf(
-            16.AP, 1.NAV, 2.HELG, 5.NAV, 2.HELG, 5.AP, 2.HELG, 5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,5.NAV, 2.HELG,
+            16.AP,
+            1.NAV,
+            2.HELG,
+            5.NAV,
+            2.HELG,
+            5.AP,
+            2.HELG,
+            5.NAV,
+            2.HELG,
+            5.NAV,
+            2.HELG,
+            5.NAV,
+            2.HELG,
+            5.NAV,
+            2.HELG,
             startDato = 1.januar(2020)
         )
 
@@ -123,16 +137,18 @@ internal class UtbetalingTest {
         aktivitetslogg,
         tidligere?.let { listOf(tidligere) } ?: emptyList()
     ).also { utbetaling ->
-        utbetaling.håndter(UtbetalingHendelse(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "ignore",
-            aktørId = "ignore",
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            utbetalingsreferanse = "ref",
-            status = AKSEPTERT,
-            melding = "hei"
-        ))
+        utbetaling.håndter(
+            UtbetalingHendelse(
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = "ignore",
+                aktørId = "ignore",
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                orgnummer = ORGNUMMER,
+                utbetalingsreferanse = "ref",
+                status = AKSEPTERT,
+                melding = "hei"
+            )
+        )
     }
 
     private class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
@@ -156,7 +172,7 @@ internal class UtbetalingTest {
             linje: Utbetalingslinje,
             fom: LocalDate,
             tom: LocalDate,
-            beløp: Int,
+            beløp: Int?,
             aktuellDagsinntekt: Int,
             grad: Double,
             delytelseId: Int,
@@ -171,12 +187,12 @@ internal class UtbetalingTest {
             refFagsystemIder.add(refFagsystemId)
         }
 
-        internal fun antallLinjer() = linjeteller
-        internal fun fagSystemId(indeks: Int) = fagsystemIder.elementAt(indeks)
-        internal fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
-        internal fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
-        internal fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)
-        internal fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
-        internal fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
+        fun antallLinjer() = linjeteller
+        fun fagSystemId(indeks: Int) = fagsystemIder.elementAt(indeks)
+        fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
+        fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
+        fun refFagsystemId(indeks: Int) = refFagsystemIder.elementAt(indeks)
+        fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
+        fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     }
 }

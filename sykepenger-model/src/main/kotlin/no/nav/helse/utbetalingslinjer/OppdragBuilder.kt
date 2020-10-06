@@ -3,8 +3,8 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.UtbetalingStrategy
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -28,7 +28,7 @@ internal class OppdragBuilder(
     }
 
     internal fun result(): Oppdrag {
-        arbeisdsgiverLinjer.removeAll { it.beløp == 0 }
+        arbeisdsgiverLinjer.removeAll { it.beløp == null }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
         return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
@@ -43,7 +43,21 @@ internal class OppdragBuilder(
     ) {
         økonomi.reflection { grad, aktuellDagsinntekt ->
             if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == 0 || linje.beløp == dagStrategy(dag.økonomi)))
+            if (grad == linje.grad && (linje.beløp == null || linje.beløp == dagStrategy(dag.økonomi)))
+                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
+            else
+                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+        }
+    }
+
+    override fun visit(
+        dag: AnnullertDag,
+        dato: LocalDate,
+        økonomi: Økonomi
+    ) {
+        økonomi.reflection { grad, aktuellDagsinntekt ->
+            if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
+            if (grad == linje.grad && (linje.beløp == null || linje.beløp == dagStrategy(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -64,7 +78,7 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
+        dag: Arbeidsdag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -72,7 +86,7 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
+        dag: ArbeidsgiverperiodeDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -81,7 +95,7 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
+        dag: AvvistDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -89,7 +103,7 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+        dag: Fridag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
@@ -97,14 +111,14 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
+        dag: ForeldetDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(dag: NavDag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
+    private fun addLinje(dag: Utbetalingsdag, dato: LocalDate, grad: Double, aktuellDagsinntekt: Double) {
         arbeisdsgiverLinjer.add(
             0,
             Utbetalingslinje(
@@ -118,42 +132,51 @@ internal class OppdragBuilder(
         )
     }
 
+
     private fun addLinje(dato: LocalDate, grad: Double) {
         arbeisdsgiverLinjer.add(
             0,
-            Utbetalingslinje(dato, dato, 0, 0, grad, fagsystemId)
+            Utbetalingslinje(dato, dato, null, 0, grad, fagsystemId)
         )
     }
 
     internal interface Tilstand {
         fun betalingsdag(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
-        ) {}
+        ) {
+        }
+
         fun helgedag(
             dag: NavHelgDag,
             dato: LocalDate,
             grad: Double
-        ) {}
+        ) {
+        }
+
         fun nyLinje(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
-        ) {}
+        ) {
+        }
+
         fun nyLinje(
             dag: NavHelgDag,
             dato: LocalDate,
             grad: Double
-        ) {}
+        ) {
+        }
+
         fun ikkeBetalingsdag() {}
     }
 
     private inner class MellomLinjer : Tilstand {
         override fun betalingsdag(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
@@ -162,8 +185,9 @@ internal class OppdragBuilder(
             tilstand = LinjeMedSats()
         }
 
+
         override fun nyLinje(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
@@ -171,6 +195,7 @@ internal class OppdragBuilder(
             addLinje(dag, dato, grad, aktuellDagsinntekt)
             tilstand = LinjeMedSats()
         }
+
 
         override fun helgedag(
             dag: NavHelgDag,
@@ -197,7 +222,7 @@ internal class OppdragBuilder(
         }
 
         override fun betalingsdag(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
@@ -206,7 +231,7 @@ internal class OppdragBuilder(
         }
 
         override fun nyLinje(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
@@ -238,7 +263,7 @@ internal class OppdragBuilder(
         }
 
         override fun betalingsdag(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double
@@ -250,7 +275,7 @@ internal class OppdragBuilder(
         }
 
         override fun nyLinje(
-            dag: NavDag,
+            dag: Utbetalingsdag,
             dato: LocalDate,
             grad: Double,
             aktuellDagsinntekt: Double

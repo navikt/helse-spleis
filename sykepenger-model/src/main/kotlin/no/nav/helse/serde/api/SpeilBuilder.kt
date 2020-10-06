@@ -523,7 +523,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     }
 
     private inner class VedtaksperiodeState(
-        private val vedtaksperiode: Vedtaksperiode,
+        vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
@@ -653,7 +653,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                         UtbetalingerDTO.UtbetalingslinjeDTO(
                             fom = linje.fom,
                             tom = linje.tom,
-                            dagsats = linje.beløp,
+                            dagsats = linje.beløp!!,
                             grad = linje.grad
                         )
                     }
@@ -884,7 +884,12 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             grad: Prosentdel = 0.prosent
         ) {
             sykdomstidslinjeListe.add(
-                SykdomstidslinjedagDTO(dato, dag.toSpeilDagtype(), KildeDTO(kilde.toSpeilKildetype(), kilde.meldingsreferanseId()), grad.toDouble())
+                SykdomstidslinjedagDTO(
+                    dato,
+                    dag.toSpeilDagtype(),
+                    KildeDTO(kilde.toSpeilKildetype(), kilde.meldingsreferanseId()),
+                    grad.toDouble()
+                )
             )
         }
 
