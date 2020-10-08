@@ -240,11 +240,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, hendelse)
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje) {
-        if (overlapperMed(hendelse)) {
-            kontekst(hendelse)
-            tilstand.håndter(this, hendelse)
-        }
+    internal fun håndter(hendelse: OverstyrTidslinje) = overlapperMed(hendelse).also {
+        if (!it) return it
+        kontekst(hendelse)
+        tilstand.håndter(this, hendelse)
     }
 
     fun håndter(annullering: Annullering) {
@@ -1387,10 +1386,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.sykdomshistorikk.håndter(hendelse)
-            vedtaksperiode.sykdomstidslinje =
-                vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
-            vedtaksperiode.hendelseIder.add(hendelse.meldingsreferanseId())
+            vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
     }

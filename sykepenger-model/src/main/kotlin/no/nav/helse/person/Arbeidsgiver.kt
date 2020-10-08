@@ -251,7 +251,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
-        sykdomshistorikk.nyHåndter(hendelse)
         vedtaksperioder.toList().forEach { it.håndter(hendelse) }
     }
 
