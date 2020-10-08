@@ -340,8 +340,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Opptjening,
                 Dagpenger,
                 Arbeidsavklaringspenger,
-                Medlemskap,
-                BistandSaksbehandler
+                Medlemskap
             }
         }
 

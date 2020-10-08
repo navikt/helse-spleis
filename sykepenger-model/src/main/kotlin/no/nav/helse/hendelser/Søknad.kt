@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -171,11 +170,7 @@ class Søknad constructor(
                 Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Utenlandsdager ikke støttet")
 
             override fun valider(søknad: Søknad) {
-                if (Toggles.problemdagerSkaperError) {
-                    søknad.error("Søknaden inneholder utenlandsopphold")
-                } else {
-                    søknad.warn("Søknaden inneholder utenlandsopphold")
-                }
+                søknad.error("Søknaden inneholder utenlandsopphold")
             }
         }
     }

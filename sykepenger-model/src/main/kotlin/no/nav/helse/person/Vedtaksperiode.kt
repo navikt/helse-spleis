@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.BistandSaksbehandler
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
@@ -395,25 +394,6 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
             .also { trengerInntektsmelding() }
-
-        if (!sykdomshistorikk.sykdomstidslinje().valider()) {
-            hendelse.behov(BistandSaksbehandler, "Trenger hjelp fra saksbehandler med problemdager")
-            return
-        }
-
-        tilstand(hendelse, nesteTilstand)
-    }
-
-    private fun fortsett(hendelse: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
-        hendelse.kontekst(this)
-        oppdaterHistorikk(hendelse)
-
-        if (!sykdomshistorikk.sykdomstidslinje().valider()) {
-            hendelse.behov(BistandSaksbehandler, "Trenger hjelp fra saksbehandler med problemdager")
-            return
-        }
-
-        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -924,7 +904,6 @@ internal class Vedtaksperiode private constructor(
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
                 søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
             }
-
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -932,10 +911,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.fortsett(hendelse, AvventerVilkårsprøvingGap)
         }
     }
 
