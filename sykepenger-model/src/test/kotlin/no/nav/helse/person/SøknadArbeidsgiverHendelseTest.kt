@@ -55,14 +55,14 @@ internal class SøknadArbeidsgiverHendelseTest {
     }
 
     @Test
-    fun `andre søknad ugyldig`() {
+    fun `andre søknad ignoreres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         person.håndter(søknadArbeidsgiver(Søknadsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
 
     @Test
@@ -161,7 +161,7 @@ internal class SøknadArbeidsgiverHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(0))
     }
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = "987654321") =

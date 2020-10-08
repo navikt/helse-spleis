@@ -133,32 +133,40 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
         kontekst(sykmelding)
-        valider(sykmelding) { tilstand.håndter(this, sykmelding) }
+        if (this.skalForkastesVedOverlapp()) {
+            valider(sykmelding) { tilstand.håndter(this, sykmelding) }
+        } else {
+            tilstand.håndter(this, sykmelding)
+        }
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
-        valider(søknad) { tilstand.håndter(this, søknad) }
+        if (this.skalForkastesVedOverlapp()) {
+            valider(søknad) { tilstand.håndter(this, søknad) }
+        } else {
+            tilstand.håndter(this, søknad)
+        }
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
-        if (!this.skalBytteTilstandVedForkastelse()) {
-            tilstand.håndter(this, søknad)
-        } else {
+        if (this.skalForkastesVedOverlapp()) {
             valider(søknad) { tilstand.håndter(this, søknad) }
+        } else {
+            tilstand.håndter(this, søknad)
         }
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
-        if (!this.skalBytteTilstandVedForkastelse()) {
-            tilstand.håndter(this, inntektsmelding)
-        } else {
+        if (this.skalForkastesVedOverlapp()) {
             valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
+        } else {
+            tilstand.håndter(this, inntektsmelding)
         }
     }
 
@@ -291,6 +299,14 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
             AvventerVilkårsprøvingArbeidsgiversøknad,
+            UtbetalingFeilet
+        )
+
+    private fun skalForkastesVedOverlapp() =
+        this.tilstand !in listOf(
+            Avsluttet,
+            AvsluttetUtenUtbetalingMedInntektsmelding,
+            AvsluttetUtenUtbetaling,
             UtbetalingFeilet
         )
 

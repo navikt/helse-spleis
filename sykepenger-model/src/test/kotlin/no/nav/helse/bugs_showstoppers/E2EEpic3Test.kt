@@ -1105,4 +1105,20 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`(){
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterSøknad(Sykdom(1.januar, 30.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 31.januar, 100))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+    }
+
 }
