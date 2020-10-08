@@ -634,6 +634,39 @@ internal abstract class AbstractEndToEndTest {
             )
         )
 
+
+    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100, førsteFraværsdag: LocalDate = fom) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+        val id = observatør.vedtaksperioder.toList().last()
+        håndterInntektsmeldingMedValidering(
+            id,
+            listOf(Periode(fom, fom.plusDays(15))),
+            førsteFraværsdag = førsteFraværsdag
+        )
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterVilkårsgrunnlag(id, INNTEKT)
+        håndterYtelser(id)   // No history
+        håndterSimulering(id)
+        håndterUtbetalingsgodkjenning(id, true)
+        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+    }
+
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+        val id = observatør.vedtaksperioder.toList().last()
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+        håndterYtelser(id)   // No history
+        håndterSimulering(id)
+        håndterUtbetalingsgodkjenning(id, true)
+        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+    }
+
+    protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+        val id = observatør.vedtaksperioder.toList().last()
+        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
+    }
+
     protected fun simulering(
         vedtaksperiodeId: UUID,
         simuleringOK: Boolean = true,
@@ -758,5 +791,5 @@ infix fun Any?.skalVære(expected: Any?) =
     }
 
 infix fun Boolean.ellers(message: String) {
-    if(!this) fail(message)
+    if (!this) fail(message)
 }

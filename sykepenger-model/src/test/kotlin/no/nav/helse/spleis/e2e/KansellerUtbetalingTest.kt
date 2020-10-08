@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
@@ -20,8 +17,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
-
-    private var vedtaksperiodeTeller: Int = 0
 
     @BeforeEach
     internal fun setup() {
@@ -114,7 +109,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
-        håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
@@ -127,7 +122,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
         }
-        håndterUtbetalt(vedtaksperiodeTeller.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse())
             assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
@@ -202,40 +197,6 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(100.0, utbetalingslinje.grad)
     }
 
-    private fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        vedtaksperiodeTeller += 1
-        val id = vedtaksperiodeTeller.vedtaksperiode
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-    }
-
-    private fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        vedtaksperiodeTeller += 1
-        val id = vedtaksperiodeTeller.vedtaksperiode
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterYtelser(id)
-        håndterSimulering(id)
-        håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-    }
-
-    private fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int, førsteFraværsdag: LocalDate) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        vedtaksperiodeTeller += 1
-        val id = vedtaksperiodeTeller.vedtaksperiode
-        håndterInntektsmeldingMedValidering(
-            id,
-            listOf(Periode(fom, fom.plusDays(15))),
-            førsteFraværsdag = førsteFraværsdag
-        )
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterVilkårsgrunnlag(id, INNTEKT)
-        håndterYtelser(id)   // No history
-        håndterSimulering(id)
-        håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-    }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
