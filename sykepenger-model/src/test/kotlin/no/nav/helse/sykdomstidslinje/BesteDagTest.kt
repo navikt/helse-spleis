@@ -14,10 +14,16 @@ internal class BesteDagTest {
         private val ukjentDag get() = Dag.UkjentDag(2.mandag, TestEvent.søknad)
         private val arbeidsdagFraSøknad get() = Dag.Arbeidsdag(2.mandag, TestEvent.søknad)
         private val ferieFraInntektsmelding get() = Dag.Feriedag(2.mandag, TestEvent.inntektsmelding)
-        private val arbeidsgiverdagFraInntektsmelding get() = Dag.Arbeidsgiverdag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
+        private val arbeidsgiverdagFraInntektsmelding
+            get() = Dag.Arbeidsgiverdag(
+                2.mandag,
+                Økonomi.sykdomsgrad(100.prosent),
+                TestEvent.inntektsmelding
+            )
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
         private val utenlandsFraSøknad get() = Dag.Utenlandsdag(2.mandag, TestEvent.søknad)
+        private val annullertDag get() = Dag.AnnullertDag(2.mandag, TestEvent.testkilde)
     }
 
     @Test
@@ -60,6 +66,18 @@ internal class BesteDagTest {
     fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
         assertWinner(sykedagFraSøknad, arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad)
         assertWinner(arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad, sykedagFraSøknad)
+    }
+
+    @Test
+    fun `Annullering vinner over alt annet`() {
+        assertWinner(annullertDag, arbeidsgiverdagFraInntektsmelding, annullertDag)
+        assertWinner(annullertDag, ukjentDag, annullertDag)
+        assertWinner(annullertDag, arbeidsdagFraSøknad, annullertDag)
+        assertWinner(annullertDag, ferieFraInntektsmelding, annullertDag)
+        assertWinner(annullertDag, arbeidsgiverdagFraInntektsmelding, annullertDag)
+        assertWinner(annullertDag, ferieFraSøknad, annullertDag)
+        assertWinner(annullertDag, sykedagFraSøknad, annullertDag)
+        assertWinner(annullertDag, utenlandsFraSøknad, annullertDag)
     }
 
     private fun assertWinner(

@@ -150,7 +150,7 @@ internal class Sykdomstidslinje private constructor(
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
     private fun erEnSykedag(it: Dag) =
-        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag
+        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is AnnullertDag
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
@@ -374,6 +374,7 @@ internal class Sykdomstidslinje private constructor(
         is Sykedag,
         is SykHelgedag,
         is Arbeidsgiverdag,
+        is AnnullertDag,
         is ArbeidsgiverHelgedag -> true
         else -> false
     }
