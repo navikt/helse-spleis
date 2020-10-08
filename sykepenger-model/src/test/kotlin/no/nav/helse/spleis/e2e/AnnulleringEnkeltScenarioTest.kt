@@ -7,7 +7,6 @@ import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AnnullertDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -30,19 +29,17 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
     fun `Sykdomstidslinje har annullerte dager`() {
         eventsFremTilUtbetaling()
 
-        assertEquals(
-            Sykdomstidslinje.annullerteDager(fom til tom, TestEvent.testkilde),
-            inspektør.sykdomstidslinje
-        )
+        sjekkAt {
+            sykdomstidslinje er Sykdomstidslinje.annullerteDager(fom til tom, TestEvent.testkilde)
+        }
     }
 
     @Test
     fun `Ingen feil`() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
-
-        inspektør.also {
-            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
+        sjekkAt {
+            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
         }
     }
 
@@ -51,35 +48,34 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
 
-        inspektør.also {
-            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_SØKNAD_FERDIG_GAP,
-                AVVENTER_VILKÅRSPRØVING_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
     }
 
     @Test
     fun `Utbetalingslinje har annullerte dager`() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
-        TestTidslinjeInspektør(inspektør.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
-            assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-            assertEquals(8, tidslinjeInspektør.dagtelling[AnnullertDag::class])
+        sjekkAt {
+            TestTidslinjeInspektør(utbetalingstidslinjer(0)).apply {
+                dagtelling[ArbeidsgiverperiodeDag::class] er 16
+                dagtelling[AnnullertDag::class] er 8
+            }
         }
     }
 
@@ -87,21 +83,21 @@ internal class AnnulleringEnkeltScenarioTest : AbstractEndToEndTest() {
     fun `Oppdrag har nullbetaling`() {
         eventsFremTilUtbetaling()
         håndterUtbetalt()
-        inspektør.also {
-            val førAnnullering = it.arbeidsgiverOppdrag[0]
-            assertEquals(1, førAnnullering.size)
-            assertEquals(fom.plusDays(16), førAnnullering.first().fom)
-            assertEquals(tom, førAnnullering.first().tom)
-            assertEquals(8586, førAnnullering.totalbeløp())
+        sjekkAt {
+            val førAnnullering = arbeidsgiverOppdrag[0]
+            førAnnullering.size er 1
+            førAnnullering.first().fom er fom.plusDays(16)
+            førAnnullering.first().tom er tom
+            førAnnullering.totalbeløp() er 8586
             val fagsystemId = førAnnullering.fagsystemId()
 
-            val etterAnnullering = it.arbeidsgiverOppdrag[1]
-            assertEquals(1, etterAnnullering.size)
-            assertEquals(fom.plusDays(16), etterAnnullering.first().fom)
-            assertEquals(tom, etterAnnullering.first().tom)
-            assertEquals(fagsystemId, etterAnnullering.fagsystemId())
-            assertEquals(0, etterAnnullering.totalbeløp())
-            assertTrue(etterAnnullering.dagSatser().all { it.second == 0 })
+            val etterAnnullering = arbeidsgiverOppdrag[1]
+            etterAnnullering.size er 1
+            etterAnnullering.first().fom er fom.plusDays(16)
+            etterAnnullering.first().tom er tom
+            etterAnnullering.fagsystemId() er fagsystemId
+            etterAnnullering.totalbeløp() er 0
+            etterAnnullering.dagSatser().all { it.second == 0 } er sant
         }
     }
 

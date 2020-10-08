@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -49,6 +50,11 @@ internal abstract class AbstractEndToEndTest {
         val ferieperioder: List<Periode>,
         val refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>>
     )
+
+    fun sjekkAt(init: TestArbeidsgiverInspektør.() -> Unit) {
+        val inspektør = this.inspektør  // create the receiver object
+        inspektør.init()        // pass the receiver object to the lambda
+    }
 
     @BeforeEach
     internal fun abstractSetup() {
@@ -296,8 +302,8 @@ internal abstract class AbstractEndToEndTest {
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Foreldrepenger))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Foreldrepenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Institusjonsopphold))
         person.håndter(
@@ -734,4 +740,23 @@ internal abstract class AbstractEndToEndTest {
         if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
         return requireNotNull(vedtaksperioderIder[this to indeks])
     }
+
+}
+
+const val sant = true
+
+const val usant = false
+
+infix fun Any?.er(expected: Any?) =
+    assertEquals(expected, this)
+
+infix fun Any?.skalVære(expected: Any?) =
+    if (expected == null) {
+        this == null
+    } else {
+        expected == this
+    }
+
+infix fun Boolean.ellers(message: String) {
+    if(!this) fail(message)
 }
