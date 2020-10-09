@@ -44,10 +44,9 @@ class Opptjeningvurdering(
                 map: MutableMap<String, Int>,
                 beregningsdato: LocalDate
             ) {
-                liste.forEach {
-                    map.compute(it.orgnummer) { _, opptjeningsdager ->
-                        val dager = it.opptjeningsdager(beregningsdato)
-                        opptjeningsdager?.let { max(it, dager) } ?: dager
+                liste.forEach { arbeidsforhold ->
+                    map.compute(arbeidsforhold.orgnummer) { _, opptjeningsdager ->
+                        max(arbeidsforhold.opptjeningsdager(beregningsdato), opptjeningsdager ?: 0)
                     }
                 }
             }
