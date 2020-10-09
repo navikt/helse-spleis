@@ -101,6 +101,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         sykdomstidslinje = sykdomstidslinje,
         godkjentAv = this["godkjentAv"] as String?,
         godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
+        automatiskBehandlet = this["automatiskBehandling"] as Boolean? ?: false,
         vilkår = vilkår,
         førsteFraværsdag = this["førsteFraværsdag"] as? LocalDate,
         inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as? Double,

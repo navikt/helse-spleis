@@ -41,6 +41,7 @@ data class VedtaksperiodeDTO(
     val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val godkjentAv: String?,
     val godkjenttidspunkt: LocalDateTime?,
+    val automatiskBehandlet: Boolean,
     val vilkår: VilkårDTO,
     val førsteFraværsdag: LocalDate?,
     val inntektFraInntektsmelding: Double?,

@@ -571,6 +571,15 @@ class SpeilBuilderTest {
         assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
     }
 
+    @Test
+    fun `legger ved felt for automatisk behandling`() {
+        val (person, hendelser) = person(automatiskBehandling = true)
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO
+        assertTrue(vedtaksperiode.automatiskBehandlet)
+        assertEquals("Automatisk behandlet", vedtaksperiode.godkjentAv)
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -605,7 +614,8 @@ class SpeilBuilderTest {
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
             søknadhendelseId: UUID = UUID.randomUUID(),
-            påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList()
+            påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList(),
+            automatiskBehandling: Boolean = false
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
@@ -631,7 +641,7 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, automatiskBehandling = automatiskBehandling))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
 
                     påfølgendePerioder.forEach { periode ->
@@ -1183,7 +1193,7 @@ class SpeilBuilderTest {
             )
         }
 
-        private fun utbetalingsgodkjenning(vedtaksperiodeId: String, utbetalingGodkjent: Boolean = true) =
+        private fun utbetalingsgodkjenning(vedtaksperiodeId: String, utbetalingGodkjent: Boolean = true, automatiskBehandling: Boolean = false) =
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -1191,9 +1201,9 @@ class SpeilBuilderTest {
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingGodkjent = utbetalingGodkjent,
-                saksbehandler = "en_saksbehandler_ident",
+                saksbehandler = if (automatiskBehandling) "Automatisk behandlet" else "en_saksbehandler_ident",
                 godkjenttidspunkt = LocalDateTime.now(),
-                automatiskBehandling = false
+                automatiskBehandling = automatiskBehandling
             )
 
         private fun simulering(vedtaksperiodeId: String) = Simulering(
