@@ -26,7 +26,7 @@ class Simulering(
                 warn("Ingenting ble simulert")
             }
             oppdrag.totalbeløp() != simuleringResultat.totalbeløp -> {
-                warn("Simulering kom frem til et annet totalbeløp. Kontroller beløpet til utbetaling")
+                info("Simulering kom frem til et annet totalbeløp. Kontroller beløpet til utbetaling")
             }
             oppdrag.map { Periode(it.fom, it.tom) }.any { oppdrag -> simuleringResultat.perioder.none { oppdrag.overlapperMed(it.periode) } } -> {
                 warn("Simulering inneholder ikke alle periodene som skal betales")
