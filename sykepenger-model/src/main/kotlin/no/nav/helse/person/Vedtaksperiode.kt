@@ -1347,6 +1347,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
                 periodetype = vedtaksperiode.periodetype()
             )
+            loggUlikGreendate(vedtaksperiode)
         }
 
         override fun håndter(
@@ -1379,6 +1380,19 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        // log occurence for quantitative data for analysis
+        private val logger = LoggerFactory.getLogger(AvventerGodkjenning::class.java)
+        private fun loggUlikGreendate(vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.førsteFraværsdag.also { førsteFraværsdag ->
+                val greendate = vedtaksperiode.arbeidsgiver
+                    .sykdomstidslinje()
+                    .kuttFremTilOgMed(vedtaksperiode.periode.endInclusive)
+                    .førsteFraværsdag()
+                if (førsteFraværsdag != greendate) logger.info("første fraværsdag ($førsteFraværsdag) er ulik greendate ($greendate) for ${vedtaksperiode.id}")
+                else logger.info("første fraværsdag ($førsteFraværsdag) er lik greendate for ${vedtaksperiode.id}")
+            }
         }
     }
 
