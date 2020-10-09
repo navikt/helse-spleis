@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -1390,8 +1391,16 @@ internal class Vedtaksperiode private constructor(
                     .sykdomstidslinje()
                     .kuttFremTilOgMed(vedtaksperiode.periode.endInclusive)
                     .førsteFraværsdag()
-                if (førsteFraværsdag != greendate) logger.info("første fraværsdag ($førsteFraværsdag) er ulik greendate ($greendate) for ${vedtaksperiode.id}")
-                else logger.info("første fraværsdag ($førsteFraværsdag) er lik greendate for ${vedtaksperiode.id}")
+                if (førsteFraværsdag != greendate) logger.info(
+                    "første fraværsdag ($førsteFraværsdag) er ulik greendate ($greendate) for {}, {}",
+                    keyValue("vedtaksperiode_id", vedtaksperiode.id),
+                    keyValue("periodetype", vedtaksperiode.periodetype())
+                )
+                else logger.info(
+                    "første fraværsdag ($førsteFraværsdag) er lik greendate for {}, {}",
+                    keyValue("vedtaksperiode_id", vedtaksperiode.id),
+                    keyValue("periodetype", vedtaksperiode.periodetype())
+                )
             }
         }
     }
