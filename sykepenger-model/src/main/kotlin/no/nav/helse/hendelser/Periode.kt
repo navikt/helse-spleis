@@ -10,8 +10,6 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     override val start: LocalDate = fom
     override val endInclusive: LocalDate = tom
 
-    private val range = start..endInclusive
-
     init {
         require(start <= endInclusive) { "fom kan ikke være etter tom" }
     }
@@ -49,7 +47,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive
 
-    internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in range }
+    internal operator fun contains(datoer: List<LocalDate>) = datoer.any { it in this }
 
     override fun toString(): String {
         return start.format(formatter) + " til " + endInclusive.format(formatter)
