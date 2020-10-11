@@ -138,6 +138,7 @@ internal class PeriodeTest {
     fun likhet() {
         val periode = Periode(2.januar, 3.januar)
         assertTrue(periode == periode)
+        assertTrue(periode == Periode(2.januar, 3.januar))
         assertFalse(periode == Periode(periode.start, periode.endInclusive.plusDays(1)))
         assertFalse(periode == Periode(periode.start.plusDays(1), periode.endInclusive))
     }
