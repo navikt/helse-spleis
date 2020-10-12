@@ -190,6 +190,14 @@ internal class YtelserHendelseTest {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
+            omsorgspenger = Omsorgspenger(
+                perioder = emptyList(),
+                aktivitetslogg = it
+            ),
+            opplæringspenger = Opplæringspenger(
+                perioder = emptyList(),
+                aktivitetslogg = it
+            ),
             institusjonsopphold = Institusjonsopphold(
                 perioder = emptyList(),
                 aktivitetslogg = it

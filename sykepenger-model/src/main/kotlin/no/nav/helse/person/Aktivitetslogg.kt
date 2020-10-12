@@ -210,6 +210,26 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
+                internal fun omsorgspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+                    aktivitetslogg.behov(
+                        Behovtype.Omsorgspenger,
+                        "Trenger informasjon om omsorgspengerytelser fra Infotrygd", mapOf(
+                            "omsorgspengerFom" to periode.start.toString(),
+                            "omsorgspengerTom" to periode.endInclusive.toString()
+                        )
+                    )
+                }
+
+                internal fun opplæringspenger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+                    aktivitetslogg.behov(
+                        Behovtype.Opplæringspenger,
+                        "Trenger informasjon om opplæringspengerytelser fra Infotrygd", mapOf(
+                            "opplæringspengerFom" to periode.start.toString(),
+                            "opplæringspengerTom" to periode.endInclusive.toString()
+                        )
+                    )
+                }
+
                 internal fun institusjonsopphold(aktivitetslogg: IAktivitetslogg, periode: Periode) {
                     aktivitetslogg.behov(
                         Behovtype.Institusjonsopphold,
@@ -331,6 +351,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Sykepengehistorikk,
                 Foreldrepenger,
                 Pleiepenger,
+                Omsorgspenger,
+                Opplæringspenger,
                 Institusjonsopphold,
                 EgenAnsatt,
                 Godkjenning,

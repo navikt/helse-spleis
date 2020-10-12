@@ -12,6 +12,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
@@ -450,6 +452,8 @@ internal class Vedtaksperiode private constructor(
         )
         foreldrepenger(hendelse)
         pleiepenger(hendelse, periode)
+        omsorgspenger(hendelse, periode)
+        opplæringspenger(hendelse, periode)
         institusjonsopphold(hendelse, periode)
     }
 
@@ -1230,6 +1234,8 @@ internal class Vedtaksperiode private constructor(
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 overlappende(vedtaksperiode.periode, ytelser.pleiepenger())
+                overlappende(vedtaksperiode.periode, ytelser.omsorgspenger())
+                overlappende(vedtaksperiode.periode, ytelser.opplæringspenger())
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->

@@ -138,17 +138,23 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendYtelser(
         vedtaksperiodeIndeks: Int,
         pleiepenger: List<TestMessageFactory.PleiepengerTestdata> = emptyList(),
+        omsorgspenger: List<TestMessageFactory.OmsorgspengerTestdata> = emptyList(),
+        opplæringspenger: List<TestMessageFactory.OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<TestMessageFactory.InstitusjonsoppholdTestdata> = emptyList()
     ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
+        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagYtelser(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk),
                 pleiepenger = pleiepenger,
+                omsorgspenger = omsorgspenger,
+                opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder
             )
         )

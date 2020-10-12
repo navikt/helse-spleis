@@ -148,6 +148,18 @@ internal class TestMessageFactory(
         val grad: Int
     )
 
+    class OmsorgspengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val grad: Int
+    )
+
+    class OpplæringspengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val grad: Int
+    )
+
     class InstitusjonsoppholdTestdata(
         val startdato: LocalDate,
         val faktiskSluttdato: LocalDate?,
@@ -159,16 +171,32 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         pleiepenger: List<PleiepengerTestdata> = emptyList(),
+        omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
+        opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList()
     ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
-            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger", "Institusjonsopphold"),
+            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger", "Omsorgspenger", "Opplæringspenger", "Institusjonsopphold"),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
                 "Foreldrepenger" to emptyMap<String, String>(),
                 "Pleiepenger" to pleiepenger.map { data ->
+                    mapOf(
+                        "fom" to data.fom,
+                        "tom" to data.tom,
+                        "grad" to data.grad
+                    )
+                },
+                "Omsorgspenger" to omsorgspenger.map { data ->
+                    mapOf(
+                        "fom" to data.fom,
+                        "tom" to data.tom,
+                        "grad" to data.grad
+                    )
+                },
+                "Opplæringspenger" to opplæringspenger.map { data ->
                     mapOf(
                         "fom" to data.fom,
                         "tom" to data.tom,

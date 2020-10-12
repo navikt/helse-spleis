@@ -5,6 +5,8 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
@@ -299,12 +301,16 @@ internal abstract class AbstractEndToEndTest {
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
+        omsorgspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Foreldrepenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Omsorgspenger))
+        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Opplæringspenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Institusjonsopphold))
         person.håndter(
             ytelser(
@@ -313,6 +319,8 @@ internal abstract class AbstractEndToEndTest {
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 foreldrepenger = foreldrepenger,
                 pleiepenger = pleiepenger,
+                omsorgspenger = omsorgspenger,
+                opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder
             )
         )
@@ -581,6 +589,8 @@ internal abstract class AbstractEndToEndTest {
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
+        omsorgspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ): Ytelser {
@@ -609,6 +619,14 @@ internal abstract class AbstractEndToEndTest {
             ),
             pleiepenger = Pleiepenger(
                 perioder = pleiepenger,
+                aktivitetslogg = aktivitetslogg
+            ),
+            omsorgspenger = Omsorgspenger(
+                perioder = omsorgspenger,
+                aktivitetslogg = aktivitetslogg
+            ),
+            opplæringspenger = Opplæringspenger(
+                perioder = opplæringspenger,
                 aktivitetslogg = aktivitetslogg
             ),
             institusjonsopphold = Institusjonsopphold(

@@ -13,13 +13,22 @@ internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(Sykepengehistorikk, Foreldrepenger, Pleiepenger, Institusjonsopphold)
+    override val behov = listOf(
+        Sykepengehistorikk,
+        Foreldrepenger,
+        Pleiepenger,
+        Omsorgspenger,
+        Opplæringspenger,
+        Institusjonsopphold
+    )
     override val riverName = "Ytelser"
 
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Foreldrepenger.name}")
         packet.requireKey("@løsning.${Sykepengehistorikk.name}")
         packet.requireKey("@løsning.${Pleiepenger.name}")
+        packet.requireKey("@løsning.${Omsorgspenger.name}")
+        packet.requireKey("@løsning.${Opplæringspenger.name}")
         packet.requireKey("@løsning.${Institusjonsopphold.name}")
         packet.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         packet.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
@@ -35,6 +44,16 @@ internal class YtelserRiver(
             }
         }
         packet.requireArray("@løsning.${Pleiepenger.name}") {
+            interestedIn("fom") { it.asLocalDate() }
+            interestedIn("tom") { it.asLocalDate() }
+            interestedIn("grad") { it.asInt() }
+        }
+        packet.requireArray("@løsning.${Omsorgspenger.name}") {
+            interestedIn("fom") { it.asLocalDate() }
+            interestedIn("tom") { it.asLocalDate() }
+            interestedIn("grad") { it.asInt() }
+        }
+        packet.requireArray("@løsning.${Opplæringspenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }
             interestedIn("grad") { it.asInt() }

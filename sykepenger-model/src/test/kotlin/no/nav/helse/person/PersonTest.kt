@@ -181,6 +181,14 @@ internal class PersonTest {
                             perioder = emptyList(),
                             aktivitetslogg = Aktivitetslogg()
                         ),
+                        omsorgspenger = Omsorgspenger(
+                            perioder = emptyList(),
+                            aktivitetslogg = Aktivitetslogg()
+                        ),
+                        opplæringspenger = Opplæringspenger(
+                            perioder = emptyList(),
+                            aktivitetslogg = Aktivitetslogg()
+                        ),
                         aktivitetslogg = Aktivitetslogg()
                     )
                 )

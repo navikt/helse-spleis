@@ -13,6 +13,8 @@ class Ytelser(
     private val utbetalingshistorikk: Utbetalingshistorikk,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val pleiepenger: Pleiepenger,
+    private val omsorgspenger: Omsorgspenger,
+    private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
@@ -21,6 +23,10 @@ class Ytelser(
     internal fun foreldrepenger() = foreldrepermisjon
 
     internal fun pleiepenger() = pleiepenger
+
+    internal fun omsorgspenger() = omsorgspenger
+
+    internal fun opplæringspenger() = opplæringspenger
 
     internal fun institusjonsopphold() = institusjonsopphold
 

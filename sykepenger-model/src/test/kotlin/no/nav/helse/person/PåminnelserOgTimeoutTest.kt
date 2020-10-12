@@ -47,12 +47,15 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         assertTilstand(TilstandType.AVVENTER_GAP)
-        assertEquals(4, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_GAP))
         assertTilstand(TilstandType.AVVENTER_GAP)
-        assertEquals(4, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Institusjonsopphold))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
@@ -104,12 +107,15 @@ class PåminnelserOgTimeoutTest {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(4, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
         assertTilstand(TilstandType.AVVENTER_HISTORIKK)
-        assertEquals(4, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Institusjonsopphold))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
     }
 
@@ -373,6 +379,14 @@ class PåminnelserOgTimeoutTest {
                 aktivitetslogg = Aktivitetslogg()
             ),
             pleiepenger = Pleiepenger(
+                perioder = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
+            ),
+            omsorgspenger = Omsorgspenger(
+                perioder = emptyList(),
+                aktivitetslogg = Aktivitetslogg()
+            ),
+            opplæringspenger = Opplæringspenger(
                 perioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg()
             ),

@@ -55,6 +55,20 @@ internal fun Validation.overlappende(
 
 internal fun Validation.overlappende(
     sykdomsperiode: Periode,
+    omsorgspenger: Omsorgspenger
+) = valider("Har overlappende omsorgspengerytelse med syketilfelle") {
+    !omsorgspenger.overlapper(sykdomsperiode)
+}
+
+internal fun Validation.overlappende(
+    sykdomsperiode: Periode,
+    opplæringspenger: Opplæringspenger
+) = valider("Har overlappende opplæringspengerytelse med syketilfelle") {
+    !opplæringspenger.overlapper(sykdomsperiode)
+}
+
+internal fun Validation.overlappende(
+    sykdomsperiode: Periode,
     institusjonsopphold: Institusjonsopphold
 ) = valider("Har overlappende institusjonsopphold med syketilfelle") {
     !institusjonsopphold.overlapper(sykdomsperiode)

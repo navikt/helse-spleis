@@ -1,11 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.Foreldrepermisjon
-import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
-import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -39,6 +36,12 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val pleiepenger =
         Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asPeriode), aktivitetslogg)
 
+    private val omsorgspenger =
+        Omsorgspenger(packet["@løsning.${Behovtype.Omsorgspenger.name}"].map(::asPeriode), aktivitetslogg)
+
+    private val opplæringspenger =
+        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asPeriode), aktivitetslogg)
+
     private val institusjonsopphold = Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
         Institusjonsoppholdsperiode(
             it.path("startdato").asLocalDate(),
@@ -56,6 +59,8 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
             pleiepenger = pleiepenger,
+            omsorgspenger = omsorgspenger,
+            opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             aktivitetslogg = aktivitetslogg
         )
