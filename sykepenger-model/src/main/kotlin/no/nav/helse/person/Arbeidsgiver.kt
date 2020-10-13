@@ -188,12 +188,12 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.toList().any { it.håndter(påminnelse) }
     }
 
-    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
-        kansellerUtbetaling.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(kansellerUtbetaling) }
-    }
+    internal fun håndter(hendelse: KansellerUtbetaling) {
+        hendelse.kontekst(this)
+        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
 
-    internal fun annullerUtbetaling(hendelse: KansellerUtbetaling) {
+        hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
+
         // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
         val sisteUtbetaling =
             utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
@@ -205,37 +205,43 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Forsøkte å kansellere en utbetaling som allerede er annullert")
             return
         }
-
         val utbetaling = sisteUtbetaling.kansellerUtbetaling()
-
-        person.annullert(
-            PersonObserver.UtbetalingAnnullertEvent(
-                fødselsnummer = hendelse.fødselsnummer(),
-                aktørId = hendelse.aktørId(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
-                fagsystemId = hendelse.fagsystemId,
-                utbetalingslinjer = sisteUtbetaling.let {
-                    it.arbeidsgiverOppdrag().map {
-                        PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                            fom = it.fom,
-                            tom = it.tom,
-                            beløp = it.totalbeløp(),
-                            grad = it.grad
-                        )
-                    }
-                },
-                annullertAvSaksbehandler = hendelse.opprettet,
-                saksbehandlerEpost = hendelse.saksbehandlerEpost
-            )
-        )
-
-        hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
         utbetalinger.add(utbetaling)
         sendUtbetalingsbehov(
             aktivitetslogg = hendelse.aktivitetslogg,
             oppdrag = utbetaling.arbeidsgiverOppdrag(),
             saksbehandler = hendelse.saksbehandler
         )
+    }
+
+    internal fun annullerUtbetaling(hendelse: KansellerUtbetaling) {
+
+        val sisteUtbetaling =
+            utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
+
+        if (sisteUtbetaling != null) {
+            person.annullert(
+                PersonObserver.UtbetalingAnnullertEvent(
+                    fødselsnummer = hendelse.fødselsnummer(),
+                    aktørId = hendelse.aktørId(),
+                    organisasjonsnummer = hendelse.organisasjonsnummer(),
+                    fagsystemId = hendelse.fagsystemId,
+                    utbetalingslinjer = sisteUtbetaling.let {
+                        it.arbeidsgiverOppdrag().map {
+                            PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
+                                fom = it.fom,
+                                tom = it.tom,
+                                beløp = it.totalbeløp(),
+                                grad = it.grad
+                            )
+                        }
+                    },
+                    annullertAvSaksbehandler = hendelse.opprettet,
+                    saksbehandlerEpost = hendelse.saksbehandlerEpost
+                )
+            )
+        }
+
     }
 
     internal fun håndter(hendelse: Rollback) {

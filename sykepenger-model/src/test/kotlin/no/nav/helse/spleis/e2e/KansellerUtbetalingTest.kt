@@ -43,6 +43,13 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     fun `kanseller siste utbetaling`() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling()
+        sjekkAt {
+            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
+            val behov = sisteBehov(1.vedtaksperiode)
+            behov.type er Behovtype.Utbetaling
+            @Suppress("UNCHECKED_CAST")
+            (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"] er "OPPH"
+        }
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())

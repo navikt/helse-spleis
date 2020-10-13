@@ -64,8 +64,8 @@ internal class TestArbeidsgiverInspektør(
     }
 
     private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
-        internal lateinit var aktivitetslogg: Aktivitetslogg
-        internal lateinit var arbeidsgiver: Arbeidsgiver
+        lateinit var aktivitetslogg: Aktivitetslogg
+        lateinit var arbeidsgiver: Arbeidsgiver
 
         init {
             person.accept(this)
@@ -171,6 +171,11 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
+
+
+    internal fun sisteBehov(id: UUID) =
+        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
+
 
     override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
         if (!inGyldigePerioder || førsteFraværsdag == null) return
