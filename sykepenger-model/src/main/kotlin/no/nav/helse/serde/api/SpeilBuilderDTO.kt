@@ -44,6 +44,7 @@ data class VedtaksperiodeDTO(
     val automatiskBehandlet: Boolean,
     val vilkår: VilkårDTO,
     val beregningsdato: LocalDate?,
+    val førsteFraværsdag: LocalDate? = beregningsdato, // TODO: bare til Speil er tilpasst nytt navn
     val inntektFraInntektsmelding: Double?,
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,

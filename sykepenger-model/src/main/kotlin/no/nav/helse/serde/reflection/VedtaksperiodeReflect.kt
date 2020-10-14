@@ -109,7 +109,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
-        "førsteFraværsdag" to beregningsdato, // TODO: ta bort når speil er tilpasset nytt navn
         "beregningsdato" to beregningsdato,
         "inntektFraInntektsmelding" to beregningsdato?.let { arbeidsgiver.inntekt(it)?.get<Double>("årlig")?.div(12.0) },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
