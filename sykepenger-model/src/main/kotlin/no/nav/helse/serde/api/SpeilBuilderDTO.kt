@@ -43,7 +43,7 @@ data class VedtaksperiodeDTO(
     val godkjenttidspunkt: LocalDateTime?,
     val automatiskBehandlet: Boolean,
     val vilkår: VilkårDTO,
-    val førsteFraværsdag: LocalDate?,
+    val beregningsdato: LocalDate?,
     val inntektFraInntektsmelding: Double?,
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,
@@ -268,7 +268,7 @@ data class VilkårDTO(
 
 data class SykepengedagerDTO(
     val forbrukteSykedager: Int?,
-    val førsteFraværsdag: LocalDate?,
+    val beregningsdato: LocalDate?,
     val førsteSykepengedag: LocalDate?,
     val maksdato: LocalDate?,
     val gjenståendeDager: Int?,

@@ -18,7 +18,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val automatiskBehandling: Boolean? = vedtaksperiode["automatiskBehandling"]
-    private val førsteFraværsdag:LocalDate? = vedtaksperiode["førsteFraværsdag"]
+    private val beregningsdato:LocalDate? = vedtaksperiode["beregningsdato"]
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
@@ -91,7 +91,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
-        "førsteFraværsdag" to førsteFraværsdag,
+        "beregningsdato" to beregningsdato,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "personFagsystemId" to personFagsystemId,
@@ -109,8 +109,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
-        "førsteFraværsdag" to førsteFraværsdag,
-        "inntektFraInntektsmelding" to førsteFraværsdag?.let { arbeidsgiver.inntekt(it)?.get<Double>("årlig")?.div(12.0) },
+        "førsteFraværsdag" to beregningsdato, // TODO: ta bort når speil er tilpasset nytt navn
+        "beregningsdato" to beregningsdato,
+        "inntektFraInntektsmelding" to beregningsdato?.let { arbeidsgiver.inntekt(it)?.get<Double>("årlig")?.div(12.0) },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 }

@@ -17,8 +17,8 @@ class Opptjeningvurdering(
     internal fun harOpptjening(orgnummer: String) =
         opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, førsteFraværsdag: LocalDate): Aktivitetslogg {
-        Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, førsteFraværsdag)
+    internal fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, beregningsdato: LocalDate): Aktivitetslogg {
+        Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, beregningsdato)
         if (harOpptjening(orgnummer)) aktivitetslogg.info(
             "Har minst %d dager opptjening",
             TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
@@ -32,21 +32,21 @@ class Opptjeningvurdering(
         private val fom: LocalDate,
         private val tom: LocalDate? = null
     ) {
-        private fun opptjeningsdager(førsteFraværsdag: LocalDate): Int {
-            if (fom > førsteFraværsdag) return 0
-            if (tom != null && tom < førsteFraværsdag) return 0
-            return fom.datesUntil(førsteFraværsdag).count().toInt()
+        private fun opptjeningsdager(beregningsdato: LocalDate): Int {
+            if (fom > beregningsdato) return 0
+            if (tom != null && tom < beregningsdato) return 0
+            return fom.datesUntil(beregningsdato).count().toInt()
         }
 
         internal companion object {
             fun opptjeningsdager(
                 liste: List<Arbeidsforhold>,
                 map: MutableMap<String, Int>,
-                førsteFraværsdag: LocalDate
+                beregningsdato: LocalDate
             ) {
                 liste.forEach {
                     map.compute(it.orgnummer) { _, opptjeningsdager ->
-                        val dager = it.opptjeningsdager(førsteFraværsdag)
+                        val dager = it.opptjeningsdager(beregningsdato)
                         opptjeningsdager?.let { max(it, dager) } ?: dager
                     }
                 }

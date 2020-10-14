@@ -8,7 +8,7 @@ import java.time.LocalDate
 internal class MaksimumUtbetaling(
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val aktivitetslogg: Aktivitetslogg,
-    private val førsteFraværsdag: LocalDate
+    private val beregningsdato: LocalDate
 ) {
 
     private var harRedusertUtbetaling = false
@@ -16,7 +16,7 @@ internal class MaksimumUtbetaling(
     internal fun betal() {
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
-                økonomiList.betal(førsteFraværsdag)
+                økonomiList.betal(beregningsdato)
                 harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()
             }
         }

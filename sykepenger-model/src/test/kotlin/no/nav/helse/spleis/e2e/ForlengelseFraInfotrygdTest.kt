@@ -39,7 +39,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(3.januar, inspektør.førsteFraværsdag(0)) {
+        assertEquals(3.januar, inspektør.beregningsdato(0)) {
             "Første fraværsdag settes til den første utbetalte dagen fordi " +
                 "vi ikke er i stand til å regne den ut selv ennå. " +
                 "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"
@@ -118,7 +118,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
-        assertEquals(3.januar, inspektør.førsteFraværsdag(0)) {
+        assertEquals(3.januar, inspektør.beregningsdato(0)) {
             "Første fraværsdag settes til den første utbetalte dagen fordi " +
                 "vi ikke er i stand til å regne den ut selv ennå. " +
                 "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"

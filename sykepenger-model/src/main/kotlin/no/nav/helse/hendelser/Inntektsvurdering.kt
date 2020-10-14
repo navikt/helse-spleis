@@ -59,8 +59,8 @@ class Inntektsvurdering(
     private fun avviksprosent(beregnetInntekt: Inntekt) =
         beregnetInntekt.avviksprosent(sammenligningsgrunnlag)
 
-    internal fun lagreInntekter(person: Person, førsteFraværsdag: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =
-        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, førsteFraværsdag, vilkårsgrunnlag)
+    internal fun lagreInntekter(person: Person, beregningsdato: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =
+        ArbeidsgiverInntekt.lagreInntekter(inntekter, person, beregningsdato, vilkårsgrunnlag)
 
     class ArbeidsgiverInntekt(
         private val arbeidsgiver: String,
@@ -68,10 +68,10 @@ class Inntektsvurdering(
     ) {
         internal fun lagreInntekter(
             inntektshistorikk: InntektshistorikkVol2,
-            førsteFraværsdag: LocalDate,
+            beregningsdato: LocalDate,
             meldingsreferanseId: UUID
         ) {
-            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, førsteFraværsdag, meldingsreferanseId)
+            MånedligInntekt.lagreInntekter(inntekter, inntektshistorikk, beregningsdato, meldingsreferanseId)
         }
 
         private fun harInntekter() = inntekter.isNotEmpty()
@@ -80,10 +80,10 @@ class Inntektsvurdering(
             fun lagreInntekter(
                 inntekter: List<ArbeidsgiverInntekt>,
                 person: Person,
-                førsteFraværsdag: LocalDate,
+                beregningsdato: LocalDate,
                 vilkårsgrunnlag: Vilkårsgrunnlag
             ) {
-                inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, førsteFraværsdag, vilkårsgrunnlag) }
+                inntekter.forEach { person.lagreInntekter(it.arbeidsgiver, it, beregningsdato, vilkårsgrunnlag) }
             }
 
             internal fun kilder(inntekter: List<ArbeidsgiverInntekt>, antallMåneder: Int) =
@@ -145,14 +145,14 @@ class Inntektsvurdering(
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
                     inntektshistorikk: InntektshistorikkVol2,
-                    førsteFraværsdag: LocalDate,
+                    beregningsdato: LocalDate,
                     meldingsreferanseId: UUID
                 ) {
                     inntektshistorikk {
                         inntekter.forEach {
                             when (it.inntektsgrunnlag) {
                                 Inntektsgrunnlag.SYKEPENGEGRUNNLAG -> addSkattSykepengegrunnlag(
-                                    dato = førsteFraværsdag,
+                                    dato = beregningsdato,
                                     hendelseId = meldingsreferanseId,
                                     beløp = it.inntekt,
                                     måned = it.yearMonth,
@@ -162,7 +162,7 @@ class Inntektsvurdering(
                                 )
                                 Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG ->
                                     addSkattSammenligningsgrunnlag(
-                                        dato = førsteFraværsdag,
+                                        dato = beregningsdato,
                                         hendelseId = meldingsreferanseId,
                                         beløp = it.inntekt,
                                         måned = it.yearMonth,

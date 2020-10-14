@@ -11,7 +11,7 @@ internal class ArbeidsavklaringspengerTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
-        private val førsteFraværsdag = 3.mars
+        private val beregningsdato = 3.mars
     }
 
     @Test
@@ -23,8 +23,8 @@ internal class ArbeidsavklaringspengerTest {
     @Test
     fun `AAP eldre enn 6 måneder`() {
         assertFalse(undersøke(Periode(
-            fom = førsteFraværsdag.minusMonths(8),
-            tom = førsteFraværsdag.minusMonths(6).minusDays(1)
+            fom = beregningsdato.minusMonths(8),
+            tom = beregningsdato.minusMonths(6).minusDays(1)
         )))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -32,8 +32,8 @@ internal class ArbeidsavklaringspengerTest {
     @Test
     fun `AAP innenfor 6 måneder`() {
         assertFalse(undersøke(Periode(
-            fom = førsteFraværsdag.minusMonths(8),
-            tom = førsteFraværsdag.minusMonths(6)
+            fom = beregningsdato.minusMonths(8),
+            tom = beregningsdato.minusMonths(6)
         )))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -41,6 +41,6 @@ internal class ArbeidsavklaringspengerTest {
     private fun undersøke(vararg perioder: Periode): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val aap = Arbeidsavklaringspenger(perioder.toList())
-        return aap.valider(aktivitetslogg, førsteFraværsdag).hasErrorsOrWorse()
+        return aap.valider(aktivitetslogg, beregningsdato).hasErrorsOrWorse()
     }
 }

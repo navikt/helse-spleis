@@ -118,13 +118,13 @@ internal class VilkårsgrunnlagTest {
     }
 
     private fun førsteFraværsdag(): LocalDate {
-        var _førsteFraværsdag: LocalDate? = null
+        var dato: LocalDate? = null
         person.accept(object : PersonVisitor {
-            override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-                _førsteFraværsdag = førsteFraværsdag
+            override fun visitBeregningsdato(beregningsdato: LocalDate?) {
+                dato = beregningsdato
             }
         })
-        return requireNotNull(_førsteFraværsdag)
+        return requireNotNull(dato)
     }
 
 

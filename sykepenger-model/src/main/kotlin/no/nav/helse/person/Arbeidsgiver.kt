@@ -284,12 +284,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagreInntekter(
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
-        førsteFraværsdag: LocalDate,
+        beregningsdato: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         arbeidsgiverInntekt.lagreInntekter(
             inntektshistorikkVol2,
-            førsteFraværsdag,
+            beregningsdato,
             vilkårsgrunnlag.meldingsreferanseId()
         )
     }

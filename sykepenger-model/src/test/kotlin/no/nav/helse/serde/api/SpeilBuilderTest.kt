@@ -18,7 +18,7 @@ import java.util.*
 
 class SpeilBuilderTest {
     @Test
-    fun `dager før førsteFraværsdag og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
+    fun `dager før beregningsdato og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
 
@@ -285,13 +285,13 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `forlengelse fra Infotrygd får riktig første fraværsdag`() {
+    fun `forlengelse fra Infotrygd får riktig beregningsdato`() {
         val fom1Periode = 1.januar
         val tom1Periode = 31.januar
-        val førsteFraværsdagInfotrygd = 1.desember(2017)
+        val beregningsdatoFraInfotrygd = 1.desember(2017)
         val fom2Periode = 1.februar
         val tom2Periode = 14.februar
-        val inntektshistorikk = listOf(Inntektsopplysning(førsteFraværsdagInfotrygd, 31000.månedlig, orgnummer, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(beregningsdatoFraInfotrygd, 31000.månedlig, orgnummer, true))
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
@@ -316,7 +316,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = førsteFraværsdagInfotrygd,
+                        fom = beregningsdatoFraInfotrygd,
                         tom = 4.januar
                     )
                 )
@@ -335,7 +335,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = førsteFraværsdagInfotrygd,
+                        fom = beregningsdatoFraInfotrygd,
                         tom = tom1Periode,
                         inntektshistorikk = inntektshistorikk
                     )
@@ -344,7 +344,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = førsteFraværsdagInfotrygd,
+                        fom = beregningsdatoFraInfotrygd,
                         tom = tom1Periode,
                         inntektshistorikk = inntektshistorikk
                     )
@@ -363,8 +363,8 @@ class SpeilBuilderTest {
             }
 
         // Denne periode er forlengelse av Infotrygd-periode.
-        // Kombinasjonen førsteFraværsdag != første dag i sykdomstidslinjen og JA fører til riktig visnig
-        assertEquals(førsteFraværsdagInfotrygd, vedtaksperioder.first().førsteFraværsdag)
+        // Kombinasjonen beregningsdato != første dag i sykdomstidslinjen og JA fører til riktig visnig
+        assertEquals(beregningsdatoFraInfotrygd, vedtaksperioder.first().beregningsdato)
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
@@ -453,7 +453,7 @@ class SpeilBuilderTest {
 
         val sykepengedager = vilkår.sykepengedager
         assertEquals(11, sykepengedager.forbrukteSykedager)
-        assertEquals(fom, sykepengedager.førsteFraværsdag)
+        assertEquals(fom, sykepengedager.beregningsdato)
         assertEquals(fom.plusDays(16), sykepengedager.førsteSykepengedag)
         assertEquals(28.desember, sykepengedager.maksdato)
         assertEquals(237, sykepengedager.gjenståendeDager)

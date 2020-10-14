@@ -224,12 +224,12 @@ class Person private constructor(
     internal fun lagreInntekter(
         arbeidsgiverId: String,
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
-        førsteFraværsdag: LocalDate,
+        beregningsdato: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(
             arbeidsgiverInntekt,
-            førsteFraværsdag,
+            beregningsdato,
             vilkårsgrunnlag
         )
     }

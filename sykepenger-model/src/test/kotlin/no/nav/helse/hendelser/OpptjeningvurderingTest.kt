@@ -12,7 +12,7 @@ internal class OpptjeningvurderingTest {
 
     private companion object {
         private const val ORGNUMMER = "345"
-        private val FØRSTE_FRAVÆRSDAG = 1.januar
+        private val BEREGNINGSDATO = 1.januar
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -26,16 +26,16 @@ internal class OpptjeningvurderingTest {
     }
 
     @Test
-    fun `arbeidsforhold nyere enn første fraværsdag`() {
-        assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, FØRSTE_FRAVÆRSDAG.plusDays(1)))) {
+    fun `arbeidsforhold nyere enn beregningsdato`() {
+        assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, BEREGNINGSDATO.plusDays(1)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
         })
     }
 
     @Test
-    fun `arbeidsforhold avsluttet før fraværsdag`() {
-        assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, LocalDate.MIN, FØRSTE_FRAVÆRSDAG.minusDays(1)))) {
+    fun `arbeidsforhold avsluttet før beregningsdato`() {
+        assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, LocalDate.MIN, BEREGNINGSDATO.minusDays(1)))) {
             assertEquals(0, it.opptjeningsdager(ORGNUMMER))
             assertFalse(it.harOpptjening(ORGNUMMER))
         })
@@ -80,7 +80,7 @@ internal class OpptjeningvurderingTest {
     private fun undersøke(arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>, test: (Opptjeningvurdering) -> Unit): Boolean {
         aktivitetslogg = Aktivitetslogg()
         val opptjeningvurdering = Opptjeningvurdering(arbeidsforhold)
-        return opptjeningvurdering.valider(aktivitetslogg, ORGNUMMER, FØRSTE_FRAVÆRSDAG).hasErrorsOrWorse().also {
+        return opptjeningvurdering.valider(aktivitetslogg, ORGNUMMER, BEREGNINGSDATO).hasErrorsOrWorse().also {
             test(opptjeningvurdering)
         }
     }

@@ -51,11 +51,11 @@ internal class ØkonomiDagTest {
     @Test
     fun `Bruerk riktig G-verdi ved begrensning`() {
         tidslinjeOf(2.NAV(3000)).let { tidslinje ->
-            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), førsteFraværsdag = 30.april(2019)).betal()
+            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), beregningsdato = 30.april(2019)).betal()
             assertØkonomi(tidslinje, 2236)
         }
         tidslinjeOf(2.NAV(3000)).let { tidslinje ->
-            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), førsteFraværsdag = 1.mai(2019)).betal()
+            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), beregningsdato = 1.mai(2019)).betal()
             assertØkonomi(tidslinje, 2304)
         }
     }

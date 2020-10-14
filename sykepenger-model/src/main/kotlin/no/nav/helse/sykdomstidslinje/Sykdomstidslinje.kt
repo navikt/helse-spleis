@@ -121,14 +121,11 @@ internal class Sykdomstidslinje private constructor(
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
-    internal fun førsteFraværsdag(): LocalDate? {
-        return førsteSykedagDagEtterSisteIkkeSykedag() ?: førsteSykedag()
+    internal fun beregningsdato(): LocalDate? {
+        return førsteSykedagISisteSammenhengendeSykefravær() ?: førsteSykedag()
     }
 
-    /**
-     * Første fraværsdag i siste sammenhengende sykefravær i perioden
-     */
-    private fun førsteSykedagDagEtterSisteIkkeSykedag() =
+    private fun førsteSykedagISisteSammenhengendeSykefravær() =
         fjernDagerEtterSisteSykedag().let { tidslinje ->
             tidslinje.periode?.lastOrNull { this[it] is Arbeidsdag || this[it] is FriskHelgedag || this[it] is UkjentDag }
                 ?.let { ikkeSykedag ->

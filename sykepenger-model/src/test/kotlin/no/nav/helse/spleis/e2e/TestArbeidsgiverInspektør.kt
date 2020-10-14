@@ -28,7 +28,7 @@ internal class TestArbeidsgiverInspektør(
     private var vedtaksperiodeindeks: Int = -1
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
-    private val førsteFraværsdager = mutableMapOf<Int, LocalDate>()
+    private val beregningsdatoer = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val gjenståendeSykedagerer = mutableMapOf<Int, Int>()
     private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
@@ -177,9 +177,9 @@ internal class TestArbeidsgiverInspektør(
         personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
 
 
-    override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-        if (!inGyldigePerioder || førsteFraværsdag == null) return
-        førsteFraværsdager[vedtaksperiodeindeks] = førsteFraværsdag
+    override fun visitBeregningsdato(beregningsdato: LocalDate?) {
+        if (!inGyldigePerioder || beregningsdato == null) return
+        beregningsdatoer[vedtaksperiodeindeks] = beregningsdato
     }
 
     override fun visitMaksdato(maksdato: LocalDate?) {
@@ -328,7 +328,7 @@ internal class TestArbeidsgiverInspektør(
         "Missing collection initialization"
     }
 
-    internal fun førsteFraværsdag(indeks: Int) = førsteFraværsdager[indeks] ?: fail {
+    internal fun beregningsdato(indeks: Int) = beregningsdatoer[indeks] ?: fail {
         "Missing collection initialization"
     }
 

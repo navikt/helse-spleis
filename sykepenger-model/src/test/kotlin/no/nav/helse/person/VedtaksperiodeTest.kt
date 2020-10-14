@@ -52,31 +52,31 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `første fraversdag skal returnere første fraversdag fra inntektsmelding`() {
+    fun `beregningsdato stemmer med første fraversdag fra inntektsmelding`() {
         val førsteFraværsdag = 20.oktober
         val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 
-        assertEquals(førsteFraværsdag, førsteFraværsdag(vedtaksperiode))
+        assertEquals(førsteFraværsdag, beregningsdato(vedtaksperiode))
     }
 
     @Test
-    fun `om en inntektsmelding ikke er mottat skal første fraværsdag returnere null`() {
+    fun `om en inntektsmelding ikke er mottat skal beregningsdato beregnes`() {
         val vedtaksperiode = periodeFor(
             sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
         )
 
-        assertNull(førsteFraværsdag(vedtaksperiode))
+        assertNull(beregningsdato(vedtaksperiode))
     }
 
-    private fun førsteFraværsdag(vedtaksperiode: Vedtaksperiode): LocalDate? {
-        var _førsteFraværsdag: LocalDate? = null
+    private fun beregningsdato(vedtaksperiode: Vedtaksperiode): LocalDate? {
+        var dato: LocalDate? = null
         vedtaksperiode.accept(object : VedtaksperiodeVisitor {
-            override fun visitFørsteFraværsdag(førsteFraværsdag: LocalDate?) {
-                _førsteFraværsdag = førsteFraværsdag
+            override fun visitBeregningsdato(beregningsdato: LocalDate?) {
+                dato = beregningsdato
             }
         })
-        return _førsteFraværsdag
+        return dato
     }
 
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =

@@ -86,7 +86,7 @@ internal class OverlapMergeTest {
     }
 
     @Test
-    fun `første fraværsdag`() {
+    fun `gradert sykedag med ferie`() {
         tidslinje = listOf(
             1.januar sykTil 1.januar grad 50,
             5.januar ferieTil 8.januar
