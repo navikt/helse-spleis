@@ -36,6 +36,8 @@ private fun originalJson() =
         },
         {
           "førsteFraværsdag": null
+        },
+        {
         }
       ],
       "forkastede": [
@@ -64,6 +66,9 @@ private fun expectedJson() =
         },
         {
           "førsteFraværsdag": null,
+          "beregningsdato": null
+        },
+        {
           "beregningsdato": null
         }
       ],
