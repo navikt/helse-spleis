@@ -93,7 +93,8 @@ internal class GodkjenningHendelseTest {
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
-        automatiskBehandling = false
+        automatiskBehandling = false,
+        saksbehandlerEpost = "ola@nordmann.ss"
     ).apply {
         hendelse = this
     }

@@ -409,7 +409,8 @@ class PåminnelserOgTimeoutTest {
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
         godkjenttidspunkt = LocalDateTime.now(),
-        automatiskBehandling = false
+        automatiskBehandling = false,
+        saksbehandlerEpost = "ola@normann.ss"
     ).apply {
         hendelse = this
     }

@@ -42,13 +42,18 @@ class JsonBuilderTest {
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
         assertEquals(TilstandType.AVSLUTTET, tilstand)
-        val personPre = objectMapper.writeValueAsString(person)
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
-        val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
+        val personPost = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
-        val personPost = objectMapper.writeValueAsString(personDeserialisert)
-        assertEquals(personPre, personPost, personPre)
+
+        assertJsonEquals(person, personPost)
+    }
+
+    private fun assertJsonEquals(expected: Any, actual: Any) {
+        val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
+        val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
+        assertEquals(expectedJson, actualJson)
     }
 
     @Test
@@ -368,7 +373,8 @@ class JsonBuilderTest {
             utbetalingGodkjent = true,
             saksbehandler = "en_saksbehandler_ident",
             godkjenttidspunkt = LocalDateTime.now(),
-            automatiskBehandling = false
+            automatiskBehandling = false,
+            saksbehandlerEpost = "noe@ikke.no"
         )
 
         fun simulering(vedtaksperiodeId: String) = Simulering(

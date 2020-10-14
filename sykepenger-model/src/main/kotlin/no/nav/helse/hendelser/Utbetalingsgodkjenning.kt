@@ -12,6 +12,7 @@ class Utbetalingsgodkjenning(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
+    private val saksbehandlerEpost: String,
     private val utbetalingGodkjent: Boolean,
     private val godkjenttidspunkt: LocalDateTime,
     private val automatiskBehandling: Boolean
@@ -19,6 +20,7 @@ class Utbetalingsgodkjenning(
 
     internal fun vedtaksperiodeId() = vedtaksperiodeId
     internal fun saksbehandler() = saksbehandler
+    internal fun saksbehandlerEpost() = saksbehandlerEpost
     internal fun godkjenttidspunkt() = godkjenttidspunkt
     internal fun automatiskBehandling() = automatiskBehandling
 

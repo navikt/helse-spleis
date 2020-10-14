@@ -1211,7 +1211,8 @@ class SpeilBuilderTest {
                 utbetalingGodkjent = utbetalingGodkjent,
                 saksbehandler = if (automatiskBehandling) "Automatisk behandlet" else "en_saksbehandler_ident",
                 godkjenttidspunkt = LocalDateTime.now(),
-                automatiskBehandling = automatiskBehandling
+                automatiskBehandling = automatiskBehandling,
+                saksbehandlerEpost = "mille.mellomleder@nav.no"
             )
 
         private fun simulering(vedtaksperiodeId: String) = Simulering(

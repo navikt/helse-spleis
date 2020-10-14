@@ -85,6 +85,7 @@ internal class MessageMediatorTest {
             tilstand = TilstandType.START,
             utbetalingGodkjent = true,
             saksbehandlerIdent = "en_saksbehandler",
+            saksbehandlerEpost = "en_saksbehandler@ikke.no",
             automatiskBehandling = false
         ))
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)

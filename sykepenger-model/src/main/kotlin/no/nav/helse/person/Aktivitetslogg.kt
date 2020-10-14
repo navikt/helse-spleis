@@ -87,7 +87,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
     internal fun warn() = Aktivitet.Warn.filter(aktiviteter)
-    override fun behov() = Aktivitet.Behov.filter(aktiviteter)
+    override fun behov() = Behov.filter(aktiviteter)
     private fun error() = Aktivitet.Error.filter(aktiviteter)
     private fun severe() = Aktivitet.Severe.filter(aktiviteter)
 
@@ -124,7 +124,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         internal fun inOrder() = label + "\t" + this.toString()
 
-        override fun toString() = label + "  \t" +  tidsstempel + "  \t" + melding + meldingerString()
+        override fun toString() = label + "  \t" + tidsstempel + "  \t" + melding + meldingerString()
 
         private fun meldingerString(): String {
             return kontekster.joinToString(separator = "") { " (${it.melding()})" }
@@ -246,7 +246,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     beregningSlutt: YearMonth
                 ) {
                     aktivitetslogg.behov(
-                        Behovtype.InntekterForSammenligningsgrunnlag, "Trenger inntekter for sammenligningsgrunnlag", mapOf(
+                        Behovtype.InntekterForSammenligningsgrunnlag,
+                        "Trenger inntekter for sammenligningsgrunnlag",
+                        mapOf(
                             "beregningStart" to beregningStart.toString(),
                             "beregningSlutt" to beregningSlutt.toString()
                         )
@@ -329,13 +331,19 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg: IAktivitetslogg,
                     oppdrag: Oppdrag,
                     maksdato: LocalDate? = null,
-                    saksbehandler: String
+                    saksbehandler: String,
+                    saksbehandlerEpost: String,
+                    godkjenttidspunkt: LocalDateTime,
+                    annullering: Boolean
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Utbetaling,
                         "Trenger å sende utbetaling til Oppdrag",
                         OppdragReflect(oppdrag).toMap().apply {
                             put("saksbehandler", saksbehandler)
+                            put("saksbehandlerEpost", saksbehandlerEpost)
+                            put("godkjenttidspunkt", godkjenttidspunkt.toString())
+                            put("annullering", annullering)
                             maksdato?.let { put("maksdato", maksdato.toString()) }
                         })
                 }

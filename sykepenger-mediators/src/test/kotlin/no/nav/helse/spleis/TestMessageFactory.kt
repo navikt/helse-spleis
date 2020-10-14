@@ -339,6 +339,7 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         utbetalingGodkjent: Boolean,
         saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
         automatiskBehandling: Boolean
     ): String {
         return lagBehovMedLøsning(
@@ -349,6 +350,7 @@ internal class TestMessageFactory(
                 "Godkjenning" to mapOf(
                     "godkjent" to utbetalingGodkjent,
                     "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
                     "automatiskBehandling" to automatiskBehandling,
                     "godkjenttidspunkt" to LocalDateTime.now()
                 )

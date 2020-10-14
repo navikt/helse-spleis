@@ -205,7 +205,8 @@ internal class TilUtbetalingHendelseTest {
         saksbehandler = godkjentAv,
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
-        automatiskBehandling = automatiskBehandling
+        automatiskBehandling = automatiskBehandling,
+        saksbehandlerEpost = "mille.mellomleder@nav.no"
     ).apply {
         hendelse = this
     }

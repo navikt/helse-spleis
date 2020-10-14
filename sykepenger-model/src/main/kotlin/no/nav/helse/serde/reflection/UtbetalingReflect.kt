@@ -52,7 +52,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
 }
 
 private class UtbetalingstidslinjeReflect(private val utbetalingstidslinje: Utbetalingstidslinje) {
-    internal fun toMap() = mutableMapOf<String, Any?>(
+    fun toMap() = mutableMapOf<String, Any?>(
         "dager" to utbetalingstidslinje.map {
             when(it::class) {
                 Arbeidsdag::class -> UtbetalingsdagReflect(it, TypeData.Arbeidsdag).toMap()

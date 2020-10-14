@@ -55,7 +55,8 @@ internal class UtbetalingReflectTest {
             Aktivitetslogg(),
             emptyList()
         ).also { utbetaling ->
-            utbetaling.håndter(UtbetalingHendelse(
+            utbetaling.håndter(
+                UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),
                     vedtaksperiodeId = "ignore",
                     aktørId = "ignore",
@@ -124,4 +125,4 @@ internal class UtbetalingReflectTest {
 inline fun <reified T : Any> Any?.castAsList() = this as List<T>
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T : Any, U: Any> Any?.castAsMap() = this as Map<T,U>
+inline fun <reified T : Any, U : Any> Any?.castAsMap() = this as Map<T, U>

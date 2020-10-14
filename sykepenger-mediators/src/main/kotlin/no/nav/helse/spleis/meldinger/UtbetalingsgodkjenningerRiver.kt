@@ -19,6 +19,7 @@ internal class UtbetalingsgodkjenningerRiver(
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
         packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
+        packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")
         packet.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
         packet.requireKey("@løsning.${Godkjenning.name}.automatiskBehandling")
     }

@@ -1429,11 +1429,19 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
+            val godkjentAvEpost = hendelse
+                .takeIf { it is Utbetalingsgodkjenning }
+                ?.let { it as Utbetalingsgodkjenning }
+                ?.saksbehandlerEpost()
+
             sendUtbetalingsbehov(
                 hendelse,
                 vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
                 requireNotNull(vedtaksperiode.maksdato),
-                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" }
+                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                requireNotNull(godkjentAvEpost) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                requireNotNull(vedtaksperiode.godkjenttidspunkt) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                annullering = false
             )
         }
 

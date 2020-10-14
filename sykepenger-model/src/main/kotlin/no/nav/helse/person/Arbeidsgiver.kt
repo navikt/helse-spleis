@@ -214,7 +214,10 @@ internal class Arbeidsgiver private constructor(
         sendUtbetalingsbehov(
             aktivitetslogg = hendelse.aktivitetslogg,
             oppdrag = utbetaling.arbeidsgiverOppdrag(),
-            saksbehandler = hendelse.saksbehandler
+            godkjenttidspunkt = hendelse.opprettet,
+            saksbehandler = hendelse.saksbehandler,
+            saksbehandlerEpost = hendelse.saksbehandlerEpost,
+            annullering = true
         )
     }
 

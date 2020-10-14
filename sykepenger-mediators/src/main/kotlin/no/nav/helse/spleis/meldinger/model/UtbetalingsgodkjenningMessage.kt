@@ -12,6 +12,7 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val saksbehandler = packet["@løsning.${Godkjenning.name}.saksbehandlerIdent"].asText()
+    private val saksbehandlerEpost = packet["@løsning.${Godkjenning.name}.saksbehandlerEpost"].asText()
     private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
     private val automatiskBehandling = packet["@løsning.${Godkjenning.name}.automatiskBehandling"].asBoolean()
@@ -24,6 +25,7 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = saksbehandler,
+            saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
             utbetalingGodkjent = utbetalingGodkjent,
             automatiskBehandling = automatiskBehandling
