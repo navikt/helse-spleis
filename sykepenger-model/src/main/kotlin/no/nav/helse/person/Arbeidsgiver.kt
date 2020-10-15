@@ -262,6 +262,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
+    internal fun beregningsdato(kuttdato: LocalDate): LocalDate? {
+        if (!harHistorikk() || kuttdato == LocalDate.MAX) return null
+        return sykdomstidslinje()
+            .kuttFremTilOgMed(kuttdato)
+            .beregningsdato()
+    }
+
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     internal fun inntekt(dato: LocalDate): Inntekt? = inntektshistorikk.inntekt(dato)

@@ -52,12 +52,12 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `beregningsdato stemmer med første fraversdag fra inntektsmelding`() {
+    fun `beregningsdato stemmer ikke med førsteFraværsdag fra inntektsmelding når den er oppgitt feil`() {
         val førsteFraværsdag = 20.oktober
         val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 
-        assertEquals(førsteFraværsdag, beregningsdato(vedtaksperiode))
+        assertEquals(10.september, beregningsdato(vedtaksperiode))
     }
 
     @Test
@@ -66,7 +66,7 @@ internal class VedtaksperiodeTest {
             sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
         )
 
-        assertNull(beregningsdato(vedtaksperiode))
+        assertEquals(1.juli, beregningsdato(vedtaksperiode))
     }
 
     private fun beregningsdato(vedtaksperiode: Vedtaksperiode): LocalDate? {

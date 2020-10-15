@@ -103,7 +103,6 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
         automatiskBehandlet = this["automatiskBehandling"] as Boolean? ?: false,
         vilkår = vilkår,
-        beregningsdato = this["beregningsdato"] as? LocalDate,
         inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as? Double,
         totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Int,
         hendelser = hendelser,
@@ -199,9 +198,9 @@ internal fun mapVilkår(
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
-    val beregningsdato = vedtaksperiodeMap["beregningsdato"] as? LocalDate
-    val sykepengegrunnlag = sykepengegrunnlag(inntekter, beregningsdato ?: LocalDate.MAX)
-    val beregnetMånedsinntekt = inntekt(inntekter, beregningsdato ?: LocalDate.MAX)
+    val beregningsdato = vedtaksperiodeMap["beregningsdato"] as LocalDate
+    val sykepengegrunnlag = sykepengegrunnlag(inntekter, beregningsdato)
+    val beregnetMånedsinntekt = inntekt(inntekter, beregningsdato)
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
@@ -221,10 +220,8 @@ internal fun mapVilkår(
         alderSisteSykedag = alderSisteSykepengedag,
         oppfylt = personalder.øvreAldersgrense.isAfter(sisteSykepengedagEllerSisteDagIPerioden)
     )
-    val opptjening = beregningsdato?.let {
-        dataForVilkårsvurdering?.let {
-            mapOpptjening(beregningsdato, it)
-        }
+    val opptjening = dataForVilkårsvurdering?.let {
+        mapOpptjening(beregningsdato, it)
     }
     val søknadsfrist = søknadNav?.let {
         SøknadsfristDTO(
@@ -234,20 +231,18 @@ internal fun mapVilkår(
             oppfylt = søknadsfristOppfylt(it)
         )
     }
-    val sykepengegrunnlagDTO = beregningsdato?.let {
-        SykepengegrunnlagDTO(
-            sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
-            grunnbeløp = (Grunnbeløp.`1G`
-                .beløp(beregningsdato)
-                .reflection { årlig, _, _, _ -> årlig })
-                .toInt(),
-            oppfylt = sykepengegrunnlagOppfylt(
-                personalder = personalder,
-                beregnetMånedsinntekt = beregnetMånedsinntekt,
-                beregningsdato = beregningsdato
-            )
+    val sykepengegrunnlagDTO = SykepengegrunnlagDTO(
+        sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
+        grunnbeløp = (Grunnbeløp.`1G`
+            .beløp(beregningsdato)
+            .reflection { årlig, _, _, _ -> årlig })
+            .toInt(),
+        oppfylt = sykepengegrunnlagOppfylt(
+            personalder = personalder,
+            beregnetMånedsinntekt = beregnetMånedsinntekt,
+            beregningsdato = beregningsdato
         )
-    }
+    )
     val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus;
     return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO, medlemskapstatusDTO)
 }

@@ -43,7 +43,7 @@ internal class InntektsmeldingHendelseTest {
     @Test
     fun `beregningdato oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
-        assertThrows<AssertionFailedError> { inspektør.beregningsdato(0) }
+        assertEquals(6.januar, inspektør.beregningsdato(0))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(1.januar, inspektør.beregningsdato(0))

@@ -48,7 +48,7 @@ class JsonBuilderTest {
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
-        assertEquals(personPre, personPost, personPre.toString())
+        assertEquals(personPre, personPost, personPre)
     }
 
     @Test

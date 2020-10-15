@@ -364,7 +364,6 @@ class SpeilBuilderTest {
 
         // Denne periode er forlengelse av Infotrygd-periode.
         // Kombinasjonen beregningsdato != første dag i sykdomstidslinjen og JA fører til riktig visnig
-        assertEquals(beregningsdatoFraInfotrygd, vedtaksperioder.first().beregningsdato)
         assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
