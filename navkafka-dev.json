@@ -274,6 +274,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkelsykpmock",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelsykpmock",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
