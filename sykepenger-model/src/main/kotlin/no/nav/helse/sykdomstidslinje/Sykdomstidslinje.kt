@@ -100,10 +100,10 @@ internal class Sykdomstidslinje private constructor(
      * Without padding of days
      */
     internal fun kuttFremTilOgMed(kuttDatoInclusive: LocalDate) =
-        Sykdomstidslinje(dager.headMap(kuttDatoInclusive.plusDays(1)))
+        Sykdomstidslinje(dager.headMap(kuttDatoInclusive.plusDays(1)).toMap())
 
     internal fun kuttFraOgMed(kuttDatoInclusive: LocalDate) =
-        Sykdomstidslinje(dager.tailMap(kuttDatoInclusive))
+        Sykdomstidslinje(dager.tailMap(kuttDatoInclusive).toMap())
 
     internal fun trim(periode: Periode) =
         Sykdomstidslinje(dager.filterNot { it.key in periode })
