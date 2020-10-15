@@ -51,15 +51,15 @@ internal class SykdomstidslinjeTest {
     @Test
     fun `kutter frem til og med`() {
         val tidslinje = Sykdomstidslinje.sykedager(1.februar, 1.mars, 100, TestEvent.testkilde)
-        assertEquals(14.februar, tidslinje.kuttFremTilOgMed(14.februar).sisteDag())
-        assertEquals(1.mars, tidslinje.kuttFremTilOgMed(1.mars).sisteDag())
-        assertEquals(1.mars, tidslinje.kuttFremTilOgMed(1.april).sisteDag())
-        assertEquals(1.februar, tidslinje.kuttFremTilOgMed(1.februar).sisteDag())
+        assertEquals(14.februar, tidslinje.fremTilOgMed(14.februar).sisteDag())
+        assertEquals(1.mars, tidslinje.fremTilOgMed(1.mars).sisteDag())
+        assertEquals(1.mars, tidslinje.fremTilOgMed(1.april).sisteDag())
+        assertEquals(1.februar, tidslinje.fremTilOgMed(1.februar).sisteDag())
         assertEquals(1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100, TestEvent.testkilde)
-            .kuttFremTilOgMed(1.februar)
+            .fremTilOgMed(1.februar)
             .sisteDag())
-        assertEquals(0, tidslinje.kuttFremTilOgMed(tidslinje.førsteDag().minusDays(1)).length())
-        assertEquals(0, Sykdomstidslinje().kuttFremTilOgMed(1.januar).length())
+        assertEquals(0, tidslinje.fremTilOgMed(tidslinje.førsteDag().minusDays(1)).length())
+        assertEquals(0, Sykdomstidslinje().fremTilOgMed(1.januar).length())
     }
 
     @Test
@@ -70,46 +70,6 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals(" AAASS", merged.toShortString())
-    }
-
-    @Test
-    fun sykeperioder() {
-        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.tirsdag, 100.0, TestEvent.testkilde) +
-            Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.testkilde) +
-            Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.testkilde) +
-            Sykdomstidslinje.arbeidsdager(Periode(1.lørdag, 1.søndag), TestEvent.testkilde) +
-            Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.testkilde)
-        val aktivitetslogg = Aktivitetslogg()
-        assertTrue(tidslinje.valider(aktivitetslogg))
-        assertEquals(
-            listOf(Periode(1.mandag, 1.tirsdag), Periode(1.torsdag, 1.fredag), Periode(2.mandag, 2.fredag)),
-            tidslinje.sykeperioder()
-        )
-    }
-
-    @Test
-    fun `sykeperioder starter bare med sykedag`() {
-        val tidslinje = Sykdomstidslinje.foreldetSykedag(1.mandag, 1.tirsdag, 100.0, TestEvent.testkilde) +
-            Sykdomstidslinje.arbeidsdager(1.onsdag, 1.onsdag, TestEvent.testkilde) +
-            Sykdomstidslinje.feriedager(1.torsdag, 1.torsdag, TestEvent.testkilde) +
-            Sykdomstidslinje.foreldetSykedag(1.fredag, 1.fredag, 100.0, TestEvent.testkilde) +
-            Sykdomstidslinje.arbeidsdager(Periode(1.lørdag, 1.søndag), TestEvent.testkilde) +
-            Sykdomstidslinje.sykedager(2.mandag, 2.fredag, 100.0, TestEvent.testkilde)
-        val aktivitetslogg = Aktivitetslogg()
-        assertTrue(tidslinje.valider(aktivitetslogg))
-        assertEquals(
-            listOf(Periode(1.mandag, 1.tirsdag), Periode(1.fredag, 1.fredag), Periode(2.mandag, 2.fredag)),
-            tidslinje.sykeperioder()
-        )
-    }
-
-    @Test
-    fun `første sykeperiode starter bare med sykedag`() {
-        val tidslinje = Sykdomstidslinje.feriedager(1.mandag, 1.tirsdag, TestEvent.testkilde) +
-            Sykdomstidslinje.sykedager(1.onsdag, 1.fredag, 100.0, TestEvent.testkilde)
-        val aktivitetslogg = Aktivitetslogg()
-        assertTrue(tidslinje.valider(aktivitetslogg))
-        assertEquals(listOf(Periode(1.onsdag, 1.fredag)), tidslinje.sykeperioder())
     }
 
     @Test

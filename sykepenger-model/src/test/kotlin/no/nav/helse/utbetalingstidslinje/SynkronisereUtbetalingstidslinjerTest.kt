@@ -60,13 +60,13 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     @Test
-    fun `Sammenhengende periode for en spesifikk periode`() {
-        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(1.januar til 31.januar))
-        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(8.januar til 28.februar))
-        assertEquals(1.januar til 28.februar, person.sammenhengendePeriode(15.januar til 7.februar))
-        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(8.april til 31.mai))
-        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(1.juni til 30.juni))
-        assertEquals(1.april til 30.juni, person.sammenhengendePeriode(1.april til 30.april))
+    fun `beregningsdato`() {
+        assertEquals(1.januar, person.beregningsdato(31.januar))
+        assertEquals(1.januar, person.beregningsdato(28.februar))
+        assertEquals(1.januar, person.beregningsdato(30.mars))
+        assertEquals(1.april, person.beregningsdato(1.april))
+        assertEquals(1.april, person.beregningsdato(31.mai))
+        assertEquals(1.april, person.beregningsdato(1.juli))
     }
 
     @Test

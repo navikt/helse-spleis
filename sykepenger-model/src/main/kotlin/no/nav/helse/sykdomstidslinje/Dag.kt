@@ -28,6 +28,18 @@ internal sealed class Dag(
             høyre
         }
 
+        internal val sammenhengendeSykdom: BesteStrategy = { venstre: Dag, høyre: Dag ->
+            require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
+            when (venstre) {
+                is Sykedag,
+                is SykHelgedag,
+                is Arbeidsgiverdag,
+                is AnnullertDag,
+                is ArbeidsgiverHelgedag -> venstre
+                else -> høyre
+            }
+        }
+
         internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             ProblemDag(

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
@@ -52,12 +53,15 @@ internal class Arbeidsgiver private constructor(
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
-        internal fun sammenhengendeSykeperioder(arbeidsgivere: List<Arbeidsgiver>) =
-            arbeidsgivere
-                .flatMap { it.vedtaksperioder }
-                .map(Vedtaksperiode::sykeperioder)
-                .flatten()
-                .slåSammen()
+        internal fun beregningsdato(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
+            Sykdomstidslinje.beregningsdato(dato, arbeidsgivere
+                .filter(Arbeidsgiver::harHistorikk)
+                .map(Arbeidsgiver::sykdomstidslinje))
+
+        internal fun beregningsperioder(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
+                arbeidsgivere
+                    .filter(Arbeidsgiver::harHistorikk)
+                    .mapNotNull { it.beregningsdato(dato) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -264,9 +268,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun beregningsdato(kuttdato: LocalDate): LocalDate? {
         if (!harHistorikk() || kuttdato == LocalDate.MAX) return null
-        return sykdomstidslinje()
-            .kuttFremTilOgMed(kuttdato)
-            .beregningsdato()
+        return sykdomstidslinje().beregningsdato(kuttdato)
     }
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
@@ -558,7 +560,5 @@ internal enum class ForkastetÅrsak {
     ERSTATTES,
     ANNULLERING
 }
-
-internal fun List<Arbeidsgiver>.sammenhengendeSykeperioder() = Arbeidsgiver.sammenhengendeSykeperioder(this)
 
 internal typealias VedtaksperioderSelector = (Arbeidsgiver, Vedtaksperiode) -> MutableList<Vedtaksperiode>

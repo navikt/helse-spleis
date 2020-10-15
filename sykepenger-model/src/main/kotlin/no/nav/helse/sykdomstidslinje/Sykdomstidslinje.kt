@@ -7,6 +7,7 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.override
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -99,11 +100,11 @@ internal class Sykdomstidslinje private constructor(
     /**
      * Without padding of days
      */
-    internal fun kuttFremTilOgMed(kuttDatoInclusive: LocalDate) =
-        Sykdomstidslinje(dager.headMap(kuttDatoInclusive.plusDays(1)).toMap())
+    internal fun fremTilOgMed(dato: LocalDate) =
+        Sykdomstidslinje(dager.headMap(dato.plusDays(1)).toMap())
 
-    internal fun kuttFraOgMed(kuttDatoInclusive: LocalDate) =
-        Sykdomstidslinje(dager.tailMap(kuttDatoInclusive).toMap())
+    internal fun fraOgMed(dato: LocalDate) =
+        Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(periode: Periode) =
         Sykdomstidslinje(dager.filterNot { it.key in periode })
@@ -120,6 +121,9 @@ internal class Sykdomstidslinje private constructor(
     internal fun låsOpp(periode: Periode) = this.also {
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
+
+    internal fun beregningsdato(kuttdato: LocalDate) =
+        fremTilOgMed(kuttdato).beregningsdato()
 
     internal fun beregningsdato() =
         førsteSykedagEtterSisteOppholdsdag() ?: førsteSykedag()
@@ -192,6 +196,9 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal companion object {
+        internal fun beregningsdato(dato: LocalDate, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+            .merge(sammenhengendeSykdom)
+            .beregningsdato(dato)
 
         internal fun arbeidsdager(periode: Periode?, kilde: Hendelseskilde) =
             Sykdomstidslinje(
@@ -362,7 +369,7 @@ internal class Sykdomstidslinje private constructor(
     }
 
     fun harNyArbeidsgiverperiodeEtter(etter: LocalDate) =
-        kuttFraOgMed(etter)
+        fraOgMed(etter)
             .kunSykedager()
             .zipWithNext()
             .any { erNyArbeidsgiverperiode(it.first, it.second) }
@@ -372,38 +379,10 @@ internal class Sykdomstidslinje private constructor(
 
     private fun kunSykedager() =
         this.dager
-            .filterValues { it.erSykedag() }
+            .filterValues { erEnSykedag(it) }
             .map { it.key }
 
-    private fun Dag.erSykedag() = when (this) {
-        is Sykedag,
-        is SykHelgedag,
-        is Arbeidsgiverdag,
-        is AnnullertDag,
-        is ArbeidsgiverHelgedag -> true
-        else -> false
-    }
-
-    private fun Dag.erArbeidsdag() = this is Arbeidsdag || this is FriskHelgedag
-
-    internal fun erSisteDagArbeidsdag() = this.dager.values.lastOrNull()?.erArbeidsdag() ?: true
-
-    internal fun sykeperioder() =
-        dager.entries
-            .filterNot { it.value.erArbeidsdag() }
-            .dropWhile { (_, dag) -> !(dag.erSykedag() || dag is ForeldetSykedag) }
-            .fold(listOf<Periode>()) { perioder, (dato, dag) ->
-                if (perioder.isEmpty()) return@fold listOf(Periode(dato, dato))
-
-                val siste = perioder.last()
-                when {
-                    siste.endInclusive.isEqual(dato.minusDays(1)) -> {
-                        perioder.dropLast(1).plusElement(Periode(siste.start, dato))
-                    }
-                    dag.erSykedag() || dag is ForeldetSykedag -> perioder.plusElement(Periode(dato, dato))
-                    else -> perioder
-                }
-            }
+    internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     fun harAnnulerteDager() = dager.any { it.value is AnnullertDag }
 

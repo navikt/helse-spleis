@@ -161,7 +161,7 @@ internal class Sykdomshistorikk private constructor(
                     hendelseId = null,
                     tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().kuttFraOgMed(fraOgMed)
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().fraOgMed(fraOgMed)
                 )
             }
         }

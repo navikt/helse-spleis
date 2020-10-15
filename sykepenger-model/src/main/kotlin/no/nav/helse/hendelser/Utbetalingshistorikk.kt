@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode.Companion.slåSammen
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.utvid
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.utvidTilbake
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Companion.tilModellPerioder
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
@@ -55,9 +55,11 @@ class Utbetalingshistorikk(
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
 
-    internal fun oppdaterSammenhengendePerioder(perioder: List<ModellPeriode>): List<ModellPeriode> {
-        val infotrygdperioder = utbetalinger.tilModellPerioder().utvid(inntektshistorikk)
-        return (infotrygdperioder + perioder).slåSammen()
+    internal fun oppdaterBeregningsdatoer(perioder: List<LocalDate>, sluttdato: LocalDate): List<LocalDate> {
+        val infotrygdperioder = utbetalinger.tilModellPerioder().utvidTilbake(inntektshistorikk)
+        return (infotrygdperioder + perioder.map { it til sluttdato })
+            .slåSammen() // TODO: hva gjør slåSammen, og trengs Periode-objekter (siden sluttdato er alltid samme, og man uansett bare vil ha startdatoen)?
+            .map { it.start }
     }
 
     class Inntektsopplysning(
@@ -71,11 +73,15 @@ class Utbetalingshistorikk(
         internal companion object {
             private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-            internal fun List<ModellPeriode>.utvid(perioder: List<Inntektsopplysning>) =
-                map { (it.start.nærmesteFom(perioder) ?: it.start) til it.endInclusive }
+            internal fun List<ModellPeriode>.utvidTilbake(perioder: List<Inntektsopplysning>) =
+                map {
+                    it.oppdaterFom(it.start.nærmesteFom(perioder) ?: it.start)
+                }
 
             private fun LocalDate.nærmesteFom(perioder: List<Inntektsopplysning>) =
-                perioder.map { it.sykepengerFom }.sorted().lastOrNull { it <= this }
+                perioder
+                    .maxBy { it.sykepengerFom <= this }
+                    ?.sykepengerFom
                     .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for orgnumre ${perioder.map { it.orgnummer }}") }
 
             fun valider(

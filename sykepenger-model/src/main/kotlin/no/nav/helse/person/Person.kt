@@ -243,29 +243,26 @@ class Person private constructor(
     }
 
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        val dato = sammenhengendePeriode(periode).start
+        val dato = beregningsdato(periode.endInclusive) ?: periode.start
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun sammenhengendePeriode(periode: Periode) =
-        sammenhengendeSykeperioder().lastOrNull { it.overlapperMed(periode) } ?: periode
-
-    private fun sammenhengendeSykeperioder() =
-        arbeidsgivere.sammenhengendeSykeperioder()
+    internal fun beregningsdato(dato: LocalDate) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato)
+    private fun beregningsperiode(periode: Periode) = beregningsdato(periode.endInclusive)?.let { periode.oppdaterFom(it) } ?: periode
+    private fun beregningsdatoer(dato: LocalDate) = Arbeidsgiver.beregningsperioder(arbeidsgivere, dato)
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        val sammenhengendeSykeperioder =
-            ytelser.utbetalingshistorikk().oppdaterSammenhengendePerioder(sammenhengendeSykeperioder())
-        val sammenhengendePeriode =
-            if (sammenhengendeSykeperioder.isEmpty()) periode else sammenhengendePeriode(periode)
-        val inntektsdatoer = sammenhengendeSykeperioder.map { it.start }
+        val beregningsperiode = beregningsperiode(periode)
+        val beregningsdatoer = ytelser
+            .utbetalingshistorikk()
+            .oppdaterBeregningsdatoer(beregningsdatoer(periode.endInclusive), periode.endInclusive)
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
             .map { arbeidsgiver ->
                 arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
-                    inntektsdatoer,
-                    sammenhengendePeriode,
+                    beregningsdatoer,
+                    beregningsperiode,
                     ytelser
                 )
             }.toMap()

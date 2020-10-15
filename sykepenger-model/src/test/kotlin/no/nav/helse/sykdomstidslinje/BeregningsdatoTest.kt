@@ -8,12 +8,18 @@ import no.nav.helse.tournament.dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class BeregningsdatoTest {
+
+    @BeforeEach
+    fun setup() {
+        resetSeed()
+    }
 
     @Test
     fun `beregningsdato er null for ugyldige situasjoner`() {
@@ -26,17 +32,18 @@ internal class BeregningsdatoTest {
     }
 
     @Test
-    fun `utgangspunkt for beregning er sykedag, arbeidsgiverdag eller syk helgedag`() {
+    fun `beregningsdato er sykedag, arbeidsgiverdag eller syk helgedag`() {
         assertFørsteDagErBeregningsdato(1.S)
         assertFørsteDagErBeregningsdato(1.U)
         assertFørsteDagErBeregningsdato(1.H)
     }
 
     @Test
-    fun `utgangspunkt for beregning av ytelse er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
+    fun `beregningsdato er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
         assertFørsteDagErBeregningsdato(2.S)
         assertFørsteDagErBeregningsdato(2.U)
 
+        resetSeed(4.januar)
         perioder(2.S, 2.n_, 2.S) { periode1, _, _ ->
             assertFørsteDagErBeregningsdato(periode1, this)
         }
@@ -213,6 +220,102 @@ internal class BeregningsdatoTest {
             .merge(dagturnering::beste)
         val beregningsdato = tidslinje.beregningsdato()
         beregningsdato er 1.januar
+    }
+
+    @Test
+    fun `tilstøtende arbeidsgivertidslinjer`() {
+        val arbeidsgiver1tidslinje = 14.S
+        val arbeidsgiver2tidslinje = 14.S
+        assertTrue(arbeidsgiver1tidslinje.sisteDag().erRettFør(arbeidsgiver2tidslinje.førsteDag()))
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med helgegap`() {
+        val arbeidsgiver1tidslinje = 12.S + 2.n_
+        val arbeidsgiver2tidslinje = 14.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med arbeidsdager i helg`() {
+        val arbeidsgiver1tidslinje = 12.S + 1.A
+        val arbeidsgiver2tidslinje = 1.A + 14.S
+        assertBeregningsdato(15.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med arbeidsdager og sykedager i helg`() {
+        val arbeidsgiver1tidslinje = 14.S
+        resetSeed(10.januar)
+        val arbeidsgiver2tidslinje = 2.S + 2.A + 7.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på fredag`() {
+        val arbeidsgiver1tidslinje = 11.S + 1.A + 2.n_
+        val arbeidsgiver2tidslinje = 14.S
+        assertBeregningsdato(15.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med helgegap og arbeidsdag på mandag`() {
+        val arbeidsgiver1tidslinje = 12.S + 2.n_
+        val arbeidsgiver2tidslinje = 1.A + 13.S
+        assertBeregningsdato(16.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer overlappende arbeidsdager og sykedager`() {
+        val arbeidsgiver1tidslinje = 6.S + 6.A
+        resetSeed()
+        val arbeidsgiver2tidslinje = 14.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med gap blir sammenhengende`() {
+        val arbeidsgiver1tidslinje = 7.S + 7.A
+        resetSeed()
+        val arbeidsgiver2tidslinje = 14.A + 14.S
+        resetSeed()
+        val arbeidsgiver3tidslinje = 7.A + 7.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje, arbeidsgiver3tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med ferie som gap blir sammenhengende`() {
+        val arbeidsgiver1tidslinje = 7.S + 1.F
+        val arbeidsgiver2tidslinje = 1.F + 14.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med ferie som gap, med arbeidsdag på samme dager, forblir usammenhengende`() {
+        val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
+        resetSeed(1.januar)
+        val arbeidsgiver2tidslinje = 7.S + 2.A + 7.S
+        assertBeregningsdato(1.januar, 31.januar, arbeidsgiver1tidslinje)
+        assertBeregningsdato(10.januar, 31.januar, arbeidsgiver2tidslinje)
+        assertBeregningsdato(10.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertBeregningsdato(10.januar, 10.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertBeregningsdato(1.januar, 9.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+        assertBeregningsdato(1.januar, 7.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med ferie i begynnelsen, med arbeidsdag på samme dager, forblir usammenhengende`() {
+        val arbeidsgiver1tidslinje = 7.F + 7.S
+        resetSeed(1.januar)
+        val arbeidsgiver2tidslinje = 7.A + 7.S
+        assertBeregningsdato(8.januar, 31.januar, arbeidsgiver1tidslinje)
+        assertBeregningsdato(8.januar, 31.januar, arbeidsgiver2tidslinje)
+        assertBeregningsdato(8.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    private fun assertBeregningsdato(forventetBeregningsdato: LocalDate, kuttdato: LocalDate, vararg tidslinje: Sykdomstidslinje) {
+        assertEquals(forventetBeregningsdato, Sykdomstidslinje.beregningsdato(kuttdato, tidslinje.toList()))
     }
 
     private fun assertBeregningsdato(

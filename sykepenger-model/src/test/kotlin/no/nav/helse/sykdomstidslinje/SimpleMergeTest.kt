@@ -78,22 +78,22 @@ internal class SimpleMergeTest {
     fun `tidslinjen kan kuttes`() {
         val original = (1.januar jobbTil 5.januar).merge(15.januar jobbTil 19.januar)
 
-        original.kuttFremTilOgMed(17.januar).also {
+        original.fremTilOgMed(17.januar).also {
             assertEquals(Periode(1.januar, 17.januar), it.periode())
             assertSize(17, it)
         }
 
-        original.kuttFremTilOgMed(10.januar).also {
+        original.fremTilOgMed(10.januar).also {
             assertEquals(Periode(1.januar, 5.januar), it.periode())
             assertSize(5, it)
         }
 
-        original.kuttFremTilOgMed(1.februar).also {
+        original.fremTilOgMed(1.februar).also {
             assertEquals(Periode(1.januar, 19.januar), it.periode())
             assertSize(19, it)
         }
 
-        original.kuttFremTilOgMed(1.desember(2017)).also {
+        original.fremTilOgMed(1.desember(2017)).also {
             assertNull(it.periode())
             assertSize(0, it)
         }
