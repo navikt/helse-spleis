@@ -121,26 +121,36 @@ internal class Sykdomstidslinje private constructor(
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
-    internal fun beregningsdato(): LocalDate? {
-        return førsteSykedagISisteSammenhengendeSykefravær() ?: førsteSykedag()
-    }
+    internal fun beregningsdato() =
+        førsteSykedagEtterSisteOppholdsdag() ?: førsteSykedag()
 
-    private fun førsteSykedagISisteSammenhengendeSykefravær() =
-        fjernDagerEtterSisteSykedag().let { tidslinje ->
-            tidslinje.periode?.lastOrNull { this[it] is Arbeidsdag || this[it] is FriskHelgedag || this[it] is UkjentDag }
-                ?.let { ikkeSykedag ->
-                    tidslinje.dager.entries.firstOrNull {
-                        it.key.isAfter(ikkeSykedag) && erEnSykedag(it.value)
-                    }?.key
-                }
-        }
+    private fun førsteSykedagEtterSisteOppholdsdag() =
+        kuttEtterSisteSykedag().sisteOppholdsdag()?.let(::førsteSykedagEtter)
 
     internal fun førsteSykedagEtter(dato: LocalDate) =
-        dager.entries.firstOrNull { it.key >= dato && erEnSykedag(it.value) }?.key
+        periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
+
+    private fun sisteOppholdsdag() = periode?.lastOrNull { oppholdsdag(it) }
+
+    private fun oppholdsdag(dato: LocalDate): Boolean {
+        if (erArbeidsdag(dato)) return true
+        if (this[dato] !is UkjentDag) return false
+        return !helgeoppholdMellomSykedager(dato)
+    }
+
+    private fun erArbeidsdag(dato: LocalDate) =
+        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag
+
+    private fun helgeoppholdMellomSykedager(dato: LocalDate): Boolean {
+        if (!dato.erHelg()) return false
+        val fredag = this[dato.minusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 1 else 2)]
+        val mandag = this[dato.plusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 2 else 1)]
+        return erEnSykedag(fredag) && erEnSykedag(mandag)
+    }
 
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
-    private fun fjernDagerEtterSisteSykedag(): Sykdomstidslinje = periode
+    private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
         ?.findLast { erEnSykedag(this[it]) }
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 

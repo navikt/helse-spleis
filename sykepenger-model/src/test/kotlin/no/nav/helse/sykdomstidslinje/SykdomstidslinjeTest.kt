@@ -49,6 +49,20 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
+    fun `kutter frem til og med`() {
+        val tidslinje = Sykdomstidslinje.sykedager(1.februar, 1.mars, 100, TestEvent.testkilde)
+        assertEquals(14.februar, tidslinje.kuttFremTilOgMed(14.februar).sisteDag())
+        assertEquals(1.mars, tidslinje.kuttFremTilOgMed(1.mars).sisteDag())
+        assertEquals(1.mars, tidslinje.kuttFremTilOgMed(1.april).sisteDag())
+        assertEquals(1.februar, tidslinje.kuttFremTilOgMed(1.februar).sisteDag())
+        assertEquals(1.februar, Sykdomstidslinje.sykedager(1.februar, 1.februar, 100, TestEvent.testkilde)
+            .kuttFremTilOgMed(1.februar)
+            .sisteDag())
+        assertEquals(0, tidslinje.kuttFremTilOgMed(tidslinje.førsteDag().minusDays(1)).length())
+        assertEquals(0, Sykdomstidslinje().kuttFremTilOgMed(1.januar).length())
+    }
+
+    @Test
     fun `overskriving av tidslinje`() {
         val tidslinje1 = (Sykdomstidslinje.problemdager(1.mandag, 1.onsdag, TestEvent.sykmelding, "Yes")
             + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.0, TestEvent.sykmelding))

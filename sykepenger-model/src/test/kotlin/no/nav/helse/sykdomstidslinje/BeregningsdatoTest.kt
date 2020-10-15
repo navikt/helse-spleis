@@ -37,8 +37,8 @@ internal class BeregningsdatoTest {
         assertFørsteDagErBeregningsdato(2.S)
         assertFørsteDagErBeregningsdato(2.U)
 
-        perioder(2.S, 2.n_, 2.S) { _, _, periode3 ->
-            assertFørsteDagErBeregningsdato(periode3, this)
+        perioder(2.S, 2.n_, 2.S) { periode1, _, _ ->
+            assertFørsteDagErBeregningsdato(periode1, this)
         }
         perioder(2.S, 2.A, 2.F, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErBeregningsdato(periode4, this)
@@ -99,6 +99,27 @@ internal class BeregningsdatoTest {
         perioder(2.S, 2.n_) { sykedager, _ ->
             assertFørsteDagErBeregningsdato(sykedager, this)
         }
+    }
+
+    @Test
+    fun `helg mellom to sykmeldinger`() {
+        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100)) // slutter fredag
+        val sykmelding2 = sykmelding(Sykmeldingsperiode(29.januar, 9.februar, 100)) // starter mandag
+        assertBeregningsdato(1.januar, sykmelding1, sykmelding2)
+    }
+
+    @Test
+    fun `fredag og helg mellom to sykmeldinger`() {
+        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 25.januar, 100)) // slutter torsdag
+        val sykmelding2 = sykmelding(Sykmeldingsperiode(29.januar, 9.februar, 100)) // starter mandag
+        assertBeregningsdato(29.januar, sykmelding1, sykmelding2)
+    }
+
+    @Test
+    fun `helg og mandag mellom to sykmeldinger`() {
+        val sykmelding1 = sykmelding(Sykmeldingsperiode(1.januar, 26.januar, 100)) // slutter fredag
+        val sykmelding2 = sykmelding(Sykmeldingsperiode(30.januar, 9.februar, 100)) // starter tirsdag
+        assertBeregningsdato(30.januar, sykmelding1, sykmelding2)
     }
 
     @Test
@@ -196,15 +217,11 @@ internal class BeregningsdatoTest {
 
     private fun assertBeregningsdato(
         forventetBeregningsdato: LocalDate,
-        sykmelding: Sykmelding,
-        søknad: Søknad,
-        inntektsmelding: Inntektsmelding
+        vararg hendelse: SykdomstidslinjeHendelse
     ) {
-        val tidslinje = listOf(
-            sykmelding.sykdomstidslinje(),
-            søknad.sykdomstidslinje(),
-            inntektsmelding.sykdomstidslinje()
-        ).merge(dagturnering::beste)
+        val tidslinje = hendelse
+            .map { it.sykdomstidslinje() }
+            .merge(dagturnering::beste)
 
         val beregningsdato = tidslinje.beregningsdato()
         assertEquals(forventetBeregningsdato, beregningsdato) {
@@ -286,14 +303,14 @@ internal class BeregningsdatoTest {
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
 
         private fun assertDagenErBeregningsdato(
-            dagen: Dag,
+            dagen: LocalDate,
             sykdomstidslinje: Sykdomstidslinje
         ) {
-            val beregningsdato = sykdomstidslinje.beregningsdato()?.let { sykdomstidslinje[it] }
+            val beregningsdato = sykdomstidslinje.beregningsdato()
             assertEquals(
                 dagen,
                 beregningsdato
-            ) { "Forventet $dagen, men fikk $beregningsdato.\nTidslinjen:\n$sykdomstidslinje" }
+            ) { "Forventet $dagen, men fikk $beregningsdato.\nPeriode: ${sykdomstidslinje.periode()}\nTidslinjen:\n$sykdomstidslinje" }
         }
 
         private fun assertFørsteDagErBeregningsdato(sykdomstidslinje: Sykdomstidslinje) {
@@ -306,9 +323,9 @@ internal class BeregningsdatoTest {
             perioden: Sykdomstidslinje,
             sykdomstidslinje: Sykdomstidslinje
         ) {
-            val førsteDag = perioden.periode()?.start
+            val førsteDag = perioden.periode()?.start ?: fail { "Tom periode" }
             assertNotNull(førsteDag)
-            assertDagenErBeregningsdato(perioden[førsteDag!!], sykdomstidslinje)
+            assertDagenErBeregningsdato(førsteDag, sykdomstidslinje)
         }
     }
 }
