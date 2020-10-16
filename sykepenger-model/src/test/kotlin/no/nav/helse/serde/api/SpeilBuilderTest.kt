@@ -523,7 +523,7 @@ class SpeilBuilderTest {
                 1.januar(2019).rangeTo(31.januar(2019))
             )
         )
-        person.aktivitetslogg.toString()
+
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(0, vedtaksperiode.vilkår.sykepengedager.gjenståendeDager)
@@ -532,16 +532,22 @@ class SpeilBuilderTest {
     @Test
     fun `Skal ta med forkastede vedtaksperioder`() {
         val (person, hendelser) = tilbakerulletPerson()
-        person.aktivitetslogg.toString()
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(2, personDTO.arbeidsgivere.first().vedtaksperioder.size)
+    }
+
+    @Test
+    fun `Skal ta med annullerte vedtaksperioder`() {
+        val (person, hendelser) = annullertPerson()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
+        assertEquals(TilstandstypeDTO.TilAnnullering, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test
     fun `Sender unike advarsler per periode`() {
         val (person, hendelser) = personMedToAdvarsler(fom = 1.januar(2018), tom = 31.januar(2018))
 
-        person.aktivitetslogg.toString()
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
         assertEquals(vedtaksperiode.aktivitetslogg.distinctBy { it.melding }, vedtaksperiode.aktivitetslogg)
@@ -806,6 +812,38 @@ class SpeilBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+            }
+        }
+
+        private fun annullertPerson(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
+            this to mutableListOf<HendelseDTO>().apply {
+                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
+                    håndter(sykmelding)
+                    add(sykmeldingDTO)
+                }
+                fangeVedtaksperiodeId()
+                søknad(
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sendtSøknad = 1.april.atStartOfDay()
+                ).also { (søknad, søknadDTO) ->
+                    håndter(søknad)
+                    add(søknadDTO)
+                }
+                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                    håndter(inntektsmelding)
+                    add(inntektsmeldingDTO)
+                }
+                håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+
+
+                val utbetalteUtbetalinger = utbetalingsliste.filter { it.erUtbetalt() }
+                håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
             }
         }
 
@@ -1271,6 +1309,17 @@ class SpeilBuilderTest {
             utbetalingsreferanse = "ref",
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei"
+        )
+
+        private fun annullering(fagsystemId: String) = KansellerUtbetaling(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            fagsystemId = fagsystemId,
+            saksbehandler = "en_saksbehandler_ident",
+            saksbehandlerEpost = "saksbehandler@nav.no",
+            opprettet = LocalDateTime.now()
         )
     }
 }

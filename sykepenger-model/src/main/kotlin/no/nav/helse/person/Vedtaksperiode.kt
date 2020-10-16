@@ -1428,12 +1428,12 @@ internal class Vedtaksperiode private constructor(
                 ?.saksbehandlerEpost()
 
             sendUtbetalingsbehov(
-                hendelse,
-                vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
-                requireNotNull(vedtaksperiode.maksdato),
-                requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
-                requireNotNull(godkjentAvEpost) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
-                requireNotNull(vedtaksperiode.godkjenttidspunkt) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                aktivitetslogg = hendelse,
+                oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
+                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                saksbehandler = requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                saksbehandlerEpost = requireNotNull(godkjentAvEpost) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                godkjenttidspunkt = requireNotNull(vedtaksperiode.godkjenttidspunkt) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
                 annullering = false
             )
         }

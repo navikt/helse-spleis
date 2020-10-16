@@ -473,7 +473,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
             arbeidsgiverMap["vedtaksperioder"] =
                 (arbeidsgiverMap["vedtaksperioder"] as List<Any?>) + this.vedtaksperioder.toList()
-                    .filter { it.tilstand == TilstandstypeDTO.Utbetalt }
+                    .filter { it.tilstand == TilstandstypeDTO.Utbetalt || it.tilstand  == TilstandstypeDTO.TilAnnullering }
         }
 
         override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
