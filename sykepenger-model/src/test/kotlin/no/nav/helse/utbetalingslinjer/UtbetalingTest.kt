@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class UtbetalingTest {
@@ -146,7 +147,11 @@ internal class UtbetalingTest {
                 orgnummer = ORGNUMMER,
                 utbetalingsreferanse = "ref",
                 status = AKSEPTERT,
-                melding = "hei"
+                melding = "hei",
+                saksbehandler = "Z999999",
+                saksbehandlerEpost = "mille.mellomleder@nav.no",
+                godkjenttidspunkt = LocalDateTime.now(),
+                annullert = false
             )
         )
     }

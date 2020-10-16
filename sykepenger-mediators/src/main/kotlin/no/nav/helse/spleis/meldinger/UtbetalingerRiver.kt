@@ -18,8 +18,17 @@ internal class UtbetalingerRiver(
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Utbetaling.name}")
         // skip OVERFØRT; we don't need to react to it (yet)
-        packet.requireAny("@løsning.${Utbetaling.name}.status", Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name))
-        packet.requireKey("@løsning.${Utbetaling.name}.beskrivelse")
+        packet.requireAny(
+            "@løsning.${Utbetaling.name}.status",
+            Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name)
+        )
+        packet.requireKey(
+            "@løsning.${Utbetaling.name}.beskrivelse",
+            "@løsning.${Utbetaling.name}.saksbehandler",
+            "@løsning.${Utbetaling.name}.saksbehandlerEpost",
+            "@løsning.${Utbetaling.name}.godkjenttidspunkt",
+            "@løsning.${Utbetaling.name}.annullert"
+        )
         packet.requireKey("fagsystemId")
     }
 

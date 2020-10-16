@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
 
@@ -13,6 +14,10 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
     private val fagsystemId = packet["fagsystemId"].asText()
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
+    private val saksbehandler = packet["@løsning.${Utbetaling.name}.saksbehandler"].asText()
+    private val saksbehandlerEpost = packet["@løsning.${Utbetaling.name}.saksbehandlerEpost"].asText()
+    private val godkjenttidspunkt = packet["@løsning.${Utbetaling.name}.godkjenttidspunkt"].asLocalDateTime()
+    private val annullert = packet["@løsning.${Utbetaling.name}.annullert"].asBoolean()
 
     private val utbetaling
         get() = UtbetalingHendelse(
@@ -23,7 +28,11 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
             orgnummer = organisasjonsnummer,
             utbetalingsreferanse = fagsystemId,
             status = status,
-            melding = beskrivelse
+            melding = beskrivelse,
+            godkjenttidspunkt = godkjenttidspunkt,
+            saksbehandler = saksbehandler,
+            saksbehandlerEpost = saksbehandlerEpost,
+            annullert = annullert
         )
 
     override fun behandle(mediator: IHendelseMediator) {

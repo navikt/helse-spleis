@@ -161,7 +161,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     fun `publiserer et event ved annullering`() {
         val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, "tbd@nav.no", true)
 
         val annullering = observatør.annulleringer.lastOrNull()
         assertNotNull(annullering)
@@ -183,7 +183,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.vedtaksperioder.size)
 
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, "tbd@nav.no", true)
 
         val vedtaksperioderIder = observatør.vedtaksperioder.toList()
         assertEquals(TilstandType.TIL_INFOTRYGD, observatør.tilstander[vedtaksperioderIder[0]]?.last())

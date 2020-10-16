@@ -139,7 +139,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendKansellerUtbetaling(fagsystemId)
-        sendUtbetaling(0, true)
+        sendUtbetaling(0, true, "tbd@nav.no", true)
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
         val utbetalingAnnullert =
@@ -163,7 +163,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, saksbehandlerIdent = "SYSTEM", automatiskBehandling = true)
+        sendUtbetalingsgodkjenning(
+            vedtaksperiodeIndeks = 0,
+            godkjent = true,
+            saksbehandlerIdent = "SYSTEM",
+            automatiskBehandling = true
+        )
         sendUtbetaling(0, true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
@@ -181,7 +186,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, godkjent = true, saksbehandlerIdent = "O123456", automatiskBehandling = false)
+        sendUtbetalingsgodkjenning(
+            vedtaksperiodeIndeks = 0,
+            godkjent = true,
+            saksbehandlerIdent = "O123456",
+            automatiskBehandling = false
+        )
         sendUtbetaling(0, true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }

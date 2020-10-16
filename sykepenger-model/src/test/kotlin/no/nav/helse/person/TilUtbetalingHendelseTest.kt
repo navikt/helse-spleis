@@ -172,7 +172,11 @@ internal class TilUtbetalingHendelseTest {
         )
     }
 
-    private fun håndterGodkjenning(index: Int, godkjentAv: String = SAKSBEHANDLER_IDENT, automatiskBehandling: Boolean = false) {
+    private fun håndterGodkjenning(
+        index: Int,
+        godkjentAv: String = SAKSBEHANDLER_IDENT,
+        automatiskBehandling: Boolean = false
+    ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
@@ -191,12 +195,21 @@ internal class TilUtbetalingHendelseTest {
             orgnummer = ORGNUMMER,
             utbetalingsreferanse = "ref",
             status = status,
-            melding = "hei"
+            melding = "hei",
+            saksbehandler = "Z999999",
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            godkjenttidspunkt = LocalDateTime.now(),
+            annullert = false
         ).apply {
             hendelse = this
         }
 
-    private fun utbetalingsgodkjenning(index: Int, godkjent: Boolean, godkjentAv: String, automatiskBehandling: Boolean) = Utbetalingsgodkjenning(
+    private fun utbetalingsgodkjenning(
+        index: Int,
+        godkjent: Boolean,
+        godkjentAv: String,
+        automatiskBehandling: Boolean
+    ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = UNG_PERSON_FNR_2018,

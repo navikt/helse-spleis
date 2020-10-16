@@ -367,16 +367,26 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterUtbetalt(
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
-        status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+        status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
+        annullert: Boolean = false
+
     ) {
-        person.håndter(utbetaling(vedtaksperiodeId, status))
+        person.håndter(
+            utbetaling(
+                vedtaksperiodeId,
+                status,
+                saksbehandlerEpost = saksbehandlerEpost,
+                annullert = annullert
+            )
+        )
     }
 
     protected fun håndterGrunnbeløpsregulering(
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
         virkningFra: LocalDate
-    ){
+    ) {
         person.håndter(
             Grunnbeløpsregulering(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -422,7 +432,9 @@ internal abstract class AbstractEndToEndTest {
     protected fun utbetaling(
         vedtaksperiodeId: UUID,
         status: UtbetalingHendelse.Oppdragstatus,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
+        annullert: Boolean = false
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
@@ -432,7 +444,11 @@ internal abstract class AbstractEndToEndTest {
             orgnummer = orgnummer,
             utbetalingsreferanse = "ref",
             status = status,
-            melding = "hei"
+            melding = "hei",
+            saksbehandler = "Z999999",
+            saksbehandlerEpost = saksbehandlerEpost,
+            godkjenttidspunkt = LocalDateTime.now(),
+            annullert = annullert
         )
 
     protected fun sykmelding(

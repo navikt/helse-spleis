@@ -275,7 +275,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato, grunnbeløp)) return
+        if (!grunnbeløpsregulering.erRelevant(
+                arbeidsgiverFagsystemId,
+                personFagsystemId,
+                beregningsdato,
+                grunnbeløp
+            )
+        ) return
         kontekst(grunnbeløpsregulering)
         tilstand.håndter(this, grunnbeløpsregulering)
     }
@@ -1427,18 +1433,14 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            val godkjentAvEpost = hendelse
-                .takeIf { it is Utbetalingsgodkjenning }
-                ?.let { it as Utbetalingsgodkjenning }
-                ?.saksbehandlerEpost()
-
+            val cast = hendelse as Utbetalingsgodkjenning
             sendUtbetalingsbehov(
                 aktivitetslogg = hendelse,
                 oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
                 maksdato = requireNotNull(vedtaksperiode.maksdato),
-                saksbehandler = requireNotNull(vedtaksperiode.godkjentAv) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
-                saksbehandlerEpost = requireNotNull(godkjentAvEpost) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
-                godkjenttidspunkt = requireNotNull(vedtaksperiode.godkjenttidspunkt) { "Forventer at saksbehandler har blitt satt på dette tidspunktet" },
+                saksbehandler = cast.saksbehandler(),
+                saksbehandlerEpost = cast.saksbehandlerEpost(),
+                godkjenttidspunkt = cast.godkjenttidspunkt(),
                 annullering = false
             )
         }
@@ -1485,14 +1487,8 @@ internal class Vedtaksperiode private constructor(
     internal object TilAnnullering : Vedtaksperiodetilstand {
         override val type = TIL_ANNULLERING
 
-        private lateinit var kansellerUtbetaling: KansellerUtbetaling
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
             hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til annullering")
-        }
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-            kansellerUtbetaling = hendelse as KansellerUtbetaling
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -1513,7 +1509,12 @@ internal class Vedtaksperiode private constructor(
             if (utbetaling.valider().hasErrorsOrWorse()) {
                 utbetaling.warn("Annullering ble ikke gjennomført")
             } else {
-                vedtaksperiode.arbeidsgiver.annullerUtbetaling(kansellerUtbetaling)
+                vedtaksperiode.arbeidsgiver.annullerUtbetaling(
+                    utbetaling,
+                    vedtaksperiode.arbeidsgiverFagsystemId!!,
+                    utbetaling.godkjenttidspunkt,
+                    saksbehandlerEpost = utbetaling.saksbehandlerEpost
+                )
                 utbetaling.info("Behandler annullering for vedtaksperiode: %s", vedtaksperiode.id.toString())
                 vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, utbetaling, Arbeidsgiver.ALLE)
                 vedtaksperiode.invaliderPeriode(utbetaling)

@@ -657,7 +657,12 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, automatiskBehandling = automatiskBehandling))
+                    håndter(
+                        utbetalingsgodkjenning(
+                            vedtaksperiodeId = vedtaksperiodeId,
+                            automatiskBehandling = automatiskBehandling
+                        )
+                    )
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
 
                     påfølgendePerioder.forEach { periode ->
@@ -1250,7 +1255,11 @@ class SpeilBuilderTest {
             )
         }
 
-        private fun utbetalingsgodkjenning(vedtaksperiodeId: String, utbetalingGodkjent: Boolean = true, automatiskBehandling: Boolean = false) =
+        private fun utbetalingsgodkjenning(
+            vedtaksperiodeId: String,
+            utbetalingGodkjent: Boolean = true,
+            automatiskBehandling: Boolean = false
+        ) =
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -1319,7 +1328,11 @@ class SpeilBuilderTest {
             orgnummer = orgnummer,
             utbetalingsreferanse = "ref",
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-            melding = "hei"
+            melding = "hei",
+            saksbehandler = "Z999999",
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            godkjenttidspunkt = LocalDateTime.now(),
+            annullert = false
         )
         private fun annullering(fagsystemId: String) = KansellerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),

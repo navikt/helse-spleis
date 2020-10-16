@@ -178,7 +178,14 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
-            behov = listOf("Sykepengehistorikk", "Foreldrepenger", "Pleiepenger", "Omsorgspenger", "Opplæringspenger", "Institusjonsopphold"),
+            behov = listOf(
+                "Sykepengehistorikk",
+                "Foreldrepenger",
+                "Pleiepenger",
+                "Omsorgspenger",
+                "Opplæringspenger",
+                "Institusjonsopphold"
+            ),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
                 "Foreldrepenger" to emptyMap<String, String>(),
@@ -374,7 +381,15 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagUtbetaling(vedtaksperiodeId: UUID, tilstand: TilstandType, utbetalingOK: Boolean = true): String {
+    fun lagUtbetaling(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        utbetalingOK: Boolean = true,
+        saksbehandler: String = "Siri Saksbehandler",
+        saksbehandlerEpost: String = "siri.saksbehandler@nav.no",
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
+        annullert: Boolean = false
+    ): String {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             tilstand = tilstand,
@@ -382,7 +397,11 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
-                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
+                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
+                    "saksbehandler" to saksbehandler,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "godkjenttidspunkt" to godkjenttidspunkt,
+                    "annullert" to annullert
                 )
             ),
             ekstraFelter = mapOf(

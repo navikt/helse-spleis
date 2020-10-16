@@ -132,14 +132,16 @@ internal abstract class AbstractEndToEndMediatorTest {
         automatiskBehandling: Boolean = false
     ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingsgodkjenning(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning),
-            utbetalingGodkjent = godkjent,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            automatiskBehandling = automatiskBehandling
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingsgodkjenning(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning),
+                utbetalingGodkjent = godkjent,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                automatiskBehandling = automatiskBehandling
+            )
+        )
     }
 
     protected fun sendYtelser(
@@ -186,32 +188,48 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
-        testRapid.sendTestMessage(meldingsfabrikk.lagVilkårsgrunnlag(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag),
-            egenAnsatt = egenAnsatt,
-            inntekter = inntekter,
-            opptjening = opptjening,
-            medlemskapstatus = medlemskapstatus
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVilkårsgrunnlag(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(
+                    vedtaksperiodeIndeks,
+                    InntekterForSammenligningsgrunnlag
+                ),
+                egenAnsatt = egenAnsatt,
+                inntekter = inntekter,
+                opptjening = opptjening,
+                medlemskapstatus = medlemskapstatus
+            )
+        )
     }
 
     protected fun sendSimulering(vedtaksperiodeIndeks: Int, status: SimuleringMessage.Simuleringstatus) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering))
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-            status = status
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+                status = status
+            )
+        )
     }
 
-    protected fun sendUtbetaling(vedtaksperiodeIndeks: Int, utbetalingOK: Boolean = true) {
+    protected fun sendUtbetaling(
+        vedtaksperiodeIndeks: Int,
+        utbetalingOK: Boolean = true,
+        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
+        annullert: Boolean = false
+    ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetaling(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-            utbetalingOK = utbetalingOK
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetaling(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+                saksbehandlerEpost = saksbehandlerEpost,
+                annullert = annullert,
+                utbetalingOK = utbetalingOK
+            )
+        )
     }
 
     protected fun sendRollback(personVersjon: Long) {

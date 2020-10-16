@@ -374,7 +374,7 @@ class JsonBuilderTest {
             saksbehandler = "en_saksbehandler_ident",
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
-            saksbehandlerEpost = "noe@ikke.no"
+            saksbehandlerEpost = "mille.mellomleder@nav.no"
         )
 
         fun simulering(vedtaksperiodeId: String) = Simulering(
@@ -396,7 +396,11 @@ class JsonBuilderTest {
             orgnummer = orgnummer,
             utbetalingsreferanse = "ref",
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-            melding = "hei"
+            melding = "hei",
+            saksbehandler = "Z999999",
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            godkjenttidspunkt = LocalDateTime.now(),
+            annullert = false
         )
     }
 }

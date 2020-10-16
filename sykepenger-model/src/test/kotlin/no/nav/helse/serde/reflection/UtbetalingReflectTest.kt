@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class UtbetalingReflectTest {
@@ -64,8 +65,13 @@ internal class UtbetalingReflectTest {
                     orgnummer = ORGNUMMER,
                     utbetalingsreferanse = "ref",
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-                    melding = "hei"
-                ))
+                    melding = "hei",
+                    saksbehandler = "Z999999",
+                    saksbehandlerEpost = "mille.mellomleder@nav.no",
+                    godkjenttidspunkt = LocalDateTime.now(),
+                    annullert = false
+                )
+            )
         }
 
         map = UtbetalingReflect(

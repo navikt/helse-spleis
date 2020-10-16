@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.ArbeidstakerHendelse
+import java.time.LocalDateTime
 import java.util.*
 
 class UtbetalingHendelse(
@@ -11,7 +12,11 @@ class UtbetalingHendelse(
     private val orgnummer: String,
     private val utbetalingsreferanse: String,
     private val status: Oppdragstatus,
-    private val melding: String
+    private val melding: String,
+    internal val godkjenttidspunkt: LocalDateTime,
+    internal val saksbehandler: String,
+    internal val saksbehandlerEpost: String,
+    internal val annullert: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

@@ -17,6 +17,7 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVol2
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class Arbeidsgiver private constructor(
@@ -53,14 +54,16 @@ internal class Arbeidsgiver private constructor(
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
         internal fun beregningsdato(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
-            Sykdomstidslinje.beregningsdato(dato, arbeidsgivere
-                .filter(Arbeidsgiver::harHistorikk)
-                .map(Arbeidsgiver::sykdomstidslinje))
+            Sykdomstidslinje.beregningsdato(
+                dato, arbeidsgivere
+                    .filter(Arbeidsgiver::harHistorikk)
+                    .map(Arbeidsgiver::sykdomstidslinje)
+            )
 
         internal fun beregningsperioder(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
-                arbeidsgivere
-                    .filter(Arbeidsgiver::harHistorikk)
-                    .mapNotNull { it.beregningsdato(dato) }
+            arbeidsgivere
+                .filter(Arbeidsgiver::harHistorikk)
+                .mapNotNull { it.beregningsdato(dato) }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -225,10 +228,15 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.toList().forEach { it.håndter(hendelse) }
     }
 
-    internal fun annullerUtbetaling(hendelse: KansellerUtbetaling) {
+    internal fun annullerUtbetaling(
+        hendelse: ArbeidstakerHendelse,
+        fagsystemId: String,
+        godkjentTidspunkt: LocalDateTime,
+        saksbehandlerEpost: String
+    ) {
 
         val sisteUtbetaling =
-            utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
+            utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == fagsystemId }
 
         if (sisteUtbetaling != null) {
             person.annullert(
@@ -236,9 +244,9 @@ internal class Arbeidsgiver private constructor(
                     fødselsnummer = hendelse.fødselsnummer(),
                     aktørId = hendelse.aktørId(),
                     organisasjonsnummer = hendelse.organisasjonsnummer(),
-                    fagsystemId = hendelse.fagsystemId,
-                    utbetalingslinjer = sisteUtbetaling.let {
-                        it.arbeidsgiverOppdrag().map {
+                    fagsystemId = fagsystemId,
+                    utbetalingslinjer = sisteUtbetaling.let { utbetaling ->
+                        utbetaling.arbeidsgiverOppdrag().map {
                             PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
                                 fom = it.fom,
                                 tom = it.tom,
@@ -247,8 +255,8 @@ internal class Arbeidsgiver private constructor(
                             )
                         }
                     },
-                    annullertAvSaksbehandler = hendelse.opprettet,
-                    saksbehandlerEpost = hendelse.saksbehandlerEpost
+                    annullertAvSaksbehandler = godkjentTidspunkt,
+                    saksbehandlerEpost = saksbehandlerEpost
                 )
             )
         }
@@ -263,7 +271,7 @@ internal class Arbeidsgiver private constructor(
     fun håndter(hendelse: Annullering) {
         låsOpp(hendelse.fom til hendelse.tom)
         sykdomshistorikk.nyHåndter(hendelse)
-        vedtaksperioder.toList().forEach{it.håndter(hendelse)}
+        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
