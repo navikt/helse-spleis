@@ -12,7 +12,7 @@ class GRegulering(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    internal val virkningFra: LocalDate,
+    private val virkningFra: LocalDate,
     private val fagsystemId: String
 ) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
 
@@ -22,9 +22,12 @@ class GRegulering(
 
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    fun erRelevant(fagsystemId: String, beregningsdato: LocalDate, grunnbeløp: Inntekt) =
-        fagsystemId == this.fagsystemId && grunnbeløp(beregningsdato) > grunnbeløp
+    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato, virkningFra)
 
-    fun grunnbeløp(beregningsdato: LocalDate) =
-        Grunnbeløp.`1G`.beløp(beregningsdato, virkningFra)
+    internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, beregningsdato: LocalDate, grunnbeløp: Inntekt) =
+        relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && grunnbeløp(beregningsdato) > grunnbeløp
+
+    private fun relevantFagsystemId(arbeidsgiverFagsystemId: String?, personFagsystemId: String?): Boolean {
+        return arbeidsgiverFagsystemId == fagsystemId || personFagsystemId == fagsystemId
+    }
 }

@@ -275,13 +275,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(gRegulering: GRegulering) {
-        if (arbeidsgiverFagsystemId == null || !gRegulering.erRelevant(
-                arbeidsgiverFagsystemId!!,
-                beregningsdato,
-                grunnbeløp
-            )
-        ) return
-        gRegulering.kontekst(this)
+        if (!gRegulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato, grunnbeløp)) return
+        kontekst(gRegulering)
         tilstand.håndter(this, gRegulering)
     }
 
@@ -515,9 +510,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun regulerGrunnbeløp(gRegulering: GRegulering) {
-        if (!utbetalingstidslinje.er6GBegrenset()) return
-        gRegulering.info("Starter G-regulering")
-        datoForGJustering = gRegulering.virkningFra
+        datoForGJustering = LocalDate.now()
         tilstand(gRegulering, AvventerHistorikk)
     }
 
@@ -1649,6 +1642,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gRegulering: GRegulering) {
+            if (!vedtaksperiode.utbetalingstidslinje.er6GBegrenset()) return gRegulering.info("Perioden er ikke begrenset av 6G - grunnbeløpsregulering unødvendig")
+            gRegulering.info("Foretar grunnbeløpsregulering")
             vedtaksperiode.regulerGrunnbeløp(gRegulering)
         }
 
