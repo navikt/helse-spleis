@@ -14,7 +14,8 @@ internal class ArbeidsgiverUtbetalinger(
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val aktivitetslogg: Aktivitetslogg,
     private val organisasjonsnummer: String,
-    private val fødselsnummer: String
+    private val fødselsnummer: String,
+    private val gReguleringsdato: LocalDate = beregningsdato
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 

@@ -74,7 +74,13 @@ internal class Økonomi private constructor(
                 { it.personbeløp!! },
                 { it, beløp -> it.personbeløp = beløp }
             )
-            require(budsjett == totalPerson(økonomiList)){"budsjett: $budsjett != totalPerson: ${totalPerson(økonomiList)}"}
+            require(budsjett == totalPerson(økonomiList)) {
+                "budsjett: $budsjett != totalPerson: ${
+                    totalPerson(
+                        økonomiList
+                    )
+                }"
+            }
         }
 
         private fun justerArbeidsgiver(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
@@ -85,10 +91,22 @@ internal class Økonomi private constructor(
                 { it.arbeidsgiverbeløp!! },
                 { it, beløp -> it.arbeidsgiverbeløp = beløp }
             )
-            require(budsjett == totalArbeidsgiver(økonomiList)){"budsjett: $budsjett != totalArbeidsgiver: ${totalArbeidsgiver(økonomiList)}"}
+            require(budsjett == totalArbeidsgiver(økonomiList)) {
+                "budsjett: $budsjett != totalArbeidsgiver: ${
+                    totalArbeidsgiver(
+                        økonomiList
+                    )
+                }"
+            }
         }
 
-        private fun juster(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt, get: (Økonomi) -> Inntekt, set: (Økonomi, Inntekt) -> Unit) {
+        private fun juster(
+            økonomiList: List<Økonomi>,
+            total: Inntekt,
+            budsjett: Inntekt,
+            get: (Økonomi) -> Inntekt,
+            set: (Økonomi, Inntekt) -> Unit
+        ) {
             val sorterteØkonomier = økonomiList.sortedByDescending { get(it) }
             val ratio = budsjett ratio total
             val skalertTotal = sorterteØkonomier.onEach {
@@ -118,7 +136,7 @@ internal class Økonomi private constructor(
                 .summer()
 
         internal fun erUnderInntektsgrensen(økonomiList: List<Økonomi>, alder: Alder, dato: LocalDate): Boolean {
-            return økonomiList.map{ it.aktuellDagsinntekt!! }.summer() < alder.minimumInntekt(dato)
+            return økonomiList.map { it.aktuellDagsinntekt!! }.summer() < alder.minimumInntekt(dato)
         }
 
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
@@ -187,8 +205,8 @@ internal class Økonomi private constructor(
             arbeidsgiverBetalingProsent.toDouble(),
             dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
             aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
-            arbeidsgiverbeløp!!.reflection { _, _, _, daglig-> daglig },
-            personbeløp!!.reflection { _, _, _, daglig-> daglig },
+            arbeidsgiverbeløp!!.reflection { _, _, _, daglig -> daglig },
+            personbeløp!!.reflection { _, _, _, daglig -> daglig },
             er6GBegrenset
         )
 

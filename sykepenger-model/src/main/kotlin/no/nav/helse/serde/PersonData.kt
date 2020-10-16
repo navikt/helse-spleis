@@ -519,7 +519,8 @@ internal data class PersonData(
             private val personNettoBeløp: Int,
             private val arbeidsgiverFagsystemId: String?,
             private val arbeidsgiverNettoBeløp: Int,
-            private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
+            private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            private val datoForGJustering: LocalDate?
         ) {
 
             internal fun createVedtaksperiode(
@@ -558,7 +559,8 @@ internal data class PersonData(
                         personNettoBeløp,
                         arbeidsgiverFagsystemId,
                         arbeidsgiverNettoBeløp,
-                        forlengelseFraInfotrygd
+                        forlengelseFraInfotrygd,
+                        datoForGJustering
                     )
             }
 

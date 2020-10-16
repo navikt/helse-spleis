@@ -28,6 +28,12 @@ internal class Utbetalingstidslinje private constructor(
         )
     }
 
+    internal fun er6GBegrenset(): Boolean{
+        return utbetalingsdager.any {
+            it.økonomi.er6GBegrenset()
+        }
+    }
+
     internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
         Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }
             .toMutableList())

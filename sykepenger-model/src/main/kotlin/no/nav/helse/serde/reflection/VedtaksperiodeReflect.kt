@@ -6,6 +6,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -25,6 +26,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
     private val arbeidsgiverNettoBeløp: Int = vedtaksperiode["arbeidsgiverNettoBeløp"]
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
+    private val datoForGJustering:LocalDate? = vedtaksperiode["datoForGJustering"]
+    private val grunnbeløp: Inntekt = vedtaksperiode["grunnbeløp"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
@@ -100,7 +103,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "personNettoBeløp" to personNettoBeløp,
         "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
         "arbeidsgiverNettoBeløp" to arbeidsgiverNettoBeløp,
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
+        "datoForGJustering" to datoForGJustering,
+        "grunnbeløp" to grunnbeløp.reflection { årlig, _, _, _ -> årlig }
     )
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
@@ -113,7 +118,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "automatiskBehandling" to automatiskBehandling,
         "beregningsdatoFraInfotrygd" to beregningsdatoFraInfotrygd,
         "beregningsdato" to beregningsdato,
-        "inntektFraInntektsmelding" to arbeidsgiver.inntekt(beregningsdato)?.get<Double>("årlig")?.div(12.0),
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
-    )
+        "inntektFraInntektsmelding" to arbeidsgiver.inntekt(beregningsdato)?.reflection{ _, månedlig, _, _ -> månedlig },
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
+        "datoForGJustering" to datoForGJustering,
+        "grunnbeløp" to grunnbeløp.reflection { årlig, _, _, _ -> årlig }
+        )
 }

@@ -162,6 +162,12 @@ class Person private constructor(
             ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 
+    fun håndter(hendelse: GRegulering) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
+    }
+
     fun addObserver(observer: PersonObserver) {
         observers.add(observer)
     }

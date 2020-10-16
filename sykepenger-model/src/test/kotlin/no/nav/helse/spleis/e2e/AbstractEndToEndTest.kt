@@ -372,6 +372,24 @@ internal abstract class AbstractEndToEndTest {
         person.håndter(utbetaling(vedtaksperiodeId, status))
     }
 
+    protected fun håndterGRegulering(
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        orgnummer: String = ORGNUMMER,
+        fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
+        virkningFra: LocalDate
+    ){
+        person.håndter(
+            GRegulering(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                organisasjonsnummer = orgnummer,
+                virkningFra = virkningFra,
+                fagsystemId = fagsystemId
+            )
+        )
+    }
+
     protected fun håndterKansellerUtbetaling(
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId()

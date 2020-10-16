@@ -11,11 +11,13 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
@@ -2242,4 +2244,71 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(30.desember, observatør.utbetaltEventer[11].oppdrag.first().utbetalingslinjer.first().tom)
         assertEquals(30.desember, utbetaltEvent.oppdrag.first().utbetalingslinjer.first().tom)
     }
+
+    @Test
+    fun `Skal ikke g reguleres hvis virkning fra før virkningsdato`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), gradFraSykmelding = 100), sendtTilNav = 1.januar(2020))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterGRegulering(virkningFra = 20.juli(2020))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
+    @Test
+    fun `Skal g reguleres hvis virkning fra etter virkningsdato`() {
+        val årligInntekt = 800000.00.årlig
+        håndterSykmelding(Sykmeldingsperiode(1.mai(2020), 31.mai(2020), 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.mai(2020), 15.mai(2020))), refusjon = Triple(null, årligInntekt, emptyList()))
+        håndterSøknad(Sykdom(1.mai(2020), 31.mai(2020), gradFraSykmelding = 100), sendtTilNav = 31.mai(2020))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, årligInntekt)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterGRegulering(virkningFra = 22.september(2020))
+
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
+
 }

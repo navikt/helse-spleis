@@ -218,6 +218,11 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    internal fun håndter(hendelse: GRegulering) {
+        hendelse.kontekst(this)
+        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
+    }
+
     internal fun annullerUtbetaling(hendelse: KansellerUtbetaling) {
 
         val sisteUtbetaling =

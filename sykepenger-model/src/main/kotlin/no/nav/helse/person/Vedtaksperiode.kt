@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -61,13 +62,19 @@ internal class Vedtaksperiode private constructor(
     private var personNettoBeløp: Int,
     private var arbeidsgiverFagsystemId: String?,
     private var arbeidsgiverNettoBeløp: Int,
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
+    private var datoForGJustering: LocalDate? = null
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
-    private val beregningsdato get() =
-        beregningsdatoFraInfotrygd
-            ?: arbeidsgiver.beregningsdato(periode.endInclusive)
-            ?: periode.start
+    private val beregningsdato
+        get() =
+            beregningsdatoFraInfotrygd
+                ?: arbeidsgiver.beregningsdato(periode.endInclusive)
+                ?: periode.start
+
+    private val virkningGrunnbeløp get() = datoForGJustering ?: beregningsdato
+
+    private val grunnbeløp get() = Grunnbeløp.`1G`.beløp(beregningsdato, virkningGrunnbeløp)
 
     internal constructor(
         person: Person,
@@ -265,6 +272,17 @@ internal class Vedtaksperiode private constructor(
             return
         }
         tilstand.håndter(this, annullering)
+    }
+
+    internal fun håndter(gRegulering: GRegulering) {
+        if (arbeidsgiverFagsystemId == null || !gRegulering.erRelevant(
+                arbeidsgiverFagsystemId!!,
+                beregningsdato,
+                grunnbeløp
+            )
+        ) return
+        gRegulering.kontekst(this)
+        tilstand.håndter(this, gRegulering)
     }
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
@@ -496,6 +514,13 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun regulerGrunnbeløp(gRegulering: GRegulering) {
+        if (!utbetalingstidslinje.er6GBegrenset()) return
+        gRegulering.info("Starter G-regulering")
+        datoForGJustering = gRegulering.virkningFra
+        tilstand(gRegulering, AvventerHistorikk)
+    }
+
     private fun emitVedtaksperiodeEndret(
         currentState: Vedtaksperiodetilstand,
         hendelseaktivitetslogg: Aktivitetslogg,
@@ -693,6 +718,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
+        }
+
+        fun håndter(vedtaksperiode: Vedtaksperiode, gRegulering: GRegulering) {
         }
 
         fun håndter(
@@ -1612,6 +1640,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gRegulering: GRegulering) {
+            vedtaksperiode.regulerGrunnbeløp(gRegulering)
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1641,7 +1673,6 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.tilstand(annullering, AvventerHistorikk)
         }
-
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {
