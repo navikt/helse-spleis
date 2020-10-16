@@ -343,6 +343,11 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetalingMedInntektsmelding
         )
 
+    internal fun foregåendeSomErBehandletUtenUtbetaling() =
+        arbeidsgiver.finnSykeperiodeRettFør(this)?.takeIf {
+            it.tilstand in listOf(AvsluttetUtenUtbetaling, AvsluttetUtenUtbetalingMedInntektsmelding)
+        }?.id
+
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
         arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.let {
             it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()

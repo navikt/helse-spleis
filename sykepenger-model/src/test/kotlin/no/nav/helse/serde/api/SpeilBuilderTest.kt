@@ -554,6 +554,16 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `Sender med varsler for tidligere periode som er avsluttet uten utbetaling`() {
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling(aap = listOf(Periode(1.september(2017), 30.september(2017))))
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertEquals(1, vedtaksperiode.aktivitetslogg.size)
+        assertNotEquals(vedtaksperiode.id, vedtaksperiode.aktivitetslogg[0].vedtaksperiodeId)
+    }
+
+    @Test
     fun `legger ved kildeId sammen med dag i tidslinja`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
@@ -912,7 +922,8 @@ class SpeilBuilderTest {
             }
 
         private fun ingenutbetalingPåfølgendeBetaling(
-            søknadhendelseId: UUID = UUID.randomUUID()
+            søknadhendelseId: UUID = UUID.randomUUID(),
+            aap: List<Periode> = emptyList()
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
@@ -941,7 +952,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
-                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, arbeidsavklaringspenger = aap))
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -1310,7 +1321,6 @@ class SpeilBuilderTest {
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei"
         )
-
         private fun annullering(fagsystemId: String) = KansellerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
