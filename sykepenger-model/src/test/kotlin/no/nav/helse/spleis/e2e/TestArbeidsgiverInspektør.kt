@@ -12,7 +12,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -255,7 +254,6 @@ internal class TestArbeidsgiverInspektør(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
-            grad: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -265,7 +263,6 @@ internal class TestArbeidsgiverInspektør(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            grad: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -273,7 +270,6 @@ internal class TestArbeidsgiverInspektør(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            grad: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -281,7 +277,6 @@ internal class TestArbeidsgiverInspektør(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            grad: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -289,7 +284,6 @@ internal class TestArbeidsgiverInspektør(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            grad: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 

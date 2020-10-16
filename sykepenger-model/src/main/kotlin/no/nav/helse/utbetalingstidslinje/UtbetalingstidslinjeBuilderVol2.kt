@@ -10,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -72,7 +71,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
 
@@ -86,7 +84,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
 
@@ -94,7 +91,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dag: Dag.Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykedag(dato, økonomi)
 
@@ -102,7 +98,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dag: Dag.ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = foreldetSykedag(dato, økonomi)
 
@@ -110,7 +105,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
 

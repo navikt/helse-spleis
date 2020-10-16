@@ -15,7 +15,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -198,7 +197,6 @@ internal interface SykdomstidslinjeVisitor {
         dag: Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -210,7 +208,6 @@ internal interface SykdomstidslinjeVisitor {
         dag: ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -219,7 +216,6 @@ internal interface SykdomstidslinjeVisitor {
         dag: Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -228,7 +224,6 @@ internal interface SykdomstidslinjeVisitor {
         dag: ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -237,7 +232,6 @@ internal interface SykdomstidslinjeVisitor {
         dag: SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        grad: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }

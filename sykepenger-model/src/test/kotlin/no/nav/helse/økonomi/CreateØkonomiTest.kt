@@ -150,7 +150,6 @@ internal class CreateØkonomiTest {
                 dag: Dag.Sykedag,
                 dato: LocalDate,
                 økonomi: Økonomi,
-                grad: Prosentdel,
                 kilde: SykdomstidslinjeHendelse.Hendelseskilde
             ) {
                 _økonomi = økonomi
