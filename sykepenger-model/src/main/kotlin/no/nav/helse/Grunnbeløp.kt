@@ -48,8 +48,8 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
             fun gjeldendeGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate, virkningFra: LocalDate): HistoriskGrunnbeløp {
                 require(virkningFra >= dato) { "Virkningsdato må være nyere eller lik beregningsdato" }
                 return grunnbeløper
-                    .filter { virkningFra >= it.virkningsdato }
-                    .maxBy { dato >= it.gyldigFra }
+                    .filter { virkningFra >= it.virkningsdato && dato >= it.gyldigFra }
+                    .maxBy { it.virkningsdato }
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
             }
         }
