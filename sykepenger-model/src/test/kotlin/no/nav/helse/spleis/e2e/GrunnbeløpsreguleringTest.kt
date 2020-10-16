@@ -11,7 +11,7 @@ import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Test
 
-internal class GrunnbeløpjusteringTest : AbstractEndToEndTest() {
+internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal g reguleres hvis virkning fra etter virkningsdato`() {
@@ -25,7 +25,7 @@ internal class GrunnbeløpjusteringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterGRegulering(virkningFra = 22.september(2020))
+        håndterGrunnbeløpsregulering(virkningFra = 22.september(2020))
 
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)

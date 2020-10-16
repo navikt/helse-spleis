@@ -63,7 +63,7 @@ internal class Vedtaksperiode private constructor(
     private var arbeidsgiverFagsystemId: String?,
     private var arbeidsgiverNettoBeløp: Int,
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
-    private var datoForGJustering: LocalDate? = null
+    private var datoForGrunnbeløpsregulering: LocalDate? = null
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val beregningsdato
@@ -72,7 +72,7 @@ internal class Vedtaksperiode private constructor(
                 ?: arbeidsgiver.beregningsdato(periode.endInclusive)
                 ?: periode.start
 
-    private val virkningGrunnbeløp get() = datoForGJustering ?: beregningsdato
+    private val virkningGrunnbeløp get() = datoForGrunnbeløpsregulering ?: beregningsdato
 
     private val grunnbeløp get() = Grunnbeløp.`1G`.beløp(beregningsdato, virkningGrunnbeløp)
 
@@ -274,10 +274,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, annullering)
     }
 
-    internal fun håndter(gRegulering: GRegulering) {
-        if (!gRegulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato, grunnbeløp)) return
-        kontekst(gRegulering)
-        tilstand.håndter(this, gRegulering)
+    internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
+        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato, grunnbeløp)) return
+        kontekst(grunnbeløpsregulering)
+        tilstand.håndter(this, grunnbeløpsregulering)
     }
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
@@ -509,9 +509,9 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun regulerGrunnbeløp(gRegulering: GRegulering) {
-        datoForGJustering = LocalDate.now()
-        tilstand(gRegulering, AvventerHistorikk)
+    private fun regulerGrunnbeløp(grunnbeløpsregulering: Grunnbeløpsregulering) {
+        datoForGrunnbeløpsregulering = LocalDate.now()
+        tilstand(grunnbeløpsregulering, AvventerHistorikk)
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -713,7 +713,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, gRegulering: GRegulering) {
+        fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
         }
 
         fun håndter(
@@ -1641,10 +1641,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, gRegulering: GRegulering) {
-            if (!vedtaksperiode.utbetalingstidslinje.er6GBegrenset()) return gRegulering.info("Perioden er ikke begrenset av 6G - grunnbeløpsregulering unødvendig")
-            gRegulering.info("Foretar grunnbeløpsregulering")
-            vedtaksperiode.regulerGrunnbeløp(gRegulering)
+        override fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
+            if (!vedtaksperiode.utbetalingstidslinje.er6GBegrenset()) return grunnbeløpsregulering.info("Perioden er ikke begrenset av 6G - grunnbeløpsregulering unødvendig")
+            grunnbeløpsregulering.info("Foretar grunnbeløpsregulering")
+            vedtaksperiode.regulerGrunnbeløp(grunnbeløpsregulering)
         }
 
         override fun håndter(

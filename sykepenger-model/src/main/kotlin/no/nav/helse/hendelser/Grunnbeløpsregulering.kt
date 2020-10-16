@@ -7,12 +7,12 @@ import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
 
-class GRegulering(
+class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val virkningFra: LocalDate,
+    private val reguleringstidspunkt: LocalDate,
     private val fagsystemId: String
 ) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
 
@@ -22,7 +22,7 @@ class GRegulering(
 
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato, virkningFra)
+    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato, reguleringstidspunkt)
 
     internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, beregningsdato: LocalDate, grunnbeløp: Inntekt) =
         relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && grunnbeløp(beregningsdato) > grunnbeløp

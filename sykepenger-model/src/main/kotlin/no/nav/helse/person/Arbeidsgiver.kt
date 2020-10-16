@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
@@ -221,7 +220,7 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun håndter(hendelse: GRegulering) {
+    internal fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(hendelse) }
     }

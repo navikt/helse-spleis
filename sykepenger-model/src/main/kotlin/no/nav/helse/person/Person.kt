@@ -162,7 +162,7 @@ class Person private constructor(
             ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 
-    fun håndter(hendelse: GRegulering) {
+    fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
             ?: hendelse.error("Finner ikke arbeidsgiver")
