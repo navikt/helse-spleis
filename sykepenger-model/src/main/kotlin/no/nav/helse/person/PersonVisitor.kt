@@ -196,7 +196,6 @@ internal interface SykdomstidslinjeVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -209,7 +208,6 @@ internal interface SykdomstidslinjeVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -219,7 +217,6 @@ internal interface SykdomstidslinjeVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -229,7 +226,6 @@ internal interface SykdomstidslinjeVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }
@@ -239,7 +235,6 @@ internal interface SykdomstidslinjeVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) {
     }

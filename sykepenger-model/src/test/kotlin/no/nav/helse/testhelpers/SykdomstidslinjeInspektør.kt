@@ -52,7 +52,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -68,7 +67,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -78,7 +76,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -88,7 +85,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)
@@ -98,7 +94,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
         set(dag, dato, økonomi, kilde)

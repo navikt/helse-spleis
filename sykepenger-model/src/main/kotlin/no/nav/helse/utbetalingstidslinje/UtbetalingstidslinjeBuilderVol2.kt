@@ -68,7 +68,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = egenmeldingsdag(dato)
 
@@ -83,7 +82,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
 
@@ -92,7 +90,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykedag(dato, økonomi)
 
@@ -101,7 +98,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = foreldetSykedag(dato, økonomi)
 
@@ -110,7 +106,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = sykHelgedag(dato, økonomi)
 

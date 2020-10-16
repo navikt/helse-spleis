@@ -151,7 +151,6 @@ internal class CreateØkonomiTest {
                 dato: LocalDate,
                 økonomi: Økonomi,
                 grad: Prosentdel,
-                arbeidsgiverBetalingProsent: Prosentdel,
                 kilde: SykdomstidslinjeHendelse.Hendelseskilde
             ) {
                 _økonomi = økonomi

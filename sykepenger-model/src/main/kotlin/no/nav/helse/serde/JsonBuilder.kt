@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
-import no.nav.helse.serde.mapping.JsonDagType.*
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -342,10 +341,9 @@ internal class JsonBuilder : PersonVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, kilde)
 
     override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         currentState.visitDag(dag, dato, kilde)
@@ -358,40 +356,36 @@ internal class JsonBuilder : PersonVisitor {
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, kilde)
 
     override fun visitDag(
         dag: Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, kilde)
 
     override fun visitDag(
         dag: ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, kilde)
 
     override fun visitDag(
         dag: SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
         grad: Prosentdel,
-        arbeidsgiverBetalingProsent: Prosentdel,
         kilde: Hendelseskilde
     ) =
-        currentState.visitDag(dag, dato, økonomi, grad, arbeidsgiverBetalingProsent, kilde)
+        currentState.visitDag(dag, dato, økonomi, grad, kilde)
 
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
@@ -869,124 +863,68 @@ internal class JsonBuilder : PersonVisitor {
             popState()
         }
 
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
-            leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
 
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
-            leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
 
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            leggTilDag(dag, dato, kilde, økonomi)
+        ) = leggTilDag(dag, kilde)
 
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
-            leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
 
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
-            leggTilDag(dag, dato, kilde)
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = leggTilDag(dag, kilde)
 
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            leggTilDag(dag, dato, kilde, økonomi)
+        ) = leggTilDag(dag, kilde)
 
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            leggTilDag(dag, dato, kilde, økonomi)
+        ) = leggTilDag(dag, kilde)
 
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            leggTilDag(dag, dato, kilde, økonomi)
+        ) = leggTilDag(dag, kilde)
 
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
-        ) =
-            leggTilDag(dag, dato, kilde, økonomi)
+        ) = leggTilDag(dag, kilde)
 
-        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
-            leggTilDag(dag, dato, kilde, melding = melding)
+        override fun visitDag(
+            dag: ProblemDag,
+            dato: LocalDate,
+            kilde: Hendelseskilde,
+            melding: String
+        ) = leggTilDag(dag, kilde, melding)
 
         private fun leggTilDag(
             dag: Dag,
-            dato: LocalDate,
             kilde: Hendelseskilde,
-            økonomi: Økonomi? = null,
             melding: String? = null
         ) {
-            dager.add(
-                mutableMapOf(
-                    "dato" to dato,
-                    "type" to dag.toJsonType(),
-                    "kilde" to kilde.toJson()
-                ).also { data ->
-                    økonomi?.reflection { grad,
-                                          arbeidsgiverBetalingProsent,
-                                          dekningsgrunnlag,
-                                          aktuellDagsinntekt,
-                                          arbeidsgiverbeløp,
-                                          personbeløp,
-                                          er6GBegrenset ->
-
-                        data.put("grad", grad)
-                        data.put("arbeidsgiverBetalingProsent", arbeidsgiverBetalingProsent)
-                        dekningsgrunnlag?.also { data.put("dekningsgrunnlag", it) }
-                        aktuellDagsinntekt?.also { data.put("aktuellDagsinntekt", it) }
-                        arbeidsgiverbeløp?.also { data.put("arbeidsgiverbeløp", it) }
-                        personbeløp?.also { data.put("personbeløp", it) }
-                        er6GBegrenset?.also { data.put("er6GBegrenset", it) }
-                        melding?.let { data["melding"] = it }
-                    }
-                }
-            )
+            dager.add(serialisertSykdomstidslinjedag(dag, kilde, melding))
         }
     }
 }
 
-private fun Hendelseskilde.toJson() = mapOf(
-    "type" to toString(), "id" to meldingsreferanseId()
-)
-
-private fun Dag.toJsonType() = when (this) {
-    is Sykedag -> SYKEDAG
-    is UkjentDag -> UKJENT_DAG
-    is Arbeidsdag -> ARBEIDSDAG
-    is Arbeidsgiverdag -> ARBEIDSGIVERDAG
-    is Feriedag -> FERIEDAG
-    is FriskHelgedag -> FRISK_HELGEDAG
-    is ArbeidsgiverHelgedag -> ARBEIDSGIVER_HELGEDAG
-    is ForeldetSykedag -> FORELDET_SYKEDAG
-    is SykHelgedag -> SYK_HELGEDAG
-    is Permisjonsdag -> PERMISJONSDAG
-    is Studiedag -> STUDIEDAG
-    is Utenlandsdag -> UTENLANDSDAG
-    is ProblemDag -> PROBLEMDAG
-    is AnnullertDag -> ANNULLERTDAG
-}

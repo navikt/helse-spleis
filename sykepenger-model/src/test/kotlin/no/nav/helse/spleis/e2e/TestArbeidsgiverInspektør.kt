@@ -241,7 +241,6 @@ internal class TestArbeidsgiverInspektør(
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -252,7 +251,6 @@ internal class TestArbeidsgiverInspektør(
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -261,7 +259,6 @@ internal class TestArbeidsgiverInspektør(
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -270,7 +267,6 @@ internal class TestArbeidsgiverInspektør(
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 
@@ -279,7 +275,6 @@ internal class TestArbeidsgiverInspektør(
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
 

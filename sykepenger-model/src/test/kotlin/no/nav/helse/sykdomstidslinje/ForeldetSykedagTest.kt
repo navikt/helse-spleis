@@ -124,7 +124,6 @@ internal class ForeldetSykedagTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag::class)
@@ -134,7 +133,6 @@ internal class ForeldetSykedagTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
@@ -142,7 +140,6 @@ internal class ForeldetSykedagTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
@@ -150,7 +147,6 @@ internal class ForeldetSykedagTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
@@ -158,7 +154,6 @@ internal class ForeldetSykedagTest {
             dato: LocalDate,
             økonomi: Økonomi,
             grad: Prosentdel,
-            arbeidsgiverBetalingProsent: Prosentdel,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = inkrementer(dag::class)

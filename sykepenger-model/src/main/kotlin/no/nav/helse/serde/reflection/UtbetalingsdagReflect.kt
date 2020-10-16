@@ -15,22 +15,8 @@ internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingsdag, private val
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to type,
         "dato" to dato
-    ).also { map ->
-        økonomi.reflection { grad,
-                             arbeidsgiverBetalingProsent,
-                             dekningsgrunnlag,
-                             aktuellDagsinntekt,
-                             arbeidsgiverbeløp,
-                             personbeløp,
-                             er6GBegrenset ->
-            map.put("grad", grad)
-            map.put("arbeidsgiverBetalingProsent", arbeidsgiverBetalingProsent)
-            dekningsgrunnlag?.also { map.put("dekningsgrunnlag", it) }
-            aktuellDagsinntekt?.also { map.put("aktuellDagsinntekt", it) }
-            arbeidsgiverbeløp?.also { map.put("arbeidsgiverbeløp", it) }
-            personbeløp?.also { map.put("personbeløp", it) }
-            er6GBegrenset?.also { map.put("er6GBegrenset", it) }
-        }
+    ).apply {
+        putAll(serialiserØkonomi(økonomi))
     }
 }
 
@@ -43,21 +29,7 @@ internal class AvvistdagReflect(avvistdag: AvvistDag) {
         "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
         "dato" to dato,
         "begrunnelse" to begrunnelse.name
-    ).also { map ->
-        økonomi.reflection { grad,
-                             arbeidsgiverBetalingProsent,
-                             dekningsgrunnlag,
-                             aktuellDagsinntekt,
-                             arbeidsgiverbeløp,
-                             personbeløp,
-                             er6GBegrenset ->
-            map.put("grad", grad)
-            map.put("arbeidsgiverBetalingProsent", arbeidsgiverBetalingProsent)
-            dekningsgrunnlag?.also { map.put("dekningsgrunnlag", it) }
-            aktuellDagsinntekt?.also { map.put("aktuellDagsinntekt", it) }
-            arbeidsgiverbeløp?.also { map.put("arbeidsgiverbeløp", it) }
-            personbeløp?.also { map.put("personbeløp", it) }
-            er6GBegrenset?.also { map.put("er6GBegrenset", it) }
-        }
+    ).apply {
+        putAll(serialiserØkonomi(økonomi))
     }
 }

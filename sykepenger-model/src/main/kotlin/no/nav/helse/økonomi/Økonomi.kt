@@ -266,7 +266,7 @@ internal class Økonomi private constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
-        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+        visitor.visitDag(dag, dato, this, grad, kilde)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,
@@ -274,7 +274,7 @@ internal class Økonomi private constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
-        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+        visitor.visitDag(dag, dato, this, grad, kilde)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,
@@ -282,7 +282,7 @@ internal class Økonomi private constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
-        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+        visitor.visitDag(dag, dato, this, grad, kilde)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,
@@ -290,7 +290,7 @@ internal class Økonomi private constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
-        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+        visitor.visitDag(dag, dato, this, grad, kilde)
 
     internal fun accept(
         visitor: SykdomstidslinjeVisitor,
@@ -306,7 +306,7 @@ internal class Økonomi private constructor(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) =
-        visitor.visitDag(dag, dato, this, grad, arbeidsgiverBetalingProsent, kilde)
+        visitor.visitDag(dag, dato, this, grad, kilde)
 
     internal sealed class Tilstand {
 

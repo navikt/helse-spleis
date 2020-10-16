@@ -436,6 +436,7 @@ class SpeilBuilderTest {
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
         assertEquals(31, sykdomstidslinje.size)
         assertEquals(SpeilDagtype.SYKEDAG, sykdomstidslinje.first().type)
+        assertEquals(100.0, (sykdomstidslinje.last()).grad)
         assertEquals("Søknad", sykdomstidslinje.first().kilde.type.toString())
         assertEquals(1.januar, sykdomstidslinje.first().dagen)
 
