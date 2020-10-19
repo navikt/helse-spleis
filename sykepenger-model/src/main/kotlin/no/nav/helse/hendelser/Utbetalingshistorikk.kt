@@ -7,6 +7,9 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Companion.tilModellPe
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -54,6 +57,11 @@ class Utbetalingshistorikk(
     fun addInntekter(person: Person, ytelser: Ytelser) {
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
+
+    internal fun historiskeTidslinjer(organisasjonsnummer: String? = null) =
+        Periode.Utbetalingsperiode.historiskePerioder(organisasjonsnummer, utbetalinger, inntektshistorikk).map { periode ->
+            Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+        }
 
     internal fun oppdaterBeregningsdatoer(perioder: List<LocalDate>, sluttdato: LocalDate): List<LocalDate> {
         val infotrygdperioder = utbetalinger.tilModellPerioder().utvidTilbake(inntektshistorikk)
@@ -119,6 +127,14 @@ class Utbetalingshistorikk(
                     }
                 }
             }
+
+            fun finnNærmeste(organisasjonsnummer: String, periode: ModellPeriode, inntektshistorikk: List<Inntektsopplysning>) =
+                inntektshistorikk
+                    .filter { it.orgnummer == organisasjonsnummer }
+                    .filter { it.sykepengerFom <= periode.start }
+                    .maxBy { it.sykepengerFom }
+                    ?.sykepengerFom
+                    .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for $organisasjonsnummer") }
         }
 
         internal fun valider(aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
@@ -191,11 +207,25 @@ class Utbetalingshistorikk(
             }
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(INGEN))
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(Inntekt.INGEN))
                 else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(ugradertBeløp))
             }
 
             internal companion object {
+
+                fun historiskePerioder(organisasjonsnummer: String?, perioder: List<Periode>, inntektshistorikk: List<Inntektsopplysning>) =
+                    perioder.filterIsInstance<Utbetalingsperiode>()
+                        .filter { if (organisasjonsnummer == null) true else it.orgnr == organisasjonsnummer }
+                        .map {
+                            it.periode.oppdaterFom(
+                                Inntektsopplysning.finnNærmeste(
+                                    it.orgnr,
+                                    it.periode,
+                                    inntektshistorikk
+                                ) ?: it.periode.start
+                            )
+                        }
+
                 fun valider(
                     liste: List<Periode>,
                     aktivitetslogg: Aktivitetslogg,
@@ -285,7 +315,7 @@ class Utbetalingshistorikk(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje()
-                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(INGEN)) } }
+                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN)) } }
 
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())

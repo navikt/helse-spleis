@@ -405,6 +405,64 @@ class UtbetalingshistorikkTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
     }
 
+    @Test
+    fun `historisk perioder`() {
+        val AG1 = "AG1orgnr"
+        val AG2 = "AG2orgnr"
+        val AG3 = "AG3orgnr"
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.januar, 10.januar, 1234, 100, AG1),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.januar, 20.januar, 1234, 100, AG1),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(10.februar, 20.februar, 1234, 100, AG2)
+        )
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, AG1, true),
+            Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.månedlig, AG3, true)
+        )
+
+        val historiskePerioder = Utbetalingshistorikk.Periode.Utbetalingsperiode.historiskePerioder(null, utbetalinger, inntektshistorikk)
+
+        assertEquals(3, historiskePerioder.size)
+        assertEquals(1.januar, historiskePerioder[0].start)
+        assertEquals(1.januar, historiskePerioder[1].start)
+        assertEquals(10.februar, historiskePerioder[2].start)
+    }
+
+    @Test
+    fun `historisk perioder for én arbeidsgiver`() {
+        val AG1 = "AG1orgnr"
+        val AG2 = "AG2orgnr"
+        val AG3 = "AG3orgnr"
+        val utbetalinger = listOf(
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(5.januar, 10.januar, 1234, 100, AG1),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.januar, 20.januar, 1234, 100, AG1),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(10.februar, 20.februar, 1234, 100, AG2)
+        )
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, AG1, true),
+            Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.månedlig, AG3, true)
+        )
+
+        val historiskePerioder = Utbetalingshistorikk.Periode.Utbetalingsperiode.historiskePerioder(AG1, utbetalinger, inntektshistorikk)
+
+        assertEquals(2, historiskePerioder.size)
+        assertEquals(1.januar, historiskePerioder[0].start)
+        assertEquals(1.januar, historiskePerioder[1].start)
+    }
+
+    @Test
+    fun `finner nærmeste inntektsopplysning`() {
+        val inntektsopplysninger = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(10.januar, 1234.månedlig, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(10.februar, 1234.månedlig, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(10.mars, 1234.månedlig, "annet orgnr", true))
+
+        assertEquals(10.januar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(10.januar, 28.februar), inntektsopplysninger))
+        assertNull(Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(9.januar, 28.februar), inntektsopplysninger))
+        assertEquals(10.februar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(15.februar, 31.mars), inntektsopplysninger))
+        assertEquals(10.februar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(15.mars, 31.mars), inntektsopplysninger))
+    }
+
     private class Inspektør : UtbetalingsdagVisitor {
         var førsteDag: LocalDate? = null
         var sisteDag: LocalDate? = null
