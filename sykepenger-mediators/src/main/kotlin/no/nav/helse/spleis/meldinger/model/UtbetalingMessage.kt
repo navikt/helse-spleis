@@ -17,7 +17,7 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
     private val saksbehandler = packet["saksbehandler"].asText()
     private val saksbehandlerEpost = packet["saksbehandlerEpost"].asText()
     private val godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime()
-    private val annullert = packet["annullert"].asBoolean()
+    private val annullering = packet["annullering"].asBoolean()
 
     private val utbetaling
         get() = UtbetalingHendelse(
@@ -32,7 +32,7 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
             godkjenttidspunkt = godkjenttidspunkt,
             saksbehandler = saksbehandler,
             saksbehandlerEpost = saksbehandlerEpost,
-            annullert = annullert
+            annullert = annullering
         )
 
     override fun behandle(mediator: IHendelseMediator) {

@@ -388,7 +388,7 @@ internal class TestMessageFactory(
         saksbehandler: String = "Siri Saksbehandler",
         saksbehandlerEpost: String = "siri.saksbehandler@nav.no",
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
-        annullert: Boolean = false
+        annullering: Boolean = false
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
@@ -405,7 +405,7 @@ internal class TestMessageFactory(
                 "saksbehandler" to saksbehandler,
                 "saksbehandlerEpost" to saksbehandlerEpost,
                 "godkjenttidspunkt" to godkjenttidspunkt,
-                "annullert" to annullert
+                "annullering" to annullering
             )
         )
     }

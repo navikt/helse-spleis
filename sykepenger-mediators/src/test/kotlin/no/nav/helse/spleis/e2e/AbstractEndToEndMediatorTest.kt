@@ -226,7 +226,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 saksbehandlerEpost = saksbehandlerEpost,
-                annullert = annullert,
+                annullering = annullert,
                 utbetalingOK = utbetalingOK
             )
         )

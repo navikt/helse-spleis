@@ -27,7 +27,7 @@ internal class UtbetalingerRiver(
             "saksbehandler",
             "saksbehandlerEpost",
             "godkjenttidspunkt",
-            "annullert"
+            "annullering"
         )
         packet.requireKey("fagsystemId")
     }
