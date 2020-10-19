@@ -1713,10 +1713,6 @@ internal class Vedtaksperiode private constructor(
         private val log = LoggerFactory.getLogger("vedtaksperiode")
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun sykdomstidslinje(perioder: List<Vedtaksperiode>) = perioder
-            .filterNot { it.tilstand == TilInfotrygd }
-            .map { it.sykdomstidslinje }.join()
-
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
                 .filterNot { it >= vedtaksperiode }
