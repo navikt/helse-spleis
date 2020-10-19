@@ -115,14 +115,18 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(29.januar, 23.februar, 100))
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER)
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    1.januar,
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
-        assertEquals(3.januar, inspektør.beregningsdato(0)) {
-            "Første fraværsdag settes til den første utbetalte dagen fordi " +
-                "vi ikke er i stand til å regne den ut selv ennå. " +
-                "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"
-        }
+        assertEquals(1.januar, inspektør.beregningsdato(0))
     }
 
     @Test

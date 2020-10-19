@@ -21,6 +21,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
+import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -294,7 +295,7 @@ internal class Vedtaksperiode private constructor(
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
     internal fun periodetype() = when {
-        forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA ->
+        forlengelseFraInfotrygd == JA ->
             arbeidsgiver.finnSykeperiodeRettFør(this)?.run { Periodetype.INFOTRYGDFORLENGELSE }
                 ?: Periodetype.OVERGANG_FRA_IT
         harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
@@ -556,6 +557,11 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    private fun forlengelseFraInfotrygd(utbetalingshistorikk: Utbetalingshistorikk) {
+        forlengelseFraInfotrygd = JA
+        beregningsdatoFraInfotrygd = arbeidsgiver.beregningsdato(periode.endInclusive, utbetalingshistorikk)
+
+    }
     /**
      * Skedulering av utbetaling opp mot andre arbeidsgivere
      */
@@ -1011,11 +1017,7 @@ internal class Vedtaksperiode private constructor(
                         if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
                             // TODO: burde vi endre tilstand til "Gap" når vi nettopp har funnet ut at vi _ikke_ er det?
                             nesteTilstand = AvventerVilkårsprøvingGap
-                            vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-                            vedtaksperiode.beregningsdatoFraInfotrygd =
-                                oldtid
-                                    .utbetalingerInkludert(arbeidsgiver)
-                                    .førsteUtbetalingsdag(vedtaksperiode.periode)
+                            vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
                             ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
                         } else {
                             nesteTilstand = AvventerInntektsmeldingFerdigGap
@@ -1032,7 +1034,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-
     }
 
     internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
@@ -1273,7 +1274,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
-                        if (tilstøtendePeriode.forlengelseFraInfotrygd == ForlengelseFraInfotrygd.JA)
+                        if (tilstøtendePeriode.forlengelseFraInfotrygd == JA)
                             vedtaksperiode.beregningsdatoFraInfotrygd = tilstøtendePeriode.beregningsdatoFraInfotrygd
                         else vedtaksperiode.beregningsdatoFraInfotrygd = null
                         return@onSuccess
@@ -1291,14 +1292,10 @@ internal class Vedtaksperiode private constructor(
                             return@onSuccess
                         }
 
-                        vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.JA
-
                         arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
                         ytelser.kontekst(vedtaksperiode)
 
-                        vedtaksperiode.beregningsdatoFraInfotrygd = oldtid
-                            .utbetalingerInkludert(vedtaksperiode.arbeidsgiver)
-                            .førsteUtbetalingsdag(vedtaksperiode.periode)
+                        vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
                     }
 
                     arbeidsgiver.addInntekt(ytelser)

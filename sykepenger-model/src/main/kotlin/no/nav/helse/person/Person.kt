@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -253,21 +254,20 @@ class Person private constructor(
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun beregningsdato(dato: LocalDate) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato)
-    private fun beregningsperiode(periode: Periode) = beregningsdato(periode.endInclusive)?.let { periode.oppdaterFom(it) } ?: periode
-    private fun beregningsdatoer(dato: LocalDate) = Arbeidsgiver.beregningsperioder(arbeidsgivere, dato)
+    internal fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun beregningsperiode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
+    private fun inntektsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.inntektsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
+        val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()
         val beregningsperiode = beregningsperiode(periode)
-        val beregningsdatoer = ytelser
-            .utbetalingshistorikk()
-            .oppdaterBeregningsdatoer(beregningsdatoer(periode.endInclusive), periode.endInclusive)
+        val inntektsdatoer = inntektsdatoer(periode.endInclusive, historiskeTidslinjer)
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
             .map { arbeidsgiver ->
                 arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
-                    beregningsdatoer,
+                    inntektsdatoer,
                     beregningsperiode,
                     ytelser
                 )

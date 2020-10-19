@@ -53,17 +53,32 @@ internal class Arbeidsgiver private constructor(
         internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
         internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
 
-        internal fun beregningsdato(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
+        internal fun beregningsdato(
+            arbeidsgivere: List<Arbeidsgiver>,
+            dato: LocalDate,
+            historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()
+        ) =
             Sykdomstidslinje.beregningsdato(
-                dato, arbeidsgivere
+                dato, historiskeTidslinjer + arbeidsgivere
                     .filter(Arbeidsgiver::harHistorikk)
                     .map(Arbeidsgiver::sykdomstidslinje)
             )
 
-        internal fun beregningsperioder(arbeidsgivere: List<Arbeidsgiver>, dato: LocalDate) =
-            arbeidsgivere
-                .filter(Arbeidsgiver::harHistorikk)
-                .mapNotNull { it.beregningsdato(dato) }
+        internal fun inntektsdatoer(
+            arbeidsgivere: List<Arbeidsgiver>,
+            dato: LocalDate,
+            historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()
+        ): List<LocalDate> {
+            val inntektsdatoer = mutableListOf<LocalDate>()
+            var kuttdato = dato
+            do {
+                val beregningsdato = beregningsdato(arbeidsgivere, kuttdato, historiskeTidslinjer)?.also {
+                kuttdato = it.minusDays(1)
+                inntektsdatoer.add(it)
+                }
+            } while (beregningsdato != null)
+            return inntektsdatoer
+        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -281,9 +296,16 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
-    internal fun beregningsdato(kuttdato: LocalDate): LocalDate? {
-        if (!harHistorikk() || kuttdato == LocalDate.MAX) return null
-        return sykdomstidslinje().beregningsdato(kuttdato)
+    internal fun beregningsdato(kuttdato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) =
+        beregningsdato(kuttdato, utbetalingshistorikk.historiskeTidslinjer(organisasjonsnummer))
+
+    internal fun beregningsdato(kuttdato: LocalDate) =
+        beregningsdato(kuttdato, emptyList())
+
+    private fun beregningsdato(kuttdato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje>): LocalDate? {
+        if (kuttdato == LocalDate.MAX) return null
+        val tidslinje = if (harHistorikk()) listOf(sykdomstidslinje()) else emptyList()
+        return Sykdomstidslinje.beregningsdato(kuttdato, tidslinje + historiskeTidslinjer)
     }
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
