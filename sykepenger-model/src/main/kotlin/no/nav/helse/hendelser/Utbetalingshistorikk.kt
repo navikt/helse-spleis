@@ -1,20 +1,15 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.utvidTilbake
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Companion.tilModellPerioder
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -63,13 +58,6 @@ class Utbetalingshistorikk(
             Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
         }
 
-    internal fun oppdaterBeregningsdatoer(perioder: List<LocalDate>, sluttdato: LocalDate): List<LocalDate> {
-        val infotrygdperioder = utbetalinger.tilModellPerioder().utvidTilbake(inntektshistorikk)
-        return (infotrygdperioder + perioder.map { it til sluttdato })
-            .slåSammen() // TODO: hva gjør slåSammen, og trengs Periode-objekter (siden sluttdato er alltid samme, og man uansett bare vil ha startdatoen)?
-            .map { it.start }
-    }
-
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Inntekt,
@@ -80,17 +68,6 @@ class Utbetalingshistorikk(
 
         internal companion object {
             private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
-            internal fun List<ModellPeriode>.utvidTilbake(perioder: List<Inntektsopplysning>) =
-                map {
-                    it.oppdaterFom(it.start.nærmesteFom(perioder) ?: it.start)
-                }
-
-            private fun LocalDate.nærmesteFom(perioder: List<Inntektsopplysning>) =
-                perioder
-                    .maxBy { it.sykepengerFom <= this }
-                    ?.sykepengerFom
-                    .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for orgnumre ${perioder.map { it.orgnummer }}") }
 
             fun valider(
                 liste: List<Inntektsopplysning>,
@@ -178,8 +155,6 @@ class Utbetalingshistorikk(
     sealed class Periode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun sorter(liste: List<Periode>) = liste.sortedBy { it.periode.start }
-            internal fun List<Periode>.tilModellPerioder() =
-                map { it.periode }
         }
 
         protected val periode = ModellPeriode(fom, tom)
