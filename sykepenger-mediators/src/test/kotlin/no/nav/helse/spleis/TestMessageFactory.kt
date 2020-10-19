@@ -397,15 +397,15 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
-                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
-                    "saksbehandler" to saksbehandler,
-                    "saksbehandlerEpost" to saksbehandlerEpost,
-                    "godkjenttidspunkt" to godkjenttidspunkt,
-                    "annullert" to annullert
+                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
                 )
             ),
             ekstraFelter = mapOf(
-                "fagsystemId" to "123456789"
+                "fagsystemId" to "123456789",
+                "saksbehandler" to saksbehandler,
+                "saksbehandlerEpost" to saksbehandlerEpost,
+                "godkjenttidspunkt" to godkjenttidspunkt,
+                "annullert" to annullert
             )
         )
     }

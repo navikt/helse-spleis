@@ -14,10 +14,10 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
     private val fagsystemId = packet["fagsystemId"].asText()
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
-    private val saksbehandler = packet["@løsning.${Utbetaling.name}.saksbehandler"].asText()
-    private val saksbehandlerEpost = packet["@løsning.${Utbetaling.name}.saksbehandlerEpost"].asText()
-    private val godkjenttidspunkt = packet["@løsning.${Utbetaling.name}.godkjenttidspunkt"].asLocalDateTime()
-    private val annullert = packet["@løsning.${Utbetaling.name}.annullert"].asBoolean()
+    private val saksbehandler = packet["saksbehandler"].asText()
+    private val saksbehandlerEpost = packet["saksbehandlerEpost"].asText()
+    private val godkjenttidspunkt = packet["godkjenttidspunkt"].asLocalDateTime()
+    private val annullert = packet["annullert"].asBoolean()
 
     private val utbetaling
         get() = UtbetalingHendelse(

@@ -24,10 +24,10 @@ internal class UtbetalingerRiver(
         )
         packet.requireKey(
             "@løsning.${Utbetaling.name}.beskrivelse",
-            "@løsning.${Utbetaling.name}.saksbehandler",
-            "@løsning.${Utbetaling.name}.saksbehandlerEpost",
-            "@løsning.${Utbetaling.name}.godkjenttidspunkt",
-            "@løsning.${Utbetaling.name}.annullert"
+            "saksbehandler",
+            "saksbehandlerEpost",
+            "godkjenttidspunkt",
+            "annullert"
         )
         packet.requireKey("fagsystemId")
     }
