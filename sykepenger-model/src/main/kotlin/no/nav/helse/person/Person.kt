@@ -256,7 +256,7 @@ class Person private constructor(
 
     internal fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
     private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
-    private fun alleBeregningsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.alleBeregningsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
+    internal fun alleBeregningsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.alleBeregningsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()

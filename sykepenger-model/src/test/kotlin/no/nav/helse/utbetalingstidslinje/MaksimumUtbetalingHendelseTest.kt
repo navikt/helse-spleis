@@ -22,6 +22,7 @@ internal class MaksimumUtbetalingHendelseTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
+            listOf(1.januar),
             1.januar
         ).betal()
         undersøke(tidslinje)
@@ -33,6 +34,7 @@ internal class MaksimumUtbetalingHendelseTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
+            listOf(1.januar),
             1.januar
         ).betal()
         undersøke(tidslinje)
@@ -44,6 +46,7 @@ internal class MaksimumUtbetalingHendelseTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
+            listOf(1.januar),
             1.januar
         ).betal()
         undersøke(tidslinje)
@@ -57,6 +60,7 @@ internal class MaksimumUtbetalingHendelseTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
+            listOf(1.januar),
             1.januar
 
         ).betal()
@@ -68,7 +72,8 @@ internal class MaksimumUtbetalingHendelseTest {
         val tidslinje = tidslinjeOf(10.NAV(1200, 50.0))
         MaksimumUtbetaling(
             listOf(tidslinje),
-                aktivitetslogg,
+            aktivitetslogg,
+            listOf(1.januar),
             1.januar
 
         ).betal()

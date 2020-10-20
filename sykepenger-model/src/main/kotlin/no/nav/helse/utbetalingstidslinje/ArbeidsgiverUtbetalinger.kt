@@ -9,13 +9,13 @@ internal class ArbeidsgiverUtbetalinger(
     private val tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>,
     private val personTidslinje: Utbetalingstidslinje,
     private val periode: Periode,
-    private val beregningsdato: LocalDate,
+    private val beregningsdatoer: List<LocalDate>,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val aktivitetslogg: Aktivitetslogg,
     private val organisasjonsnummer: String,
     private val fødselsnummer: String,
-    private val grunnbeløpsreguleringDato: LocalDate = beregningsdato
+    private val virkningsdato: LocalDate = periode.endInclusive
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
@@ -26,7 +26,7 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)
         }
-        MaksimumUtbetaling(tidslinjer, aktivitetslogg, beregningsdato).betal()
+        MaksimumUtbetaling(tidslinjer, aktivitetslogg, beregningsdatoer, virkningsdato).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.createUtbetaling(
                 fødselsnummer,

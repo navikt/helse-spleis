@@ -80,7 +80,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             ),
             tidslinjeOf(),
             1.januar til 31.januar,
-            1.januar,
+            listOf(1.januar),
             Alder(UNG_PERSON_FNR_2018),
             NormalArbeidstaker,
             Aktivitetslogg(),

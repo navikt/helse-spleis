@@ -1310,7 +1310,7 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
                         personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        beregningsdato = vedtaksperiode.beregningsdato,
+                        beregningsdatoer = person.alleBeregningsdatoer(vedtaksperiode.periode.endInclusive, ytelser.utbetalingshistorikk().historiskeTidslinjer()),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,
