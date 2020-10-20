@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.mai
+import no.nav.helse.testhelpers.oktober
 import no.nav.helse.testhelpers.september
 
 import org.junit.jupiter.api.Assertions.*
@@ -73,6 +74,14 @@ internal class GrunnbeløpsreguleringTest {
     fun `regulert periode er irrelevant for regulering`() {
         val virkningFra = 21.september(2020)
         val beregningsdato = 1.mai(2020)
+        val grunnbeløpsregulering = Grunnbeløpsregulering(id, AKTØRID, FNR, ORGNR, virkningFra, ARBEIDSGIVERFAGSYSTEMID)
+        assertFalse(grunnbeløpsregulering.erRelevant(ARBEIDSGIVERFAGSYSTEMID, PERSONFAGSYSTEMID, beregningsdato, Grunnbeløp.`1G`.beløp(beregningsdato, virkningFra)))
+    }
+
+    @Test
+    fun `periode nyere enn virkningstidspunktet til g-reguleringen`() {
+        val virkningFra = 21.september(2020)
+        val beregningsdato = 10.oktober(2020)
         val grunnbeløpsregulering = Grunnbeløpsregulering(id, AKTØRID, FNR, ORGNR, virkningFra, ARBEIDSGIVERFAGSYSTEMID)
         assertFalse(grunnbeløpsregulering.erRelevant(ARBEIDSGIVERFAGSYSTEMID, PERSONFAGSYSTEMID, beregningsdato, Grunnbeløp.`1G`.beløp(beregningsdato, virkningFra)))
     }

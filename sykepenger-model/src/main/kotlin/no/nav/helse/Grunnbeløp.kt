@@ -46,9 +46,9 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
 
         companion object {
             fun gjeldendeGrunnbeløp(grunnbeløper: List<HistoriskGrunnbeløp>, dato: LocalDate, virkningFra: LocalDate): HistoriskGrunnbeløp {
-                require(virkningFra >= dato) { "Virkningsdato må være nyere eller lik beregningsdato" }
+                val virkningsdato = maxOf(dato, virkningFra)
                 return grunnbeløper
-                    .filter { virkningFra >= it.virkningsdato && dato >= it.gyldigFra }
+                    .filter { virkningsdato >= it.virkningsdato && dato >= it.gyldigFra }
                     .maxBy { it.virkningsdato }
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
             }

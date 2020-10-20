@@ -2,12 +2,12 @@ package no.nav.helse
 
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.mai
+import no.nav.helse.testhelpers.oktober
 import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
 
@@ -38,7 +38,7 @@ internal class GrunnbeløpTest {
     }
 
     @Test
-    fun `virkingsdato må være nyere enn beregningsdato`() {
-        assertThrows<IllegalArgumentException> { Grunnbeløp.`1G`.beløp(30.april(2020), 29.april(2020)) }
+    fun `beregningsdato brukes når virkningsdato er eldre`() {
+        assertEquals(101351.årlig, Grunnbeløp.`1G`.beløp(10.oktober(2020), 21.september(2020)))
     }
 }
