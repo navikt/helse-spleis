@@ -26,8 +26,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
     private val arbeidsgiverNettoBeløp: Int = vedtaksperiode["arbeidsgiverNettoBeløp"]
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
-    private val datoForGrunnbeløpsregulering:LocalDate? = vedtaksperiode["datoForGrunnbeløpsregulering"]
-    private val grunnbeløp: Inntekt = vedtaksperiode["grunnbeløp"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
@@ -103,9 +101,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "personNettoBeløp" to personNettoBeløp,
         "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
         "arbeidsgiverNettoBeløp" to arbeidsgiverNettoBeløp,
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
-        "datoForGrunnbeløpsregulering" to datoForGrunnbeløpsregulering,
-        "grunnbeløp" to grunnbeløp.reflection { årlig, _, _, _ -> årlig }
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
@@ -119,8 +115,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "beregningsdatoFraInfotrygd" to beregningsdatoFraInfotrygd,
         "beregningsdato" to beregningsdato,
         "inntektFraInntektsmelding" to arbeidsgiver.inntekt(beregningsdato)?.reflection{ _, månedlig, _, _ -> månedlig },
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
-        "datoForGrunnbeløpsregulering" to datoForGrunnbeløpsregulering,
-        "grunnbeløp" to grunnbeløp.reflection { årlig, _, _, _ -> årlig }
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
         )
 }

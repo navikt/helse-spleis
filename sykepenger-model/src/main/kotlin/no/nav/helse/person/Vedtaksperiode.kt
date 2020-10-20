@@ -63,8 +63,7 @@ internal class Vedtaksperiode private constructor(
     private var personNettoBeløp: Int,
     private var arbeidsgiverFagsystemId: String?,
     private var arbeidsgiverNettoBeløp: Int,
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
-    private var datoForGrunnbeløpsregulering: LocalDate? = null
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val beregningsdato
@@ -72,10 +71,6 @@ internal class Vedtaksperiode private constructor(
             beregningsdatoFraInfotrygd
                 ?: arbeidsgiver.beregningsdato(periode.endInclusive)
                 ?: periode.start
-
-    private val virkningGrunnbeløp get() = datoForGrunnbeløpsregulering ?: beregningsdato
-
-    private val grunnbeløp get() = Grunnbeløp.`1G`.beløp(beregningsdato, virkningGrunnbeløp)
 
     internal constructor(
         person: Person,
@@ -516,7 +511,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun regulerGrunnbeløp(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        datoForGrunnbeløpsregulering = LocalDate.now()
         tilstand(grunnbeløpsregulering, AvventerHistorikk)
     }
 
