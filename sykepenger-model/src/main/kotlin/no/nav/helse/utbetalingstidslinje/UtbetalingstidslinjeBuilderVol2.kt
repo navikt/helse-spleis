@@ -169,7 +169,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             val dekningsgrunnlag = inntektshistorikkVol2.dekningsgrunnlag(it, arbeidsgiverRegler)
             val grunnlagForSykepengegrunnlag = inntektshistorikkVol2.grunnlagForSykepengegrunnlag(it)
             if (dekningsgrunnlag == null || grunnlagForSykepengegrunnlag == null) {
-                sikkerLogg.info("Dekningsgrunnlag: [$dekningsgrunnlag], grunnlagForSykepengegrunnlag: [$grunnlagForSykepengegrunnlag]")
+                sikkerLogg.info("Dekningsgrunnlag: [$dekningsgrunnlag], grunnlagForSykepengegrunnlag: [$grunnlagForSykepengegrunnlag], for dato: [$dato]")
                 null
             }
             else Inntekter(
