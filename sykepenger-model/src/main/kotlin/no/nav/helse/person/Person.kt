@@ -254,9 +254,11 @@ class Person private constructor(
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
+    internal fun beregningsdato(dato: LocalDate) = beregningsdato(dato, emptyList())
+    internal fun beregningsdato(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = beregningsdato(dato, utbetalingshistorikk.historiskeTidslinjer())
     internal fun alleBeregningsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.alleBeregningsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje>) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()

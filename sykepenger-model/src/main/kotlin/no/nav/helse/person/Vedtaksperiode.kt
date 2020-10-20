@@ -69,7 +69,7 @@ internal class Vedtaksperiode private constructor(
     private val beregningsdato
         get() =
             beregningsdatoFraInfotrygd
-                ?: arbeidsgiver.beregningsdato(periode.endInclusive)
+                ?: person.beregningsdato(periode.endInclusive)
                 ?: periode.start
 
     internal constructor(
@@ -547,8 +547,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun forlengelseFraInfotrygd(utbetalingshistorikk: Utbetalingshistorikk) {
         forlengelseFraInfotrygd = JA
-        beregningsdatoFraInfotrygd = arbeidsgiver.beregningsdato(periode.endInclusive, utbetalingshistorikk)
-
+        beregningsdatoFraInfotrygd = person.beregningsdato(periode.endInclusive, utbetalingshistorikk)
     }
     /**
      * Skedulering av utbetaling opp mot andre arbeidsgivere
