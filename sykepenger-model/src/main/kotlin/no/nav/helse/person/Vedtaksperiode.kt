@@ -276,13 +276,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        if (!grunnbeløpsregulering.erRelevant(
-                arbeidsgiverFagsystemId,
-                personFagsystemId,
-                beregningsdato,
-                grunnbeløp
-            )
-        ) return
+        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato)) return
         kontekst(grunnbeløpsregulering)
         tilstand.håndter(this, grunnbeløpsregulering)
     }
@@ -1645,7 +1639,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
-            if (!vedtaksperiode.utbetalingstidslinje.er6GBegrenset()) return grunnbeløpsregulering.info("Perioden er ikke begrenset av 6G - grunnbeløpsregulering unødvendig")
+            if (grunnbeløpsregulering.håndtert()) return grunnbeløpsregulering.info("Grunnbeløpsreguleringen er håndtert av en annen periode")
             grunnbeløpsregulering.info("Foretar grunnbeløpsregulering")
             vedtaksperiode.regulerGrunnbeløp(grunnbeløpsregulering)
         }

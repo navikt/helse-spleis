@@ -2254,7 +2254,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterGrunnbeløpsregulering(virkningFra = 20.juli(2020))
+        håndterGrunnbeløpsregulering(gyldighetsdato = 20.juli(2020))
 
         assertTilstander(
             1.vedtaksperiode,

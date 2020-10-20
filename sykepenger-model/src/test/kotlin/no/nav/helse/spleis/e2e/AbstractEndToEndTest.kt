@@ -385,7 +385,7 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterGrunnbeløpsregulering(
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
-        virkningFra: LocalDate
+        gyldighetsdato: LocalDate
     ) {
         person.håndter(
             Grunnbeløpsregulering(
@@ -393,7 +393,7 @@ internal abstract class AbstractEndToEndTest {
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
-                reguleringstidspunkt = virkningFra,
+                gyldighetsdato = gyldighetsdato,
                 fagsystemId = fagsystemId
             )
         )

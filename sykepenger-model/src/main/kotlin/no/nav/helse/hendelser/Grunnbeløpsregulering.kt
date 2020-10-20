@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
 
@@ -12,9 +11,11 @@ class Grunnbeløpsregulering(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val reguleringstidspunkt: LocalDate,
+    private val gyldighetsdato: LocalDate,
     private val fagsystemId: String
 ) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
+
+    private var håndtert = false
 
     override fun aktørId() = aktørId
 
@@ -22,12 +23,16 @@ class Grunnbeløpsregulering(
 
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato, reguleringstidspunkt)
+    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato)
 
-    internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, beregningsdato: LocalDate, grunnbeløp: Inntekt) =
-        relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && grunnbeløp(beregningsdato) > grunnbeløp
-
-    private fun relevantFagsystemId(arbeidsgiverFagsystemId: String?, personFagsystemId: String?): Boolean {
-        return arbeidsgiverFagsystemId == fagsystemId || personFagsystemId == fagsystemId
+    internal fun håndtert() = håndtert.also {
+        if (!it) håndtert = true
     }
+
+    internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, beregningsdato: LocalDate) =
+        relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && beregningsdato >= gyldighetsdato
+
+    private fun relevantFagsystemId(arbeidsgiverFagsystemId: String?, personFagsystemId: String?) =
+        arbeidsgiverFagsystemId == fagsystemId || personFagsystemId == fagsystemId
+
 }

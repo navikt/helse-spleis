@@ -240,7 +240,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
+        vedtaksperioder.toList().reversed().forEach { it.håndter(hendelse) }
     }
 
     internal fun annullerUtbetaling(

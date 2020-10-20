@@ -5,9 +5,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.mai
-import no.nav.helse.testhelpers.september
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -15,20 +13,16 @@ import java.time.LocalDate
 internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     private companion object {
         private val HØY_INNTEKT = 800000.00.årlig
-        private val VIRKNINGSDATO_2020_GRUNNBELØP = 21.september(2020)
         private val GYLDIGHETSDATO_2020_GRUNNBELØP = 1.mai(2020)
     }
 
     @Test
-    fun `justere periode etter ny g-sats, men før virkningsdato`() {
-        val fom = GYLDIGHETSDATO_2020_GRUNNBELØP
-        val tom = fom.plusDays(31)
-        utbetaltVedtaksperiodeBegrensetAv6G(1, fom, tom)
-        håndterGrunnbeløpsregulering(virkningFra = VIRKNINGSDATO_2020_GRUNNBELØP)
-        håndterYtelser(1.vedtaksperiode) // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, AKSEPTERT)
+    fun `siste periode på en fagsystemID håndterer grunnbeløpsregulering`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.april(2020), 31.mai(2020)) // beregningsdato før 1. mai
+        utbetaltVedtaksperiodeBegrensetAv6G(2, 10.juni(2020), 30.juni(2020)) // gap, ny beregningsdato 10.juni
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.juli(2020), 31.juli(2020))
+        utbetaltVedtaksperiodeBegrensetAv6G(4, 10.august(2020), 31.august(2020)) // gap, ny beregningsdato 10. august
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -39,12 +33,42 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            4.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -58,7 +82,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         val tomPeriode2 = fomPeriode2.plusMonths(1)
         utbetaltVedtaksperiodeBegrensetAv6G(2, fomPeriode2, tomPeriode2, listOf(Periode(fomPeriode1, fomPeriode1.plusDays(15))), fomPeriode2)
 
-        håndterGrunnbeløpsregulering(virkningFra = VIRKNINGSDATO_2020_GRUNNBELØP)
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         håndterYtelser(2.vedtaksperiode) // No history
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -102,7 +126,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         val fom = GYLDIGHETSDATO_2020_GRUNNBELØP.minusDays(1)
         val tom = fom.plusDays(31)
         utbetaltVedtaksperiodeBegrensetAv6G(1, fom, tom)
-        håndterGrunnbeløpsregulering(virkningFra = VIRKNINGSDATO_2020_GRUNNBELØP)
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -119,30 +143,10 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode med nytt grunnbeløp trengs ikke justering`() {
-        val fom = VIRKNINGSDATO_2020_GRUNNBELØP
-        val tom = fom.plusDays(31)
-        utbetaltVedtaksperiodeBegrensetAv6G(1, fom, tom)
-        håndterGrunnbeløpsregulering(virkningFra = VIRKNINGSDATO_2020_GRUNNBELØP)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `g-regulering før virkningsdato har ikke virkning`() {
         val fom = GYLDIGHETSDATO_2020_GRUNNBELØP
         val tom = fom.plusDays(31)
         utbetaltVedtaksperiodeBegrensetAv6G(1, fom, tom)
-        håndterGrunnbeløpsregulering(virkningFra = VIRKNINGSDATO_2020_GRUNNBELØP.minusDays(1))
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -153,7 +157,8 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -176,6 +181,19 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             refusjon = Triple(null, HØY_INNTEKT, emptyList())
         )
         håndterVilkårsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode, HØY_INNTEKT)
+        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
+        håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
+        håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)
+    }
+
+    private fun utbetaltForlengetVedtaksperiodeBegrensetAv6G(
+        vedtaksperiodeIndeks: Int,
+        fom: LocalDate,
+        tom: LocalDate
+    ) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
