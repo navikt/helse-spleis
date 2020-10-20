@@ -255,20 +255,20 @@ class Person private constructor(
     }
 
     internal fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun beregningsperiode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
-    private fun inntektsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.inntektsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
+    private fun alleBeregningsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.alleBeregningsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()
-        val beregningsperiode = beregningsperiode(periode)
-        val inntektsdatoer = inntektsdatoer(periode.endInclusive, historiskeTidslinjer)
+        val sammenhengendePeriode = sammenhengendePeriode(periode)
+        val inntektsdatoer = alleBeregningsdatoer(periode.endInclusive, historiskeTidslinjer)
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
             .map { arbeidsgiver ->
                 arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
                     inntektsdatoer,
-                    beregningsperiode,
+                    sammenhengendePeriode,
                     ytelser
                 )
             }.toMap()

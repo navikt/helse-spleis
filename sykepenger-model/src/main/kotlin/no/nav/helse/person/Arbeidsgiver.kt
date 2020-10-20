@@ -64,7 +64,7 @@ internal class Arbeidsgiver private constructor(
                     .map(Arbeidsgiver::sykdomstidslinje)
             )
 
-        internal fun inntektsdatoer(
+        internal fun alleBeregningsdatoer(
             arbeidsgivere: List<Arbeidsgiver>,
             dato: LocalDate,
             historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()
@@ -73,8 +73,8 @@ internal class Arbeidsgiver private constructor(
             var kuttdato = dato
             do {
                 val beregningsdato = beregningsdato(arbeidsgivere, kuttdato, historiskeTidslinjer)?.also {
-                kuttdato = it.minusDays(1)
-                inntektsdatoer.add(it)
+                    kuttdato = it.minusDays(1)
+                    inntektsdatoer.add(it)
                 }
             } while (beregningsdato != null)
             return inntektsdatoer
