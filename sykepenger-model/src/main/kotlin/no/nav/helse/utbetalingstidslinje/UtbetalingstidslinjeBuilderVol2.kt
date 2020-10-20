@@ -12,6 +12,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 /**
@@ -30,6 +31,10 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private var sykedagerIArbeidsgiverperiode = 0
     private var ikkeSykedager = 0
     private var fridager = 0
+
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
 
     private class Inntekter(
         val dekningsgrunnlag: Inntekt,
@@ -163,7 +168,10 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         inntekter = dato.inntektdato?.let {
             val dekningsgrunnlag = inntektshistorikkVol2.dekningsgrunnlag(it, arbeidsgiverRegler)
             val grunnlagForSykepengegrunnlag = inntektshistorikkVol2.grunnlagForSykepengegrunnlag(it)
-            if (dekningsgrunnlag == null || grunnlagForSykepengegrunnlag == null) null
+            if (dekningsgrunnlag == null || grunnlagForSykepengegrunnlag == null) {
+                sikkerLogg.info("Dekningsgrunnlag: [$dekningsgrunnlag], grunnlagForSykepengegrunnlag: [$grunnlagForSykepengegrunnlag]")
+                null
+            }
             else Inntekter(
                 dekningsgrunnlag = dekningsgrunnlag,
                 aktuellDagsinntekt = grunnlagForSykepengegrunnlag
