@@ -366,13 +366,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `no-gap historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
-        håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-            1.desember(2017),
-            16.desember(2017),
-            15000,
-            100,
-            ORGNUMMER
-        ))
+        håndterYtelser(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                1.desember(2017),
+                16.desember(2017),
+                15000,
+                100,
+                ORGNUMMER
+            )
+        )
         inspektør.also {
             assertNoErrors(it)
             assertFalse(it.personLogg.hasWarningsOrWorse())
@@ -389,6 +391,110 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+        )
+    }
+
+    @Test
+    fun `fremtidig test av utbetalingstidslinjeBuilderVol2, historikk fra flere arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(20.september(2020), 19.oktober(2020), 100))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode,
+            Sykdom(20.september(2020), 19.oktober(2020), 100)
+        )
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                21.august(2020),
+                19.september(2020),
+                2077,
+                100,
+                ORGNUMMER
+            ),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                21.august(2019),
+                19.september(2019),
+                1043,
+                100,
+                "12345789"
+            ),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    27.juli(2020),
+                    45000.månedlig,
+                    ORGNUMMER,
+                    true
+                ),
+                Utbetalingshistorikk.Inntektsopplysning(
+                    21.august(2019),
+                    22600.månedlig,
+                    "12345789",
+                    true
+                )
+            )
+        )
+
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(inntekter = inntektperioder {
+            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            1.juli(2019) til 1.juni(2020) inntekter {
+                ORGNUMMER inntekt 45000.månedlig
+            }
+        }))
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                21.august(2020),
+                19.september(2020),
+                2077,
+                100,
+                ORGNUMMER
+            ),
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                21.august(2019),
+                19.september(2019),
+                1043,
+                100,
+                "12345789"
+            ),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    27.juli(2020),
+                    45000.månedlig,
+                    ORGNUMMER,
+                    true
+                ),
+                Utbetalingshistorikk.Inntektsopplysning(
+                    21.august(2019),
+                    22600.månedlig,
+                    "12345789",
+                    true
+                )
+            )
+        )
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertFalse(it.personLogg.hasWarningsOrWorse())
+            assertActivities(it)
+            assertFalse(it.inntekter.isEmpty())
+            assertNotNull(it.inntektshistorikk.inntekt(27.juli(2020)))
+            assertEquals(2, it.sykdomshistorikk.size)
+            assertEquals(21, it.dagtelling[Sykedag::class])
+            assertEquals(9, it.dagtelling[SykHelgedag::class])
+            assertEquals(43617, it.nettoBeløp[0])
+        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
         )
     }
 
