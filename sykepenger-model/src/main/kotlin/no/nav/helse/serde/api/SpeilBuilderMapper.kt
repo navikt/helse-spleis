@@ -2,6 +2,7 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -79,8 +80,10 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     val dataForVilkårsvurdering = this["dataForVilkårsvurdering"]?.let { it as GrunnlagsdataDTO }
     val hendelser: List<HendelseDTO> = this["hendelser"].cast()
     val søknad = hendelser.find { it.type == "SENDT_SØKNAD_NAV" } as? SøknadNavDTO
+    val tom = sykdomstidslinje.last().dagen
     val vilkår = mapVilkår(
         this,
+        tom,
         sykdomstidslinje,
         fødselsnummer,
         dataForVilkårsvurdering,
@@ -93,7 +96,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         id = this["id"] as UUID,
         gruppeId = gruppeId,
         fom = sykdomstidslinje.first().dagen,
-        tom = sykdomstidslinje.last().dagen,
+        tom = tom,
         tilstand = this["tilstand"] as TilstandstypeDTO,
         fullstendig = true,
         utbetalingsreferanse = this["utbetalingsreferanse"] as String?,
@@ -190,6 +193,7 @@ internal fun mapOpptjening(
 
 internal fun mapVilkår(
     vedtaksperiodeMap: Map<String, Any?>,
+    tom: LocalDate,
     sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     fødselsnummer: String,
     dataForVilkårsvurdering: GrunnlagsdataDTO?,
@@ -234,7 +238,7 @@ internal fun mapVilkår(
     val sykepengegrunnlagDTO = SykepengegrunnlagDTO(
         sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
         grunnbeløp = (Grunnbeløp.`1G`
-            .beløp(beregningsdato)
+            .beløp(beregningsdato, tom)
             .reflection { årlig, _, _, _ -> årlig })
             .toInt(),
         oppfylt = sykepengegrunnlagOppfylt(
