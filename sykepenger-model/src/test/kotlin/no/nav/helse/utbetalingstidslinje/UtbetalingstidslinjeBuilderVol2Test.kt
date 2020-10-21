@@ -556,6 +556,25 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.navdager.assertDekningsgrunnlag(29.januar(2020) til 31.januar(2020), 30000.månedlig)
     }
 
+    @Test
+    fun `opphold i arbeidsgiverperiode`() {
+        resetSeed(4.januar(2020))
+        assertDoesNotThrow {
+            (16.U + 2.A + 2.S).utbetalingslinjer(
+                inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                    this {
+                        addInntektsmelding(22.januar(2020), hendelseId, 30000.månedlig)
+                    }
+                },
+                inntektsdatoer = listOf(22.januar(2020), 4.januar(2020))
+            )
+        }
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(4.januar(2020) til 19.januar(2020), null)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), null)
+        inspektør.navdager.assertDekningsgrunnlag(22.januar(2020) til 23.januar(2020), 30000.månedlig)
+    }
+
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
         invoke {
             addInntektsmelding(1.januar, hendelseId, 31000.månedlig)
