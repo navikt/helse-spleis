@@ -14,6 +14,7 @@ import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
@@ -533,6 +534,26 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 17.januar(2020), null)
         inspektør.fridager.assertDekningsgrunnlag(18.januar(2020) til 18.januar(2020), null)
         inspektør.navdager.assertDekningsgrunnlag(19.januar(2020) til 21.januar(2020), 30000.månedlig)
+    }
+
+    @Test
+    fun `opphold i arbeidsgiverperioden`() {
+        resetSeed(1.januar(2020))
+        assertDoesNotThrow {
+            (1.S + 11.A + 21.S).utbetalingslinjer(
+                inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                    this {
+                        addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
+                    }
+                },
+                inntektsdatoer = listOf(13.januar(2020), 1.januar(2020))
+            )
+        }
+
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 1.januar(2020), null)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(2.januar(2020) til 12.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(13.januar(2020) til 28.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(29.januar(2020) til 31.januar(2020), 30000.månedlig)
     }
 
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
