@@ -253,7 +253,7 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Forsøkte å kansellere en utbetaling som allerede er annullert")
             return
         }
-        val utbetaling = sisteUtbetaling.kansellerUtbetaling()
+        val utbetaling = sisteUtbetaling.kansellerUtbetaling(hendelse.aktivitetslogg)
         utbetalinger.add(utbetaling)
         sendUtbetalingsbehov(
             aktivitetslogg = hendelse.aktivitetslogg,

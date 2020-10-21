@@ -1,18 +1,28 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtbetalingslinjeForskjellTest {
 
-    protected companion object {
+    private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "987654321"
         private const val FAGSYSTEMID = "FAGSYSTEMID"
+    }
+
+    private lateinit var aktivitetslogg: Aktivitetslogg
+    private operator fun Oppdrag.minus(other: Oppdrag) = this.minus(other, aktivitetslogg)
+
+    @BeforeEach
+    fun setup(){
+        aktivitetslogg = Aktivitetslogg()
     }
 
     @Test
@@ -23,6 +33,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -33,6 +44,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -47,6 +59,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[0].id, actual[0].refId)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(Endringskode.NY, actual[0].endringskode)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -61,6 +75,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[0].id, actual[0].id)
         assertNull(actual[0].refId)
         assertNull(actual[0].refFagsystemId)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -75,6 +90,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[0].id, actual[1].refId)
         assertEquals(original[0].id + 1, actual[1].id)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -89,6 +105,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -103,6 +120,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -129,6 +147,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[0].id + 1, actual[1].id)
         assertEquals(Endringskode.UEND, actual[0].endringskode)
         assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -163,6 +182,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[3].endringskode)
         assertEquals(actual[2].id + 1, actual[3].id)
         assertEquals(actual[2].id, actual[3].refId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -191,6 +212,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[3].endringskode)
         assertEquals(original[5].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -204,6 +227,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[0].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -217,6 +242,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[0].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -245,6 +272,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.UEND, actual[0].endringskode)
         assertEquals(Endringskode.ENDR, actual[1].endringskode)
         assertEquals(Endringskode.NY, actual[2].endringskode)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `slett nøyaktig en periode`() {
@@ -267,6 +296,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `original andre periode samsvarer delvis med ny`() {
@@ -286,6 +317,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `perioden min starter midt i en original periode`() {
@@ -305,6 +338,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `ny er tom`() {
@@ -322,6 +357,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(null, actual[0].refFagsystemId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `ny er tom uten sisteArbeidsgiverdag`() {
@@ -339,6 +376,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(null, actual[0].refFagsystemId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
@@ -348,6 +387,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(recalculated, actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(Endringskode.NY, actual.endringskode)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `originalen har hale å slette`() {
@@ -367,6 +408,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[1].id)
         assertEquals(original[0].id, actual[1].refId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `Sletting hvor alt blir sendt på nytt`() {
@@ -388,6 +431,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertLink(actual[1], original[0])
         assertEquals(Endringskode.NY, actual[2].endringskode)
         assertLink(actual[2], actual[1])
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `Sletting med UEND`() {
@@ -419,6 +464,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[2].endringskode)
         assertEquals(actual[0].id + 1, actual[2].id)
         assertEquals(actual[0].id, actual[2].refId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test fun `slette fra hode og hale av originalen`() {
@@ -440,6 +487,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[1].id)
         assertEquals(original[0].id, actual[1].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -476,6 +525,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(Endringskode.NY, actual[2].endringskode)
         assertEquals(actual[1].id + 1, actual[2].id)
         assertEquals(actual[1].id, actual[2].refId)
+
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -500,6 +551,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[3].id, actual[0].id)
         assertEquals(null, actual[0].refId)
+
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test

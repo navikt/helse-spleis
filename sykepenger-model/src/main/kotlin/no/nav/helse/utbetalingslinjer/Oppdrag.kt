@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
@@ -90,7 +91,7 @@ internal class Oppdrag private constructor(
             }
         }
 
-    internal operator fun minus(other: Oppdrag): Oppdrag {
+    internal fun minus(other: Oppdrag, aktivitetslogg: Aktivitetslogg): Oppdrag {
         val tidligere = other.copyWith(other.linjerUtenOpphør())
         return when {
             tidligere.isEmpty() ->
@@ -102,10 +103,14 @@ internal class Oppdrag private constructor(
                 this
             this.førstedato > tidligere.sistedato ->
                 this
-            this.førstedato > tidligere.førstedato ->
+            this.førstedato > tidligere.førstedato -> {
+                aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 deleted(tidligere)
-            this.førstedato < tidligere.førstedato ->
+            }
+            this.førstedato < tidligere.førstedato -> {
+                aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 appended(tidligere)
+            }
             this.førstedato == tidligere.førstedato ->
                 ghosted(tidligere)
             else ->

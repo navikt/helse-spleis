@@ -63,7 +63,7 @@ internal class Utbetaling private constructor(
             utbetalinger: List<Utbetaling>
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, reflectedArbeidsgiverBeløp)
             .result()
-            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon) })
+            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon) }, aktivitetslogg)
             .also { oppdrag ->
                 utbetalinger.lastOrNull()?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
                 aktivitetslogg.info(
@@ -103,10 +103,10 @@ internal class Utbetaling private constructor(
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
-    internal fun kansellerUtbetaling() = Utbetaling(
+    internal fun kansellerUtbetaling(aktivitetslogg: Aktivitetslogg) = Utbetaling(
         utbetalingstidslinje,
-        arbeidsgiverOppdrag.emptied() - arbeidsgiverOppdrag,
-        personOppdrag.emptied() - personOppdrag,
+        arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, aktivitetslogg),
+        personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),
         LocalDateTime.now(),
         ANNULLERT
     )
