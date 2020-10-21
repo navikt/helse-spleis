@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
