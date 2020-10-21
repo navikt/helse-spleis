@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles.replayEnabled
+import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -548,6 +548,7 @@ internal class Vedtaksperiode private constructor(
         forlengelseFraInfotrygd = JA
         beregningsdatoFraInfotrygd = person.beregningsdato(periode.endInclusive, utbetalingshistorikk)
     }
+
     /**
      * Skedulering av utbetaling opp mot andre arbeidsgivere
      */
@@ -1008,7 +1009,7 @@ internal class Vedtaksperiode private constructor(
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
                             // TODO: burde vi endre tilstand til "Gap" når vi nettopp har funnet ut at vi _ikke_ er det?
-                            nesteTilstand = AvventerVilkårsprøvingGap
+                            nesteTilstand = if (vilkårshåndteringInfotrygd) AvventerHistorikk else AvventerVilkårsprøvingGap
                             vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
                             ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
                         } else {
@@ -1308,7 +1309,10 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
                         personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        beregningsdatoer = person.alleBeregningsdatoer(vedtaksperiode.periode.endInclusive, ytelser.utbetalingshistorikk().historiskeTidslinjer()),
+                        beregningsdatoer = person.alleBeregningsdatoer(
+                            vedtaksperiode.periode.endInclusive,
+                            ytelser.utbetalingshistorikk().historiskeTidslinjer()
+                        ),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,
@@ -1682,7 +1686,10 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE_OG_ETTERGØLGENDE)
-            vedtaksperiode.arbeidsgiver.søppelbøtte(hendelse, vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode))
+            vedtaksperiode.arbeidsgiver.søppelbøtte(
+                hendelse,
+                vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode)
+            )
         }
 
         override fun håndter(
