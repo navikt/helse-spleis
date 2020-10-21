@@ -741,7 +741,8 @@ internal data class PersonData(
         val arbeidsgiverOppdrag: OppdragData,
         val personOppdrag: OppdragData,
         val tidsstempel: LocalDateTime,
-        val status: String
+        val status: String,
+        val annullert: Boolean
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -751,7 +752,8 @@ internal data class PersonData(
                 arbeidsgiverOppdrag.konverterTilOppdrag(),
                 personOppdrag.konverterTilOppdrag(),
                 tidsstempel,
-                enumValueOf<Utbetaling.Status>(status)
+                enumValueOf<Utbetaling.Status>(status),
+                annullert
             )
     }
 

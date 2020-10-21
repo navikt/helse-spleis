@@ -18,7 +18,8 @@ internal class Utbetaling private constructor(
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
-    private var status: Status
+    private var status: Status,
+    private var annullert: Boolean
 ) {
     internal constructor(
         fødselsnummer: String,
@@ -32,21 +33,22 @@ internal class Utbetaling private constructor(
         buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
         LocalDateTime.now(),
-        IKKE_UTBETALT
+        IKKE_UTBETALT,
+        false
     )
 
     internal enum class Status {
         IKKE_UTBETALT,
         UTBETALT,
-        UTBETALING_FEILET,
-        ANNULLERT;
+        UTBETALING_FEILET
     }
 
     internal fun erUtbetalt() = status == UTBETALT
-    internal fun erAnnullert() = status == ANNULLERT
+    internal fun erAnnullert() = annullert
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         status = if (utbetaling.hasErrorsOrWorse()) UTBETALING_FEILET else UTBETALT
+        annullert = utbetaling.annullert
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -82,11 +84,15 @@ internal class Utbetaling private constructor(
 
         private fun sisteGyldig(utbetalinger: List<Utbetaling>, default: () -> Oppdrag) =
             utbetalinger
-                .lastOrNull { it.status == UTBETALT }
+                .utbetalte()
+                .firstOrNull()
                 ?.arbeidsgiverOppdrag
                 ?: default()
 
-        internal fun List<Utbetaling>.utbetalte() = filter { it.status == UTBETALT }
+        internal fun List<Utbetaling>.utbetalte() =
+            groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
+                .map { (_, utbetalingerPerFagsystemId) -> utbetalingerPerFagsystemId.last() }
+                .filter { it.status == UTBETALT && !it.annullert }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
@@ -108,7 +114,8 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, aktivitetslogg),
         personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),
         LocalDateTime.now(),
-        ANNULLERT
+        IKKE_UTBETALT,
+        true
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
