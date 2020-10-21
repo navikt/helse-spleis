@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -19,6 +20,7 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
@@ -65,6 +67,11 @@ internal abstract class AbstractEndToEndTest {
         sykmeldinger.clear()
         søknader.clear()
         inntektsmeldinger.clear()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.replayEnabled = false
     }
 
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) {

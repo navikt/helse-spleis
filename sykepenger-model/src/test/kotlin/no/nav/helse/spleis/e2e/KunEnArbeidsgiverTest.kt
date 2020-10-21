@@ -1578,11 +1578,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet — uten replay`() {
-        Toggles.replayEnabled = false
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test

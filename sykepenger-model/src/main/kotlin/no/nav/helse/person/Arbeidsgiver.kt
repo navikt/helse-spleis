@@ -44,14 +44,41 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
+        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
+            val treff = filter { it <= vedtaksperiode }.toMutableList()
+            val kandidater = (this - treff).toMutableList()
+            fun predikat(vedtaksperiode: Vedtaksperiode) = treff.any { it.erSykeperiodeRettFør(vedtaksperiode) }
+            while (kandidater.any(::predikat)) {
+                val nyeTreff = kandidater.filter(::predikat)
+                kandidater.removeAll(nyeTreff)
+                treff.addAll(nyeTreff)
+            }
+            return treff.filter { it in this }
+        }
+
+        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode2(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
+            val remaining = filter(SENERE_EXCLUSIVE(vedtaksperiode)).toMutableList()
+            val sammeArbeidsgiverperiode = (filter { it !in remaining }).toMutableList()
+            while (sammeArbeidsgiverperiode.last().erSykeperiodeRettFør(remaining.first())) {
+                sammeArbeidsgiverperiode.add(remaining.removeAt(0))
+            }
+            return sammeArbeidsgiverperiode
+        }
+
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal val TIDLIGERE: VedtaksperioderSelector = Arbeidsgiver::tidligere
-        internal val TIDLIGERE_OG_ETTERGØLGENDE: VedtaksperioderSelector = Arbeidsgiver::tidligereOgEtterfølgende
-        internal val SENERE: VedtaksperioderSelector = Arbeidsgiver::senere
-        internal val SENERE_EXCLUSIVE: VedtaksperioderSelector = Arbeidsgiver::senereExclusive
-        internal val KUN: VedtaksperioderSelector = Arbeidsgiver::kun
-        internal val ALLE: VedtaksperioderSelector = Arbeidsgiver::alle
+        internal val TIDLIGERE = fun(tidligereEnn: Vedtaksperiode): VedtaksperioderFilter {
+            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode <= tidligereEnn
+        }
+
+        internal val SENERE = fun (senereEllerLikDenne: Vedtaksperiode): VedtaksperioderFilter {
+            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEllerLikDenne
+        }
+        internal val SENERE_EXCLUSIVE = fun (senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
+            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
+        }
+
+        internal val ALLE: VedtaksperioderFilter = { true }
 
         internal fun beregningsdato(
             arbeidsgivere: List<Arbeidsgiver>,
@@ -331,21 +358,19 @@ internal class Arbeidsgiver private constructor(
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntektshistorikk.sykepengegrunnlag(dato)
 
     internal fun søppelbøtte(hendelse: PersonHendelse) {
-        vedtaksperioder.firstOrNull()?.also { søppelbøtte(it, hendelse, ALLE) }
+        vedtaksperioder.firstOrNull()?.also { søppelbøtte(hendelse, ALLE) }
     }
 
     internal fun søppelbøtte(
-        vedtaksperiode: Vedtaksperiode,
         hendelse: PersonHendelse,
-        block: VedtaksperioderSelector,
+        filter: VedtaksperioderFilter,
         sendTilInfotrygd: Boolean = true
     ): List<Vedtaksperiode> {
-        if (vedtaksperiode !in vedtaksperioder) return listOf()
-        return forkastet(vedtaksperiode, block)
+        return forkast(filter)
             .takeIf { it.isNotEmpty() }
             ?.also { perioder ->
                 perioder
-                    .onEach {
+                    .forEach {
                         it.ferdig(hendelse, sendTilInfotrygd)
                         sykdomshistorikk.fjernDager(it.periode())
                     }
@@ -356,18 +381,17 @@ internal class Arbeidsgiver private constructor(
             ?: listOf()
     }
 
-    private fun forkastet(vedtaksperiode: Vedtaksperiode, block: VedtaksperioderSelector) =
-        block(this, vedtaksperiode).also { selected ->
-            vedtaksperioder.removeAll(selected)
-            forkastede.putAll(selected.map { it to UKJENT })
-        }
+    private fun forkast(filter: VedtaksperioderFilter) = vedtaksperioder
+            .filter(filter)
+            .also { perioder ->
+                vedtaksperioder.removeAll(perioder)
+                forkastede.putAll(perioder.map { it to UKJENT })
+            }
 
-    private fun tidligere(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.subList(0, vedtaksperioder.indexOf(vedtaksperiode) + 1).toMutableList()
-
-    private fun tidligereOgEtterfølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
+    private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
         var index = vedtaksperioder.indexOf(vedtaksperiode)
         val results = vedtaksperioder.subList(0, index + 1).toMutableList()
+        if (results.isEmpty()) return mutableListOf()
         while (vedtaksperioder.last() != results.last()) {
             if (!vedtaksperioder[index].erSykeperiodeRettFør(vedtaksperioder[index + 1])) break
             results.add(vedtaksperioder[index + 1])
@@ -376,27 +400,16 @@ internal class Arbeidsgiver private constructor(
         return results
     }
 
-    private fun senere(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.let {
-            it.sort()
-            it.subList(
-                vedtaksperioder.indexOf(vedtaksperiode),
-                vedtaksperioder.size
-            ).toMutableList()
-        }
-
-    private fun senereExclusive(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.let {
-            it.sort()
-            it.subList(
-                minOf(vedtaksperioder.indexOf(vedtaksperiode) + 1, vedtaksperioder.size),
-                vedtaksperioder.size
-            ).toMutableList()
-        }
-
-    private fun kun(vedtaksperiode: Vedtaksperiode) = mutableListOf(vedtaksperiode)
-
-    private fun alle(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.toMutableList()
+    internal fun tidligereOgEttergølgende2(segSelv: Vedtaksperiode): VedtaksperioderFilter {
+        val medSammeArbeidsgiverperiode = tidligereOgEttergølgende(segSelv)
+        // TODO
+        /*if (medSammeArbeidsgiverperiode.sorted() != vedtaksperioder.senereMedSammeArbeidsgiverperiode(segSelv).sorted()) {
+            println("Sup")
+            error("WAT")
+            tidligereOgEtterfølgende(segSelv)
+        }*/
+        return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in medSammeArbeidsgiverperiode
+    }
 
     private fun gjenopptaBehandling(hendelse: PersonHendelse) {
         vedtaksperioder.firstOrNull { it.skalGjenopptaBehandling() }?.also {
@@ -406,7 +419,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun forkastAlleTidligere(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         if (vedtaksperiode == vedtaksperioder.first()) return
-        søppelbøtte(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1], hendelse, TIDLIGERE)
+        søppelbøtte(hendelse, TIDLIGERE(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1]))
     }
 
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
@@ -586,4 +599,4 @@ internal enum class ForkastetÅrsak {
     ANNULLERING
 }
 
-internal typealias VedtaksperioderSelector = (Arbeidsgiver, Vedtaksperiode) -> MutableList<Vedtaksperiode>
+internal typealias VedtaksperioderFilter = (Vedtaksperiode) -> Boolean

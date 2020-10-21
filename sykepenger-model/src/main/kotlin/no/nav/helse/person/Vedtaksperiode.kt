@@ -26,7 +26,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.join
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -803,14 +802,20 @@ internal class Vedtaksperiode private constructor(
                         return@returnPoint TilInfotrygd
                     }
                     replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
+                        sykmelding,
+                        Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
+                        false
+                    )
+                    /*replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
                         vedtaksperiode,
                         sykmelding,
                         Arbeidsgiver.SENERE_EXCLUSIVE,
                         false
-                    )
+                    )*/
                 } else {
                     if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
-                        vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
+                        vedtaksperiode.arbeidsgiver.søppelbøtte(sykmelding, Arbeidsgiver.SENERE(vedtaksperiode))
+                        //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
                         return@returnPoint TilInfotrygd
                     }
                 }
@@ -1500,7 +1505,7 @@ internal class Vedtaksperiode private constructor(
                     saksbehandlerEpost = utbetaling.saksbehandlerEpost
                 )
                 utbetaling.info("Behandler annullering for vedtaksperiode: %s", vedtaksperiode.id.toString())
-                vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, utbetaling, Arbeidsgiver.ALLE)
+                vedtaksperiode.arbeidsgiver.søppelbøtte(utbetaling, Arbeidsgiver.ALLE)
                 vedtaksperiode.invaliderPeriode(utbetaling)
             }
 
@@ -1676,7 +1681,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE_OG_ETTERGØLGENDE)
+            //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE_OG_ETTERGØLGENDE)
+            vedtaksperiode.arbeidsgiver.søppelbøtte(hendelse, vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode))
         }
 
         override fun håndter(
