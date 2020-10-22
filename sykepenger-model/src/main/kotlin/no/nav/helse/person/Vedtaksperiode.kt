@@ -716,15 +716,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype())
-                    .hasErrorsOrWorse()
-            ) return vedtaksperiode.tilstand(
-                utbetalingshistorikk,
-                TilInfotrygd
-            ) {
-                utbetalingshistorikk.kontekst(person)
-                utbetalingshistorikk.error("Utbetalingshistorikk sjekket; fant feil, sender perioden til Infotrygd.")
-            }
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype()).hasErrorsOrWorse())
+                return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
         }
 
