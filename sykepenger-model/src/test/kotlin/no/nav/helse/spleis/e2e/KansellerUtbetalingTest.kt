@@ -42,15 +42,14 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `kanseller siste utbetaling`() {
         val behovTeller = inspektør.personLogg.behov().size
-        håndterKansellerUtbetaling()
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt {
             !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-            val behov = sisteBehov(1.vedtaksperiode)
-            behov.type er Behovtype.Utbetaling
+            val behov = sisteBehov(Behovtype.Utbetaling)
             @Suppress("UNCHECKED_CAST")
             (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"] er "OPPH"
         }
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(2, it.arbeidsgiverOppdrag.size)
@@ -78,10 +77,10 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
-        håndterKansellerUtbetaling()
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
     }
 
@@ -94,19 +93,23 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
             assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
         }
-        håndterKansellerUtbetaling()
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(1))
-            assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(1))
+            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(2))
+            assertTrue(it.utbetalinger.last().erAnnullert())
+            assertFalse(it.utbetalinger.last().erUtbetalt())
         }
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
         inspektør.also {
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(1))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(1))
             assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(2))
             assertEquals(Behovtype.Utbetaling, it.personLogg.behov().last().type)
+            assertTrue(it.utbetalinger.last().erAnnullert())
+            assertTrue(it.utbetalinger.last().erUtbetalt())
         }
     }
 
@@ -114,25 +117,25 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     fun `Periode som håndterer godkjent annullering i TilAnnullering blir forkastet`() {
         håndterKansellerUtbetaling()
         inspektør.also {
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
     }
 
     @Test
     fun `Periode som håndterer avvist annullering i TilAnnullering blir værende i TilAnnullering`() {
-        håndterKansellerUtbetaling()
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AVVIST, annullert = true)
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse())
-            assertEquals(TilstandType.TIL_ANNULLERING, inspektør.sisteTilstand(0))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
     }
 
@@ -159,14 +162,13 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `publiserer et event ved annullering`() {
-        val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, "tbd@nav.no", true)
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, saksbehandlerEpost = "tbd@nav.no", annullert = true)
 
         val annullering = observatør.annulleringer.lastOrNull()
         assertNotNull(annullering)
 
-        assertEquals(fagsystemId, annullering!!.fagsystemId)
+        assertEquals(inspektør.fagsystemId(1.vedtaksperiode), annullering!!.fagsystemId)
 
         val utbetalingslinje = annullering.utbetalingslinjer.first()
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
@@ -178,16 +180,16 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder`() {
-        val fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId()
+        val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
         forlengVedtak(27.januar, 20.februar, 100)
         assertEquals(2, observatør.vedtaksperioder.size)
 
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, "tbd@nav.no", true)
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, saksbehandlerEpost = "tbd@nav.no", annullert = true)
 
         val vedtaksperioderIder = observatør.vedtaksperioder.toList()
-        assertEquals(TilstandType.TIL_INFOTRYGD, observatør.tilstander[vedtaksperioderIder[0]]?.last())
-        assertEquals(TilstandType.TIL_INFOTRYGD, observatør.tilstander[vedtaksperioderIder[1]]?.last())
+        assertEquals(TilstandType.AVSLUTTET, observatør.tilstander[vedtaksperioderIder[0]]?.last())
+        assertEquals(TilstandType.AVSLUTTET, observatør.tilstander[vedtaksperioderIder[1]]?.last())
 
         val annulleringer = observatør.annulleringer
         assertEquals(1, annulleringer.size)

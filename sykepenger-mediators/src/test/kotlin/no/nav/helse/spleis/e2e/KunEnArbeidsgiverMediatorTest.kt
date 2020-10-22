@@ -45,7 +45,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `perioder påvirket av "kanseller utbetaling"-event går til TilAnnullering`() {
+    fun `perioder påvirket av "kanseller utbetaling"-event blir forkastet men forblir i Avsluttet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -57,7 +57,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendKansellerUtbetaling(fagsystemId)
 
-        assertTilstander(
+        assertForkastedeTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_GAP",
@@ -66,8 +66,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING",
-            "AVSLUTTET",
-            "TIL_ANNULLERING"
+            "AVSLUTTET"
         )
     }
 
@@ -135,11 +134,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
-        sendUtbetaling(0, true)
+        sendUtbetaling(0, utbetalingOK = true)
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendKansellerUtbetaling(fagsystemId)
-        sendUtbetaling(0, true, "tbd@nav.no", true)
+        sendUtbetaling(0, fagsystemId = fagsystemId, utbetalingOK = true, saksbehandlerEpost = "tbd@nav.no", annullert = true)
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
         val utbetalingAnnullert =
@@ -169,7 +168,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             saksbehandlerIdent = "SYSTEM",
             automatiskBehandling = true
         )
-        sendUtbetaling(0, true)
+        sendUtbetaling(0, utbetalingOK = true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 
@@ -192,7 +191,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             saksbehandlerIdent = "O123456",
             automatiskBehandling = false
         )
-        sendUtbetaling(0, true)
+        sendUtbetaling(0, utbetalingOK = true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 

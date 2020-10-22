@@ -541,7 +541,8 @@ class SpeilBuilderTest {
         val (person, hendelser) = annullertPerson()
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
-        assertEquals(TilstandstypeDTO.TilAnnullering, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
+        // TODO: Asserte på riktig state her
+        assertEquals(TilstandstypeDTO.Utbetalt, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test

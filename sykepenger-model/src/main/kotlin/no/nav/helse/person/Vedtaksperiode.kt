@@ -221,13 +221,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, utbetaling)
     }
 
-
-    internal fun håndter(kansellerUtbetaling: KansellerUtbetaling) {
-        if (arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
-        kontekst(kansellerUtbetaling)
-        tilstand.håndter(this, kansellerUtbetaling)
-    }
-
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
         if (!påminnelse.gjelderTilstand(tilstand.type)) return true
@@ -712,9 +705,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
@@ -1654,12 +1644,6 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, kansellerUtbetaling: KansellerUtbetaling) {
-            if (vedtaksperiode.arbeidsgiverFagsystemId != kansellerUtbetaling.fagsystemId) return
-            vedtaksperiode.kontekst(kansellerUtbetaling)
-            vedtaksperiode.tilstand(kansellerUtbetaling, TilAnnullering)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
         }
@@ -1674,6 +1658,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.hendelseIder.add(annullering.meldingsreferanseId())
 
             vedtaksperiode.tilstand(annullering, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
+            if (utbetaling.annullert) {
+                vedtaksperiode.tilstand(utbetaling, TilAnnullering)
+            }
         }
     }
 

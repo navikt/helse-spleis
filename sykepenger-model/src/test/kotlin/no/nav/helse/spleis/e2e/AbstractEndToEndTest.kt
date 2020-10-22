@@ -376,13 +376,15 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
         status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
-        annullert: Boolean = false
+        annullert: Boolean = false,
+        fagsystemId: String = inspektør.fagsystemId(vedtaksperiodeId)
 
     ) {
         person.håndter(
             utbetaling(
-                vedtaksperiodeId,
-                status,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fagsystemId = fagsystemId,
+                status = status,
                 saksbehandlerEpost = saksbehandlerEpost,
                 annullert = annullert
             )
@@ -438,6 +440,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun utbetaling(
         vedtaksperiodeId: UUID,
+        fagsystemId: String,
         status: UtbetalingHendelse.Oppdragstatus,
         orgnummer: String = ORGNUMMER,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
@@ -449,7 +452,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            utbetalingsreferanse = "ref",
+            utbetalingsreferanse = fagsystemId,
             status = status,
             melding = "hei",
             saksbehandler = "Z999999",
@@ -706,7 +709,7 @@ internal abstract class AbstractEndToEndTest {
         håndterYtelser(id)   // No history
         håndterSimulering(id)
         håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
@@ -716,7 +719,7 @@ internal abstract class AbstractEndToEndTest {
         håndterYtelser(id)   // No history
         håndterSimulering(id)
         håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 
     protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int = 100) {

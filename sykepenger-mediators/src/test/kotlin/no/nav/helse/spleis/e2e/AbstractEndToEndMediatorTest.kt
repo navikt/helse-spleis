@@ -216,6 +216,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendUtbetaling(
         vedtaksperiodeIndeks: Int,
+        fagsystemId: String = "fagsystemid",
         utbetalingOK: Boolean = true,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
         annullert: Boolean = false
@@ -224,6 +225,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                fagsystemId = fagsystemId,
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 saksbehandlerEpost = saksbehandlerEpost,
                 annullering = annullert,

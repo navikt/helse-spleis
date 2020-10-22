@@ -93,7 +93,7 @@ internal class MessageMediatorTest {
 
     @Test
     fun utbetaling() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetaling(UUID.randomUUID(), TilstandType.START, true))
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetaling(UUID.randomUUID(), fagsystemId = "qwer1234", tilstand = TilstandType.START, utbetalingOK = true))
         assertTrue(hendelseMediator.lestUtbetaling)
     }
 

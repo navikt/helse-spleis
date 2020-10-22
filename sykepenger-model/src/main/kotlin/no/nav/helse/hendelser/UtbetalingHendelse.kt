@@ -10,7 +10,7 @@ class UtbetalingHendelse(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
-    private val utbetalingsreferanse: String,
+    internal val utbetalingsreferanse: String,
     private val status: Oppdragstatus,
     private val melding: String,
     internal val godkjenttidspunkt: LocalDateTime,

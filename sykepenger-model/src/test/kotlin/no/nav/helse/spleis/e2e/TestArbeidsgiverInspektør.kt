@@ -34,6 +34,7 @@ internal class TestArbeidsgiverInspektør(
     private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
     private val forkastetGjenståendeSykedagerer = mutableMapOf<Int, Int>()
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
+    private val fagsystemIder = mutableMapOf<UUID, String>()
     private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
     internal val personLogg: Aktivitetslogg
@@ -135,6 +136,11 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
     }
 
+    override fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {
+        if (fagsystemId == null) return
+        fagsystemIder[periodeIder[vedtaksperiodeindeks]!!] = fagsystemId
+    }
+
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
         if (inVedtaksperiode) utbetalingstidslinjer[periodeIder.getValue(vedtaksperiodeindeks)] = tidslinje
     }
@@ -175,6 +181,9 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sisteBehov(id: UUID) =
         personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
+
+    internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.behov().last { it.type == type }
 
 
     override fun visitBeregningsdato(beregningsdato: LocalDate?) {
@@ -338,6 +347,10 @@ internal class TestArbeidsgiverInspektør(
     }
 
     internal fun hendelseIder(vedtaksperiodeId: UUID) = hendelseIder[vedtaksperiodeId] ?: fail {
+        "Missing collection initialization"
+    }
+
+    internal fun fagsystemId(vedtaksperiodeId: UUID) = fagsystemIder[vedtaksperiodeId] ?: fail {
         "Missing collection initialization"
     }
 

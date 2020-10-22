@@ -228,7 +228,16 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
+        if (utbetaling.annullert) {
+            if (utbetaling.valider().hasErrorsOrWorse()) {
+                utbetaling.warn("Annullering ble ikke gjennomført")
+            }
+            utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == utbetaling.utbetalingsreferanse }
+                .håndter(utbetaling)
+            annullerUtbetaling(utbetaling, utbetaling.utbetalingsreferanse, utbetaling.godkjenttidspunkt, utbetaling.saksbehandlerEpost)
+        } else {
+            vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
+        }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -238,7 +247,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: KansellerUtbetaling) {
         hendelse.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(hendelse) }
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
 
@@ -263,6 +271,7 @@ internal class Arbeidsgiver private constructor(
             saksbehandlerEpost = hendelse.saksbehandlerEpost,
             annullering = true
         )
+        søppelbøtte(hendelse, ALLE)
     }
 
     internal fun håndter(hendelse: Grunnbeløpsregulering) {
@@ -307,7 +316,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        søppelbøtte(hendelse)
+        søppelbøtte(hendelse, ALLE)
     }
 
     fun håndter(hendelse: Annullering) {
@@ -356,10 +365,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntektshistorikk.sykepengegrunnlag(dato)
-
-    internal fun søppelbøtte(hendelse: PersonHendelse) {
-        vedtaksperioder.firstOrNull()?.also { søppelbøtte(hendelse, ALLE) }
-    }
 
     internal fun søppelbøtte(
         hendelse: PersonHendelse,

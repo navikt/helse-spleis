@@ -84,7 +84,11 @@ internal class TestRapid : RapidsConnection() {
         private val behov
             get() = mutableMapOf<UUID, MutableList<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, TilstandType>>>().apply {
                 events("behov") {
-                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                    val vedtaksperiodeIdString = it.path("vedtaksperiodeId")
+                        .takeIf { id -> !id.isMissingNode }
+                        ?.asText() ?: return@events
+
+                    val id = UUID.fromString(vedtaksperiodeIdString)
                     val tilstand = TilstandType.valueOf(it.path("tilstand").asText())
                     this.getOrPut(id) { mutableListOf() }.apply {
                         it.path("@behov").onEach {

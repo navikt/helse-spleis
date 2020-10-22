@@ -396,7 +396,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 automatiskBehandling = false
             )
         )
-        person.håndter(utbetaling(orgnummer.id(0), AKSEPTERT, orgnummer = orgnummer))
+        person.håndter(
+            utbetaling(
+                orgnummer.id(0),
+                inspektør.fagsystemId(orgnummer.id(0)),
+                status = AKSEPTERT,
+                orgnummer = orgnummer
+            )
+        )
     }
 
     private fun utbetalinger(dagTeller: Int, orgnummer: String): List<RefusjonTilArbeidsgiver> {
