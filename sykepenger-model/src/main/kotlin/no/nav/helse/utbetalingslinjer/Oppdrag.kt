@@ -1,11 +1,14 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.*
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.streams.toList
 
@@ -16,8 +19,17 @@ internal class Oppdrag private constructor(
     private var fagsystemId: String,
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
-    private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() }
+    private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() },
+    private var tidsstempel: LocalDateTime,
+    private var utbetalingtilstand: Utbetalingtilstand
 ) : MutableList<Utbetalingslinje> by linjer {
+
+    internal companion object {
+        internal fun sorter(oppdrag: List<Oppdrag>) = oppdrag.sortedByDescending { it.tidsstempel }
+    }
+
+    internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
+    internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 
     internal constructor(
         mottaker: String,
@@ -31,7 +43,9 @@ internal class Oppdrag private constructor(
         linjer.toMutableList(),
         fagsystemId,
         Endringskode.NY,
-        sisteArbeidsgiverdag
+        sisteArbeidsgiverdag,
+        tidsstempel = LocalDateTime.now(),
+        utbetalingtilstand = IkkeUtbetalt
     )
 
     internal constructor(mottaker: String, fagområde: Fagområde):
@@ -47,9 +61,17 @@ internal class Oppdrag private constructor(
 
     internal fun fagsystemId() = fagsystemId
 
-    internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
+    internal fun utbetal(fagsystemId: FagsystemId) {
+        utbetalingtilstand.utbetal(fagsystemId, this)
+    }
 
-    internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
+    internal fun håndter(fagsystemId: FagsystemId, utbetaling: UtbetalingHendelse) {
+        utbetalingtilstand.håndter(fagsystemId, this, utbetaling)
+    }
+
+    private fun betale(fagsystemId: FagsystemId) {
+        // TODO: varsle fagsystemId at utbetaling kan gjøres?
+    }
 
     internal fun removeUEND() = Oppdrag(
         mottaker,
@@ -57,8 +79,12 @@ internal class Oppdrag private constructor(
         linjer.filter { it.erForskjell() }.toMutableList(),
         fagsystemId,
         endringskode,
-        sisteArbeidsgiverdag
+        sisteArbeidsgiverdag,
+        tidsstempel = tidsstempel,
+        utbetalingtilstand = utbetalingtilstand
     )
+
+    internal fun erUtbetalt() = utbetalingtilstand == Utbetalt
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
@@ -128,8 +154,8 @@ internal class Oppdrag private constructor(
         nåværende.first().linkTo(tidligere.last())
         nåværende.zipWithNext { a, b -> b.linkTo(a) }
     }
-
     private lateinit var tilstand: Tilstand
+
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
 
     private lateinit var linkTo: Utbetalingslinje
@@ -158,7 +184,9 @@ internal class Oppdrag private constructor(
         linjer.toMutableList(),
         fagsystemId,
         endringskode,
-        sisteArbeidsgiverdag
+        sisteArbeidsgiverdag,
+        tidsstempel = tidsstempel,
+        utbetalingtilstand = utbetalingtilstand
     )
 
     private var deletion: Utbetalingslinje? = null
@@ -190,6 +218,31 @@ internal class Oppdrag private constructor(
             fagsystemId = fagsystemId,
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
+
+    internal interface Utbetalingtilstand {
+        fun utbetal(fagsystemId: FagsystemId, oppdrag: Oppdrag) {
+            throw IllegalStateException("Kan ikke utbetale i tilstand ${this::class.simpleName}")
+        }
+        fun håndter(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetaling: UtbetalingHendelse) {
+            throw IllegalStateException("Kan ikke håndtere utbetalinghendelse i tilstand ${this::class.simpleName}")
+        }
+
+        object IkkeUtbetalt : Utbetalingtilstand {
+            override fun utbetal(fagsystemId: FagsystemId, oppdrag: Oppdrag) {
+                oppdrag.betale(fagsystemId)
+                oppdrag.utbetalingtilstand = Overført
+            }
+        }
+
+        object Overført : Utbetalingtilstand {
+            override fun håndter(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetaling: UtbetalingHendelse) {
+                oppdrag.utbetalingtilstand = if (utbetaling.hasErrorsOrWorse()) UtbetalingFeilet else Utbetalt
+            }
+        }
+
+        object UtbetalingFeilet : Utbetalingtilstand {}
+        object Utbetalt : Utbetalingtilstand {}
+    }
 
     private interface Tilstand {
         fun forskjell(

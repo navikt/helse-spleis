@@ -776,7 +776,9 @@ internal data class PersonData(
                     fagsystemId,
                     Endringskode.valueOf(endringskode),
                     sisteArbeidsgiverdag,
-                    nettoBeløp
+                    nettoBeløp,
+                    LocalDateTime.now(),
+                    Oppdrag.Utbetalingtilstand.IkkeUtbetalt
                 )
         }
     }

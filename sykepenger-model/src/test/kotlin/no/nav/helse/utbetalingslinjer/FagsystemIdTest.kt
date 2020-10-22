@@ -1,18 +1,17 @@
-package no.nav.helse.person
+package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.Utbetalingsdager
-import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.OppdragBuilder
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class FagsystemIdTest {
 
@@ -20,12 +19,14 @@ internal class FagsystemIdTest {
         private const val ORGNUMMER = "123456789"
     }
 
-    private lateinit var fagsystemIder: MutableList<FagsystemId>
+    private val fagsystemIder: MutableList<FagsystemId> = mutableListOf()
+    private val oppdrag: MutableMap<Oppdrag, FagsystemId> = mutableMapOf()
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
     fun beforeEach() {
-        fagsystemIder = mutableListOf()
+        fagsystemIder.clear()
+        oppdrag.clear()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -44,20 +45,35 @@ internal class FagsystemIdTest {
 
     @Test
     fun `legger nytt oppdrag til på eksisterende fagsystemId`() {
-        opprett(16.AP, 5.NAV)
+        opprettOgUtbetal(16.AP, 5.NAV)
         opprett(5.NAV(1300))
         assertEquals(1, fagsystemIder.size)
     }
 
     @Test
+    fun `kan kun ha ett oppdrag som ikke er utbetalt`() {
+        opprett(16.AP, 5.NAV)
+        assertThrows<IllegalStateException> {
+            opprett(5.NAV(1300))
+        }
+    }
+
+    @Test
     fun `mapper riktig når det finnes flere fagsystemId'er`() {
-        val oppdrag1 = opprett(16.AP, 5.NAV)
-        val oppdrag2 = opprett(16.AP, 5.NAV, startdato = 1.mars)
+        val oppdrag1 = opprettOgUtbetal(16.AP, 5.NAV)
+        val oppdrag2 = opprettOgUtbetal(16.AP, 5.NAV, startdato = 1.mars)
         val oppdrag1Oppdatert = opprett(16.AP, 5.NAV(1300))
         assertEquals(2, fagsystemIder.size)
         assertEquals(oppdrag1.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
         assertNotEquals(oppdrag2.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
     }
+
+    private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null) =
+        opprett(*dager, startdato = startdato, sisteDato = sisteDato).also {
+            val fagsystemId = oppdrag.getValue(it)
+            fagsystemId.utbetal()
+            fagsystemId.håndter(utbetalingHendelse(it))
+        }
 
     private fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null): Oppdrag {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
@@ -72,10 +88,24 @@ internal class FagsystemIdTest {
                 ORGNUMMER,
                 Fagområde.SykepengerRefusjon,
                 sisteDato ?: tidslinje.sisteDato()
-            ).result().let {
-                FagsystemId.kobleTil(fagsystemIder, it, aktivitetslogg)
+            ).result().also {
+                oppdrag[it] = FagsystemId.kobleTil(fagsystemIder, it, aktivitetslogg)
             }
         }
     }
 
+    private fun utbetalingHendelse(oppdrag: Oppdrag) = UtbetalingHendelse(
+        UUID.randomUUID(),
+        UUID.randomUUID().toString(),
+        "AKTØRID",
+        "FØDSELSNUMMER",
+        ORGNUMMER,
+        oppdrag.fagsystemId(),
+        UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+        "",
+        LocalDateTime.now(),
+        "EN SAKSBEHANDLER",
+        "saksbehandler@saksbehandlersen.no",
+        false
+    )
 }

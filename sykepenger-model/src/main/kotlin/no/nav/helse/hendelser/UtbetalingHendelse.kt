@@ -28,6 +28,8 @@ class UtbetalingHendelse(
         else if (status == Oppdragstatus.AKSEPTERT_MED_FEIL) aktivitetslogg.warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
     }
 
+    internal fun erRelevant(fagsystemId: String) = utbetalingsreferanse == fagsystemId
+
     enum class Oppdragstatus {
         OVERFØRT,
         AKSEPTERT,
