@@ -499,6 +499,69 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `setter riktig inntekt i utbetalingstidslinjebuilderVol2`() {
+        håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020), 100))
+        håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(
+                Periode(4.september(2020), 19.september(2020))
+            ),
+            førsteFraværsdag = 21.september(2020)) // 20. september er en søndag
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertActivities(it)
+            assertFalse(it.inntekter.isEmpty())
+            assertNotNull(it.inntektshistorikk.inntekt(21.september(2020)))
+            assertEquals(21.september(2020), it.beregningsdato(0))
+            assertEquals(21465, it.nettoBeløp[0])
+        }
+    }
+
+
+    @Test
+    fun `inntektsmeldingen padder ikke senere vedtaksperioder med arbeidsdager`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100))
+        håndterSøknad(Sykdom(4.januar, 22.januar,100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(4.januar, 19.januar)),
+            førsteFraværsdag = 4.januar
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(24.januar, 31.januar,100))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(4.januar, 19.januar)),
+            førsteFraværsdag = 24.januar
+        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        inspektør.also {
+            assertNoErrors(it)
+            assertActivities(it)
+            assertFalse(it.inntekter.isEmpty())
+            assertNotNull(it.inntektshistorikk.inntekt(4.januar))
+            assertNotNull(it.inntektshistorikk.inntekt(24.januar))
+            assertEquals(4.januar, it.beregningsdato(0))
+            assertEquals(24.januar, it.beregningsdato(1))
+            assertEquals(19, it.dagtelling[Sykedag::class])
+            assertEquals(8, it.dagtelling[SykHelgedag::class])
+            assertEquals(1, it.dagtelling[Dag.UkjentDag::class])
+        }
+    }
+
+    @Test
     fun `ingen nav utbetaling kreves, blir automatisk behandlet og avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 5.januar, 100))

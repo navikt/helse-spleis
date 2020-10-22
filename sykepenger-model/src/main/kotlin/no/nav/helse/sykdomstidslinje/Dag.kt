@@ -217,3 +217,10 @@ internal fun LocalDate.erRettFør(other: LocalDate): Boolean =
         SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
+
+internal fun LocalDate.erHelgedagRettFør(other: LocalDate): Boolean =
+    this.isBefore(other) && when (this.dayOfWeek) {
+        SUNDAY -> this.plusDays(1) == other
+        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+        else -> false
+    }

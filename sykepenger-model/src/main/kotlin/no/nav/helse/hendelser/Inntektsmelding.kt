@@ -5,11 +5,8 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektshistorikkVol2
-import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -49,7 +46,7 @@ class Inntektsmelding(
     }
 
     private var sykdomstidslinje: Sykdomstidslinje = (
-        arbeidsgivertidslinje(arbeidsgiverperioder)
+        arbeidsgivertidslinje(arbeidsgiverperioder, førsteFraværsdag)
             + ferietidslinje(ferieperioder)
             + nyFørsteFraværsdagtidslinje(førsteFraværsdag)
         ).merge(beste)
@@ -78,10 +75,26 @@ class Inntektsmelding(
         return this > other
     }
 
-    private fun arbeidsgivertidslinje(arbeidsgiverperioder: List<Periode>): List<Sykdomstidslinje> {
+    private fun arbeidsgivertidslinje(
+        arbeidsgiverperioder: List<Periode>,
+        førsteFraværsdag: LocalDate?
+    ): List<Sykdomstidslinje> {
         val arbeidsgiverdager = arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste)
 
-        return listOfNotNull(arbeidsgiverdager, Sykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde))
+        var arbeidsdager = Sykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde)
+
+        if (førsteFraværsdag?.let {
+                arbeidsgiverdager.periode()?.endInclusive?.plusDays(1)?.erHelgedagRettFør(it)
+            } == true) {
+            arbeidsdager +=
+                Sykdomstidslinje.arbeidsdager(
+                    arbeidsgiverdager.sisteDag().plusDays(1),
+                    førsteFraværsdag.minusDays(1),
+                    kilde
+                )
+        }
+
+        return listOfNotNull(arbeidsgiverdager, arbeidsdager)
     }
 
     private fun ferietidslinje(ferieperioder: List<Periode>): List<Sykdomstidslinje> =
