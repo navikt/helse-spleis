@@ -478,7 +478,7 @@ internal class Vedtaksperiode private constructor(
     private fun trengerVilkårsgrunnlag(hendelse: PersonHendelse) {
         val beregningSlutt = YearMonth.from(beregningsdato).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
-        egenAnsatt(hendelse)
+        if (!vilkårshåndteringInfotrygd) egenAnsatt(hendelse)
         opptjening(hendelse)
         dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)

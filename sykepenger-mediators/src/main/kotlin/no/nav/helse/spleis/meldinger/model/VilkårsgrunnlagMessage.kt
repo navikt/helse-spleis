@@ -26,7 +26,7 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val erEgenAnsatt = packet["@løsning.${EgenAnsatt.name}"].asBoolean()
+    private val erEgenAnsatt = if (!vilkårshåndteringInfotrygd) packet["@løsning.${EgenAnsatt.name}"].asBoolean() else false
     private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
         .flatMap { måned ->
             måned["inntektsliste"]
