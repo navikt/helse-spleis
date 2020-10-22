@@ -1,9 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -363,7 +360,10 @@ internal class InntektshistorikkVol2Test {
     @Test
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
-        inntektsmelding(førsteFraværsdag = 2.januar).addInntekt(historikk)
+        inntektsmelding(
+            førsteFraværsdag = 2.januar,
+            arbeidsgiverperioder = listOf(2.januar til 17.januar)
+        ).addInntekt(historikk)
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
@@ -478,7 +478,8 @@ internal class InntektshistorikkVol2Test {
 
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = 1.januar
+        førsteFraværsdag: LocalDate = 1.januar,
+        arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
     ) = Inntektsmelding(
         meldingsreferanseId = UUID.randomUUID(),
         refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
@@ -487,7 +488,7 @@ internal class InntektshistorikkVol2Test {
         aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = listOf(1.januar til 16.januar),
+        arbeidsgiverperioder = arbeidsgiverperioder,
         ferieperioder = emptyList(),
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null

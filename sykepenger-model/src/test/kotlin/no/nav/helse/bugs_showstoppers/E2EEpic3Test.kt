@@ -585,7 +585,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+            AVVENTER_GODKJENNING
         )
     }
 

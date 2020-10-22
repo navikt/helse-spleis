@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
@@ -17,7 +16,7 @@ class Inntektsmelding(
     private val orgnummer: String,
     private val fødselsnummer: String,
     private val aktørId: String,
-    førsteFraværsdag: LocalDate?,
+    internal val førsteFraværsdag: LocalDate?,
     internal val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
@@ -26,7 +25,6 @@ class Inntektsmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
-    internal val førsteFraværsdag: LocalDate?
 
     private val beste = { venstre: Dag, høyre: Dag ->
         when {
@@ -53,26 +51,6 @@ class Inntektsmelding(
 
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
-        this.førsteFraværsdag =
-            slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder).slåSammen().lastOrNull()?.start
-                ?.takeIf { it.senereEnn(førsteFraværsdag) } ?: førsteFraværsdag
-        if (førsteFraværsdag != this.førsteFraværsdag) {
-            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
-        }
-    }
-
-    private fun slåSammenArbeidsgiverperiodeMedPåfølgendeFerie(ferieperioder: List<Periode>): List<Periode> {
-        return arbeidsgiverperioder.map { arbeidsgiverperiode ->
-            ferieperioder.fold(arbeidsgiverperiode) { utvidetPeriode, ferie ->
-                if (utvidetPeriode.erRettFør(ferie)) utvidetPeriode.merge(ferie)
-                else utvidetPeriode
-            }
-        }
-    }
-
-    private fun LocalDate.senereEnn(other: LocalDate?): Boolean {
-        if (other == null) return false
-        return this > other
     }
 
     private fun arbeidsgivertidslinje(
@@ -149,9 +127,14 @@ class Inntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        if (førsteFraværsdag == null) return
+        val beregningsdato = sykdomstidslinje.beregningsdato() ?: førsteFraværsdag ?: return
+
+        if (beregningsdato != førsteFraværsdag) {
+            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+        }
+
         inntektshistorikk.add(
-            førsteFraværsdag.minusDays(1),  // Assuming salary is the day before the first sykedag
+            beregningsdato.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt,
             Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
@@ -159,10 +142,15 @@ class Inntektsmelding(
     }
 
     internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2) {
-        if (førsteFraværsdag == null) return
+        val beregningsdato = sykdomstidslinje.beregningsdato() ?: førsteFraværsdag ?: return
+
+        if (beregningsdato != førsteFraværsdag) {
+            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+        }
+
         inntektshistorikk {
             addInntektsmelding(
-                førsteFraværsdag,
+                beregningsdato,
                 meldingsreferanseId(),
                 beregnetInntekt
             )
