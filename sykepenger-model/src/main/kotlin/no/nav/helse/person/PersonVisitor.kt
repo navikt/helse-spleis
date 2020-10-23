@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -29,7 +30,7 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor, FagsystemIdVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -37,6 +38,8 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     ) {
     }
 
+    fun preVisitFagsystemIder(fagsystemIder: List<FagsystemId>) {}
+    fun postVisitFagsystemIder(fagsystemIder: List<FagsystemId>) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
@@ -332,8 +335,21 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
 }
 
+internal interface FagsystemIdVisitor : OppdragVisitor {
+    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String) {}
+    fun preVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
+    fun postVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
+    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String) {}
+}
+
 internal interface OppdragVisitor {
-    fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {}
+    fun preVisitOppdrag(
+        oppdrag: Oppdrag,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+    ) {}
     fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
         fom: LocalDate,
@@ -349,5 +365,11 @@ internal interface OppdragVisitor {
     ) {
     }
 
-    fun postVisitOppdrag(oppdrag: Oppdrag) {}
+    fun postVisitOppdrag(
+        oppdrag: Oppdrag,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+    ) {}
 }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
@@ -255,7 +256,13 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             oppdrag.accept(this)
         }
 
-        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
+        override fun preVisitOppdrag(
+            oppdrag: Oppdrag,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime,
+            utbetalingtilstand: Oppdrag.Utbetalingtilstand
+        ) {
             this.oppdrag.add(oppdrag)
             fagsystemIder.add(oppdrag.fagsystemId())
         }

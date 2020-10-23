@@ -16,6 +16,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -169,7 +170,13 @@ internal class TestArbeidsgiverInspektør(
         arbeidsgiverOppdrag.add(oppdrag)
     }
 
-    override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
+    override fun preVisitOppdrag(
+        oppdrag: Oppdrag,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+    ) {
         if (oppdrag != arbeidsgiverOppdrag.last()) return
         this.totalBeløp.add(totalBeløp)
         this.nettoBeløp.add(nettoBeløp)

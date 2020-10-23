@@ -52,9 +52,9 @@ internal class Oppdrag private constructor(
         this(mottaker, fagområde, sisteArbeidsgiverdag = LocalDate.MIN)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, utbetalingtilstand)
         linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(this)
+        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, utbetalingtilstand)
     }
 
     internal fun fagområde() = fagområde
@@ -68,6 +68,9 @@ internal class Oppdrag private constructor(
     internal fun håndter(fagsystemId: FagsystemId, utbetaling: UtbetalingHendelse) {
         utbetalingtilstand.håndter(fagsystemId, this, utbetaling)
     }
+
+    internal fun annullere(fagsystemId: FagsystemId) =
+        utbetalingtilstand.annuller(fagsystemId, this)
 
     private fun betale(fagsystemId: FagsystemId) {
         // TODO: varsle fagsystemId at utbetaling kan gjøres?
@@ -223,6 +226,11 @@ internal class Oppdrag private constructor(
         fun utbetal(fagsystemId: FagsystemId, oppdrag: Oppdrag) {
             throw IllegalStateException("Kan ikke utbetale i tilstand ${this::class.simpleName}")
         }
+
+        fun annuller(fagsystemId: FagsystemId, oppdrag: Oppdrag): Oppdrag {
+            throw IllegalStateException("Kan ikke annullere i tilstand ${this::class.simpleName}")
+        }
+
         fun håndter(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetaling: UtbetalingHendelse) {
             throw IllegalStateException("Kan ikke håndtere utbetalinghendelse i tilstand ${this::class.simpleName}")
         }
@@ -240,8 +248,14 @@ internal class Oppdrag private constructor(
             }
         }
 
+        object Utbetalt : Utbetalingtilstand {
+            override fun annuller(fagsystemId: FagsystemId, oppdrag: Oppdrag): Oppdrag {
+                return oppdrag.emptied().minus(oppdrag, Aktivitetslogg())
+            }
+        }
+
+        object Annullert : Utbetalingtilstand {}
         object UtbetalingFeilet : Utbetalingtilstand {}
-        object Utbetalt : Utbetalingtilstand {}
     }
 
     private interface Tilstand {

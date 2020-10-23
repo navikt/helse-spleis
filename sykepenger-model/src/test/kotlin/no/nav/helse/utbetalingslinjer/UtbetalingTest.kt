@@ -170,7 +170,13 @@ internal class UtbetalingTest {
             oppdrag.accept(this)
         }
 
-        override fun preVisitOppdrag(oppdrag: Oppdrag, totalBeløp: Int, nettoBeløp: Int) {
+        override fun preVisitOppdrag(
+            oppdrag: Oppdrag,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime,
+            utbetalingtilstand: Oppdrag.Utbetalingtilstand
+        ) {
             fagsystemIder.add(oppdrag.fagsystemId())
         }
 
