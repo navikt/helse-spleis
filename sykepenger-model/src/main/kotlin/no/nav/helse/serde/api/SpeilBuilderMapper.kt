@@ -12,6 +12,7 @@ import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.sykepenge
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
@@ -19,7 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: Boolean) = when (tilstand) {
+internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: Boolean, utbetaling: Utbetaling?) = when (tilstand) {
     TilstandType.START,
     TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
     TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
@@ -45,6 +46,10 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
     TilstandType.TIL_ANNULLERING -> TilstandstypeDTO.TilAnnullering
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
     TilstandType.AVSLUTTET -> when {
+        utbetaling == null -> TilstandstypeDTO.IngenUtbetaling
+        utbetaling.erAnnullert() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert
+        utbetaling.erAnnullert() && utbetaling.erFeilet() -> TilstandstypeDTO.AnnulleringFeilet
+        utbetaling.erAnnullert() -> TilstandstypeDTO.TilAnnullering
         utbetalt -> TilstandstypeDTO.Utbetalt
         kunFerie -> TilstandstypeDTO.KunFerie
         else -> TilstandstypeDTO.IngenUtbetaling
@@ -247,7 +252,7 @@ internal fun mapVilkår(
             beregningsdato = beregningsdato
         )
     )
-    val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus;
+    val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus
     return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO, medlemskapstatusDTO)
 }
 

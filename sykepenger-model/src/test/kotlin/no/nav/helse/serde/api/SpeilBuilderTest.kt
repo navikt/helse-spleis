@@ -538,11 +538,10 @@ class SpeilBuilderTest {
 
     @Test
     fun `Skal ta med annullerte vedtaksperioder`() {
-        val (person, hendelser) = annullertPerson()
+        val (person, hendelser) = annullertPersonIkkeUtbetalt()
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
-        // TODO: Asserte på riktig state her
-        assertEquals(TilstandstypeDTO.Utbetalt, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
+        assertEquals(TilstandstypeDTO.TilAnnullering, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test
@@ -831,7 +830,7 @@ class SpeilBuilderTest {
             }
         }
 
-        private fun annullertPerson(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
+        private fun annullertPersonIkkeUtbetalt(): Pair<Person, List<HendelseDTO>> = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
                 sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDTO) ->
                     håndter(sykmelding)

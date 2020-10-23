@@ -24,13 +24,13 @@ internal class AnnulleringE2ETest : AbstractEndToEndTest() {
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
 
-        sjekkAt {
+        sjekkAt(inspektør) {
             sykdomstidslinje er Sykdomstidslinje.annullerteDager(fom til tom, TestEvent.testkilde)
         }
 
         håndterUtbetalt()
 
-        sjekkAt {
+        sjekkAt(inspektør) {
             !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
 
             assertTilstander(
@@ -83,7 +83,7 @@ internal class AnnulleringE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        sjekkAt {
+        sjekkAt(inspektør) {
             !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
 
             sykdomstidslinje.subset(fom1 til tom1)

@@ -15,6 +15,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -40,6 +41,7 @@ internal abstract class AbstractEndToEndTest {
     protected lateinit var person: Person
     protected lateinit var observatør: TestObservatør
     protected val inspektør get() = TestArbeidsgiverInspektør(person)
+    fun speilApi () = serializePersonForSpeil(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
@@ -55,9 +57,8 @@ internal abstract class AbstractEndToEndTest {
         val refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>>
     )
 
-    fun sjekkAt(init: TestArbeidsgiverInspektør.() -> Unit) {
-        val inspektør = this.inspektør  // create the receiver object
-        inspektør.init()        // pass the receiver object to the lambda
+    fun <T>sjekkAt(t: T, init: T.() -> Unit) {
+        t.init()
     }
 
     @BeforeEach

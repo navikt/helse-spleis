@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
+import no.nav.helse.serde.api.TilstandstypeDTO.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
@@ -436,6 +437,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         var inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
 
+
         override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
             this.utbetalinger = utbetalinger
         }
@@ -473,7 +475,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
             arbeidsgiverMap["vedtaksperioder"] =
                 (arbeidsgiverMap["vedtaksperioder"] as List<Any?>) + this.vedtaksperioder.toList()
-                    .filter { it.tilstand == TilstandstypeDTO.Utbetalt || it.tilstand  == TilstandstypeDTO.TilAnnullering }
+                    .filter { it.tilstand.visesNårForkastet() }
         }
 
         override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
@@ -572,11 +574,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+            val utbetaling = utbetalinger.findLast { arbeidsgiverFagsystemId != null && it.arbeidsgiverOppdrag().fagsystemId() ==arbeidsgiverFagsystemId }
             vedtaksperiodeMap["tilstand"] =
                 mapTilstander(
                     tilstand = tilstand.type,
                     utbetalt = totalbeløpakkumulator.sum() > 0,
-                    kunFerie = beregnetSykdomstidslinje.all { it.type == SpeilDagtype.FERIEDAG }
+                    kunFerie = beregnetSykdomstidslinje.all { it.type == SpeilDagtype.FERIEDAG },
+                    utbetaling = utbetaling
                 )
             if (tilstand.type in listOf(
                     TilstandType.AVSLUTTET,

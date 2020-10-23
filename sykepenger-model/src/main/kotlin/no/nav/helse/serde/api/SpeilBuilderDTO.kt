@@ -244,16 +244,20 @@ data class SykmeldingDTO(
     override val type = "NY_SØKNAD"
 }
 
-enum class TilstandstypeDTO {
+enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {
     TilUtbetaling,
-    TilAnnullering,
-    Utbetalt,
+    TilAnnullering(true),
+    Utbetalt(true),
+    Annullert(true),
+    AnnulleringFeilet(true),
     Oppgaver,
     Venter,
     IngenUtbetaling,
     KunFerie,
     Feilet,
-    TilInfotrygd
+    TilInfotrygd;
+
+    fun visesNårForkastet() = this.visForkastet
 }
 
 data class VilkårDTO(

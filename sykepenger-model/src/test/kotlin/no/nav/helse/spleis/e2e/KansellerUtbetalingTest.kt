@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -43,32 +44,58 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     fun `kanseller siste utbetaling`() {
         val behovTeller = inspektør.personLogg.behov().size
         håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        sjekkAt {
+        sjekkAt(inspektør) {
             !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
             val behov = sisteBehov(Behovtype.Utbetaling)
-            @Suppress("UNCHECKED_CAST")
-            (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"] er "OPPH"
-        }
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        inspektør.also {
-            assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
-            assertEquals(2, it.arbeidsgiverOppdrag.size)
-            assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            TestOppdragInspektør(it.arbeidsgiverOppdrag[1]).also { oppdragInspektør ->
-                assertEquals(
-                    Utbetalingslinje(19.januar, 26.januar, 1431, 1431, 100.0),
-                    oppdragInspektør.linjer[0]
-                )
-                assertEquals(Endringskode.ENDR, oppdragInspektør.endringskoder[0])
-                assertNull(oppdragInspektør.refFagsystemIder[0])
-            }
-            it.personLogg.behov().last().also {
-                assertEquals(Behovtype.Utbetaling, it.type)
-                assertEquals(null, it.detaljer()["maksdato"])
-                assertEquals("Ola Nordmann", it.detaljer()["saksbehandler"])
-                assertEquals("SPREF", it.detaljer()["fagområde"])
-            }
 
+            @Suppress("UNCHECKED_CAST")
+            val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
+            statusForUtbetaling er "OPPH"
+        }
+
+        sjekkAt(speilApi().arbeidsgivere[0]) {
+            vedtaksperioder[0].tilstand er TilstandstypeDTO.TilAnnullering
+        }
+
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+        sjekkAt(inspektør) {
+            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
+            arbeidsgiverOppdrag.size er 2
+            (personLogg.behov().size - behovTeller) skalVære 1 ellers personLogg.toString()
+        }
+
+        sjekkAt(TestOppdragInspektør(inspektør.arbeidsgiverOppdrag[1])) {
+            linjer[0] er Utbetalingslinje(19.januar, 26.januar, 1431, 1431, 100.0)
+            endringskoder[0] er Endringskode.ENDR
+            refFagsystemIder[0] er null
+        }
+
+        sjekkAt(inspektør.personLogg.behov().last()) {
+            type er Behovtype.Utbetaling
+            detaljer()["maksdato"] er null
+            detaljer()["saksbehandler"] er "Ola Nordmann"
+            detaljer()["fagområde"] er "SPREF"
+        }
+
+        sjekkAt(speilApi().arbeidsgivere[0]) {
+            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
+        }
+    }
+
+
+
+    @Test
+    fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
+        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.FEIL, annullert = true)
+
+        sjekkAt(inspektør) {
+            personLogg.hasErrorsOrWorse() ellers personLogg.toString()
+            arbeidsgiverOppdrag.size er 2
+        }
+
+        sjekkAt(speilApi().arbeidsgivere[0]) {
+            vedtaksperioder[0].tilstand er TilstandstypeDTO.AnnulleringFeilet
         }
     }
 
@@ -163,7 +190,12 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `publiserer et event ved annullering`() {
         håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, saksbehandlerEpost = "tbd@nav.no", annullert = true)
+        håndterUtbetalt(
+            1.vedtaksperiode,
+            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+            saksbehandlerEpost = "tbd@nav.no",
+            annullert = true
+        )
 
         val annullering = observatør.annulleringer.lastOrNull()
         assertNotNull(annullering)
@@ -185,7 +217,12 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.vedtaksperioder.size)
 
         håndterKansellerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, saksbehandlerEpost = "tbd@nav.no", annullert = true)
+        håndterUtbetalt(
+            1.vedtaksperiode,
+            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+            saksbehandlerEpost = "tbd@nav.no",
+            annullert = true
+        )
 
         val vedtaksperioderIder = observatør.vedtaksperioder.toList()
         assertEquals(TilstandType.AVSLUTTET, observatør.tilstander[vedtaksperioderIder[0]]?.last())

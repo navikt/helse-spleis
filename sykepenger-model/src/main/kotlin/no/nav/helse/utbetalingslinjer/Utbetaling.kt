@@ -44,6 +44,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun erUtbetalt() = status == UTBETALT
+    internal fun erFeilet() = status == UTBETALING_FEILET
     internal fun erAnnullert() = annullert
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
