@@ -44,6 +44,7 @@ class Person private constructor(
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+        utbetalingshistorikk.kontekst(this)
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk)
     }
 
