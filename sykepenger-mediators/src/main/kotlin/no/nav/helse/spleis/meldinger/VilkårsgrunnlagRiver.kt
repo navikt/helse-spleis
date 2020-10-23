@@ -15,10 +15,10 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(
-        InntekterForSammenligningsgrunnlag, EgenAnsatt, Opptjening,
-        Dagpenger, Arbeidsavklaringspenger, Medlemskap
-    )
+    override val behov =
+        if (!vilkårshåndteringInfotrygd) listOf(InntekterForSammenligningsgrunnlag, EgenAnsatt, Opptjening, Dagpenger, Arbeidsavklaringspenger, Medlemskap)
+        else listOf(InntekterForSammenligningsgrunnlag, Opptjening, Dagpenger, Arbeidsavklaringspenger, Medlemskap)
+
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(packet: JsonMessage) {
