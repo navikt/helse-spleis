@@ -1,5 +1,5 @@
 val micrometerRegistryPrometheusVersion = "1.5.2"
-val ktorVersion = "1.3.1"
+val ktorVersion = "1.4.0"
 val wireMockVersion = "2.27.1"
 
 val mainClass = "no.nav.helse.spleis.AppKt"

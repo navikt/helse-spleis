@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.4.0"
 }
 
 val flywayVersion = "6.5.0"
@@ -41,15 +41,15 @@ allprojects {
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "12"
+            kotlinOptions.jvmTarget = "14"
         }
 
         named<KotlinCompile>("compileTestKotlin") {
-            kotlinOptions.jvmTarget = "12"
+            kotlinOptions.jvmTarget = "14"
         }
 
         withType<Wrapper> {
-            gradleVersion = "6.5.1"
+            gradleVersion = "6.7"
         }
     }
 }
