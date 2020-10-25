@@ -30,11 +30,11 @@ class Vilkårsgrunnlag(
 
     internal fun valider(
         beregnetInntekt: Inntekt,
-        beregningsdato: LocalDate,
+        skjæringstidspunkt: LocalDate,
         periodetype: Periodetype
     ): Aktivitetslogg {
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
-        opptjeningvurdering.valider(aktivitetslogg, orgnummer, beregningsdato)
+        opptjeningvurdering.valider(aktivitetslogg, orgnummer, skjæringstidspunkt)
         medlemskapsvurdering.valider(aktivitetslogg, periodetype)
         if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
         else info("er ikke egen ansatt")
@@ -46,13 +46,13 @@ class Vilkårsgrunnlag(
             harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus
         )
-        dagpenger.valider(aktivitetslogg, beregningsdato)
-        arbeidsavklaringspenger.valider(aktivitetslogg, beregningsdato)
+        dagpenger.valider(aktivitetslogg, skjæringstidspunkt)
+        arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt)
         return aktivitetslogg
     }
 
-    internal fun lagreInntekter(person: Person, beregningsdato: LocalDate) {
-        inntektsvurdering.lagreInntekter(person, beregningsdato, this)
+    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
+        inntektsvurdering.lagreInntekter(person, skjæringstidspunkt, this)
     }
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }

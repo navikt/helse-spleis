@@ -58,7 +58,8 @@ class SerialisertPerson(val json: String) {
             V39SetterAutomatiskBehandlingPåVedtaksperiode(),
             V40RenamerFørsteFraværsdag(),
             V41RenamerBeregningsdato(),
-            V42AnnulleringIUtbetaling()
+            V42AnnulleringIUtbetaling(),
+            V43RenamerSkjæringstidspunkt()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

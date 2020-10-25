@@ -72,7 +72,7 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {}
     fun visitPersonFagsystemId(fagsystemId: String?) {}
     fun visitGodkjentAv(godkjentAv: String?) {}
-    fun visitBeregningsdato(beregningsdato: LocalDate?) {}
+    fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun visitTilstand(tilstand: Vedtaksperiodetilstand) {}

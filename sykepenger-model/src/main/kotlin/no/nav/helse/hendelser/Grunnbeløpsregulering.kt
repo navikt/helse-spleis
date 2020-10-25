@@ -23,14 +23,14 @@ class Grunnbeløpsregulering(
 
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun grunnbeløp(beregningsdato: LocalDate) = Grunnbeløp.`1G`.beløp(beregningsdato)
+    internal fun grunnbeløp(skjæringstidspunkt: LocalDate) = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
     internal fun håndtert() = håndtert.also {
         if (!it) håndtert = true
     }
 
-    internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, beregningsdato: LocalDate) =
-        relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && beregningsdato >= gyldighetsdato
+    internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, skjæringstidspunkt: LocalDate) =
+        relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && skjæringstidspunkt >= gyldighetsdato
 
     private fun relevantFagsystemId(arbeidsgiverFagsystemId: String?, personFagsystemId: String?) =
         arbeidsgiverFagsystemId == fagsystemId || personFagsystemId == fagsystemId

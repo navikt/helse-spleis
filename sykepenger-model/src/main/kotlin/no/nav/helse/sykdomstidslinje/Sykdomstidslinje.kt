@@ -122,10 +122,10 @@ internal class Sykdomstidslinje private constructor(
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
-    internal fun beregningsdato(kuttdato: LocalDate) =
-        fremTilOgMed(kuttdato).beregningsdato()
+    internal fun skjæringstidspunkt(kuttdato: LocalDate) =
+        fremTilOgMed(kuttdato).skjæringstidspunkt()
 
-    internal fun beregningsdato() =
+    internal fun skjæringstidspunkt() =
         førsteSykedagEtterSisteOppholdsdag() ?: førsteSykedag()
 
     private fun førsteSykedagEtterSisteOppholdsdag() =
@@ -196,9 +196,9 @@ internal class Sykdomstidslinje private constructor(
     }
 
     internal companion object {
-        internal fun beregningsdato(dato: LocalDate, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+        internal fun skjæringstidspunkt(dato: LocalDate, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .merge(sammenhengendeSykdom)
-            .beregningsdato(dato)
+            .skjæringstidspunkt(dato)
 
         internal fun arbeidsdager(periode: Periode?, kilde: Hendelseskilde) =
             Sykdomstidslinje(

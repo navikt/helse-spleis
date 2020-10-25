@@ -8,7 +8,7 @@ import java.time.LocalDate
 internal class MaksimumUtbetaling(
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val aktivitetslogg: Aktivitetslogg,
-    private val beregningsdatoer: List<LocalDate>,
+    private val skjæringstidspunkter: List<LocalDate>,
     private val virkningsdato: LocalDate
 ) {
 
@@ -17,7 +17,7 @@ internal class MaksimumUtbetaling(
     internal fun betal() {
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
-                økonomiList.betal(beregningsdato(dato), virkningsdato)
+                økonomiList.betal(skjæringstidspunkt(dato), virkningsdato)
                 harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()
             }
         }
@@ -27,8 +27,8 @@ internal class MaksimumUtbetaling(
             aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
     }
 
-    private fun beregningsdato(dato: LocalDate) =
-        beregningsdatoer
+    private fun skjæringstidspunkt(dato: LocalDate) =
+        skjæringstidspunkter
             .filter { dato >= it }
             .max()
             ?: dato

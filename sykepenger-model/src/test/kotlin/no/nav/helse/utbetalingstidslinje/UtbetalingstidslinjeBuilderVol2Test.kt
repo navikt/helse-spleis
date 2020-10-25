@@ -401,7 +401,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(1.januar(2020), hendelseId, 31000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(1.januar(2020))
+            skjæringstidspunkter = listOf(1.januar(2020))
         )
         inspektør.navdager.assertDekningsgrunnlag(1.januar(2020) til 31.januar(2020), 31000.månedlig)
     }
@@ -415,7 +415,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(21.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(21.januar(2020))
+            skjæringstidspunkter = listOf(21.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 10.januar(2020), null)
@@ -433,7 +433,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(31.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(1.januar(2020), 31.januar(2020))
+            skjæringstidspunkter = listOf(1.januar(2020), 31.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 31000.månedlig)
@@ -451,7 +451,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(13.januar(2020))
+            skjæringstidspunkter = listOf(13.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 3.januar(2020), null)
@@ -470,7 +470,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(1.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(1.januar(2020))
+            skjæringstidspunkter = listOf(1.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 5.januar(2020), 30000.månedlig)
@@ -488,7 +488,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(11.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(11.januar(2020))
+            skjæringstidspunkter = listOf(11.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 2.januar(2020), null)
@@ -509,7 +509,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(25.januar(2020), hendelseId, 31000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(1.januar(2020), 25.januar(2020))
+            skjæringstidspunkter = listOf(1.januar(2020), 25.januar(2020))
         )
 
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 30000.månedlig)
@@ -528,7 +528,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                     addInntektsmelding(19.januar(2020), hendelseId, 30000.månedlig)
                 }
             },
-            inntektsdatoer = listOf(19.januar(2020))
+            skjæringstidspunkter = listOf(19.januar(2020))
         )
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), null)
         inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 17.januar(2020), null)
@@ -546,7 +546,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                         addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
                     }
                 },
-                inntektsdatoer = listOf(13.januar(2020), 1.januar(2020))
+                skjæringstidspunkter = listOf(13.januar(2020), 1.januar(2020))
             )
         }
 
@@ -566,7 +566,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                         addInntektsmelding(20.januar(2020), hendelseId, 30000.månedlig)
                     }
                 },
-                inntektsdatoer = listOf(20.januar(2020), 3.januar(2020))
+                skjæringstidspunkter = listOf(20.januar(2020), 3.januar(2020))
             )
         }
 
@@ -585,7 +585,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                         addInntektsmelding(22.januar(2020), hendelseId, 30000.månedlig)
                     }
                 },
-                inntektsdatoer = listOf(22.januar(2020), 4.januar(2020))
+                skjæringstidspunkter = listOf(22.januar(2020), 4.januar(2020))
             )
         }
 
@@ -622,12 +622,12 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
 
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektshistorikkVol2: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderVol2Test.inntektshistorikkVol2,
-        inntektsdatoer: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars)
+        skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars)
     ) {
         tidslinje = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = this.periode()!!,
             inntektshistorikkVol2 = inntektshistorikkVol2,
-            inntektsdatoer = inntektsdatoer
+            skjæringstidspunkter = skjæringstidspunkter
         ).result(this)
     }
 

@@ -61,22 +61,22 @@ internal class InntektshistorikkTest {
 
     @Test
     fun `Sykepengegrunnlag er begrenset til 6G når inntekt er høyere enn 6G`() {
-        val beregningsdato = 1.januar(2020)
-        val `6GBeløp` = Grunnbeløp.`6G`.beløp(beregningsdato)
+        val skjæringstidspunkt = 1.januar(2020)
+        val `6GBeløp` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
 
         val årsinntektOver6G =
-            listOf(Inntektsendring(beregningsdato, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
+            listOf(Inntektsendring(skjæringstidspunkt, UUID.randomUUID(), 49929.01.månedlig, INFOTRYGD))
         assertEquals(
             `6GBeløp`,
-            Inntektshistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, beregningsdato)
+            Inntektshistorikk.Inntektsendring.sykepengegrunnlag(årsinntektOver6G, skjæringstidspunkt)
         )
 
         val årsinntektUnder6G =
-            listOf(Inntektsendring(beregningsdato, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
+            listOf(Inntektsendring(skjæringstidspunkt, UUID.randomUUID(), 49928.månedlig, INFOTRYGD))
         assertTrue(
             Inntektshistorikk.Inntektsendring.sykepengegrunnlag(
                 årsinntektUnder6G,
-                beregningsdato
+                skjæringstidspunkt
             )!! < `6GBeløp`
         )
     }

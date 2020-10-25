@@ -60,13 +60,13 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     @Test
-    fun `beregningsdato`() {
-        assertEquals(1.januar, person.beregningsdato(31.januar))
-        assertEquals(1.januar, person.beregningsdato(28.februar))
-        assertEquals(1.januar, person.beregningsdato(30.mars))
-        assertEquals(1.april, person.beregningsdato(1.april))
-        assertEquals(1.april, person.beregningsdato(31.mai))
-        assertEquals(1.april, person.beregningsdato(1.juli))
+    fun skjæringstidspunkt() {
+        assertEquals(1.januar, person.skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, person.skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, person.skjæringstidspunkt(30.mars))
+        assertEquals(1.april, person.skjæringstidspunkt(1.april))
+        assertEquals(1.april, person.skjæringstidspunkt(31.mai))
+        assertEquals(1.april, person.skjæringstidspunkt(1.juli))
     }
 
     @Test

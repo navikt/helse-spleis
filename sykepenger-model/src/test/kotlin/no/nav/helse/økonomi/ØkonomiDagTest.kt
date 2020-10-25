@@ -63,15 +63,15 @@ internal class ØkonomiDagTest {
 
     @Test
     fun `bruker virkningsdato for å finne aktuell G-verdi ved begrensning`() {
-        val beregningsdato = 1.mai(2020)
+        val skjæringstidspunkt = 1.mai(2020)
         val virkningsdatoForNyttGrunnbeløp = 21.september(2020)
-        tidslinjeOf(2.NAV(3000), startDato = beregningsdato).let { tidslinje ->
-            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), listOf(beregningsdato), beregningsdato).betal()
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(beregningsdato).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2019-grunnbeløp
+        tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
+            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), listOf(skjæringstidspunkt), skjæringstidspunkt).betal()
+            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2019-grunnbeløp
         }
-        tidslinjeOf(2.NAV(3000), startDato = beregningsdato).let { tidslinje ->
-            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), listOf(beregningsdato), virkningsdatoForNyttGrunnbeløp).betal()
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(beregningsdato, virkningsdatoForNyttGrunnbeløp).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2020-grunnbeløp fordi virkningsdato er passert
+        tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
+            MaksimumUtbetaling(listOf(tidslinje), Aktivitetslogg(), listOf(skjæringstidspunkt), virkningsdatoForNyttGrunnbeløp).betal()
+            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdatoForNyttGrunnbeløp).rundTilDaglig().reflection { _, _, _, daglig -> daglig}) // 2020-grunnbeløp fordi virkningsdato er passert
         }
     }
 

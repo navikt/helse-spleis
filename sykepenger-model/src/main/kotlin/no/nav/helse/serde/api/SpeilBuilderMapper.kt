@@ -2,7 +2,6 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -188,11 +187,11 @@ internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnla
 )
 
 internal fun mapOpptjening(
-    beregningsdato: LocalDate,
+    skjæringstidspunkt: LocalDate,
     dataForVilkårsvurdering: GrunnlagsdataDTO
 ) = OpptjeningDTO(
     antallKjenteOpptjeningsdager = dataForVilkårsvurdering.antallOpptjeningsdagerErMinst,
-    fom = beregningsdato.minusDays(dataForVilkårsvurdering.antallOpptjeningsdagerErMinst.toLong()),
+    fom = skjæringstidspunkt.minusDays(dataForVilkårsvurdering.antallOpptjeningsdagerErMinst.toLong()),
     oppfylt = dataForVilkårsvurdering.harOpptjening
 )
 
@@ -207,9 +206,9 @@ internal fun mapVilkår(
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
-    val beregningsdato = vedtaksperiodeMap["beregningsdato"] as LocalDate
-    val sykepengegrunnlag = sykepengegrunnlag(inntekter, beregningsdato)
-    val beregnetMånedsinntekt = inntekt(inntekter, beregningsdato)
+    val skjæringstidspunkt = vedtaksperiodeMap["skjæringstidspunkt"] as LocalDate
+    val sykepengegrunnlag = sykepengegrunnlag(inntekter, skjæringstidspunkt)
+    val beregnetMånedsinntekt = inntekt(inntekter, skjæringstidspunkt)
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
@@ -218,7 +217,7 @@ internal fun mapVilkår(
     val gjenståendeDager = (vedtaksperiodeMap["gjenståendeSykedager"] as Int?) ?: 0
     val sykepengedager = SykepengedagerDTO(
         forbrukteSykedager = forbrukteSykedager,
-        beregningsdato = beregningsdato,
+        skjæringstidspunkt = skjæringstidspunkt,
         førsteSykepengedag = førsteSykepengedag,
         maksdato = maksdato,
         gjenståendeDager = gjenståendeDager,
@@ -230,7 +229,7 @@ internal fun mapVilkår(
         oppfylt = personalder.øvreAldersgrense.isAfter(sisteSykepengedagEllerSisteDagIPerioden)
     )
     val opptjening = dataForVilkårsvurdering?.let {
-        mapOpptjening(beregningsdato, it)
+        mapOpptjening(skjæringstidspunkt, it)
     }
     val søknadsfrist = søknadNav?.let {
         SøknadsfristDTO(
@@ -243,13 +242,13 @@ internal fun mapVilkår(
     val sykepengegrunnlagDTO = SykepengegrunnlagDTO(
         sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
         grunnbeløp = (Grunnbeløp.`1G`
-            .beløp(beregningsdato, tom)
+            .beløp(skjæringstidspunkt, tom)
             .reflection { årlig, _, _, _ -> årlig })
             .toInt(),
         oppfylt = sykepengegrunnlagOppfylt(
             personalder = personalder,
             beregnetMånedsinntekt = beregnetMånedsinntekt,
-            beregningsdato = beregningsdato
+            skjæringstidspunkt = skjæringstidspunkt
         )
     )
     val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus
@@ -259,8 +258,8 @@ internal fun mapVilkår(
 private fun sykepengegrunnlagOppfylt(
     personalder: Alder,
     beregnetMånedsinntekt: Inntekt?,
-    beregningsdato: LocalDate
-) = beregnetMånedsinntekt?.let { it > personalder.minimumInntekt(beregningsdato) }
+    skjæringstidspunkt: LocalDate
+) = beregnetMånedsinntekt?.let { it > personalder.minimumInntekt(skjæringstidspunkt) }
 
 private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {
     val søknadSendtMåned = søknadNav.sendtNav.toLocalDate().withDayOfMonth(1)

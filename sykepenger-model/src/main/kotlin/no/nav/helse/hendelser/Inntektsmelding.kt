@@ -127,14 +127,14 @@ class Inntektsmelding(
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        val beregningsdato = sykdomstidslinje.beregningsdato() ?: førsteFraværsdag ?: return
+        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt() ?: førsteFraværsdag ?: return
 
-        if (beregningsdato != førsteFraværsdag) {
+        if (skjæringstidspunkt != førsteFraværsdag) {
             warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
         }
 
         inntektshistorikk.add(
-            beregningsdato.minusDays(1),  // Assuming salary is the day before the first sykedag
+            skjæringstidspunkt.minusDays(1),  // Assuming salary is the day before the first sykedag
             meldingsreferanseId(),
             beregnetInntekt,
             Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
@@ -142,15 +142,15 @@ class Inntektsmelding(
     }
 
     internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2) {
-        val beregningsdato = sykdomstidslinje.beregningsdato() ?: førsteFraværsdag ?: return
+        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt() ?: førsteFraværsdag ?: return
 
-        if (beregningsdato != førsteFraværsdag) {
+        if (skjæringstidspunkt != førsteFraværsdag) {
             warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
         }
 
         inntektshistorikk {
             addInntektsmelding(
-                beregningsdato,
+                skjæringstidspunkt,
                 meldingsreferanseId(),
                 beregnetInntekt
             )

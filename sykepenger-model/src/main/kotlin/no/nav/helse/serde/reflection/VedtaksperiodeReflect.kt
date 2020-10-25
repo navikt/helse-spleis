@@ -6,7 +6,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -19,8 +18,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val automatiskBehandling: Boolean? = vedtaksperiode["automatiskBehandling"]
-    private val beregningsdatoFraInfotrygd:LocalDate? = vedtaksperiode["beregningsdatoFraInfotrygd"]
-    private val beregningsdato:LocalDate= vedtaksperiode["beregningsdato"]
+    private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
+    private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
@@ -93,8 +92,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
-        "beregningsdatoFraInfotrygd" to beregningsdatoFraInfotrygd,
-        "beregningsdato" to beregningsdato,
+        "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
+        "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "personFagsystemId" to personFagsystemId,
@@ -112,9 +111,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjentAv" to godkjentAv,
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
-        "beregningsdatoFraInfotrygd" to beregningsdatoFraInfotrygd,
-        "beregningsdato" to beregningsdato,
-        "inntektFraInntektsmelding" to arbeidsgiver.inntekt(beregningsdato)?.reflection{ _, månedlig, _, _ -> månedlig },
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "inntektFraInntektsmelding" to arbeidsgiver.inntekt(skjæringstidspunkt)?.reflection{ _, månedlig, _, _ -> månedlig },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
         )
 }

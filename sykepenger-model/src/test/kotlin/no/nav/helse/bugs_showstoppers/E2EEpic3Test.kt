@@ -34,7 +34,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ingen sykedager i tidslinjen - beregningsdato-bug`() {
+    fun `Ingen sykedager i tidslinjen - skjæringstidspunkt-bug`() {
         håndterSykmelding(Sykmeldingsperiode(6.januar(2020), 7.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar(2020), 10.januar(2020), 100))
         håndterSykmelding(Sykmeldingsperiode(27.januar(2020), 28.januar(2020), 100))
@@ -393,7 +393,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
         assertEquals(FriskHelgedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[7.januar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[8.januar]::class)
-        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().beregningsdato())
+        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().skjæringstidspunkt())
         assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
     }
 
@@ -412,7 +412,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(7.januar, inspektør.sykdomshistorikk.sykdomstidslinje().førsteDag())
         assertEquals(FriskHelgedag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[7.januar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomshistorikk.sykdomstidslinje()[8.januar]::class)
-        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().beregningsdato())
+        assertEquals(9.januar, inspektør.sykdomshistorikk.sykdomstidslinje().skjæringstidspunkt())
         assertEquals(28.januar, inspektør.sykdomshistorikk.sykdomstidslinje().sisteDag())
     }
 

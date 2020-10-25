@@ -49,7 +49,7 @@ internal class Vedtaksperiode private constructor(
     private var godkjentAv: String?,
     private var godkjenttidspunkt: LocalDateTime?,
     private var automatiskBehandling: Boolean?,
-    private var beregningsdatoFraInfotrygd: LocalDate?,
+    private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private val sykdomshistorikk: Sykdomshistorikk,
@@ -65,10 +65,10 @@ internal class Vedtaksperiode private constructor(
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
-    private val beregningsdato
+    private val skjæringstidspunkt
         get() =
-            beregningsdatoFraInfotrygd
-                ?: person.beregningsdato(periode.endInclusive)
+            skjæringstidspunktFraInfotrygd
+                ?: person.skjæringstidspunkt(periode.endInclusive)
                 ?: periode.start
 
     internal constructor(
@@ -93,7 +93,7 @@ internal class Vedtaksperiode private constructor(
         godkjentAv = null,
         godkjenttidspunkt = null,
         automatiskBehandling = null,
-        beregningsdatoFraInfotrygd = null,
+        skjæringstidspunktFraInfotrygd = null,
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
         sykdomshistorikk = Sykdomshistorikk(),
@@ -129,7 +129,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitArbeidsgiverFagsystemId(arbeidsgiverFagsystemId)
         visitor.visitPersonFagsystemId(personFagsystemId)
         visitor.visitGodkjentAv(godkjentAv)
-        visitor.visitBeregningsdato(beregningsdato)
+        visitor.visitSkjæringstidspunkt(skjæringstidspunkt)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
         visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, sykmeldingsperiode)
@@ -263,7 +263,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, beregningsdato)) return
+        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, skjæringstidspunkt)) return
         kontekst(grunnbeløpsregulering)
         tilstand.håndter(this, grunnbeløpsregulering)
     }
@@ -391,9 +391,9 @@ internal class Vedtaksperiode private constructor(
         val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(this)
         hendelse.førsteFraværsdag?.also {
             when {
-                tilstøtende == null -> if (it != beregningsdato)
+                tilstøtende == null -> if (it != skjæringstidspunkt)
                     hendelse.warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
-                tilstøtende.beregningsdato == beregningsdato && beregningsdato != hendelse.førsteFraværsdag ->
+                tilstøtende.skjæringstidspunkt == skjæringstidspunkt && skjæringstidspunkt != hendelse.førsteFraværsdag ->
                     hendelse.warn("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode")
             }
         }
@@ -433,11 +433,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        vilkårsgrunnlag.lagreInntekter(person, beregningsdato)
-        val beregnetInntekt = arbeidsgiver.inntekt(beregningsdato) ?: vilkårsgrunnlag.severe(
-            "Finner ikke inntekt for perioden $beregningsdato"
+        vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
+        val beregnetInntekt = arbeidsgiver.inntekt(skjæringstidspunkt) ?: vilkårsgrunnlag.severe(
+            "Finner ikke inntekt for perioden $skjæringstidspunkt"
         )
-        if (vilkårsgrunnlag.valider(beregnetInntekt, beregningsdato, periodetype()).hasErrorsOrWorse().also {
+        if (vilkårsgrunnlag.valider(beregnetInntekt, skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
@@ -469,7 +469,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: PersonHendelse) {
-        val beregningSlutt = YearMonth.from(beregningsdato).minusMonths(1)
+        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         if (!vilkårshåndteringInfotrygd) egenAnsatt(hendelse)
         opptjening(hendelse)
@@ -539,7 +539,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun forlengelseFraInfotrygd(utbetalingshistorikk: Utbetalingshistorikk) {
         forlengelseFraInfotrygd = JA
-        beregningsdatoFraInfotrygd = person.beregningsdato(periode.endInclusive, utbetalingshistorikk)
+        skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
     }
 
     /**
@@ -621,7 +621,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendUtbetaltEvent() {
         val sykepengegrunnlag =
-            requireNotNull(arbeidsgiver.sykepengegrunnlag(beregningsdato)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
+            requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
         person.vedtaksperiodeUtbetalt(
             tilUtbetaltEvent(
                 aktørId = aktørId,
@@ -1001,7 +1001,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 valider("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger") {
-                    vedtaksperiode.beregningsdatoFraInfotrygd
+                    vedtaksperiode.skjæringstidspunktFraInfotrygd
                         ?.let { arbeidsgiver.inntekt(it) != null }
                         ?: true
                 }
@@ -1251,8 +1251,8 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
                         if (tilstøtendePeriode.forlengelseFraInfotrygd == JA)
-                            vedtaksperiode.beregningsdatoFraInfotrygd = tilstøtendePeriode.beregningsdatoFraInfotrygd
-                        else vedtaksperiode.beregningsdatoFraInfotrygd = null
+                            vedtaksperiode.skjæringstidspunktFraInfotrygd = tilstøtendePeriode.skjæringstidspunktFraInfotrygd
+                        else vedtaksperiode.skjæringstidspunktFraInfotrygd = null
                         return@onSuccess
                     }
 
@@ -1263,7 +1263,7 @@ internal class Vedtaksperiode private constructor(
 
                         if (!oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
                             vedtaksperiode.forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
-                            vedtaksperiode.beregningsdatoFraInfotrygd = null
+                            vedtaksperiode.skjæringstidspunktFraInfotrygd = null
                             ytelser.info("Perioden er en førstegangsbehandling")
                             return@onSuccess
                         }
@@ -1292,7 +1292,7 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
                         personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        beregningsdatoer = person.alleBeregningsdatoer(
+                        skjæringstidspunkter = person.skjæringstidspunkter(
                             vedtaksperiode.periode.endInclusive,
                             ytelser.utbetalingshistorikk().historiskeTidslinjer()
                         ),

@@ -17,8 +17,8 @@ class Opptjeningvurdering(
     internal fun harOpptjening(orgnummer: String) =
         opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, beregningsdato: LocalDate): Aktivitetslogg {
-        Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, beregningsdato)
+    internal fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, skjæringstidspunkt: LocalDate): Aktivitetslogg {
+        Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, skjæringstidspunkt)
         if (harOpptjening(orgnummer)) aktivitetslogg.info(
             "Har minst %d dager opptjening",
             TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
@@ -32,21 +32,21 @@ class Opptjeningvurdering(
         private val fom: LocalDate,
         private val tom: LocalDate? = null
     ) {
-        private fun opptjeningsdager(beregningsdato: LocalDate): Int {
-            if (fom > beregningsdato) return 0
-            if (tom != null && tom < beregningsdato) return 0
-            return fom.datesUntil(beregningsdato).count().toInt()
+        private fun opptjeningsdager(skjæringstidspunkt: LocalDate): Int {
+            if (fom > skjæringstidspunkt) return 0
+            if (tom != null && tom < skjæringstidspunkt) return 0
+            return fom.datesUntil(skjæringstidspunkt).count().toInt()
         }
 
         internal companion object {
             fun opptjeningsdager(
                 liste: List<Arbeidsforhold>,
                 map: MutableMap<String, Int>,
-                beregningsdato: LocalDate
+                skjæringstidspunkt: LocalDate
             ) {
                 liste.forEach { arbeidsforhold ->
                     map.compute(arbeidsforhold.orgnummer) { _, opptjeningsdager ->
-                        max(arbeidsforhold.opptjeningsdager(beregningsdato), opptjeningsdager ?: 0)
+                        max(arbeidsforhold.opptjeningsdager(skjæringstidspunkt), opptjeningsdager ?: 0)
                     }
                 }
             }

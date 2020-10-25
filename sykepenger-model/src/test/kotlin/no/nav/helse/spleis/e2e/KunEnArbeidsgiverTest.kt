@@ -515,7 +515,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertActivities(it)
             assertFalse(it.inntekter.isEmpty())
             assertNotNull(it.inntektshistorikk.inntekt(21.september(2020)))
-            assertEquals(21.september(2020), it.beregningsdato(0))
+            assertEquals(21.september(2020), it.skjæringstidspunkt(0))
             assertEquals(21465, it.nettoBeløp[0])
         }
     }
@@ -553,8 +553,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertFalse(it.inntekter.isEmpty())
             assertNotNull(it.inntektshistorikk.inntekt(4.januar))
             assertNotNull(it.inntektshistorikk.inntekt(24.januar))
-            assertEquals(4.januar, it.beregningsdato(0))
-            assertEquals(24.januar, it.beregningsdato(1))
+            assertEquals(4.januar, it.skjæringstidspunkt(0))
+            assertEquals(24.januar, it.skjæringstidspunkt(1))
             assertEquals(19, it.dagtelling[Sykedag::class])
             assertEquals(8, it.dagtelling[SykHelgedag::class])
             assertEquals(1, it.dagtelling[Dag.UkjentDag::class])
@@ -1450,8 +1450,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(3.januar, it.beregningsdato(0))
-            assertEquals(3.januar, it.beregningsdato(1))
+            assertEquals(3.januar, it.skjæringstidspunkt(0))
+            assertEquals(3.januar, it.skjæringstidspunkt(1))
         }
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertNotNull(inspektør.maksdato(2.vedtaksperiode))

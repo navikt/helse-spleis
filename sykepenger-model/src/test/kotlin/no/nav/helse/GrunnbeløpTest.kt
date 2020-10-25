@@ -38,7 +38,7 @@ internal class GrunnbeløpTest {
     }
 
     @Test
-    fun `beregningsdato brukes når virkningsdato er eldre`() {
+    fun `skjæringstidspunkt brukes når virkningsdato er eldre`() {
         assertEquals(101351.årlig, Grunnbeløp.`1G`.beløp(10.oktober(2020), 21.september(2020)))
     }
 }

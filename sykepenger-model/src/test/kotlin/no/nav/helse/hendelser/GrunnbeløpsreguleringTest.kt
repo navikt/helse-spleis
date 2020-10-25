@@ -34,7 +34,7 @@ internal class GrunnbeløpsreguleringTest {
     }
 
     @Test
-    fun `beregningsdato kan ikke være eldre enn gyldighetsdato`() {
+    fun `skjæringstidspunkt kan ikke være eldre enn gyldighetsdato`() {
         Grunnbeløpsregulering(id, AKTØRID, FNR, ORGNR, GRUNNBELØP_GYLDIG_FRA, ARBEIDSGIVERFAGSYSTEMID).also { grunnbeløpsregulering ->
             assertFalse(grunnbeløpsregulering.erRelevant(ARBEIDSGIVERFAGSYSTEMID, PERSONFAGSYSTEMID, GRUNNBELØP_GYLDIG_FRA.minusDays(1)))
         }

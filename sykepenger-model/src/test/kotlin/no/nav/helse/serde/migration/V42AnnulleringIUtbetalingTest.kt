@@ -15,7 +15,7 @@ class V42AnnulleringIUtbetalingTest {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Test
-    fun `renamer beregningsdato til beregningsdatoFraInfotrygd`() {
+    fun `setter annullert-flagg`() {
         val migrated = listOf(V42AnnulleringIUtbetaling())
             .migrate(objectMapper.readTree(originalJson()))
         val expected = objectMapper.readTree(expectedJson())

@@ -232,12 +232,12 @@ class Person private constructor(
     internal fun lagreInntekter(
         arbeidsgiverId: String,
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
-        beregningsdato: LocalDate,
+        skjæringstidspunkt: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(
             arbeidsgiverInntekt,
-            beregningsdato,
+            skjæringstidspunkt,
             vilkårsgrunnlag
         )
     }
@@ -251,28 +251,28 @@ class Person private constructor(
     }
 
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        val dato = beregningsdato(periode.endInclusive) ?: periode.start
+        val dato = skjæringstidspunkt(periode.endInclusive) ?: periode.start
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun beregningsdato(dato: LocalDate) = beregningsdato(dato, emptyList())
-    internal fun beregningsdato(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = beregningsdato(dato, utbetalingshistorikk.historiskeTidslinjer())
-    internal fun alleBeregningsdatoer(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.alleBeregningsdatoer(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun beregningsdato(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje>) = Arbeidsgiver.beregningsdato(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = beregningsdato(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
+    internal fun skjæringstidspunkt(dato: LocalDate) = skjæringstidspunkt(dato, emptyList())
+    internal fun skjæringstidspunkt(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = skjæringstidspunkt(dato, utbetalingshistorikk.historiskeTidslinjer())
+    internal fun skjæringstidspunkter(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun skjæringstidspunkt(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje>) = Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, dato, historiskeTidslinjer)
+    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = skjæringstidspunkt(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()
         val sammenhengendePeriode = sammenhengendePeriode(periode)
-        val inntektsdatoer = alleBeregningsdatoer(periode.endInclusive, historiskeTidslinjer)
+        val skjæringstidspunkter = skjæringstidspunkter(periode.endInclusive, historiskeTidslinjer)
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
             .map { arbeidsgiver ->
                 arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
-                    inntektsdatoer,
-                    sammenhengendePeriode,
-                    ytelser
+                    skjæringstidspunkter = skjæringstidspunkter,
+                    sammenhengendePeriode = sammenhengendePeriode,
+                    ytelser = ytelser
                 )
             }.toMap()
     }

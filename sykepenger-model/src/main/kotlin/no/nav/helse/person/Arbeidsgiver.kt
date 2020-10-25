@@ -80,31 +80,31 @@ internal class Arbeidsgiver private constructor(
 
         internal val ALLE: VedtaksperioderFilter = { true }
 
-        internal fun beregningsdato(
+        internal fun skjæringstidspunkt(
             arbeidsgivere: List<Arbeidsgiver>,
             dato: LocalDate,
-            historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()
+            historiskeTidslinjer: List<Sykdomstidslinje>
         ) =
-            Sykdomstidslinje.beregningsdato(
+            Sykdomstidslinje.skjæringstidspunkt(
                 dato, historiskeTidslinjer + arbeidsgivere
                     .filter(Arbeidsgiver::harHistorikk)
                     .map(Arbeidsgiver::sykdomstidslinje)
             )
 
-        internal fun alleBeregningsdatoer(
+        internal fun skjæringstidspunkter(
             arbeidsgivere: List<Arbeidsgiver>,
             dato: LocalDate,
-            historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()
+            historiskeTidslinjer: List<Sykdomstidslinje>
         ): List<LocalDate> {
-            val inntektsdatoer = mutableListOf<LocalDate>()
+            val skjæringstidspunkter = mutableListOf<LocalDate>()
             var kuttdato = dato
             do {
-                val beregningsdato = beregningsdato(arbeidsgivere, kuttdato, historiskeTidslinjer)?.also {
+                val skjæringstidspunkt = skjæringstidspunkt(arbeidsgivere, kuttdato, historiskeTidslinjer)?.also {
                     kuttdato = it.minusDays(1)
-                    inntektsdatoer.add(it)
+                    skjæringstidspunkter.add(it)
                 }
-            } while (beregningsdato != null)
-            return inntektsdatoer
+            } while (skjæringstidspunkt != null)
+            return skjæringstidspunkter
         }
     }
 
@@ -354,12 +354,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagreInntekter(
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
-        beregningsdato: LocalDate,
+        skjæringstidspunkt: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         arbeidsgiverInntekt.lagreInntekter(
             inntektshistorikkVol2,
-            beregningsdato,
+            skjæringstidspunkt,
             vilkårsgrunnlag.meldingsreferanseId()
         )
     }
@@ -489,7 +489,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
     internal fun oppdatertUtbetalingstidslinje(
-        inntektsdatoer: List<LocalDate>,
+        skjæringstidspunkter: List<LocalDate>,
         sammenhengendePeriode: Periode,
         ytelser: Ytelser
     ): Utbetalingstidslinje {
@@ -512,7 +512,7 @@ internal class Arbeidsgiver private constructor(
             val vol2Linje = UtbetalingstidslinjeBuilderVol2(
                 sammenhengendePeriode = sammenhengendePeriode,
                 inntektshistorikkVol2 = inntektshistorikkVol2,
-                inntektsdatoer = inntektsdatoer,
+                skjæringstidspunkter = skjæringstidspunkter,
                 forlengelseStrategy = { sykdomstidslinje ->
                     Oldtidsutbetalinger().let { oldtid ->
                         ytelser.utbetalingshistorikk().append(oldtid)

@@ -76,7 +76,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, førsteFraværsdag().plusDays(1)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, skjæringstidspunkt().plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -117,11 +117,11 @@ internal class VilkårsgrunnlagTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
     }
 
-    private fun førsteFraværsdag(): LocalDate {
+    private fun skjæringstidspunkt(): LocalDate {
         var dato: LocalDate? = null
         person.accept(object : PersonVisitor {
-            override fun visitBeregningsdato(beregningsdato: LocalDate?) {
-                dato = beregningsdato
+            override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
+                dato = skjæringstidspunkt
             }
         })
         return requireNotNull(dato)

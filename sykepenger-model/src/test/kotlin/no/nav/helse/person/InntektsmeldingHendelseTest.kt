@@ -8,8 +8,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.opentest4j.AssertionFailedError
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -41,12 +39,12 @@ internal class InntektsmeldingHendelseTest {
     }
 
     @Test
-    fun `beregningdato oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
+    fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
-        assertEquals(6.januar, inspektør.beregningsdato(0))
+        assertEquals(6.januar, inspektør.skjæringstidspunkt(0))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1.januar, inspektør.beregningsdato(0))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
     }
 
     @Test

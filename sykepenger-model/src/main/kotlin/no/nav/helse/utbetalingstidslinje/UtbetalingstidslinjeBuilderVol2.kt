@@ -22,7 +22,7 @@ import java.time.LocalDate
 internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private val sammenhengendePeriode: Periode,
     private val inntektshistorikkVol2: InntektshistorikkVol2,
-    private val inntektsdatoer: List<LocalDate>,
+    private val skjæringstidspunkter: List<LocalDate>,
     private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
@@ -180,7 +180,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     }
 
     private val LocalDate.inntektdato
-        get() = inntektsdatoer.sorted().lastOrNull { it <= this }
+        get() = skjæringstidspunkter.sorted().lastOrNull { it <= this }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {
         tidslinje.addArbeidsgiverperiodedag(

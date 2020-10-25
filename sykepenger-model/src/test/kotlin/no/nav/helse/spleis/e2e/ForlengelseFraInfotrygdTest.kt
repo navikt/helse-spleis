@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
-import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -41,7 +39,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(3.januar, inspektør.beregningsdato(0)) {
+        assertEquals(3.januar, inspektør.skjæringstidspunkt(0)) {
             "Første fraværsdag settes til den første utbetalte dagen fordi " +
                 "vi ikke er i stand til å regne den ut selv ennå. " +
                 "Bør regnes ut riktig når vi har én sykdomstidslinje på arbeidsgiver-nivå"
@@ -128,7 +126,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
-        assertEquals(1.januar, inspektør.beregningsdato(0))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
     }
 
     @Test
