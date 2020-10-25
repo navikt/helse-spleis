@@ -18,7 +18,6 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation(kotlin("stdlib-jdk8"))
         implementation("ch.qos.logback:logback-classic:1.2.3")
         implementation("net.logstash.logback:logstash-logback-encoder:6.4") {
             exclude("com.fasterxml.jackson.core")
