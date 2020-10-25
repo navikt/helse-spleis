@@ -9,6 +9,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ internal fun tilUtbetaltEvent(
     aktørId: String,
     fødselnummer: String,
     orgnummer: String,
-    sykepengegrunnlag: Double,
+    sykepengegrunnlag: Inntekt,
     hendelseIder: List<UUID>,
     utbetaling: Utbetaling,
     utbetalingstidslinje: Utbetalingstidslinje,
@@ -51,7 +52,7 @@ private class UtbetaltEventBuilder(
     private val fødselnummer: String,
     private val orgnummer: String,
     private val hendelseIder: List<UUID>,
-    private val sykepengegrunnlag: Double,
+    private val sykepengegrunnlag: Inntekt,
     utbetaling: Utbetaling,
     utbetalingstidslinje: Utbetalingstidslinje,
     private val periode: Periode,
@@ -62,7 +63,7 @@ private class UtbetaltEventBuilder(
     private val maksdato: LocalDate?
 ) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
-    private val dagsats = (sykepengegrunnlag / 260).roundToInt()
+    private val dagsats = sykepengegrunnlag.reflection { _, _, _, daglig -> daglig }
     private val oppdragListe = mutableListOf<UtbetaltEvent.Utbetalt>()
     private val utbetalingslinjer = mutableListOf<UtbetaltEvent.Utbetalt.Utbetalingslinje>()
     private val ikkeUtbetalteDager = finnIkkeUtbetalteDager(utbetalingstidslinje)
@@ -87,7 +88,7 @@ private class UtbetaltEventBuilder(
             godkjentAv = godkjentAv,
             automatiskBehandling = automatiskBehandling,
             opprettet = opprettet,
-            sykepengegrunnlag = sykepengegrunnlag,
+            sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
             maksdato = maksdato
         )
     }
