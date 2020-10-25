@@ -89,7 +89,7 @@ class Inntektsmelding(
     override fun periode() =
         super.periode().let {
             Periode(
-                listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).max()!!,
+                listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).maxOrNull()!!,
                 it.endInclusive
             )
         }

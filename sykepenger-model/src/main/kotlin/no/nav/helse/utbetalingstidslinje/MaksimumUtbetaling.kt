@@ -30,7 +30,7 @@ internal class MaksimumUtbetaling(
     private fun skjæringstidspunkt(dato: LocalDate) =
         skjæringstidspunkter
             .filter { dato >= it }
-            .max()
+            .maxOrNull()
             ?: dato
 
 }

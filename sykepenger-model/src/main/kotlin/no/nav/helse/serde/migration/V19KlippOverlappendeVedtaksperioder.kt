@@ -52,8 +52,7 @@ internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19)
                 tom =
                     periode[sykdomshistorikkKey].flatMap { it[hendelsetidslinjeKey][dagerKey] }
                         .filter { it["kilde"]["type"].asText() != "Inntektsmelding" }
-                        .map { LocalDate.parse(it[datoKey].asText()) }
-                        .max()
+                        .maxOfOrNull { LocalDate.parse(it[datoKey].asText()) }
                         ?: run {
                             log.error("Kunne ikke migrere vedtaksperiode: $vedtaksperiodeId med tom historikk.")
                             throw IllegalStateException("Kunne ikke migrere vedtaksperiode: $vedtaksperiodeId med tom historikk.")

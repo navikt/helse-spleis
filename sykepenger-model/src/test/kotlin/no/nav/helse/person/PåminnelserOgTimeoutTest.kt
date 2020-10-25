@@ -236,7 +236,7 @@ class PåminnelserOgTimeoutTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = perioder.toList(),
-            mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelse = this
         }

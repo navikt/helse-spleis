@@ -57,7 +57,7 @@ internal class SykmeldingTest {
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
-        val tidligsteFom = sykeperioder.map { it.fom }.min()?.atStartOfDay()
+        val tidligsteFom = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay()
         sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

@@ -23,8 +23,8 @@ internal class Utbetalingstidslinje private constructor(
 
     internal companion object {
         internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = Periode(
-            tidslinjer.map { it.førsteDato() }.min()!!,
-            tidslinjer.map { it.sisteDato() }.max()!!
+            tidslinjer.minOfOrNull { it.førsteDato() }!!,
+            tidslinjer.maxOfOrNull { it.sisteDato() }!!
         )
     }
 

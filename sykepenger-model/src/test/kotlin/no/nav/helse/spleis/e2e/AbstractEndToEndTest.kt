@@ -142,14 +142,14 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun replaySykmelding(hendelseId: UUID) = håndterSykmelding(
         id = hendelseId,
-        sykeperioder = *requireNotNull(sykmeldinger[hendelseId])
+        sykeperioder = requireNotNull(sykmeldinger[hendelseId])
     )
 
     protected fun replaySøknad(hendelseId: UUID) = håndterSøknad(
         id = hendelseId,
         sendtTilNav = requireNotNull(søknader[hendelseId]).first,
         harAndreInntektskilder = requireNotNull(søknader[hendelseId]).second,
-        perioder = *requireNotNull(søknader[hendelseId]).third
+        perioder = requireNotNull(søknader[hendelseId]).third
     )
 
     protected fun replayInntektsmelding(hendelseId: UUID): UUID {
@@ -198,7 +198,7 @@ internal abstract class AbstractEndToEndTest {
     ): UUID {
         søknad(
             id = id,
-            perioder = *perioder,
+            perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder,
             sendtTilNav = sendtTilNav
         ).also(person::håndter)
@@ -209,12 +209,12 @@ internal abstract class AbstractEndToEndTest {
     protected fun håndterSøknadArbeidsgiver(
         vararg perioder: SøknadArbeidsgiver.Søknadsperiode,
         orgnummer: String = ORGNUMMER
-    ) = søknadArbeidsgiver(perioder = *perioder, orgnummer = orgnummer).also(person::håndter)
+    ) = søknadArbeidsgiver(perioder = perioder, orgnummer = orgnummer).also(person::håndter)
 
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeId: UUID,
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.map { it.start }.max() ?: 1.januar,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
@@ -225,7 +225,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.map { it.start }.max() ?: 1.januar,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         id: UUID = UUID.randomUUID(),
@@ -474,7 +474,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = mottatt ?: sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = mottatt ?: sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -487,7 +487,7 @@ internal abstract class AbstractEndToEndTest {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.map { it.fom }.min()?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = sykeperioder.minOfOrNull { it.fom }?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }

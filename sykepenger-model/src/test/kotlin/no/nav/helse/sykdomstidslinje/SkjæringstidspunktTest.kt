@@ -340,7 +340,7 @@ internal class SkjæringstidspunktTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 

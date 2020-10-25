@@ -71,6 +71,6 @@ internal class SykmeldingHendelseTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

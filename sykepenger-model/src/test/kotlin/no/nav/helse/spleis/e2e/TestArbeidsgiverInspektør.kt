@@ -194,7 +194,7 @@ internal class TestArbeidsgiverInspektør(
 
 
     override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-        if (!inGyldigePerioder || skjæringstidspunkt == null) return
+        if (!inGyldigePerioder) return
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
     }
 

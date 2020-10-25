@@ -49,7 +49,7 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
                 val virkningsdato = maxOf(dato, virkningFra)
                 return grunnbeløper
                     .filter { virkningsdato >= it.virkningsdato && dato >= it.gyldigFra }
-                    .maxBy { it.virkningsdato }
+                    .maxByOrNull { it.virkningsdato }
                     ?: throw NoSuchElementException("Finner ingen grunnbeløp etter $dato")
             }
         }

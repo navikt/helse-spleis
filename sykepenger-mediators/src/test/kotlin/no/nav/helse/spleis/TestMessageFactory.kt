@@ -35,7 +35,7 @@ internal class TestMessageFactory(
     }
 
     fun lagNySøknad(vararg perioder: SoknadsperiodeDTO): String {
-        val fom = perioder.minBy { it.fom!! }!!.fom!!
+        val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
             id = UUID.randomUUID().toString(),
@@ -44,7 +44,7 @@ internal class TestMessageFactory(
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
             fom = fom,
-            tom = perioder.maxBy { it.tom!! }?.tom,
+            tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
             sendtNav = null,
@@ -66,11 +66,11 @@ internal class TestMessageFactory(
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-            fom = perioder.minBy { it.fom!! }?.fom,
-            tom = perioder.maxBy { it.tom!! }?.tom,
+            fom = perioder.minOfOrNull { it.fom!! },
+            tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
-            sendtArbeidsgiver = perioder.maxBy { it.tom!! }?.tom?.atStartOfDay(),
+            sendtArbeidsgiver = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
             egenmeldinger = egenmeldinger,
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
@@ -89,11 +89,11 @@ internal class TestMessageFactory(
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-            fom = perioder.minBy { it.fom!! }?.fom,
-            tom = perioder.maxBy { it.tom!! }?.tom,
+            fom = perioder.minOfOrNull { it.fom!! },
+            tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
             startSyketilfelle = LocalDate.now(),
-            sendtNav = perioder.maxBy { it.tom!! }?.tom?.atStartOfDay(),
+            sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
             fravar = emptyList(),

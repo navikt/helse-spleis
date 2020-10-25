@@ -14,7 +14,6 @@ import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
-import io.micrometer.core.instrument.binder.kafka.KafkaConsumerMetrics
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
@@ -35,8 +34,7 @@ internal fun Application.nais() {
             JvmGcMetrics(),
             ProcessorMetrics(),
             JvmThreadMetrics(),
-            LogbackMetrics(),
-            KafkaConsumerMetrics()
+            LogbackMetrics()
         )
     }
 

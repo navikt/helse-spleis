@@ -109,8 +109,7 @@ class Utbetalingshistorikk(
                 inntektshistorikk
                     .filter { it.orgnummer == organisasjonsnummer }
                     .filter { it.sykepengerFom <= periode.start }
-                    .maxBy { it.sykepengerFom }
-                    ?.sykepengerFom
+                    .maxOfOrNull { it.sykepengerFom }
                     .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for $organisasjonsnummer") }
         }
 

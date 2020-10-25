@@ -60,7 +60,7 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
 
             internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Inntekt? =
                 inntekt(inntekter, dato)?.let {
-                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).min()
+                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).minOrNull()
                 }
         }
 

@@ -209,7 +209,7 @@ internal class VilkårsgrunnlagHendelseTest {
         aktørId = "aktørId",
         orgnummer = ORGNR,
         sykeperioder = perioder,
-        mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+        mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
         hendelse = this
     }

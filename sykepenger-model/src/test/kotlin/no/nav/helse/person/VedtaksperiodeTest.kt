@@ -108,7 +108,7 @@ internal class VedtaksperiodeTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = perioder,
-        mottatt = perioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+        mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(

@@ -139,7 +139,7 @@ internal class InntektsmeldingHendelseTest {
         aktørId = AKTØRID,
         orgnummer = orgnr,
         sykeperioder = listOf(*sykeperioder),
-        mottatt = sykeperioder.map { it.fom }.min()?.atStartOfDay() ?: LocalDateTime.now()
+        mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNR) =

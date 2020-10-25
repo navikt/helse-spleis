@@ -1320,7 +1320,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
-        håndterSøknad(perioder = *arrayOf(Sykdom(1.januar, 21.januar, 100), Permisjon(21.januar, 21.januar)), id = 1.vedtaksperiode)
+        håndterSøknad(perioder = arrayOf(Sykdom(1.januar, 21.januar, 100), Permisjon(21.januar, 21.januar)), id = 1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,

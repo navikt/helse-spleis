@@ -195,6 +195,6 @@ internal class SøknadArbeidsgiverHendelseTest {
             aktørId = "12345",
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.map{ it.fom }.min()?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = sykeperioder.minOfOrNull { it.fom }?.plusMonths(3)?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

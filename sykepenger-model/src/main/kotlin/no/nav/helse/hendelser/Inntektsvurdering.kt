@@ -124,7 +124,7 @@ class Inntektsvurdering(
                 }
 
                 internal fun månedFørSlutt(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
-                    inntekter.map { it.yearMonth }.max()?.minusMonths(antallMåneder.toLong() - 1)
+                    inntekter.maxOfOrNull { it.yearMonth }?.minusMonths(antallMåneder.toLong() - 1)
 
                 internal fun årligGjennomsnitt(inntekter: List<MånedligInntekt>): Inntekt =
                     inntekter
@@ -139,8 +139,8 @@ class Inntektsvurdering(
                     return ChronoUnit.MONTHS.between(inntekter.maxMonth(), inntekter.minMonth())
                 }
 
-                private fun List<MånedligInntekt>.minMonth() = map { it.yearMonth }.min()
-                private fun List<MånedligInntekt>.maxMonth() = map { it.yearMonth }.max()
+                private fun List<MånedligInntekt>.minMonth() = minOfOrNull { it.yearMonth }
+                private fun List<MånedligInntekt>.maxMonth() = maxOfOrNull { it.yearMonth }
 
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,

@@ -23,8 +23,8 @@ class SøknadArbeidsgiver constructor(
 
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
-        fom = perioder.minBy { it.fom }?.fom ?: severe("Søknad mangler fradato")
-        tom = perioder.maxBy { it.tom }?.tom ?: severe("Søknad mangler tildato")
+        fom = perioder.minOfOrNull { it.fom } ?: severe("Søknad mangler fradato")
+        tom = perioder.maxOfOrNull { it.tom } ?: severe("Søknad mangler tildato")
 
         sykdomstidslinje = perioder.map { it.sykdomstidslinje(kilde) }.merge(noOverlap)
     }

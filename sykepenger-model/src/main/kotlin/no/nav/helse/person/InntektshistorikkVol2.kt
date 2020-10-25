@@ -151,7 +151,7 @@ internal class InntektshistorikkVol2 {
         private val inntektsopplysninger: List<Skatt> = listOf()
     ) : Inntektsopplysning {
 
-        override val prioritet = inntektsopplysninger.map { it.prioritet }.max() ?: 0
+        override val prioritet = inntektsopplysninger.maxOfOrNull { it.prioritet } ?: 0
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this)

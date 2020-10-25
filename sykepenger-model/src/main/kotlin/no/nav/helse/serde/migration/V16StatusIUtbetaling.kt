@@ -24,8 +24,8 @@ internal class V16StatusIUtbetaling : JsonMigration(version = 16) {
             }
             arbeidsgiver["vedtaksperioder"].forEach { vedtaksperiode ->
                 val dager = vedtaksperiode["utbetalingstidslinje"]["dager"].map { it["dato"].textValue() }
-                val fom = dager.min()
-                val tom = dager.max()
+                val fom = dager.minOrNull()
+                val tom = dager.maxOrNull()
 
                 arbeidsgiver["utbetalinger"]
                     .filter { utbetaling ->
