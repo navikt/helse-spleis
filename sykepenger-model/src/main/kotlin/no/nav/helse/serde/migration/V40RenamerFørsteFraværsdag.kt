@@ -8,19 +8,25 @@ internal class V40RenamerFørsteFraværsdag : JsonMigration(version = 40) {
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            renameFørsteFraværsdag(arbeidsgiver.path("vedtaksperioder"))
-            renameFørsteFraværsdag(arbeidsgiver.path("forkastede"))
+            vedtaksperioder(arbeidsgiver.path("vedtaksperioder"))
+            forkastede(arbeidsgiver.path("forkastede"))
         }
     }
 
-    private fun renameFørsteFraværsdag(perioder: JsonNode) {
-        perioder.forEach { periode ->
-            periode as ObjectNode
-            periode.path("førsteFraværsdag")
-                .takeIf(JsonNode::isTextual)
-                ?.also { periode.put("beregningsdato", it.textValue()) }
-                ?: periode.putNull("beregningsdato")
-        }
+    private fun vedtaksperioder(perioder: JsonNode) {
+        perioder.forEach(::migrer)
+    }
+
+    private fun forkastede(perioder: JsonNode) {
+        perioder.forEach { migrer(it.path("vedtaksperiode")) }
+    }
+
+    private fun migrer(periode: JsonNode) {
+        periode as ObjectNode
+        periode.path("førsteFraværsdag")
+            .takeIf(JsonNode::isTextual)
+            ?.also { periode.put("beregningsdato", it.textValue()) }
+            ?: periode.putNull("beregningsdato")
     }
 
 }

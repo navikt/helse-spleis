@@ -42,10 +42,14 @@ private fun originalJson() =
       ],
       "forkastede": [
         {
-          "førsteFraværsdag": "2020-09-01"
+          "vedtaksperiode": {
+            "førsteFraværsdag": "2020-09-01"
+          }
         },
         {
-          "førsteFraværsdag": null
+          "vedtaksperiode": {
+            "førsteFraværsdag": null
+          }
         }
       ]
     }
@@ -74,12 +78,16 @@ private fun expectedJson() =
       ],
       "forkastede": [
         {
-          "førsteFraværsdag": "2020-09-01",
-          "beregningsdato": "2020-09-01"
+          "vedtaksperiode": {
+            "førsteFraværsdag": "2020-09-01",
+            "beregningsdato": "2020-09-01"
+          }
         },
         {
-          "førsteFraværsdag": null,
-          "beregningsdato": null
+          "vedtaksperiode": {
+            "førsteFraværsdag": null,
+            "beregningsdato": null
+          }
         }
       ]
     }

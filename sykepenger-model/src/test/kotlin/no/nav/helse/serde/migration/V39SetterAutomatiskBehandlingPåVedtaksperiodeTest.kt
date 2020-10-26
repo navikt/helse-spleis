@@ -45,10 +45,14 @@ private fun originalJson() =
       ],
       "forkastede": [
         {
-          "godkjentAv": "Saksbehandler"
+          "vedtaksperiode": {
+            "godkjentAv": "Saksbehandler"
+          }
         },
         {
-          "godkjentAv": null
+          "vedtaksperiode": {
+            "godkjentAv": null
+          }
         }
       ]
     }
@@ -77,12 +81,16 @@ private fun expectedJson() =
       ],
       "forkastede": [
         {
-          "godkjentAv": "Saksbehandler",
-          "automatiskBehandling": false
+          "vedtaksperiode": {
+            "godkjentAv": "Saksbehandler",
+            "automatiskBehandling": false
+          }
         },
         {
-          "godkjentAv": null,
-          "automatiskBehandling": null
+          "vedtaksperiode": {
+            "godkjentAv": null,
+            "automatiskBehandling": null
+          }
         }
       ]
     }

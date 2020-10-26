@@ -8,19 +8,25 @@ internal class V39SetterAutomatiskBehandlingPåVedtaksperiode : JsonMigration(ve
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
-            kopierHendelseIderFraHistorikk(arbeidsgiver["vedtaksperioder"])
-            kopierHendelseIderFraHistorikk(arbeidsgiver["forkastede"])
+            vedtaksperioder(arbeidsgiver["vedtaksperioder"])
+            forkastede(arbeidsgiver["forkastede"])
         }
     }
 
-    private fun kopierHendelseIderFraHistorikk(perioder: JsonNode) {
-        perioder.forEach { periode ->
-            periode as ObjectNode
-            if(periode.path("godkjentAv").let {it.isNull || it.isMissingNode}) {
-                periode.putNull("automatiskBehandling")
-            } else {
-                periode.put("automatiskBehandling", false)
-            }
+    private fun vedtaksperioder(perioder: JsonNode) {
+        perioder.forEach(::migrer)
+    }
+
+    private fun forkastede(perioder: JsonNode) {
+        perioder.forEach { migrer(it.path("vedtaksperiode")) }
+    }
+
+    private fun migrer(periode: JsonNode) {
+        periode as ObjectNode
+        if(periode.path("godkjentAv").let {it.isNull || it.isMissingNode}) {
+            periode.putNull("automatiskBehandling")
+        } else {
+            periode.put("automatiskBehandling", false)
         }
     }
 
