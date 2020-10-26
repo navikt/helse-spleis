@@ -9,18 +9,26 @@ internal class V43RenamerSkjæringstidspunkt : JsonMigration(version = 43) {
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             renameSkjæringstidspunkt(arbeidsgiver.path("vedtaksperioder"))
-            renameSkjæringstidspunkt(arbeidsgiver.path("forkastede"))
+            renameSkjæringstidspunktForkastede(arbeidsgiver.path("forkastede"))
         }
     }
 
     private fun renameSkjæringstidspunkt(perioder: JsonNode) {
+        perioder.forEach(::migrer)
+    }
+
+    private fun renameSkjæringstidspunktForkastede(perioder: JsonNode) {
         perioder.forEach { periode ->
-            periode as ObjectNode
-            periode.path("beregningsdatoFraInfotrygd")
-                .takeIf(JsonNode::isTextual)
-                ?.also { periode.put("skjæringstidspunktFraInfotrygd", it.textValue()) }
-                ?: periode.putNull("skjæringstidspunktFraInfotrygd")
+            migrer(periode.path("vedtaksperiode"))
         }
+    }
+
+    private fun migrer(periode: JsonNode) {
+        periode as ObjectNode
+        periode.path("beregningsdatoFraInfotrygd")
+            .takeIf(JsonNode::isTextual)
+            ?.also { periode.put("skjæringstidspunktFraInfotrygd", it.textValue()) }
+            ?: periode.putNull("skjæringstidspunktFraInfotrygd")
     }
 
 }

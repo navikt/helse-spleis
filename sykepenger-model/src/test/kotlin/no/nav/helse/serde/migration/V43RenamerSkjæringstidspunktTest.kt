@@ -42,10 +42,14 @@ private fun originalJson() =
       ],
       "forkastede": [
         {
-          "beregningsdatoFraInfotrygd": "2020-09-01"
+          "vedtaksperiode": {
+            "beregningsdatoFraInfotrygd": "2020-09-01"
+          }
         },
         {
-          "beregningsdatoFraInfotrygd": null
+          "vedtaksperiode": {
+            "beregningsdatoFraInfotrygd": null
+          }
         }
       ]
     }
@@ -74,12 +78,16 @@ private fun expectedJson() =
       ],
       "forkastede": [
         {
-          "beregningsdatoFraInfotrygd": "2020-09-01",
-          "skjæringstidspunktFraInfotrygd": "2020-09-01"
+          "vedtaksperiode": {
+            "beregningsdatoFraInfotrygd": "2020-09-01",
+            "skjæringstidspunktFraInfotrygd": "2020-09-01"
+          }
         },
         {
-          "beregningsdatoFraInfotrygd": null,
-          "skjæringstidspunktFraInfotrygd": null
+          "vedtaksperiode": {
+              "beregningsdatoFraInfotrygd": null,
+              "skjæringstidspunktFraInfotrygd": null
+          }
         }
       ]
     }
