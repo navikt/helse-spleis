@@ -329,7 +329,6 @@ internal class TilUtbetalingHendelseTest {
                     ORGNUMMER inntekt 31000.månedlig
                 }
             }),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

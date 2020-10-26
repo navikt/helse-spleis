@@ -57,7 +57,6 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertEquals(20.prosent, dataForVilkårsvurdering()?.avviksprosent)
         assertEquals(15000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
-        assertEquals(false, dataForVilkårsvurdering()?.erEgenAnsatt)
         assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
     }
@@ -190,7 +189,6 @@ internal class VilkårsgrunnlagTest {
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-        erEgenAnsatt = false,
         dagpenger = Dagpenger(dagpenger),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(
             arbeidsavklaringspenger

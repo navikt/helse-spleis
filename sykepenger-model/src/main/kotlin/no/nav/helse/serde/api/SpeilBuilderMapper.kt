@@ -173,7 +173,6 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
 }
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
-    erEgenAnsatt = grunnlagsdata.erEgenAnsatt,
     beregnetÅrsinntektFraInntektskomponenten =
         grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
     avviksprosent = grunnlagsdata.avviksprosent?.ratio(),

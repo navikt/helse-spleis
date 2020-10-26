@@ -225,7 +225,6 @@ internal class TestMessageFactory(
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
-        egenAnsatt: Boolean = false,
         inntekter: List<Pair<YearMonth, Double>>,
         opptjening: List<Triple<String, LocalDate, LocalDate?>>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
@@ -233,7 +232,6 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             behov = listOf(
                 InntekterForSammenligningsgrunnlag.name,
-                EgenAnsatt.name,
                 Opptjening.name,
                 Dagpenger.name,
                 Arbeidsavklaringspenger.name,
@@ -242,7 +240,6 @@ internal class TestMessageFactory(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             løsninger = mapOf(
-                EgenAnsatt.name to egenAnsatt,
                 InntekterForSammenligningsgrunnlag.name to inntekter
                     .groupBy { it.first }
                     .map {

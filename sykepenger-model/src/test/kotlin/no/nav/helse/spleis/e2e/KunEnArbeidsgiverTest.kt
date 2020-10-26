@@ -434,15 +434,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             )
         )
-
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(inntekter = inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-            1.juli(2019) til 1.juni(2020) inntekter {
-                ORGNUMMER inntekt 45000.månedlig
-            }
-        }))
-
         håndterYtelser(
             1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
@@ -492,7 +483,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -892,7 +882,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             100,
             ORGNUMMER
         ))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             31.januar,
@@ -907,7 +896,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
@@ -1038,7 +1026,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             100,
             ORGNUMMER
         ))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
             1.januar,
             2.januar,
@@ -1072,7 +1059,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar,  31.januar, 100))
         håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER))
 
         inspektør.also {
@@ -1967,7 +1953,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(7.august(2019), 50005.månedlig, ORGNUMMER, true))
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, 50005.månedlig)
         håndterYtelser(1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(8.august(2019), 4.september(2019), 2304, 100, ORGNUMMER),
@@ -2111,7 +2096,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
             1.vedtaksperiode,
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
@@ -2126,7 +2110,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )

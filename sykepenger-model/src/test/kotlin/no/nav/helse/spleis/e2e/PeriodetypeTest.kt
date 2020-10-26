@@ -100,7 +100,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
         håndterYtelser(1.vedtaksperiode, historikk)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, historikk)
         håndterSimulering(1.vedtaksperiode)
 
@@ -109,7 +108,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -128,7 +126,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
         håndterYtelser(1.vedtaksperiode, historikk)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, historikk)
         håndterSimulering(1.vedtaksperiode)
 

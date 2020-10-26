@@ -205,7 +205,6 @@ internal class GodkjenningHendelseTest {
                         orgnummer inntekt 31000.månedlig
                     }
                 }),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

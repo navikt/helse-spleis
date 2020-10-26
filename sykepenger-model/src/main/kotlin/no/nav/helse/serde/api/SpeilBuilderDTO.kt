@@ -152,7 +152,6 @@ enum class MedlemskapstatusDTO {
 }
 
 data class GrunnlagsdataDTO(
-    val erEgenAnsatt: Boolean,
     val beregnetÅrsinntektFraInntektskomponenten: Double,
     val avviksprosent: Double?,
     val antallOpptjeningsdagerErMinst: Int,

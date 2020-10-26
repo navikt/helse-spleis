@@ -53,5 +53,3 @@ spec:
     value: spleis
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
-  - name: VILKARSHANDTERING_INFOTRYGD_FEATURE_TOGGLE
-    value: "true"

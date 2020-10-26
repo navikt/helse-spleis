@@ -2,12 +2,10 @@ package no.nav.helse.person
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggles.replayEnabled
-import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.egenAnsatt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
@@ -472,7 +470,6 @@ internal class Vedtaksperiode private constructor(
     private fun trengerVilkårsgrunnlag(hendelse: PersonHendelse) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
-        if (!vilkårshåndteringInfotrygd) egenAnsatt(hendelse)
         opptjening(hendelse)
         dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
@@ -1004,8 +1001,7 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiver.utbetalteUtbetalinger()
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
-                            // TODO: burde vi endre tilstand til "Gap" når vi nettopp har funnet ut at vi _ikke_ er det?
-                            nesteTilstand = if (vilkårshåndteringInfotrygd) AvventerHistorikk else AvventerVilkårsprøvingGap
+                            nesteTilstand = AvventerHistorikk
                             vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
                             ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
                         } else {

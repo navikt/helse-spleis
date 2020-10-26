@@ -186,7 +186,6 @@ internal abstract class AbstractEndToEndTest {
         harAndreInntektskilder: Boolean = false
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, EgenAnsatt))
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
 
@@ -219,7 +218,6 @@ internal abstract class AbstractEndToEndTest {
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ) {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, EgenAnsatt))
         håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
     }
 
@@ -252,7 +250,6 @@ internal abstract class AbstractEndToEndTest {
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
-        egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
@@ -266,7 +263,6 @@ internal abstract class AbstractEndToEndTest {
         arbeidsavklaringspenger: List<Periode> = emptyList()
     ) {
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, EgenAnsatt))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Dagpenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Arbeidsavklaringspenger))
         assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Medlemskap))
@@ -274,7 +270,6 @@ internal abstract class AbstractEndToEndTest {
             vilkårsgrunnlag(
                 vedtaksperiodeId,
                 arbeidsforhold,
-                egenAnsatt,
                 medlemskapstatus,
                 orgnummer,
                 inntektsvurdering,
@@ -335,7 +330,6 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterAnnullering(
-        vedtaksperiodeId: UUID = 1.vedtaksperiode,
         fom: LocalDate = 3.januar,
         tom: LocalDate = 26.januar
     ) {
@@ -558,7 +552,6 @@ internal abstract class AbstractEndToEndTest {
     protected fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
-        egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntektsvurdering: Inntektsvurdering,
@@ -571,7 +564,6 @@ internal abstract class AbstractEndToEndTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
-            erEgenAnsatt = egenAnsatt,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 if (arbeidsforhold.isEmpty()) listOf(

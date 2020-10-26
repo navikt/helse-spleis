@@ -202,7 +202,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun vilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
-        egenAnsatt: Boolean = false,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         inntekter: List<ArbeidsgiverInntekt>
@@ -216,7 +215,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter
             ),
-            erEgenAnsatt = egenAnsatt,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             opptjeningvurdering = Opptjeningvurdering(
                 if (arbeidsforhold.isEmpty()) listOf(

@@ -85,10 +85,10 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        assertEquals(6, hendelse.behov().size)
+        assertEquals(5, hendelse.behov().size)
         person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP))
         assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
-        assertEquals(6, hendelse.behov().size)
+        assertEquals(5, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Dagpenger))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Arbeidsavklaringspenger))
         assertTrue(
@@ -97,7 +97,6 @@ class PåminnelserOgTimeoutTest {
                 Behovtype.InntekterForSammenligningsgrunnlag
             )
         )
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.EgenAnsatt))
         assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
     }
 
@@ -273,7 +272,6 @@ class PåminnelserOgTimeoutTest {
                     orgnummer inntekt 31000.månedlig
                 }
             }),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

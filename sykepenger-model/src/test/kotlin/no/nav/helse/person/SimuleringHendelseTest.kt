@@ -165,7 +165,6 @@ internal class SimuleringHendelseTest {
                     orgnummer inntekt 31000.månedlig
                 }
             }),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

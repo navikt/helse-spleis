@@ -261,7 +261,6 @@ internal class YtelserHendelseTest {
                     ORGNR inntekt 31000.månedlig
                 }
             }),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -26,7 +25,6 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val erEgenAnsatt = if (!vilkårshåndteringInfotrygd) packet["@løsning.${EgenAnsatt.name}"].asBoolean() else false
     private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
         .flatMap { måned ->
             måned["inntektsliste"]
@@ -107,7 +105,6 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
             ),
-            erEgenAnsatt = erEgenAnsatt,
             dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
                 Periode(
                     it.first,

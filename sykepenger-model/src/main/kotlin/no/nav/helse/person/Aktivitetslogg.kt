@@ -116,7 +116,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
 
         internal fun kontekst(typer: List<String>): Map<String, String> =
             kontekster
-                .let { if (typer.isEmpty()) it else it.filter { it.kontekstType in typer } }
+                .let { if (typer.isEmpty()) it else it.filter { kontekst -> kontekst.kontekstType in typer } }
                 .fold(mutableMapOf()) { result, kontekst -> result.apply { putAll(kontekst.kontekstMap) } }
 
         override fun compareTo(other: Aktivitet) = this.tidsstempel.compareTo(other.tidsstempel)
@@ -255,10 +255,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
-                internal fun egenAnsatt(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(Behovtype.EgenAnsatt, "Trenger informasjon om EgenAnsatt")
-                }
-
                 internal fun opptjening(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(Behovtype.Opptjening, "Trenger informasjon om sykepengeopptjening")
                 }
@@ -362,7 +358,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Omsorgspenger,
                 Opplæringspenger,
                 Institusjonsopphold,
-                EgenAnsatt,
                 Godkjenning,
                 Simulering,
                 Utbetaling,

@@ -39,7 +39,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
-        private val INNTEKT = 31000.00
+        private const val INNTEKT = 31000.00
     }
 
     private val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT)
@@ -105,7 +105,6 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, egenmeldinger))
     }
 
@@ -116,7 +115,6 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag))
     }
 
@@ -171,7 +169,6 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendVilkårsgrunnlag(
         vedtaksperiodeIndeks: Int,
-        egenAnsatt: Boolean = false,
         inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT },
         opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(
             Triple(
@@ -183,7 +180,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
     ) {
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, EgenAnsatt))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
@@ -195,7 +191,6 @@ internal abstract class AbstractEndToEndMediatorTest {
                     vedtaksperiodeIndeks,
                     InntekterForSammenligningsgrunnlag
                 ),
-                egenAnsatt = egenAnsatt,
                 inntekter = inntekter,
                 opptjening = opptjening,
                 medlemskapstatus = medlemskapstatus

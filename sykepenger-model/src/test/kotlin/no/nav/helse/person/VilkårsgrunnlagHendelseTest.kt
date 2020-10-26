@@ -34,20 +34,8 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     @Test
-    fun `egen ansatt`() {
-        håndterVilkårsgrunnlag(
-            egenAnsatt = true,
-            inntekter = tolvMånederMedInntekt(1000.0.månedlig),
-            arbeidsforhold = ansattSidenStart2017()
-        )
-
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
-    }
-
-    @Test
     fun `ingen inntekt`() {
-        håndterVilkårsgrunnlag(egenAnsatt = false, inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
+        håndterVilkårsgrunnlag(inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
@@ -56,7 +44,6 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `avvik i inntekt`() {
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             inntekter = tolvMånederMedInntekt(799.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
@@ -68,7 +55,6 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `latterlig avvik i inntekt`() {
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             inntekter = tolvMånederMedInntekt(1.månedlig),
             arbeidsforhold = ansattSidenStart2017()
         )
@@ -80,7 +66,6 @@ internal class VilkårsgrunnlagHendelseTest {
     @Test
     fun `9 måneder med inntekt gir riktig sammenligningsgrunnlag`() {
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             inntekter = inntektperioder {
                 1.januar(2017) til 1.april(2017) inntekter {
                     ORGNR inntekt 12000.månedlig
@@ -100,7 +85,6 @@ internal class VilkårsgrunnlagHendelseTest {
     fun `ikke egen ansatt og ingen avvik i inntekt`() {
         val månedslønn = 1000.0.månedlig
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             beregnetInntekt = månedslønn,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
@@ -154,7 +138,6 @@ internal class VilkårsgrunnlagHendelseTest {
         val månedslønn = 1000.0.månedlig
         val `25 % mer` = månedslønn * 1.26
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             beregnetInntekt = `25 % mer`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
@@ -169,7 +152,6 @@ internal class VilkårsgrunnlagHendelseTest {
         val månedslønn = 1000.0.månedlig
         val `25 % mindre` = månedslønn * 0.74
         håndterVilkårsgrunnlag(
-            egenAnsatt = false,
             beregnetInntekt = `25 % mindre`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
@@ -190,7 +172,6 @@ internal class VilkårsgrunnlagHendelseTest {
     }
 
     private fun håndterVilkårsgrunnlag(
-        egenAnsatt: Boolean,
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntekter: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
@@ -198,7 +179,7 @@ internal class VilkårsgrunnlagHendelseTest {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
-        person.håndter(vilkårsgrunnlag(egenAnsatt = egenAnsatt, inntekter = inntekter, arbeidsforhold = arbeidsforhold))
+        person.håndter(vilkårsgrunnlag(inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
     private fun sykmelding(
@@ -250,7 +231,6 @@ internal class VilkårsgrunnlagHendelseTest {
         }
 
     private fun vilkårsgrunnlag(
-        egenAnsatt: Boolean,
         inntekter: List<ArbeidsgiverInntekt>,
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold>
     ) =
@@ -261,7 +241,6 @@ internal class VilkårsgrunnlagHendelseTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNR,
             inntektsvurdering = Inntektsvurdering(inntekter),
-            erEgenAnsatt = egenAnsatt,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             dagpenger = Dagpenger(emptyList()),

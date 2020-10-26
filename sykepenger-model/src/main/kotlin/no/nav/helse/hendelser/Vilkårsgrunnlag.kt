@@ -17,7 +17,6 @@ class Vilkårsgrunnlag(
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
-    private val erEgenAnsatt: Boolean,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val dagpenger: Dagpenger,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger
@@ -36,10 +35,7 @@ class Vilkårsgrunnlag(
         inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
         opptjeningvurdering.valider(aktivitetslogg, orgnummer, skjæringstidspunkt)
         medlemskapsvurdering.valider(aktivitetslogg, periodetype)
-        if (erEgenAnsatt) error("Støtter ikke behandling av NAV-ansatte eller familiemedlemmer av NAV-ansatte")
-        else info("er ikke egen ansatt")
         grunnlagsdata = Grunnlagsdata(
-            erEgenAnsatt = erEgenAnsatt,
             beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
             avviksprosent = inntektsvurdering.avviksprosent(),
             antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
@@ -58,7 +54,6 @@ class Vilkårsgrunnlag(
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
     internal class Grunnlagsdata(
-        internal val erEgenAnsatt: Boolean,
         internal val beregnetÅrsinntektFraInntektskomponenten: Inntekt,
         internal val avviksprosent: Prosent?,
         internal val antallOpptjeningsdagerErMinst: Int,

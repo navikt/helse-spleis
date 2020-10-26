@@ -806,7 +806,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(30.mars(2020), 30.mars(2020))
             ), førsteFraværsdag = 16.mars(2020), refusjon = Triple(null, INNTEKT, emptyList())
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeId = 1.vedtaksperiode,
+            inntekt = INNTEKT,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+        ) // make sure Vilkårsgrunnlag fails
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -815,7 +819,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TIL_INFOTRYGD
         )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, egenAnsatt = true) // make sure Vilkårsgrunnlag fails
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeId = 2.vedtaksperiode,
+            inntekt = INNTEKT,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+        ) // make sure Vilkårsgrunnlag fails
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
@@ -967,8 +975,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
             )
         )
-
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(
             3.vedtaksperiode,
             RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
@@ -1070,7 +1076,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         val historikk = RefusjonTilArbeidsgiver(27.juli(2020), 13.september(2020), 1000, 100, ORGNUMMER)
         håndterYtelser(2.vedtaksperiode, historikk)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode, historikk)
 
         assertEquals(40, 248 - inspektør.gjenståendeSykedager(0))
@@ -1095,7 +1100,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         val historikk = RefusjonTilArbeidsgiver(17.august(2020), 22.august(2020), 1000, 100, ORGNUMMER)
         håndterYtelser(2.vedtaksperiode, historikk)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode, historikk)
 
         inspektør.also {

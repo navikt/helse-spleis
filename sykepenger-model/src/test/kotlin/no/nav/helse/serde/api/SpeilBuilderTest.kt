@@ -1151,7 +1151,6 @@ class SpeilBuilderTest {
                     )
                 )
             ),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
@@ -1179,7 +1178,6 @@ class SpeilBuilderTest {
                     )
                 )
             ),
-            erEgenAnsatt = false,
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             dagpenger = Dagpenger(emptyList()),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())

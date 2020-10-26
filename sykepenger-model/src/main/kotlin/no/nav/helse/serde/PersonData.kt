@@ -602,7 +602,6 @@ internal data class PersonData(
             ) {
                 internal fun parseDataForVilkårsvurdering(
                 ): Vilkårsgrunnlag.Grunnlagsdata = Vilkårsgrunnlag.Grunnlagsdata(
-                    erEgenAnsatt = erEgenAnsatt,
                     beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
                     avviksprosent = avviksprosent.ratio,
                     harOpptjening = harOpptjening,

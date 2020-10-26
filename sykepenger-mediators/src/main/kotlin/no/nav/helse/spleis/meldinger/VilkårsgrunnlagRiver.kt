@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,9 +14,7 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov =
-        if (!vilkårshåndteringInfotrygd) listOf(InntekterForSammenligningsgrunnlag, EgenAnsatt, Opptjening, Dagpenger, Arbeidsavklaringspenger, Medlemskap)
-        else listOf(InntekterForSammenligningsgrunnlag, Opptjening, Dagpenger, Arbeidsavklaringspenger, Medlemskap)
+    override val behov = listOf(InntekterForSammenligningsgrunnlag, Opptjening, Dagpenger, Arbeidsavklaringspenger, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"
 
@@ -33,7 +30,6 @@ internal class VilkårsgrunnlagRiver(
         packet.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
             require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
         }
-        if (!vilkårshåndteringInfotrygd) packet.requireKey("@løsning.${EgenAnsatt.name}")
         packet.requireArray("@løsning.${Opptjening.name}") {
             requireKey("orgnummer")
             require("ansattSiden", JsonNode::asLocalDate)

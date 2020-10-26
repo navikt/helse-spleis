@@ -77,7 +77,7 @@ internal class AnnulleringE2ETest : AbstractEndToEndTest() {
 
         nyttVedtak(fom1, tom1)
         forlengVedtak(fom2, tom2)
-        håndterAnnullering(2.vedtaksperiode, fom2, tom2)
+        håndterAnnullering(fom2, tom2)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
