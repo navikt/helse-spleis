@@ -174,7 +174,7 @@ class Utbetalingshistorikk(
             private val orgnr: String
         ) : Periode(fom, tom) {
             private val ugradertBeløp = ((beløp * 100) / grad.toDouble()).roundToInt().daglig
-            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom) == ugradertBeløp
+            private val maksDagsats = Grunnbeløp.`6G`.dagsats(fom, LocalDate.now()) == ugradertBeløp
 
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
