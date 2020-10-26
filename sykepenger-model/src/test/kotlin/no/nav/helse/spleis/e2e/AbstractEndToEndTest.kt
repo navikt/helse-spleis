@@ -691,6 +691,38 @@ internal abstract class AbstractEndToEndTest {
 
 
     protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100, førsteFraværsdag: LocalDate = fom) {
+        val id = tilGodkjent(fom, tom, grad, førsteFraværsdag)
+        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+    }
+
+    protected fun tilGodkjent(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Int,
+        førsteFraværsdag: LocalDate
+    ): UUID {
+        val id = tilSimulert(fom, tom, grad, førsteFraværsdag)
+        håndterUtbetalingsgodkjenning(id, true)
+        return id
+    }
+
+    protected fun tilSimulert(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Int,
+        førsteFraværsdag: LocalDate
+    ): UUID {
+        val id = tilYtelser(fom, tom, grad, førsteFraværsdag)
+        håndterSimulering(id)
+        return id
+    }
+
+    protected fun tilYtelser(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Int,
+        førsteFraværsdag: LocalDate
+    ): UUID {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.vedtaksperioder.toList().last()
         håndterInntektsmeldingMedValidering(
@@ -701,10 +733,9 @@ internal abstract class AbstractEndToEndTest {
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterVilkårsgrunnlag(id, INNTEKT)
         håndterYtelser(id)   // No history
-        håndterSimulering(id)
-        håndterUtbetalingsgodkjenning(id, true)
-        håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        return id
     }
+
 
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
@@ -836,10 +867,10 @@ const val sant = true
 
 const val usant = false
 
-infix fun Any?.er(expected: Any?) =
+infix fun <T>T?.er(expected: T?) =
     assertEquals(expected, this)
 
-infix fun Any?.skalVære(expected: Any?) =
+infix fun <T>T?.skalVære(expected: T?) =
     if (expected == null) {
         this == null
     } else {

@@ -254,12 +254,20 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
+        vedtaksperioder.find{!it.tillatAnullering()}?.let{
+            hendelse.error("Kan ikke annullere, vedtaksperiode blokkerer.")
+            return
+        }
 
         // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
         val sisteUtbetaling =
             utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
         if (sisteUtbetaling == null) {
             hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
+            return
+        }
+        if(!sisteUtbetaling.erUtbetalt()) {
+            hendelse.error("Kan ikke kansellere. Siste utbetaling er feilet eller ikke fullført %s", hendelse.fagsystemId)
             return
         }
         if (sisteUtbetaling.erAnnullert()) {

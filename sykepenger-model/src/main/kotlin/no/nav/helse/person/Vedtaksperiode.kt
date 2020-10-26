@@ -681,6 +681,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
+    fun tillatAnullering() =
+        this.tilstand != TilUtbetaling
+
 
     // log occurence for quantitative data for analysis
     private fun loggUlikSkjæringstidspunkt(utbetalingshistorikk: Utbetalingshistorikk) {
@@ -1472,9 +1475,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
+            utbetaling.valider()
             vedtaksperiode.utbetaling().håndter(utbetaling)
 
-            if (utbetaling.valider().hasErrorsOrWorse()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+            if (utbetaling.hasErrorsOrWorse()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
                 utbetaling.error("Utbetaling ble ikke gjennomført")
             }
 

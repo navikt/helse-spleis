@@ -253,7 +253,7 @@ enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {
     Venter,
     IngenUtbetaling,
     KunFerie,
-    Feilet,
+    Feilet(true),
     TilInfotrygd;
 
     fun visesNårForkastet() = this.visForkastet
