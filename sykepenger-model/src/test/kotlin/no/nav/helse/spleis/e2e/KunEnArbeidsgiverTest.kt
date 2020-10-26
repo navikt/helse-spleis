@@ -1306,7 +1306,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
-        håndterSøknad(perioder = arrayOf(Sykdom(1.januar, 21.januar, 100), Permisjon(21.januar, 21.januar)), id = 1.vedtaksperiode)
+        håndterSøknad(
+            perioder = arrayOf(Sykdom(1.januar, 21.januar, 100), Permisjon(21.januar, 21.januar)),
+            id = 1.vedtaksperiode
+        )
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -1535,7 +1538,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To tilstøtende perioder, inntektsmelding 2 med arbeidsdager i starten`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar, 100))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar)))
+        håndterInntektsmeldingMedValidering(
+            2.vedtaksperiode,
+            listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar))
+        )
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
@@ -2422,4 +2428,31 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
+    @Test
+    fun `Sender ut event om mottatt inntektsmelding`() {
+        Toggles.mottattInntektsmeldingEventEnabled = true
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(listOf(Periode(1.januar(2020), 16.januar(2020))))
+
+        assertEquals(1, observatør.mottattInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Sender ikke ut event om mottatt inntektsmelding hvis toggle er av`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(listOf(Periode(1.januar(2020), 16.januar(2020))))
+
+        assertEquals(0, observatør.mottattInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Sender ikke ut event om mottatt inntektsmelding hvis det ikke finnes noen overlappende vedtaksperiode`() {
+        Toggles.mottattInntektsmeldingEventEnabled = true
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
+        håndterInntektsmelding(listOf(Periode(3.mars(2020), 16.mars(2020))))
+
+        assertEquals(0, observatør.mottattInntektsmeldingVedtaksperioder.size)
+    }
+
 }

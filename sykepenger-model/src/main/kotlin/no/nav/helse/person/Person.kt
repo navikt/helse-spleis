@@ -158,6 +158,10 @@ class Person private constructor(
         observers.forEach { it.manglerInntektsmelding(event) }
     }
 
+    fun mottattInntektsmelding(event: PersonObserver.MottattInntektsmeldingEvent) {
+        observers.forEach { it.mottattInntektsmelding(event) }
+    }
+
     fun håndter(hendelse: KansellerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)

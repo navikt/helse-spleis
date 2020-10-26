@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.Toggles
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -171,6 +172,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
+        if (Toggles.mottattInntektsmeldingEventEnabled) mottattInntektsmelding()
         if (this.skalForkastesVedOverlapp()) {
             valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
         } else {
@@ -479,6 +481,18 @@ internal class Vedtaksperiode private constructor(
     private fun trengerInntektsmelding() {
         this.person.trengerInntektsmelding(
             PersonObserver.ManglendeInntektsmeldingEvent(
+                vedtaksperiodeId = this.id,
+                organisasjonsnummer = this.organisasjonsnummer,
+                fødselsnummer = this.fødselsnummer,
+                fom = this.periode.start,
+                tom = this.periode.endInclusive
+            )
+        )
+    }
+
+    private fun mottattInntektsmelding() {
+        this.person.mottattInntektsmelding(
+            PersonObserver.MottattInntektsmeldingEvent(
                 vedtaksperiodeId = this.id,
                 organisasjonsnummer = this.organisasjonsnummer,
                 fødselsnummer = this.fødselsnummer,

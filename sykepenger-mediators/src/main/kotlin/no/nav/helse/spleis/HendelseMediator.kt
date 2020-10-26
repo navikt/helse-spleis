@@ -404,6 +404,18 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun mottattInntektsmelding(event: PersonObserver.MottattInntektsmeldingEvent) {
+                queueMessage(
+                    "mottatt_inntektsmelding", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "fom" to event.fom,
+                            "tom" to event.tom
+                        )
+                    )
+                )
+            }
+
             private fun leggPåStandardfelter(event: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {
                 this["@event_name"] = event
                 this["@id"] = UUID.randomUUID()
