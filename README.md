@@ -3,9 +3,8 @@
 ![Bygg og deploy api](https://github.com/navikt/helse-spleis/workflows/Bygg%20og%20deploy%20api/badge.svg)
 
 ## Beskrivelse
-Tar i mot hendelser knytter til sykepengesaken for en person, for eksempel søknader og inntektsmeldinger.
 
-Håndterer vedtaksperiodene for en person, og sørger for å innhente informasjon vi trenger for å kunne foreslå en utbetaling.
+Tar inn søknader og inntektsmeldinger for en person og foreslår utbetalinger.
 
 ## Regler
 Dagturnering: https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
