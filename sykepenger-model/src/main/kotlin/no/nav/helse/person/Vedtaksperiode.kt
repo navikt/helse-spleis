@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.Toggles.vilkårshåndteringInfotrygd
 import no.nav.helse.hendelser.*
@@ -661,6 +662,18 @@ internal class Vedtaksperiode private constructor(
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
 
+    // log occurence for quantitative data for analysis
+    private fun loggUlikSkjæringstidspunkt(utbetalingshistorikk: Utbetalingshistorikk) {
+        if (forlengelseFraInfotrygd != JA) return
+        val beregnetSkjæringstidspunkt = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
+        if (skjæringstidspunkt == beregnetSkjæringstidspunkt) return
+        log.info(
+            "skjæringstidspunktet fra Infotrygd ($skjæringstidspunkt) er ulik beregnet skjæringstidspunkt ($beregnetSkjæringstidspunkt) for {}, {}",
+            keyValue("vedtaksperiode_id", id),
+            keyValue("periodetype", periodetype())
+        )
+    }
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -1251,7 +1264,9 @@ internal class Vedtaksperiode private constructor(
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
                         vedtaksperiode.forlengelseFraInfotrygd = tilstøtendePeriode.forlengelseFraInfotrygd
                         if (tilstøtendePeriode.forlengelseFraInfotrygd == JA)
-                            vedtaksperiode.skjæringstidspunktFraInfotrygd = tilstøtendePeriode.skjæringstidspunktFraInfotrygd
+                            vedtaksperiode.skjæringstidspunktFraInfotrygd = tilstøtendePeriode.skjæringstidspunktFraInfotrygd.also {
+                                vedtaksperiode.loggUlikSkjæringstidspunkt(ytelser.utbetalingshistorikk())
+                            }
                         else vedtaksperiode.skjæringstidspunktFraInfotrygd = null
                         return@onSuccess
                     }
@@ -1691,7 +1706,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        private val log = LoggerFactory.getLogger("vedtaksperiode")
+        private val log = LoggerFactory.getLogger(Vedtaksperiode::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
