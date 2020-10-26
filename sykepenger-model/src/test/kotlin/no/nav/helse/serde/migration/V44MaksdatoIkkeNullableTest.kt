@@ -41,10 +41,14 @@ private fun originalJson() =
       ],
       "forkastede": [
         {
-          "maksdato": "2020-09-01"
+          "vedtaksperiode": {
+            "maksdato": "2020-09-01"
+          }
         },
         {
-          "maksdato": null
+          "vedtaksperiode": {
+            "maksdato": null
+          }
         }
       ]
     }
@@ -71,10 +75,14 @@ private fun expectedJson() =
       ],
       "forkastede": [
         {
-          "maksdato": "2020-09-01"
+          "vedtaksperiode": {
+            "maksdato": "2020-09-01"
+          }
         },
         {
-          "maksdato": "+999999999-12-31"
+          "vedtaksperiode": {
+            "maksdato": "+999999999-12-31"
+          }
         }
       ]
     }

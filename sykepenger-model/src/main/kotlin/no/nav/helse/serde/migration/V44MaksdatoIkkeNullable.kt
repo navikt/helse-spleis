@@ -10,15 +10,23 @@ internal class V44MaksdatoIkkeNullable : JsonMigration(version = 44) {
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             settMaksdatoDefault(arbeidsgiver.path("vedtaksperioder"))
-            settMaksdatoDefault(arbeidsgiver.path("forkastede"))
+            settMaksdatoDefaultForkastede(arbeidsgiver.path("forkastede"))
         }
     }
 
     private fun settMaksdatoDefault(perioder: JsonNode) {
+        perioder.forEach(::migrer)
+    }
+
+    private fun settMaksdatoDefaultForkastede(perioder: JsonNode) {
         perioder.forEach { periode ->
-            periode as ObjectNode
-            if (!periode.path("maksdato").isTextual)
-                periode.put("maksdato", "${LocalDate.MAX}")
+            migrer(periode.path("vedtaksperiode"))
         }
+    }
+
+    private fun migrer(periode: JsonNode) {
+        periode as ObjectNode
+        if (!periode.path("maksdato").isTextual)
+            periode.put("maksdato", "${LocalDate.MAX}")
     }
 }
