@@ -358,6 +358,7 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 Omsorgspenger,
                 Opplæringspenger,
                 Institusjonsopphold,
+                EgenAnsatt,
                 Godkjenning,
                 Simulering,
                 Utbetaling,
