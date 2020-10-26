@@ -213,7 +213,7 @@ internal fun mapVilkår(
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
     personalder.redusertYtelseAlder.isBefore(sisteSykepengedagEllerSisteDagIPerioden)
-    val maksdato = (vedtaksperiodeMap["maksdato"] as LocalDate?) ?: LocalDate.MAX
+    val maksdato = vedtaksperiodeMap["maksdato"] as LocalDate
     val gjenståendeDager = (vedtaksperiodeMap["gjenståendeSykedager"] as Int?) ?: 0
     val sykepengedager = SykepengedagerDTO(
         forbrukteSykedager = forbrukteSykedager,
@@ -268,9 +268,9 @@ private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {
 }
 
 private fun ikkeOppbruktSykepengedager(
-    maksdato: LocalDate?,
+    maksdato: LocalDate,
     sisteSykepengedag: LocalDate
-) = maksdato?.isAfter(sisteSykepengedag)
+) = maksdato.isAfter(sisteSykepengedag)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> Any?.cast() = this as List<T>

@@ -198,8 +198,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
     }
 
-    override fun visitMaksdato(maksdato: LocalDate?) {
-        if (maksdato == null) return
+    override fun visitMaksdato(maksdato: LocalDate) {
         if (!inGyldigePerioder) forkastetMaksdatoer[vedtaksperiodeindeks] = maksdato
         else maksdatoer[vedtaksperiodeindeks] = maksdato
     }

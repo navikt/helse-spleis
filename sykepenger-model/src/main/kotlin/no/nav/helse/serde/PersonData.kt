@@ -497,7 +497,7 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             private val id: UUID,
-            private val maksdato: LocalDate?,
+            private val maksdato: LocalDate,
             private val gjenståendeSykedager: Int?,
             private val forbrukteSykedager: Int?,
             private val godkjentAv: String?,

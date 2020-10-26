@@ -275,9 +275,9 @@ data class SykepengedagerDTO(
     val beregningsdato: LocalDate = skjæringstidspunkt, // backward-compatible with Speil (temporary)
     val førsteFraværsdag: LocalDate = skjæringstidspunkt, // backward-compatible with Speil (temporary)
     val førsteSykepengedag: LocalDate?,
-    val maksdato: LocalDate?,
+    val maksdato: LocalDate,
     val gjenståendeDager: Int?,
-    val oppfylt: Boolean?
+    val oppfylt: Boolean
 )
 
 data class AlderDTO(

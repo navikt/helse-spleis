@@ -63,7 +63,7 @@ interface PersonObserver {
         val automatiskBehandling: Boolean,
         val opprettet: LocalDateTime,
         val sykepengegrunnlag: Double,
-        val maksdato: LocalDate?
+        val maksdato: LocalDate
     ) {
         data class Utbetalt(
             val mottaker: String,

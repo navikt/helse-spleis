@@ -30,7 +30,7 @@ internal fun tilUtbetaltEvent(
     gjenståendeSykedager: Int,
     godkjentAv: String,
     automatiskBehandling: Boolean,
-    maksdato: LocalDate?
+    maksdato: LocalDate
 ) = UtbetaltEventBuilder(
     aktørId = aktørId,
     fødselnummer = fødselnummer,
@@ -60,7 +60,7 @@ private class UtbetaltEventBuilder(
     private val gjenståendeSykedager: Int,
     private val godkjentAv: String,
     private val automatiskBehandling: Boolean,
-    private val maksdato: LocalDate?
+    private val maksdato: LocalDate
 ) : UtbetalingVisitor {
     private lateinit var opprettet: LocalDateTime
     private val dagsats = sykepengegrunnlag.reflection { _, _, _, daglig -> daglig }

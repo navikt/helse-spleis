@@ -375,8 +375,9 @@ internal class HendelseMediator(
                             "godkjentAv" to event.godkjentAv,
                             "automatiskBehandling" to event.automatiskBehandling,
                             "opprettet" to event.opprettet,
-                            "sykepengegrunnlag" to event.sykepengegrunnlag
-                        ).maybeAdd("maksdato" to event.maksdato)
+                            "sykepengegrunnlag" to event.sykepengegrunnlag,
+                            "maksdato" to event.maksdato
+                        )
                     )
                 )
             }
@@ -421,12 +422,6 @@ internal class HendelseMediator(
 
             private fun queueMessage(event: String, outgoingMessage: JsonMessage) {
                 queueMessage(hendelse.fødselsnummer(), leggPåStandardfelter(event, outgoingMessage).toJson())
-            }
-
-            private fun Map<String, Any>.maybeAdd(pair: Pair<String, Any?>) = if (pair.second != null) {
-                this.plus(pair.first to pair.second!!)
-            } else {
-                this
             }
         }
     }

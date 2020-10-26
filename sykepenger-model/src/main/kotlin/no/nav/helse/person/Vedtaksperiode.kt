@@ -44,7 +44,7 @@ internal class Vedtaksperiode private constructor(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
-    private var maksdato: LocalDate?,
+    private var maksdato: LocalDate,
     private var gjenståendeSykedager: Int?,
     private var forbrukteSykedager: Int?,
     private var godkjentAv: String?,
@@ -88,7 +88,7 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = tilstand,
-        maksdato = null,
+        maksdato = LocalDate.MAX,
         gjenståendeSykedager = null,
         forbrukteSykedager = null,
         godkjentAv = null,
@@ -1356,7 +1356,7 @@ internal class Vedtaksperiode private constructor(
             simulering(
                 aktivitetslogg = hendelse,
                 oppdrag = Fagområde.SykepengerRefusjon.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
-                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                maksdato = vedtaksperiode.maksdato,
                 saksbehandler = "Spleis"
             )
         }
@@ -1428,7 +1428,7 @@ internal class Vedtaksperiode private constructor(
             sendUtbetalingsbehov(
                 aktivitetslogg = hendelse,
                 oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
-                maksdato = requireNotNull(vedtaksperiode.maksdato),
+                maksdato = vedtaksperiode.maksdato,
                 saksbehandler = cast.saksbehandler(),
                 saksbehandlerEpost = cast.saksbehandlerEpost(),
                 godkjenttidspunkt = cast.godkjenttidspunkt(),

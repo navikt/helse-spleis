@@ -12,7 +12,7 @@ import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal val id: UUID = vedtaksperiode["id"]
-    private val maksdato: LocalDate? = vedtaksperiode["maksdato"]
+    private val maksdato: LocalDate = vedtaksperiode["maksdato"]
     private val gjenståendeSykedager: Int? = vedtaksperiode["gjenståendeSykedager"]
     private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
@@ -114,5 +114,5 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "skjæringstidspunkt" to skjæringstidspunkt,
         "inntektFraInntektsmelding" to arbeidsgiver.inntekt(skjæringstidspunkt)?.reflection{ _, månedlig, _, _ -> månedlig },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
-        )
+    )
 }

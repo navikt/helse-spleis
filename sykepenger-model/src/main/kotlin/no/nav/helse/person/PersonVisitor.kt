@@ -66,7 +66,7 @@ internal interface VedtaksperiodeVisitor : SykdomshistorikkVisitor, Utbetalingsd
     ) {
     }
 
-    fun visitMaksdato(maksdato: LocalDate?) {}
+    fun visitMaksdato(maksdato: LocalDate) {}
     fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {}
     fun visitForbrukteSykedager(forbrukteSykedager: Int?) {}
     fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {}
