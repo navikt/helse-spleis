@@ -207,7 +207,7 @@ internal fun mapVilkår(
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val skjæringstidspunkt = vedtaksperiodeMap["skjæringstidspunkt"] as LocalDate
-    val sykepengegrunnlag = sykepengegrunnlag(inntekter, skjæringstidspunkt)
+    val sykepengegrunnlag = sykepengegrunnlag(inntekter, skjæringstidspunkt, tom)
     val beregnetMånedsinntekt = inntekt(inntekter, skjæringstidspunkt)
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)

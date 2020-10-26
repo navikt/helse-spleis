@@ -30,12 +30,12 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
         inntekter.sort()
     }
 
-    internal fun inntekt(dato: LocalDate) = Inntektsendring.inntekt(inntekter, dato)
+    internal fun inntekt(skjæringstidspunkt: LocalDate) = Inntektsendring.inntekt(inntekter, skjæringstidspunkt)
 
-    internal fun sykepengegrunnlag(dato: LocalDate) = Inntektsendring.sykepengegrunnlag(inntekter, dato)
+    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate,  virkningFra: LocalDate = LocalDate.now()) = Inntektsendring.sykepengegrunnlag(inntekter, skjæringstidspunkt, virkningFra)
 
-    internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
-        inntekt(dato)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
+    internal fun dekningsgrunnlag(skjæringstidspunkt: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
+        inntekt(skjæringstidspunkt)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
 
     internal fun subset(datoer: List<LocalDate>): Inntektshistorikk{
         return Inntektshistorikk(datoer
@@ -52,15 +52,15 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
         ) : Comparable<Inntektsendring> {
 
         companion object {
-            internal fun inntektendring(inntekter: List<Inntektsendring>, dato: LocalDate) =
-                (inntekter.lastOrNull { it.fom <= dato } ?: inntekter.firstOrNull())
+            internal fun inntektendring(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate) =
+                (inntekter.lastOrNull { it.fom <= skjæringstidspunkt } ?: inntekter.firstOrNull())
 
-            internal fun inntekt(inntekter: List<Inntektsendring>, dato: LocalDate) =
-                inntektendring(inntekter, dato)?.beløp
+            internal fun inntekt(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate) =
+                inntektendring(inntekter, skjæringstidspunkt)?.beløp
 
-            internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, dato: LocalDate): Inntekt? =
-                inntekt(inntekter, dato)?.let {
-                    listOf(it, Grunnbeløp.`6G`.beløp(dato)).minOrNull()
+            internal fun sykepengegrunnlag(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate, virkningFra: LocalDate = LocalDate.now()): Inntekt? =
+                inntekt(inntekter, skjæringstidspunkt)?.let {
+                    listOf(it, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningFra)).minOrNull()
                 }
         }
 

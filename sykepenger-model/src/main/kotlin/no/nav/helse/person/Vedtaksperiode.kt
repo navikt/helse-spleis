@@ -621,7 +621,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun sendUtbetaltEvent() {
         val sykepengegrunnlag =
-            requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
+            requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt, periode.endInclusive)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
         person.vedtaksperiodeUtbetalt(
             tilUtbetaltEvent(
                 aktørId = aktørId,

@@ -364,7 +364,8 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun sykepengegrunnlag(dato: LocalDate): Inntekt? = inntektshistorikk.sykepengegrunnlag(dato)
+    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, virkningFra: LocalDate = LocalDate.now()) =
+        inntektshistorikk.sykepengegrunnlag(skjæringstidspunkt, virkningFra)
 
     internal fun søppelbøtte(
         hendelse: PersonHendelse,
