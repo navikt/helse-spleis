@@ -332,6 +332,15 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetalingMedInntektsmelding
         )
 
+    internal fun erAvsluttet() =
+        this.tilstand in listOf(
+            Avsluttet,
+            AvsluttetUtenUtbetalingMedInntektsmelding,
+            AvsluttetUtenUtbetaling,
+            AvventerVilkårsprøvingArbeidsgiversøknad,
+            UtbetalingFeilet
+        )
+
     internal fun foregåendeSomErBehandletUtenUtbetaling() =
         arbeidsgiver.finnSykeperiodeRettFør(this)?.takeIf {
             it.tilstand in listOf(AvsluttetUtenUtbetaling, AvsluttetUtenUtbetalingMedInntektsmelding)
@@ -826,6 +835,11 @@ internal class Vedtaksperiode private constructor(
                         //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
                         return@returnPoint TilInfotrygd
                     }
+                }
+
+                if (vedtaksperiode.arbeidsgiver.harTilstøtendeForkastet(vedtaksperiode)) {
+                    vedtaksperiode.arbeidsgiver.søppelbøtte(sykmelding, Arbeidsgiver.SENERE(vedtaksperiode))
+                    return@returnPoint TilInfotrygd
                 }
 
                 val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)

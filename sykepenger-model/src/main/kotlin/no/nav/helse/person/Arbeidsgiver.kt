@@ -71,10 +71,10 @@ internal class Arbeidsgiver private constructor(
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode <= tidligereEnn
         }
 
-        internal val SENERE = fun (senereEllerLikDenne: Vedtaksperiode): VedtaksperioderFilter {
+        internal val SENERE = fun(senereEllerLikDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEllerLikDenne
         }
-        internal val SENERE_EXCLUSIVE = fun (senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
+        internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
 
@@ -234,7 +234,12 @@ internal class Arbeidsgiver private constructor(
             }
             utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == utbetaling.utbetalingsreferanse }
                 .håndter(utbetaling)
-            annullerUtbetaling(utbetaling, utbetaling.utbetalingsreferanse, utbetaling.godkjenttidspunkt, utbetaling.saksbehandlerEpost)
+            annullerUtbetaling(
+                utbetaling,
+                utbetaling.utbetalingsreferanse,
+                utbetaling.godkjenttidspunkt,
+                utbetaling.saksbehandlerEpost
+            )
         } else {
             vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
         }
@@ -388,11 +393,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun forkast(filter: VedtaksperioderFilter) = vedtaksperioder
-            .filter(filter)
-            .also { perioder ->
-                vedtaksperioder.removeAll(perioder)
-                forkastede.putAll(perioder.map { it to UKJENT })
-            }
+        .filter(filter)
+        .also { perioder ->
+            vedtaksperioder.removeAll(perioder)
+            forkastede.putAll(perioder.map { it to UKJENT })
+        }
 
     private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
         var index = vedtaksperioder.indexOf(vedtaksperiode)
@@ -569,6 +574,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
+
+    internal fun harTilstøtendeForkastet(vedtaksperiode: Vedtaksperiode) =
+        forkastede.entries.map { it.key }.any { it.erSykeperiodeRettFør(vedtaksperiode) && it.erAvsluttet() }
 
 
     internal class JsonRestorer private constructor() {
