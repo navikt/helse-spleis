@@ -147,7 +147,7 @@ private class UtbetaltEventBuilder(
             UtbetaltEvent.Utbetalt.Utbetalingslinje(
                 fom = fom,
                 tom = tom,
-                dagsats = min(aktuellDagsinntekt, this.dagsats),
+                dagsats = dagsats,
                 beløp = beløp!!,
                 grad = grad,
                 sykedager = linje.filterNot { it.erHelg() }.count()
