@@ -65,7 +65,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
         assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
-        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
@@ -135,7 +135,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
         assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
 
-        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(0)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test

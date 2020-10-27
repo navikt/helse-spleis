@@ -11,7 +11,7 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     override val endInclusive: LocalDate = tom
 
     init {
-        require(start <= endInclusive) { "fom kan ikke være etter tom" }
+        require(start <= endInclusive) { "fom ($start) kan ikke være etter tom ($endInclusive)" }
     }
 
     companion object {

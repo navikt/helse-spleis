@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -1161,6 +1162,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_GAP
         )
+        assertEquals(INNTEKT, inspektør.vilkårsgrunnlag(0)?.beregnetÅrsinntektFraInntektskomponenten)
+        assertNull(inspektør.vilkårsgrunnlag(1))
     }
 
     @Test
@@ -1711,62 +1714,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
-    }
-
-    @Test
-    fun `data for vilkårsvurdering propageres til tilstøtende`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
-        assertThrows<AssertionFailedError> {
-            assertNull(inspektør.vilkårsgrunnlag(3))
-        }
-    }
-
-    @Test
-    fun `data for vilkårsvurdering hentes fra foregående`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(5.april, 30.april, 100))
-
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
-        assertThrows<AssertionFailedError> {
-            assertNull(inspektør.vilkårsgrunnlag(3))
-        }
-    }
-
-    @Test
-    fun `perioden henter vilkårsgrunnlag selv om tidligere periode har lest inntektsmelding når det er gap mellom periodene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 4.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertNotNull(inspektør.vilkårsgrunnlag(1))
-        assertNotEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
     }
 
     @Test

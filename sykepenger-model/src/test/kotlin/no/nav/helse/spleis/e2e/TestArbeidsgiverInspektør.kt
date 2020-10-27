@@ -36,7 +36,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
     private val fagsystemIder = mutableMapOf<UUID, String>()
     private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
-    private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata>()
+    private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata?>()
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntektshistorikk
@@ -242,7 +242,6 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
-        if (dataForVilkårsvurdering == null) return
         vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
     }
 
@@ -318,9 +317,7 @@ internal class TestArbeidsgiverInspektør(
         "Missing collection initialization"
     }
 
-    internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks]
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 

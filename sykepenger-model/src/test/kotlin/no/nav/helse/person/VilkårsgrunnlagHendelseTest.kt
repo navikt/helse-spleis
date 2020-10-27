@@ -78,7 +78,7 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(148000.årlig, inspektør.vilkårsgrunnlag(0).beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(148000.årlig, inspektør.vilkårsgrunnlag(0)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
