@@ -123,7 +123,19 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                 )
             )
         )
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK)
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    1.januar,
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
+        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
     }
 
@@ -136,7 +148,12 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000, 100, ORGNUMMER),
+            inntektshistorikk = emptyList()
+        )
+        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test

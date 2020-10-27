@@ -30,11 +30,21 @@ internal class ForkastingTest : AbstractEndToEndTest() {
                 ORGNUMMER
             ), inntektshistorikk = emptyList()
         )
+        håndterYtelser(
+            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                1.januar,
+                31.januar,
+                INNTEKT_AS_INT,
+                100,
+                ORGNUMMER
+            ), inntektshistorikk = emptyList()
+        )
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
+            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
     }

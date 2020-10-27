@@ -558,11 +558,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun forlengelseFraInfotrygd(utbetalingshistorikk: Utbetalingshistorikk) {
-        forlengelseFraInfotrygd = JA
-        skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
-    }
-
     /**
      * Skedulering av utbetaling opp mot andre arbeidsgivere
      */
@@ -1031,19 +1026,13 @@ internal class Vedtaksperiode private constructor(
                         ytelser.utbetalingshistorikk().append(oldtid)
                         arbeidsgiver.utbetalteUtbetalinger()
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
-                        if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
-                            nesteTilstand = AvventerHistorikk
-                            vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
-                            ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
+                        nesteTilstand = if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
+                            ytelser.info("Oppdaget at perioden er en direkte overgang fra periode i Infotrygd")
+                            AvventerHistorikk
                         } else {
-                            nesteTilstand = AvventerInntektsmeldingFerdigGap
+                            AvventerInntektsmeldingFerdigGap
                         }
                     }
-                }
-                valider("Kan ikke forlenge periode fra Infotrygd uten inntektsopplysninger") {
-                    vedtaksperiode.skjæringstidspunktFraInfotrygd
-                        ?.let { arbeidsgiver.inntekt(it) != null }
-                        ?: true
                 }
                 onSuccess {
                     vedtaksperiode.tilstand(ytelser, nesteTilstand)
@@ -1313,7 +1302,11 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
                         ytelser.kontekst(vedtaksperiode)
 
-                        vedtaksperiode.forlengelseFraInfotrygd(ytelser.utbetalingshistorikk())
+                        vedtaksperiode.forlengelseFraInfotrygd = JA
+                        vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(
+                            vedtaksperiode.periode.endInclusive,
+                            ytelser.utbetalingshistorikk()
+                        )
                     }
 
                     arbeidsgiver.addInntekt(ytelser)
