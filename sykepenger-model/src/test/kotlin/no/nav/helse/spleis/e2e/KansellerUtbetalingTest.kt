@@ -149,7 +149,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun ingenBehovErAnnullering() {
+    private fun assertIngenAnnulleringsbehov() {
         assertFalse(
             inspektør.personLogg.behov()
                 .filter { it.type == Behovtype.Utbetaling }
@@ -174,7 +174,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             vedtaksperioder[0].tilstand er TilstandstypeDTO.TilUtbetaling
         }
 
-        ingenBehovErAnnullering()
+        assertIngenAnnulleringsbehov()
     }
 
     @Test
@@ -191,7 +191,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             vedtaksperioder[0].tilstand er TilstandstypeDTO.Feilet
         }
 
-        ingenBehovErAnnullering()
+        assertIngenAnnulleringsbehov()
     }
 
 
@@ -211,7 +211,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             vedtaksperioder[1].tilstand er TilstandstypeDTO.TilUtbetaling
         }
 
-        ingenBehovErAnnullering()
+        assertIngenAnnulleringsbehov()
     }
 
 
