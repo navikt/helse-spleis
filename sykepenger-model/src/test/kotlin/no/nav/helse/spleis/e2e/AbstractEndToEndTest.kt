@@ -9,12 +9,12 @@ import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.reflect.KClass
 
 internal abstract class AbstractEndToEndTest {
 
@@ -186,7 +187,7 @@ internal abstract class AbstractEndToEndTest {
         vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean = false
     ) {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
+        assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Søknad::class)
         håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
     }
 
@@ -218,7 +219,7 @@ internal abstract class AbstractEndToEndTest {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
     ): UUID {
-        assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
+        assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Inntektsmelding::class)
         return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
     }
 
@@ -263,10 +264,13 @@ internal abstract class AbstractEndToEndTest {
         ),
         arbeidsavklaringspenger: List<Periode> = emptyList()
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Dagpenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Arbeidsavklaringspenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Medlemskap))
+        fun assertEtterspurt(behovtype: Behovtype) =
+            assertEtterspurt(vedtaksperiodeId, behovtype, Vilkårsgrunnlag::class)
+
+        assertEtterspurt(InntekterForSammenligningsgrunnlag)
+        assertEtterspurt(Behovtype.Dagpenger)
+        assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
+        assertEtterspurt(Medlemskap)
         person.håndter(
             vilkårsgrunnlag(
                 vedtaksperiodeId,
@@ -280,7 +284,7 @@ internal abstract class AbstractEndToEndTest {
     }
 
     protected fun håndterSimulering(vedtaksperiodeId: UUID = 1.vedtaksperiode) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Simulering))
+        assertEtterspurt(vedtaksperiodeId, Behovtype.Simulering, Simulering::class)
         person.håndter(simulering(vedtaksperiodeId))
     }
 
@@ -310,12 +314,15 @@ internal abstract class AbstractEndToEndTest {
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Foreldrepenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Pleiepenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Omsorgspenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Opplæringspenger))
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Behovtype.Institusjonsopphold))
+        fun assertEtterspurt(behovtype: Behovtype) =
+            assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
+
+        assertEtterspurt(Sykepengehistorikk)
+        assertEtterspurt(Foreldrepenger)
+        assertEtterspurt(Behovtype.Pleiepenger)
+        assertEtterspurt(Behovtype.Omsorgspenger)
+        assertEtterspurt(Behovtype.Opplæringspenger)
+        assertEtterspurt(Behovtype.Institusjonsopphold)
         person.håndter(
             ytelser(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -364,7 +371,7 @@ internal abstract class AbstractEndToEndTest {
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false
     ) {
-        assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, Godkjenning))
+        assertEtterspurt(vedtaksperiodeId, Godkjenning, Utbetalingsgodkjenning::class)
         person.håndter(utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling))
     }
 
@@ -758,7 +765,7 @@ internal abstract class AbstractEndToEndTest {
         simuleringOK: Boolean = true,
         orgnummer: String = ORGNUMMER
     ) =
-        no.nav.helse.hendelser.Simulering(
+        Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
@@ -859,6 +866,26 @@ internal abstract class AbstractEndToEndTest {
     internal fun String.id(indeks: Int): UUID {
         if (vedtaksperioderIder[this to indeks] == null) VedtaksperioderFinder(person)
         return requireNotNull(vedtaksperioderIder[this to indeks])
+    }
+
+    private fun <T : ArbeidstakerHendelse> assertEtterspurt(
+        vedtaksperiodeId: UUID,
+        behovtype: Behovtype,
+        løsning: KClass<T>
+    ) = assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, behovtype)) {
+        "Forventer at $behovtype skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
+            observatør.tilstander[vedtaksperiodeId]?.last()
+        }"
+    }
+
+    private fun <T : ArbeidstakerHendelse> assertIkkeEtterspurt(
+        vedtaksperiodeId: UUID,
+        behovtype: Behovtype,
+        løsning: KClass<T>
+    ) = assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, behovtype)) {
+        "Forventer ikke at $behovtype skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
+            observatør.tilstander[vedtaksperiodeId]?.last()
+        }"
     }
 
 }
