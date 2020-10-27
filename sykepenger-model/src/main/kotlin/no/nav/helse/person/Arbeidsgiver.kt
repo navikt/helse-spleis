@@ -586,6 +586,9 @@ internal class Arbeidsgiver private constructor(
     internal fun harTilstøtendeForkastet(vedtaksperiode: Vedtaksperiode) =
         forkastede.entries.map { it.key }.any { it.erSykeperiodeRettFør(vedtaksperiode) && it.erAvsluttet() }
 
+    internal fun harForkastetAvsluttetOgNyereEnn(cutOff: LocalDate) =
+        forkastede.entries.map { it.key }.any { it.erAvsluttet() && it.periode().endInclusive.isAfter(cutOff) }
+
 
     internal class JsonRestorer private constructor() {
         internal companion object {

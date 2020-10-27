@@ -1311,6 +1311,9 @@ internal class Vedtaksperiode private constructor(
 
                     arbeidsgiver.addInntekt(ytelser)
                     ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
+                    if (arbeidsgiver.harForkastetAvsluttetOgNyereEnn(vedtaksperiode.periode().start.minusMonths(6))) {
+                        ytelser.warn("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.")
+                    }
                 }
                 harInntektshistorikk(arbeidsgiver, vedtaksperiode.periode.start)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
