@@ -116,42 +116,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `påfølgende periode med arbeidsdager i begynnelsen regnes ikke som gap`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100), Arbeid(1.mars, 3.mars))
-        assertTilstander(1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTilstander(2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
-        )
-        assertNull(inspektør.vilkårsgrunnlag(0))
-        assertNull(inspektør.vilkårsgrunnlag(1))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(0))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(1))
-    }
-
-    @Test
-    fun `inntektsmelding bryter opp forlengelse`() {
+    fun `inntektsmelding bryter ikke opp forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(18.januar, 1.februar)))
@@ -159,7 +124,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100), Arbeid(1.mars, 3.mars))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
@@ -185,7 +150,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(0))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(0))
-        assertEquals(4.mars, inspektør.skjæringstidspunkt(1))
+        assertEquals(18.januar, inspektør.skjæringstidspunkt(1))
     }
 
     @Test
