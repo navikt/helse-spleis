@@ -744,7 +744,8 @@ internal class Vedtaksperiode private constructor(
             "skjæringstidspunktet fra Infotrygd ($skjæringstidspunkt) er ulik beregnet skjæringstidspunkt ($beregnetSkjæringstidspunkt) for {}, {}",
             keyValue("vedtaksperiode_id", id),
             keyValue("periodetype", periodetype()),
-            keyValue("fnr", fødselsnummer)
+            keyValue("fnr", fødselsnummer),
+            keyValue("aktørId", aktørId)
         )
     }
 
