@@ -1,12 +1,15 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -53,10 +56,12 @@ class Utbetalingshistorikk(
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
 
-    internal fun historiskeTidslinjer(organisasjonsnummer: String? = null) =
-        Periode.Utbetalingsperiode.historiskePerioder(organisasjonsnummer, utbetalinger, inntektshistorikk).map { periode ->
-            Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
-        }
+    internal fun historiskeTidslinjer() =
+        Periode.Utbetalingsperiode.historiskePerioder(utbetalinger, inntektshistorikk)
+            .slåSammen()
+            .map { periode ->
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+            }
 
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
@@ -187,9 +192,8 @@ class Utbetalingshistorikk(
 
             internal companion object {
 
-                fun historiskePerioder(organisasjonsnummer: String?, perioder: List<Periode>, inntektshistorikk: List<Inntektsopplysning>) =
+                fun historiskePerioder(perioder: List<Periode>, inntektshistorikk: List<Inntektsopplysning>) =
                     perioder.filterIsInstance<Utbetalingsperiode>()
-                        .filter { if (organisasjonsnummer == null) true else it.orgnr == organisasjonsnummer }
                         .map {
                             it.periode.oppdaterFom(
                                 Inntektsopplysning.finnNærmeste(
