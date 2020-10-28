@@ -1338,10 +1338,9 @@ internal class Vedtaksperiode private constructor(
                             return@onSuccess
                         }
 
-                        arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
-                        ytelser.kontekst(vedtaksperiode)
-
                         vedtaksperiode.håndterForlengelseIT(ytelser.utbetalingshistorikk())
+                        arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
+                        vedtaksperiode.kontekst(ytelser)
                     }
 
                     arbeidsgiver.addInntekt(ytelser)
