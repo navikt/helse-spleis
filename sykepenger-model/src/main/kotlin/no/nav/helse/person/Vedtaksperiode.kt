@@ -740,10 +740,11 @@ internal class Vedtaksperiode private constructor(
         if (forlengelseFraInfotrygd != JA) return
         val beregnetSkjæringstidspunkt = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
         if (skjæringstidspunkt == beregnetSkjæringstidspunkt) return
-        log.info(
+        sikkerLogg.info(
             "skjæringstidspunktet fra Infotrygd ($skjæringstidspunkt) er ulik beregnet skjæringstidspunkt ($beregnetSkjæringstidspunkt) for {}, {}",
             keyValue("vedtaksperiode_id", id),
-            keyValue("periodetype", periodetype())
+            keyValue("periodetype", periodetype()),
+            keyValue("fnr", fødselsnummer)
         )
     }
 
