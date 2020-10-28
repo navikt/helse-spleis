@@ -1145,11 +1145,14 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling.hendelse,
-                AvventerHistorikk,
-                AvventerInntektsmeldingFerdigGap
-            )
+            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtende ->
+                if (!tilstøtende.erFerdigBehandlet()) return
+                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk) {
+                    vedtaksperiode.håndterForlengelse(tilstøtende)
+                }
+            } ?: vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerInntektsmeldingFerdigGap) {
+                vedtaksperiode.håndterGapVarForlengelse()
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {

@@ -2124,4 +2124,45 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
     }
+
+    @Test
+    fun `Går ikke videre fra AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE hvis forrige periode ikke er ferdig behandlet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
+    fun `Går videre fra AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE hvis en gammel periode er i AVSLUTTET_UTEN_UTBETALING`() {
+        håndterSykmelding(Sykmeldingsperiode(20.november(2017), 12.desember(2017), 100))
+        håndterSøknad(Sykdom(20.november(2017), 12.desember(2017), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 12.januar, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(20.november(2017), 12.desember(2017), 100))
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, TIL_INFOTRYGD)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+    }
 }
