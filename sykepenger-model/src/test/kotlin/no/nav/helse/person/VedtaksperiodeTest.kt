@@ -53,7 +53,7 @@ internal class VedtaksperiodeTest {
 
     @Test
     fun `skjæringstidspunkt stemmer ikke med førsteFraværsdag fra inntektsmelding når den er oppgitt feil`() {
-        val førsteFraværsdag = 20.oktober
+        val førsteFraværsdag = 12.september
         val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 

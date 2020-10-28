@@ -105,6 +105,19 @@ class Inntektsmelding(
         )
     }
 
+    override fun erRelevant(periode: Periode) =
+        tidslinjeOverlapperMed(periode) && (førsteFraværsdag == null || førsteFraværsdagErIArbeidsgiverperioden() || førsteFraværsdagErFørEllerIPerioden(periode))
+
+    private fun tidslinjeOverlapperMed(periode: Periode) = (arbeidsgivertidslinje(arbeidsgiverperioder, førsteFraværsdag)
+        + nyFørsteFraværsdagtidslinje(førsteFraværsdag)).merge(beste).periode()?.overlapperMed(periode) == true
+
+    private fun førsteFraværsdagErIArbeidsgiverperioden() =
+        requireNotNull(førsteFraværsdag) in arbeidsgiverperioder ||
+            førsteFraværsdag.isEqual(arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1))
+
+    private fun førsteFraværsdagErFørEllerIPerioden(periode: Periode) =
+        requireNotNull(førsteFraværsdag) <= periode.endInclusive
+
     override fun valider(periode: Periode): Aktivitetslogg {
         refusjon.valider(aktivitetslogg, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Kontroller at det kun er én arbeidsgiver. Flere arbeidsforhold støttes ikke av systemet")

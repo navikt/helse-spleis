@@ -91,7 +91,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 2.februar)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
-        assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_SØKNAD_FERDIG_GAP")
+        assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
         assertIkkeForkastedeTilstander(
             2,
             "MOTTATT_SYKMELDING_UFERDIG_GAP",

@@ -171,7 +171,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMed(inntektsmelding).also {
+    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMedInntektsmelding(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
         if (Toggles.mottattInntektsmeldingEventEnabled) mottattInntektsmelding()
@@ -376,6 +376,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.sykmeldingsperiode)
 
+    private fun overlapperMedInntektsmelding(inntektsmelding: Inntektsmelding) = inntektsmelding.erRelevant(this.sykmeldingsperiode)
+
     private fun tilstand(
         event: PersonHendelse,
         nyTilstand: Vedtaksperiodetilstand,
@@ -396,6 +398,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
         arbeidsgiver.addInntekt(hendelse)
+
+        val forrigeVedtaksperiode = arbeidsgiver.finnForrigeVedaksperiode(this)
+
+        if (forrigeVedtaksperiode != null) {
+            hendelse.trimLeft(forrigeVedtaksperiode.periode.endInclusive)
+        }
+
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
@@ -1751,6 +1760,9 @@ internal class Vedtaksperiode private constructor(
             perioder
                 .filterNot { it >= vedtaksperiode }
                 .all { it.erFerdigBehandlet() }
+
+        internal fun finnForrigeVedtaksperiode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
+            perioder.filter { it.periode.endInclusive < vedtaksperiode.periode.start }.maxByOrNull { it.periode.endInclusive }
     }
 }
 

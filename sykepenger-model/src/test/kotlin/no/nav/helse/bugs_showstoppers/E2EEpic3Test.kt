@@ -44,7 +44,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(18.november(2019), 23.november(2019)),
                 Periode(14.oktober(2019), 18.oktober(2019)),
                 Periode(1.november(2019), 5.november(2019))
-            ), 18.november(2019), listOf(
+            ),
+            18.november(2019),
+            listOf(
                 Periode(5.desember(2019), 6.desember(2019)),
                 Periode(30.desember(2019), 30.desember(2019)),
                 Periode(2.januar(2020), 3.januar(2020)),
@@ -52,18 +54,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             )
         )
 
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
-        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP)
     }
 
@@ -206,7 +198,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP
+            START, MOTTATT_SYKMELDING_FERDIG_GAP
         )
         assertTilstander(
             2.vedtaksperiode,

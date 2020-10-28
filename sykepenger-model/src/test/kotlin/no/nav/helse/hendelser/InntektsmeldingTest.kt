@@ -521,6 +521,42 @@ internal class InntektsmeldingTest {
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
     }
 
+    @Test
+    fun `er ikke relevant når kun ferie etter gap overlapper`() {
+        inntektsmelding(
+            listOf(Periode(1.januar, 8.januar), Periode(10.januar, 18.januar)),
+            listOf(Periode(19.januar, 23.januar)),
+            førsteFraværsdag = 10.januar
+        )
+
+        assertFalse(inntektsmelding.erRelevant(Periode(19.januar, 25.januar)))
+        assertFalse(inntektsmelding.erRelevant(Periode(20.januar, 25.januar)))
+        assertFalse(inntektsmelding.erRelevant(Periode(24.januar, 25.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(10.januar, 25.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(18.januar, 25.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(1.januar, 25.januar)))
+    }
+
+    @Test
+    fun `er relevant når første fraværsdag er etter gap etter arbeidsgiverperioden`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 22.januar)
+        assertTrue(inntektsmelding.erRelevant(Periode(22.januar, 25.januar)))
+        assertFalse(inntektsmelding.erRelevant(Periode(23.januar, 25.januar)))
+    }
+
+    @Test
+    fun `er ikke relevant når første fraværsdag er etter vedtaksperioden`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 22.januar)
+        assertFalse(inntektsmelding.erRelevant(Periode(1.januar, 18.januar)))
+    }
+
+    @Test
+    fun `er relevant når første fraværsdag er dagen etter arbeidsgiverperioden`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 17.januar)
+        assertTrue(inntektsmelding.erRelevant(Periode(1.januar, 18.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(17.januar, 18.januar)))
+    }
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),

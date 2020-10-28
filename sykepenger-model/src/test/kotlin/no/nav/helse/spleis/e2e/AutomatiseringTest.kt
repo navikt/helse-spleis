@@ -23,7 +23,7 @@ internal class AutomatiseringTest: AbstractEndToEndTest() {
         assertNoWarnings(inspektør)
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 7.februar, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 27.februar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 7.februar, 100))
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode,
             listOf(Periode(3.januar, 18.januar)),

@@ -902,8 +902,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
         )
     }
 
@@ -916,8 +915,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_GAP
         )
     }
 
@@ -930,8 +928,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_GAP
         )
     }
 
@@ -2144,4 +2141,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(0, observatør.mottattInntektsmeldingVedtaksperioder.size)
     }
 
+    @Test
+    fun `overlappende inntektsmelding på grunn av ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100))
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GAP, LocalDateTime.now().minusYears(1))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 16.februar, 100))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), ferieperioder = listOf(5.februar til 6.februar))
+
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
+    }
 }

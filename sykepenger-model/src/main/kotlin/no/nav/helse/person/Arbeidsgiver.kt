@@ -223,7 +223,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
-            vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
@@ -459,6 +459,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
+
+    internal fun finnForrigeVedaksperiode(vedtaksperiode: Vedtaksperiode) =
+        Vedtaksperiode.finnForrigeVedtaksperiode(vedtaksperioder, vedtaksperiode)
 
     internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
