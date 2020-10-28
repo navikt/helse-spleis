@@ -75,17 +75,23 @@ class SpeilBuilderTest {
     fun `passer på at vedtakene har alle hendelsene`() {
         var vedtaksperiodeIder: List<String>
 
+        val sykmelding1Id = UUID.randomUUID()
+        val søknad1Id = UUID.randomUUID()
+        val inntektsmeldingId = UUID.randomUUID()
+        val sykmelding2Id = UUID.randomUUID()
+        val søknad2Id = UUID.randomUUID()
+
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
-                sykmelding(fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDto) ->
+                sykmelding(hendelseId = sykmelding1Id, fom = 1.januar, tom = 31.januar).also { (sykmelding, sykmeldingDto) ->
                     håndter(sykmelding)
                     add(sykmeldingDto)
                 }
-                søknad(fom = 1.januar, tom = 31.januar).also { (søknad, søknadDTO) ->
+                søknad(hendelseId = søknad1Id, fom = 1.januar, tom = 31.januar).also { (søknad, søknadDTO) ->
                     håndter(søknad)
                     add(søknadDTO)
                 }
-                inntektsmelding(fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
+                inntektsmelding(hendelseId = inntektsmeldingId, fom = 1.januar).also { (inntektsmelding, inntektsmeldingDTO) ->
                     håndter(inntektsmelding)
                     add(inntektsmeldingDTO)
                 }
@@ -98,11 +104,11 @@ class SpeilBuilderTest {
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
-                sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
+                sykmelding(hendelseId = sykmelding2Id, fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
                     håndter(sykmelding)
                     add(sykmeldingDto)
                 }
-                søknad(fom = 1.februar, tom = 14.februar).also { (søknad, søknadDTO) ->
+                søknad(hendelseId = søknad2Id, fom = 1.februar, tom = 14.februar).also { (søknad, søknadDTO) ->
                     håndter(søknad)
                     add(søknadDTO)
                 }
@@ -122,15 +128,11 @@ class SpeilBuilderTest {
 
         assertEquals(2, vedtaksperioder.size)
         assertEquals(3, vedtaksperioder.first().hendelser.size)
-        assertEquals(2, vedtaksperioder.last().hendelser.size)
-        assertEquals(
-            hendelser.subList(0, 3).map { it.id }.sorted(),
-            vedtaksperioder.first().hendelser.map { it.id }.sorted()
-        )
-        assertEquals(
-            hendelser.subList(3, 5).map { it.id }.sorted(),
-            vedtaksperioder.last().hendelser.map { it.id }.sorted()
-        )
+        assertEquals(3, vedtaksperioder.last().hendelser.size)
+        assertEquals(inntektsmeldingId, vedtaksperioder.first().inntektsmeldingId)
+        assertEquals(inntektsmeldingId, vedtaksperioder.last().inntektsmeldingId)
+        assertTrue(vedtaksperioder.first().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(sykmelding1Id, søknad1Id, inntektsmeldingId)))
+        assertTrue(vedtaksperioder.last().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(sykmelding2Id, søknad2Id, inntektsmeldingId)))
     }
 
     @Test

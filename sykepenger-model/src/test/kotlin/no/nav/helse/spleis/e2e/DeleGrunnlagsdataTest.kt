@@ -4,18 +4,12 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.opentest4j.AssertionFailedError
 
 internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
@@ -26,13 +20,38 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(5.april, 30.april, 100))
+        val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        val inntektsmelding2Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 5.april)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalt(4.vedtaksperiode)
 
         assertNotNull(inspektør.vilkårsgrunnlag(0))
         assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
         assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
-        assertNull(inspektør.vilkårsgrunnlag(3))
+        assertNotEquals(inspektør.vilkårsgrunnlag(2), inspektør.vilkårsgrunnlag(3))
+        assertTrue(inntektsmelding1Id in inspektør.hendelseIder(1.vedtaksperiode))
+        assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
+        assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
+        assertTrue(inntektsmelding2Id in inspektør.hendelseIder(4.vedtaksperiode))
     }
 
     @Test

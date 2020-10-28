@@ -18,6 +18,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
     private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
     private val automatiskBehandling: Boolean? = vedtaksperiode["automatiskBehandling"]
+    private val inntektsmeldingId:UUID? = vedtaksperiode["inntektsmeldingId"]
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
@@ -92,6 +93,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
         "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
+        "inntektsmeldingId" to inntektsmeldingId,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
@@ -111,6 +113,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "godkjenttidspunkt" to godkjenttidspunkt,
         "automatiskBehandling" to automatiskBehandling,
         "skjæringstidspunkt" to skjæringstidspunkt,
+        "inntektsmeldingId" to inntektsmeldingId,
         "inntektFraInntektsmelding" to arbeidsgiver.inntekt(skjæringstidspunkt)?.reflection{ _, månedlig, _, _ -> månedlig },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )

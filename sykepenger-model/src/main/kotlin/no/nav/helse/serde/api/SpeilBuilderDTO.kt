@@ -43,6 +43,7 @@ data class VedtaksperiodeDTO(
     val godkjenttidspunkt: LocalDateTime?,
     val automatiskBehandlet: Boolean,
     val vilkår: VilkårDTO,
+    val inntektsmeldingId: UUID?,
     val inntektFraInntektsmelding: Double?,
     val totalbeløpArbeidstaker: Int,
     val hendelser: List<HendelseDTO>,

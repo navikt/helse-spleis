@@ -110,6 +110,7 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         godkjenttidspunkt = this["godkjenttidspunkt"] as LocalDateTime?,
         automatiskBehandlet = this["automatiskBehandling"] as Boolean? ?: false,
         vilkår = vilkår,
+        inntektsmeldingId = this["inntektsmeldingId"] as? UUID,
         inntektFraInntektsmelding = this["inntektFraInntektsmelding"] as? Double,
         totalbeløpArbeidstaker = this["totalbeløpArbeidstaker"] as Int,
         hendelser = hendelser,

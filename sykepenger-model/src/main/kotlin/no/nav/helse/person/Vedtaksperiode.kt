@@ -55,6 +55,7 @@ internal class Vedtaksperiode private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
+    private var inntektsmeldingId: UUID?,
     private var periode: Periode,
     private var sykmeldingsperiode: Periode,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
@@ -99,6 +100,7 @@ internal class Vedtaksperiode private constructor(
         sykdomshistorikk = Sykdomshistorikk(),
         sykdomstidslinje = Sykdomstidslinje(),
         hendelseIder = mutableListOf(),
+        inntektsmeldingId = null,
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalingstidslinje = Utbetalingstidslinje(),
@@ -397,6 +399,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
+        inntektsmeldingId = hendelse.meldingsreferanseId()
 
         val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(this)
         hendelse.førsteFraværsdag?.also {
@@ -686,6 +689,7 @@ internal class Vedtaksperiode private constructor(
     // oppdaget gap, var forlengelse
     private fun håndterGapVarForlengelse() {
         dataForVilkårsvurdering = null
+        tilbakestillInntektsmeldingId()
         håndterGap()
     }
 
@@ -698,14 +702,25 @@ internal class Vedtaksperiode private constructor(
     // er (fortsatt) forlengelse
     private fun håndterForlengelse(tilstøtende: Vedtaksperiode) {
         dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering
+        inntektsmeldingId = tilstøtende.inntektsmeldingId?.also {
+            hendelseIder.add(it)
+        }
         forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
         skjæringstidspunktFraInfotrygd = if (forlengelseFraInfotrygd == JA) tilstøtende.skjæringstidspunktFraInfotrygd else null
     }
 
     // oppdaget forlengelse fra IT, har ikke tilstøtende
     private fun håndterForlengelseIT(utbetalingshistorikk: Utbetalingshistorikk) {
+        tilbakestillInntektsmeldingId()
         forlengelseFraInfotrygd = JA
         skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
+    }
+
+    private fun tilbakestillInntektsmeldingId() {
+        inntektsmeldingId?.also {
+            hendelseIder.remove(it)
+            inntektsmeldingId = null
+        }
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"

@@ -217,9 +217,9 @@ internal abstract class AbstractEndToEndTest {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
-    ) {
+    ): UUID {
         assertFalse(inspektør.etterspurteBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag))
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
     }
 
     protected fun håndterInntektsmelding(
