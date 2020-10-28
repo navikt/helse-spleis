@@ -74,9 +74,11 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
         kontekst(person as Aktivitetskontekst)
     }
 
-    internal fun logg(kontekst: Aktivitetskontekst): Aktivitetslogg {
+    internal fun logg(vararg kontekst: Aktivitetskontekst): Aktivitetslogg {
         return Aktivitetslogg(this).also {
-            it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet -> kontekst in aktivitet })
+            it.aktiviteter.addAll(this.aktiviteter.filter { aktivitet ->
+                kontekst.any { it in aktivitet }
+            })
         }
     }
 

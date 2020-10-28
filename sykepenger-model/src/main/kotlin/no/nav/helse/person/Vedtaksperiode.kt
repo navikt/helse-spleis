@@ -23,6 +23,7 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -342,11 +343,6 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingArbeidsgiversøknad,
             UtbetalingFeilet
         )
-
-    internal fun foregåendeSomErBehandletUtenUtbetaling() =
-        arbeidsgiver.finnSykeperiodeRettFør(this)?.takeIf {
-            it.tilstand in listOf(AvsluttetUtenUtbetaling, AvsluttetUtenUtbetalingMedInntektsmelding)
-        }?.id
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
         arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.let {
@@ -1755,6 +1751,14 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val log = LoggerFactory.getLogger(Vedtaksperiode::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
+            val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {
+                it.tilstand in listOf(AvsluttetUtenUtbetaling, AvsluttetUtenUtbetalingMedInntektsmelding)
+            }
+            val aktivitetskontekster = listOfNotNull<Aktivitetskontekst>(vedtaksperiode, tidligereUbetalt)
+            return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
+        }
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder

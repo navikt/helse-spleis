@@ -375,24 +375,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         private val arbeidsgivere = mutableListOf<ArbeidsgiverDTO>()
-        private val aktivitetslogg = mutableListOf<AktivitetDTO>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
-        }
-
-        override fun visitWarn(
-            kontekster: List<SpesifikkKontekst>,
-            aktivitet: Aktivitetslogg.Aktivitet.Warn,
-            melding: String,
-            tidsstempel: String
-        ) {
-            kontekster.find { it.kontekstType == "Vedtaksperiode" }
-                ?.let { it.kontekstMap["vedtaksperiodeId"] }
-                ?.let(UUID::fromString)
-                ?.also { vedtaksperiodeId ->
-                    aktivitetslogg.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
-                }
         }
 
         override fun preVisitArbeidsgiver(
@@ -402,7 +387,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         ) {
             if (!arbeidsgiver.harHistorikk()) return
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
-            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere, aktivitetslogg))
+            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere))
         }
 
         override fun postVisitPerson(
@@ -418,8 +403,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val arbeidsgiver: Arbeidsgiver,
         private val arbeidsgiverMap: MutableMap<String, Any?>,
         private val fødselsnummer: String,
-        private val arbeidsgivere: MutableList<ArbeidsgiverDTO>,
-        private val aktivitetslogg: List<AktivitetDTO>
+        private val arbeidsgivere: MutableList<ArbeidsgiverDTO>
     ) : JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
@@ -495,7 +479,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
                     utbetalinger = utbetalinger,
-                    aktivitetslogg = aktivitetslogg,
                     hendelseIder = hendelseIder
                 )
             )
@@ -521,7 +504,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val fødselsnummer: String,
         private val inntekter: List<Inntektshistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
-        aktivitetslogg: List<AktivitetDTO>,
         private val hendelseIder: List<UUID>
     ) : JsonState {
         private var fullstendig = false
@@ -540,12 +522,31 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
             vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser()
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
-            val tidligerePeriodeId = vedtaksperiode.foregåendeSomErBehandletUtenUtbetaling()
-            vedtaksperiodeMap["aktivitetslogg"] =
-                aktivitetslogg.filter { it.vedtaksperiodeId in listOf(vedtaksperiodeReflect.id, tidligerePeriodeId) }.distinctBy { it.melding }
+            vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
             vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
             arbeidsgiverFagsystemId = vedtaksperiodeReflect.arbeidsgiverFagsystemId
             personFagsystemId = vedtaksperiodeReflect.personFagsystemId
+        }
+
+        private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
+            val aktiviteter = mutableListOf<AktivitetDTO>()
+            Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
+                .accept(object : AktivitetsloggVisitor {
+                override fun visitWarn(
+                    kontekster: List<SpesifikkKontekst>,
+                    aktivitet: Aktivitetslogg.Aktivitet.Warn,
+                    melding: String,
+                    tidsstempel: String
+                ) {
+                    kontekster.find { it.kontekstType == "Vedtaksperiode" }
+                        ?.let { it.kontekstMap["vedtaksperiodeId"] }
+                        ?.let(UUID::fromString)
+                        ?.also { vedtaksperiodeId ->
+                            aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
+                        }
+                }
+            })
+            return aktiviteter.distinctBy { it.melding }
         }
 
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
