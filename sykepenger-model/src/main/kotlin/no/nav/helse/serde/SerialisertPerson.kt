@@ -73,7 +73,7 @@ class SerialisertPerson(val json: String) {
         try {
             migrations.migrate(jsonNode)
         } catch (err: Exception) {
-            throw RuntimeException("Feil under migrering: ${err.message}", err)
+            throw JsonMigrationException("Feil under migrering: ${err.message}", err)
         }
     }
 
@@ -86,7 +86,7 @@ class SerialisertPerson(val json: String) {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
             return personData.createPerson()
         } catch (err: Exception) {
-            throw RuntimeException("Feil under oversetting til modellobjekter: ${err.message}", err)
+            throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
         }
     }
 }

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 internal fun List<JsonMigration>.migrate(jsonNode: JsonNode) =
     JsonMigration.migrate(this, jsonNode)
 
-// Understands a specific version of a JSON message
 // Implements GoF Command Pattern to perform migration
 internal abstract class JsonMigration(private val version: Int) {
     internal companion object {

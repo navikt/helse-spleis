@@ -2,6 +2,8 @@ package no.nav.helse.spleis
 
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.serde.DeserializationException
+import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.*
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -49,9 +51,19 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
         try {
             messageRecognized = true
-            sikkerLogg.info("gjenkjente melding id={} for fnr={} som {}:\n{}", message.id, message.fødselsnummer, message::class.simpleName, message.toJson())
+            sikkerLogg.info(
+                "gjenkjente melding id={} for fnr={} som {}:\n{}",
+                message.id,
+                message.fødselsnummer,
+                message::class.simpleName,
+                message.toJson()
+            )
             hendelseRepository.lagreMelding(message)
             hendelseMediator.behandle(message)
+        } catch (err: JsonMigrationException) {
+            severeErrorHandler(err, message)
+        } catch (err: DeserializationException) {
+            severeErrorHandler(err, message)
         } catch (err: Exception) {
             errorHandler(err, message)
         }
@@ -64,6 +76,11 @@ internal class MessageMediator(
     fun afterRiverHandling(message: String) {
         if (messageRecognized || riverErrors.isEmpty()) return
         sikkerLogg.warn("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+    }
+
+    private fun severeErrorHandler(err: Exception, message: HendelseMessage) {
+        errorHandler(err, message)
+        throw err
     }
 
     private fun errorHandler(err: Exception, message: HendelseMessage) {
