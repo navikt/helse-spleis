@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Toggles
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -174,7 +173,6 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMedInntektsmelding(inntektsmelding).also {
         if (!it) return it
         kontekst(inntektsmelding)
-        if (Toggles.mottattInntektsmeldingEventEnabled) mottattInntektsmelding()
         if (this.skalForkastesVedOverlapp()) {
             valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
         } else {
@@ -379,7 +377,7 @@ internal class Vedtaksperiode private constructor(
         block: () -> Unit = {}
     ) {
         if (tilstand == nyTilstand) return  // Already in this state => ignore
-        tilstand.leaving(event)
+        tilstand.leaving(this, event)
 
         val previousState = tilstand
 
@@ -506,9 +504,9 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun mottattInntektsmelding() {
-        this.person.mottattInntektsmelding(
-            PersonObserver.MottattInntektsmeldingEvent(
+    private fun trengerIkkeInntektsmelding() {
+        this.person.trengerIkkeInntektsmelding(
+            PersonObserver.TrengerIkkeInntektsmeldingEvent(
                 vedtaksperiodeId = this.id,
                 organisasjonsnummer = this.organisasjonsnummer,
                 fødselsnummer = this.fødselsnummer,
@@ -859,7 +857,7 @@ internal class Vedtaksperiode private constructor(
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {}
 
-        fun leaving(aktivitetslogg: IAktivitetslogg) {}
+        fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -1125,6 +1123,10 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             vedtaksperiode.trengerInntektsmelding()
         }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.trengerIkkeInntektsmelding()
+        }
     }
 
     internal object AvventerUferdigGap : Vedtaksperiodetilstand {
@@ -1145,7 +1147,11 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling.hendelse, AvventerHistorikk, AvventerInntektsmeldingFerdigGap)
+            vedtaksperiode.håndterMuligForlengelse(
+                gjenopptaBehandling.hendelse,
+                AvventerHistorikk,
+                AvventerInntektsmeldingFerdigGap
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1154,6 +1160,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             vedtaksperiode.trengerInntektsmelding()
+        }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.trengerIkkeInntektsmelding()
         }
     }
 
@@ -1246,6 +1256,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
             vedtaksperiode.trengerInntektsmelding()
+        }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
     }

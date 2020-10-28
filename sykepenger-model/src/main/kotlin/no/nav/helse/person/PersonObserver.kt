@@ -107,7 +107,7 @@ interface PersonObserver {
         val tom: LocalDate
     )
 
-    data class MottattInntektsmeldingEvent(
+    data class TrengerIkkeInntektsmeldingEvent(
         val vedtaksperiodeId: UUID,
         val fødselsnummer: String,
         val organisasjonsnummer: String,
@@ -148,7 +148,7 @@ interface PersonObserver {
 
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
 
-    fun mottattInntektsmelding(event: MottattInntektsmeldingEvent) {}
+    fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
 
     fun annullering(event: UtbetalingAnnullertEvent) {}
 }

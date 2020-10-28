@@ -158,8 +158,8 @@ class Person private constructor(
         observers.forEach { it.manglerInntektsmelding(event) }
     }
 
-    fun mottattInntektsmelding(event: PersonObserver.MottattInntektsmeldingEvent) {
-        observers.forEach { it.mottattInntektsmelding(event) }
+    fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {

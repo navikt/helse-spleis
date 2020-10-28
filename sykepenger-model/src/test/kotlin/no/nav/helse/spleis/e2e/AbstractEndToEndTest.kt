@@ -74,7 +74,6 @@ internal abstract class AbstractEndToEndTest {
     @AfterEach
     fun teardown() {
         Toggles.replayEnabled = false
-        Toggles.mottattInntektsmeldingEventEnabled = false
     }
 
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) {

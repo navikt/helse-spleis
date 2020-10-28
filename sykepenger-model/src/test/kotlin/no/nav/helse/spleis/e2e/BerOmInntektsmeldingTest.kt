@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -7,7 +8,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -39,7 +39,8 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertNoErrors(inspektør)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstander(2.vedtaksperiode,
+        assertTilstander(
+            2.vedtaksperiode,
             START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
@@ -68,7 +69,10 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100, ORGNUMMER)) // -> TIL_INFOTRYGD
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100, ORGNUMMER)
+        ) // -> TIL_INFOTRYGD
 
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
@@ -79,5 +83,67 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
+        håndterYtelser(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP
+        )
+
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_UFERDIG_GAP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 2.februar)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+            AVVENTER_UFERDIG_GAP
+        )
+
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK
+        )
+
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
 }

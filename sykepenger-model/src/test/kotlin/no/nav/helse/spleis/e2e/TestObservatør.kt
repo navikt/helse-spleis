@@ -8,7 +8,7 @@ internal class TestObservatør : PersonObserver {
     internal val tilstander = mutableMapOf<UUID, MutableList<TilstandType>>()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
-    val mottattInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
+    val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val hendelserTilReplay = mutableMapOf<UUID, List<UUID>>()
     val vedtaksperioder = mutableSetOf<UUID>()
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
@@ -29,8 +29,8 @@ internal class TestObservatør : PersonObserver {
         manglendeInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
     }
 
-    override fun mottattInntektsmelding(event: PersonObserver.MottattInntektsmeldingEvent) {
-        mottattInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
+    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+        trengerIkkeInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {

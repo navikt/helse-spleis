@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.PersonObserver
@@ -2110,32 +2109,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-    }
-
-    @Test
-    fun `Sender ut event om mottatt inntektsmelding`() {
-        Toggles.mottattInntektsmeldingEventEnabled = true
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
-        håndterInntektsmelding(listOf(Periode(1.januar(2020), 16.januar(2020))))
-
-        assertEquals(1, observatør.mottattInntektsmeldingVedtaksperioder.size)
-    }
-
-    @Test
-    fun `Sender ikke ut event om mottatt inntektsmelding hvis toggle er av`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
-        håndterInntektsmelding(listOf(Periode(1.januar(2020), 16.januar(2020))))
-
-        assertEquals(0, observatør.mottattInntektsmeldingVedtaksperioder.size)
-    }
-
-    @Test
-    fun `Sender ikke ut event om mottatt inntektsmelding hvis det ikke finnes noen overlappende vedtaksperiode`() {
-        Toggles.mottattInntektsmeldingEventEnabled = true
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100))
-        håndterInntektsmelding(listOf(Periode(3.mars(2020), 16.mars(2020))))
-
-        assertEquals(0, observatør.mottattInntektsmeldingVedtaksperioder.size)
     }
 
     @Test

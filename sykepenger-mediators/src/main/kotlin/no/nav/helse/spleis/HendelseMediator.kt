@@ -404,9 +404,9 @@ internal class HendelseMediator(
                 )
             }
 
-            override fun mottattInntektsmelding(event: PersonObserver.MottattInntektsmeldingEvent) {
+            override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
                 queueMessage(
-                    "mottatt_inntektsmelding", JsonMessage.newMessage(
+                    "trenger_ikke_inntektsmelding", JsonMessage.newMessage(
                         mapOf(
                             "vedtaksperiodeId" to event.vedtaksperiodeId,
                             "fom" to event.fom,
