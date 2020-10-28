@@ -11,12 +11,9 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.opentest4j.AssertionFailedError
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
@@ -1960,14 +1957,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar, 100))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.februar, 10.februar, 100))
-        håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.utbetalinger[0].erUtbetalt())
         assertTrue(inspektør.utbetalinger[1].erAnnullert())
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
-        håndterKansellerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         assertEquals(2, inspektør.utbetalinger.size)
     }
 

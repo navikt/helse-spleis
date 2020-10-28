@@ -408,15 +408,19 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagKansellerUtbetaling(fagsystemId: String): String {
+    fun lagAnnullering(fagsystemId: String): String {
         return nyHendelse(
-            "kanseller_utbetaling", mapOf(
+            "annullering", mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "fagsystemId" to fagsystemId,
-                "saksbehandler" to "Ola Nordmann",
-                "saksbehandlerEpost" to "tbd@nav.no"
+                "saksbehandler" to mapOf(
+                    "navn" to "Siri Saksbhandler",
+                    "epostaddresse" to "siri.saksbehandler@nav.no",
+                    "oid" to "${UUID.randomUUID()}",
+                    "ident" to "S1234567",
+                )
             )
         )
     }

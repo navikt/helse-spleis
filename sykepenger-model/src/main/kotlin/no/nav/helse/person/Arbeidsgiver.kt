@@ -250,7 +250,7 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.toList().any { it.håndter(påminnelse) }
     }
 
-    internal fun håndter(hendelse: KansellerUtbetaling) {
+    internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
@@ -267,20 +267,20 @@ internal class Arbeidsgiver private constructor(
             return
         }
         if(!sisteUtbetaling.erUtbetalt()) {
-            hendelse.error("Kan ikke kansellere. Siste utbetaling er feilet eller ikke fullført %s", hendelse.fagsystemId)
+            hendelse.error("Kan ikke annullere. Siste utbetaling er feilet eller ikke fullført %s", hendelse.fagsystemId)
             return
         }
         if (sisteUtbetaling.erAnnullert()) {
-            hendelse.info("Forsøkte å kansellere en utbetaling som allerede er annullert")
+            hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
             return
         }
-        val utbetaling = sisteUtbetaling.kansellerUtbetaling(hendelse.aktivitetslogg)
+        val utbetaling = sisteUtbetaling.annuller(hendelse.aktivitetslogg)
         utbetalinger.add(utbetaling)
         sendUtbetalingsbehov(
             aktivitetslogg = hendelse.aktivitetslogg,
             oppdrag = utbetaling.arbeidsgiverOppdrag(),
             godkjenttidspunkt = hendelse.opprettet,
-            saksbehandler = hendelse.saksbehandler,
+            saksbehandler = hendelse.saksbehandlerIdent,
             saksbehandlerEpost = hendelse.saksbehandlerEpost,
             annullering = true
         )

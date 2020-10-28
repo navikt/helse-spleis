@@ -237,8 +237,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagRollbackDelete())
     }
 
-    protected fun sendKansellerUtbetaling(fagsystemId: String) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagKansellerUtbetaling(fagsystemId))
+    protected fun sendAnnullering(fagsystemId: String) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering(fagsystemId))
     }
 
     protected fun sendOverstyringTidslinje(dager: List<ManuellOverskrivingDag>) {

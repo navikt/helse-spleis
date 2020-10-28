@@ -17,12 +17,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
+internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling(orgnummer = "999999")
+        håndterAnnullerUtbetaling(orgnummer = "999999")
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
         }
@@ -31,17 +31,17 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `avvis hvis vi ikke finner fagsystemId`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling(fagsystemId = "unknown")
+        håndterAnnullerUtbetaling(fagsystemId = "unknown")
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, it.sisteTilstand(0))
         }
     }
 
     @Test
-    fun `kanseller siste utbetaling`() {
+    fun `annuller siste utbetaling`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         val behovTeller = inspektør.personLogg.behov().size
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt(inspektør) {
             !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
             val behov = sisteBehov(Behovtype.Utbetaling)
@@ -82,11 +82,11 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `Kanseller flere fagsystemid for samme arbeidsgiver`() {
+    fun `Annuller flere fagsystemid for samme arbeidsgiver`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         nyttVedtak(1.mars, 31.mars, 100, 1.mars)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
         sjekkAt(speilApi().arbeidsgivere[0]) {
             vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
@@ -96,7 +96,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
         sisteBehovErAnnullering(1.vedtaksperiode)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         sjekkAt(speilApi().arbeidsgivere[0]) {
@@ -108,12 +108,12 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kanseller flere fagsystemid for samme arbeidsgiver, utenom den i midten`() {
+    fun `Annuller flere fagsystemid for samme arbeidsgiver, utenom den i midten`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         nyttVedtak(1.mars, 31.mars, 100, 1.mars)
         nyttVedtak(1.mai, 31.mai, 100, 1.mai)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
         sjekkAt(speilApi().arbeidsgivere[0]) {
             vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
@@ -127,7 +127,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             hentLinjer()[0]["statuskode"] er "OPPH"
         }
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(3.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(3.vedtaksperiode))
         håndterUtbetalt(3.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         sjekkAt(speilApi().arbeidsgivere[0]) {
@@ -162,10 +162,10 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kanseller oppdrag som er under utbetaling feiler`() {
+    fun `Annuller oppdrag som er under utbetaling feiler`() {
         tilGodkjent(3.januar, 26.januar, 100, 3.januar)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt(inspektør) {
             personLogg.hasErrorsOrWorse() ellers personLogg.toString()
         }
@@ -178,11 +178,11 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kanseller av oppdrag med feilet utbetaling feiler`() {
+    fun `Annuller av oppdrag med feilet utbetaling feiler`() {
         tilGodkjent(3.januar, 26.januar, 100, 3.januar)
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.FEIL)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt(inspektør) {
             personLogg.hasErrorsOrWorse() ellers personLogg.toString()
         }
@@ -196,11 +196,11 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `Kan ikke kansellere hvis noen vedtaksperioder er til utbetaling`() {
+    fun `Kan ikke annullere hvis noen vedtaksperioder er til utbetaling`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         tilGodkjent(1.mars, 31.mars, 100, 1.mars)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
 
         sjekkAt(inspektør) {
             personLogg.hasErrorsOrWorse() ellers personLogg.toString()
@@ -221,7 +221,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         tilSimulert(1.mars, 31.mars, 100, 1.mars)
         forlengPeriode(1.april, 30.april, 100)
 
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         sjekkAt(inspektør) {
@@ -254,7 +254,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.FEIL, annullert = true)
 
         sjekkAt(inspektør) {
@@ -273,7 +273,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(0))
         }
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
@@ -290,7 +290,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1))
             assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(2))
         }
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
@@ -313,7 +313,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Periode som håndterer godkjent annullering i TilAnnullering blir forkastet`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling()
+        håndterAnnullerUtbetaling()
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
@@ -327,7 +327,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Periode som håndterer avvist annullering i TilAnnullering blir værende i TilAnnullering`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteForkastetTilstand(0))
         }
@@ -350,7 +350,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2))
         }
         val behovTeller = inspektør.personLogg.behov().size
-        håndterKansellerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
@@ -363,7 +363,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `publiserer et event ved annullering`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterKansellerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(
             1.vedtaksperiode,
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
@@ -391,7 +391,7 @@ internal class KansellerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(27.januar, 20.februar, 100)
         assertEquals(2, observatør.vedtaksperioder.size)
 
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalt(
             1.vedtaksperiode,
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,

@@ -6,9 +6,9 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
+internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
-        KansellerUtbetalingerRiver(rapidsConnection, mediator)
+        AnnullerUtbetalingerRiver(rapidsConnection, mediator)
     }
 
     @Test
@@ -22,18 +22,21 @@ internal class KansellerUtbetalingerRiverRiverTest : RiverTest() {
     }
 
     @Language("JSON")
-    private val json = """
-    {
-        "@id": "${UUID.randomUUID()}",
-        "@opprettet": "2020-01-24T11:25:00",
-        "@event_name": "kanseller_utbetaling",
-        "aktørId": "999",
-        "fødselsnummer": "08127411111",
-        "organisasjonsnummer": "orgnummer",
-        "fagsystemId": "ABCD1234",
-        "saksbehandler": "Ola Nordmann",
-        "saksbehandlerEpost": "tbd@nav.no"
+    private val json = """{
+    "@id": "${UUID.randomUUID()}",
+    "@opprettet": "2020-01-24T11:25:00",
+    "@event_name": "annullering",
+    "aktørId": "999",
+    "fødselsnummer": "08127411111",
+    "organisasjonsnummer": "orgnummer",
+    "fagsystemId": "ABCD1234",
+    "saksbehandler": {
+        "navn": "Siri Saksbhandler",
+        "epostaddresse": "siri.saksbehandler@nav.no",
+        "oid": "${UUID.randomUUID()}",
+        "ident": "S1234567"
     }
+}
 """.trimIndent()
 
     @Language("JSON")

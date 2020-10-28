@@ -69,7 +69,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
 
         assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
     }
@@ -93,7 +93,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
@@ -114,7 +114,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemId)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100))
@@ -151,7 +151,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterKansellerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode,

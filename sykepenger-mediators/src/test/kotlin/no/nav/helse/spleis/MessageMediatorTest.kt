@@ -35,9 +35,9 @@ internal class MessageMediatorTest {
     }
 
     @Test
-    fun `kanseller utbetaling`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagKansellerUtbetaling("123456789"))
-        assertTrue(hendelseMediator.lestKansellerUtbetaling)
+    fun `annullerer utbetaling`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAnnullering("123456789"))
+        assertTrue(hendelseMediator.lestAnnullerUtbetaling)
     }
 
     @Test

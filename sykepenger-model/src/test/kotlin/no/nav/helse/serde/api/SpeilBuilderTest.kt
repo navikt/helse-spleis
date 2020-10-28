@@ -1333,13 +1333,13 @@ class SpeilBuilderTest {
             godkjenttidspunkt = LocalDateTime.now(),
             annullert = false
         )
-        private fun annullering(fagsystemId: String) = KansellerUtbetaling(
+        private fun annullering(fagsystemId: String) = AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             fagsystemId = fagsystemId,
-            saksbehandler = "en_saksbehandler_ident",
+            saksbehandlerIdent = "en_saksbehandler_ident",
             saksbehandlerEpost = "saksbehandler@nav.no",
             opprettet = LocalDateTime.now()
         )

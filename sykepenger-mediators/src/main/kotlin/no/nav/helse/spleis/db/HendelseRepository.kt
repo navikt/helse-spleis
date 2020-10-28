@@ -48,7 +48,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
             is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
             is UtbetalingMessage -> UTBETALING
-            is KansellerUtbetalingMessage -> KANSELLER_UTBETALING
+            is AnnulleringMessage -> KANSELLER_UTBETALING
             is UtbetalingshistorikkMessage -> return // ignore UtbetalingshistorikkMessage
             is RollbackMessage -> ROLLBACK
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")

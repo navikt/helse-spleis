@@ -162,7 +162,7 @@ class Person private constructor(
         observers.forEach { it.mottattInntektsmelding(event) }
     }
 
-    fun håndter(hendelse: KansellerUtbetaling) {
+    fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
             ?: hendelse.error("Finner ikke arbeidsgiver")

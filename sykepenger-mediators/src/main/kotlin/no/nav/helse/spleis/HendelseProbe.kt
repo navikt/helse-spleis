@@ -60,7 +60,7 @@ object HendelseProbe {
         tell("SøknadArbeidsgiver")
     }
 
-    fun onKansellerUtbetaling() {
+    fun onAnnullerUtbetaling() {
         tell("KansellerUtbetaling")
     }
 

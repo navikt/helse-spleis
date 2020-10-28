@@ -110,7 +110,7 @@ internal class Utbetaling private constructor(
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
-    internal fun kansellerUtbetaling(aktivitetslogg: Aktivitetslogg) = Utbetaling(
+    internal fun annuller(aktivitetslogg: Aktivitetslogg) = Utbetaling(
         utbetalingstidslinje,
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, aktivitetslogg),
         personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),

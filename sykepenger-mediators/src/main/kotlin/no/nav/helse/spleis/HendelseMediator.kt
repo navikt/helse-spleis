@@ -127,10 +127,10 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling) {
-        håndter(message, kansellerUtbetaling) { person ->
-            HendelseProbe.onKansellerUtbetaling()
-            person.håndter(kansellerUtbetaling)
+    override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling) {
+        håndter(message, annullerUtbetaling) { person ->
+            HendelseProbe.onAnnullerUtbetaling()
+            person.håndter(annullerUtbetaling)
         }
     }
 
@@ -453,7 +453,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingOverførtMessage, utbetaling: UtbetalingOverført)
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse)
     fun behandle(message: SimuleringMessage, simulering: Simulering)
-    fun behandle(message: KansellerUtbetalingMessage, kansellerUtbetaling: KansellerUtbetaling)
+    fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling)
     fun behandle(message: RollbackMessage, rollback: Rollback)
     fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)

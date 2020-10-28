@@ -45,7 +45,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `perioder påvirket av "kanseller utbetaling"-event blir forkastet men forblir i Avsluttet`() {
+    fun `perioder påvirket av annullering-event blir forkastet men forblir i Avsluttet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -55,7 +55,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling(0)
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
-        sendKansellerUtbetaling(fagsystemId)
+        sendAnnullering(fagsystemId)
 
         assertForkastedeTilstander(
             0,
@@ -137,7 +137,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling(0, utbetalingOK = true)
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
-        sendKansellerUtbetaling(fagsystemId)
+        sendAnnullering(fagsystemId)
         sendUtbetaling(0, fagsystemId = fagsystemId, utbetalingOK = true, saksbehandlerEpost = "tbd@nav.no", annullert = true)
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)

@@ -411,18 +411,18 @@ internal abstract class AbstractEndToEndTest {
         )
     }
 
-    protected fun håndterKansellerUtbetaling(
+    protected fun håndterAnnullerUtbetaling(
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId()
     ) {
         person.håndter(
-            KansellerUtbetaling(
+            AnnullerUtbetaling(
                 meldingsreferanseId = UUID.randomUUID(),
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
                 fagsystemId = fagsystemId,
-                saksbehandler = "Ola Nordmann",
+                saksbehandlerIdent = "Ola Nordmann",
                 saksbehandlerEpost = "tbd@nav.no",
                 opprettet = LocalDateTime.now()
             )
