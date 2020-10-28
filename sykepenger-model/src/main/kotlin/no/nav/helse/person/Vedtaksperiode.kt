@@ -436,7 +436,6 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
-            .also { trengerInntektsmelding() }
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -1064,7 +1063,6 @@ internal class Vedtaksperiode private constructor(
             validation(ytelser) {
                 onError {
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
-                        .also { vedtaksperiode.trengerInntektsmelding() }
                 }
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand

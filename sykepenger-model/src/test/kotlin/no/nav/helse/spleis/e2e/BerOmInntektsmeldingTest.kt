@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
@@ -62,18 +61,6 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
-        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-    }
-
-    @Test
-    fun `vedtaksperiode med søknad som går til infotrygd ber om inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100))
-        håndterYtelser(
-            1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(18.januar, 21.januar, 15000, 100, ORGNUMMER)
-        ) // -> TIL_INFOTRYGD
-
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
