@@ -376,6 +376,7 @@ internal class HendelseMediator(
                             "automatiskBehandling" to event.automatiskBehandling,
                             "opprettet" to event.opprettet,
                             "sykepengegrunnlag" to event.sykepengegrunnlag,
+                            "månedsinntekt" to event.månedsinntekt,
                             "maksdato" to event.maksdato
                         )
                     )
