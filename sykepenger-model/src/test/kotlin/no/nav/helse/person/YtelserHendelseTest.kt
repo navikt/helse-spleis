@@ -8,25 +8,16 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 
-internal class YtelserHendelseTest {
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val ORGNR = "12345"
+internal class YtelserHendelseTest : AbstractPersonTest() {
+    private companion object {
         private val førsteSykedag = 1.januar
         private val sisteSykedag = 31.januar
-    }
-
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
     }
 
     @Test
@@ -34,19 +25,19 @@ internal class YtelserHendelseTest {
         assertThrows<Aktivitetslogg.AktivitetException> { person.håndter(ytelser(vedtaksperiodeId = UUID.randomUUID())) }
 
         person.håndter(sykmelding())
-        person.håndter(ytelser())
+        person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(søknad())
-        person.håndter(ytelser())
+        person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(inntektsmelding())
-        person.håndter(ytelser())
+        person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -59,14 +50,14 @@ internal class YtelserHendelseTest {
                     sisteHistoriskeSykedag,
                     1000,
                     100,
-                    ORGNR
+                    ORGNUMMER
                 )
             ),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     sisteHistoriskeSykedag.minusDays(30),
                     20000.månedlig,
-                    ORGNR,
+                    ORGNUMMER,
                     true
                 )
             )
@@ -76,53 +67,57 @@ internal class YtelserHendelseTest {
     @Test
     fun `ugyldig utbetalinghistorikk før inntektsmelding kaster perioden ut`() {
         håndterUgyldigYtelser()
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
         håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null)))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `fordrepengeytelse før periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
         person.håndter(simulering())
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
     fun `fordrepengeytelse i periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `fordrepengeytelse etter periode`() {
         håndterYtelser(foreldrepengeytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
         person.håndter(simulering())
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse før periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(10), førsteSykedag.minusDays(1)))
         person.håndter(simulering())
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse i periode`() {
         håndterYtelser(svangerskapsytelse = Periode(førsteSykedag.minusDays(2), førsteSykedag))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
     fun `svangerskapsytelse etter periode`() {
         håndterYtelser(svangerskapsytelse = Periode(sisteSykedag.plusDays(1), sisteSykedag.plusDays(10)))
         person.håndter(simulering())
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     private fun håndterYtelser(
@@ -137,6 +132,7 @@ internal class YtelserHendelseTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(
             ytelser(
+                vedtaksperiodeId = 1.vedtaksperiode,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 foreldrepengeYtelse = foreldrepengeytelse,
@@ -150,6 +146,7 @@ internal class YtelserHendelseTest {
         person.håndter(søknad())
         person.håndter(
             ytelser(
+                vedtaksperiodeId = 1.vedtaksperiode,
                 utbetalinger = listOf(Utbetalingshistorikk.Periode.Ugyldig(null, null)),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
@@ -158,7 +155,7 @@ internal class YtelserHendelseTest {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
+        vedtaksperiodeId: UUID,
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
@@ -169,14 +166,14 @@ internal class YtelserHendelseTest {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = "$vedtaksperiodeId",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = "$vedtaksperiodeId",
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 aktivitetslogg = it
@@ -211,7 +208,7 @@ internal class YtelserHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
             mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         )
@@ -221,7 +218,7 @@ internal class YtelserHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -238,7 +235,7 @@ internal class YtelserHendelseTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = refusjon,
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
@@ -252,19 +249,19 @@ internal class YtelserHendelseTest {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioder {
                 1.januar(2018) til 1.desember(2018) inntekter {
-                    ORGNR inntekt 31000.månedlig
+                    ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
-                    Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017))
+                    Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
                 )
             ),
             dagpenger = Dagpenger(emptyList()),
@@ -274,10 +271,10 @@ internal class YtelserHendelseTest {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             simuleringOK = true,
             melding = "",
             simuleringResultat = null

@@ -6,39 +6,26 @@ import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class VilkårsgrunnlagHendelseTest {
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val ORGNR = "12345"
-    }
-
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
+internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private lateinit var hendelse: ArbeidstakerHendelse
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
 
     @Test
     fun `ingen inntekt`() {
         håndterVilkårsgrunnlag(inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
         assertTrue(person.aktivitetslogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -49,7 +36,8 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -60,7 +48,8 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -68,17 +57,17 @@ internal class VilkårsgrunnlagHendelseTest {
         håndterVilkårsgrunnlag(
             inntekter = inntektperioder {
                 1.januar(2017) til 1.april(2017) inntekter {
-                    ORGNR inntekt 12000.månedlig
+                    ORGNUMMER inntekt 12000.månedlig
                 }
                 1.mai(2017) til 1.september(2017) inntekter {
-                    ORGNR inntekt 20000.månedlig
+                    ORGNUMMER inntekt 20000.månedlig
                 }
             },
             arbeidsforhold = ansattSidenStart2017()
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(148000.årlig, inspektør.vilkårsgrunnlag(0)?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(148000.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
@@ -91,17 +80,16 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
         val historikkFom = inspektør.sykdomstidslinje.førsteDag().minusYears(4)
         val historikkTom = inspektør.sykdomstidslinje.sisteDag()
-        val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
         assertEquals(
             historikkFom.toString(),
-            hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkFom")
+            hendelse.etterspurtBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk, "historikkFom")
         )
         assertEquals(
             historikkTom.toString(),
-            hendelse.etterspurtBehov(vedtaksperiodeId, Behovtype.Sykepengehistorikk, "historikkTom")
+            hendelse.etterspurtBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk, "historikkTom")
         )
     }
 
@@ -115,17 +103,15 @@ internal class VilkårsgrunnlagHendelseTest {
                 arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
             )
         )
-        val vedtaksperiodeId = inspektør.vedtaksperiodeId(0)
-
         val inntektsberegningStart =
             hendelse.etterspurtBehov<String>(
-                vedtaksperiodeId,
+                1.vedtaksperiode,
                 Behovtype.InntekterForSammenligningsgrunnlag,
                 "beregningStart"
             )
         val inntektsberegningSlutt =
             hendelse.etterspurtBehov<String>(
-                vedtaksperiodeId,
+                1.vedtaksperiode,
                 Behovtype.InntekterForSammenligningsgrunnlag,
                 "beregningSlutt"
             )
@@ -144,7 +130,8 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -158,16 +145,17 @@ internal class VilkårsgrunnlagHendelseTest {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     private fun ansattSidenStart2017() =
-        listOf(Opptjeningvurdering.Arbeidsforhold(ORGNR, 1.januar(2017)))
+        listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioder {
         1.januar(2017) til 1.desember(2017) inntekter {
-            ORGNR inntekt beregnetInntekt
+            ORGNUMMER inntekt beregnetInntekt
         }
     }
 
@@ -188,7 +176,7 @@ internal class VilkårsgrunnlagHendelseTest {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "aktørId",
-        orgnummer = ORGNR,
+        orgnummer = ORGNUMMER,
         sykeperioder = perioder,
         mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
@@ -201,7 +189,7 @@ internal class VilkårsgrunnlagHendelseTest {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = "aktørId",
-        orgnummer = ORGNR,
+        orgnummer = ORGNUMMER,
         perioder = perioder,
         harAndreInntektskilder = false,
         sendtTilNAV = 31.januar.atStartOfDay(),
@@ -217,7 +205,7 @@ internal class VilkårsgrunnlagHendelseTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
@@ -236,10 +224,10 @@ internal class VilkårsgrunnlagHendelseTest {
     ) =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),

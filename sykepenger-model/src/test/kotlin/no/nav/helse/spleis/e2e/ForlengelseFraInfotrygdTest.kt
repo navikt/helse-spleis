@@ -12,8 +12,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -52,8 +51,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Inntektsopplysning(1.juli(2020), INNTEKT, ORGNUMMER, true)
         )
 
-        assertEquals(18.mars(2020), inspektør.skjæringstidspunkt(0))
-        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
+        assertEquals(18.mars(2020), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
 
         håndterSykmelding(Sykmeldingsperiode(1.september(2020), 30.september(2020), 100))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.september(2020), 30.september(2020), 100))
@@ -63,8 +62,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertEquals(18.mars(2020), inspektør.skjæringstidspunkt(0))
-        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
+        assertEquals(18.mars(2020), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
     @Test
@@ -88,8 +87,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
-        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
     @Test
@@ -119,7 +118,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
+        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
     @Test
@@ -183,7 +182,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 
     @Test
@@ -301,7 +300,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertEquals(inspektør.maksdato(3.vedtaksperiode), inspektør.forkastetMaksdato(0))
+        assertEquals(inspektør.maksdato(3.vedtaksperiode), inspektør.maksdato(1.vedtaksperiode))
     }
 
     @Test
@@ -436,8 +435,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(inspektør.forlengelseFraInfotrygd(0), inspektør.forlengelseFraInfotrygd(1))
+        assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+        assertEquals(inspektør.forlengelseFraInfotrygd(2.vedtaksperiode), inspektør.forlengelseFraInfotrygd(3.vedtaksperiode))
     }
 
     @Test
@@ -490,8 +489,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(inspektør.forlengelseFraInfotrygd(0), inspektør.forlengelseFraInfotrygd(1))
+        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+        assertEquals(inspektør.forlengelseFraInfotrygd(2.vedtaksperiode), inspektør.forlengelseFraInfotrygd(3.vedtaksperiode))
     }
 
     @Test
@@ -517,7 +516,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         inspektør.apply {
             assertTrue(etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
-                utbetalingstidslinjer(vedtaksperiodeId(0))
+                utbetalingstidslinjer(1.vedtaksperiode)
                     .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
             )
         }
@@ -566,14 +565,16 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
         inspektør.apply {
             assertTrue(etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
-                utbetalingstidslinjer(vedtaksperiodeId(0))
+                utbetalingstidslinjer(2.vedtaksperiode)
                     .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
             )
             assertTrue(
-                utbetalingstidslinjer(forkastetVedtaksperiodeId(0))
+                utbetalingstidslinjer(1.vedtaksperiode)
                     .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isNotEmpty()
             )
         }

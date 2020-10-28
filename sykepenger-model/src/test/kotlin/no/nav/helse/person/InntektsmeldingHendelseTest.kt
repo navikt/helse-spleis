@@ -12,22 +12,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class InntektsmeldingHendelseTest {
+internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val AKTØRID = "12345"
-        private const val ORGNR = "987654321"
         private val INNTEKT_PR_MÅNED = 12340.månedlig
-    }
-
-    private lateinit var person: Person
-
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018)
     }
 
     @Test
@@ -41,10 +29,10 @@ internal class InntektsmeldingHendelseTest {
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
-        assertEquals(6.januar, inspektør.skjæringstidspunkt(0))
+        assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(0))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 
     @Test
@@ -52,7 +40,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -62,7 +50,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -72,7 +60,7 @@ internal class InntektsmeldingHendelseTest {
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -90,7 +78,7 @@ internal class InntektsmeldingHendelseTest {
         assertTrue(inspektør.personLogg.hasWarningsOrWorse())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -98,7 +86,7 @@ internal class InntektsmeldingHendelseTest {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, INNTEKT_PR_MÅNED, emptyList()),
-            orgnummer = ORGNR,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
@@ -111,13 +99,13 @@ internal class InntektsmeldingHendelseTest {
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
         person.håndter(inntektsmelding)
-        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = 1000.månedlig,
         førsteFraværsdag: LocalDate = 1.januar,
-        virksomhetsnummer: String = ORGNR
+        virksomhetsnummer: String = ORGNUMMER
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
@@ -133,7 +121,7 @@ internal class InntektsmeldingHendelseTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNR) = Sykmelding(
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNUMMER) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
@@ -142,7 +130,7 @@ internal class InntektsmeldingHendelseTest {
         mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
     )
 
-    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNR) =
+    private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNUMMER) =
         Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,

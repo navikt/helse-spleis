@@ -30,26 +30,18 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
 
-internal abstract class AbstractEndToEndTest {
+internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected companion object {
-        const val UNG_PERSON_FNR_2018 = "12020052345"
-        const val AKTØRID = "42"
-        const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
     }
 
-    protected lateinit var person: Person
-    protected lateinit var observatør: TestObservatør
-    protected val inspektør get() = TestArbeidsgiverInspektør(person)
     fun speilApi () = serializePersonForSpeil(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     private val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknad.Søknadsperiode>>>()
     private val inntektsmeldinger = mutableMapOf<UUID, InntektsmeldingData>()
-
-    protected val Int.vedtaksperiode get() = vedtaksperiodeId(this - 1)
 
     private data class InntektsmeldingData(
         val arbeidsgiverperioder: List<Periode>,
@@ -64,8 +56,6 @@ internal abstract class AbstractEndToEndTest {
 
     @BeforeEach
     internal fun abstractSetup() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018)
-        observatør = TestObservatør().also { person.addObserver(it) }
         sykmeldinger.clear()
         søknader.clear()
         inntektsmeldinger.clear()
@@ -114,10 +104,8 @@ internal abstract class AbstractEndToEndTest {
         assertEquals(antall, observatør.hendelserTilReplay.size)
     }
 
-    private fun vedtaksperiodeId(indeks: Int) = observatør.vedtaksperioder.toList()[indeks]
-
     private fun vedtaksperiodeIndeks(id: UUID): String {
-        val index = observatør.vedtaksperioder.indexOf(id)
+        val index = observatør.vedtaksperiodeIndeks(ORGNUMMER, id)
         return "${index + 1}.vedtaksperiode"
     }
 
@@ -730,7 +718,7 @@ internal abstract class AbstractEndToEndTest {
         førsteFraværsdag: LocalDate
     ): UUID {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        val id = observatør.vedtaksperioder.toList().last()
+        val id = observatør.sisteVedtaksperiode()
         håndterInntektsmeldingMedValidering(
             id,
             listOf(Periode(fom, fom.plusDays(15))),
@@ -745,7 +733,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        val id = observatør.vedtaksperioder.toList().last()
+        val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
         håndterYtelser(id)   // No history
         håndterSimulering(id)
@@ -755,7 +743,7 @@ internal abstract class AbstractEndToEndTest {
 
     protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-        val id = observatør.vedtaksperioder.toList().last()
+        val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
     }
 

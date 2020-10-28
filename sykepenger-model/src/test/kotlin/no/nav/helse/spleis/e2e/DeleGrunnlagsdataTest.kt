@@ -44,10 +44,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt(4.vedtaksperiode)
 
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
-        assertNotEquals(inspektør.vilkårsgrunnlag(2), inspektør.vilkårsgrunnlag(3))
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
+        assertNotEquals(inspektør.vilkårsgrunnlag(3.vedtaksperiode), inspektør.vilkårsgrunnlag(4.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(1.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
         assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
@@ -68,10 +68,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(5.april, 30.april, 100))
 
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(2))
-        assertNull(inspektør.vilkårsgrunnlag(3))
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(3.vedtaksperiode))
+        assertNull(inspektør.vilkårsgrunnlag(4.vedtaksperiode))
     }
 
     @Test
@@ -95,10 +95,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNull(inspektør.vilkårsgrunnlag(0))
-        assertNull(inspektør.vilkårsgrunnlag(1))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1))
+        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
     }
 
     @Test
@@ -128,10 +128,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP
         )
-        assertNull(inspektør.vilkårsgrunnlag(0))
-        assertNull(inspektør.vilkårsgrunnlag(1))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1))
+        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
     @Test
@@ -165,11 +165,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK
         )
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1))
-        assertEquals(18.januar, inspektør.skjæringstidspunkt(0))
-        assertEquals(18.januar, inspektør.skjæringstidspunkt(1))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+        assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test
@@ -201,11 +201,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK
         )
-        assertEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(0))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(1))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test
@@ -236,10 +236,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_VILKÅRSPRØVING_GAP
         )
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertNull(inspektør.vilkårsgrunnlag(1))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(0))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1))
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
     @Test
@@ -266,8 +266,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
-        assertNotNull(inspektør.vilkårsgrunnlag(0))
-        assertNotNull(inspektør.vilkårsgrunnlag(1))
-        assertNotEquals(inspektør.vilkårsgrunnlag(0), inspektør.vilkårsgrunnlag(1))
+        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 }

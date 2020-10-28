@@ -627,7 +627,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(8, it.dagtelling[Feriedag::class])
             assertEquals(1, it.dagtelling[Dag.Arbeidsdag::class])
 
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(8, tidslinjeInspektør.dagtelling[Fridag::class])
                 assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
@@ -666,7 +666,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(6, it.dagtelling[SykHelgedag::class])
             assertEquals(8, it.dagtelling[Feriedag::class])
 
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(8, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(8, tidslinjeInspektør.dagtelling[Fridag::class])
                 assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
@@ -705,7 +705,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             assertEquals(7, it.dagtelling[Dag.Arbeidsdag::class])
             assertEquals(2, it.dagtelling[FriskHelgedag::class])
 
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(0)).also { tidslinjeInspektør ->
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(2, tidslinjeInspektør.dagtelling[Fridag::class])
                 assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
@@ -870,7 +870,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(0))
+        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertFalse(inspektør.personLogg.hasWarningsOrWorse())
         assertTilstander(
             1.vedtaksperiode,
@@ -991,8 +991,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 9.juli)
 
         inspektør.also {
-            assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(0).periode())
-            assertEquals(Periode(9.juli, 31.juli), it.vedtaksperioder(1).periode())
+            assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(1.vedtaksperiode).periode())
+            assertEquals(Periode(9.juli, 31.juli), it.vedtaksperioder(2.vedtaksperiode).periode())
         }
     }
 
@@ -1070,7 +1070,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode, historikk)
 
-        assertEquals(40, 248 - inspektør.gjenståendeSykedager(0))
+        assertEquals(40, 248 - inspektør.gjenståendeSykedager(2.vedtaksperiode))
     }
 
     @Test

@@ -10,19 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SykmeldingHendelseTest {
-
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-    }
-
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
+internal class SykmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
@@ -31,7 +19,7 @@ internal class SykmeldingHendelseTest {
         assertTrue(inspektør.personLogg.hasActivities())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -40,7 +28,8 @@ internal class SykmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -51,8 +40,8 @@ internal class SykmeldingHendelseTest {
         assertTrue(inspektør.personLogg.hasActivities())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
-        assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
     }
 
     @Test
@@ -61,7 +50,8 @@ internal class SykmeldingHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 6.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =

@@ -51,7 +51,7 @@ internal class AnnulleringE2ETest : AbstractEndToEndTest() {
                 AVSLUTTET
             )
 
-            TestTidslinjeInspektør(utbetalingstidslinjer(0)).apply {
+            TestTidslinjeInspektør(utbetalingstidslinjer(1.vedtaksperiode)).apply {
                 dagtelling[Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class] er 16
                 dagtelling[Utbetalingstidslinje.Utbetalingsdag.AnnullertDag::class] er 8
             }
@@ -91,7 +91,7 @@ internal class AnnulleringE2ETest : AbstractEndToEndTest() {
             sykdomstidslinje.subset(fom2 til tom2)
                 .all { it is Dag.AnnullertDag } er sant
 
-            TestTidslinjeInspektør(utbetalingstidslinjer(1)).also {
+            TestTidslinjeInspektør(utbetalingstidslinjer(2.vedtaksperiode)).also {
                 it.dagtelling.size er 1
                 it.dagtelling[Utbetalingstidslinje.Utbetalingsdag.AnnullertDag::class] er 28
             }

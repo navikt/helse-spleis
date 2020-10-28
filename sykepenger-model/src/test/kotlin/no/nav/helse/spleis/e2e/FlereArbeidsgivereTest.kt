@@ -16,18 +16,17 @@ import java.util.*
 
 @Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
-
-    internal companion object {
+    private companion object {
         private const val a1 = "arbeidsgiver 1"
         private const val a2 = "arbeidsgiver 2"
         private const val a3 = "arbeidsgiver 3"
         private const val a4 = "arbeidsgiver 4"
     }
 
-    private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
-    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
-    private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
-    private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
+    private val a1Inspektør get() = inspektør(a1)
+    private val a2Inspektør get() = inspektør(a2)
+    private val a3Inspektør get() = inspektør(a3)
+    private val a4Inspektør get() = inspektør(a4)
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
@@ -325,9 +324,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     private fun assertTilstand(
         orgnummer: String,
         tilstand: TilstandType,
-        vedtaksperiodeIndeks: Int = 0
+        vedtaksperiodeIndeks: Int = 1
     ) {
-        assertEquals(tilstand, TestArbeidsgiverInspektør(person, orgnummer).sisteTilstand(vedtaksperiodeIndeks))
+        assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIndeks.vedtaksperiode(orgnummer)))
     }
 
     private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {

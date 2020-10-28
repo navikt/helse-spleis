@@ -11,28 +11,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class SimuleringHendelseTest {
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val orgnummer = "12345"
+internal class SimuleringHendelseTest : AbstractPersonTest() {
+    private companion object {
         private val førsteSykedag = 1.januar
         private val sisteSykedag = 28.februar
     }
 
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
 
     @Test
     fun `simulering er OK`() {
         håndterYtelser()
         person.håndter(simulering())
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertFalse(inspektør.personLogg.hasWarningsOrWorse())
     }
 
@@ -40,7 +31,7 @@ internal class SimuleringHendelseTest {
     fun `simulering med endret dagsats`() {
         håndterYtelser()
         person.håndter(simulering(dagsats = 500))
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
 
@@ -48,7 +39,8 @@ internal class SimuleringHendelseTest {
     fun `simulering er ikke OK`() {
         håndterYtelser()
         person.håndter(simulering(false))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
     }
 
@@ -61,7 +53,6 @@ internal class SimuleringHendelseTest {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -71,14 +62,14 @@ internal class SimuleringHendelseTest {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = "${1.vedtaksperiode}",
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it
@@ -115,7 +106,7 @@ internal class SimuleringHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
             mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
@@ -127,7 +118,7 @@ internal class SimuleringHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100, null)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -140,7 +131,7 @@ internal class SimuleringHendelseTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
@@ -156,20 +147,20 @@ internal class SimuleringHendelseTest {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioder {
                 1.januar(2018) til 1.desember(2018) inntekter {
-                    orgnummer inntekt 31000.månedlig
+                    ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
-                        orgnummer,
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -183,10 +174,10 @@ internal class SimuleringHendelseTest {
     private fun simulering(simuleringOK: Boolean = true, dagsats: Int = 1431) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             simuleringOK = simuleringOK,
             melding = "",
             simuleringResultat = if (!simuleringOK) null else Simulering.SimuleringResultat(
@@ -212,7 +203,7 @@ internal class SimuleringHendelseTest {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 11, "DAGLIG"),
-                                        refunderesOrgnummer = orgnummer
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )
@@ -238,7 +229,7 @@ internal class SimuleringHendelseTest {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 20, "DAGLIG"),
-                                        refunderesOrgnummer = orgnummer
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )

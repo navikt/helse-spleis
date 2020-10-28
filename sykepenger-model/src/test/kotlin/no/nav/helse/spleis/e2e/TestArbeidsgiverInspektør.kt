@@ -20,22 +20,19 @@ import java.util.*
 import kotlin.reflect.KClass
 
 internal class TestArbeidsgiverInspektør(
-    private val person: Person,
+    person: Person,
     orgnummer: String? = null
 ) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
         private set
-    private var vedtaksperiodeindeks: Int = -1
+    private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
-    private val forkastedeTilstander = mutableMapOf<Int, TilstandType>()
     private val skjæringstidspunkter = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableMapOf<Int, LocalDate>()
     private val gjenståendeSykedagerer = mutableMapOf<Int, Int>()
-    private val forkastetMaksdatoer = mutableMapOf<Int, LocalDate>()
-    private val forkastetGjenståendeSykedagerer = mutableMapOf<Int, Int>()
-    private val vedtaksperiodeIder = mutableMapOf<Int, UUID>()
-    private val fagsystemIder = mutableMapOf<UUID, String>()
-    private val forkastedePerioderIder = mutableMapOf<Int, UUID>()
+    private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
+    private val fagsystemIder = mutableMapOf<Int, String>()
+    private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata?>()
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
@@ -49,13 +46,12 @@ internal class TestArbeidsgiverInspektør(
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
-    private val utbetalingstidslinjer = mutableMapOf<UUID, Utbetalingstidslinje>()
+    private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
-    private var inGyldigePerioder = false
+    private var forkastetPeriode = false
     private var inVedtaksperiode = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
-    private val periodeIder = mutableMapOf<Int, UUID>()
-    private val hendelseIder = mutableMapOf<UUID, List<UUID>>()
+    private val hendelseIder = mutableMapOf<Int, List<UUID>>()
 
     init {
         HentAktivitetslogg(person, orgnummer).also { results ->
@@ -83,12 +79,6 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
-    internal fun vedtaksperiodeId(index: Int) = requireNotNull(vedtaksperiodeIder[index])
-    internal fun forkastetVedtaksperiodeId(index: Int) = requireNotNull(forkastedePerioderIder[index])
-
-    internal fun periodeErForkastet(id: UUID) = forkastedePerioderIder.containsValue(id)
-    internal fun periodeErIkkeForkastet(id: UUID) = vedtaksperiodeIder.containsValue(id)
-
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -97,24 +87,12 @@ internal class TestArbeidsgiverInspektør(
         this.arbeidsgiver = arbeidsgiver
     }
 
-    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-        inGyldigePerioder = true
-        vedtaksperiodeindeks = -1
-        periodeIder.clear()
-    }
-
-    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-        vedtaksperiodeIder.putAll(periodeIder)
-        inGyldigePerioder = false
-    }
-
     override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
-        vedtaksperiodeindeks = -1
-        periodeIder.clear()
+        forkastetPeriode = true
     }
 
     override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
-        forkastedePerioderIder.putAll(periodeIder)
+        forkastetPeriode = false
     }
 
     override fun preVisitVedtaksperiode(
@@ -128,25 +106,22 @@ internal class TestArbeidsgiverInspektør(
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
-        vedtaksperiodeindeks += 1
-        periodeIder[vedtaksperiodeindeks] = id
-        this.hendelseIder[id] = hendelseIder
-
-        if (!inGyldigePerioder) return
+        vedtaksperiodeindekser[id] = vedtaksperiodeindeks
+        vedtaksperiodeForkastet[vedtaksperiodeindeks] = forkastetPeriode
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
+        this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
     }
 
     override fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {
         if (fagsystemId == null) return
-        fagsystemIder[periodeIder[vedtaksperiodeindeks]!!] = fagsystemId
+        fagsystemIder[vedtaksperiodeindeks] = fagsystemId
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
-        if (inVedtaksperiode) utbetalingstidslinjer[periodeIder.getValue(vedtaksperiodeindeks)] = tidslinje
+        if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
     }
 
     override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
-        if (!inGyldigePerioder) return
         forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
     }
 
@@ -158,6 +133,7 @@ internal class TestArbeidsgiverInspektør(
         periode: Periode,
         opprinneligPeriode: Periode
     ) {
+        vedtaksperiodeindeks += 1
         inVedtaksperiode = false
     }
 
@@ -181,31 +157,17 @@ internal class TestArbeidsgiverInspektør(
         this.nettoBeløp.add(nettoBeløp)
     }
 
-    internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
-
-
-    internal fun sisteBehov(id: UUID) =
-        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
-
-    internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.behov().last { it.type == type }
-
-
     override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-        if (!inGyldigePerioder) return
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
     }
 
     override fun visitMaksdato(maksdato: LocalDate) {
-        if (!inGyldigePerioder) forkastetMaksdatoer[vedtaksperiodeindeks] = maksdato
-        else maksdatoer[vedtaksperiodeindeks] = maksdato
+        maksdatoer[vedtaksperiodeindeks] = maksdato
     }
 
     override fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {
         if (gjenståendeSykedager == null) return
-        if (!inGyldigePerioder) forkastetGjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
-        else gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
+        gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
     }
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
@@ -237,8 +199,7 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-        if (!inGyldigePerioder) forkastedeTilstander[vedtaksperiodeindeks] = tilstand.type
-        else tilstander[vedtaksperiodeindeks] = tilstand.type
+        tilstander[vedtaksperiodeindeks] = tilstand.type
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
@@ -255,8 +216,8 @@ internal class TestArbeidsgiverInspektør(
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
-
         override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+
         override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
@@ -264,7 +225,6 @@ internal class TestArbeidsgiverInspektør(
             økonomi: Økonomi,
             kilde: Hendelseskilde
         ) = inkrementer(dag)
-
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
@@ -287,71 +247,52 @@ internal class TestArbeidsgiverInspektør(
         ) = inkrementer(dag)
 
         override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
+
         override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag)
         override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
             inkrementer(dag)
-
         private fun inkrementer(klasse: Dag) {
             dagtelling.compute(klasse::class) { _, value -> 1 + (value ?: 0) }
         }
     }
 
-    internal fun forkastetMaksdato(indeks: Int) = forkastetMaksdatoer[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
+    private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
 
-    internal fun maksdato(vedtaksperiodeId: UUID) = maksdatoer[vedtaksperiodeIder.entries.associate { (key, value) -> value to key }[vedtaksperiodeId]] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 
-    internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun periodeErIkkeForkastet(id: UUID) = !periodeErForkastet(id)
 
-    internal fun forkastetGjenståendeSykedager(indeks: Int) = forkastetGjenståendeSykedagerer[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
 
-    internal fun forlengelseFraInfotrygd(indeks: Int) = forlengelserFraInfotrygd[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun sisteBehov(id: UUID) =
+        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
 
-    internal fun vilkårsgrunnlag(indeks: Int) = vilkårsgrunnlag[indeks]
+    internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.behov().last { it.type == type }
+
+    internal fun maksdato(id: UUID) = id.finn(maksdatoer)
+
+    internal fun gjenståendeSykedager(id: UUID) = id.finn(gjenståendeSykedagerer)
+
+    internal fun forlengelseFraInfotrygd(id: UUID) = id.finn(forlengelserFraInfotrygd)
+
+    internal fun vilkårsgrunnlag(id: UUID) = id.finn(vilkårsgrunnlag)
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 
-    internal fun sisteTilstand(indeks: Int) = tilstander[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun sisteTilstand(id: UUID) = id.finn(tilstander)
 
-    internal fun sisteForkastetTilstand(indeks: Int) = forkastedeTilstander[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun skjæringstidspunkt(id: UUID) = id.finn(skjæringstidspunkter)
 
-    internal fun skjæringstidspunkt(indeks: Int) = skjæringstidspunkter[indeks] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun utbetalingstidslinjer(id: UUID) = id.finn(utbetalingstidslinjer)
 
-    internal fun utbetalingstidslinjer(indeks: Int) = utbetalingstidslinjer(vedtaksperiodeId(indeks))
+    internal fun vedtaksperioder(id: UUID) = id.finn(vedtaksperioder)
 
-    internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = utbetalingstidslinjer[vedtaksperiodeId] ?: fail {
-        "Missing collection initialization"
-    }
+    internal fun hendelseIder(id: UUID) = id.finn(hendelseIder)
 
-    internal fun vedtaksperioder(indeks: Int) = vedtaksperioder[indeks] ?: fail {
-        "Missing collection initialization"
-    }
-
-    internal fun hendelseIder(vedtaksperiodeId: UUID) = hendelseIder[vedtaksperiodeId] ?: fail {
-        "Missing collection initialization"
-    }
-
-    internal fun fagsystemId(vedtaksperiodeId: UUID) = fagsystemIder[vedtaksperiodeId] ?: fail {
-        "Missing collection initialization"
-    }
-
-    internal fun dagTeller(klasse: KClass<out Utbetalingstidslinje.Utbetalingsdag>) =
-        TestTidslinjeInspektør(arbeidsgiver.nåværendeTidslinje()).dagtelling[klasse] ?: 0
+    internal fun fagsystemId(id: UUID) = id.finn(fagsystemIder)
 }
 

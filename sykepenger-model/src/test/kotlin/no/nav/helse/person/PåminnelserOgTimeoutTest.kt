@@ -3,60 +3,50 @@ package no.nav.helse.person
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class PåminnelserOgTimeoutTest {
+internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val orgnummer = "1234"
         private val nå = LocalDate.now()
     }
 
-    private lateinit var person: Person
     private lateinit var hendelse: ArbeidstakerHendelse
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
 
     @Test
     fun `påminnelse i mottatt sykmelding innenfor makstid`() {
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
-        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
-        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+        person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
 
     @Test
     fun `påminnelse i mottatt søknad`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
-        assertTilstand(TilstandType.AVVENTER_GAP)
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(6, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.AVVENTER_GAP))
-        assertTilstand(TilstandType.AVVENTER_GAP)
+        person.håndter(påminnelse(AVVENTER_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(6, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -64,20 +54,20 @@ class PåminnelserOgTimeoutTest {
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100)))
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100)))
-        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1)
-        person.håndter(påminnelse(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1))
-        assertTilstand(TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 1)
+        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
+        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(1), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(2.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
 
     @Test
     fun `påminnelse i mottatt inntektsmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
         person.håndter(inntektsmelding(Periode(nå.minusDays(30), nå.minusDays(14))))
-        person.håndter(påminnelse(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP))
+        person.håndter(påminnelse(AVVENTER_SØKNAD_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        assertTilstand(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP)
+        assertEquals(AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -86,18 +76,13 @@ class PåminnelserOgTimeoutTest {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         assertEquals(5, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP))
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
+        person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Dagpenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Arbeidsavklaringspenger))
-        assertTrue(
-            hendelse.etterspurteBehov(
-                inspektør.vedtaksperiodeId(0),
-                Behovtype.InntekterForSammenligningsgrunnlag
-            )
-        )
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opptjening))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dagpenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Arbeidsavklaringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.InntekterForSammenligningsgrunnlag))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opptjening))
     }
 
     @Test
@@ -107,15 +92,15 @@ class PåminnelserOgTimeoutTest {
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         assertEquals(6, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
-        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
+        person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
+        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(6, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(inspektør.vedtaksperiodeId(0), Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
 
     @Test
@@ -125,11 +110,11 @@ class PåminnelserOgTimeoutTest {
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
-        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Simulering })
-        person.håndter(påminnelse(TilstandType.AVVENTER_SIMULERING))
-        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        person.håndter(påminnelse(AVVENTER_SIMULERING, 1.vedtaksperiode))
+        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
     }
 
@@ -141,11 +126,11 @@ class PåminnelserOgTimeoutTest {
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
         person.håndter(simulering())
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Godkjenning })
-        person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        person.håndter(påminnelse(AVVENTER_GODKJENNING, 1.vedtaksperiode))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
     }
 
@@ -159,43 +144,43 @@ class PåminnelserOgTimeoutTest {
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning())
         assertEquals(1, hendelse.behov().size)
-        person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        person.håndter(påminnelse(TIL_UTBETALING, 1.vedtaksperiode))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(0, hendelse.behov().size)
     }
 
     @Test
     fun `ignorerer påminnelser på tidligere tilstander`() {
         person.håndter(sykmelding())
-        person.håndter(påminnelse(TilstandType.TIL_INFOTRYGD))
-        assertTilstand(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+        person.håndter(påminnelse(TIL_INFOTRYGD, 1.vedtaksperiode))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(søknad())
-        person.håndter(påminnelse(TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP))
-        assertTilstand(TilstandType.AVVENTER_GAP)
+        person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(TilstandType.AVVENTER_GAP))
-        assertTilstand(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP)
+        person.håndter(påminnelse(AVVENTER_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(vilkårsgrunnlag())
-        person.håndter(påminnelse(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP))
-        assertTilstand(TilstandType.AVVENTER_HISTORIKK)
+        person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(ytelser())
-        person.håndter(påminnelse(TilstandType.AVVENTER_HISTORIKK))
-        assertTilstand(TilstandType.AVVENTER_SIMULERING)
+        person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
+        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(simulering())
-        person.håndter(påminnelse(TilstandType.AVVENTER_SIMULERING))
-        assertTilstand(TilstandType.AVVENTER_GODKJENNING)
+        person.håndter(påminnelse(AVVENTER_SIMULERING, 1.vedtaksperiode))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(utbetalingsgodkjenning())
-        person.håndter(påminnelse(TilstandType.AVVENTER_GODKJENNING))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        person.håndter(påminnelse(AVVENTER_GODKJENNING, 1.vedtaksperiode))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        person.håndter(påminnelse(TilstandType.TIL_UTBETALING))
-        assertTilstand(TilstandType.TIL_UTBETALING)
+        person.håndter(påminnelse(TIL_UTBETALING, 1.vedtaksperiode))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     private fun søknad(
@@ -211,7 +196,7 @@ class PåminnelserOgTimeoutTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             perioder = perioder.toList(),
             harAndreInntektskilder = false,
             sendtTilNAV = 20.januar.atStartOfDay(),
@@ -233,7 +218,7 @@ class PåminnelserOgTimeoutTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             sykeperioder = perioder.toList(),
             mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
@@ -247,7 +232,7 @@ class PåminnelserOgTimeoutTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = førsteFraværsdag,
@@ -263,20 +248,20 @@ class PåminnelserOgTimeoutTest {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioder {
                 1.januar(2018) til 1.desember(2018) inntekter {
-                    orgnummer inntekt 31000.månedlig
+                    ORGNUMMER inntekt 31000.månedlig
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
-                        orgnummer,
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -290,10 +275,10 @@ class PåminnelserOgTimeoutTest {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             simuleringOK = true,
             melding = "",
             simuleringResultat = Simulering.SimuleringResultat(
@@ -305,7 +290,7 @@ class PåminnelserOgTimeoutTest {
                             Simulering.SimulertUtbetaling(
                                 forfallsdato = 21.januar,
                                 utbetalesTil = Simulering.Mottaker(
-                                    id = orgnummer,
+                                    id = ORGNUMMER,
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
@@ -326,7 +311,7 @@ class PåminnelserOgTimeoutTest {
                                             antall = 2,
                                             type = "DAGLIG"
                                         ),
-                                        refunderesOrgnummer = orgnummer
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )
@@ -344,28 +329,28 @@ class PåminnelserOgTimeoutTest {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = "${1.vedtaksperiode}",
                 utbetalinger = listOf(
                     Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                         17.januar(2017),
                         20.januar(2017),
                         1000,
                         100,
-                        orgnummer
+                        ORGNUMMER
                     )
                 ),
                 inntektshistorikk = listOf(
                     Utbetalingshistorikk.Inntektsopplysning(
                         1.januar(2017),
                         31000.månedlig,
-                        orgnummer,
+                        ORGNUMMER,
                         true
                     )
                 ),
@@ -402,8 +387,8 @@ class PåminnelserOgTimeoutTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,
         godkjenttidspunkt = LocalDateTime.now(),
@@ -413,12 +398,12 @@ class PåminnelserOgTimeoutTest {
         hendelse = this
     }
 
-    private fun påminnelse(tilstandType: TilstandType, indeks: Int = 0) = Påminnelse(
+    private fun påminnelse(tilstandType: TilstandType, vedtaksperiodeId: UUID) = Påminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(indeks).toString(),
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = "$vedtaksperiodeId",
         tilstand = tilstandType,
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
@@ -426,12 +411,5 @@ class PåminnelserOgTimeoutTest {
         nestePåminnelsestidspunkt = LocalDateTime.now()
     ).apply {
         hendelse = this
-    }
-
-    private fun assertTilstand(expectedTilstand: TilstandType, indeks: Int = 0) {
-        assertEquals(
-            expectedTilstand,
-            inspektør.sisteTilstand(indeks)
-        )
     }
 }

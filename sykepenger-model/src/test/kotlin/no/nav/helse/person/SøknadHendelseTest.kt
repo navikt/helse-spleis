@@ -15,30 +15,18 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SøknadHendelseTest {
-
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-    }
-
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
+internal class SøknadHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `søknad matcher sykmelding`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(0))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
@@ -48,7 +36,7 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 50)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -64,7 +52,7 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
@@ -74,7 +62,7 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count()) { inspektør.sykdomstidslinje.toString() }
     }
 
@@ -84,7 +72,8 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100), Utdanning(4.januar, 5.januar)))
         assertTrue(inspektør.personLogg.hasWarningsOrWorse())
         assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
@@ -105,8 +94,8 @@ internal class SøknadHendelseTest {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(0))
-        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(1))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(10, inspektør.sykdomstidslinje.length())
     }
 
@@ -117,7 +106,8 @@ internal class SøknadHendelseTest {
         person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 10.januar, 100)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = "987654321") =

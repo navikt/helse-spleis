@@ -9,34 +9,26 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class GodkjenningHendelseTest {
-    companion object {
-        private const val UNG_PERSON_FNR_2018 = "12020052345"
-        private const val orgnummer = "12345"
+internal class GodkjenningHendelseTest : AbstractPersonTest() {
+    private companion object {
         private val førsteSykedag = 1.januar
         private val sisteSykedag = 31.januar
     }
 
-    private lateinit var person: Person
-    private val inspektør get() = TestArbeidsgiverInspektør(person)
     private lateinit var hendelse: ArbeidstakerHendelse
-
-    @BeforeEach
-    internal fun opprettPerson() {
-        person = Person("12345", UNG_PERSON_FNR_2018)
-    }
 
     @Test
     fun `utbetaling er godkjent`() {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -44,7 +36,8 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(false))
-        assertEquals(TIL_INFOTRYGD, inspektør.sisteForkastetTilstand(0))
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -52,9 +45,9 @@ internal class GodkjenningHendelseTest {
         håndterYtelser()
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
         person.håndter(ytelser())
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
 
@@ -64,7 +57,7 @@ internal class GodkjenningHendelseTest {
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning(true))
         person.håndter(utbetalingsgodkjenning(true))
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(0))
+        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -88,8 +81,8 @@ internal class GodkjenningHendelseTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
-        organisasjonsnummer = orgnummer,
-        vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
@@ -100,7 +93,6 @@ internal class GodkjenningHendelseTest {
     }
 
     private fun ytelser(
-        vedtaksperiodeId: UUID = inspektør.vedtaksperiodeId(0),
         utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
@@ -110,14 +102,14 @@ internal class GodkjenningHendelseTest {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = "${1.vedtaksperiode}",
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it
@@ -154,7 +146,7 @@ internal class GodkjenningHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
             mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
@@ -166,7 +158,7 @@ internal class GodkjenningHendelseTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
@@ -179,7 +171,7 @@ internal class GodkjenningHendelseTest {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
@@ -195,21 +187,21 @@ internal class GodkjenningHendelseTest {
     private fun vilkårsgrunnlag() =
         Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(
                 inntektperioder {
                     1.januar(2018) til 1.desember(2018) inntekter {
-                        orgnummer inntekt 31000.månedlig
+                        ORGNUMMER inntekt 31000.månedlig
                     }
                 }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(
-                        orgnummer,
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -223,10 +215,10 @@ internal class GodkjenningHendelseTest {
     private fun simulering() =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = inspektør.vedtaksperiodeId(0).toString(),
+            vedtaksperiodeId = "${1.vedtaksperiode}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             simuleringOK = true,
             melding = "",
             simuleringResultat = null

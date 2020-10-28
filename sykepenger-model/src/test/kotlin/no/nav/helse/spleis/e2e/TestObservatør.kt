@@ -10,13 +10,22 @@ internal class TestObservatør : PersonObserver {
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val hendelserTilReplay = mutableMapOf<UUID, List<UUID>>()
-    val vedtaksperioder = mutableSetOf<UUID>()
+
+    private lateinit var sisteVedtaksperiode: UUID
+    private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
+
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
     val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
 
+    fun sisteVedtaksperiode() = sisteVedtaksperiode
+    fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
+    fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+    fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
+
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
-        vedtaksperioder.add(event.vedtaksperiodeId)
+        sisteVedtaksperiode = event.vedtaksperiodeId
+        vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
     }
