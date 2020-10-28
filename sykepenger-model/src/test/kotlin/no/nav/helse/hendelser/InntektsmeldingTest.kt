@@ -557,6 +557,12 @@ internal class InntektsmeldingTest {
         assertTrue(inntektsmelding.erRelevant(Periode(17.januar, 18.januar)))
     }
 
+    @Test
+    fun `er relevant når det ikke finnes arbeidsgiverperioder og første fraværsdag er i vedtaksperioden`() {
+        inntektsmelding(emptyList(), førsteFraværsdag = 4.januar)
+        assertTrue(inntektsmelding.erRelevant(Periode(1.januar, 18.januar)))
+    }
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),

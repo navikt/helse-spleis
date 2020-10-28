@@ -112,8 +112,8 @@ class Inntektsmelding(
         + nyFørsteFraværsdagtidslinje(førsteFraværsdag)).merge(beste).periode()?.overlapperMed(periode) == true
 
     private fun førsteFraværsdagErIArbeidsgiverperioden() =
-        requireNotNull(førsteFraværsdag) in arbeidsgiverperioder ||
-            førsteFraværsdag.isEqual(arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1))
+        arbeidsgiverperioder.isNotEmpty() && (requireNotNull(førsteFraværsdag) in arbeidsgiverperioder ||
+            førsteFraværsdag.isEqual(arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1)))
 
     private fun førsteFraværsdagErFørEllerIPerioden(periode: Periode) =
         requireNotNull(førsteFraværsdag) <= periode.endInclusive
