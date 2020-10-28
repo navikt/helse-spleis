@@ -20,6 +20,7 @@ internal class TilUtbetalingHendelseTest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val ORGNUMMER = "12345"
         private const val SAKSBEHANDLER_IDENT = "O123456"
+        private val INNTEKT = 31000.månedlig
         private lateinit var førsteSykedag: LocalDate
         private lateinit var sisteSykedag: LocalDate
         private lateinit var sykmeldingHendelseId: UUID
@@ -97,7 +98,8 @@ internal class TilUtbetalingHendelseTest {
             godkjentAv = SAKSBEHANDLER_IDENT,
             automatiskBehandling = false,
             opprettet = utbetaltEvents.first().opprettet,
-            sykepengegrunnlag = 372000.0,
+            sykepengegrunnlag = INNTEKT.reflection { årlig, _, _, _ -> årlig },
+            månedsinntekt = INNTEKT.reflection { _, månedlig, _, _ -> månedlig },
             maksdato = 28.desember
         ).also {
             assertEquals(it, utbetaltEvents.first())
@@ -150,7 +152,8 @@ internal class TilUtbetalingHendelseTest {
             godkjentAv = "SYSTEM",
             automatiskBehandling = true,
             opprettet = utbetaltEvents.first().opprettet,
-            sykepengegrunnlag = 372000.0,
+            sykepengegrunnlag = INNTEKT.reflection { årlig, _, _, _ -> årlig },
+            månedsinntekt = INNTEKT.reflection { _, månedlig, _, _ -> månedlig },
             maksdato = 28.desember
         ).also {
             assertEquals(it, utbetaltEvents.first())
@@ -303,12 +306,12 @@ internal class TilUtbetalingHendelseTest {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = inntektsmeldingHendelseId,
-            refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
             førsteFraværsdag = førsteSykedag,
-            beregnetInntekt = 31000.månedlig,
+            beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             ferieperioder = emptyList(),
             arbeidsforholdId = null,
@@ -326,7 +329,7 @@ internal class TilUtbetalingHendelseTest {
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioder {
                 1.januar(2018) til 1.desember(2018) inntekter {
-                    ORGNUMMER inntekt 31000.månedlig
+                    ORGNUMMER inntekt INNTEKT
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

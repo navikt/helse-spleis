@@ -23,7 +23,6 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -646,6 +645,8 @@ internal class Vedtaksperiode private constructor(
     private fun sendUtbetaltEvent() {
         val sykepengegrunnlag =
             requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt, periode.endInclusive)) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
+        val inntekt =
+            requireNotNull(arbeidsgiver.inntekt(skjæringstidspunkt)) { "Forventet inntekt ved opprettelse av utbetalt-event" }
         person.vedtaksperiodeUtbetalt(
             tilUtbetaltEvent(
                 aktørId = aktørId,
@@ -654,6 +655,7 @@ internal class Vedtaksperiode private constructor(
                 utbetaling = utbetaling(),
                 utbetalingstidslinje = utbetalingstidslinje,
                 sykepengegrunnlag = sykepengegrunnlag,
+                inntekt = inntekt,
                 forbrukteSykedager = requireNotNull(forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
                 godkjentAv = requireNotNull(godkjentAv),

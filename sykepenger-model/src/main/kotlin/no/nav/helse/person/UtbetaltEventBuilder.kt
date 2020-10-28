@@ -14,14 +14,13 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 internal fun tilUtbetaltEvent(
     aktørId: String,
     fødselnummer: String,
     orgnummer: String,
     sykepengegrunnlag: Inntekt,
+    inntekt: Inntekt,
     hendelseIder: List<UUID>,
     utbetaling: Utbetaling,
     utbetalingstidslinje: Utbetalingstidslinje,
@@ -37,6 +36,7 @@ internal fun tilUtbetaltEvent(
     orgnummer = orgnummer,
     hendelseIder = hendelseIder,
     sykepengegrunnlag = sykepengegrunnlag,
+    inntekt = inntekt,
     utbetaling = utbetaling,
     utbetalingstidslinje = utbetalingstidslinje,
     periode = periode,
@@ -53,6 +53,7 @@ private class UtbetaltEventBuilder(
     private val orgnummer: String,
     private val hendelseIder: List<UUID>,
     private val sykepengegrunnlag: Inntekt,
+    private val inntekt: Inntekt,
     utbetaling: Utbetaling,
     utbetalingstidslinje: Utbetalingstidslinje,
     private val periode: Periode,
@@ -89,6 +90,7 @@ private class UtbetaltEventBuilder(
             automatiskBehandling = automatiskBehandling,
             opprettet = opprettet,
             sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+            månedsinntekt = inntekt.reflection { _, månedlig, _, _ -> månedlig },
             maksdato = maksdato
         )
     }
