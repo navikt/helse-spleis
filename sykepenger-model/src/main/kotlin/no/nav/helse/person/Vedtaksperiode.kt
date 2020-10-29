@@ -686,7 +686,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterMuligForlengelse(hendelse: PersonHendelse, tilstandHvisForlengelse: Vedtaksperiodetilstand, tilstandHvisGap: Vedtaksperiodetilstand) {
         arbeidsgiver.finnSykeperiodeRettFør(this)?.also { tilstøtende ->
             tilstand(hendelse, tilstandHvisForlengelse) {
-                håndterForlengelse(tilstøtende)
+                håndterFortsattForlengelse(tilstøtende)
             }
         } ?: tilstand(hendelse, tilstandHvisGap) { håndterGapVarForlengelse() }
     }
@@ -704,7 +704,7 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunktFraInfotrygd = null
     }
 
-    // er (fortsatt) forlengelse
+    // er forlengelse
     private fun håndterForlengelse(tilstøtende: Vedtaksperiode) {
         dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering
         inntektsmeldingId = tilstøtende.inntektsmeldingId?.also {
@@ -712,6 +712,12 @@ internal class Vedtaksperiode private constructor(
         }
         forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
         skjæringstidspunktFraInfotrygd = if (forlengelseFraInfotrygd == JA) tilstøtende.skjæringstidspunktFraInfotrygd else null
+    }
+
+    // er fortsatt forlengelse
+    private fun håndterFortsattForlengelse(tilstøtende: Vedtaksperiode) {
+        tilbakestillInntektsmeldingId()
+        håndterForlengelse(tilstøtende)
     }
 
     // oppdaget forlengelse fra IT, har ikke tilstøtende
@@ -1318,7 +1324,7 @@ internal class Vedtaksperiode private constructor(
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
                     arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
-                        vedtaksperiode.håndterForlengelse(tilstøtendePeriode)
+                        vedtaksperiode.håndterFortsattForlengelse(tilstøtendePeriode)
                         if (tilstøtendePeriode.forlengelseFraInfotrygd == JA)
                             vedtaksperiode.loggUlikSkjæringstidspunkt(ytelser.utbetalingshistorikk())
                         return@onSuccess

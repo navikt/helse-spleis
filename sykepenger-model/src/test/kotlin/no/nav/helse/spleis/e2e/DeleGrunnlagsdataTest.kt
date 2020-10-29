@@ -173,6 +173,24 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `setter ikke inntektsmeldingId flere ganger`() {
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100))
+
+        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
+        val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        assertEquals(3, inspektør.hendelseIder(2.vedtaksperiode).size)
+        assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(sykmeldingId, søknadId, inntektsmeldingId)))
+    }
+
+    @Test
     fun `inntektsmelding bryter opp infotrygdforlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
