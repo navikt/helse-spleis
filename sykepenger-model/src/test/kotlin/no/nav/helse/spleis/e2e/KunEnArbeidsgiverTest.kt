@@ -2166,4 +2166,24 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
     }
+
+    @Disabled("den korte søknaden i januar forhindrer perioden i mars å fortsette når IM og vilkårsgrunnlag er håndtert")
+    @Test
+    fun `uavsluttet kort søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 12.januar, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100))
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+
+        håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+    }
 }
