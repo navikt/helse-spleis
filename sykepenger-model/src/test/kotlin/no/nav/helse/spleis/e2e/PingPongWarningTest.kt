@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.juli
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -35,7 +35,7 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, gradFraSykmelding = 100), sendtTilNav = 1.april)
-        val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.februar, 28.februar, 1337, 100, ORGNUMMER)
+        val historikk = RefusjonTilArbeidsgiver(1.februar, 28.februar, 1337, 100, ORGNUMMER)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterSimulering(3.vedtaksperiode)
@@ -65,7 +65,7 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.juli, 31.juli, 100))
         håndterSøknad(Sykdom(18.juli, 31.juli, gradFraSykmelding = 100), sendtTilNav = 1.august)
-        val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 17.juli, 1337, 100, ORGNUMMER)
+        val historikk = RefusjonTilArbeidsgiver(1.juli, 17.juli, 1337, 100, ORGNUMMER)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterSimulering(3.vedtaksperiode)
@@ -75,19 +75,18 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ikke warning for ping-pong hvis vi ikke har utbetalt periode i ny løsning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.juli, 17.juli, 100))
+    fun `Ikke warning for ping-pong hvis tidligere periode ikke gikk til avsluttet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100))
         håndterSøknad(
-            Sykdom(1.juli, 17.juli, gradFraSykmelding = 100),
-            sendtTilNav = 18.juli,
-            harAndreInntektskilder = true
+            Sykdom(1.januar, 17.januar, gradFraSykmelding = 100),
+            sendtTilNav = 18.januar,
+            harAndreInntektskilder = true // <- til infotrygd
         )
 
-        håndterSykmelding(Sykmeldingsperiode(18.juli, 31.juli, 100))
-        håndterSøknad(Sykdom(18.juli, 31.juli, gradFraSykmelding = 100), sendtTilNav = 1.august)
-        val historikk = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 17.juli, 1337, 100, ORGNUMMER)
-        håndterYtelser(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100))
+        håndterSøknad(Sykdom(18.januar, 31.januar, gradFraSykmelding = 100), sendtTilNav = 1.februar)
+        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 17.januar, 1337, 100, ORGNUMMER))
+        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 17.januar, 1337, 100, ORGNUMMER))
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
