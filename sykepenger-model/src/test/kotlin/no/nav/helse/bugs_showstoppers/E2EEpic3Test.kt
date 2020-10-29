@@ -707,10 +707,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
             TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-                assertEquals(2, tidslinjeInspektør.dagtelling[Fridag::class])
                 assertEquals(1, tidslinjeInspektør.dagtelling[NavHelgDag::class])
                 assertEquals(5, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(7, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
+                assertEquals(9, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag::class])
             }
         }
         assertTilstander(

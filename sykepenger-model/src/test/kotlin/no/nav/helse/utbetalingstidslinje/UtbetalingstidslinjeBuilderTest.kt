@@ -195,8 +195,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(26, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
@@ -301,16 +300,14 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(32, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
     fun `resetter arbeidsgiverperioden etter 16 arbeidsdager`() {
         (15.S + 16.A + 14.S).utbetalingslinjer()
         assertEquals(29, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
@@ -410,11 +407,28 @@ internal class UtbetalingstidslinjeBuilderTest {
             }
         )
         assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
-        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(3, inspektør.dagtelling[Arbeidsdag::class])
         assertEquals(2, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
         assertDagsats(1431)
+    }
+
+    @Test
+    fun `egenmeldingsdager med frisk helg gir opphold i arbeidsgiverperiode`() {
+        resetSeed(1.januar)
+        (12.U + 2.R + 2.F + 2.U).utbetalingslinjer()
+
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[17.januar])
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[18.januar])
+    }
+
+    @Test
+    fun `frisk helg gir opphold i arbeidsgiverperiode`() {
+        resetSeed(1.januar)
+        (4.U + 8.S + 2.R + 2.F + 2.S).utbetalingslinjer()
+
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[17.januar])
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[18.januar])
     }
 
     private val inntektshistorikk = Inntektshistorikk().apply {

@@ -65,7 +65,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         fridag(dato)
 
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-        friskHelgedag(dato)
+        arbeidsdag(dato)
 
     override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
@@ -148,11 +148,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             tilstand.arbeidsdagerIOppholdsdager(this, dagen)
 
     private fun fridag(dagen: LocalDate) {
-        tilstand.fridag(this, dagen)
-    }
-
-    private fun friskHelgedag(dagen: LocalDate) {
-        oppdatereInntekt(dagen)
         tilstand.fridag(this, dagen)
     }
 

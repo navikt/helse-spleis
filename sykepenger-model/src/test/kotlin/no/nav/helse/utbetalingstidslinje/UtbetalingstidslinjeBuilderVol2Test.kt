@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
@@ -198,8 +199,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         assertEquals(26, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
@@ -304,16 +304,14 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         assertEquals(32, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(4, inspektør.dagtelling[NavDag::class])
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
     fun `resetter arbeidsgiverperioden etter 16 arbeidsdager`() {
         (15.S + 16.A + 14.S).utbetalingslinjer()
         assertEquals(29, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-        assertEquals(4, inspektør.dagtelling[Fridag::class])
-        assertEquals(12, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
     }
 
     @Test
@@ -593,6 +591,38 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.arbeidsdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), null)
         inspektør.navdager.assertDekningsgrunnlag(22.januar(2020) til 23.januar(2020), 30000.månedlig)
     }
+
+    @Test
+    fun `egenmeldingsdager med frisk helg gir opphold i arbeidsgiverperiode`() {
+        (12.U + 2.R + 2.F + 2.U).utbetalingslinjer()
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[17.januar])
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[18.januar])
+    }
+
+    @Test
+    fun `frisk helg gir opphold i arbeidsgiverperiode`() {
+        (4.U + 8.S + 2.R + 2.F + 2.S).utbetalingslinjer()
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[17.januar])
+        assertEquals(ArbeidsgiverperiodeDag::class, inspektør.datoer[18.januar])
+    }
+
+    @Test
+    fun `oppdaterer inntekt etter frisk helg`() {
+        (4.U + 1.A + 2.R + 12.U + 4.S).utbetalingslinjer(
+            inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(8.januar, hendelseId, 31000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(8.januar)
+        )
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(3, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+        inspektør.navdager.assertDekningsgrunnlag(8.januar til 23.januar, 1431.daglig)
+    }
+
 
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
         invoke {
