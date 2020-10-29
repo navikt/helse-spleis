@@ -1,11 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.juli
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.testhelpers.*
@@ -90,6 +89,31 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
+        assertTrue(inspektør.personLogg.warn().isEmpty())
+    }
+
+    @Test
+    fun `Ikke ping-pong-warning hvis periode i ny løsning ikke hadde utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 13.januar, 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 13.januar, 100))
+        håndterInntektsmelding(listOf(1.januar til 13.januar), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
+        håndterSøknad(
+            Sykdom(20.februar, 28.februar, gradFraSykmelding = 100),
+            sendtTilNav = 1.mars,
+            harAndreInntektskilder = true // <- til infotrygd
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars, 100))
+        håndterSøknad(Sykdom(1.mars, 21.mars, gradFraSykmelding = 100), sendtTilNav = 1.april)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterYtelser(3.vedtaksperiode, RefusjonTilArbeidsgiver(20.februar, 28.februar, 1337, 100, ORGNUMMER))
+        håndterSimulering(3.vedtaksperiode)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(inspektør.personLogg.warn().isEmpty())
     }
 

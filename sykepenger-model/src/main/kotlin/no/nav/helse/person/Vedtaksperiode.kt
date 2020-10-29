@@ -342,9 +342,9 @@ internal class Vedtaksperiode private constructor(
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.let {
-            it.tilstand == Avsluttet && it.utbetalingstidslinje.harUtbetalinger()
-        } == true
+        arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erUtbetalt() ?: false
+
+    internal fun erUtbetalt() = tilstand == Avsluttet && utbetalingstidslinje.harUtbetalinger()
 
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
@@ -1348,7 +1348,7 @@ internal class Vedtaksperiode private constructor(
 
                     arbeidsgiver.addInntekt(ytelser)
                     ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
-                    if (arbeidsgiver.harForkastetAvsluttetOgNyereEnn(vedtaksperiode.periode().start.minusMonths(6))) {
+                    if (arbeidsgiver.harForkastetUtbetaltOgNyereEnn(vedtaksperiode.periode().start.minusMonths(6))) {
                         ytelser.warn("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.")
                     }
                 }
