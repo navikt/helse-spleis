@@ -239,13 +239,14 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(other: Vedtaksperiode, hendelse: GjenopptaBehandling) {
         val ferdig = arbeidsgiver.tidligerePerioderFerdigBehandlet(this)
-        if (this.periode.start > other.periode.start && ferdig) {
-            kontekst(hendelse.hendelse)
-            tilstand.håndter(this, hendelse)
-        }
+        if (!ferdig || this.periode.start <= other.periode.start) return
+        kontekst(hendelse.hendelse)
+        tilstand.håndter(this, hendelse)
     }
 
     internal fun håndter(hendelse: GjenopptaBehandling) {
+        val forrige = arbeidsgiver.finnSykeperiodeRettFør(this)
+        if (false == forrige?.erFerdigBehandlet()) return
         kontekst(hendelse.hendelse)
         tilstand.håndter(this, hendelse)
     }
@@ -1145,14 +1146,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtende ->
-                if (!tilstøtende.erFerdigBehandlet()) return
-                vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerHistorikk) {
-                    vedtaksperiode.håndterForlengelse(tilstøtende)
-                }
-            } ?: vedtaksperiode.tilstand(gjenopptaBehandling.hendelse, AvventerInntektsmeldingFerdigGap) {
-                vedtaksperiode.håndterGapVarForlengelse()
-            }
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling.hendelse, AvventerHistorikk, AvventerInntektsmeldingFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1780,7 +1774,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
-                .filterNot { it >= vedtaksperiode }
+                .filter { it < vedtaksperiode }
                 .all { it.erFerdigBehandlet() }
 
         internal fun finnForrigeVedtaksperiode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =

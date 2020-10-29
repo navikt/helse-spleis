@@ -430,12 +430,6 @@ internal class Arbeidsgiver private constructor(
         return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in medSammeArbeidsgiverperiode
     }
 
-    private fun gjenopptaBehandling(hendelse: PersonHendelse) {
-        vedtaksperioder.firstOrNull { it.skalGjenopptaBehandling() }?.also {
-            it.håndter(GjenopptaBehandling(hendelse))
-        }
-    }
-
     internal fun forkastAlleTidligere(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         if (vedtaksperiode == vedtaksperioder.first()) return
         søppelbøtte(hendelse, TIDLIGERE(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1]))
@@ -472,6 +466,11 @@ internal class Arbeidsgiver private constructor(
     internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
         vedtaksperioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
         person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
+    }
+
+    private fun gjenopptaBehandling(hendelse: PersonHendelse) {
+        vedtaksperioder.firstOrNull { it.skalGjenopptaBehandling() }
+            ?.håndter(GjenopptaBehandling(hendelse))
     }
 
     internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
