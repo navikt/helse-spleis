@@ -6,7 +6,7 @@ import java.util.*
 
 class UtbetalingHendelse(
     meldingsreferanseId: UUID,
-    internal val vedtaksperiodeId: String,
+    internal val vedtaksperiodeId: String?,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
