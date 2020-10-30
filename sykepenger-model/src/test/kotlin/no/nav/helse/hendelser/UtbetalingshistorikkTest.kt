@@ -191,23 +191,6 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `lager warning når dagsats endrer seg i en sammenhengende periode`() {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 100, ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, 4321, 100, ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
-        utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
-            assertTrue(it.hasWarningsOrWorse())
-            assertFalse(it.hasErrorsOrWorse())
-            assertTrue(it.hasWarningsOrWorse())
-        }
-    }
-
-    @Test
     fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
         val utbetalinger = listOf(
             RefusjonTilArbeidsgiver(1.april, 30.april, 2161, 100, ORGNUMMER),
@@ -242,23 +225,6 @@ class UtbetalingshistorikkTest {
         )
         utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
             assertFalse(it.hasWarningsOrWorse())
-        }
-    }
-
-    @Test
-    fun `lager ikke warning når dagsats og grad endrer seg i en sammenhengende periode`() {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234, 50, ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, 2345, 100, ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = emptyList()
-        )
-        utbetalingshistorikk.valider(Periode(1.april, 30.april), Periodetype.FØRSTEGANGSBEHANDLING).also {
-            assertTrue(it.hasWarningsOrWorse())
-            assertFalse(it.hasErrorsOrWorse())
-            assertTrue(it.hasWarningsOrWorse())
         }
     }
 
