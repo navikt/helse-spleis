@@ -72,6 +72,14 @@ class JsonBuilderTest {
     }
 
     @Test
+    fun `med annullering`() {
+        val person = person().apply {
+            håndter(annullering(fangeArbeidsgiverFagsystemId()))
+        }
+        testSerialiseringAvPerson(person)
+    }
+
+    @Test
     fun `gjenoppbygd person med friske helgedager er lik opprinnelig person med friske helgedager`() {
         testSerialiseringAvPerson(friskeHelgedagerPerson())
     }
@@ -220,6 +228,16 @@ class JsonBuilderTest {
                     JsonBuilderTest.tilstand = tilstand.type
                 }
             })
+        }
+
+        private fun Person.fangeArbeidsgiverFagsystemId(): String {
+            var result: String? = null
+            accept(object : PersonVisitor {
+                override fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {
+                    result = fagsystemId
+                }
+            })
+            return requireNotNull(result)
         }
 
         private fun Person.fangeSykdomstidslinje() {
@@ -385,6 +403,17 @@ class JsonBuilderTest {
             simuleringOK = true,
             melding = "Hei Aron",
             simuleringResultat = null
+        )
+
+        fun annullering(fagsystemId: String) = AnnullerUtbetaling(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            saksbehandlerIdent = "Z999999",
+            saksbehandlerEpost = "tbd@nav.no",
+            opprettet = LocalDateTime.now(),
+            fagsystemId = fagsystemId
         )
 
         fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(

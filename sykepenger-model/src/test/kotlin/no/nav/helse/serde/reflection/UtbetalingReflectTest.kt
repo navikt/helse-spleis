@@ -91,7 +91,7 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinje(0, 1.januar.toString(), "fom")
         assertUtbetalingslinje(0, 4.januar.toString(), "tom")
         assertUtbetalingslinje(0, "OPPH", "statuskode")
-        assertUtbetalingslinje(0, 1.januar, "datoStatusFom")
+        assertUtbetalingslinje(0, 1.januar.toString(), "datoStatusFom")
         assertUtbetalingslinje(0, 1, "delytelseId")
         assertUtbetalingslinje(0, null, "refDelytelseId")
         assertUtbetalingslinje(0, "ENDR", "endringskode")

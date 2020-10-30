@@ -16,7 +16,8 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "personOppdrag" to
             OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"],
-        "status" to utbetaling.get<Utbetaling.Status>("status").name
+        "status" to utbetaling.get<Utbetaling.Status>("status").name,
+        "annullert" to utbetaling.get<Boolean>("annullert")
     )
 }
 
@@ -43,7 +44,7 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "grad" to utbetalingslinje["grad"],
         "refFagsystemId" to utbetalingslinje["refFagsystemId"],
         "delytelseId" to utbetalingslinje["delytelseId"],
-        "datoStatusFom" to utbetalingslinje.get<LocalDate?>("datoStatusFom"),
+        "datoStatusFom" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.toString(),
         "statuskode" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.let { "OPPH" },
         "refDelytelseId" to utbetalingslinje["refDelytelseId"],
         "endringskode" to utbetalingslinje.get<Endringskode>("endringskode").toString(),
