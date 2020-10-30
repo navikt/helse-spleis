@@ -86,14 +86,17 @@ internal class Utbetaling private constructor(
         private fun sisteGyldig(utbetalinger: List<Utbetaling>, default: () -> Oppdrag) =
             utbetalinger
                 .utbetalte()
-                .firstOrNull()
+                .lastOrNull()
                 ?.arbeidsgiverOppdrag
                 ?: default()
 
         internal fun List<Utbetaling>.utbetalte() =
-            groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
-                .map { (_, utbetalingerPerFagsystemId) -> utbetalingerPerFagsystemId.last() }
-                .filter { it.status == UTBETALT && !it.annullert }
+            filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
+                .filter { it.status == UTBETALT }
+
+        private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
+            filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
+                .any { it.annullert }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
