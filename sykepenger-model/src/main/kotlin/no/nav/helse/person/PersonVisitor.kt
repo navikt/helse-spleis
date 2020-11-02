@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -330,10 +331,10 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
 }
 
 internal interface FagsystemIdVisitor : OppdragVisitor {
-    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String) {}
+    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {}
     fun preVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
     fun postVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
-    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String) {}
+    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {}
 }
 
 internal interface OppdragVisitor {

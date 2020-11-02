@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.*
@@ -120,7 +121,7 @@ internal class Oppdrag private constructor(
             }
         }
 
-    internal fun minus(other: Oppdrag, aktivitetslogg: Aktivitetslogg): Oppdrag {
+    internal fun minus(other: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         val tidligere = other.copyWith(other.linjerUtenOpphør())
         return when {
             tidligere.isEmpty() ->

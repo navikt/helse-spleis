@@ -2,7 +2,9 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.FagsystemIdVisitor
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.*
@@ -41,6 +43,16 @@ internal class FagsystemIdTest {
     }
 
     @Test
+    fun simulere() {
+        opprett(1.NAV)
+        val maksdato = LocalDate.MAX
+        val saksbehandler = "Z999999"
+        fagsystemId.simuler(aktivitetslogg, maksdato, saksbehandler)
+        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertSimuleringsbehov(maksdato, saksbehandler)
+    }
+
+    @Test
     fun `Nytt element når fagsystemId'er er forskjellige`() {
         opprett(1.NAV)
         opprett(1.NAV, startdato = 17.januar)
@@ -57,6 +69,19 @@ internal class FagsystemIdTest {
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
     }
 
+
+    @Test
+    fun `Ny fagsystemId når eksisterende fagsystemId er annullert`() {
+        opprettOgUtbetal(16.AP, 5.NAV)
+        annullere()
+        opprett(15.NAV(1300), startdato = 22.januar)
+        assertEquals(2, fagsystemIder.size)
+        assertTrue(fagsystemIder[0].erAnnullert())
+        assertFalse(fagsystemIder[1].erAnnullert())
+        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
+        assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+    }
+
     @Test
     fun `kan kun ha ett oppdrag som ikke er utbetalt`() {
         opprett(16.AP, 5.NAV)
@@ -69,15 +94,22 @@ internal class FagsystemIdTest {
     fun `annullere fagsystemId som ikke er utbetalt`() {
         opprett(16.AP, 5.NAV)
         assertThrows<IllegalStateException> {
-            fagsystemId.annullere()
+            fagsystemId.annullere(aktivitetslogg, LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now())
         }
+        assertTrue(aktivitetslogg.behov().isEmpty())
     }
 
     @Test
     fun `ubetalt annullering`() {
         opprettOgUtbetal(16.AP, 5.NAV)
-        fagsystemId.annullere()
+        val maksdato = LocalDate.MAX
+        val saksbehandler = "Z999999"
+        val saksbehandlerEpost = "saksbehandler@nav.no"
+        val godkjenttidspunkt = LocalDateTime.now()
+        fagsystemId.annullere(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertFalse(fagsystemId.erAnnullert())
+        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Overført)
     }
 
@@ -85,7 +117,7 @@ internal class FagsystemIdTest {
     fun `utbetale på en annullert fagsystemId`() {
         opprettOgUtbetal(16.AP, 5.NAV)
         annullere()
-        assertThrows<IllegalStateException> { fagsystemId.utbetal() }
+        assertThrows<IllegalStateException> { fagsystemId.utbetal(aktivitetslogg, LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now()) }
     }
 
     @Test
@@ -107,19 +139,63 @@ internal class FagsystemIdTest {
         assertNotEquals(oppdrag2.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
     }
 
+    private fun assertUtbetalingsbehov(maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
+        assertUtbetalingsbehov { utbetalingbehov ->
+            assertEquals("$maksdato", utbetalingbehov["maksdato"])
+            assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
+            assertEquals(saksbehandlerEpost, utbetalingbehov["saksbehandlerEpost"])
+            assertEquals("$godkjenttidspunkt", utbetalingbehov.getValue("godkjenttidspunkt"))
+            assertEquals(erAnnullering, utbetalingbehov["annullering"] as Boolean)
+        }
+    }
+
+    private fun assertSimuleringsbehov(maksdato: LocalDate, saksbehandler: String) {
+        assertSimuleringsbehov { utbetalingbehov ->
+            assertEquals("$maksdato", utbetalingbehov["maksdato"])
+            assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
+        }
+    }
+
+    private fun assertUtbetalingsbehov(block: (Map<String, Any>) -> Unit) {
+        aktivitetslogg.sisteBehov(Behovtype.Utbetaling, block)
+    }
+
+    private fun assertSimuleringsbehov(block: (Map<String, Any>) -> Unit) {
+        aktivitetslogg.sisteBehov(Behovtype.Simulering, block)
+    }
+
+    private fun Aktivitetslogg.sisteBehov(type: Behovtype, block: (Map<String, Any>) -> Unit) {
+        this.behov()
+            .last { it.type == type }
+            .detaljer()
+            .also { block(it) }
+    }
+
     private fun assertOppdragstilstander(fagsystemIndeks: Int, vararg tilstander: Oppdrag.Utbetalingtilstand) {
         assertEquals(tilstander.toList(), inspektør.oppdragtilstander(fagsystemIndeks))
     }
 
     private fun annullere() {
-        fagsystemId.annullere()
+        val maksdato = LocalDate.MAX
+        val saksbehandler = "Z999999"
+        val saksbehandlerEpost = "saksbehandler@nav.no"
+        val godkjenttidspunkt = LocalDateTime.now()
+        fagsystemId.annullere(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
         fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
     }
 
     private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null) =
         opprett(*dager, startdato = startdato, sisteDato = sisteDato).also {
             val fagsystemId = oppdrag.getValue(it)
-            fagsystemId.utbetal()
+            val maksdato = LocalDate.MAX
+            val saksbehandler = "Z999999"
+            val saksbehandlerEpost = "saksbehandler@nav.no"
+            val godkjenttidspunkt = LocalDateTime.now()
+            fagsystemId.utbetal(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+            assertTrue(aktivitetslogg.behov().isNotEmpty())
+            assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
             fagsystemId.håndter(utbetalingHendelse(it))
         }
 
@@ -127,7 +203,7 @@ internal class FagsystemIdTest {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
         MaksimumUtbetaling(
             listOf(tidslinje),
-            Aktivitetslogg(),
+            aktivitetslogg,
             listOf(1.januar),
             1.januar
         ).betal().let {
@@ -176,7 +252,7 @@ internal class FagsystemIdTest {
         internal fun oppdragtilstand(fagsystemIndeks: Int, oppdragIndeks: Int) =
             oppdragstilstander[fagsystemIndeks]?.get(oppdragIndeks) ?: fail { "Finner ikke fagsystem med indeks $fagsystemIndeks eller oppdrag med indeks $oppdragIndeks" }
 
-        override fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String) {
+        override fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {
             fagsystemIder.add(fagsystemIdTeller, id)
         }
 
@@ -206,7 +282,7 @@ internal class FagsystemIdTest {
             oppdragteller += 1
         }
 
-        override fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String) {
+        override fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {
             fagsystemIdTeller += 1
         }
     }
