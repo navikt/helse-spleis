@@ -621,7 +621,20 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
+
+        håndterSykmelding(Sykmeldingsperiode(3.september(2020), 30.september(2020), 100))
+        håndterSøknad(Sykdom(3.september(2020), 30.september(2020), 100))
+        håndterYtelser(3.vedtaksperiode, utbetalinger = historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterYtelser(3.vedtaksperiode, utbetalinger = historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
+        håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
         assertEquals(30.oktober(2020), inspektør.maksdato(1.vedtaksperiode))
         assertEquals(30.oktober(2020), inspektør.maksdato(2.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.maksdato(3.vedtaksperiode))
+        assertEquals(20.november(2019), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(20.november(2019), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(20.november(2019), inspektør.skjæringstidspunkt(3.vedtaksperiode))
     }
 }
