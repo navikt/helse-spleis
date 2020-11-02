@@ -329,7 +329,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        søppelbøtte(hendelse, ALLE)
+        søppelbøtte(RollbackArbeidsgiver(organisasjonsnummer, hendelse), ALLE)
     }
 
     fun håndter(hendelse: Annullering) {
@@ -381,7 +381,7 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.sykepengegrunnlag(skjæringstidspunkt, virkningFra)
 
     internal fun søppelbøtte(
-        hendelse: PersonHendelse,
+        hendelse: ArbeidstakerHendelse,
         filter: VedtaksperioderFilter,
         sendTilInfotrygd: Boolean = true
     ): List<Vedtaksperiode> {
@@ -463,21 +463,31 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
-    internal fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-        vedtaksperioder.toList().forEach { it.håndter(vedtaksperiode, GjenopptaBehandling(hendelse)) }
+    internal fun gjenopptaBehandling(hendelse: ArbeidstakerHendelse) {
+        vedtaksperioder.any { it.håndter(GjenopptaBehandling(hendelse)) }
         person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
     }
 
-    private fun gjenopptaBehandling(hendelse: PersonHendelse) {
-        vedtaksperioder.firstOrNull { it.skalGjenopptaBehandling() }
-            ?.håndter(GjenopptaBehandling(hendelse))
-    }
+    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse):
+        ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
+            override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
+            override fun aktørId() = hendelse.aktørId()
+            override fun fødselsnummer() = hendelse.fødselsnummer()
+        }
 
-    internal class GjenopptaBehandling(internal val hendelse: PersonHendelse)
+    internal class RollbackArbeidsgiver(
+        private val organisasjonsnummer: String,
+        private val hendelse: PersonHendelse
+    ):
+        ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
+            override fun organisasjonsnummer() = organisasjonsnummer
+            override fun aktørId() = hendelse.aktørId()
+            override fun fødselsnummer() = hendelse.fødselsnummer()
+        }
 
     internal class TilbakestillBehandling(
-        internal val organisasjonsnummer: String,
-        internal val hendelse: PersonHendelse
+        private val organisasjonsnummer: String,
+        private val hendelse: PersonHendelse
     ) : ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
         override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
