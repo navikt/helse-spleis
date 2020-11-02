@@ -579,4 +579,49 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         }
     }
+
+    @Test
+    fun `maksdato blir riktig i ping-pong-perioder`() {
+        val historikk1 = listOf(
+            RefusjonTilArbeidsgiver(20.november(2019), 3.januar(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(4.januar(2020), 31.januar(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.februar(2020), 14.februar(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(15.februar(2020), 3.mars(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(4.mars(2020), 20.mars(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.mars(2020), 17.april(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(18.april(2020), 8.mai(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(9.mai(2020), 29.mai(2020), 1000, 100, ORGNUMMER)
+        )
+        val inntektsopplysning1 = listOf(
+            Inntektsopplysning(20.november(2019), INNTEKT, ORGNUMMER, true)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100))
+        håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100))
+        håndterYtelser(1.vedtaksperiode, utbetalinger = historikk1.toTypedArray(), inntektshistorikk = inntektsopplysning1)
+        håndterYtelser(1.vedtaksperiode, utbetalinger = historikk1.toTypedArray(), inntektshistorikk = inntektsopplysning1)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        val historikk2 = historikk1 + listOf(
+            RefusjonTilArbeidsgiver(22.juni(2020), 9.juli(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(10.juli(2020), 31.juli(2020), 1000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.august(2020), 17.august(2020), 1000, 100, ORGNUMMER)
+        )
+        val inntektsopplysning2 = inntektsopplysning1 + listOf(
+            Inntektsopplysning(22.juni(2020), INNTEKT, ORGNUMMER, true)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100))
+        håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100))
+        håndterYtelser(2.vedtaksperiode, utbetalinger = historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterYtelser(2.vedtaksperiode, utbetalinger = historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertEquals(30.oktober(2020), inspektør.maksdato(1.vedtaksperiode))
+        assertEquals(30.oktober(2020), inspektør.maksdato(2.vedtaksperiode))
+    }
 }
