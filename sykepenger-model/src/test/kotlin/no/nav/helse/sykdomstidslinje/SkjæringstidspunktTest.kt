@@ -38,6 +38,11 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `syk-ferie-helg-syk regnes ikke som gap`() {
+        assertFørsteDagErSkjæringstidspunkt(15.S + 4.F + 2.n_ + 1.S)
+    }
+
+    @Test
     fun `skjæringstidspunkt er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
         assertFørsteDagErSkjæringstidspunkt(2.S)
         assertFørsteDagErSkjæringstidspunkt(2.U)
@@ -417,7 +422,10 @@ internal class SkjæringstidspunktTest {
         private fun assertFørsteDagErSkjæringstidspunkt(sykdomstidslinje: Sykdomstidslinje) {
             val førsteDag = sykdomstidslinje.periode()?.start
             assertNotNull(førsteDag)
-            assertEquals(førsteDag, sykdomstidslinje.skjæringstidspunkt())
+            val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
+            assertEquals(førsteDag, skjæringstidspunkt) {
+                "Forventet $førsteDag, men fikk $skjæringstidspunkt.\nPeriode: ${sykdomstidslinje.periode()}\nTidslinjen:\n$sykdomstidslinje"
+            }
         }
 
         private fun assertFørsteDagErSkjæringstidspunkt(
