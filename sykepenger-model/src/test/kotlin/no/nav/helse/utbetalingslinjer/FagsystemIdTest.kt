@@ -1,16 +1,16 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.FagsystemIdVisitor
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,13 +19,19 @@ import java.util.*
 internal class FagsystemIdTest {
 
     companion object {
+        private const val FNR = "12345678910"
+        private const val AKTØRID = "1234567891011"
         private const val ORGNUMMER = "123456789"
+        private const val SAKSBEHANDLER = "EN SAKSBEHANDLER"
+        private const val SAKSBEHANDLEREPOST = "saksbehandler@saksbehandlersen.no"
+        private val MAKSDATO = LocalDate.now()
+        private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
     private val fagsystemIder: MutableList<FagsystemId> = mutableListOf()
     private val oppdrag: MutableMap<Oppdrag, FagsystemId> = mutableMapOf()
     private lateinit var fagsystemId: FagsystemId
-    private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var aktivitetslogg: IAktivitetslogg
     private val inspektør get() = FagsystemIdInspektør(fagsystemIder)
 
     @BeforeEach
@@ -117,7 +123,7 @@ internal class FagsystemIdTest {
     fun `utbetale på en annullert fagsystemId`() {
         opprettOgUtbetal(16.AP, 5.NAV)
         annullere()
-        assertThrows<IllegalStateException> { fagsystemId.utbetal(aktivitetslogg, LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now()) }
+        assertThrows<IllegalStateException> { håndterGodkjenning(true, MAKSDATO) }
     }
 
     @Test
@@ -127,6 +133,18 @@ internal class FagsystemIdTest {
         annullere()
         assertTrue(fagsystemId.erAnnullert())
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
+    }
+
+    @Test
+    fun `avslag på utbetalingsgodkjenning sletter ubetalte oppdrag`() {
+        opprettOgUtbetal(16.AP, 5.NAV, godkjent = false)
+        assertTrue(fagsystemId.erTom())
+    }
+
+    @Test
+    fun `godkjent utbetalingsgodkjenning`() {
+        opprettOgUtbetal(16.AP, 5.NAV, godkjent = true)
+        assertFalse(fagsystemId.erTom())
     }
 
     @Test
@@ -164,7 +182,7 @@ internal class FagsystemIdTest {
         aktivitetslogg.sisteBehov(Behovtype.Simulering, block)
     }
 
-    private fun Aktivitetslogg.sisteBehov(type: Behovtype, block: (Map<String, Any>) -> Unit) {
+    private fun IAktivitetslogg.sisteBehov(type: Behovtype, block: (Map<String, Any>) -> Unit) {
         this.behov()
             .last { it.type == type }
             .detaljer()
@@ -177,8 +195,8 @@ internal class FagsystemIdTest {
 
     private fun annullere() {
         val maksdato = LocalDate.MAX
-        val saksbehandler = "Z999999"
-        val saksbehandlerEpost = "saksbehandler@nav.no"
+        val saksbehandler = SAKSBEHANDLER
+        val saksbehandlerEpost = SAKSBEHANDLEREPOST
         val godkjenttidspunkt = LocalDateTime.now()
         fagsystemId.annullere(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
@@ -186,14 +204,15 @@ internal class FagsystemIdTest {
         fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
     }
 
-    private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null) =
+    private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null, godkjent: Boolean = true) =
         opprett(*dager, startdato = startdato, sisteDato = sisteDato).also {
             val fagsystemId = oppdrag.getValue(it)
-            val maksdato = LocalDate.MAX
-            val saksbehandler = "Z999999"
-            val saksbehandlerEpost = "saksbehandler@nav.no"
-            val godkjenttidspunkt = LocalDateTime.now()
-            fagsystemId.utbetal(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+            val maksdato = MAKSDATO
+            val saksbehandler = SAKSBEHANDLER
+            val saksbehandlerEpost = SAKSBEHANDLEREPOST
+            val godkjenttidspunkt = GODKJENTTIDSPUNKT
+            håndterGodkjenning(godkjent, maksdato)
+            if (!godkjent) return@also
             assertTrue(aktivitetslogg.behov().isNotEmpty())
             assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
             fagsystemId.håndter(utbetalingHendelse(it))
@@ -219,18 +238,35 @@ internal class FagsystemIdTest {
         }
     }
 
+    private fun håndterGodkjenning(godkjent: Boolean, maksdato: LocalDate) {
+        fagsystemId.håndter(utbetalingsgodkjenning(godkjent), maksdato)
+    }
+
+    private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
+        UUID.randomUUID(),
+        AKTØRID,
+        FNR,
+        ORGNUMMER,
+        UUID.randomUUID().toString(),
+        SAKSBEHANDLER,
+        SAKSBEHANDLEREPOST,
+        godkjent,
+        GODKJENTTIDSPUNKT,
+        false
+    ).also { aktivitetslogg = it }
+
     private fun utbetalingHendelse(oppdrag: Oppdrag) = UtbetalingHendelse(
         UUID.randomUUID(),
         UUID.randomUUID().toString(),
-        "AKTØRID",
-        "FØDSELSNUMMER",
+        AKTØRID,
+        FNR,
         ORGNUMMER,
         oppdrag.fagsystemId(),
         UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
         "",
-        LocalDateTime.now(),
-        "EN SAKSBEHANDLER",
-        "saksbehandler@saksbehandlersen.no",
+        GODKJENTTIDSPUNKT,
+        SAKSBEHANDLER,
+        SAKSBEHANDLEREPOST,
         false
     )
 

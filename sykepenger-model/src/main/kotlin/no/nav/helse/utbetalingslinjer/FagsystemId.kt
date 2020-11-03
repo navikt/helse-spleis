@@ -1,10 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
@@ -40,7 +38,7 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
         utbetale(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
     }
 
-    internal fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime) {
+    private fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime) {
         check(!erAnnullert()) { "kan ikke utbetale på en annullert fagsystemId" }
         utbetale(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
     }
@@ -73,7 +71,24 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
         return true
     }
 
+    internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning, maksdato: LocalDate) {
+        if (utbetalingsgodkjenning.valider().hasErrorsOrWorse()) return fjernUbetalte()
+        utbetal(
+            utbetalingsgodkjenning,
+            maksdato,
+            utbetalingsgodkjenning.saksbehandler(),
+            utbetalingsgodkjenning.saksbehandlerEpost(),
+            utbetalingsgodkjenning.godkjenttidspunkt()
+        )
+    }
+
+    internal fun erTom() = oppdragsliste.isEmpty()
+
     internal fun erAnnullert() = head.erUtbetalt() && head.linjerUtenOpphør().isEmpty()
+
+    private fun fjernUbetalte() {
+        oppdragsliste.removeIf { !it.erUtbetalt() }
+    }
 
     private fun erUtbetalt() = oppdragsliste.any { it.erUtbetalt() }
 
