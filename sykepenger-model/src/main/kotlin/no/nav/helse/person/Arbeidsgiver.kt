@@ -254,8 +254,14 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
+
         vedtaksperioder.find{!it.tillatAnullering()}?.let{
             hendelse.error("Kan ikke annullere, vedtaksperiode blokkerer.")
+            return
+        }
+
+        if(sisteIkkeAnnullertUtbetaling()?.arbeidsgiverOppdrag()?.fagsystemId() != hendelse.fagsystemId) {
+            hendelse.error("Kan ikke annullere, er ikke siste utbetaling.")
             return
         }
 
@@ -285,6 +291,12 @@ internal class Arbeidsgiver private constructor(
             annullering = true
         )
         søppelbøtte(hendelse, ALLE)
+    }
+
+    private fun sisteIkkeAnnullertUtbetaling(): Utbetaling? {
+        return utbetalinger.reversed()
+            .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
+            .firstOrNull { !it.erAnnullert() }
     }
 
     internal fun håndter(hendelse: Grunnbeløpsregulering) {

@@ -143,12 +143,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
-        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(15.februar, 15.mars, 100))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(15.februar, 2.mars)), førsteFraværsdag = 15.februar)
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 25.mars, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(20.februar, 25.mars, 100))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)   // No history
-        håndterSimulering(2.vedtaksperiode)
 
         val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
@@ -172,8 +170,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GAP,
             TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
             TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_INFOTRYGD
         )
 

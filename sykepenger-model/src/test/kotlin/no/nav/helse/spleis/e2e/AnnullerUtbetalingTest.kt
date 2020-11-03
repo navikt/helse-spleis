@@ -6,7 +6,9 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.TilstandstypeDTO
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -86,59 +88,24 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         nyttVedtak(1.mars, 31.mars, 100, 1.mars)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.Utbetalt
-        }
-
-
-        sisteBehovErAnnullering(1.vedtaksperiode)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+        sjekkAt(speilApi().arbeidsgivere[0]) {
+            vedtaksperioder[0].tilstand er TilstandstypeDTO.Utbetalt
+            vedtaksperioder[1].tilstand er TilstandstypeDTO.Annullert
+        }
+
+        sisteBehovErAnnullering(2.vedtaksperiode)
+
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         sjekkAt(speilApi().arbeidsgivere[0]) {
             vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
             vedtaksperioder[1].tilstand er TilstandstypeDTO.Annullert
         }
 
-        sisteBehovErAnnullering(2.vedtaksperiode)
-    }
-
-    @Test
-    fun `Annuller flere fagsystemid for samme arbeidsgiver, utenom den i midten`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        nyttVedtak(1.mars, 31.mars, 100, 1.mars)
-        nyttVedtak(1.mai, 31.mai, 100, 1.mai)
-
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.Utbetalt
-            vedtaksperioder[2].tilstand er TilstandstypeDTO.Utbetalt
-        }
-
-        sjekkAt(inspektør.personLogg.behov().last()) {
-            type er Behovtype.Utbetaling
-            detaljer()["fagsystemId"] er inspektør.fagsystemId(1.vedtaksperiode)
-            hentLinjer()[0]["statuskode"] er "OPPH"
-        }
-
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(3.vedtaksperiode))
-        håndterUtbetalt(3.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-            vedtaksperioder[1].tilstand er TilstandstypeDTO.Utbetalt
-            vedtaksperioder[2].tilstand er TilstandstypeDTO.Annullert
-        }
-
-        val vedtaksperiode = 3.vedtaksperiode
-
-        sisteBehovErAnnullering(vedtaksperiode)
+        sisteBehovErAnnullering(1.vedtaksperiode)
     }
 
     private fun sisteBehovErAnnullering(vedtaksperiode: UUID) {
@@ -212,38 +179,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
         assertIngenAnnulleringsbehov()
-    }
-
-
-    @Test
-    fun `Vedtaksperioder etter annulert fagsystemid blir sendt til infortrygd`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        tilSimulert(1.mars, 31.mars, 100, 1.mars)
-        forlengPeriode(1.april, 30.april, 100)
-
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
-
-        sjekkAt(inspektør) {
-            !personLogg.hasErrorsOrWorse() ellers personLogg.toString()
-        }
-
-        sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder.size er 1
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.Annullert
-        }
-
-        sjekkAt(observatør.avbruttEventer) {
-            this[0].vedtaksperiodeId er 1.vedtaksperiode
-            this[0].gjeldendeTilstand er TilstandType.AVSLUTTET
-            this[1].vedtaksperiodeId er 2.vedtaksperiode
-            this[1].gjeldendeTilstand er TilstandType.TIL_INFOTRYGD
-            this[2].vedtaksperiodeId er 3.vedtaksperiode
-            this[2].gjeldendeTilstand er TilstandType.TIL_INFOTRYGD
-        }
-
-
-        sisteBehovErAnnullering(1.vedtaksperiode)
     }
 
     private fun Aktivitetslogg.Aktivitet.Behov.hentLinjer() =
@@ -430,6 +365,18 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(100.0, utbetalingslinje.grad)
     }
 
+    @Test
+    fun `kan ikke annullere utbetalingsreferanser som ikke er siste`() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.mars, 26.mars, 100, 3.mars)
+
+        val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
+
+        assertEquals(0, observatør.annulleringer.size)
+
+        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
+    }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
