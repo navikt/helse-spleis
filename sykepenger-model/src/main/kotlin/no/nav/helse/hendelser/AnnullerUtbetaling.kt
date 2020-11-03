@@ -23,4 +23,6 @@ class AnnullerUtbetaling(
 
     override fun organisasjonsnummer() = organisasjonsnummer
 
+    internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+
 }

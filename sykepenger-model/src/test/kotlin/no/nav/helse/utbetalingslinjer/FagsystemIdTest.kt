@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
@@ -100,7 +101,7 @@ internal class FagsystemIdTest {
     fun `annullere fagsystemId som ikke er utbetalt`() {
         opprett(16.AP, 5.NAV)
         assertThrows<IllegalStateException> {
-            fagsystemId.annullere(aktivitetslogg, LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now())
+            håndterAnnullering(LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now())
         }
         assertTrue(aktivitetslogg.behov().isEmpty())
     }
@@ -112,7 +113,7 @@ internal class FagsystemIdTest {
         val saksbehandler = "Z999999"
         val saksbehandlerEpost = "saksbehandler@nav.no"
         val godkjenttidspunkt = LocalDateTime.now()
-        fagsystemId.annullere(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        håndterAnnullering(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertFalse(fagsystemId.erAnnullert())
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
@@ -123,7 +124,7 @@ internal class FagsystemIdTest {
     fun `utbetale på en annullert fagsystemId`() {
         opprettOgUtbetal(16.AP, 5.NAV)
         annullere()
-        assertThrows<IllegalStateException> { håndterGodkjenning(true, MAKSDATO) }
+        assertThrows<IllegalStateException> { håndterGodkjenning(true, LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now()) }
     }
 
     @Test
@@ -198,7 +199,7 @@ internal class FagsystemIdTest {
         val saksbehandler = SAKSBEHANDLER
         val saksbehandlerEpost = SAKSBEHANDLEREPOST
         val godkjenttidspunkt = LocalDateTime.now()
-        fagsystemId.annullere(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        håndterAnnullering(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
         fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
@@ -211,7 +212,7 @@ internal class FagsystemIdTest {
             val saksbehandler = SAKSBEHANDLER
             val saksbehandlerEpost = SAKSBEHANDLEREPOST
             val godkjenttidspunkt = GODKJENTTIDSPUNKT
-            håndterGodkjenning(godkjent, maksdato)
+            håndterGodkjenning(godkjent, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
             if (!godkjent) return@also
             assertTrue(aktivitetslogg.behov().isNotEmpty())
             assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
@@ -238,21 +239,56 @@ internal class FagsystemIdTest {
         }
     }
 
-    private fun håndterGodkjenning(godkjent: Boolean, maksdato: LocalDate) {
-        fagsystemId.håndter(utbetalingsgodkjenning(godkjent), maksdato)
+    private fun håndterGodkjenning(
+        godkjent: Boolean,
+        maksdato: LocalDate,
+        saksbehandler: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime
+    ) {
+        fagsystemId.håndter(utbetalingsgodkjenning(godkjent, saksbehandler, saksbehandlerEpost, godkjenttidspunkt), maksdato)
     }
 
-    private fun utbetalingsgodkjenning(godkjent: Boolean) = Utbetalingsgodkjenning(
+    private fun håndterAnnullering(
+        maksdato: LocalDate,
+        saksbehandler: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime
+    ) {
+        fagsystemId.håndter(annullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt), maksdato)
+    }
+
+    private fun utbetalingsgodkjenning(
+        godkjent: Boolean,
+        saksbehandler: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime
+    ) = Utbetalingsgodkjenning(
         UUID.randomUUID(),
         AKTØRID,
         FNR,
         ORGNUMMER,
         UUID.randomUUID().toString(),
-        SAKSBEHANDLER,
-        SAKSBEHANDLEREPOST,
+        saksbehandler,
+        saksbehandlerEpost,
         godkjent,
-        GODKJENTTIDSPUNKT,
+        godkjenttidspunkt,
         false
+    ).also { aktivitetslogg = it }
+
+    private fun annullering(
+        saksbehandler: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime
+    ) = AnnullerUtbetaling(
+        UUID.randomUUID(),
+        AKTØRID,
+        FNR,
+        ORGNUMMER,
+        fagsystemId.fagsystemId(),
+        saksbehandler,
+        saksbehandlerEpost,
+        godkjenttidspunkt
     ).also { aktivitetslogg = it }
 
     private fun utbetalingHendelse(oppdrag: Oppdrag) = UtbetalingHendelse(
@@ -281,11 +317,11 @@ internal class FagsystemIdTest {
             fagsystemIder.onEach { it.accept(this) }
         }
 
-        internal fun oppdragtilstander(fagsystemIndeks: Int) = oppdragstilstander[fagsystemIndeks] ?: fail {
+        fun oppdragtilstander(fagsystemIndeks: Int) = oppdragstilstander[fagsystemIndeks] ?: fail {
             "Finner ikke fagsystem med indeks $fagsystemIndeks"
         }
 
-        internal fun oppdragtilstand(fagsystemIndeks: Int, oppdragIndeks: Int) =
+        fun oppdragtilstand(fagsystemIndeks: Int, oppdragIndeks: Int) =
             oppdragstilstander[fagsystemIndeks]?.get(oppdragIndeks) ?: fail { "Finner ikke fagsystem med indeks $fagsystemIndeks eller oppdrag med indeks $oppdragIndeks" }
 
         override fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {
