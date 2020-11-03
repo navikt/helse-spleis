@@ -189,6 +189,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering) {
+        håndter(message, grunnbeløpsregulering) { person ->
+            person.håndter(grunnbeløpsregulering)
+        }
+    }
+
     private fun publiserPersonRulletTilbake(
         rollback: PersonHendelse,
         message: HendelseMessage,
@@ -458,4 +464,5 @@ internal interface IHendelseMediator {
     fun behandle(message: RollbackMessage, rollback: Rollback)
     fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)
+    fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering)
 }
