@@ -189,7 +189,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         )
     }
 
-    private fun inntektsmelding(arbeidsgiver: Arbeidsgiver, beløp: Number, førsteFraværsdag: LocalDate) {
+    private fun inntektsmelding(arbeidsgiver: Arbeidsgiver, beløp: Number, førsteFraværsdag: LocalDate, skjæringstisdpunkt: LocalDate = førsteFraværsdag) {
         arbeidsgiver.addInntekt(
             Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -203,7 +203,8 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 ferieperioder = emptyList(),
                 arbeidsforholdId = null,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null
-            )
+            ),
+            skjæringstisdpunkt
         )
     }
 

@@ -192,7 +192,6 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         } else {
             validerSykdomstidslinjer()
-            addInntektVol2(inntektsmelding)
         }
     }
 
@@ -361,16 +360,16 @@ internal class Arbeidsgiver private constructor(
 
     internal fun inntekt(dato: LocalDate): Inntekt? = inntektshistorikk.inntekt(dato)
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntektshistorikk)
+    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
+        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
     internal fun addInntekt(ytelser: Ytelser) {
         ytelser.addInntekt(organisasjonsnummer, inntektshistorikk)
     }
 
-    internal fun addInntektVol2(inntektsmelding: Inntektsmelding) {
-        inntektsmelding.addInntekt(inntektshistorikkVol2)
+    internal fun addInntektVol2(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
+        inntektsmelding.addInntekt(inntektshistorikkVol2, skjæringstidspunkt)
     }
 
     internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, ytelser: Ytelser) {

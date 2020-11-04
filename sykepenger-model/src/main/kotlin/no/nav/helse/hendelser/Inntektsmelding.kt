@@ -107,14 +107,25 @@ class Inntektsmelding(
     }
 
     override fun erRelevant(periode: Periode) =
-        tidslinjeOverlapperMed(periode) && (førsteFraværsdag == null || førsteFraværsdagErIArbeidsgiverperioden() || førsteFraværsdagErFørEllerIPerioden(periode))
+        tidslinjeOverlapperMed(periode) && (førsteFraværsdag == null || førsteFraværsdagErIArbeidsgiverperioden() || førsteFraværsdagErFørEllerIPerioden(
+            periode
+        ))
 
-    private fun tidslinjeOverlapperMed(periode: Periode) = (arbeidsgivertidslinje(arbeidsgiverperioder, førsteFraværsdag)
-        + nyFørsteFraværsdagtidslinje(førsteFraværsdag)).merge(beste).periode()?.overlapperMed(periode) == true
+    private fun tidslinjeOverlapperMed(periode: Periode) =
+        (arbeidsgivertidslinje(arbeidsgiverperioder, førsteFraværsdag)
+            + nyFørsteFraværsdagtidslinje(førsteFraværsdag)).merge(beste).periode()?.overlapperMed(periode) == true
 
     private fun førsteFraværsdagErIArbeidsgiverperioden() =
         arbeidsgiverperioder.isNotEmpty() && (requireNotNull(førsteFraværsdag) in arbeidsgiverperioder ||
-            førsteFraværsdag.isEqual(arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1)))
+            førsteFraværsdag.isEqual(
+                arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1)
+            ))
+
+    private fun førsteFraværsdagErEtterArbeidsgiverperioden() =
+        arbeidsgiverperioder.isNotEmpty() && (requireNotNull(førsteFraværsdag) !in arbeidsgiverperioder &&
+            førsteFraværsdag.isAfter(
+                arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1)
+            ))
 
     private fun førsteFraværsdagErFørEllerIPerioden(periode: Periode) =
         requireNotNull(førsteFraværsdag) <= periode.endInclusive
@@ -141,8 +152,10 @@ class Inntektsmelding(
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt() ?: førsteFraværsdag ?: return
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate) {
+        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
+            ?.let { if (førsteFraværsdagErEtterArbeidsgiverperioden() && it.isAfter(skjæringstidspunktVedtaksperiode)) skjæringstidspunktVedtaksperiode else it }
+            ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
             warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
@@ -156,8 +169,10 @@ class Inntektsmelding(
         )
     }
 
-    internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2) {
-        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt() ?: førsteFraværsdag ?: return
+    internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2, skjæringstidspunktVedtaksperiode: LocalDate) {
+        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
+            ?.let { if (førsteFraværsdagErEtterArbeidsgiverperioden() && it.isAfter(skjæringstidspunktVedtaksperiode)) skjæringstidspunktVedtaksperiode else it }
+            ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
             warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")

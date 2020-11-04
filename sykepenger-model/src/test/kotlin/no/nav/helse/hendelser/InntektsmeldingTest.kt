@@ -1,7 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -561,6 +564,19 @@ internal class InntektsmeldingTest {
     fun `er relevant når det ikke finnes arbeidsgiverperioder og første fraværsdag er i vedtaksperioden`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 4.januar)
         assertTrue(inntektsmelding.erRelevant(Periode(1.januar, 18.januar)))
+    }
+
+    @Test
+    fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, beregnetInntekt = 2000.månedlig, refusjonBeløp = 2000.månedlig)
+        val inntektshistorikkVol2 = InntektshistorikkVol2()
+        val inntektshistorikk = Inntektshistorikk()
+        inntektsmelding.addInntekt(inntektshistorikkVol2, 1.februar)
+        inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
+        assertEquals(2000.månedlig, inntektshistorikkVol2.grunnlagForSykepengegrunnlag(1.februar))
+        assertEquals(null, inntektshistorikkVol2.grunnlagForSykepengegrunnlag(3.februar))
+        assertEquals(2000.månedlig, inntektshistorikk.inntekt(1.februar))
+        assertEquals(2000.månedlig, inntektshistorikk.inntekt(3.februar))
     }
 
     private fun inntektsmelding(

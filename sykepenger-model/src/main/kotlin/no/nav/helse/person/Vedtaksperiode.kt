@@ -384,7 +384,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
-        arbeidsgiver.addInntekt(hendelse)
+        arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
+        arbeidsgiver.addInntektVol2(hendelse, skjæringstidspunkt)
 
         val forrigeVedtaksperiode = arbeidsgiver.finnForrigeVedaksperiode(this)
 

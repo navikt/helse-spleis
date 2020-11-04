@@ -1,12 +1,10 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,7 +20,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntektshistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
-            .addInntekt(inntekthistorikk)
+            .addInntekt(inntekthistorikk, 1.januar)
         assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
     }
 
