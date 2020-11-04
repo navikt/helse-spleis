@@ -888,9 +888,9 @@ internal class Vedtaksperiode private constructor(
                         return@returnPoint TilInfotrygd
                     }
                 }
-
                 if (vedtaksperiode.arbeidsgiver.harTilstøtendeForkastet(vedtaksperiode)) {
                     vedtaksperiode.arbeidsgiver.søppelbøtte(sykmelding, Arbeidsgiver.SENERE(vedtaksperiode))
+                    sykmelding.error("Kan ikke forlenge en ferdigbehandlet forkastet periode")
                     return@returnPoint TilInfotrygd
                 }
 
