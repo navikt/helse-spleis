@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.inntektsmeldingkontrakt.*
+import no.nav.inntektsmeldingkontrakt.Naturalytelse.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -66,6 +67,11 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
+    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = ValidInntektsmelding.set<JsonNode>(
+        "opphoerAvNaturalytelser",
+        listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
+    ).toJson()
+
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         InntektsmeldingerRiver(rapidsConnection, mediator)
     }
@@ -81,6 +87,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingWithUnknownFieldsJson)
         assertNoErrors(ValidInntektsmeldingJson)
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
+        assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
     }
 }
 
@@ -93,4 +100,7 @@ private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.va
     put("@event_name", "inntektsmelding")
     put("@opprettet", LocalDateTime.now().toString())
 }
+
 private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)
+
+private fun List<OpphoerAvNaturalytelse>.toJsonNode(): JsonNode = objectMapper.valueToTree(this)

@@ -16,6 +16,7 @@ import no.nav.helse.spleis.db.PersonPostgresRepository
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
+import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
@@ -111,11 +112,12 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendInntektsmelding(
         vedtaksperiodeIndeks: Int,
         arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList()
     ) {
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag))
+        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser))
     }
 
     protected fun sendNyPåminnelse() {

@@ -105,7 +105,8 @@ internal class TestMessageFactory(
 
     fun lagInnteksmelding(
         arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList()
     ): String {
         val inntektsmelding = Inntektsmelding(
             inntektsmeldingId = UUID.randomUUID().toString(),
@@ -119,7 +120,7 @@ internal class TestMessageFactory(
             beregnetInntekt = inntekt.toBigDecimal(),
             refusjon = Refusjon(inntekt.toBigDecimal(), null),
             endringIRefusjoner = emptyList(),
-            opphoerAvNaturalytelser = emptyList(),
+            opphoerAvNaturalytelser = opphørAvNaturalytelser,
             gjenopptakelseNaturalytelser = emptyList(),
             arbeidsgiverperioder = arbeidsgiverperiode,
             status = Status.GYLDIG,

@@ -6,10 +6,13 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.inntektsmeldingkontrakt.Naturalytelse
+import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -138,7 +141,13 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendAnnullering(fagsystemId)
-        sendUtbetaling(0, fagsystemId = fagsystemId, utbetalingOK = true, saksbehandlerEpost = "tbd@nav.no", annullert = true)
+        sendUtbetaling(
+            0,
+            fagsystemId = fagsystemId,
+            utbetalingOK = true,
+            saksbehandlerEpost = "tbd@nav.no",
+            annullert = true
+        )
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
         val utbetalingAnnullert =
@@ -198,6 +207,31 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
         assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
         assertEquals("O123456", utbetaltEvent["godkjentAv"].textValue())
+    }
+
+    @Test
+    fun `Inntektsmelding med opphør av naturalytelser blir kastet til infotrygd`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(
+            vedtaksperiodeIndeks = 0,
+            arbeidsgiverperiode = listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar,
+            opphørAvNaturalytelser = listOf(
+                OpphoerAvNaturalytelse(
+                    Naturalytelse.ELEKTRONISKKOMMUNIKASJON,
+                    2.januar,
+                    BigDecimal(600.0)
+                )
+            )
+        )
+
+        assertForkastedeTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_GAP",
+            "TIL_INFOTRYGD"
+        )
     }
 }
 

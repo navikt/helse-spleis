@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.JsonMessageDelegate
-import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
 internal class InntektsmeldingerRiver(
@@ -38,7 +37,12 @@ internal class InntektsmeldingerRiver(
         packet.require("mottattDato", JsonNode::asLocalDateTime)
         packet.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
         packet.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
-        packet.interestedIn("refusjon.beloepPrMnd", "arbeidsforholdId", "begrunnelseForReduksjonEllerIkkeUtbetalt")
+        packet.interestedIn(
+            "refusjon.beloepPrMnd",
+            "arbeidsforholdId",
+            "begrunnelseForReduksjonEllerIkkeUtbetalt",
+            "opphoerAvNaturalytelser"
+        )
     }
 
     override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(JsonMessageDelegate(packet))

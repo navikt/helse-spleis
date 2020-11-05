@@ -21,7 +21,8 @@ class Inntektsmelding(
     private val arbeidsgiverperioder: List<Periode>,
     ferieperioder: List<Periode>,
     private val arbeidsforholdId: String?,
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    private val harOpphørAvNaturalytelser: Boolean = false
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private var beingQualified = false
@@ -128,6 +129,7 @@ class Inntektsmelding(
                 it
             )
         }
+        if (harOpphørAvNaturalytelser) aktivitetslogg.error("Brukeren har opphold i naturalytelser")
         return aktivitetslogg
     }
 

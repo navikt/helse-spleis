@@ -216,7 +216,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         id: UUID = UUID.randomUUID(),
-        beregnetInntekt: Inntekt = refusjon.second
+        beregnetInntekt: Inntekt = refusjon.second,
+        harOpphørAvNaturalytelser: Boolean = false
     ): UUID {
         inntektsmelding(
             id,
@@ -224,7 +225,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             ferieperioder = ferieperioder,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
-            beregnetInntekt = beregnetInntekt
+            beregnetInntekt = beregnetInntekt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         ).also(person::håndter)
         inntektsmeldinger[id] = InntektsmeldingData(
             arbeidsgiverperioder,
@@ -525,7 +527,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        harOpphørAvNaturalytelser: Boolean = false
     ): Inntektsmelding {
         return Inntektsmelding(
             meldingsreferanseId = id,
@@ -538,7 +541,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             arbeidsgiverperioder = arbeidsgiverperioder,
             ferieperioder = ferieperioder,
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         ).apply {
             hendelselogg = this
         }
