@@ -272,8 +272,8 @@ internal class Arbeidsgiver private constructor(
             hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
             return
         }
-        if(!sisteUtbetaling.erUtbetalt()) {
-            hendelse.error("Kan ikke annullere. Siste utbetaling er feilet eller ikke fullført %s", hendelse.fagsystemId)
+        if(sisteUtbetaling.erFeilet()) {
+            hendelse.error("Kan ikke annullere. Siste utbetaling er feilet %s", hendelse.fagsystemId)
             return
         }
         if (sisteUtbetaling.erAnnullert()) {
