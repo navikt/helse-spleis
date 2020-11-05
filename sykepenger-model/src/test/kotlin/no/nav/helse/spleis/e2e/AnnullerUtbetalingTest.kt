@@ -378,6 +378,24 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
     }
 
+    @Test
+    fun `annulerer flere fagsystemider baklengs`() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(1.mars, 31.mars, 100, 1.mars)
+
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
+        håndterUtbetalt(2.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+        sisteBehovErAnnullering(2.vedtaksperiode)
+        assertFalse(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullert())
+        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullert())
+
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+        sisteBehovErAnnullering(1.vedtaksperiode)
+        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullert())
+        assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullert())
+    }
+
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
         val linjer = mutableListOf<Utbetalingslinje>()
