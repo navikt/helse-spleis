@@ -1116,4 +1116,28 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
 
+    @Disabled("WIP Test for inntektsmelding med refusjonsopphold")
+    @Test
+    fun ` `() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterSøknad(Sykdom(1.januar, 30.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        // -> TODO refusjon IM kommer her
+
+        håndterSykmelding(Sykmeldingsperiode(31.januar, 28.februar, 100))
+        håndterSøknad(Sykdom(31.januar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 1.januar, refusjon = Triple(6.februar, INNTEKT, emptyList()))
+
+        inspektør.also {
+            assertEquals(Periode(1.januar, 30.januar), it.vedtaksperioder(0).periode())
+        }
+    }
+
 }
