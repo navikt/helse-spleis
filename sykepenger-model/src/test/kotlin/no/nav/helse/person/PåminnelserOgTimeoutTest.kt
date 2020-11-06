@@ -91,17 +91,16 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(7, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(7, hendelse.behov().size)
+        assertEquals(6, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dødsinfo))
     }
 
     @Test
