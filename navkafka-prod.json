@@ -270,6 +270,10 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvspoler",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
