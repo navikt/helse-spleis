@@ -102,13 +102,9 @@ internal class MessageMediator(
         }
 
         override fun onMessage(message: String, context: MessageContext) {
-            try {
-                beforeRiverHandling()
-                listeners.forEach { it.onMessage(message, context) }
-                afterRiverHandling(message)
-            } catch (err: Exception) {
-                errorHandler(err, message)
-            }
+            beforeRiverHandling()
+            listeners.forEach { it.onMessage(message, context) }
+            afterRiverHandling(message)
         }
 
         override fun publish(message: String) {
