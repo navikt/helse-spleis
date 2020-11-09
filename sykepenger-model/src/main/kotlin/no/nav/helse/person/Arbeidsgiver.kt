@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -282,7 +282,7 @@ internal class Arbeidsgiver private constructor(
         }
         val utbetaling = sisteUtbetaling.annuller(hendelse.aktivitetslogg)
         utbetalinger.add(utbetaling)
-        sendUtbetalingsbehov(
+        utbetaling(
             aktivitetslogg = hendelse.aktivitetslogg,
             oppdrag = utbetaling.arbeidsgiverOppdrag(),
             godkjenttidspunkt = hendelse.opprettet,

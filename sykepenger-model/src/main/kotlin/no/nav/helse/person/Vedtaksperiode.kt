@@ -15,7 +15,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.sendUtbetalingsbehov
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
@@ -1488,16 +1488,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val cast = hendelse as Utbetalingsgodkjenning
-            sendUtbetalingsbehov(
-                aktivitetslogg = hendelse,
-                oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
-                maksdato = vedtaksperiode.maksdato,
-                saksbehandler = cast.saksbehandler(),
-                saksbehandlerEpost = cast.saksbehandlerEpost(),
-                godkjenttidspunkt = cast.godkjenttidspunkt(),
-                annullering = false
-            )
+            trengerUtbetaling(hendelse, vedtaksperiode, (hendelse as Utbetalingsgodkjenning).saksbehandlerEpost())
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
@@ -1532,11 +1523,29 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            trengerUtbetaling(påminnelse, vedtaksperiode, "epost@nav.no")
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
             vedtaksperiode.kontekst(annullering)
             vedtaksperiode.tilstand(annullering, TilAnnullering)
+        }
+
+        private fun trengerUtbetaling(
+            hendelse: ArbeidstakerHendelse,
+            vedtaksperiode: Vedtaksperiode,
+            epost: String
+        ) {
+            utbetaling(
+                aktivitetslogg = hendelse,
+                oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
+                maksdato = vedtaksperiode.maksdato,
+                saksbehandler = vedtaksperiode.godkjentAv!!,
+                saksbehandlerEpost = epost,
+                godkjenttidspunkt = vedtaksperiode.godkjenttidspunkt!!,
+                annullering = false
+            )
         }
     }
 

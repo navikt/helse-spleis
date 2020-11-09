@@ -82,7 +82,7 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
 
     private fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
         head.utbetal(this)
-        Aktivitetslogg.Aktivitet.Behov.sendUtbetalingsbehov(
+        Aktivitetslogg.Aktivitet.Behov.utbetaling(
             aktivitetslogg = aktivitetslogg,
             oppdrag = head.removeUEND(),
             maksdato = maksdato,
