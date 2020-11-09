@@ -1423,14 +1423,7 @@ internal class Vedtaksperiode private constructor(
                 .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            godkjenning(
-                aktivitetslogg = hendelse,
-                periodeFom = vedtaksperiode.periode.start,
-                periodeTom = vedtaksperiode.periode.endInclusive,
-                sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode.start)!!,
-                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
-                periodetype = vedtaksperiode.periodetype()
-            )
+            trengerGodkjenning(hendelse, vedtaksperiode)
         }
 
         override fun håndter(
@@ -1463,6 +1456,24 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            trengerGodkjenning(påminnelse, vedtaksperiode)
+        }
+
+        private fun trengerGodkjenning(
+            hendelse: ArbeidstakerHendelse,
+            vedtaksperiode: Vedtaksperiode
+        ) {
+            godkjenning(
+                aktivitetslogg = hendelse,
+                periodeFom = vedtaksperiode.periode.start,
+                periodeTom = vedtaksperiode.periode.endInclusive,
+                sykepengegrunnlag = vedtaksperiode.arbeidsgiver.inntekt(vedtaksperiode.periode.start)!!,
+                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
+                periodetype = vedtaksperiode.periodetype()
+            )
         }
     }
 
