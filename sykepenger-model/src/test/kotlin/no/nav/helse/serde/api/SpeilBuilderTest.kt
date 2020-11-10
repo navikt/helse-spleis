@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
@@ -1265,13 +1266,7 @@ class SpeilBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = listOf(
-                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                    fom = fom,
-                    tom = tom,
-                    dagsats = 31000,
-                    grad = 100,
-                    orgnummer = orgnummer
-                )
+                RefusjonTilArbeidsgiver(fom = fom, tom = tom, dagsats = 31000, grad = 100, orgnummer = orgnummer)
             ),
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk

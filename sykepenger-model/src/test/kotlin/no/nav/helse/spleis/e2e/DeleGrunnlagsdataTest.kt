@@ -82,12 +82,16 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER)
+        )
         håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode,
+        assertTilstander(
+            1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag
@@ -329,13 +330,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.desember(2017),
-                15.desember(2017),
-                15000,
-                100,
-                ORGNUMMER
-            )
+            RefusjonTilArbeidsgiver(1.desember(2017), 15.desember(2017), 15000, 100, ORGNUMMER)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -373,13 +368,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.desember(2017),
-                16.desember(2017),
-                15000,
-                100,
-                ORGNUMMER
-            )
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.desember(2017), 16.desember(2017), 15000, 100, ORGNUMMER)
         )
         inspektør.also {
             assertNoErrors(it)
@@ -410,66 +400,22 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                21.august(2020),
-                19.september(2020),
-                2077,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                21.august(2019),
-                19.september(2019),
-                1043,
-                100,
-                "12345789"
-            ),
+            RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.august(2020), 19.september(2020), 2077, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.august(2019), 19.september(2019), 1043, 100, "12345789"),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    27.juli(2020),
-                    45000.månedlig,
-                    ORGNUMMER,
-                    true
-                ),
-                Utbetalingshistorikk.Inntektsopplysning(
-                    21.august(2019),
-                    22600.månedlig,
-                    "12345789",
-                    true
-                )
+                Utbetalingshistorikk.Inntektsopplysning(27.juli(2020), 45000.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(21.august(2019), 22600.månedlig, "12345789", true)
             )
         )
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                21.august(2020),
-                19.september(2020),
-                2077,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                21.august(2019),
-                19.september(2019),
-                1043,
-                100,
-                "12345789"
-            ),
+            RefusjonTilArbeidsgiver(27.juli(2020), 20.august(2020), 2077, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.august(2020), 19.september(2020), 2077, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.august(2019), 19.september(2019), 1043, 100, "12345789"),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    27.juli(2020),
-                    45000.månedlig,
-                    ORGNUMMER,
-                    true
-                ),
-                Utbetalingshistorikk.Inntektsopplysning(
-                    21.august(2019),
-                    22600.månedlig,
-                    "12345789",
-                    true
-                )
+                Utbetalingshistorikk.Inntektsopplysning(27.juli(2020), 45000.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(21.august(2019), 22600.månedlig, "12345789", true)
             )
         )
 
@@ -889,22 +835,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                31.januar,
-                INNTEKT_AS_INT,
-                100,
-                ORGNUMMER
-            )
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                31.januar,
-                INNTEKT_AS_INT,
-                100,
-                ORGNUMMER
-            )
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterSimulering(1.vedtaksperiode)
 
@@ -1034,22 +970,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                2.januar,
-                INNTEKT_AS_INT,
-                100,
-                ORGNUMMER
-            )
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                2.januar,
-                INNTEKT_AS_INT,
-                100,
-                ORGNUMMER
-            )
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
@@ -1059,13 +985,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100))
         håndterYtelser(
-            2.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.januar,
-                2.januar,
-                INNTEKT_AS_INT,
-                100,
-                ORGNUMMER
-            )
+            2.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -1080,11 +1001,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 31.januar, 100))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT_AS_INT, 100, ORGNUMMER)
         )
 
         inspektør.also {
@@ -1782,82 +1703,30 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100), Ferie(6.juli(2020), 11.juli(2020)))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                3.november(2019),
-                3.februar(2020),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                4.februar(2020),
-                28.februar(2020),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(3.november(2019), 3.februar(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(4.februar(2020), 28.februar(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    7.august(2019),
-                    50005.månedlig,
-                    ORGNUMMER,
-                    true
-                )
+                Utbetalingshistorikk.Inntektsopplysning(7.august(2019), 50005.månedlig, ORGNUMMER, true)
             )
         )
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                8.august(2019),
-                4.september(2019),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                5.september(2019),
-                20.september(2019),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                21.september(2019),
-                2.november(2019),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                3.november(2019),
-                3.februar(2020),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                4.februar(2020),
-                28.februar(2020),
-                2304,
-                100,
-                ORGNUMMER
-            ),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(8.august(2019), 4.september(2019), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(5.september(2019), 20.september(2019), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.september(2019), 2.november(2019), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(3.november(2019), 3.februar(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(4.februar(2020), 28.februar(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(28.mars(2020), 26.april(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.april(2020), 25.mai(2020), 2304, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(26.mai(2020), 21.juni(2020), 2304, 100, ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    7.august(2019),
-                    50005.månedlig,
-                    ORGNUMMER,
-                    true
-                )
+                Utbetalingshistorikk.Inntektsopplysning(7.august(2019), 50005.månedlig, ORGNUMMER, true)
             )
         )
         håndterSimulering(1.vedtaksperiode)
@@ -1874,12 +1743,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(20.juni, 30.juni))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -1889,7 +1758,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.juli, 31.juli, 100))
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
 
         assertNoErrors(inspektør)
@@ -1922,19 +1791,19 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.juni, 30.juni, 100), Arbeid(9.juni, 30.juni))
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100))
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
         )
 
         assertNoErrors(inspektør)
@@ -1963,14 +1832,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100), Ferie(28.juni, 30.juni))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
-        )
-        håndterYtelser(
-            1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER)
-        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000, 100, ORGNUMMER))
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100))
@@ -2000,7 +1863,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(27.mai(2020), 14.juni(2020), 100))
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -2024,8 +1887,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER)
         )
 
         håndterSykmelding(Sykmeldingsperiode(4.juli(2020), 20.juli(2020), 100))
@@ -2033,18 +1896,18 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.mai(2020), 26.mai(2020), 2000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.mai(2020), 14.juni(2020), 2000, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(15.juni(2020), 3.juli(2020), 2000, 100, ORGNUMMER)
         )
     }
 
@@ -2354,13 +2217,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 12.februar, 100))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.november(2017),
-                20.november(2017),
-                200,
-                100,
-                ORGNUMMER
-            ),
+            RefusjonTilArbeidsgiver(1.november(2017), 20.november(2017), 200, 100, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(1.november(2017), 20000.månedlig, ORGNUMMER, true)
             )

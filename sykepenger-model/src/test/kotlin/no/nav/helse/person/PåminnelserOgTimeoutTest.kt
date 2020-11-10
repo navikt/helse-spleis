@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.desember
@@ -333,22 +334,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
-                utbetalinger = listOf(
-                    Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                        17.januar(2017),
-                        20.januar(2017),
-                        1000,
-                        100,
-                        ORGNUMMER
-                    )
-                ),
+                utbetalinger = listOf(RefusjonTilArbeidsgiver(17.januar(2017), 20.januar(2017), 1000, 100, ORGNUMMER)),
                 inntektshistorikk = listOf(
-                    Utbetalingshistorikk.Inntektsopplysning(
-                        1.januar(2017),
-                        31000.månedlig,
-                        ORGNUMMER,
-                        true
-                    )
+                    Utbetalingshistorikk.Inntektsopplysning(1.januar(2017), 31000.månedlig, ORGNUMMER, true)
                 ),
                 aktivitetslogg = Aktivitetslogg()
             ),
