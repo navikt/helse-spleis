@@ -574,7 +574,7 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder()
-        vedtaksperioder.removeAt(0).also {
+        vedtaksperioder.removeFirst().also {
             if (it == this) return it.forsøkUtbetalingSteg2(vedtaksperioder, engineForTimeline, hendelse)
             if (it.tilstand == AvventerArbeidsgivere) {
                 this.tilstand(hendelse, AvventerArbeidsgivere)

@@ -11,7 +11,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.*
 
 @Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
@@ -23,15 +22,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         private const val a4 = "arbeidsgiver 4"
     }
 
-    private val a1Inspektør get() = inspektør(a1)
-    private val a2Inspektør get() = inspektør(a2)
-    private val a3Inspektør get() = inspektør(a3)
-    private val a4Inspektør get() = inspektør(a4)
+    private val String.inspektør get() = inspektør(this)
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
-        val periodeA1 = 1.januar to 31.januar
-        nyPeriode(1.januar to 31.januar, a1)
+        val periodeA1 = 1.januar til 31.januar
+        nyPeriode(1.januar til 31.januar, a1)
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
@@ -56,7 +52,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         )))
 
-        val periodeA2 = 15.januar to 15.februar
+        val periodeA2 = 15.januar til 15.februar
         nyPeriode(periodeA2, a2)
         person.håndter(
             inntektsmelding(
@@ -69,16 +65,16 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar to 15.februar))
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar til 15.februar))
     }
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere med flere sykeperioder`() {
-        nyPeriode(15.januar to 5.februar, a1)
+        nyPeriode(15.januar til 5.februar, a1)
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(15.januar to 28.januar, 2.februar to 3.februar),
+                listOf(15.januar til 28.januar, 2.februar til 3.februar),
                 beregnetInntekt = 30000.månedlig,
                 refusjon = Triple(null, 30000.månedlig, emptyList()),
                 førsteFraværsdag = 2.februar,
@@ -99,7 +95,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         )))
 
-        val periodeA2 = 2.februar to 20.februar
+        val periodeA2 = 2.februar til 20.februar
         nyPeriode(periodeA2, a2)
         person.håndter(
             inntektsmelding(
@@ -112,23 +108,23 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(282500.årlig, person.sammenligningsgrunnlag(15.januar to 5.februar))
+        assertEquals(282500.årlig, person.sammenligningsgrunnlag(15.januar til 5.februar))
     }
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere som overlapper hverandres sykeperioder`() {
-        nyPeriode(15.januar to 5.februar, a1)
+        nyPeriode(15.januar til 5.februar, a1)
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(15.januar to 28.januar, 2.februar to 3.februar),
+                listOf(15.januar til 28.januar, 2.februar til 3.februar),
                 beregnetInntekt = 30000.månedlig,
                 refusjon = Triple(null, 30000.månedlig, emptyList()),
                 førsteFraværsdag = 2.februar,
                 orgnummer = a1
             )
         )
-        val periodeA2 = 15.januar to 15.februar
+        val periodeA2 = 15.januar til 15.februar
         nyPeriode(periodeA2, a2)
 
         person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
@@ -156,40 +152,40 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar to 15.februar))
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar til 15.februar))
     }
 
     @Test
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
-        gapPeriode(1.januar to 31.januar, a1)
-        gapPeriode(15.januar to 15.februar, a2)
-        assertNoErrors(a1Inspektør)
-        assertNoErrors(a2Inspektør)
+        gapPeriode(1.januar til 31.januar, a1)
+        gapPeriode(15.januar til 15.februar, a2)
+        assertNoErrors(a1.inspektør)
+        assertNoErrors(a2.inspektør)
 
         historikk(a1)
-        assertNoErrors(a1Inspektør)
-        assertNoErrors(a2Inspektør)
+        assertNoErrors(a1.inspektør)
+        assertNoErrors(a2.inspektør)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
-        prosessperiode(1.januar to 31.januar, a1)
-        assertNoErrors(a1Inspektør)
+        prosessperiode(1.januar til 31.januar, a1)
+        assertNoErrors(a1.inspektør)
         assertTilstand(a1, AVSLUTTET)
 
-        prosessperiode(1.mars to 31.mars, a2)
-        assertNoErrors(a2Inspektør)
+        prosessperiode(1.mars til 31.mars, a2)
+        assertNoErrors(a2.inspektør)
         assertTilstand(a1, AVSLUTTET)
     }
 
     @Test
     fun `Tre overlappende perioder med en ikke-overlappende periode`() {
-        gapPeriode(1.januar to 31.januar, a1)
-        gapPeriode(15.januar to 15.mars, a2)
-        gapPeriode(1.februar to 28.februar, a3)
-        gapPeriode(15.april to 15.mai, a4)
+        gapPeriode(1.januar til 31.januar, a1)
+        gapPeriode(15.januar til 15.mars, a2)
+        gapPeriode(1.februar til 28.februar, a3)
+        gapPeriode(15.april til 15.mai, a4)
 
         historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
@@ -266,9 +262,9 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `Tre paralelle perioder`() {
-        gapPeriode(3.januar to 31.januar, a1)
-        gapPeriode(1.januar to 31.januar, a2)
-        gapPeriode(2.januar to 31.januar, a3)
+        gapPeriode(3.januar til 31.januar, a1)
+        gapPeriode(1.januar til 31.januar, a2)
+        gapPeriode(2.januar til 31.januar, a3)
 
         historikk(a1)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
@@ -398,7 +394,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             utbetaling(
                 orgnummer.id(0),
-                inspektør.fagsystemId(orgnummer.id(0)),
+                orgnummer.inspektør.fagsystemId(orgnummer.id(0)),
                 status = AKSEPTERT,
                 orgnummer = orgnummer
             )
@@ -422,6 +418,4 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
     }
-
-    private infix fun LocalDate.to(other: LocalDate) = Periode(this, other)
 }
