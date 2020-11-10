@@ -225,18 +225,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
-        if (!påminnelse.gjelderTilstand(tilstand.type)) return true.also {
-            person.vedtaksperiodeIkkePåminnet(påminnelse, tilstand.type)
-        }
         kontekst(påminnelse)
-        person.vedtaksperiodePåminnet(påminnelse)
-        if (LocalDateTime.now() >= tilstand.makstid(this, påminnelse.tilstandsendringstidspunkt())) {
-            påminnelse.kontekst(person)
-            påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
-            tilstand(påminnelse, TilInfotrygd)
-        } else {
-            tilstand.håndter(this, påminnelse)
-        }
+        tilstand.påminnelse(this, påminnelse)
         return true
     }
 
@@ -517,6 +507,18 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse, epost: String) {
+        utbetaling(
+            aktivitetslogg = hendelse,
+            oppdrag = utbetaling().arbeidsgiverOppdrag(),
+            maksdato = maksdato,
+            saksbehandler = godkjentAv!!,
+            saksbehandlerEpost = epost,
+            godkjenttidspunkt = godkjenttidspunkt!!,
+            annullering = false
+        )
+    }
+
     private fun replayHendelser() {
         person.vedtaksperiodeReplay(
             PersonObserver.VedtaksperiodeReplayEvent(
@@ -754,6 +756,13 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
+        vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
+        if (LocalDateTime.now() >= makstid(vedtaksperiode, påminnelse.tilstandsendringstidspunkt())) return håndterMakstid(vedtaksperiode, påminnelse)
+        håndter(vedtaksperiode, påminnelse)
+    }
+
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -768,6 +777,12 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt: LocalDateTime
         ): LocalDateTime = tilstandsendringstidspunkt
             .plusDays(30)
+
+        fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, TilInfotrygd) {
+                påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
+            }
+        }
 
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
             return SpesifikkKontekst(
@@ -1495,10 +1510,17 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            LocalDateTime.MAX
+            tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            trengerUtbetaling(hendelse, vedtaksperiode, (hendelse as Utbetalingsgodkjenning).saksbehandlerEpost())
+            val epost = if (hendelse is Utbetalingsgodkjenning) hendelse.saksbehandlerEpost() else "tbd@nav.no"
+            vedtaksperiode.trengerUtbetaling(hendelse, epost)
+        }
+
+        override fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet) {
+                påminnelse.error("Gir opp å forsøke utbetaling")
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
@@ -1514,6 +1536,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             utbetaling.valider()
+            if (utbetaling.skalForsøkesIgjen()) return utbetaling.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
             vedtaksperiode.utbetaling().håndter(utbetaling)
 
             if (utbetaling.hasErrorsOrWorse()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
@@ -1534,28 +1557,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            trengerUtbetaling(påminnelse, vedtaksperiode, "epost@nav.no")
+            vedtaksperiode.trengerUtbetaling(påminnelse, "epost@nav.no")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
             vedtaksperiode.kontekst(annullering)
             vedtaksperiode.tilstand(annullering, TilAnnullering)
-        }
-
-        private fun trengerUtbetaling(
-            hendelse: ArbeidstakerHendelse,
-            vedtaksperiode: Vedtaksperiode,
-            epost: String
-        ) {
-            utbetaling(
-                aktivitetslogg = hendelse,
-                oppdrag = vedtaksperiode.utbetaling().arbeidsgiverOppdrag(),
-                maksdato = vedtaksperiode.maksdato,
-                saksbehandler = vedtaksperiode.godkjentAv!!,
-                saksbehandlerEpost = epost,
-                godkjenttidspunkt = vedtaksperiode.godkjenttidspunkt!!,
-                annullering = false
-            )
         }
     }
 
@@ -1626,7 +1633,11 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, TilUtbetaling) {
+                påminnelse.info("Forsøker utbetaling på nytt")
+            }
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")

@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.*
 import no.nav.helse.person.ArbeidstakerHendelse
 import java.time.LocalDateTime
 import java.util.*
@@ -23,10 +24,12 @@ class UtbetalingHendelse(
     override fun organisasjonsnummer() = orgnummer
 
     fun valider() = aktivitetslogg.apply {
-        if (status == Oppdragstatus.AVVIST || status == Oppdragstatus.FEIL)
+        if (status == AVVIST || status == FEIL)
             aktivitetslogg.error("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
-        else if (status == Oppdragstatus.AKSEPTERT_MED_FEIL) aktivitetslogg.warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
+        else if (status == AKSEPTERT_MED_FEIL) aktivitetslogg.warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
     }
+
+    internal fun skalForsøkesIgjen() = status == FEIL
 
     internal fun erRelevant(fagsystemId: String) = utbetalingsreferanse == fagsystemId
 

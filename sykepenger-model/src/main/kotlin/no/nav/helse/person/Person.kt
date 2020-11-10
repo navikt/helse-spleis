@@ -80,6 +80,7 @@ class Person private constructor(
 
     fun håndter(påminnelse: Påminnelse) {
         try {
+            påminnelse.kontekst(this)
             finnArbeidsgiver(påminnelse).håndter(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.error("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
