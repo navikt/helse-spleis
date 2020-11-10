@@ -55,7 +55,7 @@ internal class MaksimumSykepengedagerfilter(
         tidslinje.kutt(sisteDato).accept(this)
 
         if (avvisteDatoer in periode)
-            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden")
+            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende brev")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
     }

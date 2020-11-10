@@ -395,7 +395,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.førsteFraværsdag?.also {
             when {
                 tilstøtende == null -> if (it != skjæringstidspunkt)
-                    hendelse.warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+                    hendelse.warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.")
                 tilstøtende.skjæringstidspunkt == skjæringstidspunkt && skjæringstidspunkt != hendelse.førsteFraværsdag ->
                     hendelse.warn("Første fraværsdag i inntektsmeldingen er forskjellig fra foregående tilstøtende periode")
             }
@@ -1041,7 +1041,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje)) {
-                søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen")
+                søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig")
                 søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
             }
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)

@@ -132,7 +132,7 @@ class Inntektsmelding(
 
     override fun valider(periode: Periode): Aktivitetslogg {
         refusjon.valider(aktivitetslogg, periode, beregnetInntekt)
-        if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Kontroller at det kun er én arbeidsgiver. Flere arbeidsforhold støttes ikke av systemet")
+        if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig")
         if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             aktivitetslogg.warn(
@@ -158,7 +158,7 @@ class Inntektsmelding(
             ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.")
         }
 
         inntektshistorikk.add(
@@ -175,7 +175,7 @@ class Inntektsmelding(
             ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Utbetal kun hvis dagsatsen er korrekt")
+            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.")
         }
 
         inntektshistorikk {
