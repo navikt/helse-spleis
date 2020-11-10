@@ -242,6 +242,13 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     )
                 }
 
+                internal fun dødsinformasjon(aktivitetslogg: IAktivitetslogg) {
+                    aktivitetslogg.behov(
+                        Behovtype.Dødsinfo,
+                        "Trenger informasjon om dødsdato fra PDL"
+                    )
+                }
+
                 internal fun inntektsberegning(
                     aktivitetslogg: IAktivitetslogg,
                     beregningStart: YearMonth,

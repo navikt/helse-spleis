@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
@@ -15,8 +16,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
@@ -473,6 +474,10 @@ internal class Vedtaksperiode private constructor(
         omsorgspenger(hendelse, periode)
         opplæringspenger(hendelse, periode)
         institusjonsopphold(hendelse, periode)
+    }
+
+    private fun trengerPersoninfo(hendelse: ArbeidstakerHendelse) {
+        dødsinformasjon(hendelse)
     }
 
     private fun trengerKortHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
@@ -1295,11 +1300,13 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser(hendelse)
+            vedtaksperiode.trengerPersoninfo(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
+            vedtaksperiode.trengerPersoninfo(påminnelse)
         }
 
         override fun håndter(
