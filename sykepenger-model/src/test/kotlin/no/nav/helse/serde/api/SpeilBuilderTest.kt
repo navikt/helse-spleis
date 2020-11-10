@@ -316,7 +316,7 @@ class SpeilBuilderTest {
 
                 // Her går den til Infotrygd pga overlap
                 håndter(
-                    ytelser(
+                    utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
                         fom = skjæringstidspunktFraInfotrygd,
                         tom = 4.januar
@@ -335,7 +335,7 @@ class SpeilBuilderTest {
                 sisteVedtaksperiodeId = collectVedtaksperiodeIder().first()
 
                 håndter(
-                    ytelser(
+                    utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
                         fom = skjæringstidspunktFraInfotrygd,
                         tom = tom1Periode,
@@ -1205,21 +1205,11 @@ class SpeilBuilderTest {
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingshistorikk = Utbetalingshistorikk(
+                utbetalingshistorikk = utbetalingshistorikk(
+                    fom = fom,
+                    tom = tom,
                     meldingsreferanseId = hendelseId,
-                    aktørId = aktørId,
-                    fødselsnummer = fnr,
-                    organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalinger = listOf(
-                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                            fom = fom,
-                            tom = tom,
-                            dagsats = 31000,
-                            grad = 100,
-                            orgnummer = orgnummer
-                        )
-                    ),
                     inntektshistorikk = inntektshistorikk,
                     aktivitetslogg = it
                 ),
@@ -1253,6 +1243,39 @@ class SpeilBuilderTest {
                 aktivitetslogg = it
             )
         }
+
+        private fun utbetalingshistorikk(
+            meldingsreferanseId: UUID = UUID.randomUUID(),
+            vedtaksperiodeId: String,
+            fom: LocalDate = 1.januar.minusYears(1),
+            tom: LocalDate = 31.januar.minusYears(1),
+            inntektshistorikk: List<Inntektsopplysning> = listOf(
+                Inntektsopplysning(
+                    fom,
+                    31000.månedlig,
+                    orgnummer,
+                    true
+                )
+            ),
+            aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+        ) = Utbetalingshistorikk(
+            meldingsreferanseId = meldingsreferanseId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalinger = listOf(
+                Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                    fom = fom,
+                    tom = tom,
+                    dagsats = 31000,
+                    grad = 100,
+                    orgnummer = orgnummer
+                )
+            ),
+            aktivitetslogg = aktivitetslogg,
+            inntektshistorikk = inntektshistorikk
+        )
 
         private fun utbetalingsgodkjenning(
             vedtaksperiodeId: String,

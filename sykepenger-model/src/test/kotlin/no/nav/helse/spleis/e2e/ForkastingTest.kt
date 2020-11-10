@@ -21,7 +21,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 23.februar, 100))
-        håndterYtelser(
+        håndterUtbetalingshistorikk(
             1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
                 1.januar,
                 31.januar,
@@ -327,7 +327,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             Søknad.Søknadsperiode.Sykdom(29.september(2020), 30.september(2020), 100)
         )
-        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, LocalDateTime.now().minusYears(1))
 
         håndterSykmelding(Sykmeldingsperiode(26.september(2020), 23.oktober(2020), 100))

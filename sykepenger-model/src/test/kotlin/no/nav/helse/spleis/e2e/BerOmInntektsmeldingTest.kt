@@ -17,7 +17,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
-        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         assertNoErrors(inspektør)
         assertTilstander(
@@ -76,7 +76,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
-        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
 
         assertTilstander(
@@ -116,7 +116,6 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
-        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

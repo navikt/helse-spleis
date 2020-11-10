@@ -37,15 +37,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(6, hendelse.behov().size)
+        assertEquals(1, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_GAP, 1.vedtaksperiode))
         assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(6, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
+        assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
 

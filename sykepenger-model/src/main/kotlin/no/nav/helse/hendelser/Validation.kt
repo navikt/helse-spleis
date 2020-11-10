@@ -39,6 +39,14 @@ internal fun Validation.validerYtelser(
     !ytelser.valider(periode, periodetype).hasErrorsOrWorse()
 }
 
+internal fun Validation.validerUtbetalingshistorikk(
+    periode: Periode,
+    utbetalingshistorikk: Utbetalingshistorikk,
+    periodetype: Periodetype
+) = valider {
+    !utbetalingshistorikk.valider(periode, periodetype).hasErrorsOrWorse()
+}
+
 internal fun Validation.overlappende(
     sykdomsperiode: Periode,
     foreldrepermisjon: Foreldrepermisjon

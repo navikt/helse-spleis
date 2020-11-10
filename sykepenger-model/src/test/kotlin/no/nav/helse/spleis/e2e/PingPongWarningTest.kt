@@ -35,7 +35,7 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, gradFraSykmelding = 100), sendtTilNav = 1.april)
         val historikk = RefusjonTilArbeidsgiver(1.februar, 28.februar, 1337, 100, ORGNUMMER)
-        håndterYtelser(3.vedtaksperiode, historikk)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterSimulering(3.vedtaksperiode)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -65,7 +65,7 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(18.juli, 31.juli, 100))
         håndterSøknad(Sykdom(18.juli, 31.juli, gradFraSykmelding = 100), sendtTilNav = 1.august)
         val historikk = RefusjonTilArbeidsgiver(1.juli, 17.juli, 1337, 100, ORGNUMMER)
-        håndterYtelser(3.vedtaksperiode, historikk)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterSimulering(3.vedtaksperiode)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -84,7 +84,10 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100))
         håndterSøknad(Sykdom(18.januar, 31.januar, gradFraSykmelding = 100), sendtTilNav = 1.februar)
-        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 17.januar, 1337, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 17.januar, 1337, 100, ORGNUMMER)
+        )
         håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 17.januar, 1337, 100, ORGNUMMER))
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)

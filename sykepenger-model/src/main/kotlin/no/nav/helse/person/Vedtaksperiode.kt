@@ -474,6 +474,10 @@ internal class Vedtaksperiode private constructor(
         utbetalingshistorikk(hendelse, periode)
     }
 
+    private fun trengerGapHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
+        utbetalingshistorikk(hendelse, periode.start.minusMonths(6) til periode.endInclusive)
+    }
+
     private fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
@@ -1064,12 +1068,12 @@ internal class Vedtaksperiode private constructor(
             .plusHours(24)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerYtelser(hendelse)
+            vedtaksperiode.trengerGapHistorikkFraInfotrygd(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerYtelser(påminnelse)
+            vedtaksperiode.trengerGapHistorikkFraInfotrygd(påminnelse)
             påminnelse.info("Forespør sykdoms- og inntektshistorikk (Påminnet)")
         }
 
@@ -1077,26 +1081,37 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
 
+        // Midlertidig for å håndtere utestående svar på Ytelser-need, kan fjernes når alle utestående Ytelser-svar til
+        // AventerGap er mottatt (et døgn?)
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            validation(ytelser) {
+            håndter(person, arbeidsgiver, vedtaksperiode, ytelser.utbetalingshistorikk())
+        }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk
+        ) {
+            validation(utbetalingshistorikk) {
                 onError {
-                    vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+                    vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
-                validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
+                validerUtbetalingshistorikk(vedtaksperiode.periode, utbetalingshistorikk, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
-                    arbeidsgiver.addInntekt(ytelser)
+                    arbeidsgiver.addInntekt(utbetalingshistorikk)
                     Oldtidsutbetalinger().also { oldtid ->
-                        ytelser.utbetalingshistorikk().append(oldtid)
+                        utbetalingshistorikk.append(oldtid)
                         arbeidsgiver.utbetalteUtbetalinger()
                             .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
                         nesteTilstand = if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
-                            ytelser.info("Oppdaget at perioden er en direkte overgang fra periode i Infotrygd")
+                            utbetalingshistorikk.info("Oppdaget at perioden er en direkte overgang fra periode i Infotrygd")
                             AvventerHistorikk
                         } else {
                             AvventerInntektsmeldingFerdigGap
@@ -1104,7 +1119,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 onSuccess {
-                    vedtaksperiode.tilstand(ytelser, nesteTilstand)
+                    vedtaksperiode.tilstand(utbetalingshistorikk, nesteTilstand)
                 }
             }
         }

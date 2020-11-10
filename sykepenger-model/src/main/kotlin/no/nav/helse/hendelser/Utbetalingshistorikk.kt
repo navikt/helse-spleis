@@ -48,6 +48,10 @@ class Utbetalingshistorikk(
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
     }
 
+    internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
+        addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
+    }
+
     fun addInntekter(person: Person, ytelser: Ytelser) {
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }

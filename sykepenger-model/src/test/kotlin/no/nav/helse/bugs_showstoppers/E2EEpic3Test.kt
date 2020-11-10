@@ -959,7 +959,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(2020), 100))
         håndterSøknad(Sykdom(12.juli(2020), 31.juli(2020), 100))
 
-        håndterYtelser(
+        håndterUtbetalingshistorikk(
             3.vedtaksperiode,
             RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814, 100, ORGNUMMER),
             inntektshistorikk = listOf(
@@ -1066,7 +1066,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GAP, LocalDateTime.now().minusDays(200)) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
 
         val historikk = RefusjonTilArbeidsgiver(27.juli(2020), 13.september(2020), 1000, 100, ORGNUMMER)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode, historikk)
 
         assertEquals(40, 248 - inspektør.gjenståendeSykedager(2.vedtaksperiode))
@@ -1090,7 +1090,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         person = SerialisertPerson(person.serialize().json).deserialize()
 
         val historikk = RefusjonTilArbeidsgiver(17.august(2020), 22.august(2020), 1000, 100, ORGNUMMER)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode, historikk)
 
         inspektør.also {

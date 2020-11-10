@@ -375,6 +375,10 @@ internal class Arbeidsgiver private constructor(
         ytelser.addInntekt(organisasjonsnummer, inntektshistorikk)
     }
 
+    internal fun addInntekt(utbetalingshistorikk: Utbetalingshistorikk) {
+        utbetalingshistorikk.addInntekt(organisasjonsnummer, inntektshistorikk)
+    }
+
     internal fun addInntektVol2(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikkVol2, skjæringstidspunkt)
     }
