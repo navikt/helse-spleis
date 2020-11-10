@@ -149,7 +149,7 @@ internal class Sykdomstidslinje private constructor(
         if (!dato.erHelg()) return false
         val fredag = this[dato.minusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 1 else 2)]
         val mandag = this[dato.plusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 2 else 1)]
-        return (erEnSykedag(fredag) || fredag is Feriedag) && erEnSykedag(mandag)
+        return (erEnSykedag(fredag) || fredag is Feriedag) && (erEnSykedag(mandag) || mandag is Feriedag)
     }
 
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key

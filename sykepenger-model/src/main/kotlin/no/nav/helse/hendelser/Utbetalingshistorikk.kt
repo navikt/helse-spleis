@@ -152,6 +152,12 @@ class Utbetalingshistorikk(
         }
     }
 
+    internal fun append(oldtid: Historie.Historikkbøtte) {
+        utbetalinger.forEach {
+            it.append(oldtid)
+        }
+    }
+
     sealed class Periode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun sorter(liste: List<Periode>) = liste.sortedBy { it.periode.start }
@@ -160,8 +166,10 @@ class Utbetalingshistorikk(
         protected val periode = ModellPeriode(fom, tom)
 
         internal open fun tidslinje() = Utbetalingstidslinje()
+        internal open fun sykdomstidslinje() = Sykdomstidslinje()
 
         internal open fun append(oldtid: Oldtidsutbetalinger) {}
+        internal open fun append(oldtid: Historie.Historikkbøtte) {}
 
         internal open fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
             if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
@@ -180,6 +188,14 @@ class Utbetalingshistorikk(
             override fun tidslinje() = Utbetalingstidslinje().apply {
                 periode.forEach { dag(this, it, grad.toDouble()) }
             }
+
+            override fun append(oldtid: Historie.Historikkbøtte) {
+                oldtid.add(orgnr, tidslinje())
+                oldtid.add(orgnr, sykdomstidslinje())
+            }
+
+            override fun sykdomstidslinje() =
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
                 if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(Inntekt.INGEN))
@@ -266,6 +282,11 @@ class Utbetalingshistorikk(
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
             }
+
+            override fun append(oldtid: Historie.Historikkbøtte) {
+                oldtid.add(tidslinje = tidslinje())
+                oldtid.add(tidslinje = sykdomstidslinje())
+            }
         }
 
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int, orgnummer: String) :
@@ -279,8 +300,16 @@ class Utbetalingshistorikk(
             override fun tidslinje() = Utbetalingstidslinje()
                 .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN)) } }
 
+            override fun sykdomstidslinje() =
+                Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
+            }
+
+            override fun append(oldtid: Historie.Historikkbøtte) {
+                oldtid.add(tidslinje = tidslinje())
+                oldtid.add(tidslinje = sykdomstidslinje())
             }
         }
 

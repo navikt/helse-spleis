@@ -43,6 +43,11 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `syk-helg-ferie-syk regnes ikke som gap`() {
+        assertFørsteDagErSkjæringstidspunkt(12.S + 2.n_ + 2.F + 1.S)
+    }
+
+    @Test
     fun `skjæringstidspunkt er første arbeidsgiverdag, sykedag eller syk helgedag i en sammenhengende periode`() {
         assertFørsteDagErSkjæringstidspunkt(2.S)
         assertFørsteDagErSkjæringstidspunkt(2.U)
