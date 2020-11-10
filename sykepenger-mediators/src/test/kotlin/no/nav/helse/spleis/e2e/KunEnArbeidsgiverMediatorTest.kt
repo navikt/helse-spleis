@@ -24,6 +24,14 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `påminnelse for feil tilstand`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendNyPåminnelse(0)
+        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(1).path("@event_name").asText())
+        assertEquals("MOTTATT_SYKMELDING_FERDIG_GAP", testRapid.inspektør.melding(1).path("tilstand").asText())
+    }
+
+    @Test
     fun `ingen historie med Søknad først`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))

@@ -136,6 +136,8 @@ interface PersonObserver {
 
     fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
 
+    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, nåværendeTilstand: TilstandType) {}
+
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 
     fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}

@@ -224,7 +224,9 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         if (id.toString() != påminnelse.vedtaksperiodeId) return false
-        if (!påminnelse.gjelderTilstand(tilstand.type)) return true
+        if (!påminnelse.gjelderTilstand(tilstand.type)) return true.also {
+            person.vedtaksperiodeIkkePåminnet(påminnelse, tilstand.type)
+        }
         kontekst(påminnelse)
         person.vedtaksperiodePåminnet(påminnelse)
         if (LocalDateTime.now() >= tilstand.makstid(this, påminnelse.tilstandsendringstidspunkt())) {

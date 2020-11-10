@@ -306,6 +306,17 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, nåværendeTilstand: TilstandType) {
+                queueMessage(
+                    "vedtaksperiode_ikke_påminnet", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
+                            "tilstand" to nåværendeTilstand
+                        )
+                    )
+                )
+            }
+
             override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
                 queueMessage(
                     "utbetaling_annullert", JsonMessage.newMessage(

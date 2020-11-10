@@ -127,6 +127,10 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
     }
 
+    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
+        observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse, tilstandType) }
+    }
+
     fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         observers.forEach { it.vedtaksperiodeAvbrutt(event) }
     }
