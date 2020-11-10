@@ -254,32 +254,35 @@ internal class Arbeidsgiver private constructor(
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
 
-        vedtaksperioder.find{!it.tillatAnullering()}?.let{
+        vedtaksperioder.find { !it.tillatAnullering() }?.let {
             hendelse.error("Kan ikke annullere, vedtaksperiode blokkerer.")
             return
         }
 
-        if(sisteIkkeAnnullertUtbetaling()?.arbeidsgiverOppdrag()?.fagsystemId() != hendelse.fagsystemId) {
+        val annulleringskandidater = annulleringskandidater()
+
+        if (annulleringskandidater.firstOrNull()?.arbeidsgiverOppdrag()?.fagsystemId() != hendelse.fagsystemId) {
             hendelse.error("Kan ikke annullere, er ikke siste utbetaling.")
             return
         }
 
         // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
-        val sisteUtbetaling =
-            utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
-        if (sisteUtbetaling == null) {
+        val kandidat = annulleringskandidater
+            .firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
+
+        if (kandidat == null) {
             hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
             return
         }
-        if(sisteUtbetaling.erFeilet()) {
+        if (kandidat.erFeilet()) {
             hendelse.error("Kan ikke annullere. Siste utbetaling er feilet %s", hendelse.fagsystemId)
             return
         }
-        if (sisteUtbetaling.erAnnullert()) {
+        if (sisteUtbetaling(hendelse.fagsystemId)?.erAnnullert() == true) {
             hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
             return
         }
-        val utbetaling = sisteUtbetaling.annuller(hendelse.aktivitetslogg)
+        val utbetaling = kandidat.annuller(hendelse.aktivitetslogg)
         utbetalinger.add(utbetaling)
         utbetaling(
             aktivitetslogg = hendelse.aktivitetslogg,
@@ -292,11 +295,15 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(hendelse, ALLE)
     }
 
-    private fun sisteIkkeAnnullertUtbetaling(): Utbetaling? {
+    private fun annulleringskandidater(): List<Utbetaling> {
         return utbetalinger.reversed()
+            .filter { utbetaling -> utbetaling.erUtbetalt() || utbetaling.erFeilet() }
             .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
-            .firstOrNull { !it.erAnnullert() }
+            .filter { !it.erAnnullert() }
     }
+
+    private fun sisteUtbetaling(fagsystemId: String) =
+        utbetalinger.findLast { it.arbeidsgiverOppdrag().fagsystemId() == fagsystemId }
 
     internal fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
@@ -479,22 +486,22 @@ internal class Arbeidsgiver private constructor(
         person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
     }
 
-    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse):
+    internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
         ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
-            override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
-            override fun aktørId() = hendelse.aktørId()
-            override fun fødselsnummer() = hendelse.fødselsnummer()
-        }
+        override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
+        override fun aktørId() = hendelse.aktørId()
+        override fun fødselsnummer() = hendelse.fødselsnummer()
+    }
 
     internal class RollbackArbeidsgiver(
         private val organisasjonsnummer: String,
         private val hendelse: PersonHendelse
-    ):
+    ) :
         ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
-            override fun organisasjonsnummer() = organisasjonsnummer
-            override fun aktørId() = hendelse.aktørId()
-            override fun fødselsnummer() = hendelse.fødselsnummer()
-        }
+        override fun organisasjonsnummer() = organisasjonsnummer
+        override fun aktørId() = hendelse.aktørId()
+        override fun fødselsnummer() = hendelse.fødselsnummer()
+    }
 
     internal class TilbakestillBehandling(
         private val organisasjonsnummer: String,
