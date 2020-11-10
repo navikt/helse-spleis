@@ -366,6 +366,29 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `setter datoStatusFom som fom dato i annullering hvor graden endres`() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        forlengVedtak(27.januar, 20.februar, 30)
+        assertEquals(2, inspektør.vedtaksperiodeTeller)
+        val fagsystemId = inspektør.fagsystemId(2.vedtaksperiode)
+
+        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
+        håndterUtbetalt(
+            2.vedtaksperiode,
+            status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
+            saksbehandlerEpost = "tbd@nav.no",
+            annullert = true
+        )
+
+        val annulleringer = observatør.annulleringer
+        assertEquals(1, annulleringer.size)
+        val annullering = annulleringer.last()
+
+        val utbetalingslinje = annullering.utbetalingslinjer.first()
+        assertEquals(19.januar, utbetalingslinje.fom)
+    }
+
+    @Test
     fun `kan ikke annullere utbetalingsreferanser som ikke er siste`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         nyttVedtak(3.mars, 26.mars, 100, 3.mars)

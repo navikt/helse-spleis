@@ -330,7 +330,7 @@ internal class Arbeidsgiver private constructor(
                     utbetalingslinjer = sisteUtbetaling.let { utbetaling ->
                         utbetaling.arbeidsgiverOppdrag().map {
                             PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                                fom = it.fom,
+                                fom = requireNotNull(it.datoStatusFom()),
                                 tom = it.tom,
                                 beløp = it.totalbeløp(),
                                 grad = it.grad

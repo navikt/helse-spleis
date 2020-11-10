@@ -49,6 +49,7 @@ internal class Utbetalingslinje internal constructor(
         this.refDelytelseId = other.delytelseId
     }
 
+    internal fun datoStatusFom() = datoStatusFom
     internal fun totalbeløp() = beløp?.let { it * antallDager() } ?: 0
 
     internal fun dager() = fom
