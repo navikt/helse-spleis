@@ -11,6 +11,8 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -83,6 +85,28 @@ internal class HistorieTest {
             assertTrue(it[1.januar] is Dag.Sykedag)
             assertTrue(it[6.januar] is Dag.SykHelgedag)
             assertTrue(it[31.januar] is Dag.Sykedag)
+        }
+    }
+
+    @Test
+    fun `utbetalingstidslinje for orgnr`() {
+        val bøtte = Historie.Historikkbøtte()
+        bøtte.add(tidslinje = tidslinjeOf(7.FRI))
+        bøtte.add(AG1, tidslinjeOf(5.NAV, 2.HELG, startDato = 8.januar))
+        bøtte.add(AG2, tidslinjeOf(5.NAV, 2.HELG, startDato = 15.januar))
+        bøtte.utbetalingstidslinje(AG1).also {
+            assertEquals(1.januar, it.førsteDato())
+            assertEquals(14.januar, it.sisteDato())
+            assertTrue(it[1.januar] is Fridag)
+            assertTrue(it[8.januar] is NavDag)
+        }
+        bøtte.utbetalingstidslinje(AG2).also {
+            assertEquals(1.januar, it.førsteDato())
+            assertEquals(21.januar, it.sisteDato())
+            assertTrue(it[1.januar] is Fridag)
+            assertTrue(it[8.januar] is UkjentDag)
+            assertTrue(it[15.januar] is NavDag)
+            assertTrue(it[21.januar] is NavHelgDag)
         }
     }
 

@@ -57,6 +57,9 @@ internal class Historie() {
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
 
         internal fun sykdomstidslinjer() = sykdomstidslinjer.values
+        internal fun utbetalingstidslinje(orgnummer: String) =
+            utbetalingstidslinjer.getOrElse(ALLE_ARBEIDSGIVERE) { Utbetalingstidslinje() } +
+                utbetalingstidslinjer.getOrElse(orgnummer) { Utbetalingstidslinje() }
 
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
             utbetalingstidslinjer.merge(orgnummer, tidslinje, Utbetalingstidslinje::plus)
