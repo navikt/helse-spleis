@@ -264,16 +264,15 @@ class Person private constructor(
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun skjæringstidspunkt(dato: LocalDate) = skjæringstidspunkt(dato, emptyList())
-    internal fun skjæringstidspunkt(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = skjæringstidspunkt(dato, utbetalingshistorikk.historiskeTidslinjer())
-    internal fun skjæringstidspunkter(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun skjæringstidspunkt(dato: LocalDate, historiskeTidslinjer: List<Sykdomstidslinje>) = Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, dato, historiskeTidslinjer)
-    private fun sammenhengendePeriode(periode: Periode, historiskeTidslinjer: List<Sykdomstidslinje> = emptyList()) = skjæringstidspunkt(periode.endInclusive, historiskeTidslinjer)?.let { periode.oppdaterFom(it) } ?: periode
+    internal fun skjæringstidspunkt(dato: LocalDate) = skjæringstidspunkt(dato, Historie())
+    internal fun skjæringstidspunkt(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = skjæringstidspunkt(dato, Historie(utbetalingshistorikk))
+    internal fun skjæringstidspunkter(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, dato, Historie(utbetalingshistorikk))
+    private fun skjæringstidspunkt(dato: LocalDate, historie: Historie) = Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, dato, historie)
+    private fun sammenhengendePeriode(periode: Periode, historie: Historie = Historie()) = skjæringstidspunkt(periode.endInclusive, historie)?.let { periode.oppdaterFom(it) } ?: periode
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        val historiskeTidslinjer = ytelser.utbetalingshistorikk().historiskeTidslinjer()
         val sammenhengendePeriode = sammenhengendePeriode(periode)
-        val skjæringstidspunkter = skjæringstidspunkter(periode.endInclusive, historiskeTidslinjer)
+        val skjæringstidspunkter = skjæringstidspunkter(periode.endInclusive, ytelser.utbetalingshistorikk())
 
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)

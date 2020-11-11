@@ -83,28 +83,22 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkt(
             arbeidsgivere: List<Arbeidsgiver>,
             dato: LocalDate,
-            historiskeTidslinjer: List<Sykdomstidslinje>
-        ) =
-            Sykdomstidslinje.skjæringstidspunkt(
-                dato, historiskeTidslinjer + arbeidsgivere
-                    .filter(Arbeidsgiver::harHistorikk)
-                    .map(Arbeidsgiver::sykdomstidslinje)
-            )
-
+            historie: Historie
+        ): LocalDate? {
+            arbeidsgivere.forEach {
+                it.append(historie)
+            }
+            return historie.skjæringstidspunkt(dato)
+        }
         internal fun skjæringstidspunkter(
             arbeidsgivere: List<Arbeidsgiver>,
             dato: LocalDate,
-            historiskeTidslinjer: List<Sykdomstidslinje>
+            historie: Historie
         ): List<LocalDate> {
-            val skjæringstidspunkter = mutableListOf<LocalDate>()
-            var kuttdato = dato
-            do {
-                val skjæringstidspunkt = skjæringstidspunkt(arbeidsgivere, kuttdato, historiskeTidslinjer)?.also {
-                    kuttdato = it.minusDays(1)
-                    skjæringstidspunkter.add(it)
-                }
-            } while (skjæringstidspunkt != null)
-            return skjæringstidspunkter
+            arbeidsgivere.forEach {
+                it.append(historie)
+            }
+            return historie.skjæringstidspunkter(dato)
         }
     }
 
@@ -617,6 +611,12 @@ internal class Arbeidsgiver private constructor(
     internal fun harForkastetUtbetaltOgNyereEnn(cutOff: LocalDate) =
         forkastede.entries.map { it.key }.any { it.erUtbetalt() && it.periode().endInclusive.isAfter(cutOff) }
 
+    internal fun append(historie: Historie) {
+        if (harHistorikk()) historie.add(organisasjonsnummer, sykdomstidslinje())
+        utbetalteUtbetalinger().forEach {
+            it.append(organisasjonsnummer, historie)
+        }
+    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

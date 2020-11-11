@@ -86,7 +86,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(3.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(ForlengelseFraInfotrygd.JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
 
@@ -181,7 +181,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(3.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 
     @Test

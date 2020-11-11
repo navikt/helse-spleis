@@ -1401,7 +1401,7 @@ internal class Vedtaksperiode private constructor(
                         periode = vedtaksperiode.periode,
                         skjæringstidspunkter = person.skjæringstidspunkter(
                             vedtaksperiode.periode.endInclusive,
-                            ytelser.utbetalingshistorikk().historiskeTidslinjer()
+                            ytelser.utbetalingshistorikk()
                         ),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,

@@ -228,8 +228,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.desember(2017), inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test

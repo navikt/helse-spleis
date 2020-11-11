@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Historie
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
@@ -123,6 +124,10 @@ internal class Utbetaling private constructor(
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
+        oldtid.add(organisasjonsnummer, utbetalingstidslinje)
+    }
+
+    internal fun append(organisasjonsnummer: String, oldtid: Historie) {
         oldtid.add(organisasjonsnummer, utbetalingstidslinje)
     }
 }

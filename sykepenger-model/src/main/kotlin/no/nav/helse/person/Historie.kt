@@ -16,9 +16,11 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class Historie(
-    utbetalingshistorikk: Utbetalingshistorikk
-) {
+internal class Historie() {
+
+    internal constructor(utbetalingshistorikk: Utbetalingshistorikk): this() {
+        utbetalingshistorikk.append(infotrygdbøtte)
+    }
 
     private companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
@@ -27,10 +29,6 @@ internal class Historie(
     private val infotrygdbøtte = Historikkbøtte()
     private val spleisbøtte = Historikkbøtte()
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
-
-    init {
-        utbetalingshistorikk.append(infotrygdbøtte)
-    }
 
     internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
     internal fun skjæringstidspunkter(tom: LocalDate): List<LocalDate> {
