@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -263,10 +262,15 @@ class Person private constructor(
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
+    internal fun append(historie: Historie) {
+        arbeidsgivere.forEach { it.append(historie) }
+    }
+
     internal fun skjæringstidspunkt(dato: LocalDate) = skjæringstidspunkt(dato, Historie())
     internal fun skjæringstidspunkt(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = skjæringstidspunkt(dato, Historie(utbetalingshistorikk))
     internal fun skjæringstidspunkter(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, dato, Historie(utbetalingshistorikk))
     private fun skjæringstidspunkt(dato: LocalDate, historie: Historie) = Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, dato, historie)
+
     private fun sammenhengendePeriode(periode: Periode, historie: Historie = Historie()) = skjæringstidspunkt(periode.endInclusive, historie)?.let { periode.oppdaterFom(it) } ?: periode
 
     internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {

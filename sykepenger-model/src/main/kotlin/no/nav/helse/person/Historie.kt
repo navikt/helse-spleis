@@ -40,6 +40,16 @@ internal class Historie() {
             spleisbøtte.harOverlappendeHistorikk(orgnr, it)
         } != null
 
+    internal fun erPingPong(orgnr: String, periode: Periode) =
+        sammenhengendePeriode(orgnr, periode)?.takeIf {
+            infotrygdbøtte
+                .sykdomstidslinje(orgnr)
+                .fraOgMed(it.start)
+                .skjæringstidspunkter(periode.endInclusive)
+                .filter { dato -> dato > periode.start.minusMonths(6) }
+                .size > 1
+        } != null
+
     internal fun førstegangsbehandling(orgnr: String, periode: Periode) =
         sammenhengendePeriode(orgnr, periode)?.let { it.start in periode } ?: false
 

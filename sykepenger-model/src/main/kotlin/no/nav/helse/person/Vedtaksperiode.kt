@@ -725,10 +725,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     // oppdaget forlengelse fra IT, har ikke tilstøtende
-    private fun håndterForlengelseIT(utbetalingshistorikk: Utbetalingshistorikk) {
+    private fun håndterForlengelseIT(historie: Historie) {
         tilbakestillInntektsmeldingId()
         forlengelseFraInfotrygd = JA
-        skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
+        skjæringstidspunktFraInfotrygd = historie.skjæringstidspunkt(periode.endInclusive)
     }
 
     private fun tilbakestillInntektsmeldingId() {
@@ -1342,6 +1342,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
+            val historie = Historie(ytelser.utbetalingshistorikk()).also { person.append(it) }
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
@@ -1352,33 +1353,31 @@ internal class Vedtaksperiode private constructor(
                 overlappende(vedtaksperiode.periode, ytelser.opplæringspenger())
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
-                    arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { tilstøtendePeriode ->
-                        vedtaksperiode.håndterFortsattForlengelse(tilstøtendePeriode)
-                        if (tilstøtendePeriode.forlengelseFraInfotrygd == JA)
-                            vedtaksperiode.loggUlikSkjæringstidspunkt(ytelser.utbetalingshistorikk())
-                        return@onSuccess
-                    }
-
-                    Oldtidsutbetalinger().also { oldtid ->
-                        ytelser.utbetalingshistorikk().append(oldtid)
-                        arbeidsgiver.utbetalteUtbetalinger()
-                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
-
-                        if (!oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
+                    val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+                    when {
+                        historie.førstegangsbehandling(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
                             vedtaksperiode.håndterGap()
                             ytelser.info("Perioden er en førstegangsbehandling")
-                            return@onSuccess
                         }
+                        tilstøtende == null || historie.overgangInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
+                            vedtaksperiode.håndterForlengelseIT(historie)
+                            arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
+                            vedtaksperiode.kontekst(ytelser)
 
-                        vedtaksperiode.håndterForlengelseIT(ytelser.utbetalingshistorikk())
-                        arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
-                        vedtaksperiode.kontekst(ytelser)
-                    }
-
-                    arbeidsgiver.addInntekt(ytelser)
-                    ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
-                    if (arbeidsgiver.harForkastetUtbetaltOgNyereEnn(vedtaksperiode.periode().start.minusMonths(6))) {
-                        ytelser.warn("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.")
+                            arbeidsgiver.addInntekt(ytelser)
+                            ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
+                            if (historie.erPingPong(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                                ytelser.warn("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.")
+                            }
+                        }
+                        historie.forlengerInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i Infotrygd")
+                            vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
+                        }
+                        else -> {
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i Spleis")
+                            vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
+                        }
                     }
                 }
                 harInntektshistorikk(arbeidsgiver, vedtaksperiode.periode.start)
