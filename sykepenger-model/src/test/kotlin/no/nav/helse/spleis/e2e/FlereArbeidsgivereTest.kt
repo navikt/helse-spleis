@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
@@ -8,12 +9,12 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-@Disabled("Virker ikke før støtte for flere arbeidsgivere blir skrudd på i Person")
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     private companion object {
         private const val a1 = "arbeidsgiver 1"
@@ -23,6 +24,16 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private val String.inspektør get() = inspektør(this)
+
+    @BeforeEach
+    fun setup() {
+        Toggles.flereArbeidsgivereEnabled = true
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Toggles.flereArbeidsgivereEnabled = false
+    }
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {

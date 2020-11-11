@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -38,7 +39,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1) return invaliderAllePerioder(hendelse)
+        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.flereArbeidsgivereEnabled) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -234,9 +235,7 @@ class Person private constructor(
             if (it) invaliderAllePerioder(arbeidstakerHendelse)
         }
 
-    internal fun nåværendeVedtaksperioder(): MutableList<Vedtaksperiode> {
-        return arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.toMutableList().also { it.sort() }
-    }
+    internal fun nåværendeVedtaksperioder() = arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.sorted()
 
     internal fun lagreInntekter(
         arbeidsgiverId: String,

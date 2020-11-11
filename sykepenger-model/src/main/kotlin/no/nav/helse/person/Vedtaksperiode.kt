@@ -561,13 +561,11 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun tickleForArbeidsgiveravhengighet(
-        påminnelse: Påminnelse
-    ) {
-        val vedtaksperioder = person.nåværendeVedtaksperioder()
-        vedtaksperioder.removeAt(0).also {
-            if (it.tilstand == AvventerArbeidsgivere) it.tilstand(påminnelse, AvventerHistorikk)
-        }
+    private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
+        person.nåværendeVedtaksperioder()
+            .first()
+            .takeIf { it.tilstand == AvventerArbeidsgivere }
+            ?.also { it.tilstand(påminnelse, AvventerHistorikk) }
     }
 
     /**
@@ -578,21 +576,20 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder()
-        vedtaksperioder.removeFirst().also {
-            if (it == this) return it.forsøkUtbetalingSteg2(vedtaksperioder, engineForTimeline, hendelse)
-            if (it.tilstand == AvventerArbeidsgivere) {
-                this.tilstand(hendelse, AvventerArbeidsgivere)
-                it.tilstand(hendelse, AvventerHistorikk)
-            }
+        val første = vedtaksperioder.first()
+        if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+        if (første.tilstand == AvventerArbeidsgivere) {
+            this.tilstand(hendelse, AvventerArbeidsgivere)
+            første.tilstand(hendelse, AvventerHistorikk)
         }
     }
 
     private fun forsøkUtbetalingSteg2(
-        vedtaksperioder: MutableList<Vedtaksperiode>,
+        andreVedtaksperioder: List<Vedtaksperiode>,
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        if (vedtaksperioder
+        if (andreVedtaksperioder
                 .filter { this.periode.overlapperMed(it.periode) }
                 .all { it.tilstand == AvventerArbeidsgivere }
         )
