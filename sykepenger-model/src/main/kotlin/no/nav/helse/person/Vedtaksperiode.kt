@@ -1347,7 +1347,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                //       overlappende(vedtaksperiode.periode, person, ytelser)
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
@@ -1726,10 +1725,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
-//        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
-//            vedtaksperiode.kontekst(annullering)
-//        }
-
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
@@ -1793,7 +1788,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, hendelse, Arbeidsgiver.TIDLIGERE_OG_ETTERGØLGENDE)
             vedtaksperiode.arbeidsgiver.søppelbøtte(
                 hendelse,
                 vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode)

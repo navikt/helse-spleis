@@ -443,12 +443,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun tidligereOgEttergølgende2(segSelv: Vedtaksperiode): VedtaksperioderFilter {
         val medSammeArbeidsgiverperiode = tidligereOgEttergølgende(segSelv)
-        // TODO
-        /*if (medSammeArbeidsgiverperiode.sorted() != vedtaksperioder.senereMedSammeArbeidsgiverperiode(segSelv).sorted()) {
-            println("Sup")
-            error("WAT")
-            tidligereOgEtterfølgende(segSelv)
-        }*/
         return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in medSammeArbeidsgiverperiode
     }
 
