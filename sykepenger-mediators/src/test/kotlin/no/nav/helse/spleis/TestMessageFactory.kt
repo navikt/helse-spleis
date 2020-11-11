@@ -185,7 +185,8 @@ internal class TestMessageFactory(
                 "Pleiepenger",
                 "Omsorgspenger",
                 "Opplæringspenger",
-                "Institusjonsopphold"
+                "Institusjonsopphold",
+                "Dødsinfo"
             ),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
@@ -211,6 +212,9 @@ internal class TestMessageFactory(
                         "grad" to data.grad
                     )
                 },
+                "Dødsinfo" to mapOf(
+                    "dødsdato" to null
+                ),
                 "Institusjonsopphold" to institusjonsoppholdsperioder.map { data ->
                     mapOf(
                         "startdato" to data.startdato,

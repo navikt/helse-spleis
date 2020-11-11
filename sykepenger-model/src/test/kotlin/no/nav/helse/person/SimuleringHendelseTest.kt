@@ -3,11 +3,9 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -95,7 +93,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it
+            aktivitetslogg = it,
+            dødsinfo = Dødsinfo(null)
         ).apply {
             hendelse = this
         }

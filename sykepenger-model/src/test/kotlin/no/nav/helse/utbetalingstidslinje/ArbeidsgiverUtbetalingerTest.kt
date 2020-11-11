@@ -342,7 +342,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             NormalArbeidstaker,
             aktivitetslogg,
             "88888888",
-            fnr
+            fnr,
         ).also {
             it.beregn()
             it.tidslinjeEngine.beregnGrenser(31.desember(2019))

@@ -49,6 +49,10 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
         )
     }, aktivitetslogg)
 
+    private val dødsinfo =
+        Dødsinfo(packet["@løsning.${Behovtype.Dødsinfo.name}"].path("dødsdato").asOptionalLocalDate())
+
+
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = this.id,
@@ -62,6 +66,7 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
+            dødsinfo = dødsinfo,
             aktivitetslogg = aktivitetslogg
         )
 

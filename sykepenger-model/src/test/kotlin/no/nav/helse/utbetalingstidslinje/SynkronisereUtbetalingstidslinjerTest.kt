@@ -83,7 +83,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             NormalArbeidstaker,
             Aktivitetslogg(),
             arb1.organisasjonsnummer(),
-            UNG_PERSON_FNR_2018
+            UNG_PERSON_FNR_2018,
         )
         // TODO gjøre ferdig eller slette testen
     }
@@ -183,7 +183,8 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 perioder = emptyList(),
                 aktivitetslogg = aktivitetslogg
             ),
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            dødsinfo = Dødsinfo(null),
         )
     }
 

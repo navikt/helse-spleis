@@ -1383,7 +1383,8 @@ internal class Vedtaksperiode private constructor(
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                        fødselsnummer = vedtaksperiode.fødselsnummer
+                        fødselsnummer = vedtaksperiode.fødselsnummer,
+                        dødsdato = ytelser.dødsinfo().dødsdato
                     ).also { engine ->
                         engine.beregn()
                     }

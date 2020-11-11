@@ -16,6 +16,7 @@ class Ytelser(
     private val omsorgspenger: Omsorgspenger,
     private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
+    private val dødsinfo: Dødsinfo,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
@@ -29,6 +30,8 @@ class Ytelser(
     internal fun opplæringspenger() = opplæringspenger
 
     internal fun institusjonsopphold() = institusjonsopphold
+
+    internal fun dødsinfo() = dødsinfo
 
     internal fun valider(periode: Periode, periodetype: Periodetype) =
         utbetalingshistorikk.valider(periode, periodetype)

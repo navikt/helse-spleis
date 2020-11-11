@@ -94,7 +94,8 @@ interface PersonObserver {
                 MinimumSykdomsgrad,
                 Annullering,
                 Fridag,
-                Arbeidsdag
+                Arbeidsdag,
+                EtterDødsdato
             }
         }
     }

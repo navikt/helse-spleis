@@ -15,13 +15,15 @@ internal class ArbeidsgiverUtbetalinger(
     private val aktivitetslogg: Aktivitetslogg,
     private val organisasjonsnummer: String,
     private val fødselsnummer: String,
-    private val virkningsdato: LocalDate = periode.endInclusive
+    private val virkningsdato: LocalDate = periode.endInclusive,
+    private val dødsdato: LocalDate? = null
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
     internal fun beregn() {
         val tidslinjer = this.tidslinjer.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
+        AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, arbeidsgiverRegler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, personTidslinje)

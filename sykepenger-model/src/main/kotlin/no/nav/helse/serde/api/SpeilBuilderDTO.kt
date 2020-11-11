@@ -199,7 +199,8 @@ enum class BegrunnelseDTO {
     SykepengedagerOppbrukt,
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
-    MinimumSykdomsgrad
+    MinimumSykdomsgrad,
+    EtterDødsdato
 }
 
 interface HendelseDTO {

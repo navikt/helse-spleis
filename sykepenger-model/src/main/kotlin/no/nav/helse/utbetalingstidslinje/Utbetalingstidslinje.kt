@@ -303,5 +303,6 @@ enum class Begrunnelse {
     SykepengedagerOppbrukt,
     MinimumInntekt,
     EgenmeldingUtenforArbeidsgiverperiode,
-    MinimumSykdomsgrad
+    MinimumSykdomsgrad,
+    EtterDødsdato
 }

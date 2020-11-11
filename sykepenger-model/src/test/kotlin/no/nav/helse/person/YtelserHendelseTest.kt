@@ -197,7 +197,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it
+            aktivitetslogg = it,
+            dødsinfo = Dødsinfo(null),
         )
     }
 

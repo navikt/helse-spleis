@@ -377,7 +377,8 @@ class JsonBuilderTest {
                     perioder = emptyList(),
                     aktivitetslogg = it
                 ),
-                aktivitetslogg = it
+                aktivitetslogg = it,
+                dødsinfo = Dødsinfo(null),
             )
         }
 

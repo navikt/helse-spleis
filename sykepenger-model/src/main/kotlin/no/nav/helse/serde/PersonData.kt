@@ -828,7 +828,8 @@ internal data class PersonData(
             SykepengedagerOppbrukt,
             MinimumInntekt,
             EgenmeldingUtenforArbeidsgiverperiode,
-            MinimumSykdomsgrad
+            MinimumSykdomsgrad,
+            EtterDødsdato
         }
 
         enum class TypeData {
@@ -897,6 +898,7 @@ internal data class PersonData(
                                 BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
                                 BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                                 BegrunnelseData.MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
+                                BegrunnelseData.EtterDødsdato -> Begrunnelse.EtterDødsdato
                                 null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
                             }
                         )

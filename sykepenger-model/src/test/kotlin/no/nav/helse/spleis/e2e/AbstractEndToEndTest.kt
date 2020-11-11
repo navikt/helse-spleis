@@ -4,6 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
@@ -301,7 +302,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        dødsdato: LocalDate? = null
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
@@ -321,7 +323,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 pleiepenger = pleiepenger,
                 omsorgspenger = omsorgspenger,
                 opplæringspenger = opplæringspenger,
-                institusjonsoppholdsperioder = institusjonsoppholdsperioder
+                institusjonsoppholdsperioder = institusjonsoppholdsperioder,
+                dødsdato = dødsdato
             )
         )
     }
@@ -627,7 +630,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        dødsdato: LocalDate? = null
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -668,7 +672,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 perioder = institusjonsoppholdsperioder,
                 aktivitetslogg = aktivitetslogg
             ),
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            dødsinfo = Dødsinfo(dødsdato),
         ).apply {
             hendelselogg = this
         }

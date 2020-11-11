@@ -361,7 +361,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg()
             ),
-            aktivitetslogg = Aktivitetslogg()
+            aktivitetslogg = Aktivitetslogg(),
+            dødsinfo = Dødsinfo(null)
         ).apply {
             hendelse = this
         }

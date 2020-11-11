@@ -19,7 +19,8 @@ internal class YtelserRiver(
         Pleiepenger,
         Omsorgspenger,
         Opplæringspenger,
-        Institusjonsopphold
+        Institusjonsopphold,
+        Dødsinfo,
     )
     override val riverName = "Ytelser"
 
@@ -30,6 +31,7 @@ internal class YtelserRiver(
         packet.requireKey("@løsning.${Omsorgspenger.name}")
         packet.requireKey("@løsning.${Opplæringspenger.name}")
         packet.requireKey("@løsning.${Institusjonsopphold.name}")
+        packet.requireKey("@løsning.${Dødsinfo.name}")
         packet.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         packet.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
         packet.requireArray("@løsning.${Sykepengehistorikk.name}") {

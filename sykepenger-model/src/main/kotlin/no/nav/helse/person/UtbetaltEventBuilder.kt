@@ -169,6 +169,7 @@ private class UtbetaltEventBuilder(
                             Begrunnelse.MinimumInntekt -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumInntekt
                             Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> UtbetaltEvent.IkkeUtbetaltDag.Type.EgenmeldingUtenforArbeidsgiverperiode
                             Begrunnelse.MinimumSykdomsgrad -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumSykdomsgrad
+                            Begrunnelse.EtterDødsdato -> UtbetaltEvent.IkkeUtbetaltDag.Type.EtterDødsdato
                         }
                     )
                 )

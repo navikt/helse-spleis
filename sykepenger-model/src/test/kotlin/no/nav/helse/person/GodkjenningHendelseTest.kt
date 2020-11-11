@@ -3,14 +3,12 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -135,7 +133,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it
+            aktivitetslogg = it,
+            dødsinfo = Dødsinfo(null),
         ).apply {
             hendelse = this
         }
