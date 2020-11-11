@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 internal class HistorieTest {
@@ -36,13 +37,13 @@ internal class HistorieTest {
         historie(
             RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000, 100, AG1),
             Ferie(15.januar, 19.januar),
-            Utbetaling(22.januar, 31.januar, 1000, 100, FNR),
+            RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000, 100, AG1),
         )
 
         assertEquals(null, historie.skjæringstidspunkt(1.januar))
         assertEquals(2.januar, historie.skjæringstidspunkt(21.januar))
         assertEquals(2.januar, historie.skjæringstidspunkt(31.januar))
-        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(22.januar, 31.januar)))
+        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(22.januar, 31.januar)))
     }
 
@@ -57,7 +58,7 @@ internal class HistorieTest {
         assertEquals(null, historie.skjæringstidspunkt(1.januar))
         assertEquals(2.januar, historie.skjæringstidspunkt(21.januar))
         assertEquals(2.januar, historie.skjæringstidspunkt(31.januar))
-        assertFalse(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(22.januar, 31.januar)))
+        assertFalse(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(16.januar, 31.januar)))
         assertTrue(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
     }
 
@@ -124,28 +125,79 @@ internal class HistorieTest {
         assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+    }
+
+    @Test
+    fun `infotrygd - gap - spleis - gap - infotrygd - spleis - spleis`() {
+        historie(refusjon(1.januar, 31.januar), refusjon(9.april, 30.april))
+        historie.add(AG1, sykedager(1.mars, 30.mars))
+        historie.add(AG1, sykedager(1.mai, 31.mai))
+        historie.add(AG1, sykedager(1.juni, 30.juni))
+
+        assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+
+        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
+        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
+
+        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
+        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
+    }
+
+    @Test
+    fun `infotrygd - spleis - spleis`() {
+        historie(refusjon(1.januar, 31.januar))
+        historie.add(AG1, sykedager(1.februar, 28.februar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+
+        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+
+        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
     }
 
     @Test
     fun `infotrygd - spleis - infotrygd - spleis`() {
         historie(refusjon(1.januar, 31.januar), refusjon(1.mars, 31.mars))
-        historie.add(AG1, tidslinjeOf(28.NAV, startDato = 1.februar))
+        historie.add(AG1, navdager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.april, 30.april))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
         assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
+        assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
+        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
     }
 
     @Test
     fun `spleis - infotrygd - spleis`() {
         historie(refusjon(1.februar, 28.februar))
-        historie.add(AG1, tidslinjeOf(31.NAV, startDato = 1.januar))
+        historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
         assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
+
+        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
+
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
@@ -156,13 +208,15 @@ internal class HistorieTest {
         assertEquals(1.mars, historie.skjæringstidspunkt(31.mars))
         assertSkjæringstidspunkter(kuttdato = 31.mars, 1.mars, 1.februar)
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.februar)
+        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
     fun `spleis - gap - infotrygd - spleis`() {
         historie(refusjon(1.februar, 28.februar))
-        historie.add(AG1, tidslinjeOf(30.NAV, startDato = 1.januar))
+        historie.add(AG1, navdager(1.januar, 30.januar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
         assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
@@ -174,7 +228,7 @@ internal class HistorieTest {
     @Test
     fun `spleis - infotrygd - gap - spleis`() {
         historie(refusjon(1.februar, 28.februar))
-        historie.add(AG1, tidslinjeOf(31.NAV))
+        historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(2.mars, 31.mars))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
         assertEquals(1.januar, historie.skjæringstidspunkt(1.mars))
@@ -186,16 +240,21 @@ internal class HistorieTest {
     fun `ubetalt spleis - ubetalt spleis`() {
         historie.add(AG1, sykedager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
     fun `spleis - ubetalt spleis - ubetalt spleis`() {
-        historie.add(AG1, tidslinjeOf(31.NAV, startDato = 1.januar))
+        historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
@@ -205,7 +264,6 @@ internal class HistorieTest {
         assertEquals(1.januar, historie.skjæringstidspunkt(1.februar))
         assertEquals(2.februar, historie.skjæringstidspunkt(28.februar))
         assertEquals(2.februar, historie.skjæringstidspunkt(31.mars))
-        assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(2.februar, 28.februar)))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
@@ -244,6 +302,9 @@ internal class HistorieTest {
 
     private fun ferie(fom: LocalDate, tom: LocalDate) =
         Ferie(fom, tom)
+
+    private fun navdager(fom: LocalDate, tom: LocalDate) =
+        tidslinjeOf((ChronoUnit.DAYS.between(fom, tom).toInt() + 1).NAV, startDato = fom)
 
     private fun sykedager(fom: LocalDate, tom: LocalDate, grad: Int = 100, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 

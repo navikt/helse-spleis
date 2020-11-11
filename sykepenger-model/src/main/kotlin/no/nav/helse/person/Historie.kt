@@ -32,24 +32,30 @@ internal class Historie() {
     private fun utbetalingstidslinje(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer) + spleisbøtte.utbetalingstidslinje(orgnummer)
     private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
-    internal fun forlengerInfotrygd(orgnr: String, periode: Periode): Boolean {
-        val skjæringstidspunkt = sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: return false
-        if (skjæringstidspunkt == periode.start) return false
-        return infotrygdbøtte.utbetalingstidslinje(orgnr)[skjæringstidspunkt].erSykedag()
-    }
+    internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
+        sammenhengendeInfotrygdperiode(orgnr, periode) != null
+
+    internal fun overgangInfotrygd(orgnr: String, periode: Periode) =
+        sammenhengendeInfotrygdperiode(orgnr, periode)?.takeUnless {
+            spleisbøtte.harOverlappendeHistorikk(orgnr, it)
+        } != null
+
+    internal fun førstegangsbehandling(orgnr: String, periode: Periode) =
+        sammenhengendePeriode(orgnr, periode)?.let { it.start in periode } ?: false
+
+    internal fun forlengelse(orgnr: String, periode: Periode) = !førstegangsbehandling(orgnr, periode) && !forlengerInfotrygd(orgnr, periode)
+
+    private fun sammenhengendeInfotrygdperiode(orgnr: String, periode: Periode) =
+        sammenhengendePeriode(orgnr, periode)?.takeIf {
+            infotrygdbøtte.utbetalingstidslinje(orgnr)[it.start].erSykedag()
+        }?.let { Periode(it.start, periode.start.minusDays(1)) }
+
+    private fun sammenhengendePeriode(orgnr: String, periode: Periode) =
+        sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive)
+            ?.let { periode.oppdaterFom(it) }
 
     internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
-    internal fun skjæringstidspunkter(tom: LocalDate): List<LocalDate> {
-        val skjæringstidspunkter = mutableListOf<LocalDate>()
-        var kuttdato = tom
-        do {
-            val skjæringstidspunkt = skjæringstidspunkt(kuttdato)?.also {
-                kuttdato = it.minusDays(1)
-                skjæringstidspunkter.add(it)
-            }
-        } while (skjæringstidspunkt != null)
-        return skjæringstidspunkter
-    }
+    internal fun skjæringstidspunkter(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkter(tom, sykdomstidslinjer)
 
     internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
@@ -79,6 +85,9 @@ internal class Historie() {
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Sykdomstidslinje) {
             sykdomstidslinjer.merge(orgnummer, tidslinje) { venstre, høyre -> venstre.merge(høyre, replace) }
         }
+
+        internal fun harOverlappendeHistorikk(orgnr: String, periode: Periode) =
+            sykdomstidslinje(orgnr).subset(periode).any { it !is UkjentDag }
 
         internal companion object {
             internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
