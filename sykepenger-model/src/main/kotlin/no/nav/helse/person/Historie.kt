@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.person.Periodetype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
@@ -32,33 +33,36 @@ internal class Historie() {
     private fun utbetalingstidslinje(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer) + spleisbøtte.utbetalingstidslinje(orgnummer)
     private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
+    internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
+        val skjæringstidspunkt = sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        return when {
+            skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
+            infotrygdbøtte.utbetalingstidslinje(orgnr)[skjæringstidspunkt].erSykedag() -> {
+                val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
+                when {
+                    spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> INFOTRYGDFORLENGELSE
+                    else -> OVERGANG_FRA_IT
+                }
+            }
+            else -> FORLENGELSE
+        }
+    }
+
     internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
-        sammenhengendeInfotrygdperiode(orgnr, periode) != null
+        periodetype(orgnr, periode) in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)
 
-    internal fun overgangInfotrygd(orgnr: String, periode: Periode) =
-        sammenhengendeInfotrygdperiode(orgnr, periode)?.takeUnless {
-            spleisbøtte.harOverlappendeHistorikk(orgnr, it)
-        } != null
-
-    internal fun erPingPong(orgnr: String, periode: Periode) =
-        sammenhengendePeriode(orgnr, periode)?.takeIf {
-            infotrygdbøtte
-                .sykdomstidslinje(orgnr)
-                .fraOgMed(it.start)
-                .skjæringstidspunkter(periode.endInclusive)
-                .filter { dato -> dato > periode.start.minusMonths(6) }
-                .size > 1
-        } != null
-
-    internal fun førstegangsbehandling(orgnr: String, periode: Periode) =
-        sammenhengendePeriode(orgnr, periode)?.let { it.start in periode } ?: false
-
-    internal fun forlengelse(orgnr: String, periode: Periode) = !førstegangsbehandling(orgnr, periode) && !forlengerInfotrygd(orgnr, periode)
-
-    private fun sammenhengendeInfotrygdperiode(orgnr: String, periode: Periode) =
-        sammenhengendePeriode(orgnr, periode)?.takeIf {
-            infotrygdbøtte.utbetalingstidslinje(orgnr)[it.start].erSykedag()
-        }?.let { Periode(it.start, periode.start.minusDays(1)) }
+    internal fun erPingPong(orgnr: String, periode: Periode): Boolean {
+        val periodetype = periodetype(orgnr, periode)
+        if (periodetype !in listOf(FORLENGELSE, INFOTRYGDFORLENGELSE)) return false
+        val skjæringstidspunkt = skjæringstidspunkt(periode.endInclusive) ?: return false
+        val antallBruddstykker = infotrygdbøtte
+            .sykdomstidslinje(orgnr)
+            .skjæringstidspunkter(periode.endInclusive)
+            .filter { dato -> dato >= skjæringstidspunkt && dato > periode.start.minusMonths(6) }
+            .size
+        if (periodetype == INFOTRYGDFORLENGELSE) return antallBruddstykker > 1
+        return antallBruddstykker >= 1
+    }
 
     private fun sammenhengendePeriode(orgnr: String, periode: Periode) =
         sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive)

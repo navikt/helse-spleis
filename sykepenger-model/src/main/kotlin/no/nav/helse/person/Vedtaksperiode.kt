@@ -22,6 +22,9 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
+import no.nav.helse.person.Kildesystem.INFOTRYGD
+import no.nav.helse.person.Kildesystem.SPLEIS
+import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -265,10 +268,10 @@ internal class Vedtaksperiode private constructor(
 
     internal fun periodetype() = when {
         forlengelseFraInfotrygd == JA ->
-            arbeidsgiver.finnSykeperiodeRettFør(this)?.run { Periodetype.INFOTRYGDFORLENGELSE }
-                ?: Periodetype.OVERGANG_FRA_IT
-        harForegåendeSomErBehandletOgUtbetalt(this) -> Periodetype.FORLENGELSE
-        else -> Periodetype.FØRSTEGANGSBEHANDLING
+            arbeidsgiver.finnSykeperiodeRettFør(this)?.run { INFOTRYGDFORLENGELSE }
+                ?: OVERGANG_FRA_IT
+        harForegåendeSomErBehandletOgUtbetalt(this) -> FORLENGELSE
+        else -> FØRSTEGANGSBEHANDLING
     }
 
     internal fun ferdig(hendelse: ArbeidstakerHendelse, sendTilInfotrygd: Boolean) {
@@ -635,7 +638,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun loggHvisForlengelse(logg: IAktivitetslogg) {
         periodetype().also { periodetype ->
-            if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) {
+            if (periodetype != FØRSTEGANGSBEHANDLING) {
                 logg.info("Perioden er en forlengelse, av type $periodetype")
             }
         }
@@ -1354,28 +1357,31 @@ internal class Vedtaksperiode private constructor(
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
                     val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+                    val periodetype = historie.periodetype(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)
+                    val opphav = if (periodetype.opphav() == SPLEIS) "ny løsning" else "Infotrygd"
+
+                    if (historie.erPingPong(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                        ytelser.warn("Perioden forlenger en behandling i $opphav, og har historikk i ${ if (periodetype.opphav() == SPLEIS) "Infotrygd" else "ny løsning"} også: Undersøk at antall dager igjen er beregnet riktig.")
+                    }
+
                     when {
-                        historie.førstegangsbehandling(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
+                        periodetype == FØRSTEGANGSBEHANDLING -> {
                             vedtaksperiode.håndterGap()
                             ytelser.info("Perioden er en førstegangsbehandling")
                         }
-                        tilstøtende == null || historie.overgangInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
+                        tilstøtende == null -> {
                             vedtaksperiode.håndterForlengelseIT(historie)
+                            // TODO: slutte å forkaste når vi har en utbetalt periode i IT foran oss
                             arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
                             vedtaksperiode.kontekst(ytelser)
 
                             arbeidsgiver.addInntekt(ytelser)
-                            ytelser.info("Perioden er en direkte overgang fra periode i Infotrygd")
-                            if (historie.erPingPong(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
-                                ytelser.warn("Perioden forlenger en behandling i Infotrygd, og har historikk fra ny løsning: Undersøk at antall dager igjen er beregnet riktig.")
-                            }
-                        }
-                        historie.forlengerInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode) -> {
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i Infotrygd")
-                            vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
+
+                            if (periodetype == OVERGANG_FRA_IT) ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+                            else ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav, dog uten tilstøtende")
                         }
                         else -> {
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i Spleis")
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav")
                             vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
                         }
                     }
@@ -1833,16 +1839,19 @@ enum class ForlengelseFraInfotrygd {
     NEI
 }
 
-enum class Periodetype {
+enum class Kildesystem { SPLEIS, INFOTRYGD }
+enum class Periodetype(private val kildesystem: Kildesystem) {
     /** Perioden er første periode i et sykdomstilfelle */
-    FØRSTEGANGSBEHANDLING,
+    FØRSTEGANGSBEHANDLING(SPLEIS),
 
     /** Perioden en en forlengelse av en Spleis-periode */
-    FORLENGELSE,
+    FORLENGELSE(SPLEIS),
 
     /** Perioden en en umiddelbar forlengelse av en periode som er utbetalt i Infotrygd */
-    OVERGANG_FRA_IT,
+    OVERGANG_FRA_IT(INFOTRYGD),
 
     /** Perioden er en direkte eller indirekte forlengelse av en OVERGANG_FRA_IT-periode */
-    INFOTRYGDFORLENGELSE
+    INFOTRYGDFORLENGELSE(INFOTRYGD);
+
+    fun opphav() = kildesystem
 }

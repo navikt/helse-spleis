@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
+import no.nav.helse.person.Periodetype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -125,9 +126,7 @@ internal class HistorieTest {
         assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
     }
 
@@ -139,20 +138,15 @@ internal class HistorieTest {
         historie.add(AG1, sykedager(1.juni, 30.juni))
 
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
-        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
+        assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
-        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
+        assertEquals(INFOTRYGDFORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.juni, 30.juni)))
     }
 
@@ -163,13 +157,10 @@ internal class HistorieTest {
         historie.add(AG1, sykedager(1.mars, 31.mars))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
 
-        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertEquals(INFOTRYGDFORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
     }
 
@@ -183,14 +174,11 @@ internal class HistorieTest {
         assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertTrue(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
-        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
-        assertFalse(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
+        assertEquals(INFOTRYGDFORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
         assertTrue(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.april, 30.april)))
     }
 
@@ -220,7 +208,7 @@ internal class HistorieTest {
         historie.add(AG1, navdager(1.august, 31.august))
         historie.add(AG1, navdager(1.september, 30.september))
         historie.add(AG1, navdager(1.oktober, 31.oktober))
-        assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertTrue(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mai, 31.mai)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.oktober, 31.oktober)))
     }
@@ -234,12 +222,11 @@ internal class HistorieTest {
         assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
         assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
 
-        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
 
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertFalse(historie.overgangInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(FORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertTrue(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
@@ -250,9 +237,8 @@ internal class HistorieTest {
         assertEquals(1.mars, historie.skjæringstidspunkt(31.mars))
         assertSkjæringstidspunkter(kuttdato = 31.mars, 1.mars, 1.februar)
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.februar)
-        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertFalse(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
@@ -266,6 +252,7 @@ internal class HistorieTest {
         assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
         assertSkjæringstidspunkter(kuttdato = 31.mars, 1.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
@@ -283,9 +270,9 @@ internal class HistorieTest {
     fun `ubetalt spleis - ubetalt spleis`() {
         historie.add(AG1, sykedager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 28.februar)))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.januar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(FORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
@@ -293,11 +280,11 @@ internal class HistorieTest {
         historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertTrue(historie.førstegangsbehandling(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
-        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
+        assertEquals(FORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
-        assertTrue(historie.forlengelse(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+        assertEquals(FORLENGELSE, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
     @Test
