@@ -34,6 +34,15 @@ internal class Historie(
 
     internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
 
+    internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
+        spleisbøtte.add(orgnummer, tidslinje)
+        add(orgnummer, Historikkbøtte.konverter(tidslinje)) // for å ta høyde for forkastet historikk
+    }
+
+    internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
+        spleisbøtte.add(orgnummer, tidslinje)
+    }
+
     internal class Historikkbøtte {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
@@ -48,16 +57,18 @@ internal class Historie(
             sykdomstidslinjer.merge(orgnummer, tidslinje) { venstre, høyre -> venstre.merge(høyre, replace) }
         }
 
-        internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
-            Sykdomstidslinje(utbetalingstidslinje.map {
-                it.dato to when {
-                    !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
-                    it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
-                    else -> UkjentDag(it.dato, INGEN)
-                }
-            }.associate { it })
+        internal companion object {
+            internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
+                Sykdomstidslinje(utbetalingstidslinje.map {
+                    it.dato to when {
+                        !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        else -> UkjentDag(it.dato, INGEN)
+                    }
+                }.associate { it })
 
-        private fun Utbetalingsdag.erSykedag() = this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag
-        private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _ -> grad }.prosent)
+            private fun Utbetalingsdag.erSykedag() = this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag
+            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _ -> grad }.prosent)
+        }
     }
 }

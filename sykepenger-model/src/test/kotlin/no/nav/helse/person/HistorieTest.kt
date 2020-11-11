@@ -4,6 +4,9 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -11,6 +14,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class HistorieTest {
@@ -60,10 +64,10 @@ internal class HistorieTest {
 
     @Test
     fun `fri i helg mappes til ukjentdag`() {
-        val historikkbøtte = Historie.Historikkbøtte()
-        val tidslinje = tidslinjeOf(5.NAV, 2.FRI, 5.NAV, 2.HELG)
-        historikkbøtte.konverter(tidslinje).also {
+        val tidslinje = tidslinjeOf(4.NAV, 3.FRI, 5.NAV, 2.HELG)
+        Historie.Historikkbøtte.konverter(tidslinje).also {
             assertTrue(it[1.januar] is Dag.Sykedag)
+            assertTrue(it[5.januar] is Dag.UkjentDag)
             assertTrue(it[6.januar] is Dag.UkjentDag)
             assertTrue(it[8.januar] is Dag.Sykedag)
             assertTrue(it[13.januar] is Dag.SykHelgedag)
@@ -72,14 +76,107 @@ internal class HistorieTest {
 
     @Test
     fun `mapper utbetalingstidslinje til sykdomstidslinje`() {
-        val historikkbøtte = Historie.Historikkbøtte()
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        historikkbøtte.konverter(tidslinje).also {
+        Historie.Historikkbøtte.konverter(tidslinje).also {
             assertTrue(it[1.januar] is Dag.Sykedag)
             assertTrue(it[6.januar] is Dag.SykHelgedag)
             assertTrue(it[31.januar] is Dag.Sykedag)
         }
     }
+
+    @Test
+    fun `infotrygd - spleis`() {
+        val historie = historie(refusjon(1.januar, 31.januar))
+        historie.add(AG1, sykedager(1.februar, 28.februar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
+    }
+
+    @Test
+    fun `spleis - infotrygd - spleis`() {
+        val historie = historie(refusjon(1.februar, 28.februar))
+        historie.add(AG1, tidslinjeOf(31.NAV, startDato = 1.januar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `infotrygd - gap - spleis`() {
+        val historie = historie(refusjon(1.februar, 27.februar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.mars, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `spleis - gap - infotrygd - spleis`() {
+        val historie = historie(refusjon(1.februar, 28.februar))
+        historie.add(AG1, tidslinjeOf(30.NAV, startDato = 1.januar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `spleis - infotrygd - gap - spleis`() {
+        val historie = historie(refusjon(1.februar, 28.februar))
+        historie.add(AG1, tidslinjeOf(31.NAV))
+        historie.add(AG1, sykedager(2.mars, 31.mars))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(1.mars))
+        assertEquals(2.mars, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `spleis - gap - spleis`() {
+        val historie = historie(refusjon(1.februar, 28.februar))
+        historie.add(AG1, tidslinjeOf(30.NAV))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `infotrygd - gap - infotrygdTilBbruker - spleis`() {
+        val historie = historie(refusjon(1.januar, 31.januar), bruker(2.februar, 28.februar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.januar, historie.skjæringstidspunkt(1.februar))
+        assertEquals(2.februar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(2.februar, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `infotrygdferie - infotrygd - spleis`() {
+        val historie = historie(ferie(1.januar, 31.januar), bruker(1.februar, 28.februar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(1.februar, historie.skjæringstidspunkt(1.februar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
+    }
+
+    @Test
+    fun `infotrygd - infotrygdferie - spleis`() {
+        val historie = historie(refusjon(1.januar, 31.januar), ferie(1.februar, 10.februar))
+        historie.add(AG1, sykedager(11.februar, 28.februar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(1.februar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(10.februar))
+        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
+    }
+
+    private fun refusjon(fom: LocalDate, tom: LocalDate, dagsats: Int = 1000, grad: Int = 100, orgnr: String = AG1) =
+        RefusjonTilArbeidsgiver(fom, tom, dagsats, grad, orgnr)
+
+    private fun bruker(fom: LocalDate, tom: LocalDate, dagsats: Int = 1000, grad: Int = 100, orgnr: String = AG1) =
+        Utbetaling(fom, tom, dagsats, grad, orgnr)
+
+    private fun ferie(fom: LocalDate, tom: LocalDate) =
+        Ferie(fom, tom)
+
+    private fun sykedager(fom: LocalDate, tom: LocalDate, grad: Int = 100, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
     private fun historie(vararg perioder: Periode) = Historie(
         Utbetalingshistorikk(
