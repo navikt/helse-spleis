@@ -33,6 +33,17 @@ internal class Historie(
     }
 
     internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
+    internal fun skjæringstidspunkter(tom: LocalDate): List<LocalDate> {
+        val skjæringstidspunkter = mutableListOf<LocalDate>()
+        var kuttdato = tom
+        do {
+            val skjæringstidspunkt = skjæringstidspunkt(kuttdato)?.also {
+                kuttdato = it.minusDays(1)
+                skjæringstidspunkter.add(it)
+            }
+        } while (skjæringstidspunkt != null)
+        return skjæringstidspunkter
+    }
 
     internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
