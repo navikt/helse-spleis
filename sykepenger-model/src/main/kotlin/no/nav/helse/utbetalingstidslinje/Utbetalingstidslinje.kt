@@ -187,8 +187,8 @@ internal class Utbetalingstidslinje private constructor(
     internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag || it is AnnullertDag }
 
     internal operator fun get(dato: LocalDate) =
-        if (dato in førsteDato()..sisteDato()) utbetalingsdager.first { it.dato == dato }
-        else UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN))
+        if (isEmpty() || dato !in førsteDato()..sisteDato()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN))
+        else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {
         return utbetalingsdager.joinToString(separator = "") {
