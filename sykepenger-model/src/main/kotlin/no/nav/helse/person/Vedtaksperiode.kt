@@ -1062,17 +1062,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
         }
 
-        // Midlertidig for å håndtere utestående svar på Ytelser-need, kan fjernes når alle utestående Ytelser-svar til
-        // AventerGap er mottatt (et døgn?)
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            ytelser: Ytelser
-        ) {
-            håndter(person, arbeidsgiver, vedtaksperiode, ytelser.utbetalingshistorikk())
-        }
-
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,

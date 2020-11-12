@@ -30,7 +30,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
         person.håndter(søknad())
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(inntektsmelding())
         person.håndter(ytelser(1.vedtaksperiode))
@@ -142,6 +142,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
     private fun håndterUgyldigYtelser() {
         person.håndter(sykmelding())
         person.håndter(søknad())
+        person.håndter(inntektsmelding())
+        person.håndter(vilkårsgrunnlag())
         person.håndter(
             ytelser(
                 vedtaksperiodeId = 1.vedtaksperiode,
