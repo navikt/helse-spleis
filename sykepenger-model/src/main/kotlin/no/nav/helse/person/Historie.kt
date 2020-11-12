@@ -37,7 +37,7 @@ internal class Historie() {
         val skjæringstidspunkt = sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
         return when {
             skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
-            infotrygdbøtte.utbetalingstidslinje(orgnr)[skjæringstidspunkt].erSykedag() -> {
+            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
                 val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
                 when {
                     spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> INFOTRYGDFORLENGELSE
@@ -105,6 +105,9 @@ internal class Historie() {
 
         internal fun harOverlappendeHistorikk(orgnr: String, periode: Periode) =
             sykdomstidslinje(orgnr).subset(periode).any { it !is UkjentDag }
+
+        internal fun erUtbetaltDag(orgnr: String, dato: LocalDate) =
+            utbetalingstidslinje(orgnr)[dato].erSykedag()
 
         internal companion object {
             internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
