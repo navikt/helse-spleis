@@ -767,7 +767,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
         ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(30)
+            .plusDays(35)
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd) {
@@ -1024,12 +1024,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSøknadFerdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_FERDIG_GAP
 
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (søknad.sykdomstidslinje().starterFør(vedtaksperiode.sykdomstidslinje)) {
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig")
@@ -1124,12 +1118,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
 
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerUferdigGap)
         }
@@ -1158,12 +1146,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
 
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, AvventerHistorikk, AvventerInntektsmeldingFerdigGap)
         }
@@ -1191,12 +1173,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSøknadUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
-
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, MottattSykmeldingFerdigForlengelse, AvventerSøknadFerdigGap)
@@ -1239,12 +1215,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_GAP
 
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndter(søknad, AvventerUferdigGap)
             søknad.info("Fullført behandling av søknad")
@@ -1257,12 +1227,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerInntektsmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_GAP
-
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(15)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding, AvventerVilkårsprøvingGap)
