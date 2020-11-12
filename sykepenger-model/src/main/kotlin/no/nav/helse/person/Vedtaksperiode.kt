@@ -478,7 +478,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGapHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
-        utbetalingshistorikk(hendelse, periode.start.minusMonths(6) til periode.endInclusive)
+        utbetalingshistorikk(hendelse, periode.start.minusYears(4) til periode.endInclusive)
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
@@ -1105,17 +1105,12 @@ internal class Vedtaksperiode private constructor(
                 validerUtbetalingshistorikk(vedtaksperiode.periode, utbetalingshistorikk, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
-                    arbeidsgiver.addInntekt(utbetalingshistorikk)
-                    Oldtidsutbetalinger().also { oldtid ->
-                        utbetalingshistorikk.append(oldtid)
-                        arbeidsgiver.utbetalteUtbetalinger()
-                            .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
-                        nesteTilstand = if (oldtid.utbetalingerInkludert(arbeidsgiver).erRettFør(vedtaksperiode.periode)) {
-                            utbetalingshistorikk.info("Oppdaget at perioden er en direkte overgang fra periode i Infotrygd")
-                            AvventerHistorikk
-                        } else {
-                            AvventerInntektsmeldingFerdigGap
-                        }
+                    val historie = Historie(utbetalingshistorikk).also { person.append(it) }
+                    nesteTilstand = if (historie.erForlengelse(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                        utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
+                        AvventerHistorikk
+                    } else {
+                        AvventerInntektsmeldingFerdigGap
                     }
                 }
                 onSuccess {
@@ -1369,12 +1364,15 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.håndterGap()
                             ytelser.info("Perioden er en førstegangsbehandling")
                         }
+                        // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
                         tilstøtende == null -> {
                             vedtaksperiode.håndterForlengelseIT(historie)
                             // TODO: slutte å forkaste når vi har en utbetalt periode i IT foran oss
                             arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
                             vedtaksperiode.kontekst(ytelser)
 
+                            // TODO: skal bare legge til inntekt når vi er en OVERGANG_FRA_IT,
+                            // altså at vi er den første perioden som overtar behandlingen fra IT
                             arbeidsgiver.addInntekt(ytelser)
 
                             if (periodetype == OVERGANG_FRA_IT) ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")

@@ -325,7 +325,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `gap historie før inntektsmelding`() {
+    fun `gap-historie før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterUtbetalingshistorikk(
@@ -364,7 +364,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `no-gap historie før inntektsmelding`() {
+    fun `gap-historie uten inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100))
         håndterUtbetalingshistorikk(
@@ -375,8 +375,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertFalse(it.personLogg.hasWarningsOrWorse())
             assertActivities(it)
-            assertFalse(it.inntekter.isEmpty())
-            assertNotNull(it.inntektshistorikk.inntekt(2.januar))
+            assertTrue(it.inntekter.isEmpty())
+            assertNull(it.inntektshistorikk.inntekt(2.januar))
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])

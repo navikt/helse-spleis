@@ -48,6 +48,9 @@ internal class Historie() {
         }
     }
 
+    internal fun erForlengelse(orgnr: String, periode: Periode) =
+        periodetype(orgnr, periode) != FØRSTEGANGSBEHANDLING
+
     internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)
 
