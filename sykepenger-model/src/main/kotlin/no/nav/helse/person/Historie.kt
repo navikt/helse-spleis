@@ -18,7 +18,11 @@ import java.time.LocalDate
 
 internal class Historie() {
 
-    internal constructor(utbetalingshistorikk: Utbetalingshistorikk): this() {
+    internal constructor(person: Person): this() {
+        person.append(spleisbøtte)
+    }
+
+    internal constructor(person: Person, utbetalingshistorikk: Utbetalingshistorikk): this(person) {
         utbetalingshistorikk.append(infotrygdbøtte)
     }
 
@@ -28,7 +32,7 @@ internal class Historie() {
     }
 
     private val infotrygdbøtte = Historikkbøtte()
-    private val spleisbøtte = Historikkbøtte()
+    private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
     private fun utbetalingstidslinje(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer) + spleisbøtte.utbetalingstidslinje(orgnummer)
     private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
@@ -67,23 +71,26 @@ internal class Historie() {
         return antallBruddstykker >= 1
     }
 
-    private fun sammenhengendePeriode(orgnr: String, periode: Periode) =
-        sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive)
-            ?.let { periode.oppdaterFom(it) }
+    internal fun sammenhengendePeriode(periode: Periode) =
+        skjæringstidspunkt(periode)?.let { periode.oppdaterFom(it) } ?: periode
 
+    internal fun skjæringstidspunkt(periode: Periode) = skjæringstidspunkt(periode.endInclusive)
     internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
+    internal fun skjæringstidspunkter(periode: Periode) = skjæringstidspunkter(periode.endInclusive)
     internal fun skjæringstidspunkter(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkter(tom, sykdomstidslinjer)
+
+    internal fun utbetalingstidslinje(periode: Periode) =
+        (infotrygdbøtte.utbetalingstidslinje() + spleisbøtte.utbetalingstidslinje()).kutt(periode.endInclusive)
 
     internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
-        add(orgnummer, Historikkbøtte.konverter(tidslinje)) // for å ta høyde for forkastet historikk
     }
 
     internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
-    internal class Historikkbøtte {
+    internal class Historikkbøtte(private val konverterUtbetalingstidslinje: Boolean = false) {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
 
@@ -91,12 +98,15 @@ internal class Historie() {
         internal fun sykdomstidslinje(orgnummer: String) = sykdomstidslinjer.getOrElse(ALLE_ARBEIDSGIVERE) { Sykdomstidslinje() }.merge(
             sykdomstidslinjer.getOrElse(orgnummer) { Sykdomstidslinje() }, replace)
 
+        internal fun utbetalingstidslinje() = utbetalingstidslinjer.values.fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
         internal fun utbetalingstidslinje(orgnummer: String) =
             utbetalingstidslinjer.getOrElse(ALLE_ARBEIDSGIVERE) { Utbetalingstidslinje() } +
                 utbetalingstidslinjer.getOrElse(orgnummer) { Utbetalingstidslinje() }
 
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
             utbetalingstidslinjer.merge(orgnummer, tidslinje, Utbetalingstidslinje::plus)
+            if (konverterUtbetalingstidslinje) add(orgnummer, konverter(tidslinje)) // for å ta høyde for forkastet historikk
         }
 
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Sykdomstidslinje) {

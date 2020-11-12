@@ -115,6 +115,28 @@ internal class HistorieTest {
             assertTrue(it[15.januar] is NavDag)
             assertTrue(it[21.januar] is NavHelgDag)
         }
+        bøtte.utbetalingstidslinje().also {
+            assertEquals(1.januar, it.førsteDato())
+            assertEquals(21.januar, it.sisteDato())
+            assertTrue(it[1.januar] is Fridag)
+            assertTrue(it[8.januar] is NavDag)
+            assertTrue(it[15.januar] is NavDag)
+            assertTrue(it[21.januar] is NavHelgDag)
+        }
+    }
+
+    @Test
+    fun `samlet utbetalingstidslinje`() {
+        historie(refusjon(1.januar, 31.januar))
+        historie.add(AG1, navdager(1.februar, 28.februar))
+        historie.utbetalingstidslinje(no.nav.helse.hendelser.Periode(1.februar, 28.februar)).also {
+            assertEquals(1.januar, it.førsteDato())
+            assertEquals(28.februar, it.sisteDato())
+        }
+        historie.utbetalingstidslinje(no.nav.helse.hendelser.Periode(1.januar, 21.januar)).also {
+            assertEquals(1.januar, it.førsteDato())
+            assertEquals(21.januar, it.sisteDato())
+        }
     }
 
     @Test
@@ -340,6 +362,7 @@ internal class HistorieTest {
 
     private fun historie(vararg perioder: Periode) {
         historie = Historie(
+            Person(AKTØRID, FNR),
             Utbetalingshistorikk(
                 UUID.randomUUID(),
                 AKTØRID,

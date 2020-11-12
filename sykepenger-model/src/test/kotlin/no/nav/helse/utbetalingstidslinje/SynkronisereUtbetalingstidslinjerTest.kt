@@ -1,10 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.*
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -61,12 +58,13 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun skjæringstidspunkt() {
-        assertEquals(1.januar, person.skjæringstidspunkt(31.januar))
-        assertEquals(1.januar, person.skjæringstidspunkt(28.februar))
-        assertEquals(1.januar, person.skjæringstidspunkt(30.mars))
-        assertEquals(1.april, person.skjæringstidspunkt(1.april))
-        assertEquals(1.april, person.skjæringstidspunkt(31.mai))
-        assertEquals(1.april, person.skjæringstidspunkt(1.juli))
+        val historie = Historie(person)
+        assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.januar, 31.januar)))
+        assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.februar, 28.februar)))
+        assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.mars, 30.mars)))
+        assertEquals(1.april, historie.skjæringstidspunkt(Periode(1.april, 1.april)))
+        assertEquals(1.april, historie.skjæringstidspunkt(Periode(1.mai, 31.mai)))
+        assertEquals(1.april, historie.skjæringstidspunkt(Periode(1.juli, 31.juli)))
     }
 
     @Test
@@ -92,7 +90,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Padding utbetalingstidslinjene til sammenhengendeperiode`() {
-        person.utbetalingstidslinjer(1.januar til 31.januar, ytelser("A1")).also {
+        person.utbetalingstidslinjer(1.januar til 31.januar, Historie(), ytelser("A1")).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)

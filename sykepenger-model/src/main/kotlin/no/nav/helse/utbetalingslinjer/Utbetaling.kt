@@ -127,7 +127,7 @@ internal class Utbetaling private constructor(
         oldtid.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
-    internal fun append(organisasjonsnummer: String, oldtid: Historie) {
-        oldtid.add(organisasjonsnummer, utbetalingstidslinje)
+    internal fun append(organisasjonsnummer: String, bøtte: Historie.Historikkbøtte) {
+        bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 }

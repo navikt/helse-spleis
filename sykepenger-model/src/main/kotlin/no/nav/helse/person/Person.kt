@@ -258,34 +258,20 @@ class Person private constructor(
     }
 
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        val dato = skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        // TODO: hensyntar ikke IT-historikk her
+        val dato = Historie(this).skjæringstidspunkt(periode) ?: periode.start
         return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
     }
 
-    internal fun append(historie: Historie) {
-        arbeidsgivere.forEach { it.append(historie) }
+    internal fun append(bøtte: Historie.Historikkbøtte) {
+        arbeidsgivere.forEach { it.append(bøtte) }
     }
 
-    internal fun skjæringstidspunkt(dato: LocalDate) = skjæringstidspunkt(dato, Historie())
-    internal fun skjæringstidspunkt(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = skjæringstidspunkt(dato, Historie(utbetalingshistorikk))
-    internal fun skjæringstidspunkter(dato: LocalDate, utbetalingshistorikk: Utbetalingshistorikk) = Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, dato, Historie(utbetalingshistorikk))
-    private fun skjæringstidspunkt(dato: LocalDate, historie: Historie) = Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, dato, historie)
-
-    private fun sammenhengendePeriode(periode: Periode, historie: Historie = Historie()) = skjæringstidspunkt(periode.endInclusive, historie)?.let { periode.oppdaterFom(it) } ?: periode
-
-    internal fun utbetalingstidslinjer(periode: Periode, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        val sammenhengendePeriode = sammenhengendePeriode(periode)
-        val skjæringstidspunkter = skjæringstidspunkter(periode.endInclusive, ytelser.utbetalingshistorikk())
-
+    internal fun utbetalingstidslinjer(periode: Periode, historie: Historie, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
         return arbeidsgivere
             .filter(Arbeidsgiver::harHistorikk)
-            .map { arbeidsgiver ->
-                arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(
-                    skjæringstidspunkter = skjæringstidspunkter,
-                    sammenhengendePeriode = sammenhengendePeriode,
-                    ytelser = ytelser
-                )
-            }.toMap()
+            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, ytelser, historie) }
+            .toMap()
     }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {

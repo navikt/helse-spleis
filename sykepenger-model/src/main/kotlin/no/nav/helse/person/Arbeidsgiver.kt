@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
@@ -79,27 +78,6 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal val ALLE: VedtaksperioderFilter = { true }
-
-        internal fun skjæringstidspunkt(
-            arbeidsgivere: List<Arbeidsgiver>,
-            dato: LocalDate,
-            historie: Historie
-        ): LocalDate? {
-            arbeidsgivere.forEach {
-                it.append(historie)
-            }
-            return historie.skjæringstidspunkt(dato)
-        }
-        internal fun skjæringstidspunkter(
-            arbeidsgivere: List<Arbeidsgiver>,
-            dato: LocalDate,
-            historie: Historie
-        ): List<LocalDate> {
-            arbeidsgivere.forEach {
-                it.append(historie)
-            }
-            return historie.skjæringstidspunkter(dato)
-        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -524,11 +502,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
-    internal fun oppdatertUtbetalingstidslinje(
-        skjæringstidspunkter: List<LocalDate>,
-        sammenhengendePeriode: Periode,
-        ytelser: Ytelser
-    ): Utbetalingstidslinje {
+    internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
+        val sammenhengendePeriode = Historie(person).sammenhengendePeriode(periode) // TODO: Hensynta _hele_ historikken her, ikke bare spleis-historikk?
+        val skjæringstidspunkter = historie.skjæringstidspunkter(periode)
+
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode,
             inntektshistorikk = inntektshistorikk,
@@ -608,13 +585,10 @@ internal class Arbeidsgiver private constructor(
     internal fun harTilstøtendeForkastet(vedtaksperiode: Vedtaksperiode) =
         forkastede.entries.map { it.key }.any { it.erSykeperiodeRettFør(vedtaksperiode) && it.erAvsluttet() }
 
-    internal fun harForkastetUtbetaltOgNyereEnn(cutOff: LocalDate) =
-        forkastede.entries.map { it.key }.any { it.erUtbetalt() && it.periode().endInclusive.isAfter(cutOff) }
-
-    internal fun append(historie: Historie) {
-        if (harHistorikk()) historie.add(organisasjonsnummer, sykdomstidslinje())
+    internal fun append(bøtte: Historie.Historikkbøtte) {
+        if (harHistorikk()) bøtte.add(organisasjonsnummer, sykdomstidslinje())
         utbetalteUtbetalinger().forEach {
-            it.append(organisasjonsnummer, historie)
+            it.append(organisasjonsnummer, bøtte)
         }
     }
 

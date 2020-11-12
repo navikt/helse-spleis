@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Toggles.replayEnabled
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -30,8 +29,11 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,7 +74,7 @@ internal class Vedtaksperiode private constructor(
     private val skjæringstidspunkt
         get() =
             skjæringstidspunktFraInfotrygd
-                ?: person.skjæringstidspunkt(periode.endInclusive)
+                ?: Historie(person).skjæringstidspunkt(periode)
                 ?: periode.start
 
     internal constructor(
@@ -334,7 +336,7 @@ internal class Vedtaksperiode private constructor(
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
         arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erUtbetalt() ?: false
 
-    internal fun erUtbetalt() = tilstand == Avsluttet && utbetalingstidslinje.harUtbetalinger()
+    private fun erUtbetalt() = tilstand == Avsluttet && utbetalingstidslinje.harUtbetalinger()
 
     private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
@@ -731,7 +733,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterForlengelseIT(historie: Historie) {
         tilbakestillInntektsmeldingId()
         forlengelseFraInfotrygd = JA
-        skjæringstidspunktFraInfotrygd = historie.skjæringstidspunkt(periode.endInclusive)
+        skjæringstidspunktFraInfotrygd = historie.skjæringstidspunkt(periode)
     }
 
     private fun tilbakestillInntektsmeldingId() {
@@ -744,21 +746,6 @@ internal class Vedtaksperiode private constructor(
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
     fun tillatAnullering() =
         this.tilstand != TilUtbetaling
-
-
-    // log occurence for quantitative data for analysis
-    private fun loggUlikSkjæringstidspunkt(utbetalingshistorikk: Utbetalingshistorikk) {
-        if (forlengelseFraInfotrygd != JA) return
-        val beregnetSkjæringstidspunkt = person.skjæringstidspunkt(periode.endInclusive, utbetalingshistorikk)
-        if (skjæringstidspunkt == beregnetSkjæringstidspunkt) return
-        sikkerLogg.info(
-            "skjæringstidspunktet fra Infotrygd ($skjæringstidspunkt) er ulik beregnet skjæringstidspunkt ($beregnetSkjæringstidspunkt) for {}, {}",
-            keyValue("vedtaksperiode_id", id),
-            keyValue("periodetype", periodetype()),
-            keyValue("fnr", fødselsnummer),
-            keyValue("aktørId", aktørId)
-        )
-    }
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
         if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
@@ -1105,7 +1092,7 @@ internal class Vedtaksperiode private constructor(
                 validerUtbetalingshistorikk(vedtaksperiode.periode, utbetalingshistorikk, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
-                    val historie = Historie(utbetalingshistorikk).also { person.append(it) }
+                    val historie = Historie(person, utbetalingshistorikk)
                     nesteTilstand = if (historie.erForlengelse(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
                         AvventerHistorikk
@@ -1340,7 +1327,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            val historie = Historie(ytelser.utbetalingshistorikk()).also { person.append(it) }
+            val historie = Historie(person, ytelser.utbetalingshistorikk())
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
@@ -1387,22 +1374,11 @@ internal class Vedtaksperiode private constructor(
                 harInntektshistorikk(arbeidsgiver, vedtaksperiode.periode.start)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    fun personTidslinje(ytelser: Ytelser, periode: Periode) =
-                        Oldtidsutbetalinger().let { oldtid ->
-                            ytelser.utbetalingshistorikk().append(oldtid)
-                            arbeidsgiver.utbetalteUtbetalinger()
-                                .forEach { it.append(arbeidsgiver.organisasjonsnummer(), oldtid) }
-                            oldtid.personTidslinje(periode)
-                        }
-
                     engineForTimeline = ArbeidsgiverUtbetalinger(
-                        tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, ytelser),
-                        personTidslinje = personTidslinje(ytelser, vedtaksperiode.periode),
+                        tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser),
+                        personTidslinje = historie.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        skjæringstidspunkter = person.skjæringstidspunkter(
-                            vedtaksperiode.periode.endInclusive,
-                            ytelser.utbetalingshistorikk()
-                        ),
+                        skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode,),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,
