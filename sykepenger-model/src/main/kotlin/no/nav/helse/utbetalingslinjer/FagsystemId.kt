@@ -38,9 +38,9 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
         return true
     }
 
-    internal fun håndter(annulleringHendelse: AnnullerUtbetaling, maksdato: LocalDate): Boolean {
+    internal fun håndter(annulleringHendelse: AnnullerUtbetaling): Boolean {
         if (!annulleringHendelse.erRelevant(fagsystemId)) return false
-        annuller(annulleringHendelse, maksdato, annulleringHendelse.saksbehandlerIdent, annulleringHendelse.saksbehandlerEpost, annulleringHendelse.opprettet)
+        annuller(annulleringHendelse, annulleringHendelse.saksbehandlerIdent, annulleringHendelse.saksbehandlerEpost, annulleringHendelse.opprettet)
         return true
     }
 
@@ -68,33 +68,20 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
 
     internal fun erAnnullert() = head.erUtbetalt() && head.linjerUtenOpphør().isEmpty()
 
-    private fun annuller(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime) {
+    private fun annuller(aktivitetslogg: IAktivitetslogg, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime) {
         check(erUtbetalt()) { "kan ikke annullere en fagsystemId uten utbetalinger" }
-        val oppdrag = sisteUtbetalte.annullere(this)
+        fjernUbetalte()
+        val oppdrag = head.annullere(this, aktivitetslogg, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         oppdragsliste.add(0, oppdrag)
-        utbetal(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
     }
 
     private fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime) {
         check(!erAnnullert()) { "kan ikke utbetale på en annullert fagsystemId" }
-        utbetal(aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
-    }
-
-    private fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
-        head.utbetal(this)
-        Aktivitetslogg.Aktivitet.Behov.utbetaling(
-            aktivitetslogg = aktivitetslogg,
-            oppdrag = head.removeUEND(),
-            maksdato = maksdato,
-            saksbehandler = saksbehandler,
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            annullering = erAnnullering
-        )
+        head.utbetal(this, aktivitetslogg, maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
     }
 
     private fun fjernUbetalte() {
-        oppdragsliste.removeIf { !it.erUtbetalt() }
+        oppdragsliste.removeIf { it.erUbetalt() }
     }
 
     private fun erUtbetalt() = oppdragsliste.any { it.erUtbetalt() }
@@ -112,6 +99,9 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
     internal companion object {
         internal fun kobleTil(fagsystemIder: MutableList<FagsystemId>, oppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): FagsystemId =
             fagsystemIder.firstOrNull { it.kobleTil(oppdrag, aktivitetslogg) }
-                ?: FagsystemId(listOf(oppdrag)).also { fagsystemIder.add(it) }
+                ?: FagsystemId(listOf(oppdrag)).also {
+                    if (oppdrag.isEmpty()) return@also
+                    fagsystemIder.add(it)
+                }
     }
 }

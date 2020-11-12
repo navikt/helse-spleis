@@ -2,20 +2,35 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal class OppdragTest {
 
     private companion object {
-        private const val ORGNUMMER = "123456789"
         private val FAGOMRÅDE = Fagområde.SykepengerRefusjon
+        private const val FNR = "12345678910"
+        private const val AKTØRID = "1234567891011"
+        private const val ORGNUMMER = "123456789"
+        private const val SAKSBEHANDLER = "EN SAKSBEHANDLER"
+        private const val SAKSBEHANDLEREPOST = "saksbehandler@saksbehandlersen.no"
+        private val MAKSDATO = LocalDate.now()
+        private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
     private lateinit var fagsystemId: FagsystemId
+    private lateinit var aktivitetslogg: IAktivitetslogg
+
+    @BeforeEach
+    fun beforeEach() {
+        aktivitetslogg = Aktivitetslogg()
+    }
 
     @Test
     fun `sorterer oppdrag basert på tidsstempel`() {
@@ -39,16 +54,16 @@ internal class OppdragTest {
     @Test
     fun `overføre et overført oppdrag`() {
         val oppdrag = oppdrag()
-        oppdrag.utbetal(fagsystemId)
-        assertThrows<IllegalStateException> { oppdrag.utbetal(fagsystemId) }
+        oppdrag.utbetal(fagsystemId, aktivitetslogg, MAKSDATO, SAKSBEHANDLER, SAKSBEHANDLEREPOST, GODKJENTTIDSPUNKT)
+        assertThrows<IllegalStateException> { oppdrag.utbetal(fagsystemId, aktivitetslogg, MAKSDATO, SAKSBEHANDLER, SAKSBEHANDLEREPOST, GODKJENTTIDSPUNKT) }
     }
 
     @Test
     fun `utbetale et utbetalt oppdrag`() {
         val oppdrag = oppdrag()
-        oppdrag.utbetal(fagsystemId)
+        oppdrag.utbetal(fagsystemId, aktivitetslogg, MAKSDATO, SAKSBEHANDLER, SAKSBEHANDLEREPOST, GODKJENTTIDSPUNKT)
         oppdrag.håndter(fagsystemId, utbetalinghendelse())
-        assertThrows<IllegalStateException> { oppdrag.utbetal(fagsystemId) }
+        assertThrows<IllegalStateException> { oppdrag.utbetal(fagsystemId, aktivitetslogg, MAKSDATO, SAKSBEHANDLER, SAKSBEHANDLEREPOST, GODKJENTTIDSPUNKT) }
         assertThrows<IllegalStateException> { oppdrag.håndter(fagsystemId, utbetalinghendelse()) }
     }
 

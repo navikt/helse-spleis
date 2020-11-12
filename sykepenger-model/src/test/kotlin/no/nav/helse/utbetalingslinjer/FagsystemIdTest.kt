@@ -101,7 +101,7 @@ internal class FagsystemIdTest {
     fun `annullere fagsystemId som ikke er utbetalt`() {
         opprett(16.AP, 5.NAV)
         assertThrows<IllegalStateException> {
-            håndterAnnullering(LocalDate.MAX, "Z999999", "saksbehandler@nav.no", LocalDateTime.now())
+            håndterAnnullering("Z999999", "saksbehandler@nav.no", LocalDateTime.now())
         }
         assertTrue(aktivitetslogg.behov().isEmpty())
     }
@@ -109,14 +109,13 @@ internal class FagsystemIdTest {
     @Test
     fun `ubetalt annullering`() {
         opprettOgUtbetal(16.AP, 5.NAV)
-        val maksdato = LocalDate.MAX
         val saksbehandler = "Z999999"
         val saksbehandlerEpost = "saksbehandler@nav.no"
         val godkjenttidspunkt = LocalDateTime.now()
-        håndterAnnullering(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        håndterAnnullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertFalse(fagsystemId.erAnnullert())
         assertTrue(aktivitetslogg.behov().isNotEmpty())
-        assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
+        assertUtbetalingsbehov(null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Overført)
     }
 
@@ -133,7 +132,7 @@ internal class FagsystemIdTest {
         opprett(16.NAV)
         annullere()
         assertTrue(fagsystemId.erAnnullert())
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
+        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
     }
 
     @Test
@@ -158,9 +157,9 @@ internal class FagsystemIdTest {
         assertNotEquals(oppdrag2.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
     }
 
-    private fun assertUtbetalingsbehov(maksdato: LocalDate, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
+    private fun assertUtbetalingsbehov(maksdato: LocalDate?, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
         assertUtbetalingsbehov { utbetalingbehov ->
-            assertEquals("$maksdato", utbetalingbehov["maksdato"])
+            assertEquals(maksdato?.toString(), utbetalingbehov["maksdato"])
             assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
             assertEquals(saksbehandlerEpost, utbetalingbehov["saksbehandlerEpost"])
             assertEquals("$godkjenttidspunkt", utbetalingbehov.getValue("godkjenttidspunkt"))
@@ -195,13 +194,12 @@ internal class FagsystemIdTest {
     }
 
     private fun annullere() {
-        val maksdato = LocalDate.MAX
         val saksbehandler = SAKSBEHANDLER
         val saksbehandlerEpost = SAKSBEHANDLEREPOST
         val godkjenttidspunkt = LocalDateTime.now()
-        håndterAnnullering(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        håndterAnnullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
-        assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
+        assertUtbetalingsbehov(null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
         fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
     }
 
@@ -250,12 +248,11 @@ internal class FagsystemIdTest {
     }
 
     private fun håndterAnnullering(
-        maksdato: LocalDate,
         saksbehandler: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime
     ) {
-        fagsystemId.håndter(annullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt), maksdato)
+        fagsystemId.håndter(annullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt))
     }
 
     private fun utbetalingsgodkjenning(
