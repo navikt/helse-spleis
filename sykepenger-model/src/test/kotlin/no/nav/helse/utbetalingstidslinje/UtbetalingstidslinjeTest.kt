@@ -3,8 +3,11 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingstidslinjeTest {
 
@@ -61,6 +64,48 @@ internal class UtbetalingstidslinjeTest {
             assertEquals(21.januar, periode?.endInclusive)
         }
     }
+
+    @Test
+    fun `minus`() {
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.AP, 2.HELG, 5.NAV, 2.HELG).minus(tidslinjeOf(10.NAV))
+        assertEquals(11, tidslinje.size)
+        assertEquals(11.januar, tidslinje.førsteDato())
+        assertTrue(tidslinje[1.januar] is UkjentDag)
+        assertTrue(tidslinje[10.januar] is UkjentDag)
+        assertTrue(tidslinje[11.januar] is ArbeidsgiverperiodeDag)
+        assertEquals(21.januar, tidslinje.sisteDato())
+    }
+
+    @Test
+    fun `ulike dagtyper`() {
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.AP, 2.HELG, 5.NAV, 2.HELG).minus(tidslinjeOf(1.AVV, 4.NAV))
+        assertEquals(16, tidslinje.size)
+        assertEquals(6.januar, tidslinje.førsteDato())
+        assertEquals(21.januar, tidslinje.sisteDato())
+    }
+
+    @Test
+    fun `fjerne dager midt i`() {
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.AP, 2.HELG, 5.NAV, 2.HELG).minus(tidslinjeOf(5.NAV, startDato = 8.januar))
+        assertEquals(21, tidslinje.size)
+        assertEquals(1.januar, tidslinje.førsteDato())
+        assertTrue(tidslinje[7.januar] is NavHelgDag)
+        assertTrue(tidslinje[8.januar] is UkjentDag)
+        assertTrue(tidslinje[12.januar] is UkjentDag)
+        assertTrue(tidslinje[13.januar] is NavHelgDag)
+        assertEquals(21.januar, tidslinje.sisteDato())
+    }
+
+    @Test
+    fun `fjerne dager på slutten`() {
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.AP).minus(tidslinjeOf(5.NAV, startDato = 8.januar))
+        assertEquals(12, tidslinje.size)
+        assertEquals(1.januar, tidslinje.førsteDato())
+        assertTrue(tidslinje[8.januar] is UkjentDag)
+        assertTrue(tidslinje[12.januar] is UkjentDag)
+        assertEquals(12.januar, tidslinje.sisteDato())
+    }
+
 
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje)
