@@ -202,7 +202,7 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    internal fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse) {
+    private fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse) {
         hendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, Arbeidsgiver.ALLE) }
     }

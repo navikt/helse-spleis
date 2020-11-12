@@ -1351,19 +1351,15 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.håndterGap()
                             ytelser.info("Perioden er en førstegangsbehandling")
                         }
+                        periodetype == OVERGANG_FRA_IT -> {
+                            vedtaksperiode.håndterForlengelseIT(historie)
+                            arbeidsgiver.addInntekt(ytelser)
+                            ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+                        }
                         // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
                         tilstøtende == null -> {
                             vedtaksperiode.håndterForlengelseIT(historie)
-                            // TODO: slutte å forkaste når vi har en utbetalt periode i IT foran oss
-                            arbeidsgiver.forkastAlleTidligere(vedtaksperiode, ytelser)
-                            vedtaksperiode.kontekst(ytelser)
-
-                            // TODO: skal bare legge til inntekt når vi er en OVERGANG_FRA_IT,
-                            // altså at vi er den første perioden som overtar behandlingen fra IT
-                            arbeidsgiver.addInntekt(ytelser)
-
-                            if (periodetype == OVERGANG_FRA_IT) ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-                            else ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav, dog uten tilstøtende")
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav, dog uten tilstøtende")
                         }
                         else -> {
                             ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav")
@@ -1378,7 +1374,7 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser),
                         personTidslinje = historie.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode,),
+                        skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser.aktivitetslogg,

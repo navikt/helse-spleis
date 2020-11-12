@@ -41,9 +41,9 @@ internal class HistorieTest {
             RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000, 100, AG1),
         )
 
-        assertEquals(null, historie.skjæringstidspunkt(1.januar))
-        assertEquals(2.januar, historie.skjæringstidspunkt(21.januar))
-        assertEquals(2.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(null, skjæringstidspunkt(1.januar))
+        assertEquals(2.januar, skjæringstidspunkt(21.januar))
+        assertEquals(2.januar, skjæringstidspunkt(31.januar))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertFalse(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(22.januar, 31.januar)))
     }
@@ -56,9 +56,9 @@ internal class HistorieTest {
             RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000, 100, AG2),
         )
 
-        assertEquals(null, historie.skjæringstidspunkt(1.januar))
-        assertEquals(2.januar, historie.skjæringstidspunkt(21.januar))
-        assertEquals(2.januar, historie.skjæringstidspunkt(31.januar))
+        assertEquals(null, skjæringstidspunkt(1.januar))
+        assertEquals(2.januar, skjæringstidspunkt(21.januar))
+        assertEquals(2.januar, skjæringstidspunkt(31.januar))
         assertFalse(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(16.januar, 31.januar)))
         assertTrue(historie.forlengerInfotrygd(AG2, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
     }
@@ -70,7 +70,7 @@ internal class HistorieTest {
             RefusjonTilArbeidsgiver(8.januar, 12.januar, 1000, 100, AG1)
         )
 
-        assertEquals(8.januar, historie.skjæringstidspunkt(12.januar))
+        assertEquals(8.januar, skjæringstidspunkt(12.januar))
     }
 
     @Test
@@ -143,9 +143,9 @@ internal class HistorieTest {
     fun `infotrygd - spleis`() {
         historie(refusjon(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, skjæringstidspunkt(28.februar))
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
@@ -191,9 +191,9 @@ internal class HistorieTest {
         historie(refusjon(1.januar, 31.januar), refusjon(1.mars, 31.mars))
         historie.add(AG1, navdager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.april, 30.april))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.januar, skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, skjæringstidspunkt(31.mars))
 
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
         assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.februar, 28.februar)))
@@ -240,9 +240,9 @@ internal class HistorieTest {
         historie(refusjon(1.februar, 28.februar))
         historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.januar, skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, skjæringstidspunkt(31.mars))
 
         assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.januar, 31.januar)))
 
@@ -255,8 +255,8 @@ internal class HistorieTest {
     fun `infotrygd - gap - spleis`() {
         historie(refusjon(1.februar, 27.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.mars, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.februar, skjæringstidspunkt(28.februar))
+        assertEquals(1.mars, skjæringstidspunkt(31.mars))
         assertSkjæringstidspunkter(kuttdato = 31.mars, 1.mars, 1.februar)
         assertSkjæringstidspunkter(kuttdato = 28.februar, 1.februar)
         assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
@@ -269,9 +269,9 @@ internal class HistorieTest {
         historie(refusjon(1.februar, 28.februar))
         historie.add(AG1, navdager(1.januar, 30.januar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
-        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.januar, skjæringstidspunkt(31.januar))
+        assertEquals(1.februar, skjæringstidspunkt(28.februar))
+        assertEquals(1.februar, skjæringstidspunkt(31.mars))
         assertSkjæringstidspunkter(kuttdato = 31.mars, 1.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertEquals(OVERGANG_FRA_IT, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
@@ -282,9 +282,9 @@ internal class HistorieTest {
         historie(refusjon(1.februar, 28.februar))
         historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(2.mars, 31.mars))
-        assertEquals(1.januar, historie.skjæringstidspunkt(31.januar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(1.mars))
-        assertEquals(2.mars, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.januar, skjæringstidspunkt(31.januar))
+        assertEquals(1.januar, skjæringstidspunkt(1.mars))
+        assertEquals(2.mars, skjæringstidspunkt(31.mars))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(2.mars, 31.mars)))
     }
 
@@ -313,9 +313,9 @@ internal class HistorieTest {
     fun `infotrygd - gap - infotrygdTilBbruker - spleis`() {
         historie(refusjon(1.januar, 31.januar), bruker(2.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.januar, historie.skjæringstidspunkt(1.februar))
-        assertEquals(2.februar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(2.februar, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.januar, skjæringstidspunkt(1.februar))
+        assertEquals(2.februar, skjæringstidspunkt(28.februar))
+        assertEquals(2.februar, skjæringstidspunkt(31.mars))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
@@ -323,9 +323,9 @@ internal class HistorieTest {
     fun `infotrygdferie - infotrygd - spleis`() {
         historie(ferie(1.januar, 31.januar), bruker(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.februar, historie.skjæringstidspunkt(1.februar))
-        assertEquals(1.februar, historie.skjæringstidspunkt(28.februar))
-        assertEquals(1.februar, historie.skjæringstidspunkt(31.mars))
+        assertEquals(1.februar, skjæringstidspunkt(1.februar))
+        assertEquals(1.februar, skjæringstidspunkt(28.februar))
+        assertEquals(1.februar, skjæringstidspunkt(31.mars))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
     }
 
@@ -333,9 +333,9 @@ internal class HistorieTest {
     fun `infotrygd - infotrygdferie - spleis`() {
         historie(refusjon(1.januar, 31.januar), ferie(1.februar, 10.februar))
         historie.add(AG1, sykedager(11.februar, 28.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(1.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(10.februar))
-        assertEquals(1.januar, historie.skjæringstidspunkt(28.februar))
+        assertEquals(1.januar, skjæringstidspunkt(1.februar))
+        assertEquals(1.januar, skjæringstidspunkt(10.februar))
+        assertEquals(1.januar, skjæringstidspunkt(28.februar))
         assertTrue(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(11.februar, 28.februar)))
     }
 
@@ -375,7 +375,9 @@ internal class HistorieTest {
         )
     }
 
+    private fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))
+
     private fun assertSkjæringstidspunkter(kuttdato: LocalDate, vararg datoer: LocalDate) {
-        assertEquals(datoer.toList(), historie.skjæringstidspunkter(kuttdato))
+        assertEquals(datoer.toList(), historie.skjæringstidspunkter(no.nav.helse.hendelser.Periode(kuttdato, kuttdato)))
     }
 }

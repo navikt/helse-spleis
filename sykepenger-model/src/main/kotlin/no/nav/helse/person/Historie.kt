@@ -9,9 +9,12 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVol2
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -26,16 +29,9 @@ internal class Historie() {
         utbetalingshistorikk.append(infotrygdbøtte)
     }
 
-    private companion object {
-        private const val ALLE_ARBEIDSGIVERE = "UKJENT"
-        private fun Utbetalingsdag.erSykedag() = this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag
-    }
-
     private val infotrygdbøtte = Historikkbøtte()
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
-    private fun utbetalingstidslinje(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer) + spleisbøtte.utbetalingstidslinje(orgnummer)
-    private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
     internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
         val skjæringstidspunkt = sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
@@ -52,6 +48,26 @@ internal class Historie() {
         }
     }
 
+    internal fun beregnUtbetalingstidslinje(organisasjonsnummer: String, periode: Periode, inntektshistorikk: Inntektshistorikk, arbeidsgiverRegler: ArbeidsgiverRegler): Utbetalingstidslinje {
+        return UtbetalingstidslinjeBuilder(
+            sammenhengendePeriode = sammenhengendePeriode(periode),
+            inntektshistorikk = inntektshistorikk,
+            forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
+            arbeidsgiverRegler = arbeidsgiverRegler
+        ).result(sykdomstidslinje(organisasjonsnummer)).minus(infotrygdtidslinje(organisasjonsnummer))
+
+    }
+
+    internal fun beregnUtbetalingstidslinjeVol2(organisasjonsnummer: String, periode: Periode, inntektshistorikk: InntektshistorikkVol2, arbeidsgiverRegler: ArbeidsgiverRegler): Utbetalingstidslinje {
+        return UtbetalingstidslinjeBuilderVol2(
+            sammenhengendePeriode = sammenhengendePeriode(periode),
+            inntektshistorikkVol2 = inntektshistorikk,
+            skjæringstidspunkter = skjæringstidspunkter(periode),
+            forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
+            arbeidsgiverRegler = arbeidsgiverRegler
+        ).result(sykdomstidslinje(organisasjonsnummer)).minus(infotrygdtidslinje(organisasjonsnummer))
+    }
+
     internal fun erForlengelse(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) != FØRSTEGANGSBEHANDLING
 
@@ -61,7 +77,7 @@ internal class Historie() {
     internal fun erPingPong(orgnr: String, periode: Periode): Boolean {
         val periodetype = periodetype(orgnr, periode)
         if (periodetype !in listOf(FORLENGELSE, INFOTRYGDFORLENGELSE)) return false
-        val skjæringstidspunkt = skjæringstidspunkt(periode.endInclusive) ?: return false
+        val skjæringstidspunkt = skjæringstidspunkt(periode) ?: return false
         val antallBruddstykker = infotrygdbøtte
             .sykdomstidslinje(orgnr)
             .skjæringstidspunkter(periode.endInclusive)
@@ -74,10 +90,8 @@ internal class Historie() {
     internal fun sammenhengendePeriode(periode: Periode) =
         skjæringstidspunkt(periode)?.let { periode.oppdaterFom(it) } ?: periode
 
-    internal fun skjæringstidspunkt(periode: Periode) = skjæringstidspunkt(periode.endInclusive)
-    internal fun skjæringstidspunkt(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkt(tom, sykdomstidslinjer)
-    internal fun skjæringstidspunkter(periode: Periode) = skjæringstidspunkter(periode.endInclusive)
-    internal fun skjæringstidspunkter(tom: LocalDate) = Sykdomstidslinje.skjæringstidspunkter(tom, sykdomstidslinjer)
+    internal fun skjæringstidspunkt(periode: Periode) = Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, sykdomstidslinjer)
+    internal fun skjæringstidspunkter(periode: Periode) = Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, sykdomstidslinjer)
 
     internal fun utbetalingstidslinje(periode: Periode) =
         (infotrygdbøtte.utbetalingstidslinje() + spleisbøtte.utbetalingstidslinje()).kutt(periode.endInclusive)
@@ -88,6 +102,19 @@ internal class Historie() {
 
     internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
+    }
+
+    private fun harInfotrygdopphav(organisasjonsnummer: String, periode: Periode): Boolean {
+        val skjæringstidspunkt = skjæringstidspunkter(periode).last()
+        return infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)
+    }
+    private fun infotrygdtidslinje(organisasjonsnummer: String) =
+        infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)
+    private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
+
+    private companion object {
+        private const val ALLE_ARBEIDSGIVERE = "UKJENT"
+        private fun Utbetalingsdag.erSykedag() = this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag
     }
 
     internal class Historikkbøtte(private val konverterUtbetalingstidslinje: Boolean = false) {

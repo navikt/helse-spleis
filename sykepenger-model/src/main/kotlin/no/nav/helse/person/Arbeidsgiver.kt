@@ -9,10 +9,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVol2
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -503,41 +500,11 @@ internal class Arbeidsgiver private constructor(
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
-        val sammenhengendePeriode = Historie(person).sammenhengendePeriode(periode) // TODO: Hensynta _hele_ historikken her, ikke bare spleis-historikk?
-        val skjæringstidspunkter = historie.skjæringstidspunkter(periode)
 
-        val utbetalingstidslinje = UtbetalingstidslinjeBuilder(
-            sammenhengendePeriode = sammenhengendePeriode,
-            inntektshistorikk = inntektshistorikk,
-            forlengelseStrategy = { sykdomstidslinje ->
-                Oldtidsutbetalinger().let { oldtid ->
-                    ytelser.utbetalingshistorikk().append(oldtid)
-                    utbetalteUtbetalinger()
-                        .forEach { it.append(organisasjonsnummer, oldtid) }
-                    oldtid.utbetalingerInkludert(this)
-                        .arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
-                }
-            },
-            arbeidsgiverRegler = NormalArbeidstaker
-        ).result(sykdomstidslinje())
-
+        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
         try {
-            val vol2Linje = UtbetalingstidslinjeBuilderVol2(
-                sammenhengendePeriode = sammenhengendePeriode,
-                inntektshistorikkVol2 = inntektshistorikkVol2,
-                skjæringstidspunkter = skjæringstidspunkter,
-                forlengelseStrategy = { sykdomstidslinje ->
-                    Oldtidsutbetalinger().let { oldtid ->
-                        ytelser.utbetalingshistorikk().append(oldtid)
-                        utbetalteUtbetalinger()
-                            .forEach { it.append(organisasjonsnummer, oldtid) }
-                        oldtid.utbetalingerInkludert(this)
-                            .arbeidsgiverperiodeErBetalt(requireNotNull(sykdomstidslinje.periode()))
-                    }
-                },
-                arbeidsgiverRegler = NormalArbeidstaker
-            ).result(sykdomstidslinje())
-
+            val sammenhengendePeriode = historie.sammenhengendePeriode(periode)
+            val vol2Linje = historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
             sammenlignGammelOgNyUtbetalingstidslinje(utbetalingstidslinje, vol2Linje, sammenhengendePeriode)
 
         } catch (e: Throwable) {

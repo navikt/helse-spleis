@@ -543,7 +543,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(3.juni(2020), 21.juni(2020), 1000, 100, ORGNUMMER),
             inntektshistorikk = listOf(Inntektsopplysning(10.mai(2020), INNTEKT, ORGNUMMER, true))
         )
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -563,7 +563,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
         inspektør.apply {
             assertTrue(etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
