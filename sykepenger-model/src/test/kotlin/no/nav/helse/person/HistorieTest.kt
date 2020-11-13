@@ -339,23 +339,6 @@ internal class HistorieTest {
     }
 
     @Test
-    fun `bryter opp etter siste infotrygd-periode`() {
-        historie(
-            refusjon(1.februar, 28.februar),
-            refusjon(5.april, 30.april),
-        )
-        historie.add(AG1, navdager(1.januar, 31.januar))
-        historie.add(AG1, sykedager(1.mai, 31.mai))
-        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(AG1, 1.mai til 31.mai, Inntektshistorikk(mutableListOf(
-            Inntektshistorikk.Inntektsendring(1.januar, UUID.randomUUID(), 25000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING),
-            Inntektshistorikk.Inntektsendring(5.april, UUID.randomUUID(), 35000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD),
-        )), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-
-        assertEquals(1.mai, utbetalingstidslinje.førsteDato())
-        assertTrue(utbetalingstidslinje[1.mai] is NavDag)
-    }
-
-    @Test
     @Disabled
     fun `bug - ny arbeidsgiverperiode med påfølgende kort infotrygdperiode, lager arbeidsgiverperiodedager ut i neste spleisperiode`() {
         historie(
