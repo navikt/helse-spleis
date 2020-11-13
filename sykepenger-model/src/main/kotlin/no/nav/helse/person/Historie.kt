@@ -114,7 +114,8 @@ internal class Historie() {
 
     private companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
-        private fun Utbetalingsdag.erSykedag() = this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag
+        private fun Utbetalingsdag.erSykedag() =
+            this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
     }
 
     internal class Historikkbøtte(private val konverterUtbetalingstidslinje: Boolean = false) {
@@ -151,7 +152,10 @@ internal class Historie() {
                 Sykdomstidslinje(utbetalingstidslinje.map {
                     it.dato to when {
                         !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        !it.dato.erHelg() && it is Fridag -> Dag.Feriedag(it.dato, INGEN)
                         it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        it is Arbeidsdag -> Dag.Arbeidsdag(it.dato, INGEN)
+                        it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
                         else -> UkjentDag(it.dato, INGEN)
                     }
                 }.associate { it })
