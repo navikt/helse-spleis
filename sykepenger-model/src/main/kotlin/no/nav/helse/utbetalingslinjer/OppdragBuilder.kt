@@ -34,17 +34,10 @@ internal class OppdragBuilder(
         return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
 
-    private val arbeidsgiverperiodelengde = 16
     private val linje get() = arbeisdsgiverLinjer.first()
-    private var ukjentDato: LocalDate? = null
-    private var ukjentAntall: Long = 0
 
     override fun visit(dag: UkjentDag, dato: LocalDate, økonomi: Økonomi) {
-        when (ukjentDato) {
-            dato.plusDays(ukjentAntall + 1) -> ukjentAntall += 1
-            else -> { ukjentDato = dato; ukjentAntall = 0 }
-        }
-        if (ukjentAntall >= arbeidsgiverperiodelengde) tilstand = Avsluttet
+        tilstand = Avsluttet
     }
 
     override fun visit(
