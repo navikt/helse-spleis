@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class FagsystemIDTest : AbstractEndToEndTest() {
@@ -118,23 +119,22 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
     */
     @Test
     fun `bruker ny fagsystemID når det er gap i Infortrygd i mellomtiden`() {
-        håndterSykmelding(Sykmeldingsperiode(30.mai, 23.juni, 100))
-        håndterSøknad(Sykdom(30.mai, 23.juni, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         val historie1 = listOf(
-            RefusjonTilArbeidsgiver(19.mai, 29.mai, 1000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100, ORGNUMMER)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(1.vedtaksperiode, *historie1.toTypedArray())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
-            RefusjonTilArbeidsgiver(1.juli, 30.september, 1000, 100, ORGNUMMER)
+            RefusjonTilArbeidsgiver(5.april, 30.april, 1000, 100, ORGNUMMER)
         )
-        håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100))
-        håndterSøknad(Sykdom(1.oktober, 31.oktober, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100))
+        håndterSøknad(Sykdom(1.mai, 31.mai, 100))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
         håndterSimulering(2.vedtaksperiode)
@@ -147,13 +147,58 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         assertNotEquals(første.fagsystemId(), siste.fagsystemId())
         første.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(30.mai, linjer.first().fom)
-            assertEquals(23.juni, linjer.first().tom)
+            assertEquals(1.februar, linjer.first().fom)
+            assertEquals(28.februar, linjer.first().tom)
         }
         siste.linjerUtenOpphør().also { linjer ->
             assertEquals(1, linjer.size)
-            assertEquals(1.oktober, linjer.last().fom)
-            assertEquals(31.oktober, linjer.last().tom)
+            assertEquals(1.mai, linjer.last().fom)
+            assertEquals(31.mai, linjer.last().tom)
+        }
+    }
+
+    /*
+       starter i IT.
+       ikke samme arbeidsgiverperiode.
+       [infotrygd][spleis][infotrygd]                         [infotrygd][spleis]
+                    ^ ny fagsystemID   ^-egentlig ny AGP her               ^ ny fagsystemID
+    */
+    @Test
+    @Disabled
+    fun `kort infotrygdperiode etter ny arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        val historie1 = listOf(
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100, ORGNUMMER)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
+        håndterYtelser(1.vedtaksperiode, *historie1.toTypedArray())
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        val historie2 = historie1 + listOf(
+            // [ nok gap til ny arbeidsgiverperiode ]
+            RefusjonTilArbeidsgiver(
+                5.april,
+                10.april,
+                1000,
+                100,
+                ORGNUMMER
+            )
+        )
+        håndterSykmelding(Sykmeldingsperiode(11.april, 30.april, 100))
+        håndterSøknad(Sykdom(11.april, 30.april, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
+        håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+
+        val siste = inspektør.utbetalinger.last().arbeidsgiverOppdrag()
+        siste.linjerUtenOpphør().also { linjer ->
+            assertEquals(1, linjer.size)
+            assertEquals(11.april, linjer.last().fom)
+            assertEquals(30.april, linjer.last().tom)
         }
     }
 
