@@ -4,8 +4,8 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.september
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

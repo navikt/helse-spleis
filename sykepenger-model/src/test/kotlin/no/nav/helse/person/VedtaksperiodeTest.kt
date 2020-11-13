@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.juli
-import no.nav.helse.oktober
-import no.nav.helse.september
+import no.nav.helse.testhelpers.juli
+import no.nav.helse.testhelpers.oktober
+import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

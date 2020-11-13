@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
-import no.nav.helse.juli
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
