@@ -134,7 +134,12 @@ internal class Historie() {
 
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Utbetalingstidslinje) {
             utbetalingstidslinjer.merge(orgnummer, tidslinje, Utbetalingstidslinje::plus)
-            if (konverterUtbetalingstidslinje) add(orgnummer, konverter(tidslinje)) // for å ta høyde for forkastet historikk
+            if (konverterUtbetalingstidslinje) {
+                // for å ta høyde for forkastet historikk, men ved overlapp vinner den eksisterende historikken
+                val eksisterende = sykdomstidslinjer[orgnummer]
+                add(orgnummer, konverter(tidslinje))
+                if (eksisterende != null) add(orgnummer, eksisterende)
+            }
         }
 
         internal fun add(orgnummer: String = ALLE_ARBEIDSGIVERE, tidslinje: Sykdomstidslinje) {

@@ -34,6 +34,34 @@ internal class HistorieTest {
     }
 
     @Test
+    fun `konvertering av utbetalingstidslinje erstatter ikke dager fra sykdomshistorikk`() {
+        val bøtte = Historie.Historikkbøtte(true)
+        bøtte.add(AG1, sykedager(8.januar, 12.januar))
+        bøtte.add(AG1, arbeidsdager(5.januar, 9.januar))
+        bøtte.add(AG1, navdager(10.januar, 11.januar))
+        bøtte.sykdomstidslinje(AG1).also {
+            assertTrue(it[5.januar] is Dag.Arbeidsdag)
+            assertTrue(it[8.januar] is Dag.Sykedag)
+            assertTrue(it[9.januar] is Dag.Sykedag)
+            assertTrue(it[12.januar] is Dag.Sykedag)
+        }
+    }
+
+    @Test
+    fun `sykdomstidslinje overskriver konvertert  utbetalingstidslinje`() {
+        val bøtte = Historie.Historikkbøtte(true)
+        bøtte.add(AG1, arbeidsdager(5.januar, 9.januar))
+        bøtte.add(AG1, navdager(10.januar, 11.januar))
+        bøtte.add(AG1, sykedager(8.januar, 12.januar))
+        bøtte.sykdomstidslinje(AG1).also {
+            assertTrue(it[5.januar] is Dag.Arbeidsdag)
+            assertTrue(it[8.januar] is Dag.Sykedag)
+            assertTrue(it[9.januar] is Dag.Sykedag)
+            assertTrue(it[12.januar] is Dag.Sykedag)
+        }
+    }
+
+    @Test
     fun `sykedag på fredag og feriedag på fredag`() {
         historie(
             RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000, 100, AG1),
