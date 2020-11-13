@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: create docker tag
-        run: echo ::set-env name=TAG::$(echo ${{ github.sha }} | cut -c1-7)
+        run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
       image: docker.pkg.github.com/${{ github.repository }}/spleis-api:${{ env.TAG }}
 
