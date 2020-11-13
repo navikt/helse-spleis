@@ -9,6 +9,7 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.sykdomstidslinje.erRettFør
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -49,23 +50,37 @@ internal class Historie() {
     }
 
     internal fun beregnUtbetalingstidslinje(organisasjonsnummer: String, periode: Periode, inntektshistorikk: Inntektshistorikk, arbeidsgiverRegler: ArbeidsgiverRegler): Utbetalingstidslinje {
-        return UtbetalingstidslinjeBuilder(
+        val sisteUtbetalingsperiode = SisteUtbetalingsperiode(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
+        val sisteInfotrygdperiode = sisteUtbetalingsperiode.sistePeriodeFør(periode)
+
+        val utbetalingstidslinje = UtbetalingstidslinjeBuilder(
             sammenhengendePeriode = sammenhengendePeriode(periode),
             inntektshistorikk = inntektshistorikk,
+            // TODO: forlengelseStrategy må kalles hver gang en ny arbeidsgiverperiode påbegynnes!
+            // kun på den måten kan vi skippe å lage arbeidsgiverperiodedager over Infotrygd utbetalingsdager!
             forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
             arbeidsgiverRegler = arbeidsgiverRegler
-        ).result(sykdomstidslinje(organisasjonsnummer)).minus(infotrygdtidslinje(organisasjonsnummer))
+        ).result(sykdomstidslinje(organisasjonsnummer))
+            .minus(infotrygdtidslinje(organisasjonsnummer))
 
+        if (sisteInfotrygdperiode != null) return utbetalingstidslinje.subset(periode.oppdaterFom(sisteInfotrygdperiode.endInclusive.plusDays(1)))
+        return utbetalingstidslinje
     }
 
     internal fun beregnUtbetalingstidslinjeVol2(organisasjonsnummer: String, periode: Periode, inntektshistorikk: InntektshistorikkVol2, arbeidsgiverRegler: ArbeidsgiverRegler): Utbetalingstidslinje {
-        return UtbetalingstidslinjeBuilderVol2(
+        val sisteUtbetalingsperiode = SisteUtbetalingsperiode(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
+        val sisteInfotrygdperiode = sisteUtbetalingsperiode.sistePeriodeFør(periode)
+
+        val utbetalingstidslinje = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = sammenhengendePeriode(periode),
             inntektshistorikkVol2 = inntektshistorikk,
             skjæringstidspunkter = skjæringstidspunkter(periode),
             forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer)).minus(infotrygdtidslinje(organisasjonsnummer))
+
+        if (sisteInfotrygdperiode != null) return utbetalingstidslinje.subset(periode.oppdaterFom(sisteInfotrygdperiode.endInclusive.plusDays(1)))
+        return utbetalingstidslinje
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
@@ -110,7 +125,9 @@ internal class Historie() {
     }
     private fun infotrygdtidslinje(organisasjonsnummer: String) =
         infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)
-    private fun sykdomstidslinje(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
+
+    private fun sykdomstidslinje(orgnummer: String) =
+        infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
     private companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
@@ -122,7 +139,7 @@ internal class Historie() {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
 
-        internal fun sykdomstidslinjer() = sykdomstidslinjer.values
+        internal fun sykdomstidslinjer() = sykdomstidslinjer.values.toList()
         internal fun sykdomstidslinje(orgnummer: String) = sykdomstidslinjer.getOrElse(ALLE_ARBEIDSGIVERE) { Sykdomstidslinje() }.merge(
             sykdomstidslinjer.getOrElse(orgnummer) { Sykdomstidslinje() }, replace)
 
@@ -167,5 +184,64 @@ internal class Historie() {
 
             private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _ -> grad }.prosent)
         }
+    }
+
+    private class SisteUtbetalingsperiode(private val utbetalingstidslinje: Utbetalingstidslinje) {
+        private var tilstand: Tilstand = FinnSiste()
+        private var førsteSykepengedagISistePeriode: LocalDate? = null
+        private var sisteSykepengedagISistePeriode: LocalDate? = null
+
+        fun sistePeriodeFør(periode: Periode) = sisteUtbetalingsperiodeFør(periode.start)
+        fun erRettFør(periode: Periode) = sisteUtbetalingsperiodeFør(periode.start)?.endInclusive?.erRettFør(periode.start) ?: false
+
+        private fun sisteUtbetalingsperiodeFør(dato: LocalDate): Periode? {
+            tilstand = FinnSiste()
+            førsteSykepengedagISistePeriode = null
+            sisteSykepengedagISistePeriode = null
+            val tidslinje = utbetalingstidslinje.kutt(dato.minusDays(1)).reverse()
+            for (challenger in tidslinje) {
+                when (challenger) {
+                    is NavDag, is ArbeidsgiverperiodeDag -> tilstand.utbetaling(challenger)
+                    is Fridag, is NavHelgDag -> tilstand.fri(challenger)
+                    else -> tilstand.gap(challenger)
+                }
+            }
+            return førsteSykepengedagISistePeriode?.let { Periode(it, sisteSykepengedagISistePeriode!!) }
+        }
+
+        private interface Tilstand {
+            fun utbetaling(dag: Utbetalingsdag) {}
+            fun fri(dag: Utbetalingsdag) {}
+            fun gap(dag: Utbetalingsdag) {}
+        }
+
+        private inner class FinnSiste : Tilstand {
+            override fun utbetaling(dag: Utbetalingsdag) {
+                førsteSykepengedagISistePeriode = dag.dato
+                sisteSykepengedagISistePeriode = dag.dato
+                tilstand = FinnFørste()
+            }
+
+            override fun fri(dag: Utbetalingsdag) {
+                sisteSykepengedagISistePeriode = dag.dato
+                tilstand = FinnFørste()
+            }
+
+            override fun gap(dag: Utbetalingsdag) {
+                tilstand = Avslutt()
+            }
+        }
+
+        private inner class FinnFørste : Tilstand {
+            override fun utbetaling(dag: Utbetalingsdag) {
+                førsteSykepengedagISistePeriode = dag.dato
+            }
+
+            override fun gap(dag: Utbetalingsdag) {
+                tilstand = Avslutt()
+            }
+        }
+
+        private inner class Avslutt : Tilstand
     }
 }

@@ -3,15 +3,19 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -332,6 +336,42 @@ internal class HistorieTest {
         assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.forlengerInfotrygd(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
         assertFalse(historie.erPingPong(AG1, no.nav.helse.hendelser.Periode(1.mars, 31.mars)))
+    }
+
+    @Test
+    fun `bryter opp etter siste infotrygd-periode`() {
+        historie(
+            refusjon(1.februar, 28.februar),
+            refusjon(5.april, 30.april),
+        )
+        historie.add(AG1, navdager(1.januar, 31.januar))
+        historie.add(AG1, sykedager(1.mai, 31.mai))
+        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(AG1, 1.mai til 31.mai, Inntektshistorikk(mutableListOf(
+            Inntektshistorikk.Inntektsendring(1.januar, UUID.randomUUID(), 25000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING),
+            Inntektshistorikk.Inntektsendring(5.april, UUID.randomUUID(), 35000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD),
+        )), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+
+        assertEquals(1.mai, utbetalingstidslinje.førsteDato())
+        assertTrue(utbetalingstidslinje[1.mai] is NavDag)
+    }
+
+    @Test
+    @Disabled
+    fun `bug - ny arbeidsgiverperiode med påfølgende kort infotrygdperiode, lager arbeidsgiverperiodedager ut i neste spleisperiode`() {
+        historie(
+            refusjon(1.februar, 28.februar),
+            refusjon(5.april, 10.april),
+        )
+        historie.add(AG1, navdager(1.januar, 31.januar))
+        historie.add(AG1, sykedager(11.april, 30.april))
+        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(AG1, 11.april til 30.april, Inntektshistorikk(mutableListOf(
+            Inntektshistorikk.Inntektsendring(1.januar, UUID.randomUUID(), 25000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING),
+            Inntektshistorikk.Inntektsendring(5.april, UUID.randomUUID(), 35000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD),
+        )), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+
+        assertEquals(11.april, utbetalingstidslinje.førsteDato())
+        assertTrue(utbetalingstidslinje[10.april] is UkjentDag)
+        assertTrue(utbetalingstidslinje[11.april] is NavDag)
     }
 
     @Test

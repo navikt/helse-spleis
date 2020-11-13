@@ -65,7 +65,7 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
     fun `Ikke warning ved ping-pong hvor forkastet periode ligger mer enn seks måneder tilbake i tid`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknad(Sykdom(1.januar, 17.januar, gradFraSykmelding = 100), sendtTilNav = 18.februar)
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -81,8 +81,8 @@ internal class PingPongWarningTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(18.juli, 31.juli, 100))
-        håndterSøknad(Sykdom(18.juli, 31.juli, gradFraSykmelding = 100), sendtTilNav = 1.august)
-        val historikk = RefusjonTilArbeidsgiver(1.juli, 17.juli, 1337, 100, ORGNUMMER)
+        håndterSøknad(Sykdom(18.juli, 31.juli, 100))
+        val historikk = RefusjonTilArbeidsgiver(1.juli, 17.juli, 1000, 100, ORGNUMMER)
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk)
         håndterYtelser(3.vedtaksperiode, historikk)
         håndterSimulering(3.vedtaksperiode)
