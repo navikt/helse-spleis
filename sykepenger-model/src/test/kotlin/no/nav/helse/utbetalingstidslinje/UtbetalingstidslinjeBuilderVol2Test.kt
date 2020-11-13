@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
@@ -351,21 +352,6 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     }
 
     @Test
-    fun `riktig inntekt for riktig dag`() {
-        resetSeed(8.januar)
-        20.S.utbetalingslinjer()
-        assertInntekter(1431)
-
-        resetSeed(8.januar)
-        40.S.utbetalingslinjer()
-        assertInntekter(1431)
-
-        resetSeed(1.februar)
-        40.S.utbetalingslinjer()
-        assertInntekter(1154)
-    }
-
-    @Test
     fun `feriedag før siste arbeidsgiverperiodedag`() {
         (15.U + 1.F + 1.U + 10.S).utbetalingslinjer()
         assertNotEquals(
@@ -416,9 +402,10 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             skjæringstidspunkter = listOf(21.januar(2020))
         )
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 10.januar(2020), null)
-        inspektør.arbeidsdager.assertDekningsgrunnlag(11.januar(2020) til 20.januar(2020), null)
-        inspektør.navdager.assertDekningsgrunnlag(21.januar(2020) til 30.januar(2020), 30000.månedlig)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 10.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(11.januar(2020) til 20.januar(2020), INGEN)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(21.januar(2020) til 26.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 30.januar(2020), 30000.månedlig)
     }
 
     @Test
@@ -452,11 +439,15 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             skjæringstidspunkter = listOf(13.januar(2020))
         )
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 3.januar(2020), null)
-        inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 5.januar(2020), null)
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(6.januar(2020) til 10.januar(2020), null)
-        inspektør.fridager.assertDekningsgrunnlag(11.januar(2020) til 12.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 3.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(4.januar(2020) til 5.januar(2020), INGEN)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(6.januar(2020) til 10.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(11.januar(2020) til 12.januar(2020), INGEN)
         inspektør.navdager.assertDekningsgrunnlag(13.januar(2020) til 1.februar(2020), 30000.månedlig)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(4, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(3, inspektør.dagtelling[NavHelgDag::class])
+        assertEquals(9, inspektør.dagtelling[NavDag::class])
     }
 
     @Test
@@ -489,12 +480,17 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             skjæringstidspunkter = listOf(11.januar(2020))
         )
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 2.januar(2020), null)
-        inspektør.arbeidsdager.assertDekningsgrunnlag(3.januar(2020) til 3.januar(2020), null)
-        inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 10.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 2.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(3.januar(2020) til 3.januar(2020), INGEN)
+        inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 10.januar(2020), INGEN)
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(11.januar(2020) til 24.januar(2020), 30000.månedlig)
         inspektør.navHelgdager.assertDekningsgrunnlag(25.januar(2020) til 26.januar(2020), 0.månedlig)
         inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 30000.månedlig)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(7, inspektør.dagtelling[Fridag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+        assertEquals(1, inspektør.dagtelling[NavDag::class])
     }
 
     @Test
@@ -513,7 +509,8 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 30000.månedlig)
         inspektør.navdager.assertDekningsgrunnlag(17.januar(2020) til 20.januar(2020), 30000.månedlig)
         inspektør.arbeidsdager.assertDekningsgrunnlag(21.januar(2020) til 21.januar(2020), 30000.månedlig)
-        inspektør.fridager.assertDekningsgrunnlag(22.januar(2020) til 26.januar(2020), 30000.månedlig)
+        inspektør.fridager.assertDekningsgrunnlag(22.januar(2020) til 24.januar(2020), 30000.månedlig)
+        inspektør.fridager.assertDekningsgrunnlag(25.januar(2020) til 26.januar(2020), 31000.månedlig)
         inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 31000.månedlig)
     }
 
@@ -528,10 +525,10 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             },
             skjæringstidspunkter = listOf(19.januar(2020))
         )
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), null)
-        inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 17.januar(2020), null)
-        inspektør.fridager.assertDekningsgrunnlag(18.januar(2020) til 18.januar(2020), null)
-        inspektør.navdager.assertDekningsgrunnlag(19.januar(2020) til 21.januar(2020), 30000.månedlig)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 18.januar(2020), INGEN)
+        inspektør.navHelgdager.assertDekningsgrunnlag(19.januar(2020) til 19.januar(2020), INGEN)
+        inspektør.navdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), 30000.månedlig)
     }
 
     @Test
@@ -548,10 +545,15 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             )
         }
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 1.januar(2020), null)
-        inspektør.arbeidsdager.assertDekningsgrunnlag(2.januar(2020) til 12.januar(2020), null)
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(13.januar(2020) til 28.januar(2020), 30000.månedlig)
-        inspektør.navdager.assertDekningsgrunnlag(29.januar(2020) til 31.januar(2020), 30000.månedlig)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 1.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(2.januar(2020) til 12.januar(2020), INGEN)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(13.januar(2020) til 27.januar(2020), 30000.månedlig)
+        inspektør.navdager.assertDekningsgrunnlag(28.januar(2020) til 31.januar(2020), 30000.månedlig)
+        inspektør.navHelgdager.assertDekningsgrunnlag(1.februar(2020) til 2.februar(2020), INGEN)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(11, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(4, inspektør.dagtelling[NavDag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
     }
 
     @Test
@@ -568,9 +570,12 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             )
         }
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(3.januar(2020) til 18.januar(2020), null)
-        inspektør.fridager.assertDekningsgrunnlag(19.januar(2020) til 19.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(3.januar(2020) til 18.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(19.januar(2020) til 19.januar(2020), INGEN)
         inspektør.navdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), 30000.månedlig)
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(1, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[NavDag::class])
     }
 
     @Test
@@ -587,8 +592,8 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             )
         }
 
-        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(4.januar(2020) til 19.januar(2020), null)
-        inspektør.arbeidsdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), null)
+        inspektør.arbeidsgiverdager.assertDekningsgrunnlag(4.januar(2020) til 19.januar(2020), INGEN)
+        inspektør.arbeidsdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), INGEN)
         inspektør.navdager.assertDekningsgrunnlag(22.januar(2020) til 23.januar(2020), 30000.månedlig)
     }
 
@@ -654,10 +659,20 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inntektshistorikkVol2: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderVol2Test.inntektshistorikkVol2,
         skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars)
     ) {
+        val inntekterForSkjæringstidspunkter = skjæringstidspunkter
+            .filterNot{
+                inntektshistorikkVol2.dekningsgrunnlag(it, ArbeidsgiverRegler.Companion.NormalArbeidstaker) == null
+            }
+            .map { dato ->
+                dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
+                    requireNotNull(inntektshistorikkVol2.dekningsgrunnlag(dato, ArbeidsgiverRegler.Companion.NormalArbeidstaker)),
+                    requireNotNull(inntektshistorikkVol2.grunnlagForSykepengegrunnlag(dato))
+                )
+            }.toMap()
+
         tidslinje = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = this.periode()!!,
-            inntektshistorikkVol2 = inntektshistorikkVol2,
-            skjæringstidspunkter = skjæringstidspunkter
+            inntekter = inntekterForSkjæringstidspunkter
         ).result(this)
     }
 
