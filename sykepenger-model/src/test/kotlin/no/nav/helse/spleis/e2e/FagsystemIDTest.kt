@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class FagsystemIDTest : AbstractEndToEndTest() {
@@ -164,7 +163,6 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
                     ^ ny fagsystemID   ^-egentlig ny AGP her               ^ ny fagsystemID
     */
     @Test
-    @Disabled
     fun `kort infotrygdperiode etter ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))

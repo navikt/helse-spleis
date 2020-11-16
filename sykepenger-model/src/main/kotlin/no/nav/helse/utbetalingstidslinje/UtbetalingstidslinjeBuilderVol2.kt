@@ -19,7 +19,7 @@ import java.time.LocalDate
 internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private val sammenhengendePeriode: Periode,
     private val inntekter: Map<LocalDate, Inntekter>,
-    private val forlengelseStrategy: (Sykdomstidslinje) -> Boolean = { false },
+    private val forlengelseStrategy: (LocalDate) -> Boolean = { false },
     private val arbeidsgiverRegler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : SykdomstidslinjeVisitor {
     private var tilstand: UtbetalingState = Initiell
@@ -46,7 +46,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             .let { inntekt(it.aktuellDagsinntekt, it.dekningsgrunnlag) }
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
-        if (forlengelseStrategy(sykdomstidslinje)) sykedagerIArbeidsgiverperiode += 16
         Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode)
             .fremTilOgMed(sammenhengendePeriode.endInclusive)
             .accept(this)
@@ -117,7 +116,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     ) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
 
     private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
+        if (arbeidsgiverperiodeGjennomført(dagen)) {
             tilstand = UtbetalingSykedager
             val inntektForDato = inntektForDato(dagen)
             tidslinje.addForeldetDag(
@@ -128,7 +127,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     }
 
     private fun egenmeldingsdag(dato: LocalDate) =
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)) {
+        if (arbeidsgiverperiodeGjennomført(dato)) {
             tidslinje.addAvvistDag(
                 dato,
                 Økonomi.ikkeBetalt().inntektIfNotNull(dato),
@@ -138,14 +137,16 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
 
     private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
 
-    private fun sykedag(dagen: LocalDate, økonomi: Økonomi) =
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
+    private fun sykedag(dagen: LocalDate, økonomi: Økonomi) {
+        if (forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode += 16
+        if (arbeidsgiverperiodeGjennomført(dagen))
             tilstand.sykedagerEtterArbeidsgiverperioden(this, dagen, økonomi)
         else
             tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
+    }
 
     private fun sykHelgedag(dagen: LocalDate, økonomi: Økonomi) =
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
+        if (arbeidsgiverperiodeGjennomført(dagen))
             tilstand.sykHelgedagEtterArbeidsgiverperioden(this, dagen, økonomi)
         else
             tilstand.sykHelgedagIArbeidsgiverperioden(this, dagen, økonomi)
@@ -211,10 +212,15 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             Økonomi.ikkeBetalt().inntektIfNotNull(dato),
             Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
         )
-        if (arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode))
+        if (arbeidsgiverperiodeGjennomført(dato))
             state(UtbetalingSykedager)
         else
             state(ArbeidsgiverperiodeSykedager)
+    }
+
+    private fun arbeidsgiverperiodeGjennomført(dagen: LocalDate): Boolean {
+        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode += 16
+        return arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)
     }
 
     private fun state(state: UtbetalingState) {

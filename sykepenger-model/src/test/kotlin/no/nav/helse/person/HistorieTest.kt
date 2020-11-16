@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -11,15 +12,17 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.reflect.KClass
 
 internal class HistorieTest {
 
@@ -339,22 +342,37 @@ internal class HistorieTest {
     }
 
     @Test
-    @Disabled
-    fun `bug - ny arbeidsgiverperiode med påfølgende kort infotrygdperiode, lager arbeidsgiverperiodedager ut i neste spleisperiode`() {
+    fun `spleis - infotrygd - gap, ny agp - infotrygd (kort) - spleis`() {
         historie(
             refusjon(1.februar, 28.februar),
             refusjon(5.april, 10.april),
         )
-        historie.add(AG1, navdager(1.januar, 31.januar))
+        historie.add(AG1, tidslinjeOf(16.AP, 15.NAV))
         historie.add(AG1, sykedager(11.april, 30.april))
-        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(AG1, 11.april til 30.april, Inntektshistorikk(mutableListOf(
-            Inntektshistorikk.Inntektsendring(1.januar, UUID.randomUUID(), 25000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING),
-            Inntektshistorikk.Inntektsendring(5.april, UUID.randomUUID(), 35000.månedlig, Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD),
-        )), ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-
-        assertEquals(11.april, utbetalingstidslinje.førsteDato())
+        val utbetalingstidslinje = beregn(AG1, 11.april til 30.april, 1.januar, 5.april)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 15.januar, ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 11.april til 30.april, NavDag::class, NavHelgDag::class)
         assertTrue(utbetalingstidslinje[10.april] is UkjentDag)
         assertTrue(utbetalingstidslinje[11.april] is NavDag)
+    }
+
+    @Test
+    fun `agp infotrygd - spleis`() {
+        historie(refusjon(1.januar, 31.januar))
+        historie.add(AG1, sykedager(1.februar, 28.februar))
+        val utbetalingstidslinje = beregn(AG1, 1.februar til 28.februar, 1.januar)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 31.januar, UkjentDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
+    fun `agp infotrygd - kort gap - spleis`() {
+        historie(refusjon(17.januar, 31.januar))
+        historie.add(AG1, sykedager(1.januar, 16.januar))
+        historie.add(AG1, sykedager(2.februar, 28.februar))
+        val utbetalingstidslinje = beregn(AG1, 2.februar til 28.februar, 1.januar, 1.februar)
+        assertAlleDager(utbetalingstidslinje, 2.februar til 17.februar, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, 18.februar til 28.februar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -483,9 +501,28 @@ internal class HistorieTest {
         )
     }
 
+    private fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
+        val inntektshistorikk = Inntektshistorikk(inntektsdatoer.map {
+            Inntektshistorikk.Inntektsendring(it, UUID.randomUUID(), 25000.månedlig, INNTEKTSMELDING)
+        }.toMutableList())
+        return historie.beregnUtbetalingstidslinje(orgnr, periode, inntektshistorikk, regler)
+    }
+
     private fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))
 
     private fun assertSkjæringstidspunkter(kuttdato: LocalDate, vararg datoer: LocalDate) {
         assertEquals(datoer.toList(), historie.skjæringstidspunkter(no.nav.helse.hendelser.Periode(kuttdato, kuttdato)))
+    }
+
+    private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+        utbetalingstidslinje.subset(periode).also { tidslinje ->
+            assertTrue(tidslinje.all { it::class in dager }) {
+                val ulikeDager = tidslinje.filter { it::class !in dager }
+                "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
+                    ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
+                        "${it.dato} er ${it::class.simpleName}"
+                    } + "\nUtbetalingstidslinje:\n" + tidslinje.toString() + "\n"
+            }
+        }
     }
 }

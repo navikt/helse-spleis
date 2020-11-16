@@ -448,10 +448,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk
     ) {
-        tidslinje = UtbetalingstidslinjeBuilder(
-            sammenhengendePeriode = this.periode()!!,
-            inntektshistorikk = inntektshistorikk
-        ).result(this)
+        tidslinje = UtbetalingstidslinjeBuilder(inntektshistorikk).result(this)
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {

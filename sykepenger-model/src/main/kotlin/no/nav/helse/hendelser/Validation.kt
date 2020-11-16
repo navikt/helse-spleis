@@ -93,6 +93,6 @@ internal fun Validation.overlappende(
 internal fun Validation.harInntektshistorikk(
     arbeidsgiver: Arbeidsgiver,
     førsteDag: LocalDate
-) = valider("Vi har ikke inntektshistorikken vi trenger") {
+) = valider("Vi har ikke inntektshistorikken vi trenger for $førsteDag") {
     arbeidsgiver.inntekt(førsteDag) != null
 }

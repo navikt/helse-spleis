@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -56,13 +57,11 @@ internal class Historie() {
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
        return UtbetalingstidslinjeBuilder(
-            sammenhengendePeriode = sammenhengendePeriode(periode),
             inntektshistorikk = inntektshistorikk,
-            // TODO: forlengelseStrategy må kalles hver gang en ny arbeidsgiverperiode påbegynnes!
-            // kun på den måten kan vi skippe å lage arbeidsgiverperiodedager over Infotrygd utbetalingsdager!
-            forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
+            forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
-        ).result(sykdomstidslinje(organisasjonsnummer)).minus(infotrygdtidslinje(organisasjonsnummer))
+        ).result(sykdomstidslinje(organisasjonsnummer))
+           .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
     }
 
     internal fun beregnUtbetalingstidslinjeVol2(
@@ -83,10 +82,10 @@ internal class Historie() {
         return UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = sammenhengendePeriode(periode),
             inntekter = inntekterForSkjæringstidspunkter,
-            forlengelseStrategy = { harInfotrygdopphav(organisasjonsnummer, periode) },
+            forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
-            .minus(infotrygdtidslinje(organisasjonsnummer))
+            .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
@@ -128,13 +127,13 @@ internal class Historie() {
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
-    private fun harInfotrygdopphav(organisasjonsnummer: String, periode: Periode): Boolean {
-        val skjæringstidspunkt = skjæringstidspunkter(periode).last()
-        return infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)
+    private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
+        if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, dagen)) return true
+        val skjæringstidspunkt = skjæringstidspunkt(dagen til dagen) ?: return false
+        if (skjæringstidspunkt == dagen) return false
+        if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)) return true
+        return spleisbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)
     }
-
-    private fun infotrygdtidslinje(organisasjonsnummer: String) =
-        infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)
 
     private fun sykdomstidslinje(orgnummer: String) =
         infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)

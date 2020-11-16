@@ -871,7 +871,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     ) = assertTrue(inspektør.etterspurteBehov(vedtaksperiodeId, behovtype)) {
         "Forventer at $behovtype skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
             observatør.tilstander[vedtaksperiodeId]?.last()
-        }"
+        }.\nAktivitetsloggen:\n${inspektør.personLogg}"
     }
 
     private fun <T : ArbeidstakerHendelse> assertIkkeEtterspurt(
