@@ -29,11 +29,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime

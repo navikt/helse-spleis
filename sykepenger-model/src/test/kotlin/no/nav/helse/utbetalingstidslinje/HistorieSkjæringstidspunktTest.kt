@@ -1,4 +1,4 @@
-package no.nav.helse.person
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Ferie
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
