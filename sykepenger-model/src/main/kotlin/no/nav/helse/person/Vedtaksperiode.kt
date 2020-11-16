@@ -146,31 +146,19 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
         kontekst(sykmelding)
-        if (this.skalForkastesVedOverlapp()) {
-            valider(sykmelding) { tilstand.håndter(this, sykmelding) }
-        } else {
-            tilstand.håndter(this, sykmelding)
-        }
+        tilstand.håndter(this, sykmelding)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
-        if (this.skalForkastesVedOverlapp()) {
-            valider(søknad) { tilstand.håndter(this, søknad) }
-        } else {
-            tilstand.håndter(this, søknad)
-        }
+        tilstand.håndter(this, søknad)
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
         if (!it) return it
         kontekst(søknad)
-        if (this.skalForkastesVedOverlapp()) {
-            valider(søknad) { tilstand.håndter(this, søknad) }
-        } else {
-            tilstand.håndter(this, søknad)
-        }
+        tilstand.håndter(this, søknad)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMedInntektsmelding(inntektsmelding).also {
@@ -179,11 +167,7 @@ internal class Vedtaksperiode private constructor(
             return it
         }
         kontekst(inntektsmelding)
-        if (this.skalForkastesVedOverlapp()) {
-            valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
-        } else {
-            tilstand.håndter(this, inntektsmelding)
-        }
+        tilstand.håndter(this, inntektsmelding)
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
@@ -346,14 +330,6 @@ internal class Vedtaksperiode private constructor(
     internal fun periode() = periode
     internal fun opprinneligPeriode() = sykmeldingsperiode
 
-    private fun valider(hendelse: SykdomstidslinjeHendelse, block: () -> Unit) {
-        if (hendelse.valider(periode).hasErrorsOrWorse())
-            return tilstand(hendelse, TilInfotrygd)
-        block()
-        if (hendelse.hasErrorsOrWorse())
-            return tilstand(hendelse, TilInfotrygd)
-    }
-
     private fun kontekst(hendelse: ArbeidstakerHendelse) {
         hendelse.kontekst(this)
         hendelse.kontekst(this.tilstand)
@@ -414,21 +390,21 @@ internal class Vedtaksperiode private constructor(
         periode = hendelse.periode()
         sykmeldingsperiode = hendelse.periode()
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand())
     }
 
     private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
     private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -778,16 +754,22 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.error("Mottatt overlappende sykmeldinger - det støttes ikke før replay av hendelser er på plass")
+            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
             søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
+            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
             søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
+            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
