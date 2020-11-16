@@ -175,9 +175,11 @@ class Utbetalingshistorikk(
         internal open fun append(oldtid: Oldtidsutbetalinger) {}
         internal open fun append(oldtid: Historie.Historikkbøtte) {}
 
-        internal open fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
-            if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
-        }
+        internal open fun valider(
+            aktivitetslogg: Aktivitetslogg,
+            other: no.nav.helse.hendelser.Periode,
+            organisasjonsnummer: String
+        ) {}
 
         abstract class Utbetalingsperiode(
             fom: LocalDate,
@@ -196,6 +198,15 @@ class Utbetalingshistorikk(
             override fun append(oldtid: Historie.Historikkbøtte) {
                 oldtid.add(orgnr, tidslinje())
                 oldtid.add(orgnr, sykdomstidslinje())
+            }
+
+            override fun valider(
+                aktivitetslogg: Aktivitetslogg,
+                other: no.nav.helse.hendelser.Periode,
+                organisasjonsnummer: String
+            ) {
+                if (organisasjonsnummer != orgnr) return
+                if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
             }
 
             override fun sykdomstidslinje() =
@@ -231,7 +242,7 @@ class Utbetalingshistorikk(
                         return aktivitetslogg
                     }
 
-                    liste.onEach { it.valider(aktivitetslogg, periode) }
+                    liste.onEach { it.valider(aktivitetslogg, periode, organisasjonsnummer) }
                     if (liste.harHistoriskeSammenhengendePerioderMedEndring())
                         aktivitetslogg.info("Dagsatsen har endret seg minst én gang i en historisk, sammenhengende periode i Infotrygd")
                     return aktivitetslogg
@@ -317,9 +328,7 @@ class Utbetalingshistorikk(
             }
         }
 
-        abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {}
-        }
+        abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {}
 
         class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
@@ -328,7 +337,11 @@ class Utbetalingshistorikk(
         class Sanksjon(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Opphold(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
+            override fun valider(
+                aktivitetslogg: Aktivitetslogg,
+                other: no.nav.helse.hendelser.Periode,
+                organisasjonsnummer: String
+            ) {
                 if (periode.endInclusive < other.start.minusDays(18)) return
                 aktivitetslogg.warn(
                     "Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.",
@@ -339,7 +352,11 @@ class Utbetalingshistorikk(
 
         class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) :
             IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: no.nav.helse.hendelser.Periode) {
+            override fun valider(
+                aktivitetslogg: Aktivitetslogg,
+                other: no.nav.helse.hendelser.Periode,
+                organisasjonsnummer: String
+            ) {
                 val tekst = when {
                     fom == null || tom == null -> "mangler fom- eller tomdato"
                     fom > tom -> "fom er nyere enn tom"

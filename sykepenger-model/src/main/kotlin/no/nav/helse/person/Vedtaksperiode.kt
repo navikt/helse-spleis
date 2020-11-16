@@ -1068,15 +1068,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
+            val historie = Historie(person, utbetalingshistorikk)
             validation(utbetalingshistorikk) {
                 onError {
                     vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
-                validerUtbetalingshistorikk(vedtaksperiode.periode, utbetalingshistorikk, vedtaksperiode.periodetype())
+                validerUtbetalingshistorikk(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), utbetalingshistorikk, vedtaksperiode.periodetype())
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
-                    val historie = Historie(person, utbetalingshistorikk)
-                    nesteTilstand = if (historie.erForlengelse(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                    nesteTilstand = if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
                         AvventerHistorikk
                     } else {
@@ -1283,7 +1283,7 @@ internal class Vedtaksperiode private constructor(
             val historie = Historie(person, ytelser.utbetalingshistorikk())
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                validerYtelser(vedtaksperiode.periode, ytelser, vedtaksperiode.periodetype())
+                validerYtelser(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), ytelser, vedtaksperiode.periodetype())
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())
                 overlappende(vedtaksperiode.periode, ytelser.pleiepenger())
@@ -1292,10 +1292,10 @@ internal class Vedtaksperiode private constructor(
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
                     val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
-                    val periodetype = historie.periodetype(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)
+                    val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
                     val opphav = if (periodetype.opphav() == SPLEIS) "ny løsning" else "Infotrygd"
 
-                    if (historie.erPingPong(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                    if (historie.erPingPong(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         ytelser.warn("Perioden forlenger en behandling i $opphav, og har historikk i ${ if (periodetype.opphav() == SPLEIS) "Infotrygd" else "ny løsning"} også: Undersøk at antall dager igjen er beregnet riktig.")
                     }
 

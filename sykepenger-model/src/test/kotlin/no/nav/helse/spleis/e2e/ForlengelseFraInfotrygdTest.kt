@@ -11,9 +11,11 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import kotlin.reflect.KClass
 
 internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
@@ -515,7 +517,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             assertTrue(etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(1.vedtaksperiode)
-                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
+                    .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()
             )
         }
     }
@@ -569,12 +571,55 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             assertTrue(etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(2.vedtaksperiode)
-                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isEmpty()
+                    .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()
             )
             assertTrue(
                 utbetalingstidslinjer(1.vedtaksperiode)
-                    .filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag>().isNotEmpty()
+                    .filterIsInstance<ArbeidsgiverperiodeDag>().isNotEmpty()
             )
+        }
+    }
+
+    @Test
+    fun `Kort gap mot Infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100))
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000, 100, ORGNUMMER))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertEquals(1, inspektør.utbetalinger.size)
+        inspektør.utbetalinger.first().utbetalingstidslinje().also { utbetalingstidslinje ->
+            assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
+            assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class, Fridag::class)
+            assertTrue(utbetalingstidslinje[1.februar] is Arbeidsdag)
+            assertAlleDager(utbetalingstidslinje, 2.februar til 28.februar, NavDag::class, NavHelgDag::class)
+        }
+    }
+
+    private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+        utbetalingstidslinje.subset(periode).also { tidslinje ->
+            assertTrue(tidslinje.all { it::class in dager }) {
+                val ulikeDager = tidslinje.filter { it::class !in dager }
+                "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
+                    ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
+                        "${it.dato} er ${it::class.simpleName}"
+                    } + "\nUtbetalingstidslinje:\n" + tidslinje.toString() + "\n"
+            }
         }
     }
 

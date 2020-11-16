@@ -36,7 +36,7 @@ internal class Historie() {
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
 
     internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
-        val skjæringstidspunkt = sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
             skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
             infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
@@ -110,8 +110,14 @@ internal class Historie() {
     internal fun sammenhengendePeriode(periode: Periode) =
         skjæringstidspunkt(periode)?.let { periode.oppdaterFom(it) } ?: periode
 
+    internal fun avgrensetPeriode(orgnr: String, periode: Periode) =
+        Periode(maxOf(periode.start, skjæringstidspunkt(orgnr, periode)), periode.endInclusive)
+
     internal fun skjæringstidspunkt(periode: Periode) =
         Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, sykdomstidslinjer)
+
+    private fun skjæringstidspunkt(orgnr: String, periode: Periode) =
+        sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
 
     internal fun skjæringstidspunkter(periode: Periode) =
         Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, sykdomstidslinjer)

@@ -137,6 +137,26 @@ internal class HistorieTest {
     }
 
     @Test
+    fun `avgrenset periode for en arbeidsgiver`() {
+        historie(
+            RefusjonTilArbeidsgiver(1.januar, 20.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100, AG2),
+        )
+        historie.add(AG1, sykedager(1.februar, 28.februar))
+        assertEquals(1.februar til 28.februar, historie.avgrensetPeriode(AG1, 1.februar til 28.februar))
+    }
+
+    @Test
+    fun `avgrenset periode går ikke lengre tilbake enn skjæringstidspunkt for arbeidsgiveren`() {
+        historie(
+            RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000, 100, AG1)
+        )
+        historie.add(AG1, sykedager(1.januar, 16.januar))
+        historie.add(AG1, sykedager(2.februar, 28.februar))
+        assertEquals(2.februar til 28.februar, historie.avgrensetPeriode(AG1, 1.januar til 28.februar))
+    }
+
+    @Test
     fun `fri i helg mappes til ukjentdag`() {
         val tidslinje = tidslinjeOf(4.NAV, 3.FRI, 5.NAV, 2.HELG)
         Historie.Historikkbøtte.konverter(tidslinje).also {
