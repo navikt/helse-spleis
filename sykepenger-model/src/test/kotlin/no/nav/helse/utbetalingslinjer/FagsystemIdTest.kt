@@ -61,11 +61,27 @@ internal class FagsystemIdTest {
 
     @Test
     fun `Nytt element når fagsystemId'er er forskjellige`() {
-        opprett(1.NAV)
+        opprettOgUtbetal(1.NAV)
         opprett(1.NAV, startdato = 17.januar)
         assertEquals(2, fagsystemIder.size)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt)
         assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+    }
+
+    @Test
+    fun `Nytt element ved ny AGP`() {
+        opprettOgUtbetal(1.NAV)
+        opprett(1.NAV, 1.AP, 1.NAV)
+        assertEquals(2, fagsystemIder.size)
+        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt)
+        assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+    }
+
+    @Test
+    fun `samme fagsystemId med gap mindre enn 16 dager`() {
+        opprettOgUtbetal(1.NAV)
+        opprett(1.NAV, 1.ARB, 1.NAV)
+        assertEquals(1, fagsystemIder.size)
     }
 
     @Test
@@ -75,7 +91,6 @@ internal class FagsystemIdTest {
         assertEquals(1, fagsystemIder.size)
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
     }
-
 
     @Test
     fun `Ny fagsystemId når eksisterende fagsystemId er annullert`() {
@@ -200,7 +215,7 @@ internal class FagsystemIdTest {
         håndterAnnullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertUtbetalingsbehov(null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
-        fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
+        fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first(), true))
     }
 
     private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null, godkjent: Boolean = true) =
@@ -214,7 +229,7 @@ internal class FagsystemIdTest {
             if (!godkjent) return@also
             assertTrue(aktivitetslogg.behov().isNotEmpty())
             assertUtbetalingsbehov(maksdato, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, false)
-            fagsystemId.håndter(utbetalingHendelse(it))
+            fagsystemId.håndter(utbetalingHendelse(oppdrag.keys.first()))
         }
 
     private fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null): Oppdrag {
@@ -288,7 +303,7 @@ internal class FagsystemIdTest {
         godkjenttidspunkt
     ).also { aktivitetslogg = it }
 
-    private fun utbetalingHendelse(oppdrag: Oppdrag) = UtbetalingHendelse(
+    private fun utbetalingHendelse(oppdrag: Oppdrag, annullert: Boolean = false) = UtbetalingHendelse(
         UUID.randomUUID(),
         UUID.randomUUID().toString(),
         AKTØRID,
@@ -300,7 +315,7 @@ internal class FagsystemIdTest {
         GODKJENTTIDSPUNKT,
         SAKSBEHANDLER,
         SAKSBEHANDLEREPOST,
-        false
+        annullert
     )
 
     private class FagsystemIdInspektør(fagsystemIder: List<FagsystemId>) : FagsystemIdVisitor {
