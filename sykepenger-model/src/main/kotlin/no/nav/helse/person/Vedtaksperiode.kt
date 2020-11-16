@@ -174,7 +174,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMedInntektsmelding(inntektsmelding).also {
-        if (!it) return it
+        if (!it) {
+            inntektsmelding.trimLeft(periode.endInclusive)
+            return it
+        }
         kontekst(inntektsmelding)
         if (this.skalForkastesVedOverlapp()) {
             valider(inntektsmelding) { tilstand.håndter(this, inntektsmelding) }
@@ -381,13 +384,6 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand) {
         arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         arbeidsgiver.addInntektVol2(hendelse, skjæringstidspunkt)
-
-        val forrigeVedtaksperiode = arbeidsgiver.finnForrigeVedaksperiode(this)
-
-        if (forrigeVedtaksperiode != null) {
-            hendelse.trimLeft(forrigeVedtaksperiode.periode.endInclusive)
-        }
-
         hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
