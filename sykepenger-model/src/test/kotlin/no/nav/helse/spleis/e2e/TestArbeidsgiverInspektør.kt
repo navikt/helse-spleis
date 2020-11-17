@@ -149,8 +149,7 @@ internal class TestArbeidsgiverInspektør(
         oppdrag: Oppdrag,
         totalBeløp: Int,
         nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+        tidsstempel: LocalDateTime
     ) {
         if (oppdrag != arbeidsgiverOppdrag.last()) return
         this.totalBeløp.add(totalBeløp)

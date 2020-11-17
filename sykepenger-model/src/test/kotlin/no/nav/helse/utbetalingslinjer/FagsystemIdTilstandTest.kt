@@ -13,7 +13,8 @@ import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -51,41 +52,41 @@ internal class FagsystemIdTilstandTest {
     @Test
     fun `happy path`() {
         opprettOgUtbetal(5.NAV, 2.HELG, 5.NAV)
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
-        assertHistorie(1.januar til 12.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
     fun `happy path med flere utbetalinger`() {
         opprettOgUtbetal(5.NAV, 2.HELG)
         opprettOgUtbetal(5.NAV, 2.HELG, 5.NAV, 2.HELG)
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "UtbetalingOverført", "Aktiv")
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 14.januar, NavDag::class, NavHelgDag::class)
-        assertHistorie(1.januar til 14.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(0, 1.januar til 14.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
     fun `annullering happy path`() {
         opprettOgUtbetal(5.NAV, 2.HELG, 5.NAV)
-        val siste = annuller()
-        kvitter()
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
+        val siste = annuller(0)
+        kvitter(0)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
-        assertTomHistorie()
+        assertTomHistorie(0)
     }
 
     @Test
     fun `annullering når siste er ubetalt`() {
         opprettOgUtbetal(5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV, 2.HELG)
-        val siste = annuller()
-        kvitter()
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
+        val siste = annuller(0)
+        kvitter(0)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -95,32 +96,32 @@ internal class FagsystemIdTilstandTest {
     fun `aktiv ubetalt går tilbake til aktiv ved avslag`() {
         opprettOgUtbetal(5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
-        utbetal(godkjent = false)
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "Aktiv")
+        utbetal(0, godkjent = false)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "Aktiv")
         assertUtbetalingstidslinje(0,1.januar til 7.januar, NavDag::class, NavHelgDag::class)
-        assertHistorie(1.januar til 7.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
     fun `ubetalt etter aktiv`() {
         opprettOgUtbetal(5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
-        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
-        assertHistorie(1.januar til 7.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
     fun `forsøke annullering med kun ett, ubetalt oppdrag`() {
         opprett(5.NAV, 2.HELG)
-        assertThrows<IllegalStateException> { annuller() }
+        assertThrows<IllegalStateException> { annuller(0) }
     }
 
     @Test
     fun `forsøke annullering med når oppdrag overføres`() {
         opprett(5.NAV, 2.HELG)
-        utbetal()
-        assertThrows<IllegalStateException> { annuller() }
+        utbetal(0)
+        assertThrows<IllegalStateException> { annuller(0) }
     }
 
     @Test
@@ -132,8 +133,8 @@ internal class FagsystemIdTilstandTest {
     @Test
     fun `ikke-godkjent periode`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
-        val siste = utbetal(godkjent = false)
-        assertTilstander("Ny", "Avvist")
+        val siste = utbetal(0, godkjent = false)
+        assertTilstander(0, "Ny", "Avvist")
         assertIkkeBehov(Behovtype.Utbetaling, siste)
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
@@ -141,16 +142,16 @@ internal class FagsystemIdTilstandTest {
     @Test
     fun `avvist utbetaling`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
-        utbetal()
-        kvitter(oppdragstatus = AVVIST)
-        assertTilstander("Ny", "UtbetalingOverført", "Avvist")
+        utbetal(0)
+        kvitter(0, AVVIST)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Avvist")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
     private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null) {
         opprett(*dager, startdato = startdato, sisteDato = sisteDato)
-        utbetal()
-        kvitter()
+        utbetal(0)
+        kvitter(0)
     }
 
     private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
@@ -165,10 +166,8 @@ internal class FagsystemIdTilstandTest {
         }
     }
 
-    private fun assertTilstander(vararg tilstand: String) = assertTilstander(fagsystemId, *tilstand)
-
-    private fun assertTilstander(fagsystemId: FagsystemId, vararg tilstand: String) {
-        assertEquals(tilstand.toList(), observer.tilstander(fagsystemId))
+    private fun assertTilstander(fagsystemIdIndeks: Int, vararg tilstand: String) {
+        assertEquals(tilstand.toList(), observer.tilstander(fagsystemIder[fagsystemIdIndeks]))
     }
 
     private fun assertIkkeBehov(behovtype: Behovtype, aktivitetslogg: IAktivitetslogg = this.aktivitetslogg) {
@@ -179,18 +178,18 @@ internal class FagsystemIdTilstandTest {
         assertTrue(aktivitetslogg.behov().last().type == behovtype) { aktivitetslogg.toString() }
     }
 
-    private fun assertTomHistorie() {
+    private fun assertTomHistorie(fagsystemIdIndeks: Int) {
         Historie.Historikkbøtte()
-            .also { fagsystemId.append(ORGNR, it) }
+            .also { fagsystemIder[fagsystemIdIndeks].append(ORGNR, it) }
             .utbetalingstidslinje()
             .also {
                 assertTrue(it.isEmpty())
             }
     }
 
-    private fun assertHistorie(periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+    private fun assertHistorie(fagsystemIdIndeks: Int, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         Historie.Historikkbøtte()
-            .also { fagsystemId.append(ORGNR, it) }
+            .also { fagsystemIder[fagsystemIdIndeks].append(ORGNR, it) }
             .utbetalingstidslinje()
             .also {
                 assertEquals(periode.endInclusive, it.sisteDato())
@@ -211,7 +210,7 @@ internal class FagsystemIdTilstandTest {
         }
     }
 
-    private fun utbetal(fagsystemId: FagsystemId = this.fagsystemId, godkjent: Boolean = true): IAktivitetslogg {
+    private fun utbetal(fagsystemIdIndeks: Int, godkjent: Boolean = true): IAktivitetslogg {
         return Utbetalingsgodkjenning(
             UUID.randomUUID(),
             AKTØRID,
@@ -225,34 +224,34 @@ internal class FagsystemIdTilstandTest {
             false
         ).also {
             it.kontekst(person)
-            fagsystemId.håndter(it, MAKSDATO)
+            fagsystemIder[fagsystemIdIndeks].håndter(it, MAKSDATO)
         }
     }
 
-    private fun annuller(fagsystemId: FagsystemId = this.fagsystemId): IAktivitetslogg {
+    private fun annuller(fagsystemIdIndeks: Int): IAktivitetslogg {
         return AnnullerUtbetaling(
             UUID.randomUUID(),
             AKTØRID,
             FNR,
             ORGNR,
-            fagsystemId.fagsystemId(),
+            inspektør.fagsystemId(fagsystemIdIndeks),
             IDENT,
             EPOST,
             GODKJENTTIDSPUNKT
         ).also {
             it.kontekst(person)
-            fagsystemId.håndter(it)
+            fagsystemIder[fagsystemIdIndeks].håndter(it)
         }
     }
 
-    private fun kvitter(fagsystemId: FagsystemId = this.fagsystemId, oppdragstatus: Oppdragstatus = AKSEPTERT): IAktivitetslogg {
+    private fun kvitter(fagsystemIdIndeks: Int, oppdragstatus: Oppdragstatus = AKSEPTERT): IAktivitetslogg {
         return UtbetalingHendelse(
             UUID.randomUUID(),
             UUID.randomUUID().toString(),
             AKTØRID,
             FNR,
             ORGNR,
-            fagsystemId.fagsystemId(),
+            inspektør.fagsystemId(fagsystemIdIndeks),
             oppdragstatus,
             "",
             GODKJENTTIDSPUNKT,
@@ -261,7 +260,7 @@ internal class FagsystemIdTilstandTest {
             false
         ).also {
             it.kontekst(person)
-            fagsystemId.håndter(it)
+            fagsystemIder[fagsystemIdIndeks].håndter(it)
         }
     }
 
@@ -284,16 +283,6 @@ internal class FagsystemIdTilstandTest {
                 fagsystemId.register(observer)
                 oppdrag[it] = fagsystemId
             }
-        }
-    }
-
-    private class FagsystemIdObservatør : FagsystemIdObserver {
-        private val tilstander = mutableMapOf<FagsystemId, MutableList<String>>()
-
-        fun tilstander(fagsystemId: FagsystemId) = tilstander[fagsystemId] ?: fail { "OH NO" }
-
-        override fun tilstandEndret(fagsystemId: FagsystemId, gammel: String, ny: String) {
-            tilstander.getOrPut(fagsystemId) { mutableListOf(gammel) }.add(ny)
         }
     }
 

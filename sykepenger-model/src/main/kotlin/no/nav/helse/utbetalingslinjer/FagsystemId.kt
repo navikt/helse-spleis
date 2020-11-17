@@ -13,11 +13,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class FagsystemId private constructor(
+    private val fagsystemId: String,
+    private val fagområde: Fagområde,
     oppdragsliste: List<Utbetaling>,
     forkastet: List<Utbetaling> = emptyList()
 ) {
 
-    private constructor(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) : this(listOf(Utbetaling(oppdrag, utbetalingstidslinje)))
+    internal constructor(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) : this(
+        oppdrag.fagsystemId(),
+        oppdrag.fagområde(),
+        listOf(Utbetaling(oppdrag, utbetalingstidslinje))
+    )
 
     private val aktive = sorterOppdrag(oppdragsliste)
     private val forkastet = sorterOppdrag(forkastet)
@@ -32,8 +38,6 @@ internal class FagsystemId private constructor(
         require(oppdragsliste.isNotEmpty())
     }
 
-    internal fun fagsystemId() = head.fagsystemId()
-    internal fun fagområde() = head.fagområde()
     internal fun nettoBeløp() = head.nettobeløp()
 
     internal fun append(orgnr: String, bøtte: Historie.Historikkbøtte) {
@@ -45,11 +49,11 @@ internal class FagsystemId private constructor(
     }
 
     internal fun accept(visitor: FagsystemIdVisitor) {
-        visitor.preVisitFagsystemId(this, fagsystemId(), fagområde(), utbetalingstidslinje)
+        visitor.preVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje)
         visitor.preVisitOppdragsliste()
         aktive.onEach { it.accept(visitor) }
         visitor.postVisitOppdragsliste()
-        visitor.postVisitFagsystemId(this, fagsystemId(), fagområde(), utbetalingstidslinje)
+        visitor.postVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje)
     }
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning, maksdato: LocalDate) {
@@ -57,13 +61,13 @@ internal class FagsystemId private constructor(
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling): Boolean {
-        if (!hendelse.erRelevant(fagsystemId())) return false
+        if (!hendelse.erRelevant(fagsystemId)) return false
         tilstand.annuller(this, hendelse, hendelse.saksbehandlerEpost, hendelse.saksbehandlerIdent, hendelse.opprettet)
         return true
     }
 
     internal fun håndter(hendelse: UtbetalingHendelse): Boolean {
-        if (!hendelse.erRelevant(fagsystemId())) return false
+        if (!hendelse.erRelevant(fagsystemId)) return false
         tilstand.kvittér(this, hendelse)
         return true
     }
@@ -77,7 +81,7 @@ internal class FagsystemId private constructor(
     internal fun erAnnullert() = tilstand == Annullert
 
     private fun utvide(opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): Boolean {
-        val utbetaling = head.lagUtvidelse(opprinnelig, utbetalingstidslinje, aktivitetslogg) ?: return false
+        val utbetaling = head.lagUtvidelse(this, opprinnelig, utbetalingstidslinje, aktivitetslogg) ?: return false
         return tilstand.nyUtbetaling(this, utbetaling)
     }
 
@@ -112,10 +116,11 @@ internal class FagsystemId private constructor(
         private val opprettet: LocalDateTime = LocalDateTime.now(),
         private var avsluttet: LocalDateTime? = null
     ) {
-        fun fagsystemId() = oppdrag.fagsystemId()
-        fun fagområde() = oppdrag.fagområde()
         fun nettobeløp() = oppdrag.nettoBeløp()
         fun utbetalingstidslinje() = utbetalingstidslinje
+
+        private fun fagsystemId() = oppdrag.fagsystemId()
+        private fun fagområde() = oppdrag.fagområde()
 
         fun accept(visitor: FagsystemIdVisitor) {
             visitor.preVisitUtbetaling(oppdrag, utbetalingstidslinje, opprettet, avsluttet)
@@ -128,36 +133,19 @@ internal class FagsystemId private constructor(
             oppdrag.simuler(aktivitetslogg, maksdato, ident)
         }
 
-        fun annuller(
-            fagsystemId: FagsystemId,
-            aktivitetslogg: IAktivitetslogg,
-            ident: String,
-            epost: String,
-            godkjenttidspunkt: LocalDateTime
-        ) {
-            val oppdrag = oppdrag.annullere(fagsystemId, aktivitetslogg, ident, epost, godkjenttidspunkt)
-            fagsystemId.nyUtbetaling(Utbetaling(oppdrag, Utbetalingstidslinje()))
+        fun annuller(aktivitetslogg: IAktivitetslogg, ident: String, epost: String, godkjenttidspunkt: LocalDateTime): Utbetaling {
+            val oppdrag = oppdrag.annullere(aktivitetslogg, ident, epost, godkjenttidspunkt)
+            return Utbetaling(oppdrag, Utbetalingstidslinje())
         }
 
-        fun utbetal(
-            fagsystemId: FagsystemId,
-            aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            ident: String,
-            epost: String,
-            godkjenttidspunkt: LocalDateTime
-        ) {
-            oppdrag.utbetal(fagsystemId, aktivitetslogg, maksdato, ident, epost, godkjenttidspunkt)
+        fun utbetal(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
+            oppdrag.utbetal(aktivitetslogg, maksdato, ident, epost, godkjenttidspunkt)
         }
 
-        fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
-            oppdrag.håndter(fagsystemId, hendelse)
-        }
-
-        fun lagUtvidelse(opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): Utbetaling? {
-            if (opprinnelig.fagområde() != fagområde()) return null
+        fun lagUtvidelse(fagsystemId: FagsystemId, opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): Utbetaling? {
+            if (opprinnelig.fagområde() != fagsystemId.fagområde) return null
             val nytt = opprinnelig.minus(oppdrag, aktivitetslogg)
-            if (nytt.fagsystemId() != fagsystemId()) return null
+            if (nytt.fagsystemId() != fagsystemId.fagsystemId) return null
             nytt.nettoBeløp(oppdrag)
             return Utbetaling(nytt, utbetalingstidslinje)
         }
@@ -194,7 +182,7 @@ internal class FagsystemId private constructor(
             godkjenttidspunkt: LocalDateTime,
             maksdato: LocalDate
         ) {
-            throw IllegalStateException("Forventet ikke å utbetale på fagsystemId=${fagsystemId.fagsystemId()} i tilstand=${this::class.simpleName}")
+            throw IllegalStateException("Forventet ikke å utbetale på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
         fun annuller(
@@ -204,11 +192,11 @@ internal class FagsystemId private constructor(
             ident: String,
             godkjenttidspunkt: LocalDateTime
         ) {
-            throw IllegalStateException("Forventet ikke å annullere på fagsystemId=${fagsystemId.fagsystemId()} i tilstand=${this::class.simpleName}")
+            throw IllegalStateException("Forventet ikke å annullere på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
         fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
-            throw IllegalStateException("Forventet ikke kvittering på fagsystemId=${fagsystemId.fagsystemId()} i tilstand=${this::class.simpleName}")
+            throw IllegalStateException("Forventet ikke kvittering på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
         fun simuler(
@@ -217,15 +205,15 @@ internal class FagsystemId private constructor(
             maksdato: LocalDate,
             saksbehandler: String
         ) {
-            throw IllegalStateException("Forventet ikke simulering på fagsystemId=${fagsystemId.fagsystemId()} i tilstand=${this::class.simpleName}")
+            throw IllegalStateException("Forventet ikke simulering på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
         fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
-            throw IllegalStateException("Kan ikke legge til ny utbetaling fagsystemId=${fagsystemId.fagsystemId()} i tilstand=${this::class.simpleName}")
+            throw IllegalStateException("Kan ikke legge til ny utbetaling fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
     }
 
-    private object Ny: Tilstand {
+    private object Ny : Tilstand {
         override fun utbetal(
             fagsystemId: FagsystemId,
             hendelse: Utbetalingsgodkjenning,
@@ -235,7 +223,7 @@ internal class FagsystemId private constructor(
             maksdato: LocalDate
         ) {
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
-            fagsystemId.head.utbetal(fagsystemId, hendelse, maksdato, ident, epost, godkjenttidspunkt)
+            fagsystemId.head.utbetal(hendelse, maksdato, ident, epost, godkjenttidspunkt)
             fagsystemId.tilstand(UtbetalingOverført)
         }
 
@@ -249,7 +237,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object Aktiv: Tilstand {
+    private object Aktiv : Tilstand {
 
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
             fagsystemId.nyUtbetaling(utbetaling)
@@ -264,12 +252,12 @@ internal class FagsystemId private constructor(
             ident: String,
             godkjenttidspunkt: LocalDateTime
         ) {
-            fagsystemId.head.annuller(fagsystemId, hendelse, ident, epost, godkjenttidspunkt)
+            fagsystemId.nyUtbetaling(fagsystemId.head.annuller(hendelse, ident, epost, godkjenttidspunkt))
             fagsystemId.tilstand(AnnulleringOverført)
         }
     }
 
-    private object Ubetalt: Tilstand {
+    private object Ubetalt : Tilstand {
         override fun utbetal(
             fagsystemId: FagsystemId,
             hendelse: Utbetalingsgodkjenning,
@@ -282,7 +270,7 @@ internal class FagsystemId private constructor(
                 fagsystemId.forkastUtbetaling()
                 return fagsystemId.tilstand(Aktiv)
             }
-            fagsystemId.head.utbetal(fagsystemId, hendelse, maksdato, ident, epost, godkjenttidspunkt)
+            fagsystemId.head.utbetal(hendelse, maksdato, ident, epost, godkjenttidspunkt)
             fagsystemId.tilstand(UtbetalingOverført)
         }
 
@@ -303,33 +291,31 @@ internal class FagsystemId private constructor(
             godkjenttidspunkt: LocalDateTime
         ) {
             fagsystemId.forkastUtbetaling()
-            fagsystemId.head.annuller(fagsystemId, hendelse, ident, epost, godkjenttidspunkt)
+            fagsystemId.nyUtbetaling(fagsystemId.head.annuller(hendelse, ident, epost, godkjenttidspunkt))
             fagsystemId.tilstand(AnnulleringOverført)
         }
     }
 
-    private object UtbetalingOverført: Tilstand {
+    private object UtbetalingOverført : Tilstand {
         override fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
-            fagsystemId.head.kvittér(fagsystemId, hendelse)
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
             fagsystemId.head.avslutt()
             fagsystemId.tilstand(Aktiv)
         }
     }
 
-    private object AnnulleringOverført: Tilstand {
+    private object AnnulleringOverført : Tilstand {
         override fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
-            fagsystemId.head.kvittér(fagsystemId, hendelse)
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
             fagsystemId.tilstand(Annullert)
         }
     }
 
-    private object Avvist: Tilstand {
+    private object Avvist : Tilstand {
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling) = false
     }
 
-    private object Annullert: Tilstand {
+    private object Annullert : Tilstand {
         override fun entering(fagsystemId: FagsystemId) {
             fagsystemId.head.avslutt()
         }

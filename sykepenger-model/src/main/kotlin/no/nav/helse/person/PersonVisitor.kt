@@ -326,14 +326,14 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
 }
 
 internal interface FagsystemIdVisitor : OppdragVisitor, UtbetalingsdagVisitor {
-    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, utbetalingstidslinje: Utbetalingstidslinje) {}
+    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, tilstand: String, utbetalingstidslinje: Utbetalingstidslinje) {}
     fun preVisitOppdragsliste() {}
     fun preVisitUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, opprettet: LocalDateTime, avsluttet: LocalDateTime?) {}
     fun preVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
     fun postVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
     fun postVisitUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, opprettet: LocalDateTime, avsluttet: LocalDateTime?) {}
     fun postVisitOppdragsliste() {}
-    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, utbetalingstidslinje: Utbetalingstidslinje) {}
+    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, tilstand: String, utbetalingstidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface OppdragVisitor {
@@ -341,8 +341,7 @@ internal interface OppdragVisitor {
         oppdrag: Oppdrag,
         totalBeløp: Int,
         nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+        tidsstempel: LocalDateTime
     ) {}
     fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
@@ -363,7 +362,6 @@ internal interface OppdragVisitor {
         oppdrag: Oppdrag,
         totalBeløp: Int,
         nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        utbetalingtilstand: Oppdrag.Utbetalingtilstand
+        tidsstempel: LocalDateTime
     ) {}
 }

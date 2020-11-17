@@ -174,8 +174,7 @@ internal class UtbetalingTest {
             oppdrag: Oppdrag,
             totalBeløp: Int,
             nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            utbetalingtilstand: Oppdrag.Utbetalingtilstand
+            tidsstempel: LocalDateTime
         ) {
             fagsystemIder.add(oppdrag.fagsystemId())
         }

@@ -778,8 +778,7 @@ internal data class PersonData(
                     Endringskode.valueOf(endringskode),
                     sisteArbeidsgiverdag,
                     nettoBeløp,
-                    LocalDateTime.now(),
-                    Oppdrag.Utbetalingtilstand.IkkeUtbetalt
+                    LocalDateTime.now()
                 )
         }
     }

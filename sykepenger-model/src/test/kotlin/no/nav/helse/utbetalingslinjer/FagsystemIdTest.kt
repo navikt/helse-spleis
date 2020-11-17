@@ -33,6 +33,7 @@ internal class FagsystemIdTest {
     private lateinit var fagsystemId: FagsystemId
     private lateinit var aktivitetslogg: IAktivitetslogg
     private val inspektør get() = FagsystemIdInspektør(fagsystemIder)
+    private val observatør = FagsystemIdObservatør()
 
     @BeforeEach
     fun beforeEach() {
@@ -45,7 +46,7 @@ internal class FagsystemIdTest {
     fun `Ny fagsystemId`() {
         opprett(1.NAV)
         assertEquals(1, fagsystemIder.size)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertTilstand(0, "Ny")
     }
 
     @Test
@@ -63,8 +64,8 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(1.NAV)
         opprett(1.NAV, 16.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt)
-        assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstand(1, "Ny")
     }
 
     @Test
@@ -72,8 +73,8 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(1.NAV)
         opprett(1.NAV, 1.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt)
-        assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstand(1, "Ny")
     }
 
     @Test
@@ -88,7 +89,7 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(16.AP, 5.NAV)
         opprett(16.AP, 5.NAV, 5.NAV(1300))
         assertEquals(1, fagsystemIder.size)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
     }
 
     @Test
@@ -99,8 +100,8 @@ internal class FagsystemIdTest {
         assertEquals(2, fagsystemIder.size)
         assertTrue(fagsystemIder[0].erAnnullert())
         assertFalse(fagsystemIder[1].erAnnullert())
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
-        assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
+        assertTilstand(1, "Ny")
     }
 
     @Test
@@ -140,7 +141,7 @@ internal class FagsystemIdTest {
         assertFalse(fagsystemId.erAnnullert())
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertUtbetalingsbehov(null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt, true)
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Overført)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført")
     }
 
     @Test
@@ -156,7 +157,7 @@ internal class FagsystemIdTest {
         opprett(16.NAV)
         annullere()
         assertTrue(fagsystemId.erAnnullert())
-        assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
+        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
     }
 
     @Test
@@ -224,8 +225,12 @@ internal class FagsystemIdTest {
             .also { block(it) }
     }
 
-    private fun assertOppdragstilstander(fagsystemIndeks: Int, vararg tilstander: Oppdrag.Utbetalingtilstand) {
-        assertEquals(tilstander.toList(), inspektør.oppdragtilstander(fagsystemIndeks))
+    private fun assertTilstand(fagsystemIdIndeks: Int, tilstand: String) {
+        assertEquals(tilstand, inspektør.tilstand(fagsystemIdIndeks))
+    }
+
+    private fun assertTilstander(fagsystemIdIndeks: Int, vararg tilstand: String) {
+        assertEquals(tilstand.toList(), observatør.tilstander(fagsystemIder[fagsystemIdIndeks]))
     }
 
     private fun annullere() {
@@ -266,7 +271,7 @@ internal class FagsystemIdTest {
                 Fagområde.SykepengerRefusjon,
                 sisteDato ?: tidslinje.sisteDato()
             ).result().also {
-                fagsystemId = FagsystemId.utvide(fagsystemIder, it, tidslinje, aktivitetslogg)
+                fagsystemId = FagsystemId.utvide(fagsystemIder, it, tidslinje, aktivitetslogg).also { it.register(observatør) }
                 oppdrag[it] = fagsystemId
             }
         }
@@ -287,7 +292,7 @@ internal class FagsystemIdTest {
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime
     ) {
-        fagsystemId.håndter(annullering(saksbehandler, saksbehandlerEpost, godkjenttidspunkt))
+        fagsystemId.håndter(annullering(0, saksbehandler, saksbehandlerEpost, godkjenttidspunkt))
     }
 
     private fun utbetalingsgodkjenning(
@@ -309,6 +314,7 @@ internal class FagsystemIdTest {
     ).also { aktivitetslogg = it }
 
     private fun annullering(
+        fagsystemIndeks: Int,
         saksbehandler: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime
@@ -317,7 +323,7 @@ internal class FagsystemIdTest {
         AKTØRID,
         FNR,
         ORGNUMMER,
-        fagsystemId.fagsystemId(),
+        inspektør.fagsystemId(fagsystemIndeks),
         saksbehandler,
         saksbehandlerEpost,
         godkjenttidspunkt

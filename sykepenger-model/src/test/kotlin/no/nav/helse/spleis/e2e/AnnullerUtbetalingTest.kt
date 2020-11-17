@@ -434,8 +434,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             oppdrag: Oppdrag,
             totalBeløp: Int,
             nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            utbetalingtilstand: Oppdrag.Utbetalingtilstand
+            tidsstempel: LocalDateTime
         ) {
             this.oppdrag.add(oppdrag)
             fagsystemIder.add(oppdrag.fagsystemId())

@@ -1,14 +1,10 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.IkkeUtbetalt
-import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.Utbetalt
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,14 +19,8 @@ internal class Oppdrag private constructor(
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
     private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() },
-    private var tidsstempel: LocalDateTime,
-    private var utbetalingtilstand: Utbetalingtilstand
+    private var tidsstempel: LocalDateTime
 ) : MutableList<Utbetalingslinje> by linjer {
-
-    internal companion object {
-        internal fun sorter(oppdrag: List<Pair<Oppdrag, Utbetalingstidslinje>>) = oppdrag.sortedByDescending { (oppdrag, _) -> oppdrag.tidsstempel }
-    }
-
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
     internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 
@@ -47,17 +37,16 @@ internal class Oppdrag private constructor(
         fagsystemId,
         Endringskode.NY,
         sisteArbeidsgiverdag,
-        tidsstempel = LocalDateTime.now(),
-        utbetalingtilstand = IkkeUtbetalt
+        tidsstempel = LocalDateTime.now()
     )
 
     internal constructor(mottaker: String, fagområde: Fagområde) :
         this(mottaker, fagområde, sisteArbeidsgiverdag = LocalDate.MIN)
 
     internal fun accept(visitor: OppdragVisitor) {
-        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, utbetalingtilstand)
+        visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
         linjer.forEach { it.accept(visitor) }
-        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel, utbetalingtilstand)
+        visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
     }
 
     internal fun fagområde() = fagområde
@@ -65,39 +54,6 @@ internal class Oppdrag private constructor(
     internal fun fagsystemId() = fagsystemId
 
     internal fun utbetal(
-        fagsystemId: FagsystemId,
-        aktivitetslogg: IAktivitetslogg,
-        maksdato: LocalDate?,
-        saksbehandler: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime
-    ) {
-        utbetalingtilstand.utbetal(
-            fagsystemId,
-            this,
-            aktivitetslogg,
-            maksdato,
-            saksbehandler,
-            saksbehandlerEpost,
-            godkjenttidspunkt
-        )
-    }
-
-    internal fun håndter(fagsystemId: FagsystemId, utbetaling: UtbetalingHendelse) {
-        utbetalingtilstand.håndter(fagsystemId, this, utbetaling)
-    }
-
-    internal fun annullere(
-        fagsystemId: FagsystemId,
-        aktivitetslogg: IAktivitetslogg,
-        saksbehandler: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime
-    ) =
-        utbetalingtilstand.annuller(fagsystemId, this, aktivitetslogg, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
-
-    private fun betale(
-        fagsystemId: FagsystemId,
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate?,
         saksbehandler: String,
@@ -113,6 +69,17 @@ internal class Oppdrag private constructor(
             godkjenttidspunkt = godkjenttidspunkt,
             annullering = linjerUtenOpphør().isEmpty()
         )
+    }
+
+    internal fun annullere(
+        aktivitetslogg: IAktivitetslogg,
+        saksbehandler: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime
+    ): Oppdrag {
+        val annullert = emptied().minus(this, aktivitetslogg)
+        annullert.utbetal(aktivitetslogg, null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
+        return annullert
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
@@ -131,13 +98,8 @@ internal class Oppdrag private constructor(
         fagsystemId,
         endringskode,
         sisteArbeidsgiverdag,
-        tidsstempel = tidsstempel,
-        utbetalingtilstand = utbetalingtilstand
+        tidsstempel = tidsstempel
     )
-
-    internal fun erUtbetalt() = utbetalingtilstand == Utbetalt
-
-    internal fun erUbetalt() = utbetalingtilstand == IkkeUtbetalt
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
@@ -239,8 +201,7 @@ internal class Oppdrag private constructor(
         fagsystemId,
         endringskode,
         sisteArbeidsgiverdag,
-        tidsstempel = tidsstempel,
-        utbetalingtilstand = utbetalingtilstand
+        tidsstempel = tidsstempel
     )
 
     private var deletion: Utbetalingslinje? = null
@@ -272,81 +233,6 @@ internal class Oppdrag private constructor(
             fagsystemId = fagsystemId,
             sisteArbeidsgiverdag = sisteArbeidsgiverdag
         )
-
-    internal interface Utbetalingtilstand {
-        fun utbetal(
-            fagsystemId: FagsystemId,
-            oppdrag: Oppdrag,
-            aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate?,
-            saksbehandler: String,
-            saksbehandlerEpost: String,
-            godkjenttidspunkt: LocalDateTime
-        ) {
-            throw IllegalStateException("Kan ikke utbetale i tilstand ${this::class.simpleName}")
-        }
-
-        fun annuller(
-            fagsystemId: FagsystemId,
-            oppdrag: Oppdrag,
-            aktivitetslogg: IAktivitetslogg,
-            saksbehandler: String,
-            saksbehandlerEpost: String,
-            godkjenttidspunkt: LocalDateTime
-        ): Oppdrag {
-            throw IllegalStateException("Kan ikke annullere i tilstand ${this::class.simpleName}")
-        }
-
-        fun håndter(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetaling: UtbetalingHendelse) {
-            throw IllegalStateException("Kan ikke håndtere utbetalinghendelse i tilstand ${this::class.simpleName}")
-        }
-
-        object IkkeUtbetalt : Utbetalingtilstand {
-            override fun utbetal(
-                fagsystemId: FagsystemId,
-                oppdrag: Oppdrag,
-                aktivitetslogg: IAktivitetslogg,
-                maksdato: LocalDate?,
-                saksbehandler: String,
-                saksbehandlerEpost: String,
-                godkjenttidspunkt: LocalDateTime
-            ) {
-                oppdrag.betale(
-                    fagsystemId,
-                    aktivitetslogg,
-                    maksdato,
-                    saksbehandler,
-                    saksbehandlerEpost,
-                    godkjenttidspunkt
-                )
-                oppdrag.utbetalingtilstand = Overført
-            }
-        }
-
-        object Overført : Utbetalingtilstand {
-            override fun håndter(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetaling: UtbetalingHendelse) {
-                oppdrag.utbetalingtilstand = if (utbetaling.hasErrorsOrWorse()) UtbetalingFeilet else Utbetalt
-            }
-        }
-
-        object Utbetalt : Utbetalingtilstand {
-            override fun annuller(
-                fagsystemId: FagsystemId,
-                oppdrag: Oppdrag,
-                aktivitetslogg: IAktivitetslogg,
-                saksbehandler: String,
-                saksbehandlerEpost: String,
-                godkjenttidspunkt: LocalDateTime
-            ): Oppdrag {
-                val annullert = oppdrag.emptied().minus(oppdrag, aktivitetslogg)
-                annullert.utbetal(fagsystemId, aktivitetslogg, null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
-                return annullert
-            }
-        }
-
-        object Annullert : Utbetalingtilstand {}
-        object UtbetalingFeilet : Utbetalingtilstand {}
-    }
 
     private interface Tilstand {
         fun forskjell(
