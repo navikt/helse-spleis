@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class HistorieEnArbeidsgiverTest : HistorieTest() {
@@ -52,9 +53,37 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, navdager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.april, 30.april))
         val utbetalingstidslinje = beregn(AG1, 1.april til 30.april, 1.januar)
-        assertAlleDager(utbetalingstidslinje, 1.januar til 31.januar, UkjentDag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
-        assertAlleDager(utbetalingstidslinje, 1.januar til 31.januar, UkjentDag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, UkjentDag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 1.april til 30.april, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
+    fun `spleis - infotrygd - ferie infotrygd - spleis`() {
+        historie(
+            refusjon(1.januar, 31.januar),
+            ferie(1.februar, 28.februar)
+        )
+        historie.add(AG1, navdager(1.desember(2017), 31.desember(2017)))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        val utbetalingstidslinje = beregn(AG1, 1.mars til 31.mars, 1.januar)
+        assertEquals(1.desember(2017), utbetalingstidslinje.førsteDato())
+        assertAlleDager(utbetalingstidslinje, 1.desember(2017) til 16.desember(2017), ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 17.desember(2017) til 31.desember(2017), NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 28.februar, UkjentDag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
+    fun `infotrygd - ferie infotrygd - spleis`() {
+        historie(
+            refusjon(1.januar, 31.januar),
+            ferie(1.februar, 28.februar)
+        )
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        val utbetalingstidslinje = beregn(AG1, 1.mars til 31.mars, 1.januar)
+        assertEquals(1.mars, utbetalingstidslinje.førsteDato())
+        assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, NavDag::class, NavHelgDag::class)
     }
 }

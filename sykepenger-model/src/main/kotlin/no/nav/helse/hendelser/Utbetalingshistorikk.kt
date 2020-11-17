@@ -298,11 +298,6 @@ class Utbetalingshistorikk(
             override fun append(oldtid: Oldtidsutbetalinger) {
                 oldtid.add(tidslinje = tidslinje())
             }
-
-            override fun append(oldtid: Historie.Historikkbøtte) {
-                oldtid.add(tidslinje = tidslinje())
-                oldtid.add(tidslinje = sykdomstidslinje())
-            }
         }
 
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, dagsats: Int, grad: Int, orgnummer: String) :

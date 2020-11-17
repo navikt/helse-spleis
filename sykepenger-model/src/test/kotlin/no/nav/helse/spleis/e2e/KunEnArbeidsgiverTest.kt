@@ -2249,4 +2249,37 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
     }
+
+    @Test
+    fun `Historisk utbetaling til bruker skal ikke bli med i utbetalingstidslinje for arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(24.juni(2020), 30.juni(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(24.juni(2020), 30.juni(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 9.juli(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.juli(2020), 9.juli(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(16.oktober(2020), 23.oktober(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.oktober(2020), 16.oktober(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 3.november(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.oktober(2020), 3.november(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(4.november(2020), 13.november(2020), 100))
+        håndterSøknad(Sykdom(4.november(2020), 13.november(2020), 100))
+        håndterInntektsmelding(listOf(Periode(16.oktober(2020), 23.oktober(2020)), Periode(28.oktober(2020), 4.november(2020))), 28.oktober(2020))
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+
+        håndterYtelser(
+            5.vedtaksperiode,
+            Utbetalingshistorikk.Periode.Utbetaling(9.mai(2018), 31.mai(2018), 1621, 100, "0"),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(9.mai(2018), 40000.månedlig, "0", true)
+            )
+        )
+
+        assertEquals(24.juni(2020), inspektør.utbetalinger.first().utbetalingstidslinje().førsteDato())
+
+    }
 }

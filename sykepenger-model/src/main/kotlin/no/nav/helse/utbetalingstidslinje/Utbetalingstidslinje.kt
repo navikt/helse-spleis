@@ -114,15 +114,20 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal operator fun minus(other: Utbetalingstidslinje): Utbetalingstidslinje {
+        if (this.utbetalingsdager.isEmpty()) return this
+        if (other.utbetalingsdager.isEmpty()) return this
+        if (!this.overlapper(other)) return this
         return this.plus(other) { venstre, høyre ->
             if ((høyre !is UkjentDag && !høyre.dato.erHelg()) || (høyre !is Fridag && høyre.dato.erHelg())) UkjentDag(høyre.dato, høyre.økonomi)
             else venstre
         }.trim()
     }
 
+    private fun overlapper(other: Utbetalingstidslinje) = this.periode().overlapperMed(other.periode())
+
     private fun trim() =
         if (isEmpty() || all { it is UkjentDag }) Utbetalingstidslinje()
-        else subset(first { it !is UkjentDag }.dato, sisteDato())
+        else subset(first { it !is UkjentDag && it !is Fridag }.dato, sisteDato())
 
     private fun binde(
         other: Utbetalingstidslinje,
