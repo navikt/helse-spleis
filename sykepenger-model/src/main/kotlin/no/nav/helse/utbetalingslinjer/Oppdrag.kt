@@ -8,6 +8,7 @@ import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.IkkeUtbetalt
 import no.nav.helse.utbetalingslinjer.Oppdrag.Utbetalingtilstand.Utbetalt
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,7 +28,7 @@ internal class Oppdrag private constructor(
 ) : MutableList<Utbetalingslinje> by linjer {
 
     internal companion object {
-        internal fun sorter(oppdrag: List<Oppdrag>) = oppdrag.sortedByDescending { it.tidsstempel }
+        internal fun sorter(oppdrag: List<Pair<Oppdrag, Utbetalingstidslinje>>) = oppdrag.sortedByDescending { (oppdrag, _) -> oppdrag.tidsstempel }
     }
 
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN

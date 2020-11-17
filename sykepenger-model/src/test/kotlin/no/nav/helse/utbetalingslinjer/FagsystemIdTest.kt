@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
@@ -62,7 +61,7 @@ internal class FagsystemIdTest {
     @Test
     fun `Nytt element når fagsystemId'er er forskjellige`() {
         opprettOgUtbetal(1.NAV)
-        opprett(1.NAV, startdato = 17.januar)
+        opprett(1.NAV, 16.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt)
         assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
@@ -87,7 +86,7 @@ internal class FagsystemIdTest {
     @Test
     fun `legger nytt oppdrag til på eksisterende fagsystemId`() {
         opprettOgUtbetal(16.AP, 5.NAV)
-        opprett(5.NAV(1300))
+        opprett(16.AP, 5.NAV, 5.NAV(1300))
         assertEquals(1, fagsystemIder.size)
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
     }
@@ -96,12 +95,22 @@ internal class FagsystemIdTest {
     fun `Ny fagsystemId når eksisterende fagsystemId er annullert`() {
         opprettOgUtbetal(16.AP, 5.NAV)
         annullere()
-        opprett(15.NAV(1300), startdato = 22.januar)
+        opprett(21.UTELATE, 15.NAV(1300))
         assertEquals(2, fagsystemIder.size)
         assertTrue(fagsystemIder[0].erAnnullert())
         assertFalse(fagsystemIder[1].erAnnullert())
         assertOppdragstilstander(0, Oppdrag.Utbetalingtilstand.Utbetalt, Oppdrag.Utbetalingtilstand.Utbetalt)
         assertOppdragstilstander(1, Oppdrag.Utbetalingtilstand.IkkeUtbetalt)
+    }
+
+    @Test
+    fun `Ny fagsystemId når eksisterende fagsystemId er avvist`() {
+        opprettOgUtbetal(16.AP, 5.NAV, godkjent = false)
+        opprett(21.UTELATE, 15.NAV(1300))
+        assertEquals(2, fagsystemIder.size)
+        inspektør.utbetalingstidslinje(1).also { tidslinje ->
+            assertEquals(22.januar, tidslinje.førsteDato())
+        }
     }
 
     @Test
@@ -151,9 +160,20 @@ internal class FagsystemIdTest {
     }
 
     @Test
-    fun `avslag på utbetalingsgodkjenning sletter ubetalte oppdrag`() {
+    fun `avslag på første oppdrag fjerner ikke dagene`() {
         opprettOgUtbetal(16.AP, 5.NAV, godkjent = false)
-        assertTrue(fagsystemId.erTom())
+        inspektør.utbetalingstidslinje(0).also { tidslinje ->
+            assertEquals(21.januar, tidslinje.sisteDato())
+        }
+    }
+
+    @Test
+    fun `avslag på andre oppdrag fjerner dagene`() {
+        opprettOgUtbetal(16.AP, 5.NAV, godkjent = true)
+        opprettOgUtbetal(16.AP, 15.NAV, godkjent = false)
+        inspektør.utbetalingstidslinje(0).also { tidslinje ->
+            assertEquals(21.januar, tidslinje.sisteDato())
+        }
     }
 
     @Test
@@ -246,7 +266,7 @@ internal class FagsystemIdTest {
                 Fagområde.SykepengerRefusjon,
                 sisteDato ?: tidslinje.sisteDato()
             ).result().also {
-                fagsystemId = FagsystemId.kobleTil(fagsystemIder, it, aktivitetslogg)
+                fagsystemId = FagsystemId.kobleTil(fagsystemIder, it, tidslinje, aktivitetslogg)
                 oppdrag[it] = fagsystemId
             }
         }
@@ -318,56 +338,4 @@ internal class FagsystemIdTest {
         annullert
     )
 
-    private class FagsystemIdInspektør(fagsystemIder: List<FagsystemId>) : FagsystemIdVisitor {
-        private val fagsystemIder = mutableListOf<String>()
-        private val oppdragsliste = mutableListOf<List<Oppdrag>>()
-        private val oppdragstilstander = mutableMapOf<Int, MutableList<Oppdrag.Utbetalingtilstand>>()
-        private var fagsystemIdTeller = 0
-        private var oppdragteller = 0
-
-        init {
-            fagsystemIder.onEach { it.accept(this) }
-        }
-
-        fun oppdragtilstander(fagsystemIndeks: Int) = oppdragstilstander[fagsystemIndeks] ?: fail {
-            "Finner ikke fagsystem med indeks $fagsystemIndeks"
-        }
-
-        fun oppdragtilstand(fagsystemIndeks: Int, oppdragIndeks: Int) =
-            oppdragstilstander[fagsystemIndeks]?.get(oppdragIndeks) ?: fail { "Finner ikke fagsystem med indeks $fagsystemIndeks eller oppdrag med indeks $oppdragIndeks" }
-
-        override fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {
-            fagsystemIder.add(fagsystemIdTeller, id)
-        }
-
-        override fun preVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {
-            oppdragteller = 0
-            this.oppdragsliste.add(fagsystemIdTeller, oppdragsliste)
-        }
-
-        override fun preVisitOppdrag(
-            oppdrag: Oppdrag,
-            totalBeløp: Int,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            utbetalingtilstand: Oppdrag.Utbetalingtilstand
-        ) {
-            oppdragstilstander.getOrPut(fagsystemIdTeller) { mutableListOf() }
-                .add(0, utbetalingtilstand)
-        }
-
-        override fun postVisitOppdrag(
-            oppdrag: Oppdrag,
-            totalBeløp: Int,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            utbetalingtilstand: Oppdrag.Utbetalingtilstand
-        ) {
-            oppdragteller += 1
-        }
-
-        override fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {
-            fagsystemIdTeller += 1
-        }
-    }
 }

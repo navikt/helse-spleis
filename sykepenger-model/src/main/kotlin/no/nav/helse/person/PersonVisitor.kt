@@ -9,11 +9,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.FagsystemId
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
@@ -330,11 +325,13 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {}
 }
 
-internal interface FagsystemIdVisitor : OppdragVisitor {
-    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {}
-    fun preVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
-    fun postVisitOppdragsliste(oppdragsliste: List<Oppdrag>) {}
-    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde) {}
+internal interface FagsystemIdVisitor : OppdragVisitor, UtbetalingsdagVisitor {
+    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, utbetalingstidslinje: Utbetalingstidslinje) {}
+    fun preVisitOppdragsliste(oppdragsliste: List<Pair<Oppdrag, Utbetalingstidslinje>>) {}
+    fun preVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
+    fun postVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
+    fun postVisitOppdragsliste(oppdragsliste: List<Pair<Oppdrag, Utbetalingstidslinje>>) {}
+    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, utbetalingstidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface OppdragVisitor {

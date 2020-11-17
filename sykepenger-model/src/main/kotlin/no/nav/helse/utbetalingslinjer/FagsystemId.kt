@@ -6,16 +6,22 @@ import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
+internal class FagsystemId private constructor(
+    oppdragsliste: List<Pair<Oppdrag, Utbetalingstidslinje>>,
+    private val forkastet: MutableList<Triple<Oppdrag, Utbetalingstidslinje, LocalDateTime>> = mutableListOf()
+) {
+
+    private constructor(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) : this(listOf(oppdrag to utbetalingstidslinje))
 
     private val oppdragsliste = Oppdrag.sorter(oppdragsliste).toMutableList()
-    private val head get() = oppdragsliste.first()
+    private val head get() = oppdragsliste.first().first
+    private val utbetalingstidslinje get() = oppdragsliste.first().second
     private val fagsystemId get() = head.fagsystemId()
     private val fagområde get() = head.fagområde()
-    private val sisteUtbetalte get() = oppdragsliste.first { it.erUtbetalt() }
     private var tilstand: Tilstand = Ny
 
     private var observer: FagsystemIdObserver = object : FagsystemIdObserver {}
@@ -32,11 +38,16 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
     }
 
     internal fun accept(visitor: FagsystemIdVisitor) {
-        visitor.preVisitFagsystemId(this, fagsystemId, fagområde)
+        visitor.preVisitFagsystemId(this, fagsystemId, fagområde, utbetalingstidslinje)
         visitor.preVisitOppdragsliste(oppdragsliste)
-        oppdragsliste.onEach { it.accept(visitor) }
+        oppdragsliste.onEach { (oppdrag, tidslinje) ->
+            visitor.preVisitOppdrag(oppdrag, tidslinje)
+            oppdrag.accept(visitor)
+            tidslinje.accept(visitor)
+            visitor.postVisitOppdrag(oppdrag, tidslinje)
+        }
         visitor.postVisitOppdragsliste(oppdragsliste)
-        visitor.postVisitFagsystemId(this, fagsystemId, fagområde)
+        visitor.postVisitFagsystemId(this, fagsystemId, fagområde, utbetalingstidslinje)
     }
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning, maksdato: LocalDate) {
@@ -74,9 +85,8 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime
     ) {
-        fjernUbetalte()
         val oppdrag = head.annullere(this, aktivitetslogg, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
-        oppdragsliste.add(0, oppdrag)
+        oppdragsliste.add(0, oppdrag to Utbetalingstidslinje())
     }
 
     private fun utbetal(
@@ -94,28 +104,26 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
     }
 
     private fun fjernUbetalte() {
-        oppdragsliste.removeIf { it.erUbetalt() }
+        val søppel = oppdragsliste.removeFirst()
+        forkastet.add(Triple(søppel.first, søppel.second, LocalDateTime.now()))
     }
 
-    private fun erUtbetalt() = oppdragsliste.any { it.erUtbetalt() }
-
-    private fun kobleTil(opprinnelig: Oppdrag, aktivitetslogg: IAktivitetslogg): Boolean {
+    private fun kobleTil(opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): Boolean {
         if (opprinnelig.fagområde() != fagområde) return false
         val oppdrag = opprinnelig.minus(head, aktivitetslogg)
         if (oppdrag.fagsystemId() != fagsystemId) return false
-        tilstand.kobleTil(this, oppdrag)
-        return true
+        return tilstand.kobleTil(this, oppdrag, utbetalingstidslinje)
     }
 
-    private fun kobleTil(nytt: Oppdrag) {
+    private fun kobleTil(nytt: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {
         nytt.nettoBeløp(head)
-        oppdragsliste.add(0, nytt)
+        oppdragsliste.add(0, nytt to utbetalingstidslinje)
     }
 
     internal companion object {
-        internal fun kobleTil(fagsystemIder: MutableList<FagsystemId>, oppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): FagsystemId =
-            fagsystemIder.firstOrNull { it.kobleTil(oppdrag, aktivitetslogg) }
-                ?: FagsystemId(listOf(oppdrag)).also {
+        internal fun kobleTil(fagsystemIder: MutableList<FagsystemId>, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): FagsystemId =
+            fagsystemIder.firstOrNull { it.kobleTil(oppdrag, utbetalingstidslinje, aktivitetslogg) }
+                ?: FagsystemId(oppdrag, utbetalingstidslinje).also {
                     if (oppdrag.isEmpty()) return@also
                     fagsystemIder.add(it)
                 }
@@ -154,7 +162,7 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
             throw IllegalStateException("Forventet ikke kvittering på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
-        fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag) {
+        fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje): Boolean {
             throw IllegalStateException("Kan ikke legge til nytt oppdrag fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
         }
 
@@ -177,13 +185,11 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
     }
 
     private object Aktiv: Tilstand {
-        override fun entering(fagsystemId: FagsystemId) {
-            fagsystemId.fjernUbetalte()
-        }
 
-        override fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag) {
-            fagsystemId.kobleTil(oppdrag)
+        override fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje): Boolean {
+            fagsystemId.kobleTil(oppdrag, utbetalingstidslinje)
             fagsystemId.tilstand(Ubetalt)
+            return true
         }
 
         override fun annuller(
@@ -207,7 +213,10 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
             godkjenttidspunkt: LocalDateTime,
             maksdato: LocalDate
         ) {
-            if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Aktiv)
+            if (hendelse.valider().hasErrorsOrWorse()) {
+                fagsystemId.fjernUbetalte()
+                return fagsystemId.tilstand(Aktiv)
+            }
             fagsystemId.utbetal(hendelse, maksdato, ident, epost, godkjenttidspunkt)
             fagsystemId.tilstand(UtbetalingOverført)
         }
@@ -219,6 +228,7 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
             ident: String,
             godkjenttidspunkt: LocalDateTime
         ) {
+            fagsystemId.fjernUbetalte()
             fagsystemId.annuller(hendelse, ident, epost, godkjenttidspunkt)
             fagsystemId.tilstand(AnnulleringOverført)
         }
@@ -241,10 +251,10 @@ internal class FagsystemId private constructor(oppdragsliste: List<Oppdrag>) {
     }
 
     private object Avvist: Tilstand {
-        override fun entering(fagsystemId: FagsystemId) {
-            fagsystemId.fjernUbetalte()
-        }
+        override fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) = false
     }
 
-    private object Annullert: Tilstand
+    private object Annullert: Tilstand {
+        override fun kobleTil(fagsystemId: FagsystemId, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) = false
+    }
 }

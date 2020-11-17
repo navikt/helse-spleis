@@ -3,7 +3,8 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -37,12 +38,12 @@ internal class OppdragTest {
         val oppdrag1 = Oppdrag(ORGNUMMER, FAGOMRÅDE)
         val oppdrag2 = Oppdrag(ORGNUMMER, FAGOMRÅDE)
         val oppdrag3 = Oppdrag(ORGNUMMER, FAGOMRÅDE)
-        val oppdrag = listOf(oppdrag2, oppdrag3, oppdrag1)
+        val oppdrag = listOf(oppdrag2 to Utbetalingstidslinje(), oppdrag3 to Utbetalingstidslinje(), oppdrag1 to Utbetalingstidslinje())
         val sorterteOppdrag = Oppdrag.sorter(oppdrag)
 
-        assertEquals(oppdrag3, sorterteOppdrag[0])
-        assertEquals(oppdrag2, sorterteOppdrag[1])
-        assertEquals(oppdrag1, sorterteOppdrag[2])
+        assertEquals(oppdrag3, sorterteOppdrag[0].first)
+        assertEquals(oppdrag2, sorterteOppdrag[1].first)
+        assertEquals(oppdrag1, sorterteOppdrag[2].first)
     }
 
     @Test
@@ -68,7 +69,7 @@ internal class OppdragTest {
     }
 
     private fun oppdrag() = Oppdrag(ORGNUMMER, FAGOMRÅDE).also {
-        fagsystemId = FagsystemId.kobleTil(mutableListOf(), it, Aktivitetslogg())
+        fagsystemId = FagsystemId.kobleTil(mutableListOf(), it, Utbetalingstidslinje(), Aktivitetslogg())
     }
 
     private fun utbetalinghendelse() = UtbetalingHendelse(
