@@ -416,11 +416,6 @@ internal class Arbeidsgiver private constructor(
         return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in medSammeArbeidsgiverperiode
     }
 
-    internal fun forkastAlleTidligere(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        if (vedtaksperiode == vedtaksperioder.first()) return
-        søppelbøtte(hendelse, TIDLIGERE(vedtaksperioder[vedtaksperioder.indexOf(vedtaksperiode) - 1]))
-    }
-
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
         return Vedtaksperiode(
             person = person,
@@ -439,9 +434,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
-
-    internal fun finnForrigeVedaksperiode(vedtaksperiode: Vedtaksperiode) =
-        Vedtaksperiode.finnForrigeVedtaksperiode(vedtaksperioder, vedtaksperiode)
 
     internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
@@ -549,9 +541,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
-
-    internal fun harTilstøtendeForkastet(vedtaksperiode: Vedtaksperiode) =
-        forkastede.entries.map { it.key }.any { it.erSykeperiodeRettFør(vedtaksperiode) && it.erAvsluttet() }
 
     internal fun append(bøtte: Historie.Historikkbøtte) {
         if (harHistorikk()) bøtte.add(organisasjonsnummer, sykdomstidslinje())

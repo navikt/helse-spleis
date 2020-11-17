@@ -7,6 +7,7 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -122,7 +123,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
@@ -302,7 +303,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
+    fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
         håndterSykmelding(Sykmeldingsperiode(29.august(2020), 25.september(2020), 100))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
@@ -325,7 +326,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(26.september(2020), 23.oktober(2020), 100))
 
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertFalse(inspektør.periodeErForkastet(3.vedtaksperiode))
     }
 
     @Test

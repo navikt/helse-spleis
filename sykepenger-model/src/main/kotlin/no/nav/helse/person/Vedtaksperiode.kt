@@ -864,22 +864,7 @@ internal class Vedtaksperiode private constructor(
                         Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
                         false
                     )
-                    /*replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
-                        vedtaksperiode,
-                        sykmelding,
-                        Arbeidsgiver.SENERE_EXCLUSIVE,
-                        false
-                    )*/
-                } else {
-                    if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
-                        vedtaksperiode.arbeidsgiver.søppelbøtte(sykmelding, Arbeidsgiver.SENERE(vedtaksperiode))
-                        //vedtaksperiode.arbeidsgiver.søppelbøtte(vedtaksperiode, sykmelding, Arbeidsgiver.SENERE)
-                        return@returnPoint TilInfotrygd
-                    }
-                }
-                if (vedtaksperiode.arbeidsgiver.harTilstøtendeForkastet(vedtaksperiode)) {
-                    vedtaksperiode.arbeidsgiver.søppelbøtte(sykmelding, Arbeidsgiver.SENERE(vedtaksperiode))
-                    sykmelding.error("Kan ikke forlenge en ferdigbehandlet forkastet periode")
+                } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
                     return@returnPoint TilInfotrygd
                 }
 
@@ -1726,9 +1711,6 @@ internal class Vedtaksperiode private constructor(
             perioder
                 .filter { it < vedtaksperiode }
                 .all { it.erFerdigBehandlet() }
-
-        internal fun finnForrigeVedtaksperiode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            perioder.filter { it.periode.endInclusive < vedtaksperiode.periode.start }.maxByOrNull { it.periode.endInclusive }
     }
 }
 
