@@ -303,7 +303,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
-        dødsdato: LocalDate? = null
+        dødsdato: LocalDate? = null,
+        statslønn: Boolean = false
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
@@ -324,7 +325,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 omsorgspenger = omsorgspenger,
                 opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
-                dødsdato = dødsdato
+                dødsdato = dødsdato,
+                statslønn = statslønn
             )
         )
     }
@@ -631,7 +633,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
-        dødsdato: LocalDate? = null
+        dødsdato: LocalDate? = null,
+        statslønn: Boolean = false
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -641,6 +644,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
+            statslønn = statslønn,
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
@@ -21,6 +22,9 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val aktivitetslogg = Aktivitetslogg()
     private val utbetalingshistorikk = UtbetalingshistorikkMessage(packet)
         .utbetalingshistorikk(aktivitetslogg)
+    private val statslønn = packet["@løsning.${Sykepengehistorikk.name}"].any {
+        it["statslønn"]?.asBoolean() ?: false
+    }
 
     private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
         .takeIf(JsonNode::isObject)?.let(::asPeriode)
@@ -67,6 +71,7 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             dødsinfo = dødsinfo,
+            statslønn = statslønn,
             aktivitetslogg = aktivitetslogg
         )
 

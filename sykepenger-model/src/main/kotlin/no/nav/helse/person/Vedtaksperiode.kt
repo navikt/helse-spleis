@@ -1256,7 +1256,11 @@ internal class Vedtaksperiode private constructor(
                     val opphav = if (periodetype.opphav() == SPLEIS) "ny løsning" else "Infotrygd"
 
                     if (historie.erPingPong(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
-                        ytelser.warn("Perioden forlenger en behandling i $opphav, og har historikk i ${ if (periodetype.opphav() == SPLEIS) "Infotrygd" else "ny løsning"} også: Undersøk at antall dager igjen er beregnet riktig.")
+                        ytelser.warn("Perioden forlenger en behandling i $opphav, og har historikk i ${if (periodetype.opphav() == SPLEIS) "Infotrygd" else "ny løsning"} også: Undersøk at antall dager igjen er beregnet riktig.")
+                    }
+
+                    if (ytelser.statslønn()) {
+                        ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at sykepengegrunnlaget er fastsatt riktig.")
                     }
 
                     when {
