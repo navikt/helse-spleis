@@ -16,7 +16,7 @@ internal class V46GamleAnnulleringsforsøk : JsonMigration(version = 46) {
             arbeidsgiver.path("utbetalinger")
                 .filter { it["arbeidsgiverOppdrag"]["linjer"].size() == 1 }
                 .filter { it["arbeidsgiverOppdrag"]["linjer"].first()["statuskode"].asText(null) == "OPPH" }
-                .filter { !it["annullert"].booleanValue() }
+                .filter { !(it.takeIf { it.hasNonNull("annullering") }?.booleanValue() ?: false) }
                 .forEach {
                     (it as ObjectNode).put("annullert", true)
                     sikkerLogg.info("Patchet gammel annullering på ${jsonNode["fødselsnummer"].textValue()}, utbetalingsref: ${it["arbeidsgiverOppdrag"]["fagsystemId"].textValue()}")

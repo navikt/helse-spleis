@@ -60,8 +60,7 @@ private fun originalJson() =
                             }
                         ]
                     },
-                    "status": "UTBETALT",
-                    "annullert": false
+                    "status": "UTBETALT"
                 },
                 {
                     "arbeidsgiverOppdrag": {
