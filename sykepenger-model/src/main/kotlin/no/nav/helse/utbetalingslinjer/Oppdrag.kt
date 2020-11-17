@@ -115,6 +115,15 @@ internal class Oppdrag private constructor(
         )
     }
 
+    internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
+        Aktivitetslogg.Aktivitet.Behov.simulering(
+            aktivitetslogg = aktivitetslogg,
+            oppdrag = removeUEND(),
+            maksdato = maksdato,
+            saksbehandler = saksbehandler
+        )
+    }
+
     internal fun removeUEND() = Oppdrag(
         mottaker,
         fagområde,

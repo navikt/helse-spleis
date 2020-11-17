@@ -2,12 +2,11 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.fail
 import java.time.LocalDateTime
 
 internal class FagsystemIdInspektør(fagsystemIder: List<FagsystemId>) : FagsystemIdVisitor {
     private val fagsystemIder = mutableListOf<String>()
-    private val oppdragsliste = mutableListOf<List<Oppdrag>>()
     private val oppdragstilstander = mutableMapOf<Int, MutableList<Oppdrag.Utbetalingtilstand>>()
     private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private var fagsystemIdTeller = 0
@@ -17,23 +16,22 @@ internal class FagsystemIdInspektør(fagsystemIder: List<FagsystemId>) : Fagsyst
         fagsystemIder.onEach { it.accept(this) }
     }
 
-    fun oppdragtilstander(fagsystemIndeks: Int) = oppdragstilstander[fagsystemIndeks] ?: Assertions.fail {
+    fun oppdragtilstander(fagsystemIndeks: Int) = oppdragstilstander[fagsystemIndeks] ?: fail {
         "Finner ikke fagsystem med indeks $fagsystemIndeks"
     }
 
     fun oppdragtilstand(fagsystemIndeks: Int, oppdragIndeks: Int) =
-        oppdragstilstander[fagsystemIndeks]?.get(oppdragIndeks) ?: Assertions.fail { "Finner ikke fagsystem med indeks $fagsystemIndeks eller oppdrag med indeks $oppdragIndeks" }
+        oppdragstilstander[fagsystemIndeks]?.get(oppdragIndeks) ?: fail { "Finner ikke fagsystem med indeks $fagsystemIndeks eller oppdrag med indeks $oppdragIndeks" }
 
-    fun utbetalingstidslinje(fagsystemIndeks: Int) = utbetalingstidslinjer[fagsystemIndeks] ?: Assertions.fail { "Finner ikke utbetalingstidslinje for fagsystem med indeks $fagsystemIndeks" }
+    fun utbetalingstidslinje(fagsystemIndeks: Int) = utbetalingstidslinjer[fagsystemIndeks] ?: fail { "Finner ikke utbetalingstidslinje for fagsystem med indeks $fagsystemIndeks" }
 
     override fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, utbetalingstidslinje: Utbetalingstidslinje) {
         fagsystemIder.add(fagsystemIdTeller, id)
         utbetalingstidslinjer[fagsystemIdTeller] = utbetalingstidslinje
     }
 
-    override fun preVisitOppdragsliste(oppdragsliste: List<Pair<Oppdrag, Utbetalingstidslinje>>) {
+    override fun preVisitOppdragsliste() {
         oppdragteller = 0
-        this.oppdragsliste.add(fagsystemIdTeller, oppdragsliste.map(Pair<Oppdrag, *>::first))
     }
 
     override fun preVisitOppdrag(

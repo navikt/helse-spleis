@@ -69,7 +69,7 @@ internal class OppdragTest {
     }
 
     private fun oppdrag() = Oppdrag(ORGNUMMER, FAGOMRÅDE).also {
-        fagsystemId = FagsystemId.kobleTil(mutableListOf(), it, Utbetalingstidslinje(), Aktivitetslogg())
+        fagsystemId = FagsystemId.utvide(mutableListOf(), it, Utbetalingstidslinje(), Aktivitetslogg())
     }
 
     private fun utbetalinghendelse() = UtbetalingHendelse(

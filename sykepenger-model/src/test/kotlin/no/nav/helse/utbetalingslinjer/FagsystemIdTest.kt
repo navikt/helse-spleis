@@ -266,7 +266,7 @@ internal class FagsystemIdTest {
                 Fagområde.SykepengerRefusjon,
                 sisteDato ?: tidslinje.sisteDato()
             ).result().also {
-                fagsystemId = FagsystemId.kobleTil(fagsystemIder, it, tidslinje, aktivitetslogg)
+                fagsystemId = FagsystemId.utvide(fagsystemIder, it, tidslinje, aktivitetslogg)
                 oppdrag[it] = fagsystemId
             }
         }
