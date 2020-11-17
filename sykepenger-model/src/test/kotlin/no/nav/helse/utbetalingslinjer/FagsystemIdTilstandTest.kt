@@ -1,16 +1,14 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AVVIST
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -55,9 +53,8 @@ internal class FagsystemIdTilstandTest {
         opprettOgUtbetal(5.NAV, 2.HELG, 5.NAV)
         assertTilstander("Ny", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertAlleDager(tidslinje, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
-        }
+        assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -66,9 +63,8 @@ internal class FagsystemIdTilstandTest {
         opprettOgUtbetal(5.NAV, 2.HELG, 5.NAV, 2.HELG)
         assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertAlleDager(tidslinje, 1.januar til 14.januar, NavDag::class, NavHelgDag::class)
-        }
+        assertUtbetalingstidslinje(0,1.januar til 14.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(1.januar til 14.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -79,9 +75,8 @@ internal class FagsystemIdTilstandTest {
         assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertTrue(tidslinje.isEmpty())
-        }
+        assertTomUtbetalingstidslinje(0)
+        assertTomHistorie()
     }
 
     @Test
@@ -93,9 +88,7 @@ internal class FagsystemIdTilstandTest {
         assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertTrue(tidslinje.isEmpty())
-        }
+        assertTomUtbetalingstidslinje(0)
     }
 
     @Test
@@ -104,10 +97,17 @@ internal class FagsystemIdTilstandTest {
         opprett(5.NAV, 2.HELG, 5.NAV)
         utbetal(godkjent = false)
         assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "Aktiv")
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertEquals(7.januar, tidslinje.sisteDato())
-            assertAlleDager(tidslinje, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
-        }
+        assertUtbetalingstidslinje(0,1.januar til 7.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(1.januar til 7.januar, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
+    fun `ubetalt etter aktiv`() {
+        opprettOgUtbetal(5.NAV, 2.HELG)
+        opprett(5.NAV, 2.HELG, 5.NAV)
+        assertTilstander("Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
+        assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
+        assertHistorie(1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -135,10 +135,7 @@ internal class FagsystemIdTilstandTest {
         val siste = utbetal(godkjent = false)
         assertTilstander("Ny", "Avvist")
         assertIkkeBehov(Behovtype.Utbetaling, siste)
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertEquals(12.januar, tidslinje.sisteDato())
-            assertAlleDager(tidslinje, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
-        }
+        assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -147,10 +144,7 @@ internal class FagsystemIdTilstandTest {
         utbetal()
         kvitter(oppdragstatus = AVVIST)
         assertTilstander("Ny", "UtbetalingOverført", "Avvist")
-        inspektør.utbetalingstidslinje(0).also { tidslinje ->
-            assertEquals(12.januar, tidslinje.sisteDato())
-            assertAlleDager(tidslinje, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
-        }
+        assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
     private fun opprettOgUtbetal(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, sisteDato: LocalDate? = null) {
@@ -183,6 +177,38 @@ internal class FagsystemIdTilstandTest {
 
     private fun assertBehov(behovtype: Behovtype, aktivitetslogg: IAktivitetslogg = this.aktivitetslogg) {
         assertTrue(aktivitetslogg.behov().last().type == behovtype) { aktivitetslogg.toString() }
+    }
+
+    private fun assertTomHistorie() {
+        Historie.Historikkbøtte()
+            .also { fagsystemId.append(ORGNR, it) }
+            .utbetalingstidslinje()
+            .also {
+                assertTrue(it.isEmpty())
+            }
+    }
+
+    private fun assertHistorie(periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+        Historie.Historikkbøtte()
+            .also { fagsystemId.append(ORGNR, it) }
+            .utbetalingstidslinje()
+            .also {
+                assertEquals(periode.endInclusive, it.sisteDato())
+                assertAlleDager(it, periode, *dager)
+            }
+    }
+
+    private fun assertTomUtbetalingstidslinje(fagsystemIdIndeks: Int) {
+        inspektør.utbetalingstidslinje(fagsystemIdIndeks).also {
+            assertTrue(it.isEmpty())
+        }
+    }
+
+    private fun assertUtbetalingstidslinje(fagsystemIdIndeks: Int, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
+        inspektør.utbetalingstidslinje(fagsystemIdIndeks).also {
+            assertEquals(periode.endInclusive, it.sisteDato())
+            assertAlleDager(it, periode, *dager)
+        }
     }
 
     private fun utbetal(fagsystemId: FagsystemId = this.fagsystemId, godkjent: Boolean = true): IAktivitetslogg {

@@ -7,6 +7,7 @@ import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.head
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.sorterOppdrag
+import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,6 +35,10 @@ internal class FagsystemId private constructor(
     internal fun fagsystemId() = head.fagsystemId()
     internal fun fagområde() = head.fagområde()
     internal fun nettoBeløp() = head.nettobeløp()
+
+    internal fun append(orgnr: String, bøtte: Historie.Historikkbøtte) {
+        Utbetaling.appendAvsluttet(aktive, orgnr, bøtte)
+    }
 
     internal fun register(fagsystemIdObserver: FagsystemIdObserver) {
         observer = fagsystemIdObserver
@@ -165,7 +170,16 @@ internal class FagsystemId private constructor(
             fun sorterOppdrag(liste: List<Utbetaling>) = liste.sortedByDescending { it.opprettet }.toMutableList()
 
             fun List<Utbetaling>.head() = first()
-            fun List<Utbetaling>.sisteAvsluttede() = firstOrNull { it.avsluttet != null }
+
+            private fun List<Utbetaling>.sisteAvsluttede() = firstOrNull { it.avsluttet != null }
+
+            fun appendAvsluttet(liste: List<Utbetaling>, orgnr: String, bøtte: Historie.Historikkbøtte) {
+                liste.sisteAvsluttede()?.also {
+                    // TODO: ta høyde for at fagområde er Sykepenger (aka. brukerutbetaling),
+                    // og derfor _ikke_ lagre på orgnr?
+                    bøtte.add(orgnr, it.utbetalingstidslinje)
+                }
+            }
         }
     }
 
