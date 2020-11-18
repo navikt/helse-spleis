@@ -7,6 +7,7 @@ import no.nav.helse.person.FagsystemIdVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.head
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.sorterOppdrag
+import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -30,6 +31,7 @@ internal class FagsystemId private constructor(
 
     private val head get() = aktive.head()
     private val utbetalingstidslinje get() = head.utbetalingstidslinje()
+    private val utbetaltTidslinje get() = aktive.utbetaltTidslinje()
     private var tilstand: Tilstand = Ny
 
     private var observer: FagsystemIdObserver = object : FagsystemIdObserver {}
@@ -41,7 +43,8 @@ internal class FagsystemId private constructor(
     internal fun nettoBeløp() = head.nettobeløp()
 
     internal fun append(orgnr: String, bøtte: Historie.Historikkbøtte) {
-        Utbetaling.appendAvsluttet(aktive, orgnr, bøtte)
+        if (utbetaltTidslinje.isEmpty()) return
+        bøtte.add(orgnr, utbetaltTidslinje)
     }
 
     internal fun register(fagsystemIdObserver: FagsystemIdObserver) {
@@ -49,11 +52,11 @@ internal class FagsystemId private constructor(
     }
 
     internal fun accept(visitor: FagsystemIdVisitor) {
-        visitor.preVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje)
+        visitor.preVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje, utbetaltTidslinje)
         visitor.preVisitOppdragsliste()
         aktive.onEach { it.accept(visitor) }
         visitor.postVisitOppdragsliste()
-        visitor.postVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje)
+        visitor.postVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje, utbetaltTidslinje)
     }
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning, maksdato: LocalDate) {
@@ -159,15 +162,7 @@ internal class FagsystemId private constructor(
 
             fun List<Utbetaling>.head() = first()
 
-            private fun List<Utbetaling>.sisteAvsluttede() = firstOrNull { it.avsluttet != null }
-
-            fun appendAvsluttet(liste: List<Utbetaling>, orgnr: String, bøtte: Historie.Historikkbøtte) {
-                liste.sisteAvsluttede()?.also {
-                    // TODO: ta høyde for at fagområde er Sykepenger (aka. brukerutbetaling),
-                    // og derfor _ikke_ lagre på orgnr?
-                    bøtte.add(orgnr, it.utbetalingstidslinje)
-                }
-            }
+            fun List<Utbetaling>.utbetaltTidslinje() = firstOrNull { it.avsluttet != null }?.utbetalingstidslinje ?: Utbetalingstidslinje()
         }
     }
 
