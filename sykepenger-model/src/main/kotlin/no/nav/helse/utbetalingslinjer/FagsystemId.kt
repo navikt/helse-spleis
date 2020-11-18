@@ -16,15 +16,21 @@ import java.time.LocalDateTime
 internal class FagsystemId private constructor(
     private val fagsystemId: String,
     private val fagområde: Fagområde,
+    private var tilstand: Tilstand,
     oppdragsliste: List<Utbetaling>,
-    forkastet: List<Utbetaling> = emptyList()
+    forkastet: List<Utbetaling>
 ) {
 
-    internal constructor(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) : this(
+    private constructor(observatør: FagsystemIdObserver, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) : this(
         oppdrag.fagsystemId(),
         oppdrag.fagområde(),
-        listOf(Utbetaling(oppdrag, utbetalingstidslinje))
-    )
+        Initiell,
+        emptyList(),
+        emptyList()
+    ) {
+        register(observatør)
+        tilstand.nyUtbetaling(this, Utbetaling(oppdrag, utbetalingstidslinje))
+    }
 
     private val aktive = sorterOppdrag(oppdragsliste)
     private val forkastet = sorterOppdrag(forkastet)
@@ -32,12 +38,11 @@ internal class FagsystemId private constructor(
     private val head get() = aktive.head()
     private val utbetalingstidslinje get() = head.utbetalingstidslinje()
     private val utbetaltTidslinje get() = aktive.utbetaltTidslinje()
-    private var tilstand: Tilstand = Ny
 
     private var observer: FagsystemIdObserver = object : FagsystemIdObserver {}
 
     init {
-        require(oppdragsliste.isNotEmpty())
+        require((tilstand == Initiell && oppdragsliste.isEmpty()) || (tilstand != Initiell && oppdragsliste.isNotEmpty()))
     }
 
     internal fun nettoBeløp() = head.nettobeløp()
@@ -118,9 +123,9 @@ internal class FagsystemId private constructor(
     }
 
     internal companion object {
-        internal fun utvide(fagsystemIder: MutableList<FagsystemId>, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): FagsystemId =
+        internal fun utvide(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg): FagsystemId =
             fagsystemIder.firstOrNull { it.utvide(oppdrag, utbetalingstidslinje, aktivitetslogg) }
-                ?: FagsystemId(oppdrag, utbetalingstidslinje).also {
+                ?: FagsystemId(observatør, oppdrag, utbetalingstidslinje).also {
                     if (oppdrag.isEmpty()) return@also
                     fagsystemIder.add(it)
                 }
@@ -225,6 +230,14 @@ internal class FagsystemId private constructor(
         }
     }
 
+
+    private object Initiell : Tilstand {
+        override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
+            fagsystemId.nyUtbetaling(Ny, utbetaling)
+            return true
+        }
+    }
+
     private object Ny : Tilstand {
         override fun overfør(
             fagsystemId: FagsystemId,
@@ -249,7 +262,6 @@ internal class FagsystemId private constructor(
     }
 
     private object Aktiv : Tilstand {
-
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
             fagsystemId.nyUtbetaling(Ubetalt, utbetaling)
             return true

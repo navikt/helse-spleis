@@ -49,7 +49,7 @@ internal class FagsystemIdTest {
     @Test
     fun `happy path`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
@@ -59,7 +59,7 @@ internal class FagsystemIdTest {
     fun `utbetaling overført`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
         utbetal(0)
-        assertTilstander(0, "Ny", "UtbetalingOverført")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført")
         assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertTomHistorie(0)
     }
@@ -68,7 +68,7 @@ internal class FagsystemIdTest {
     fun `happy path med flere utbetalinger`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV, 2.HELG)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "UtbetalingOverført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "UtbetalingOverført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 14.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 14.januar, NavDag::class, NavHelgDag::class)
@@ -79,7 +79,7 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
         val siste = annuller(0)
         kvitter(0)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -90,7 +90,7 @@ internal class FagsystemIdTest {
     fun `annullering overført`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
         val siste = annuller(0)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført")
         assertBehov(Behovtype.Utbetaling, siste)
         assertFalse(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -103,7 +103,7 @@ internal class FagsystemIdTest {
         opprett(5.NAV, 2.HELG, 5.NAV, 2.HELG)
         val siste = annuller(0)
         kvitter(0)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "AnnulleringOverført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -123,7 +123,7 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
         utbetal(0, godkjent = false)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt", "Aktiv")
         assertUtbetalingstidslinje(0,1.januar til 7.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
@@ -132,7 +132,7 @@ internal class FagsystemIdTest {
     fun `ubetalt etter aktiv`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
@@ -160,7 +160,7 @@ internal class FagsystemIdTest {
     fun `ikke-godkjent periode`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
         val siste = utbetal(0, godkjent = false)
-        assertTilstander(0, "Ny", "Avvist")
+        assertTilstander(0, "Initiell", "Ny", "Avvist")
         assertIkkeBehov(Behovtype.Utbetaling, siste)
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
@@ -170,7 +170,7 @@ internal class FagsystemIdTest {
         opprett(5.NAV, 2.HELG, 5.NAV)
         utbetal(0)
         kvitter(0, UtbetalingHendelse.Oppdragstatus.AVVIST)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Avvist")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Avvist")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
@@ -178,7 +178,7 @@ internal class FagsystemIdTest {
     fun `Ny fagsystemId`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
         assertEquals(1, fagsystemIder.size)
-        assertTilstand(0, "Ny")
+        assertTilstander(0, "Initiell", "Ny")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertTomHistorie(0)
     }
@@ -198,8 +198,8 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(0, 1.NAV)
         opprett(1.NAV, 16.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
-        assertTilstand(1, "Ny")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstander(1, "Initiell", "Ny")
         assertUtbetalingstidslinje(0, 1.januar til 1.januar, NavDag::class)
         assertHistorie(0, 1.januar til 1.januar, NavDag::class)
         assertUtbetalingstidslinje(1, 1.januar til 1.januar, NavDag::class, sisteDato = 18.januar)
@@ -213,8 +213,8 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(0, 1.NAV)
         opprett(1.NAV, 1.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv")
-        assertTilstand(1, "Ny")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv")
+        assertTilstander(1, "Initiell", "Ny")
     }
 
     @Test
@@ -229,7 +229,7 @@ internal class FagsystemIdTest {
         opprettOgUtbetal(0, 16.AP, 5.NAV)
         opprett(16.AP, 5.NAV, 5.NAV(1300))
         assertEquals(1, fagsystemIder.size)
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
     }
 
     @Test
@@ -241,8 +241,8 @@ internal class FagsystemIdTest {
         assertEquals(2, fagsystemIder.size)
         assertTrue(fagsystemIder[0].erAnnullert())
         assertFalse(fagsystemIder[1].erAnnullert())
-        assertTilstander(0, "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
-        assertTilstand(1, "Ny")
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "AnnulleringOverført", "Annullert")
+        assertTilstander(1, "Initiell", "Ny")
     }
 
     @Test
@@ -340,10 +340,6 @@ internal class FagsystemIdTest {
                     } + "\nUtbetalingstidslinje:\n" + tidslinje.toString() + "\n"
             }
         }
-    }
-
-    private fun assertTilstand(fagsystemIdIndeks: Int, tilstand: String) {
-        assertEquals(tilstand, inspektør.tilstand(fagsystemIdIndeks))
     }
 
     private fun assertTilstander(fagsystemIdIndeks: Int, vararg tilstand: String) {
@@ -459,7 +455,7 @@ internal class FagsystemIdTest {
                 ORGNR,
                 Fagområde.SykepengerRefusjon
             ).result().also {
-                fagsystemId = FagsystemId.utvide(fagsystemIder, it, tidslinje, aktivitetslogg).also { it.register(observatør) }
+                fagsystemId = FagsystemId.utvide(fagsystemIder, observatør, it, tidslinje, aktivitetslogg)
                 oppdrag[it] = fagsystemId
             }
         }
