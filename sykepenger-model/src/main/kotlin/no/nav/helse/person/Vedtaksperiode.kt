@@ -1306,7 +1306,7 @@ internal class Vedtaksperiode private constructor(
                             arbeidsgiver.addInntekt(ytelser)
                             ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
                             if (ytelser.statslønn())
-                                ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at sykepengegrunnlaget er fastsatt riktig.")
+                                ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
                         }
                         // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
                         tilstøtende == null -> {
