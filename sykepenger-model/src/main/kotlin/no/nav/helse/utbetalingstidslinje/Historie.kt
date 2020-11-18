@@ -56,12 +56,12 @@ internal class Historie() {
         inntektshistorikk: Inntektshistorikk,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-       return UtbetalingstidslinjeBuilder(
+        return UtbetalingstidslinjeBuilder(
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
-           .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
+            .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
     }
 
     internal fun beregnUtbetalingstidslinjeVol2(
@@ -70,23 +70,15 @@ internal class Historie() {
         inntektshistorikk: InntektshistorikkVol2,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-        val inntekterForSkjæringstidspunkter = skjæringstidspunkter(periode)
-            .filterNot { inntektshistorikk.dekningsgrunnlag(it, NormalArbeidstaker) == null }
-            .toMutableList()
-            .apply {
-                addAll(
-                    Sykdomstidslinje.skjæringstidspunkter(
-                        periode.endInclusive,
-                        infotrygdbøtte.sykdomstidslinjer()
+        val inntekterForSkjæringstidspunkter =
+            (skjæringstidspunkter(periode) + Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, infotrygdbøtte.sykdomstidslinjer()))
+                .filterNot { inntektshistorikk.dekningsgrunnlag(it, NormalArbeidstaker) == null }
+                .map { dato ->
+                    dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
+                        requireNotNull(inntektshistorikk.dekningsgrunnlag(dato, NormalArbeidstaker)),
+                        requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlag(dato))
                     )
-                )
-            }
-            .map { dato ->
-                dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
-                    requireNotNull(inntektshistorikk.dekningsgrunnlag(dato, NormalArbeidstaker)),
-                    requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlag(dato))
-                )
-            }.toMap()
+                }.toMap()
 
         return UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = sammenhengendePeriode(periode),
