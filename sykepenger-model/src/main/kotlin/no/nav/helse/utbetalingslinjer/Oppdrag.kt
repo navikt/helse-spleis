@@ -53,7 +53,7 @@ internal class Oppdrag private constructor(
 
     internal fun fagsystemId() = fagsystemId
 
-    internal fun utbetal(
+    internal fun overfør(
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate?,
         saksbehandler: String,
@@ -69,17 +69,6 @@ internal class Oppdrag private constructor(
             godkjenttidspunkt = godkjenttidspunkt,
             annullering = linjerUtenOpphør().isEmpty()
         )
-    }
-
-    internal fun annullere(
-        aktivitetslogg: IAktivitetslogg,
-        saksbehandler: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime
-    ): Oppdrag {
-        val annullert = emptied().minus(this, aktivitetslogg)
-        annullert.utbetal(aktivitetslogg, null, saksbehandler, saksbehandlerEpost, godkjenttidspunkt)
-        return annullert
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
