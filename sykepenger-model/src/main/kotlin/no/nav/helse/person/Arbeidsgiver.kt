@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
@@ -493,13 +494,12 @@ internal class Arbeidsgiver private constructor(
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
-
+        if (Toggles.nyUtbetalingstidslinjebuilder) return historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
         val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
         try {
             val sammenhengendePeriode = historie.sammenhengendePeriode(periode)
             val vol2Linje = historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
             sammenlignGammelOgNyUtbetalingstidslinje(utbetalingstidslinje, vol2Linje, sammenhengendePeriode)
-
         } catch (e: Throwable) {
             sikkerLogg.info("Feilet ved bygging av utbetalingstidslinje på ny måte for ${ytelser.vedtaksperiodeId}", e)
         }

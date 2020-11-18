@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
@@ -2280,6 +2281,63 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
 
         assertEquals(24.juni(2020), inspektør.utbetalinger.first().utbetalingstidslinje().førsteDato())
+
+    }
+
+    @Test
+    fun `Ny utbetalingsbuilder feiler ikke når sykdomshistorikk inneholder arbeidsgiverperiode som hører til infotrygdperiode`() {
+        Toggles.nyUtbetalingstidslinjebuilder = true
+        håndterSykmelding(Sykmeldingsperiode(28.september(2020), 14.oktober(2020), 30))
+        håndterSøknad(Sykdom(28.september(2020), 14.oktober(2020), 30))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(3.september(2020), 7.september(2020), 200, 30, ORGNUMMER),
+            RefusjonTilArbeidsgiver(8.september(2020), 27.september(2020), 200, 30, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(3.september(2020), 20000.månedlig, ORGNUMMER, true)
+            )
+        )
+        håndterYtelser(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(3.september(2020), 7.september(2020), 200, 30, ORGNUMMER),
+            RefusjonTilArbeidsgiver(8.september(2020), 27.september(2020), 200, 30, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(3.september(2020), 20000.månedlig, ORGNUMMER, true)
+            )
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(15.oktober(2020), 30.oktober(2020), 30))
+        håndterSøknad(Sykdom(15.oktober(2020), 30.oktober(2020), 30))
+        håndterYtelser(
+            2.vedtaksperiode,
+            RefusjonTilArbeidsgiver(3.september(2020), 7.september(2020), 200, 30, ORGNUMMER),
+            RefusjonTilArbeidsgiver(8.september(2020), 27.september(2020), 200, 30, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(3.september(2020), 20000.månedlig, ORGNUMMER, true)
+            )
+        )
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        håndterSykmelding(Sykmeldingsperiode(11.november(2020), 11.november(2020), 100))
+        håndterSøknad(Sykdom(11.november(2020), 11.november(2020), 100))
+        håndterInntektsmelding(listOf(Periode(18.august(2020), 2.september(2020))), 11.november(2020))
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        assertDoesNotThrow {
+            håndterYtelser(
+                3.vedtaksperiode,
+                RefusjonTilArbeidsgiver(3.september(2020), 7.september(2020), 200, 30, ORGNUMMER),
+                RefusjonTilArbeidsgiver(8.september(2020), 27.september(2020), 200, 30, ORGNUMMER),
+                inntektshistorikk = listOf(
+                    Utbetalingshistorikk.Inntektsopplysning(3.september(2020), 20000.månedlig, ORGNUMMER, true)
+                )
+            )
+        }
+        Toggles.nyUtbetalingstidslinjebuilder = false
 
     }
 }

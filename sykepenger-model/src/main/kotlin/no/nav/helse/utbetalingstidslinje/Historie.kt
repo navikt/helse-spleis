@@ -72,6 +72,15 @@ internal class Historie() {
     ): Utbetalingstidslinje {
         val inntekterForSkjæringstidspunkter = skjæringstidspunkter(periode)
             .filterNot { inntektshistorikk.dekningsgrunnlag(it, NormalArbeidstaker) == null }
+            .toMutableList()
+            .apply {
+                addAll(
+                    Sykdomstidslinje.skjæringstidspunkter(
+                        periode.endInclusive,
+                        infotrygdbøtte.sykdomstidslinjer()
+                    )
+                )
+            }
             .map { dato ->
                 dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
                     requireNotNull(inntektshistorikk.dekningsgrunnlag(dato, NormalArbeidstaker)),
