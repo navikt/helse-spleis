@@ -26,6 +26,24 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     }
 
     @Test
+    fun `infotrygd - spleis - spleis - kort gap - spleis`() {
+        historie(
+            refusjon(17.januar, 20.januar),
+            refusjon(21.januar, 31.januar)
+        )
+        historie.add(AG1, navdager(1.februar, 28.februar))
+        historie.add(AG1, navdager(1.mars, 31.mars))
+        historie.add(AG1, sykedager(1.januar, 16.januar))
+        historie.add(AG1, sykedager(10.april, 30.april))
+        val utbetalingstidslinje = beregn(AG1, 1.april til 30.april, 17.januar, 10.april)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.februar til 31.mars, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.april til 9.april, Arbeidsdag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 10.april til 30.april, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
     fun `agp infotrygd - spleis`() {
         historie(refusjon(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
