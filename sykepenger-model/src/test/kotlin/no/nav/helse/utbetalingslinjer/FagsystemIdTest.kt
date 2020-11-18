@@ -184,13 +184,22 @@ internal class FagsystemIdTest {
     }
 
     @Test
-    fun simulere() {
-        opprett(1.NAV)
-        val maksdato = LocalDate.MAX
-        val saksbehandler = "Z999999"
-        fagsystemId.simuler(aktivitetslogg, maksdato, saksbehandler)
+    fun `simulere ny`() {
+        opprett(16.AP, 10.NAV)
+        fagsystemId.simuler(aktivitetslogg)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
-        assertSimuleringsbehov(maksdato, saksbehandler)
+        assertSimuleringsbehov(MAKSDATO, "SPLEIS")
+        assertTilstander(0, "Initiell", "Ny")
+    }
+
+    @Test
+    fun `simulere ubetalt`() {
+        opprettOgUtbetal(0, 16.AP, 10.NAV)
+        opprett(16.AP, 10.NAV, 10.NAV)
+        fagsystemId.simuler(aktivitetslogg)
+        assertTilstander(0, "Initiell", "Ny", "UtbetalingOverført", "Aktiv", "Ubetalt")
+        assertTrue(aktivitetslogg.behov().isNotEmpty())
+        assertSimuleringsbehov(MAKSDATO, "SPLEIS")
     }
 
     @Test
@@ -402,7 +411,7 @@ internal class FagsystemIdTest {
             false
         ).also {
             it.kontekst(person)
-            fagsystemIder[fagsystemIdIndeks].håndter(it, MAKSDATO)
+            fagsystemIder[fagsystemIdIndeks].håndter(it)
         }
     }
 
@@ -455,7 +464,7 @@ internal class FagsystemIdTest {
                 ORGNR,
                 Fagområde.SykepengerRefusjon
             ).result().also {
-                fagsystemId = FagsystemId.utvide(fagsystemIder, observatør, it, tidslinje, aktivitetslogg)
+                fagsystemId = FagsystemId.utvide(fagsystemIder, observatør, it, tidslinje, MAKSDATO, aktivitetslogg)
                 oppdrag[it] = fagsystemId
             }
         }
