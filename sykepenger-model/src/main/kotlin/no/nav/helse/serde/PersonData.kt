@@ -9,6 +9,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
+import no.nav.helse.serde.reflection.FagsystemTilstandType
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Dag
@@ -734,6 +735,62 @@ internal data class PersonData(
                     hendelseSykdomstidslinje.createSykdomstidslinje(),
                     beregnetSykdomstidslinje.createSykdomstidslinje()
                 )
+        }
+    }
+
+    data class FagsystemIdData(
+        private val fagsystemId: String,
+        private val fagområde: String,
+        private val tilstand: FagsystemTilstandType,
+        private val utbetalinger: List<UtbetalingData>,
+        private val forkastet: List<UtbetalingData>
+    ) {
+        internal fun konverterTilFagsystemId() = FagsystemId::class.primaryConstructor!!
+            .apply { isAccessible = true }
+            .call(
+                fagsystemId,
+                Fagområde.from(fagområde),
+                FagsystemTilstandType.tilTilstand(tilstand),
+                utbetalinger.map { it.konverterTilUtbetaling() },
+                forkastet.map { it.konverterTilUtbetaling() }
+            )
+
+        data class UtbetalingData(
+            private val oppdrag: OppdragData,
+            private val utbetalingstidslinje: UtbetalingstidslinjeData,
+            private val type: FagsystemId.Utbetaling.Utbetalingtype,
+            private val maksdato: LocalDate?,
+            private val opprettet: LocalDateTime,
+            private val godkjentAv: GodkjentAvData?,
+            private val sendt: LocalDateTime?,
+            private val avstemmingsnøkkel: Long?,
+            private val overføringstidspunkt: LocalDateTime?,
+            private val avsluttet: LocalDateTime?
+        ) {
+
+            internal fun konverterTilUtbetaling() = FagsystemId.Utbetaling::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(
+                    oppdrag.konverterTilOppdrag(),
+                    utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
+                    type,
+                    maksdato,
+                    opprettet,
+                    godkjentAv?.konverterTilTriple(),
+                    sendt,
+                    avstemmingsnøkkel,
+                    overføringstidspunkt,
+                    avsluttet
+                )
+
+            data class GodkjentAvData(
+                private val ident: String,
+                private val epost: String,
+                private val tidsstempel: LocalDateTime
+            ) {
+                internal fun konverterTilTriple() =
+                    Triple(ident, epost, tidsstempel)
+            }
         }
     }
 

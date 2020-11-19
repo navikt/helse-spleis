@@ -8,6 +8,8 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.head
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.sorterOppdrag
 import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Companion.utbetaltTidslinje
+import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.FagsystemId.Utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -32,12 +34,12 @@ internal class FagsystemId private constructor(
         tilstand.nyUtbetaling(this, utbetaling)
     }
 
-    private val aktive = sorterOppdrag(oppdragsliste)
+    private val utbetalinger = sorterOppdrag(oppdragsliste)
     private val forkastet = sorterOppdrag(forkastet)
 
-    private val head get() = aktive.head()
+    private val head get() = utbetalinger.head()
     private val utbetalingstidslinje get() = head.utbetalingstidslinje()
-    private val utbetaltTidslinje get() = aktive.utbetaltTidslinje()
+    private val utbetaltTidslinje get() = utbetalinger.utbetaltTidslinje()
 
     private var observer: FagsystemIdObserver = object : FagsystemIdObserver {}
 
@@ -59,7 +61,7 @@ internal class FagsystemId private constructor(
     internal fun accept(visitor: FagsystemIdVisitor) {
         visitor.preVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje, utbetaltTidslinje)
         visitor.preVisitOppdragsliste()
-        aktive.onEach { it.accept(visitor) }
+        utbetalinger.onEach { it.accept(visitor) }
         visitor.postVisitOppdragsliste()
         visitor.postVisitFagsystemId(this, fagsystemId, fagområde, tilstand::class.simpleName!!, utbetalingstidslinje, utbetaltTidslinje)
     }
@@ -94,7 +96,7 @@ internal class FagsystemId private constructor(
         tilstand.prøvIgjen(this, aktivitetslogg)
     }
 
-    internal fun erTom() = aktive.isEmpty()
+    internal fun erTom() = utbetalinger.isEmpty()
 
     internal fun erAnnullert() = tilstand == Annullert
 
@@ -104,7 +106,7 @@ internal class FagsystemId private constructor(
     }
 
     private fun nyUtbetaling(utbetaling: Utbetaling) {
-        aktive.add(0, utbetaling)
+        utbetalinger.add(0, utbetaling)
     }
 
     private fun nyUtbetaling(nesteTilstand: Tilstand, utbetaling: Utbetaling) {
@@ -133,7 +135,7 @@ internal class FagsystemId private constructor(
     }
 
     private fun forkastUtbetaling() {
-        val søppel = aktive.removeFirst()
+        val søppel = utbetalinger.removeFirst()
         forkastet.add(0, søppel.avslutt())
     }
 
@@ -153,9 +155,10 @@ internal class FagsystemId private constructor(
         tilstand.entering(this)
     }
 
-    private class Utbetaling private constructor(
+    internal class Utbetaling private constructor(
         private val oppdrag: Oppdrag,
         private val utbetalingstidslinje: Utbetalingstidslinje,
+        private val type: Utbetalingtype,
         private val maksdato: LocalDate? = null,
         private val opprettet: LocalDateTime = LocalDateTime.now(),
         private var godkjentAv: Triple<String, String, LocalDateTime>? = null,
@@ -164,6 +167,12 @@ internal class FagsystemId private constructor(
         private var overføringstidspunkt: LocalDateTime? = null,
         private var avsluttet: LocalDateTime? = null
     ) {
+        init {
+            require((type != ANNULLERING && maksdato != null) || (type == ANNULLERING && maksdato == null)) {
+                "Maksdato må være satt dersom det ikke er en annullering."
+            }
+        }
+
         fun nettobeløp() = oppdrag.nettoBeløp()
         fun utbetalingstidslinje() = utbetalingstidslinje
 
@@ -199,33 +208,38 @@ internal class FagsystemId private constructor(
             avsluttet = tidsstempel
         }
 
+        private fun erAvsluttet() = avsluttet != null
+
+        internal enum class Utbetalingtype { UTBETALING, ANNULLERING }
+
         companion object {
             private const val systemident = "SPLEIS"
 
-            fun nyUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate) = Utbetaling(oppdrag, utbetalingstidslinje, maksdato)
+            fun nyUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate) =
+                Utbetaling(oppdrag, utbetalingstidslinje, UTBETALING, maksdato)
 
             fun lagUtvidelse(fagsystemId: FagsystemId, siste: Utbetaling, kandidat: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): Utbetaling? {
                 if (kandidat.fagområde() != fagsystemId.fagområde) return null
                 val nytt = kandidat.minus(siste.oppdrag, aktivitetslogg)
                 if (nytt.fagsystemId() != fagsystemId.fagsystemId) return null
                 nytt.nettoBeløp(siste.oppdrag)
-                return Utbetaling(nytt, utbetalingstidslinje, maksdato)
+                return Utbetaling(nytt, utbetalingstidslinje, UTBETALING, maksdato)
             }
 
             fun lagAnnullering(siste: Utbetaling, aktivitetslogg: IAktivitetslogg): Utbetaling {
                 val oppdrag = siste.oppdrag.emptied().minus(siste.oppdrag, aktivitetslogg)
-                return Utbetaling(oppdrag, Utbetalingstidslinje())
+                return Utbetaling(oppdrag, Utbetalingstidslinje(), ANNULLERING)
             }
 
             fun sorterOppdrag(liste: List<Utbetaling>) = liste.sortedByDescending { it.opprettet }.toMutableList()
 
             fun List<Utbetaling>.head() = first()
 
-            fun List<Utbetaling>.utbetaltTidslinje() = firstOrNull { it.avsluttet != null }?.utbetalingstidslinje ?: Utbetalingstidslinje()
+            fun List<Utbetaling>.utbetaltTidslinje() = firstOrNull { it.erAvsluttet() }?.utbetalingstidslinje ?: Utbetalingstidslinje()
         }
     }
 
-    private interface Tilstand {
+    internal interface Tilstand {
         fun entering(fagsystemId: FagsystemId) {}
 
         fun godkjenn(
@@ -273,14 +287,14 @@ internal class FagsystemId private constructor(
     }
 
 
-    private object Initiell : Tilstand {
+    internal object Initiell : Tilstand {
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
             fagsystemId.nyUtbetaling(Ny, utbetaling)
             return true
         }
     }
 
-    private object Ny : Tilstand {
+    internal object Ny : Tilstand {
         override fun godkjenn(
             fagsystemId: FagsystemId,
             hendelse: Utbetalingsgodkjenning,
@@ -300,7 +314,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object Aktiv : Tilstand {
+    internal object Aktiv : Tilstand {
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling): Boolean {
             fagsystemId.nyUtbetaling(Ubetalt, utbetaling)
             return true
@@ -317,7 +331,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object Ubetalt : Tilstand {
+    internal object Ubetalt : Tilstand {
         override fun godkjenn(
             fagsystemId: FagsystemId,
             hendelse: Utbetalingsgodkjenning,
@@ -351,7 +365,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object UtbetalingSendt : Tilstand {
+    internal object UtbetalingSendt : Tilstand {
         override fun overført(fagsystemId: FagsystemId, hendelse: no.nav.helse.hendelser.UtbetalingOverført) {
             fagsystemId.overført(UtbetalingOverført, hendelse)
         }
@@ -361,7 +375,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object UtbetalingOverført : Tilstand {
+    internal object UtbetalingOverført : Tilstand {
         override fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
             fagsystemId.avsluttUtbetaling(Aktiv)
@@ -372,7 +386,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object AnnulleringSendt : Tilstand {
+    internal object AnnulleringSendt : Tilstand {
         override fun overført(fagsystemId: FagsystemId, hendelse: no.nav.helse.hendelser.UtbetalingOverført) {
             fagsystemId.overført(AnnulleringOverført, hendelse)
         }
@@ -382,7 +396,7 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object AnnulleringOverført : Tilstand {
+    internal object AnnulleringOverført : Tilstand {
         override fun kvittér(fagsystemId: FagsystemId, hendelse: UtbetalingHendelse) {
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
             fagsystemId.avsluttUtbetaling(Annullert)
@@ -393,11 +407,11 @@ internal class FagsystemId private constructor(
         }
     }
 
-    private object Avvist : Tilstand {
+    internal object Avvist : Tilstand {
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling) = false
     }
 
-    private object Annullert : Tilstand {
+    internal object Annullert : Tilstand {
         override fun nyUtbetaling(fagsystemId: FagsystemId, utbetaling: Utbetaling) = false
     }
 }
