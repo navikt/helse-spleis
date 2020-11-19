@@ -744,6 +744,7 @@ internal data class PersonData(
     data class FagsystemIdData(
         private val fagsystemId: String,
         private val fagområde: String,
+        private val mottaker: String,
         private val tilstand: FagsystemTilstandType,
         private val utbetalinger: List<UtbetalingData>,
         private val forkastet: List<UtbetalingData>
@@ -753,6 +754,7 @@ internal data class PersonData(
             .call(
                 fagsystemId,
                 Fagområde.from(fagområde),
+                mottaker,
                 FagsystemTilstandType.tilTilstand(tilstand),
                 utbetalinger.map { it.konverterTilUtbetaling() },
                 forkastet.map { it.konverterTilUtbetaling() }

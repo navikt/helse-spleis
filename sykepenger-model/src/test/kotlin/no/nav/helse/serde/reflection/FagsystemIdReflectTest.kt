@@ -59,6 +59,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
 
         assertEquals(inspektør.fagsystemId(0), result["fagsystemId"])
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
+        assertEquals(ORGNR, result["mottaker"])
         assertEquals(AKTIV, result["tilstand"])
         val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
         assertEquals(1, utbetalinger.size)
@@ -151,6 +152,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         val data = PersonData.FagsystemIdData(
             fagsystemId = fagsystemIdId,
             fagområde = Fagområde.SykepengerRefusjon.verdi,
+            mottaker = "orgnr",
             tilstand = AKTIV,
             utbetalinger = listOf(
                 PersonData.FagsystemIdData.UtbetalingData(

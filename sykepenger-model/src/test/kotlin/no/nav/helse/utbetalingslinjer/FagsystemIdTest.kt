@@ -260,12 +260,12 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
 
     @Test
     fun `mapper riktig når det finnes flere fagsystemId'er`() {
-        val oppdrag1 = opprettOgUtbetal(0, 16.AP, 5.NAV)
-        val oppdrag2 = opprettOgUtbetal(1, 16.AP, 5.NAV, startdato = 1.mars)
-        val oppdrag1Oppdatert = opprett(16.AP, 5.NAV(1300))
+        val fagsystemId1 = opprettOgUtbetal(0, 16.AP, 5.NAV)
+        val fagsystemId2 = opprettOgUtbetal(1, 16.AP, 5.NAV, 30.ARB, 16.AP, 5.NAV)
+        val fagsystemId1Oppdatert = opprett(16.AP, 5.NAV(1300))
         assertEquals(2, fagsystemIder.size)
-        assertEquals(oppdrag1.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
-        assertNotEquals(oppdrag2.fagsystemId(), oppdrag1Oppdatert.fagsystemId())
+        assertEquals(fagsystemId1, fagsystemId1Oppdatert)
+        assertNotEquals(fagsystemId2, fagsystemId1Oppdatert)
     }
 
     @Test

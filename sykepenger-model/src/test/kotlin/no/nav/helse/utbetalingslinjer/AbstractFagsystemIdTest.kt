@@ -21,7 +21,7 @@ internal abstract class AbstractFagsystemIdTest {
     protected companion object {
         private const val FNR = "12345678910"
         private const val AKTØRID = "1234567891011"
-        private const val ORGNR = "123456789"
+        const val ORGNR = "123456789"
         const val IDENT = "A999999"
         const val EPOST = "saksbehandler@saksbehandlersen.no"
         private const val AVSTEMMINGSNØKKEL = 1L
@@ -77,15 +77,15 @@ internal abstract class AbstractFagsystemIdTest {
             .also { block(it) }
     }
 
-    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): Oppdrag {
-        val oppdrag = opprett(*dager, startdato = startdato)
+    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): FagsystemId {
+        val fagsystemId = opprett(*dager, startdato = startdato)
         utbetal(fagsystemIdIndeks, godkjent = godkjent, automatiskBehandling = automatiskBehandling)
         if (godkjent) {
             assertUtbetalingsbehov(MAKSDATO, IDENT, EPOST, GODKJENTTIDSPUNKT, false)
             overført(fagsystemIdIndeks)
             kvitter(fagsystemIdIndeks)
         }
-        return oppdrag
+        return fagsystemId
     }
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
@@ -216,22 +216,16 @@ internal abstract class AbstractFagsystemIdTest {
         }
     }
 
-    protected fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar): Oppdrag {
+    protected fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar): FagsystemId {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
-        MaksimumUtbetaling(
+        return MaksimumUtbetaling(
             listOf(tidslinje),
             aktivitetslogg,
             listOf(1.januar),
             1.januar
         ).betal().let {
-            return OppdragBuilder(
-                tidslinje,
-                ORGNR,
-                Fagområde.SykepengerRefusjon
-            ).result().also {
-                fagsystemId = FagsystemId.utvide(fagsystemIder, observatør, it, tidslinje, MAKSDATO, aktivitetslogg)
-                oppdrag[it] = fagsystemId
-            }
-        }
+            OppdragBuilder(tidslinje, ORGNR, Fagområde.SykepengerRefusjon)
+                .result(fagsystemIder, observatør, MAKSDATO, aktivitetslogg)
+        }.also { fagsystemId = it }
     }
 }

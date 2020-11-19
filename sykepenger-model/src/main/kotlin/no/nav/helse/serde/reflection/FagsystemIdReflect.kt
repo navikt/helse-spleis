@@ -46,6 +46,7 @@ internal class FagsystemIdReflect(private val fagsystemId: FagsystemId) {
     internal fun toMap() = mutableMapOf<String, Any>(
         "fagsystemId" to fagsystemId["fagsystemId"],
         "fagområde" to fagsystemId.get<Fagområde>("fagområde").verdi,
+        "mottaker" to fagsystemId["mottaker"],
         "tilstand" to FagsystemTilstandType.fraTilstand(fagsystemId.get<Tilstand>("tilstand")),
         "utbetalinger" to fagsystemId.get<List<Utbetaling>>("utbetalinger").map { UtbetalingReflect(it).toMap() },
         "forkastet" to fagsystemId.get<List<Utbetaling>>("forkastet").map { UtbetalingReflect(it).toMap() }

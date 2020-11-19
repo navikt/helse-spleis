@@ -18,14 +18,16 @@ import java.time.LocalDateTime
 internal class FagsystemId private constructor(
     private val fagsystemId: String,
     private val fagområde: Fagområde,
+    private val mottaker: String,
     private var tilstand: Tilstand,
     oppdragsliste: List<Utbetaling>,
     forkastet: List<Utbetaling>
 ) {
 
-    private constructor(observatør: FagsystemIdObserver, oppdrag: Oppdrag, utbetaling: Utbetaling) : this(
-        oppdrag.fagsystemId(),
-        oppdrag.fagområde(),
+    internal constructor(observatør: FagsystemIdObserver, fagsystemId: String, fagområde: Fagområde, mottaker: String, utbetaling: Utbetaling) : this(
+        fagsystemId,
+        fagområde,
+        mottaker,
         Initiell,
         emptyList(),
         emptyList()
@@ -100,7 +102,7 @@ internal class FagsystemId private constructor(
 
     internal fun erAnnullert() = tilstand == Annullert
 
-    private fun utvide(opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): Boolean {
+    internal fun utvide(opprinnelig: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): Boolean {
         val utbetaling = Utbetaling.lagUtvidelse(this, head, opprinnelig, utbetalingstidslinje, maksdato, aktivitetslogg) ?: return false
         return tilstand.nyUtbetaling(this, utbetaling)
     }
@@ -137,15 +139,6 @@ internal class FagsystemId private constructor(
     private fun forkastUtbetaling() {
         val søppel = utbetalinger.removeFirst()
         forkastet.add(0, søppel.avslutt())
-    }
-
-    internal companion object {
-        internal fun utvide(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): FagsystemId =
-            fagsystemIder.firstOrNull { it.utvide(oppdrag, utbetalingstidslinje, maksdato, aktivitetslogg) }
-                ?: FagsystemId(observatør, oppdrag, Utbetaling.nyUtbetaling(oppdrag, utbetalingstidslinje, maksdato)).also {
-                    if (oppdrag.isEmpty()) return@also
-                    fagsystemIder.add(it)
-                }
     }
 
     private fun tilstand(nyTilstand: Tilstand) {
@@ -221,9 +214,8 @@ internal class FagsystemId private constructor(
                 Utbetaling(oppdrag, utbetalingstidslinje, UTBETALING, maksdato)
 
             fun lagUtvidelse(fagsystemId: FagsystemId, siste: Utbetaling, kandidat: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): Utbetaling? {
-                if (kandidat.fagområde() != fagsystemId.fagområde) return null
                 val nytt = kandidat.minus(siste.oppdrag, aktivitetslogg)
-                if (nytt.fagsystemId() != fagsystemId.fagsystemId) return null
+                if (!nytt.tilhører(fagsystemId.fagsystemId, fagsystemId.fagområde)) return null
                 nytt.nettoBeløp(siste.oppdrag)
                 return Utbetaling(nytt, utbetalingstidslinje, UTBETALING, maksdato)
             }

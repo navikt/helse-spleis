@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.UtbetalingStrategy
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -12,8 +13,8 @@ import java.util.*
 import kotlin.math.roundToInt
 
 internal class OppdragBuilder(
-    tidslinje: Utbetalingstidslinje,
-    private val orgnummer: String,
+    private val tidslinje: Utbetalingstidslinje,
+    private val mottaker: String,
     private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
     private val dagStrategy: UtbetalingStrategy = NavDag.reflectedArbeidsgiverBeløp
@@ -31,7 +32,16 @@ internal class OppdragBuilder(
         arbeisdsgiverLinjer.removeAll { it.beløp == null }
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
-        return Oppdrag(orgnummer, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
+        return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
+    }
+
+    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): FagsystemId {
+        val oppdrag = result()
+        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, maksdato, aktivitetslogg) }
+            ?: FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje, maksdato)).also {
+                if (oppdrag.isEmpty()) return@also
+                fagsystemIder.add(it)
+            }
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()
