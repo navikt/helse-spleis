@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -417,6 +419,23 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }.erAnnullert())
         assertTrue(inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(2.vedtaksperiode) }.erAnnullert())
+    }
+
+    @Test
+    fun `annuller over ikke utbetalt forlengelse`() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        val annullering = inspektør.utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == inspektør.fagsystemId(1.vedtaksperiode) }
+        sisteBehovErAnnullering(1.vedtaksperiode)
+        assertTrue(annullering.erAnnullert())
+        assertEquals(19.januar, annullering.arbeidsgiverOppdrag().førstedato)
+        assertEquals(26.januar, annullering.arbeidsgiverOppdrag().sistedato)
     }
 
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
