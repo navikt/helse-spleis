@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,7 +28,8 @@ class JsonBuilderTest {
         .setMixIns(
             mutableMapOf(
                 Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
-                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java
+                Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
+                FagsystemId::class.java to FagsystemIdMixin::class.java
             )
         )
         .registerModule(JavaTimeModule())
@@ -37,6 +39,9 @@ class JsonBuilderTest {
 
     @JsonIgnoreProperties("person", "arbeidsgiver")
     private class VedtaksperiodeMixin
+
+    @JsonIgnoreProperties("observer")
+    private class FagsystemIdMixin
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {

@@ -7,6 +7,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.FagsystemId
+import no.nav.helse.utbetalingslinjer.FagsystemIdObserver
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -27,8 +29,9 @@ internal class Arbeidsgiver private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
-    private val utbetalinger: MutableList<Utbetaling>
-) : Aktivitetskontekst {
+    private val utbetalinger: MutableList<Utbetaling>,
+    private val fagsystemIder: MutableList<FagsystemId>
+) : Aktivitetskontekst, FagsystemIdObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
@@ -38,8 +41,13 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
-        utbetalinger = mutableListOf()
+        utbetalinger = mutableListOf(),
+        fagsystemIder = mutableListOf()
     )
+
+    init {
+        fagsystemIder.forEach { it.register(this) }
+    }
 
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -56,6 +64,9 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.accept(visitor)
         inntektshistorikkVol2.accept(visitor)
         sykdomshistorikk.accept(visitor)
+        visitor.preVisitFagsystemIder(fagsystemIder)
+        fagsystemIder.forEach { it.accept(visitor) }
+        visitor.postVisitFagsystemIder(fagsystemIder)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -532,7 +543,8 @@ internal class Arbeidsgiver private constructor(
                 sykdomshistorikk: Sykdomshistorikk,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
-                utbetalinger: MutableList<Utbetaling>
+                utbetalinger: List<Utbetaling>,
+                fagsystemIder: List<FagsystemId>
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -542,7 +554,8 @@ internal class Arbeidsgiver private constructor(
                 sykdomshistorikk,
                 vedtaksperioder,
                 forkastede,
-                utbetalinger
+                utbetalinger.toMutableList(),
+                fagsystemIder.toMutableList()
             )
         }
     }

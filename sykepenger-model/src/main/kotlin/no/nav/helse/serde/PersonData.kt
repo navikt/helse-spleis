@@ -142,7 +142,8 @@ internal data class PersonData(
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
-        private val utbetalinger: List<UtbetalingData>
+        private val utbetalinger: List<UtbetalingData>,
+        private val fagsystemIder: List<FagsystemIdData>?
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
@@ -153,9 +154,8 @@ internal data class PersonData(
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = sortedMapOf<Vedtaksperiode, ForkastetÅrsak>()
-        private val modelUtbetalinger = mutableListOf<Utbetaling>().apply {
-            addAll(utbetalinger.map { it.konverterTilUtbetaling() })
-        }
+        private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
+        private val modelFagsystemIder = fagsystemIder?.map { it.konverterTilFagsystemId() } ?: emptyList()
 
         internal fun konverterTilArbeidsgiver(
             person: Person,
@@ -171,7 +171,8 @@ internal data class PersonData(
                 modelSykdomshistorikk,
                 vedtaksperiodeliste,
                 forkastedeliste,
-                modelUtbetalinger
+                modelUtbetalinger,
+                modelFagsystemIder
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
