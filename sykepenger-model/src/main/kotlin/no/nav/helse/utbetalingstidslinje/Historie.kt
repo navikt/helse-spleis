@@ -138,7 +138,7 @@ internal class Historie() {
 
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
         if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, dagen)) return true
-        val skjæringstidspunkt = skjæringstidspunkt(dagen til dagen) ?: return false
+        val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen) ?: return false
         if (skjæringstidspunkt == dagen) return false
         if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)) return true
         return spleisbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)
