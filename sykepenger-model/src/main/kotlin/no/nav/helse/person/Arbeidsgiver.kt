@@ -471,7 +471,7 @@ internal class Arbeidsgiver private constructor(
     internal fun overlapper(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
 
     internal fun nåværendeVedtaksperiode(): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { !it.erFerdigBehandlet() }
+        return vedtaksperioder.firstOrNull { it.måFerdigstilles() }
     }
 
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()

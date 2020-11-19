@@ -308,13 +308,13 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetalingMedInntektsmelding
         )
 
-    internal fun erAvsluttet() =
-        this.tilstand in listOf(
+    internal fun måFerdigstilles() =
+        this.tilstand !in listOf(
+            TilInfotrygd,
             Avsluttet,
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
-            AvventerVilkårsprøvingArbeidsgiversøknad,
-            UtbetalingFeilet
+            AvventerVilkårsprøvingArbeidsgiversøknad
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
@@ -887,7 +887,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.håndterForlengelse(it)
                 }
                 val forlengelse = periodeRettFør != null
-                val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+                val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
                 when {
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                     forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
@@ -1748,7 +1748,7 @@ internal class Vedtaksperiode private constructor(
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
                 .filter { it < vedtaksperiode }
-                .all { it.erFerdigBehandlet() }
+                .none { it.måFerdigstilles() }
     }
 }
 

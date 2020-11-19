@@ -827,7 +827,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TIL_INFOTRYGD

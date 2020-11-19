@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -13,7 +12,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         bli stuck i en variant av *_UFERDIG_GAP. Da vil de aldri komme seg videre og til slutt time ut
     */
     @Test
-    @Disabled
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100))
@@ -52,12 +50,11 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         fortsette behandling. Dessverre setter vi oss fast i AVVENTER_HISTORIKK fordi periode #1 blokkerer utførelsen i Vedtaksperiode.forsøkUtbetaling(..)
      */
     @Test
-    @Disabled
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100))
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
@@ -66,9 +63,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.mars, 7.mars, 100))
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
         )
 
@@ -77,9 +74,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
             TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
@@ -94,9 +91,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstander(
             3.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
+            TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,
