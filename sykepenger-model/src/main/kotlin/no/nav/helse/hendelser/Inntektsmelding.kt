@@ -25,8 +25,6 @@ class Inntektsmelding(
     private val harOpphørAvNaturalytelser: Boolean = false
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
-    private var beingQualified = false
-
     private val beste = { venstre: Dag, høyre: Dag ->
         when {
             venstre::class == høyre::class -> venstre
@@ -187,11 +185,7 @@ class Inntektsmelding(
         }
     }
 
-    internal fun beingQualified() {
-        beingQualified = true
-    }
-
-    internal fun isNotQualified() = !beingQualified
+    internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.skjæringstidspunkt() in periode
 
     class Refusjon(
         private val opphørsdato: LocalDate?,
