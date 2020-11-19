@@ -59,6 +59,7 @@ internal class Historie() {
         return UtbetalingstidslinjeBuilder(
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
+            skjæringstidspunkter = skjæringstidspunkter(periode),
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
             .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
@@ -76,7 +77,8 @@ internal class Historie() {
                 .map { dato ->
                     dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
                         requireNotNull(inntektshistorikk.dekningsgrunnlag(dato, NormalArbeidstaker)),
-                        requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlag(dato))
+                        requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlag(dato)),
+                        dato
                     )
                 }.toMap()
 
@@ -201,7 +203,7 @@ internal class Historie() {
                     }
                 }.associate { it })
 
-            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _ -> grad }.prosent)
+            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _ -> grad }.prosent)
         }
     }
 }

@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.TilstandstypeDTO.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
@@ -698,7 +697,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            økonomi.reflection { grad, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+            økonomi.reflection { grad, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
                 utbetalingstidslinjeMap.add(
                     NavDagDTO(
                         type = TypeDataDTO.NavDag,

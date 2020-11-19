@@ -169,8 +169,8 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
                         nettoBeløp = 1000
                     ),
                     PersonData.UtbetalingstidslinjeData(
-                        (1..16).map { UtbetalingsdagData(ArbeidsgiverperiodeDag, it.januar, 1000.0, 1000.0, null, 100.0, 100.0, 1000, 0, false) } +
-                        (17..31).map { UtbetalingsdagData(NavDag, it.januar, 1000.0, 1000.0, null, 100.0, 100.0, 1000, 0, false) }
+                        (1..16).map { UtbetalingsdagData(ArbeidsgiverperiodeDag, it.januar, 1000.0, 1000.0, 1.januar, null, 100.0, 100.0, 1000, 0, false) } +
+                        (17..31).map { UtbetalingsdagData(NavDag, it.januar, 1000.0, 1000.0, 1.januar, null, 100.0, 100.0, 1000, 0, false) }
                     ),
                     type = UTBETALING,
                     maksdato = 28.desember,

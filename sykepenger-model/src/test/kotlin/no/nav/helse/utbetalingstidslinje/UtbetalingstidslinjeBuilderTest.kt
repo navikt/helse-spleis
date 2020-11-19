@@ -378,7 +378,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 .navdager
                 .first()
                 .økonomi
-                .reflection { _, _, dekningsgrunnlag, _, _, _, _ -> dekningsgrunnlag }
+                .reflection { _, _, dekningsgrunnlag, _, _, _, _, _ -> dekningsgrunnlag }
         )
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
@@ -448,7 +448,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk
     ) {
-        tidslinje = UtbetalingstidslinjeBuilder(inntektshistorikk).result(this)
+        tidslinje = UtbetalingstidslinjeBuilder(inntektshistorikk, skjæringstidspunkter = listOf(1.januar)).result(this)
     }
 
     private class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {

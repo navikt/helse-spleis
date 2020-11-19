@@ -22,7 +22,7 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5, 66.67)
         createØkonomi(data).also { økonomi ->
-            økonomi.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
+            økonomi.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(66.67, arbeidsgiverBetalingProsent)
                 assertNull(dekningsgrunnlag)
@@ -42,6 +42,7 @@ internal class CreateØkonomiTest {
                     grad,
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
+                    skjæringstidspunkt,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -68,6 +69,7 @@ internal class CreateØkonomiTest {
                     grad,
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
+                    skjæringstidspunkt,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -99,6 +101,7 @@ internal class CreateØkonomiTest {
         1.januar,
         aktuellDagsinntekt,
         dekningsgrunnlag,
+        1.januar,
         null,
         grad,
         arbeidsgiverBetalingProsent,
@@ -123,6 +126,7 @@ internal class CreateØkonomiTest {
         arbeidsgiverBetalingProsent,
         aktuellDagsinntekt,
         dekningsgrunnlag,
+        null,
         arbeidsgiverbeløp,
         personbeløp,
         er6GBegrenset,
