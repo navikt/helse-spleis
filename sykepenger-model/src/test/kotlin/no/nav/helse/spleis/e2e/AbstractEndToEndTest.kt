@@ -205,10 +205,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
-        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList())
+        refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
+        beregnetInntekt: Inntekt = refusjon.second
     ): UUID {
         assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Inntektsmelding::class)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon, beregnetInntekt = beregnetInntekt)
     }
 
     protected fun håndterInntektsmelding(
