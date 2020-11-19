@@ -42,36 +42,8 @@ internal class Arbeidsgiver private constructor(
     )
 
     internal companion object {
-        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-            val treff = filter { it <= vedtaksperiode }.toMutableList()
-            val kandidater = (this - treff).toMutableList()
-            fun predikat(vedtaksperiode: Vedtaksperiode) = treff.any { it.erSykeperiodeRettFør(vedtaksperiode) }
-            while (kandidater.any(::predikat)) {
-                val nyeTreff = kandidater.filter(::predikat)
-                kandidater.removeAll(nyeTreff)
-                treff.addAll(nyeTreff)
-            }
-            return treff.filter { it in this }
-        }
-
-        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode2(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-            val remaining = filter(SENERE_EXCLUSIVE(vedtaksperiode)).toMutableList()
-            val sammeArbeidsgiverperiode = (filter { it !in remaining }).toMutableList()
-            while (sammeArbeidsgiverperiode.last().erSykeperiodeRettFør(remaining.first())) {
-                sammeArbeidsgiverperiode.add(remaining.removeAt(0))
-            }
-            return sammeArbeidsgiverperiode
-        }
-
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal val TIDLIGERE = fun(tidligereEnn: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode <= tidligereEnn
-        }
-
-        internal val SENERE = fun(senereEllerLikDenne: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEllerLikDenne
-        }
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
