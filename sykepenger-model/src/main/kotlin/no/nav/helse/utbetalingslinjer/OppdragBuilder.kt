@@ -35,13 +35,12 @@ internal class OppdragBuilder(
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
 
-    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, maksdato: LocalDate, aktivitetslogg: IAktivitetslogg): FagsystemId {
-        val oppdrag = result()
-        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, maksdato, aktivitetslogg) }
-            ?: FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje, maksdato)).also {
-                if (oppdrag.isEmpty()) return@also
+    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, aktivitetslogg: IAktivitetslogg): FagsystemId? {
+        val oppdrag = result().takeIf(Oppdrag::isNotEmpty) ?: return null
+        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, aktivitetslogg) }
+            ?: (FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje)).also {
                 fagsystemIder.add(it)
-            }
+            })
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()

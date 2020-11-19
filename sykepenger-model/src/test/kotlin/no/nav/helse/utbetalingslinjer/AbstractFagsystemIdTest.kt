@@ -10,7 +10,8 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,6 +27,8 @@ internal abstract class AbstractFagsystemIdTest {
         const val EPOST = "saksbehandler@saksbehandlersen.no"
         private const val AVSTEMMINGSNØKKEL = 1L
         val MAKSDATO = LocalDate.now()
+        const val FORBUKTE_DAGER = 100
+        const val GJENSTÅENDE_DAGER = 148
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
@@ -47,18 +50,18 @@ internal abstract class AbstractFagsystemIdTest {
 
     protected fun assertUtbetalingsbehov(maksdato: LocalDate?, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
         assertUtbetalingsbehov { utbetalingbehov ->
-            Assertions.assertEquals(maksdato?.toString(), utbetalingbehov["maksdato"])
-            Assertions.assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
-            Assertions.assertEquals(saksbehandlerEpost, utbetalingbehov["saksbehandlerEpost"])
-            Assertions.assertEquals("$godkjenttidspunkt", utbetalingbehov.getValue("godkjenttidspunkt"))
-            Assertions.assertEquals(erAnnullering, utbetalingbehov["annullering"] as Boolean)
+            assertEquals(maksdato?.toString(), utbetalingbehov["maksdato"])
+            assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
+            assertEquals(saksbehandlerEpost, utbetalingbehov["saksbehandlerEpost"])
+            assertEquals("$godkjenttidspunkt", utbetalingbehov.getValue("godkjenttidspunkt"))
+            assertEquals(erAnnullering, utbetalingbehov["annullering"] as Boolean)
         }
     }
 
     protected fun assertSimuleringsbehov(maksdato: LocalDate, saksbehandler: String) {
         assertSimuleringsbehov { utbetalingbehov ->
-            Assertions.assertEquals("$maksdato", utbetalingbehov["maksdato"])
-            Assertions.assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
+            assertEquals("$maksdato", utbetalingbehov["maksdato"])
+            assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
         }
     }
 
@@ -77,8 +80,9 @@ internal abstract class AbstractFagsystemIdTest {
             .also { block(it) }
     }
 
-    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): FagsystemId {
+    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): FagsystemId? {
         val fagsystemId = opprett(*dager, startdato = startdato)
+        klargjør(fagsystemIdIndeks)
         utbetal(fagsystemIdIndeks, godkjent = godkjent, automatiskBehandling = automatiskBehandling)
         if (godkjent) {
             assertUtbetalingsbehov(MAKSDATO, IDENT, EPOST, GODKJENTTIDSPUNKT, false)
@@ -90,7 +94,7 @@ internal abstract class AbstractFagsystemIdTest {
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->
-            Assertions.assertTrue(tidslinje.all { it::class in dager }) {
+            assertTrue(tidslinje.all { it::class in dager }) {
                 val ulikeDager = tidslinje.filter { it::class !in dager }
                 "Forventet at alle dager skal være en av: ${dager.joinToString { it.simpleName ?: "UKJENT" }}.\n" +
                     ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
@@ -101,15 +105,15 @@ internal abstract class AbstractFagsystemIdTest {
     }
 
     protected fun assertTilstander(fagsystemIdIndeks: Int, vararg tilstand: String) {
-        Assertions.assertEquals(tilstand.toList(), observatør.tilstander(fagsystemIder[fagsystemIdIndeks]))
+        assertEquals(tilstand.toList(), observatør.tilstander(fagsystemIder[fagsystemIdIndeks]))
     }
 
     protected fun assertIkkeBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, aktivitetslogg: IAktivitetslogg = this.aktivitetslogg) {
-        Assertions.assertTrue(aktivitetslogg.behov().none { it.type == behovtype })
+        assertTrue(aktivitetslogg.behov().none { it.type == behovtype })
     }
 
     protected fun assertBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, aktivitetslogg: IAktivitetslogg = this.aktivitetslogg) {
-        Assertions.assertTrue(aktivitetslogg.behov().last().type == behovtype) { aktivitetslogg.toString() }
+        assertTrue(aktivitetslogg.behov().last().type == behovtype) { aktivitetslogg.toString() }
     }
 
     protected fun assertTomHistorie(fagsystemIdIndeks: Int) {
@@ -117,9 +121,9 @@ internal abstract class AbstractFagsystemIdTest {
             .also { fagsystemIder[fagsystemIdIndeks].append(ORGNR, it) }
             .utbetalingstidslinje()
             .also {
-                Assertions.assertTrue(it.isEmpty())
+                assertTrue(it.isEmpty())
             }
-        Assertions.assertTrue(inspektør.utbetaltTidslinje(fagsystemIdIndeks).isEmpty())
+        assertTrue(inspektør.utbetaltTidslinje(fagsystemIdIndeks).isEmpty())
     }
 
     protected fun assertHistorie(fagsystemIdIndeks: Int, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
@@ -127,23 +131,27 @@ internal abstract class AbstractFagsystemIdTest {
             .also { fagsystemIder[fagsystemIdIndeks].append(ORGNR, it) }
             .utbetalingstidslinje()
             .also {
-                Assertions.assertEquals(it, inspektør.utbetaltTidslinje(fagsystemIdIndeks))
-                Assertions.assertEquals(periode.endInclusive, it.sisteDato())
+                assertEquals(it, inspektør.utbetaltTidslinje(fagsystemIdIndeks))
+                assertEquals(periode.endInclusive, it.sisteDato())
                 assertAlleDager(it, periode, *dager)
             }
     }
 
     protected fun assertTomUtbetalingstidslinje(fagsystemIdIndeks: Int) {
         inspektør.utbetalingstidslinje(fagsystemIdIndeks).also {
-            Assertions.assertTrue(it.isEmpty())
+            assertTrue(it.isEmpty())
         }
     }
 
     protected fun assertUtbetalingstidslinje(fagsystemIdIndeks: Int, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>, sisteDato: LocalDate = periode.endInclusive) {
         inspektør.utbetalingstidslinje(fagsystemIdIndeks).also {
-            Assertions.assertEquals(sisteDato, it.sisteDato())
+            assertEquals(sisteDato, it.sisteDato())
             assertAlleDager(it, periode, *dager)
         }
+    }
+
+    protected fun klargjør(fagsystemIdIndeks: Int) {
+        fagsystemIder[fagsystemIdIndeks].klargjør(MAKSDATO, FORBUKTE_DAGER, GJENSTÅENDE_DAGER)
     }
 
     protected fun utbetal(fagsystemIdIndeks: Int, godkjent: Boolean = true, automatiskBehandling: Boolean = false): IAktivitetslogg {
@@ -216,16 +224,13 @@ internal abstract class AbstractFagsystemIdTest {
         }
     }
 
-    protected fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar): FagsystemId {
+    protected fun opprett(vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar): FagsystemId? {
         val tidslinje = tidslinjeOf(*dager, startDato = startdato)
-        return MaksimumUtbetaling(
-            listOf(tidslinje),
-            aktivitetslogg,
-            listOf(1.januar),
-            1.januar
-        ).betal().let {
-            OppdragBuilder(tidslinje, ORGNR, Fagområde.SykepengerRefusjon)
-                .result(fagsystemIder, observatør, MAKSDATO, aktivitetslogg)
-        }.also { fagsystemId = it }
+        return MaksimumUtbetaling(listOf(tidslinje), aktivitetslogg, listOf(1.januar), 1.januar)
+            .also { it.betal() }
+            .let {
+                OppdragBuilder(tidslinje, ORGNR, Fagområde.SykepengerRefusjon)
+                    .result(fagsystemIder, observatør, aktivitetslogg)
+            }?.also { fagsystemId = it }
     }
 }

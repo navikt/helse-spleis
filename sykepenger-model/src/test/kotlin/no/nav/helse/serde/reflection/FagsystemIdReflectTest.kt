@@ -27,28 +27,28 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
     @Test
     fun `serialize tilstand`() {
         assertEquals(AKTIV, fraTilstand(Aktiv))
-        assertEquals(ANNULLERING_OVERFØRT, fraTilstand(AnnulleringOverført))
-        assertEquals(ANNULLERING_SENDT, fraTilstand(AnnulleringSendt))
         assertEquals(ANNULLERT, fraTilstand(Annullert))
         assertEquals(AVVIST, fraTilstand(Avvist))
         assertEquals(INITIELL, fraTilstand(Initiell))
         assertEquals(NY, fraTilstand(Ny))
+        assertEquals(NY_KLAR, fraTilstand(NyKlar))
         assertEquals(UBETALT, fraTilstand(Ubetalt))
-        assertEquals(UTBETALING_OVERFØRT, fraTilstand(UtbetalingOverført))
-        assertEquals(UTBETALING_SENDT, fraTilstand(UtbetalingSendt))
+        assertEquals(UBETALT_KLAR, fraTilstand(UbetaltKlar))
+        assertEquals(OVERFØRT, fraTilstand(Overført))
+        assertEquals(SENDT, fraTilstand(Sendt))
     }
 
     @Test
     fun `deserialize tilstand`() {
         assertEquals(Aktiv, tilTilstand(AKTIV))
-        assertEquals(AnnulleringOverført, tilTilstand(ANNULLERING_OVERFØRT))
-        assertEquals(AnnulleringSendt, tilTilstand(ANNULLERING_SENDT))
         assertEquals(Annullert, tilTilstand(ANNULLERT))
         assertEquals(Avvist, tilTilstand(AVVIST))
         assertEquals(Ny, tilTilstand(NY))
+        assertEquals(NyKlar, tilTilstand(NY_KLAR))
         assertEquals(Ubetalt, tilTilstand(UBETALT))
-        assertEquals(UtbetalingOverført, tilTilstand(UTBETALING_OVERFØRT))
-        assertEquals(UtbetalingSendt, tilTilstand(UTBETALING_SENDT))
+        assertEquals(UbetaltKlar, tilTilstand(UBETALT_KLAR))
+        assertEquals(Overført, tilTilstand(OVERFØRT))
+        assertEquals(Sendt, tilTilstand(SENDT))
         assertThrows<IllegalArgumentException> { tilTilstand(INITIELL) }
     }
 
@@ -68,6 +68,8 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertNotNull(utbetalinger.first()["utbetalingstidslinje"])
         assertEquals(UTBETALING, utbetalinger.first()["type"])
         assertEquals(MAKSDATO, utbetalinger.first()["maksdato"])
+        assertEquals(FORBUKTE_DAGER, utbetalinger.first()["forbrukteSykedager"])
+        assertEquals(GJENSTÅENDE_DAGER, utbetalinger.first()["gjenståendeSykedager"])
         assertFalse(utbetalinger.first()["automatiskBehandlet"] as Boolean)
         assertTrue(utbetalinger.first()["opprettet"] is LocalDateTime)
         val godkjentAv = utbetalinger.first()["godkjentAv"].castAsMap<String, Any>()
@@ -93,19 +95,23 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
         opprett(5.NAV, 2.HELG, 5.NAV, 10.NAV)
         annuller(0)
+        overført(0)
+        kvitter(0)
 
         val result = reflect.toMap()
 
         assertEquals(inspektør.fagsystemId(0), result["fagsystemId"])
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
-        assertEquals(ANNULLERING_SENDT, result["tilstand"])
+        assertEquals(ANNULLERT, result["tilstand"])
         val forkastede = result["forkastet"].castAsList<Map<String, Any?>>()
         assertEquals(1, forkastede.size)
 
         assertNotNull(forkastede.first()["oppdrag"])
         assertNotNull(forkastede.first()["utbetalingstidslinje"])
         assertEquals(UTBETALING, forkastede.first()["type"])
-        assertEquals(MAKSDATO, forkastede.first()["maksdato"])
+        assertNull(forkastede.first()["maksdato"])
+        assertEquals(-1, forkastede.first()["forbrukteSykedager"])
+        assertEquals(-1, forkastede.first()["gjenståendeSykedager"])
         assertTrue(forkastede.first()["opprettet"] is LocalDateTime)
         assertNull(forkastede.first()["godkjentAv"])
         assertNull(forkastede.first()["sendt"])
@@ -126,7 +132,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
 
         assertEquals(inspektør.fagsystemId(0), result["fagsystemId"])
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
-        assertEquals(ANNULLERING_SENDT, result["tilstand"])
+        assertEquals(SENDT, result["tilstand"])
 
         val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
         assertEquals(2, utbetalinger.size)
@@ -185,6 +191,8 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
                     ),
                     type = UTBETALING,
                     maksdato = 28.desember,
+                    forbrukteSykedager = FORBUKTE_DAGER,
+                    gjenståendeSykedager = GJENSTÅENDE_DAGER,
                     opprettet = LocalDateTime.now(),
                     godkjentAv = PersonData.FagsystemIdData.UtbetalingData.GodkjentAvData("Z999999", "saksbehandler@nav.no", LocalDateTime.now()),
                     automatiskBehandlet = false,

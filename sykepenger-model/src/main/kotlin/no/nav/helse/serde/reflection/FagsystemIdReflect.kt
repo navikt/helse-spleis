@@ -8,34 +8,35 @@ import no.nav.helse.utbetalingslinjer.FagsystemId.*
 import java.time.LocalDateTime
 
 enum class FagsystemTilstandType {
-    AKTIV, ANNULLERING_OVERFØRT, ANNULLERING_SENDT, ANNULLERT,
-    AVVIST, INITIELL, NY, UBETALT, UTBETALING_OVERFØRT, UTBETALING_SENDT;
+    AKTIV, ANNULLERT, AVVIST, INITIELL,
+    NY, NY_KLAR, UBETALT, UBETALT_KLAR,
+    OVERFØRT, SENDT;
 
     internal companion object {
         fun fraTilstand(tilstand: Tilstand) = when (tilstand) {
             is Aktiv -> AKTIV
-            is AnnulleringOverført -> ANNULLERING_OVERFØRT
-            is AnnulleringSendt -> ANNULLERING_SENDT
             is Annullert -> ANNULLERT
             is Avvist -> AVVIST
             is Initiell -> INITIELL
             is Ny -> NY
+            is NyKlar -> NY_KLAR
             is Ubetalt -> UBETALT
-            is UtbetalingOverført -> UTBETALING_OVERFØRT
-            is UtbetalingSendt -> UTBETALING_SENDT
+            is UbetaltKlar -> UBETALT_KLAR
+            is Overført -> OVERFØRT
+            is Sendt -> SENDT
             else -> throw IllegalStateException("Ukjent tilstand ${tilstand::class.simpleName}")
         }
 
         fun tilTilstand(type: FagsystemTilstandType) = when (type) {
             AKTIV -> Aktiv
-            ANNULLERING_OVERFØRT -> AnnulleringOverført
-            ANNULLERING_SENDT -> AnnulleringSendt
             ANNULLERT -> Annullert
             AVVIST -> Avvist
             NY -> Ny
+            NY_KLAR -> NyKlar
             UBETALT -> Ubetalt
-            UTBETALING_OVERFØRT -> UtbetalingOverført
-            UTBETALING_SENDT -> UtbetalingSendt
+            UBETALT_KLAR -> UbetaltKlar
+            OVERFØRT -> Overført
+            SENDT -> Sendt
             else -> throw IllegalArgumentException("støtter ikke å gjenopprette tilstand $type")
         }
     }
@@ -61,6 +62,8 @@ internal class FagsystemIdReflect(private val fagsystemId: FagsystemId) {
             "utbetalingstidslinje" to utbetalingstidslinje,
             "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
             "maksdato" to utbetaling["maksdato"],
+            "forbrukteSykedager" to utbetaling["forbrukteSykedager"],
+            "gjenståendeSykedager" to utbetaling["gjenståendeSykedager"],
             "opprettet" to utbetaling["opprettet"],
             "godkjentAv" to utbetaling.maybe<Triple<String, String, LocalDateTime>>("godkjentAv")?.let { (ident, epost, tidsstempel) ->
                 mapOf(
