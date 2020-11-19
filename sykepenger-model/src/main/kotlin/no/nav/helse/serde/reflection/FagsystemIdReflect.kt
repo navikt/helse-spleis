@@ -68,6 +68,7 @@ internal class FagsystemIdReflect(private val fagsystemId: FagsystemId) {
                     "tidsstempel" to tidsstempel
                 )
             },
+            "automatiskBehandlet" to utbetaling["automatiskBehandlet"],
             "sendt" to utbetaling["sendt"],
             "avstemmingsnøkkel" to utbetaling["avstemmingsnøkkel"],
             "overføringstidspunkt" to utbetaling["overføringstidspunkt"],

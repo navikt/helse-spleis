@@ -77,9 +77,9 @@ internal abstract class AbstractFagsystemIdTest {
             .also { block(it) }
     }
 
-    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true): Oppdrag {
+    protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): Oppdrag {
         val oppdrag = opprett(*dager, startdato = startdato)
-        utbetal(fagsystemIdIndeks, godkjent = godkjent)
+        utbetal(fagsystemIdIndeks, godkjent = godkjent, automatiskBehandling = automatiskBehandling)
         if (godkjent) {
             assertUtbetalingsbehov(MAKSDATO, IDENT, EPOST, GODKJENTTIDSPUNKT, false)
             overført(fagsystemIdIndeks)
@@ -146,7 +146,7 @@ internal abstract class AbstractFagsystemIdTest {
         }
     }
 
-    protected fun utbetal(fagsystemIdIndeks: Int, godkjent: Boolean = true): IAktivitetslogg {
+    protected fun utbetal(fagsystemIdIndeks: Int, godkjent: Boolean = true, automatiskBehandling: Boolean = false): IAktivitetslogg {
         return Utbetalingsgodkjenning(
             UUID.randomUUID(),
             AKTØRID,
@@ -157,7 +157,7 @@ internal abstract class AbstractFagsystemIdTest {
             EPOST,
             godkjent,
             GODKJENTTIDSPUNKT,
-            false
+            automatiskBehandling
         ).also {
             it.kontekst(person)
             fagsystemIder[fagsystemIdIndeks].håndter(it)

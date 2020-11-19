@@ -67,7 +67,7 @@ internal class FagsystemId private constructor(
     }
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
-        tilstand.godkjenn(this, hendelse, hendelse.saksbehandlerEpost(), hendelse.saksbehandler(), hendelse.godkjenttidspunkt())
+        tilstand.godkjenn(this, hendelse, hendelse.saksbehandlerEpost(), hendelse.saksbehandler(), hendelse.automatiskBehandling(), hendelse.godkjenttidspunkt())
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling): Boolean {
@@ -114,8 +114,8 @@ internal class FagsystemId private constructor(
         tilstand(nesteTilstand)
     }
 
-    private fun overfør(nesteTilstand: Tilstand, aktivitetslogg: IAktivitetslogg, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
-        head.overfør(aktivitetslogg, ident, epost, godkjenttidspunkt)
+    private fun overfør(nesteTilstand: Tilstand, aktivitetslogg: IAktivitetslogg, ident: String, epost: String, automatiskBehandlet: Boolean, godkjenttidspunkt: LocalDateTime) {
+        head.overfør(aktivitetslogg, ident, epost, automatiskBehandlet, godkjenttidspunkt)
         tilstand(nesteTilstand)
     }
 
@@ -126,7 +126,7 @@ internal class FagsystemId private constructor(
 
     private fun annuller(aktivitetslogg: IAktivitetslogg, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
         nyUtbetaling(Utbetaling.lagAnnullering(head, aktivitetslogg))
-        overfør(AnnulleringSendt, aktivitetslogg, ident, epost, godkjenttidspunkt)
+        overfør(AnnulleringSendt, aktivitetslogg, ident, epost, false, godkjenttidspunkt)
     }
 
     private fun avsluttUtbetaling(nesteTilstand: Tilstand) {
@@ -162,6 +162,7 @@ internal class FagsystemId private constructor(
         private val maksdato: LocalDate? = null,
         private val opprettet: LocalDateTime = LocalDateTime.now(),
         private var godkjentAv: Triple<String, String, LocalDateTime>? = null,
+        private var automatiskBehandlet: Boolean = false,
         private var sendt: LocalDateTime? = null,
         private var avstemmingsnøkkel: Long? = null,
         private var overføringstidspunkt: LocalDateTime? = null,
@@ -188,8 +189,9 @@ internal class FagsystemId private constructor(
             oppdrag.simuler(aktivitetslogg, maksdato, systemident)
         }
 
-        fun overfør(aktivitetslogg: IAktivitetslogg, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
+        fun overfør(aktivitetslogg: IAktivitetslogg, ident: String, epost: String, automatiskBehandlet: Boolean, godkjenttidspunkt: LocalDateTime) {
             godkjentAv = Triple(ident, epost, godkjenttidspunkt)
+            this.automatiskBehandlet = automatiskBehandlet
             overfør(aktivitetslogg)
         }
 
@@ -247,6 +249,7 @@ internal class FagsystemId private constructor(
             hendelse: Utbetalingsgodkjenning,
             epost: String,
             ident: String,
+            automatiskBehandlet: Boolean,
             godkjenttidspunkt: LocalDateTime
         ) {
             throw IllegalStateException("Forventet ikke å utbetale på fagsystemId=${fagsystemId.fagsystemId} i tilstand=${this::class.simpleName}")
@@ -300,10 +303,11 @@ internal class FagsystemId private constructor(
             hendelse: Utbetalingsgodkjenning,
             epost: String,
             ident: String,
+            automatiskBehandlet: Boolean,
             godkjenttidspunkt: LocalDateTime
         ) {
             if (hendelse.valider().hasErrorsOrWorse()) return fagsystemId.tilstand(Avvist)
-            fagsystemId.overfør(UtbetalingSendt, hendelse, ident, epost, godkjenttidspunkt)
+            fagsystemId.overfør(UtbetalingSendt, hendelse, ident, epost, automatiskBehandlet, godkjenttidspunkt)
         }
 
         override fun simuler(
@@ -337,13 +341,14 @@ internal class FagsystemId private constructor(
             hendelse: Utbetalingsgodkjenning,
             epost: String,
             ident: String,
+            automatiskBehandlet: Boolean,
             godkjenttidspunkt: LocalDateTime
         ) {
             if (hendelse.valider().hasErrorsOrWorse()) {
                 fagsystemId.forkastUtbetaling()
                 return fagsystemId.tilstand(Aktiv)
             }
-            fagsystemId.overfør(UtbetalingSendt, hendelse, ident, epost, godkjenttidspunkt)
+            fagsystemId.overfør(UtbetalingSendt, hendelse, ident, epost, automatiskBehandlet, godkjenttidspunkt)
         }
 
         override fun simuler(

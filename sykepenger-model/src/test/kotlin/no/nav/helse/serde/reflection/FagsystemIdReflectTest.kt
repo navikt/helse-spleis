@@ -60,15 +60,16 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertEquals(inspektør.fagsystemId(0), result["fagsystemId"])
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
         assertEquals(AKTIV, result["tilstand"])
-        val utbetalinger = result["utbetalinger"] as List<Map<String, Any?>>
+        val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
         assertEquals(1, utbetalinger.size)
 
         assertNotNull(utbetalinger.first()["oppdrag"])
         assertNotNull(utbetalinger.first()["utbetalingstidslinje"])
         assertEquals(UTBETALING, utbetalinger.first()["type"])
         assertEquals(MAKSDATO, utbetalinger.first()["maksdato"])
+        assertFalse(utbetalinger.first()["automatiskBehandlet"] as Boolean)
         assertTrue(utbetalinger.first()["opprettet"] is LocalDateTime)
-        val godkjentAv = utbetalinger.first()["godkjentAv"] as Map<String, Any>
+        val godkjentAv = utbetalinger.first()["godkjentAv"].castAsMap<String, Any>()
         assertEquals(IDENT, godkjentAv["ident"])
         assertEquals(EPOST, godkjentAv["epost"])
         assertTrue(godkjentAv["tidsstempel"] is LocalDateTime)
@@ -76,6 +77,14 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertTrue(utbetalinger.first()["avstemmingsnøkkel"] is Long)
         assertTrue(utbetalinger.first()["overføringstidspunkt"] is LocalDateTime)
         assertTrue(utbetalinger.first()["avsluttet"] is LocalDateTime)
+    }
+
+    @Test
+    fun `automatisk behandling`() {
+        opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV, automatiskBehandling = true)
+        val result = reflect.toMap()
+        val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
+        assertTrue(utbetalinger.first()["automatiskBehandlet"] as Boolean)
     }
 
     @Test
@@ -89,7 +98,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertEquals(inspektør.fagsystemId(0), result["fagsystemId"])
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
         assertEquals(ANNULLERING_SENDT, result["tilstand"])
-        val forkastede = result["forkastet"] as List<Map<String, Any?>>
+        val forkastede = result["forkastet"].castAsList<Map<String, Any?>>()
         assertEquals(1, forkastede.size)
 
         assertNotNull(forkastede.first()["oppdrag"])
@@ -103,7 +112,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertNull(forkastede.first()["overføringstidspunkt"])
         assertTrue(forkastede.first()["avsluttet"] is LocalDateTime)
 
-        val utbetalinger = result["utbetalinger"] as List<Map<String, Any?>>
+        val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
         assertEquals(2, utbetalinger.size)
     }
 
@@ -118,7 +127,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertEquals(Fagområde.SykepengerRefusjon.verdi, result["fagområde"])
         assertEquals(ANNULLERING_SENDT, result["tilstand"])
 
-        val utbetalinger = result["utbetalinger"] as List<Map<String, Any?>>
+        val utbetalinger = result["utbetalinger"].castAsList<Map<String, Any?>>()
         assertEquals(2, utbetalinger.size)
 
         assertNotNull(utbetalinger.first()["oppdrag"])
@@ -126,7 +135,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
         assertEquals(ANNULLERING, utbetalinger.first()["type"])
         assertNull(utbetalinger.first()["maksdato"])
         assertTrue(utbetalinger.first()["opprettet"] is LocalDateTime)
-        val godkjentAv = utbetalinger.first()["godkjentAv"] as Map<String, Any>
+        val godkjentAv = utbetalinger.first()["godkjentAv"].castAsMap<String, Any>()
         assertEquals(IDENT, godkjentAv["ident"])
         assertEquals(EPOST, godkjentAv["epost"])
         assertTrue(godkjentAv["tidsstempel"] is LocalDateTime)
@@ -176,6 +185,7 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
                     maksdato = 28.desember,
                     opprettet = LocalDateTime.now(),
                     godkjentAv = PersonData.FagsystemIdData.UtbetalingData.GodkjentAvData("Z999999", "saksbehandler@nav.no", LocalDateTime.now()),
+                    automatiskBehandlet = false,
                     sendt = LocalDateTime.now(),
                     avstemmingsnøkkel = 12345L,
                     overføringstidspunkt = LocalDateTime.now(),
