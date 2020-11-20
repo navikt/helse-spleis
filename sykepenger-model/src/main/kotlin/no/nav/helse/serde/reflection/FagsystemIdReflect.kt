@@ -9,8 +9,7 @@ import java.time.LocalDateTime
 
 enum class FagsystemTilstandType {
     AKTIV, ANNULLERT, AVVIST, INITIELL,
-    NY, NY_KLAR, UBETALT, UBETALT_KLAR,
-    OVERFØRT, SENDT;
+    NY, UBETALT, OVERFØRT, SENDT;
 
     internal companion object {
         fun fraTilstand(tilstand: Tilstand) = when (tilstand) {
@@ -19,9 +18,7 @@ enum class FagsystemTilstandType {
             is Avvist -> AVVIST
             is Initiell -> INITIELL
             is Ny -> NY
-            is NyKlar -> NY_KLAR
             is Ubetalt -> UBETALT
-            is UbetaltKlar -> UBETALT_KLAR
             is Overført -> OVERFØRT
             is Sendt -> SENDT
             else -> throw IllegalStateException("Ukjent tilstand ${tilstand::class.simpleName}")
@@ -32,9 +29,7 @@ enum class FagsystemTilstandType {
             ANNULLERT -> Annullert
             AVVIST -> Avvist
             NY -> Ny
-            NY_KLAR -> NyKlar
             UBETALT -> Ubetalt
-            UBETALT_KLAR -> UbetaltKlar
             OVERFØRT -> Overført
             SENDT -> Sendt
             else -> throw IllegalArgumentException("støtter ikke å gjenopprette tilstand $type")

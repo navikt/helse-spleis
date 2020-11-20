@@ -33,10 +33,10 @@ internal class OppdragBuilder(
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
     }
 
-    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, aktivitetslogg: IAktivitetslogg): FagsystemId? {
+    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, aktivitetslogg: IAktivitetslogg): FagsystemId? {
         val oppdrag = result().takeIf(Oppdrag::isNotEmpty) ?: return null
-        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, aktivitetslogg) }
-            ?: (FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje)).also {
+        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, aktivitetslogg) }
+            ?: (FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager)).also {
                 fagsystemIder.add(it)
             })
     }

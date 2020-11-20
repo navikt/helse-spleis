@@ -15,7 +15,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `happy path`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
@@ -24,9 +24,8 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `utbetaling overført`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
-        klargjør(0)
         utbetal(0)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt")
         assertUtbetalingstidslinje(0,1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertTomHistorie(0)
     }
@@ -35,7 +34,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `happy path med flere utbetalinger`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV, 2.HELG)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt", "UbetaltKlar",  "Sendt", "Overført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt",  "Sendt", "Overført", "Aktiv")
         assertBehov(Behovtype.Utbetaling)
         assertUtbetalingstidslinje(0,1.januar til 14.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 14.januar, NavDag::class, NavHelgDag::class)
@@ -47,7 +46,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         val siste = annuller(0)
         overført(0)
         kvitter(0)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Sendt", "Overført", "Annullert")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Sendt", "Overført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -58,7 +57,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `annullering overført`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG, 5.NAV)
         val siste = annuller(0)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Sendt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Sendt")
         assertBehov(Behovtype.Utbetaling, siste)
         assertFalse(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -72,7 +71,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         val siste = annuller(0)
         overført(0)
         kvitter(0)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt", "Sendt", "Overført", "Annullert")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt", "Sendt", "Overført", "Annullert")
         assertBehov(Behovtype.Utbetaling, siste)
         assertTrue(fagsystemId.erAnnullert())
         assertTomUtbetalingstidslinje(0)
@@ -92,9 +91,8 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `aktiv ubetalt går tilbake til aktiv ved avslag`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
-        klargjør(0)
         utbetal(0, godkjent = false)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt", "UbetaltKlar", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt", "Aktiv")
         assertUtbetalingstidslinje(0,1.januar til 7.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
@@ -103,7 +101,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `ubetalt etter aktiv`() {
         opprettOgUtbetal(0, 5.NAV, 2.HELG)
         opprett(5.NAV, 2.HELG, 5.NAV)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
         assertHistorie(0, 1.januar til 7.januar, NavDag::class, NavHelgDag::class)
     }
@@ -121,17 +119,8 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     }
 
     @Test
-    fun `forsøke annullering i Ny klargjort`() {
-        opprett(5.NAV, 2.HELG)
-        klargjør(0)
-        utbetal(0)
-        assertThrows<IllegalStateException> { annuller(0) }
-    }
-
-    @Test
     fun `forsøke annullering i Sendt`() {
         opprett(5.NAV, 2.HELG)
-        klargjør(0)
         utbetal(0)
         assertThrows<IllegalStateException> { annuller(0) }
     }
@@ -139,7 +128,6 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `forsøke annullering i Overført`() {
         opprett(5.NAV, 2.HELG)
-        klargjør(0)
         utbetal(0)
         overført(0)
         assertThrows<IllegalStateException> { annuller(0) }
@@ -154,9 +142,8 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `ikke-godkjent periode`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
-        klargjør(0)
         val siste = utbetal(0, godkjent = false)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Avvist")
+        assertTilstander(0, "Initiell", "Ny", "Avvist")
         assertIkkeBehov(Behovtype.Utbetaling, siste)
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
@@ -164,11 +151,10 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `avvist utbetaling`() {
         opprett(5.NAV, 2.HELG, 5.NAV)
-        klargjør(0)
         utbetal(0)
         overført(0)
         kvitter(0, UtbetalingHendelse.Oppdragstatus.AVVIST)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Avvist")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Avvist")
         assertUtbetalingstidslinje(0, 1.januar til 12.januar, NavDag::class, NavHelgDag::class)
     }
 
@@ -184,35 +170,18 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     @Test
     fun `simulere ny`() {
         opprett(16.AP, 10.NAV)
-        assertThrows<IllegalStateException> { fagsystemId.simuler(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny")
-    }
-
-    @Test
-    fun `simulere ny klargjort`() {
-        opprett(16.AP, 10.NAV)
-        klargjør(0)
         fagsystemId.simuler(aktivitetslogg)
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertSimuleringsbehov(MAKSDATO, "SPLEIS")
-        assertTilstander(0, "Initiell", "Ny", "NyKlar")
+        assertTilstander(0, "Initiell", "Ny")
     }
 
     @Test
     fun `simulere ubetalt`() {
         opprettOgUtbetal(0, 16.AP, 10.NAV)
         opprett(16.AP, 10.NAV, 10.NAV)
-        assertThrows<IllegalStateException> { fagsystemId.simuler(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt")
-    }
-
-    @Test
-    fun `simulere ubetalt klargjort`() {
-        opprettOgUtbetal(0, 16.AP, 10.NAV)
-        opprett(16.AP, 10.NAV, 10.NAV)
-        klargjør(0)
         fagsystemId.simuler(aktivitetslogg)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt", "UbetaltKlar")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt")
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertSimuleringsbehov(MAKSDATO, "SPLEIS")
     }
@@ -222,7 +191,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         opprettOgUtbetal(0, 1.NAV)
         opprett(1.NAV, 16.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv")
         assertTilstander(1, "Initiell", "Ny")
         assertUtbetalingstidslinje(0, 1.januar til 1.januar, NavDag::class)
         assertHistorie(0, 1.januar til 1.januar, NavDag::class)
@@ -237,7 +206,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         opprettOgUtbetal(0, 1.NAV)
         opprett(1.NAV, 1.AP, 1.NAV)
         assertEquals(2, fagsystemIder.size)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv")
         assertTilstander(1, "Initiell", "Ny")
     }
 
@@ -253,7 +222,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         opprettOgUtbetal(0, 16.AP, 5.NAV)
         opprett(16.AP, 5.NAV, 5.NAV(1300))
         assertEquals(1, fagsystemIder.size)
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Ubetalt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Ubetalt")
     }
 
     @Test
@@ -266,7 +235,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         assertEquals(2, fagsystemIder.size)
         assertTrue(fagsystemIder[0].erAnnullert())
         assertFalse(fagsystemIder[1].erAnnullert())
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Sendt", "Overført", "Annullert")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Sendt", "Overført", "Annullert")
         assertTilstander(1, "Initiell", "Ny")
     }
 
@@ -317,10 +286,9 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `retry før overført`() {
         val aktivitetslogg = Aktivitetslogg()
         opprett(16.AP, 5.NAV)
-        klargjør(0)
         utbetal(0)
         assertDoesNotThrow { fagsystemId.prøvIgjen(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt")
         assertBehov(Behovtype.Utbetaling, aktivitetslogg)
     }
 
@@ -328,11 +296,10 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
     fun `retry før kvittering`() {
         val aktivitetslogg = Aktivitetslogg()
         opprett(16.AP, 5.NAV)
-        klargjør(0)
         utbetal(0)
         overført(0)
         assertDoesNotThrow { fagsystemId.prøvIgjen(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført")
         assertBehov(Behovtype.Utbetaling, aktivitetslogg)
     }
 
@@ -342,7 +309,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         opprettOgUtbetal(0, 16.AP, 5.NAV)
         annuller(0)
         assertDoesNotThrow { fagsystemId.prøvIgjen(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Sendt")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Sendt")
         assertBehov(Behovtype.Utbetaling, aktivitetslogg)
     }
 
@@ -353,7 +320,7 @@ internal class FagsystemIdTest : AbstractFagsystemIdTest() {
         annuller(0)
         overført(0)
         assertDoesNotThrow { fagsystemId.prøvIgjen(aktivitetslogg) }
-        assertTilstander(0, "Initiell", "Ny", "NyKlar", "Sendt", "Overført", "Aktiv", "Sendt", "Overført")
+        assertTilstander(0, "Initiell", "Ny", "Sendt", "Overført", "Aktiv", "Sendt", "Overført")
         assertBehov(Behovtype.Utbetaling, aktivitetslogg)
     }
 }

@@ -82,7 +82,6 @@ internal abstract class AbstractFagsystemIdTest {
 
     protected fun opprettOgUtbetal(fagsystemIdIndeks: Int, vararg dager: Utbetalingsdager, startdato: LocalDate = 1.januar, godkjent: Boolean = true, automatiskBehandling: Boolean = false): FagsystemId? {
         val fagsystemId = opprett(*dager, startdato = startdato)
-        klargjør(fagsystemIdIndeks)
         utbetal(fagsystemIdIndeks, godkjent = godkjent, automatiskBehandling = automatiskBehandling)
         if (godkjent) {
             assertUtbetalingsbehov(MAKSDATO, IDENT, EPOST, GODKJENTTIDSPUNKT, false)
@@ -148,10 +147,6 @@ internal abstract class AbstractFagsystemIdTest {
             assertEquals(sisteDato, it.sisteDato())
             assertAlleDager(it, periode, *dager)
         }
-    }
-
-    protected fun klargjør(fagsystemIdIndeks: Int) {
-        fagsystemIder[fagsystemIdIndeks].klargjør(MAKSDATO, FORBUKTE_DAGER, GJENSTÅENDE_DAGER)
     }
 
     protected fun utbetal(fagsystemIdIndeks: Int, godkjent: Boolean = true, automatiskBehandling: Boolean = false): IAktivitetslogg {
@@ -230,7 +225,7 @@ internal abstract class AbstractFagsystemIdTest {
             .also { it.betal() }
             .let {
                 OppdragBuilder(tidslinje, ORGNR, Fagområde.SykepengerRefusjon)
-                    .result(fagsystemIder, observatør, aktivitetslogg)
+                    .result(fagsystemIder, observatør, MAKSDATO, FORBUKTE_DAGER, GJENSTÅENDE_DAGER, aktivitetslogg)
             }?.also { fagsystemId = it }
     }
 }
