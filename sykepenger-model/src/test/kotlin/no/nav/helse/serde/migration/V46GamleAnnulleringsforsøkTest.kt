@@ -80,8 +80,7 @@ private fun originalJson() =
                         "fagsystemId": "fagsystemId-4",
                         "linjer": [
                             {
-                                "datoStatusFom": null,
-                                "statuskode": null
+                                "datoStatusFom": null
                             }
                         ]
                     },
@@ -152,8 +151,7 @@ private fun expectedJson() =
                         "fagsystemId": "fagsystemId-4",
                         "linjer": [
                             {
-                                "datoStatusFom": null,
-                                "statuskode": null
+                                "datoStatusFom": null
                             }
                         ]
                     },

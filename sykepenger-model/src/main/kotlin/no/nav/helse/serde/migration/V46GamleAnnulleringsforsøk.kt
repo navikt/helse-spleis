@@ -15,7 +15,7 @@ internal class V46GamleAnnulleringsforsøk : JsonMigration(version = 46) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger")
                 .filter { it["arbeidsgiverOppdrag"]["linjer"].size() == 1 }
-                .filter { it["arbeidsgiverOppdrag"]["linjer"].first()["statuskode"].asText(null) == "OPPH" }
+                .filter { it["arbeidsgiverOppdrag"]["linjer"].first().path("statuskode").asText(null) == "OPPH" }
                 .filter { !(it.takeIf { it.hasNonNull("annullert") }?.booleanValue() ?: false) }
                 .forEach {
                     (it as ObjectNode).put("annullert", true)
