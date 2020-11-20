@@ -62,20 +62,6 @@ internal class OppdragBuilder(
     }
 
     override fun visit(
-        dag: AnnullertDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        økonomi.reflection { grad, aktuellDagsinntekt ->
-            if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
-                tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
-            else
-                tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-        }
-    }
-
-    override fun visit(
         dag: NavHelgDag,
         dato: LocalDate,
         økonomi: Økonomi

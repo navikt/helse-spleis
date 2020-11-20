@@ -34,7 +34,6 @@ internal sealed class Dag(
                 is Sykedag,
                 is SykHelgedag,
                 is Arbeidsgiverdag,
-                is AnnullertDag,
                 is ArbeidsgiverHelgedag -> venstre
                 else -> høyre
             }
@@ -76,16 +75,6 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde)
     }
-
-    internal class AnnullertDag(
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : Dag(dato, kilde) {
-
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, Økonomi.sykdomsgrad(100.prosent), kilde)
-    }
-
 
     internal class Arbeidsdag(
         dato: LocalDate,

@@ -10,44 +10,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
-
-    @Disabled("Slik skal det virke etter at annullering trigger replay")
-    @Test
-    fun `annullerer første periode i en sammenhengende utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 15.februar, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 15.februar, 100))
-        håndterYtelser(2.vedtaksperiode)   // No history
-        håndterSimulering(2.vedtaksperiode)
-        person.håndter(
-            Annullering(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNUMMER,
-                fom = 27.januar,
-                tom = 15.februar,
-                saksbehandlerIdent = "Z999999",
-                saksbehandler = "Ola Nordmann",
-                saksbehandlerEpost = "tbd@nav.no",
-                opprettet = LocalDateTime.now()
-            )
-        )
-
-        assertNotEquals(0, observatør.utbetaltEventer.last().oppdrag.last().utbetalingslinjer.first().beløp)
-        assertEquals(0, observatør.utbetaltEventer.last().oppdrag.last().utbetalingslinjer.last().beløp)
-    }
 
     @Disabled("Slik skal det virke etter at annullering trigger replay")
     @Test

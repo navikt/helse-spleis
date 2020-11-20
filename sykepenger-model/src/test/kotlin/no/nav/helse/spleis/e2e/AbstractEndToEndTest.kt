@@ -332,26 +332,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
-    protected fun håndterAnnullering(
-        fom: LocalDate = 3.januar,
-        tom: LocalDate = 26.januar
-    ) {
-        person.håndter(
-            Annullering(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                organisasjonsnummer = ORGNUMMER,
-                fom = fom,
-                tom = tom,
-                saksbehandlerIdent = "Z999999",
-                saksbehandler = "Ola Nordmann",
-                saksbehandlerEpost = "tbd@nav.no",
-                opprettet = LocalDateTime.now()
-            )
-        )
-    }
-
     protected fun håndterPåminnelse(
         vedtaksperiodeId: UUID,
         påminnetTilstand: TilstandType,

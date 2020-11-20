@@ -1,9 +1,6 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 
@@ -28,7 +25,6 @@ internal enum class Turneringsnøkkel {
     AnnenInntekt_SØ,
     Utenlandsdag,
     Saksbehandlerdag,
-    AnnullertDag,
     UkjentDag,
     UbestemtDag;
 
@@ -56,7 +52,6 @@ internal enum class Turneringsnøkkel {
             dag is Sykedag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is SykHelgedag && dag.kommerFra(Sykmelding::class) -> SykHelgedag_SM
             dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
-            dag is Dag.AnnullertDag -> AnnullertDag
             dag is Dag.UkjentDag -> UkjentDag
             dag is Dag.Utenlandsdag -> Utenlandsdag
             else -> throw IllegalArgumentException("Ingen turneringsnøkkel definert for ${dag::class.simpleName}")

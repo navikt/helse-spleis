@@ -211,26 +211,6 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
-    fun `annullering påvirker ikke skjæringstidspunkt`() {
-        val sykmelding = sykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        val søknad = søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100))
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                1.januar til 31.januar
-            ), førsteFraværsdag = 1.januar
-        )
-        val annullering = annullering(1.januar til 31.januar)
-        val tidslinje = listOf(
-            sykmelding,
-            søknad,
-            inntektsmelding,
-            annullering
-        ).map { it.sykdomstidslinje() }
-            .merge(dagturnering::beste)
-        assertEquals(1.januar, tidslinje.skjæringstidspunkt())
-    }
-
-    @Test
     fun `tilstøtende arbeidsgivertidslinjer`() {
         val arbeidsgiver1tidslinje = 14.S
         val arbeidsgiver2tidslinje = 14.S
@@ -351,21 +331,6 @@ internal class SkjæringstidspunktTest {
             orgnummer = ORGNUMMER,
             sykeperioder = listOf(*sykeperioder),
             mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
-        )
-    }
-
-    private fun annullering(periode: Periode): Annullering {
-        return Annullering(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AKTØRID,
-            fom = periode.start,
-            tom = periode.endInclusive,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            saksbehandlerIdent = "z999999",
-            saksbehandler = "Test Testesen",
-            saksbehandlerEpost = "test@test.test",
-            opprettet = LocalDateTime.MAX
         )
     }
 

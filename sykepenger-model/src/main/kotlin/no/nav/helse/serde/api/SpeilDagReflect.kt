@@ -46,5 +46,4 @@ private fun Dag.toSpeilDagtype() = when (this) {
     is Dag.Studiedag -> SpeilDagtype.STUDIEDAG
     is Dag.Utenlandsdag -> SpeilDagtype.UTENLANDSDAG
     is Dag.ProblemDag -> SpeilDagtype.UBESTEMTDAG
-    is Dag.AnnullertDag -> SpeilDagtype.ANNULLERTDAG
 }

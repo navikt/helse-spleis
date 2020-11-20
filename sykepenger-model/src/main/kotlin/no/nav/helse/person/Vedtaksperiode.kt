@@ -234,11 +234,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, hendelse)
     }
 
-    fun håndter(annullering: Annullering) {
-        if (this.periode.endInclusive < annullering.fom) return
-        tilstand.håndter(this, annullering)
-    }
-
     internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
         if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, skjæringstidspunkt)) return
         kontekst(grunnbeløpsregulering)
@@ -851,11 +846,6 @@ internal class Vedtaksperiode private constructor(
             hendelse: OverstyrTidslinje
         ) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
-            vedtaksperiode.kontekst(annullering)
-            vedtaksperiode.tilstand(annullering, TilInfotrygd)
         }
 
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
@@ -1498,11 +1488,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerUtbetaling(påminnelse, "epost@nav.no")
         }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
-            vedtaksperiode.kontekst(annullering)
-            vedtaksperiode.tilstand(annullering, TilAnnullering)
-        }
     }
 
     internal object TilAnnullering : Vedtaksperiodetilstand {
@@ -1686,16 +1671,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, annullering: Annullering) {
-            vedtaksperiode.kontekst(annullering)
-            vedtaksperiode.sykdomshistorikk.håndter(annullering)
-            vedtaksperiode.sykdomstidslinje =
-                vedtaksperiode.arbeidsgiver.sykdomstidslinje().subset(vedtaksperiode.periode)
-            vedtaksperiode.hendelseIder.add(annullering.meldingsreferanseId())
-
-            vedtaksperiode.tilstand(annullering, AvventerHistorikk)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
             if (utbetaling.annullert) {

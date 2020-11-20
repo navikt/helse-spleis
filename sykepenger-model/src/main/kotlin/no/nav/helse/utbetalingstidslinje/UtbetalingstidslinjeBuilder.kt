@@ -106,15 +106,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         melding: String
     ) = throw IllegalArgumentException("Forventet ikke problemdag i utbetalingstidslinjen. Melding: $melding")
 
-    override fun visitDag(
-        dag: Dag.AnnullertDag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) =
-        annullertDag(dato, økonomi)
-
-
     private fun foreldetSykedag(dagen: LocalDate, økonomi: Økonomi) {
         if (arbeidsgiverperiodeGjennomført(dagen)) {
             tilstand = UtbetalingSykedager
@@ -156,20 +147,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         tilstand.fridag(this, dagen)
     }
 
-    private fun annullertDag(dagen: LocalDate, økonomi: Økonomi) {
-        if (arbeidsgiverperiodeGjennomført(dagen))
-            tilstand.annullert(this, dagen, økonomi)
-        else
-            tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
+    private fun oppdatereInntekt(dato: LocalDate) {
+        dekningsgrunnlag = inntektshistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
+        aktuellDagsinntekt = inntektshistorikk.inntekt(dato) ?: INGEN
     }
 
     private fun oppdatereSkjæringstidspunkt(dato: LocalDate) {
         skjæringstidspunkt = skjæringstidspunkt(dato)
-    }
-
-    private fun oppdatereInntekt(dato: LocalDate) {
-        dekningsgrunnlag = inntektshistorikk.dekningsgrunnlag(dato, arbeidsgiverRegler)
-        aktuellDagsinntekt = inntektshistorikk.inntekt(dato) ?: INGEN
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate) {
@@ -204,13 +188,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     private fun håndterFridag(dato: LocalDate) {
         fridager += 1
         tidslinje.addFridag(dato, Økonomi.ikkeBetalt().inntekt(aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt))
-    }
-
-
-    private fun håndterAnnullertDag(dagen: LocalDate, økonomi: Økonomi) {
-        //TODO: Skal annulerte dager oppdatere inntekt? Hva er oppdatere inntekt?
-        //oppdatereInntekt(dagen)
-        tidslinje.addAnnullertDag(dagen, økonomi.inntekt(INGEN))
     }
 
     private fun håndterFriEgenmeldingsdag(dato: LocalDate) {
@@ -255,9 +232,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         )
 
         fun fridag(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
-        fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.håndterAnnullertDag(dagen, økonomi)
-        }
 
         fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
         fun arbeidsdagerEtterOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate)
@@ -333,9 +307,6 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
             splitter.håndterFridag(dagen)
         }
 
-        override fun annullert(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate, økonomi: Økonomi) {
-            splitter.håndterAnnullertDag(dagen, økonomi)
-        }
 
         override fun arbeidsdagerIOppholdsdager(splitter: UtbetalingstidslinjeBuilder, dagen: LocalDate) {
             splitter.håndterArbeidsdag(dagen)

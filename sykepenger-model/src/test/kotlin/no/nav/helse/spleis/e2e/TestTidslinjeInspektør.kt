@@ -44,15 +44,6 @@ internal class TestTidslinjeInspektør(tidslinje: Utbetalingstidslinje) :
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AnnullertDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        datoer[dag.dato] = Utbetalingstidslinje.Utbetalingsdag.AnnullertDag::class
-        inkrementer(Utbetalingstidslinje.Utbetalingsdag.AnnullertDag::class)
-    }
-
-    override fun visit(
         dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
         dato: LocalDate,
         økonomi: Økonomi

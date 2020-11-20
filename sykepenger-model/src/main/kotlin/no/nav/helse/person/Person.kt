@@ -116,11 +116,6 @@ class Person private constructor(
         finnArbeidsgiver(hendelse).håndter(hendelse)
     }
 
-    fun håndter(hendelse: Annullering) {
-        hendelse.kontekst(this)
-        finnArbeidsgiver(hendelse).håndter(hendelse)
-    }
-
     fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(event) }
     }

@@ -171,7 +171,7 @@ internal class Sykdomstidslinje private constructor(
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
     private fun erEnSykedag(it: Dag) =
-        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is AnnullertDag
+        it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
@@ -201,7 +201,6 @@ internal class Sykdomstidslinje private constructor(
                     Feriedag::class -> "F"
                     FriskHelgedag::class -> "R"
                     ForeldetSykedag::class -> "K"
-                    AnnullertDag::class -> "!️"
                     else -> "*"
                 }
         } ?: "Tom tidslinje"
@@ -356,16 +355,6 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
-
-        fun annullerteDager(periode: Periode, kilde: Hendelseskilde) = Sykdomstidslinje(
-            periode.start.datesUntil(periode.endInclusive.plusDays(1))
-                .collect(
-                    toMap<LocalDate, LocalDate, Dag>(
-                        { it },
-                        { dag -> AnnullertDag(dag, kilde) }
-                    )
-                )
-        )
     }
 
     override operator fun iterator() = object : Iterator<Dag> {
@@ -399,8 +388,6 @@ internal class Sykdomstidslinje private constructor(
             .map { it.key }
 
     internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
-
-    fun harAnnulerteDager() = dager.any { it.value is AnnullertDag }
 
 }
 

@@ -41,5 +41,5 @@ private fun Dag.toJsonType() = when (this) {
     is Dag.Studiedag -> JsonDagType.STUDIEDAG
     is Dag.Utenlandsdag -> JsonDagType.UTENLANDSDAG
     is Dag.ProblemDag -> JsonDagType.PROBLEMDAG
-    is Dag.AnnullertDag -> JsonDagType.ANNULLERTDAG
+    else -> JsonDagType.UKJENT_DAG // todo fjern
 }
