@@ -116,30 +116,3 @@ internal class Utbetalingslinje internal constructor(
     internal fun erOpphør() = datoStatusFom != null
 }
 
-internal enum class Endringskode {
-    NY, UEND, ENDR
-}
-
-internal enum class Klassekode(internal val verdi: String) {
-    RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP");
-
-    internal companion object {
-        private val map = values().associateBy(Klassekode::verdi)
-        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
-    }
-}
-
-internal enum class Fagområde(internal val verdi: String, private val linjerStrategy: (Utbetaling) -> Oppdrag) {
-    SykepengerRefusjon("SPREF", Utbetaling::arbeidsgiverOppdrag),
-    Sykepenger("SP", Utbetaling::personOppdrag);
-
-    override fun toString() = verdi
-
-    internal fun utbetalingslinjer(utbetaling: Utbetaling): Oppdrag =
-        linjerStrategy(utbetaling)
-
-    internal companion object {
-        private val map = values().associateBy(Fagområde::verdi)
-        fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
-    }
-}

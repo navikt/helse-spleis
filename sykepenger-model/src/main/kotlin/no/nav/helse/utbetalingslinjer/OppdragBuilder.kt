@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.UtbetalingStrategy
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -17,11 +16,10 @@ internal class OppdragBuilder(
     private val mottaker: String,
     private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
-    private val dagStrategy: UtbetalingStrategy = NavDag.reflectedArbeidsgiverBeløp
+    private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
 ) : UtbetalingsdagVisitor {
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
-    private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
     private var sisteArbeidsgiverdag: LocalDate? = null
 
     init {
@@ -56,7 +54,7 @@ internal class OppdragBuilder(
     ) {
         økonomi.reflection { grad, aktuellDagsinntekt ->
             if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == null || linje.beløp == dagStrategy(dag.økonomi)))
+            if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -70,7 +68,7 @@ internal class OppdragBuilder(
     ) {
         økonomi.reflection { grad, aktuellDagsinntekt ->
             if (arbeisdsgiverLinjer.isEmpty()) return@reflection tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
-            if (grad == linje.grad && (linje.beløp == null || linje.beløp == dagStrategy(dag.økonomi)))
+            if (grad == linje.grad && (linje.beløp == null || linje.beløp == fagområde.beløp(dag.økonomi)))
                 tilstand.betalingsdag(dag, dato, grad, aktuellDagsinntekt!!)
             else
                 tilstand.nyLinje(dag, dato, grad, aktuellDagsinntekt!!)
@@ -137,7 +135,7 @@ internal class OppdragBuilder(
             Utbetalingslinje(
                 dato,
                 dato,
-                dagStrategy(dag.økonomi),
+                fagområde.beløp(dag.økonomi),
                 aktuellDagsinntekt.roundToInt(),
                 grad,
                 fagsystemId
@@ -281,7 +279,7 @@ internal class OppdragBuilder(
             grad: Double,
             aktuellDagsinntekt: Double
         ) {
-            linje.beløp = dagStrategy(dag.økonomi)
+            linje.beløp = fagområde.beløp(dag.økonomi)
             linje.aktuellDagsinntekt = aktuellDagsinntekt.roundToInt() //Needs to be changed for self employed
             linje.fom = dag.dato
             tilstand = LinjeMedSats()
