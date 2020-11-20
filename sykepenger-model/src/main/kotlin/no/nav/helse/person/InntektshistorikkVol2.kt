@@ -4,6 +4,8 @@ package no.nav.helse.person
 import no.nav.helse.Appender
 import no.nav.helse.AppenderFeature
 import no.nav.helse.appender
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -31,8 +33,14 @@ internal class InntektshistorikkVol2 {
         visitor.postVisitInntekthistorikkVol2(this)
     }
 
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
+        grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: grunnlagForSykepengegrunnlagFraInfotrygd(skjæringstidspunkt til dato)
+
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
         historikk.first().grunnlagForSykepengegrunnlag(dato)
+
+    private fun grunnlagForSykepengegrunnlagFraInfotrygd(periode: Periode) =
+        historikk.first().grunnlagForSykepengegrunnlagFraInfotrygd(periode)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
         historikk.first().grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
@@ -40,57 +48,60 @@ internal class InntektshistorikkVol2 {
     internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
         grunnlagForSykepengegrunnlag(dato)?.times(regler.dekningsgrad())
 
-    internal fun clone() = InntektshistorikkVol2().also {
-        it.historikk.addAll(this.historikk.map(Innslag::clone))
-    }
-
     internal class Innslag {
 
         private val inntekter = mutableListOf<Inntektsopplysning>()
 
-        fun accept(visitor: InntekthistorikkVisitor) {
+        internal fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitInnslag(this)
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInnslag(this)
         }
 
-        fun clone() = Innslag().also {
+        internal fun clone() = Innslag().also {
             it.inntekter.addAll(this.inntekter)
         }
 
-        fun add(inntektsopplysning: Inntektsopplysning) {
+        internal fun add(inntektsopplysning: Inntektsopplysning) {
             if (inntekter.all { it.kanLagres(inntektsopplysning) }) {
                 inntekter.removeIf { it.skalErstattesAv(inntektsopplysning) }
                 inntekter.add(inntektsopplysning)
             }
         }
 
-        fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
+        internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
             inntekter
                 .sorted()
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(dato) }
                 .firstOrNull()
 
-        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+        internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
             inntekter
                 .sorted()
                 .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
                 .firstOrNull()
 
+        internal fun grunnlagForSykepengegrunnlagFraInfotrygd(periode: Periode) =
+            inntekter
+                .filterIsInstance<Infotrygd>()
+                .sorted()
+                .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
+                .firstOrNull()
     }
 
     internal interface Inntektsopplysning : Comparable<Inntektsopplysning> {
+        val dato: LocalDate
         val prioritet: Int
         fun accept(visitor: InntekthistorikkVisitor)
         fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntekt? = null
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt? = null
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
-        override fun compareTo(other: Inntektsopplysning) = -this.prioritet.compareTo(other.prioritet)
+        override fun compareTo(other: Inntektsopplysning) = (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
         fun kanLagres(other: Inntektsopplysning) = true
     }
 
     internal class Saksbehandler(
-        private val dato: LocalDate,
+        override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
@@ -101,7 +112,7 @@ internal class InntektshistorikkVol2 {
             visitor.visitSaksbehandler(this)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.beløp
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
@@ -109,7 +120,7 @@ internal class InntektshistorikkVol2 {
 
 
     internal class Inntektsmelding(
-        private val dato: LocalDate,
+        override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
@@ -120,7 +131,7 @@ internal class InntektshistorikkVol2 {
             visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.beløp
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Inntektsmelding && this.dato == other.dato
@@ -130,7 +141,7 @@ internal class InntektshistorikkVol2 {
     }
 
     internal class Infotrygd(
-        private val dato: LocalDate,
+        override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
@@ -141,17 +152,19 @@ internal class InntektshistorikkVol2 {
             visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = if (dato == this.dato) beløp else null
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.beløp
+        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }?.beløp
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
     }
 
     internal class SkattComposite(
-        private val inntektsopplysninger: List<Skatt> = listOf()
+        private val inntektsopplysninger: List<Skatt>
     ) : Inntektsopplysning {
 
-        override val prioritet = inntektsopplysninger.maxOfOrNull { it.prioritet } ?: 0
+        override val dato = inntektsopplysninger.first().dato
+        override val prioritet = inntektsopplysninger.first().prioritet
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this)
@@ -179,7 +192,7 @@ internal class InntektshistorikkVol2 {
     }
 
     internal sealed class Skatt(
-        protected val dato: LocalDate,
+        override val dato: LocalDate,
         protected val hendelseId: UUID,
         protected val beløp: Inntekt,
         protected val måned: YearMonth,
@@ -231,7 +244,7 @@ internal class InntektshistorikkVol2 {
             }
 
             override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-                if (this.dato == dato && måned.isWithinRangeOf(dato, 3)) beløp else null
+                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 3) }?.beløp
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sykepengegrunnlag && this.dato == other.dato && this.tidsstempel != other.tidsstempel
@@ -265,7 +278,7 @@ internal class InntektshistorikkVol2 {
             }
 
             override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-                if (this.dato == dato && måned.isWithinRangeOf(dato, 12)) beløp else null
+                takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }?.beløp
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato

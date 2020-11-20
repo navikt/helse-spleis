@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -56,6 +57,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     private fun tilMånedligDouble() = årlig / 12
 
     internal fun rundTilDaglig() = Inntekt((årlig / ARBEIDSDAGER_PER_ÅR).roundToInt() * ARBEIDSDAGER_PER_ÅR.toDouble())
+
+    internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler) = times(regler.dekningsgrad())
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 

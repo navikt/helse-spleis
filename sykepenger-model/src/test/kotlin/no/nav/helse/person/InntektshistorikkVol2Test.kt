@@ -16,7 +16,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-@ExperimentalStdlibApi
 internal class InntektshistorikkVol2Test {
 
     private lateinit var historikk: InntektshistorikkVol2
@@ -380,6 +379,19 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
+    }
+
+    @Test
+    fun `Finner nærmeste inntekt fra Infotrygd, hvis det ikke finnes inntekt for skjæringstidspunkt`() {
+        utbetalingshistorikk(
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(10.januar, 30000.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(5.januar, 25000.månedlig, ORGNUMMER, true)
+            )
+        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 11.januar))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 9.januar))
+        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar))
     }
 
     private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {

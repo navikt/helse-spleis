@@ -2358,4 +2358,38 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_VILKÅRSPRØVING_GAP)
     }
+
+    @Test
+    fun `Ny utbetalingsbuilder feiler ikke når IT har kontinuerlig sykdom på tvers av arbeidsgivere`() {
+        Toggles.nyUtbetalingstidslinjebuilder = true
+        håndterSykmelding(Sykmeldingsperiode(28.september(2020), 18.oktober(2020), 100))
+        håndterSøknad(Sykdom(28.september(2020), 18.oktober(2020), 100))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar(2019), 22.februar(2019), 200, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(23.mars(2020), 5.juli(2020), 200, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.Ferie(6.juli(2020), 27.september(2020)),
+            RefusjonTilArbeidsgiver(5.desember(2018), 31.desember(2018), 200, 100, "123455433"),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar(2019), 20000.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(23.mars(2020), 21000.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(5.desember(2018), 18000.månedlig, "123455433", true)
+            )
+        )
+        assertDoesNotThrow {
+            håndterYtelser(
+                1.vedtaksperiode,
+                RefusjonTilArbeidsgiver(1.januar(2019), 22.februar(2019), 200, 100, ORGNUMMER),
+                RefusjonTilArbeidsgiver(23.mars(2020), 5.juli(2020), 200, 100, ORGNUMMER),
+                Utbetalingshistorikk.Periode.Ferie(6.juli(2020), 27.september(2020)),
+                RefusjonTilArbeidsgiver(5.desember(2018), 31.desember(2018), 200, 100, "123455433"),
+                inntektshistorikk = listOf(
+                    Utbetalingshistorikk.Inntektsopplysning(1.januar(2019), 20000.månedlig, ORGNUMMER, true),
+                    Utbetalingshistorikk.Inntektsopplysning(23.mars(2020), 21000.månedlig, ORGNUMMER, true),
+                    Utbetalingshistorikk.Inntektsopplysning(5.desember(2018), 18000.månedlig, "123455433", true)
+                )
+            )
+        }
+        Toggles.nyUtbetalingstidslinjebuilder = false
+    }
 }

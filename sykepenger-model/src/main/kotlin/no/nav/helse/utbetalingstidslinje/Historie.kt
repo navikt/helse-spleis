@@ -14,7 +14,6 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -71,20 +70,10 @@ internal class Historie() {
         inntektshistorikk: InntektshistorikkVol2,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-        val inntekterForSkjæringstidspunkter =
-            (skjæringstidspunkter(periode) + Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, infotrygdbøtte.sykdomstidslinjer()))
-                .filterNot { inntektshistorikk.dekningsgrunnlag(it, NormalArbeidstaker) == null }
-                .map { dato ->
-                    dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
-                        requireNotNull(inntektshistorikk.dekningsgrunnlag(dato, NormalArbeidstaker)),
-                        requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlag(dato)),
-                        dato
-                    )
-                }.toMap()
-
         return UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = sammenhengendePeriode(periode),
-            inntekter = inntekterForSkjæringstidspunkter,
+            skjæringstidspunkter = skjæringstidspunkter(periode),
+            inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
