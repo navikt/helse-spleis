@@ -3,6 +3,7 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverReflectTest {
@@ -15,8 +16,9 @@ internal class ArbeidsgiverReflectTest {
     @Test
     fun `mapper Arbeidsgiver til map`() {
         val map = ArbeidsgiverReflect(arbeidsgiver).toMap()
-        assertEquals(2 , map.size)
+        assertEquals(3 , map.size)
         assertEquals(ORGNR, map["organisasjonsnummer"])
+        assertTrue(map["beregnetUtbetalingstidslinjer"] is List<*>)
     }
 
     internal val arbeidsgiver = Arbeidsgiver(Person(AKTØR, FØDSELSNUMMER), ORGNR)

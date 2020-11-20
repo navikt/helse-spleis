@@ -41,6 +41,13 @@ private class ModelDeepEquals {
         } else {
             if (one is BigDecimal && other is BigDecimal) {
                 assertEqualWithMessage(one.toLong(), other.toLong(), path)
+            } else if (one is Pair<*, *> && other is Pair<*, *>) {
+                assertDeepEquals(one.first, other.first, path)
+                assertDeepEquals(one.second, other.second, path)
+            } else if (one is Triple<*, *, *> && other is Triple<*, *, *>) {
+                assertDeepEquals(one.first, other.first, path)
+                assertDeepEquals(one.second, other.second, path)
+                assertDeepEquals(one.third, other.third, path)
             } else {
                 assertEqualWithMessage(one, other, path)
             }

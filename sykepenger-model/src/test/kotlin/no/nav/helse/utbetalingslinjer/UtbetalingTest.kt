@@ -137,6 +137,9 @@ internal class UtbetalingTest {
         tidslinje,
         sisteDato,
         aktivitetslogg,
+        LocalDate.MAX,
+        100,
+        148,
         tidligere?.let { listOf(tidligere) } ?: emptyList()
     ).also { utbetaling ->
         utbetaling.håndter(

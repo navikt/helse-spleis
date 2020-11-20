@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
@@ -26,12 +27,15 @@ internal class Utbetaling private constructor(
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         sisteDato: LocalDate,
-        aktivitetslogg: Aktivitetslogg,
+        aktivitetslogg: IAktivitetslogg,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
         utbetalinger: List<Utbetaling>
     ) : this(
         utbetalingstidslinje,
-        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
+        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
+        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         LocalDateTime.now(),
         IKKE_UTBETALT,
         false
@@ -62,7 +66,10 @@ internal class Utbetaling private constructor(
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: Aktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
             utbetalinger: List<Utbetaling>
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato)
             .result()
@@ -79,7 +86,10 @@ internal class Utbetaling private constructor(
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: Aktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
             utbetalinger: List<Utbetaling>
         ) = Oppdrag(fødselsnummer, Sykepenger)
 

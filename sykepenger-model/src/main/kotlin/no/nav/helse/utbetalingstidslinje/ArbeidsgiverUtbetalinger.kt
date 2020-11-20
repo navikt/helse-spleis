@@ -30,13 +30,7 @@ internal class ArbeidsgiverUtbetalinger(
         }
         MaksimumUtbetaling(tidslinjer, aktivitetslogg, skjæringstidspunkter, virkningsdato).betal()
         this.tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            arbeidsgiver.createUtbetaling(
-                fødselsnummer,
-                organisasjonsnummer,
-                utbetalingstidslinje,
-                periode.endInclusive,
-                aktivitetslogg
-            )
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
         }
     }
 

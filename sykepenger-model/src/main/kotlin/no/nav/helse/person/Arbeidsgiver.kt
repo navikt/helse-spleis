@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
@@ -30,7 +31,8 @@ internal class Arbeidsgiver private constructor(
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>,
-    private val fagsystemIder: MutableList<FagsystemId>
+    private val fagsystemIder: MutableList<FagsystemId>,
+    private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>
 ) : Aktivitetskontekst, FagsystemIdObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
@@ -42,7 +44,8 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
         utbetalinger = mutableListOf(),
-        fagsystemIder = mutableListOf()
+        fagsystemIder = mutableListOf(),
+        beregnetUtbetalingstidslinjer = mutableListOf()
     )
 
     init {
@@ -83,28 +86,36 @@ internal class Arbeidsgiver private constructor(
 
     internal fun utbetaling() = utbetalinger.lastOrNull()
 
-    internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
-
-    internal fun nåværendeTidslinje() =
-        utbetaling()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
-
-    internal fun createUtbetaling(
+    internal fun lagUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        organisasjonsnummer: String,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        sisteDato: LocalDate,
-        aktivitetslogg: Aktivitetslogg
-    ) {
+        engineForTimeline: MaksimumSykepengedagerfilter,
+        periode: Periode
+    ){
+        val (organisasjonsnummer, utbetalingstidslinje, _) = beregnetUtbetalingstidslinjer.last()
+        engineForTimeline.beregnGrenser(periode.endInclusive)
         utbetalinger.add(
             Utbetaling(
                 fødselsnummer,
                 organisasjonsnummer,
                 utbetalingstidslinje,
-                sisteDato,
+                periode.endInclusive,
                 aktivitetslogg,
+                engineForTimeline.maksdato(),
+                engineForTimeline.forbrukteSykedager(),
+                engineForTimeline.gjenståendeSykedager(),
                 utbetalinger
             )
         )
+    }
+
+    internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
+
+    internal fun nåværendeTidslinje() =
+        beregnetUtbetalingstidslinjer.lastOrNull()?.second ?: throw IllegalStateException("mangler utbetalinger")
+
+    internal fun lagreUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) {
+        beregnetUtbetalingstidslinjer.add(Triple(organisasjonsnummer, utbetalingstidslinje, LocalDateTime.now()))
     }
 
     private fun validerSykdomstidslinjer() = vedtaksperioder.forEach {
@@ -544,7 +555,8 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
                 utbetalinger: List<Utbetaling>,
-                fagsystemIder: List<FagsystemId>
+                fagsystemIder: List<FagsystemId>,
+                beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -555,7 +567,8 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder,
                 forkastede,
                 utbetalinger.toMutableList(),
-                fagsystemIder.toMutableList()
+                fagsystemIder.toMutableList(),
+                beregnetUtbetalingstidslinjer.toMutableList()
             )
         }
     }

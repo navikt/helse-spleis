@@ -577,7 +577,7 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        engineForTimeline.beregnGrenser(this.periode.endInclusive)
+        arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, engineForTimeline, this.periode)
         maksdato = engineForTimeline.maksdato()
         gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()
