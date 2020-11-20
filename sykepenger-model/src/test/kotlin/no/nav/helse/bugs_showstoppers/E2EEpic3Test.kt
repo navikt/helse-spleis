@@ -786,10 +786,15 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     fun `vilkårsgrunnlagfeil på kort arbeidsgiversøknad`() {
         håndterSykmelding(Sykmeldingsperiode(2.mars(2020), 2.mars(2020), 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(2.mars(2020), 2.mars(2020), 100))
+
         håndterSykmelding(Sykmeldingsperiode(16.mars(2020), 29.mars(2020), 100))
+
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 15.april(2020), 100))
+
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(16.mars(2020), 29.mars(2020), 100))
+
         håndterSøknad(Sykdom(30.mars(2020), 15.april(2020), 100))
+
         håndterInntektsmeldingMedValidering(
             1.vedtaksperiode, listOf(
                 Periode(2.mars(2020), 2.mars(2020)),
@@ -797,28 +802,32 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(30.mars(2020), 30.mars(2020))
             ), førsteFraværsdag = 16.mars(2020), refusjon = Triple(null, INNTEKT, emptyList())
         )
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeId = 1.vedtaksperiode,
-            inntekt = INNTEKT,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
-        ) // make sure Vilkårsgrunnlag fails
-        assertForkastetPeriodeTilstander(
+
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
-            TIL_INFOTRYGD
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = 2.vedtaksperiode,
             inntekt = INNTEKT,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
         ) // make sure Vilkårsgrunnlag fails
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
             AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TIL_INFOTRYGD

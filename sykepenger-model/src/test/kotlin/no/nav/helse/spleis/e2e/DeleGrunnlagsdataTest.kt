@@ -9,7 +9,10 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiv
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.april
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -272,9 +275,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
+
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         assertTilstander(1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -288,11 +291,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 }

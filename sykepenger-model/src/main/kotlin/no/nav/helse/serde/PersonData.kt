@@ -9,6 +9,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
+import no.nav.helse.serde.reflection.FagsystemTilstandType
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Dag
@@ -141,7 +142,8 @@ internal data class PersonData(
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
-        private val utbetalinger: List<UtbetalingData>
+        private val utbetalinger: List<UtbetalingData>,
+        private val fagsystemIder: List<FagsystemIdData>?
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
@@ -152,9 +154,8 @@ internal data class PersonData(
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = sortedMapOf<Vedtaksperiode, ForkastetÅrsak>()
-        private val modelUtbetalinger = mutableListOf<Utbetaling>().apply {
-            addAll(utbetalinger.map { it.konverterTilUtbetaling() })
-        }
+        private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
+        private val modelFagsystemIder = fagsystemIder?.map { it.konverterTilFagsystemId() } ?: emptyList()
 
         internal fun konverterTilArbeidsgiver(
             person: Person,
@@ -170,7 +171,8 @@ internal data class PersonData(
                 modelSykdomshistorikk,
                 vedtaksperiodeliste,
                 forkastedeliste,
-                modelUtbetalinger
+                modelUtbetalinger,
+                modelFagsystemIder
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {
@@ -389,6 +391,7 @@ internal data class PersonData(
                 private val arbeidsgiverBetalingProsent: Double,
                 private val aktuellDagsinntekt: Double?,
                 private val dekningsgrunnlag: Double?,
+                private val skjæringstidspunkt: LocalDate?,
                 private val arbeidsgiverbeløp: Int?,
                 private val personbeløp: Int?,
                 private val er6GBegrenset: Boolean?,
@@ -407,6 +410,7 @@ internal data class PersonData(
                             arbeidsgiverBetalingProsent.prosent,
                             aktuellDagsinntekt,
                             dekningsgrunnlag,
+                            skjæringstidspunkt,
                             arbeidsgiverbeløp,
                             personbeløp,
                             er6GBegrenset,
@@ -737,6 +741,70 @@ internal data class PersonData(
         }
     }
 
+    data class FagsystemIdData(
+        private val fagsystemId: String,
+        private val fagområde: String,
+        private val mottaker: String,
+        private val tilstand: FagsystemTilstandType,
+        private val utbetalinger: List<UtbetalingData>,
+        private val forkastet: List<UtbetalingData>
+    ) {
+        internal fun konverterTilFagsystemId() = FagsystemId::class.primaryConstructor!!
+            .apply { isAccessible = true }
+            .call(
+                fagsystemId,
+                Fagområde.from(fagområde),
+                mottaker,
+                FagsystemTilstandType.tilTilstand(tilstand),
+                utbetalinger.map { it.konverterTilUtbetaling() },
+                forkastet.map { it.konverterTilUtbetaling() }
+            )
+
+        data class UtbetalingData(
+            private val oppdrag: OppdragData,
+            private val utbetalingstidslinje: UtbetalingstidslinjeData,
+            private val type: FagsystemId.Utbetaling.Utbetalingtype,
+            private val maksdato: LocalDate?,
+            private val forbrukteSykedager: Int,
+            private val gjenståendeSykedager: Int,
+            private val opprettet: LocalDateTime,
+            private val godkjentAv: GodkjentAvData?,
+            private val automatiskBehandlet: Boolean,
+            private val sendt: LocalDateTime?,
+            private val avstemmingsnøkkel: Long?,
+            private val overføringstidspunkt: LocalDateTime?,
+            private val avsluttet: LocalDateTime?
+        ) {
+
+            internal fun konverterTilUtbetaling() = FagsystemId.Utbetaling::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(
+                    oppdrag.konverterTilOppdrag(),
+                    utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
+                    type,
+                    opprettet,
+                    maksdato,
+                    forbrukteSykedager,
+                    gjenståendeSykedager,
+                    godkjentAv?.konverterTilTriple(),
+                    automatiskBehandlet,
+                    sendt,
+                    avstemmingsnøkkel,
+                    overføringstidspunkt,
+                    avsluttet
+                )
+
+            data class GodkjentAvData(
+                private val ident: String,
+                private val epost: String,
+                private val tidsstempel: LocalDateTime
+            ) {
+                internal fun konverterTilTriple() =
+                    Triple(ident, epost, tidsstempel)
+            }
+        }
+    }
+
     data class UtbetalingData(
         val utbetalingstidslinje: UtbetalingstidslinjeData,
         val arbeidsgiverOppdrag: OppdragData,
@@ -847,6 +915,7 @@ internal data class PersonData(
             private val dato: LocalDate,
             private val aktuellDagsinntekt: Double,
             private val dekningsgrunnlag: Double,
+            private val skjæringstidspunkt: LocalDate?,
             private val begrunnelse: BegrunnelseData?,
             private val grad: Double?,
             private val arbeidsgiverBetalingProsent: Double?,
@@ -862,6 +931,7 @@ internal data class PersonData(
                         arbeidsgiverBetalingProsent?.prosent,
                         aktuellDagsinntekt.daglig,
                         dekningsgrunnlag.daglig,
+                        skjæringstidspunkt,
                         arbeidsgiverbeløp?.daglig,
                         personbeløp?.daglig,
                         er6GBegrenset,

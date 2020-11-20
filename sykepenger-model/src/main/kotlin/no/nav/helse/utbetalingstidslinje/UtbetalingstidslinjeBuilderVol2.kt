@@ -30,7 +30,8 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
 
     internal class Inntekter(
         val dekningsgrunnlag: Inntekt,
-        val aktuellDagsinntekt: Inntekt
+        val aktuellDagsinntekt: Inntekt,
+        val skjæringstidspunkt: LocalDate?
     )
 
     private val tidslinje = Utbetalingstidslinje()
@@ -42,8 +43,8 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
         requireNotNull(inntektForDatoOrNull(dato)) { "Fant ikke inntekt for $dato" }
 
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
-        (inntektForDatoOrNull(dato) ?: Inntekter(INGEN, INGEN))
-            .let { inntekt(it.aktuellDagsinntekt, it.dekningsgrunnlag) }
+        (inntektForDatoOrNull(dato) ?: Inntekter(INGEN, INGEN, null))
+            .let { inntekt(it.aktuellDagsinntekt, it.dekningsgrunnlag, it.skjæringstidspunkt) }
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode)
@@ -121,7 +122,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             val inntektForDato = inntektForDato(dagen)
             tidslinje.addForeldetDag(
                 dagen,
-                økonomi.inntekt(inntektForDato.aktuellDagsinntekt, inntektForDato.dekningsgrunnlag)
+                økonomi.inntekt(inntektForDato.aktuellDagsinntekt, inntektForDato.dekningsgrunnlag, inntektForDato.skjæringstidspunkt)
             )
         } else tilstand.sykedagerIArbeidsgiverperioden(this, dagen, økonomi)
     }
@@ -176,12 +177,12 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private fun håndterNAVdag(dato: LocalDate, økonomi: Økonomi) {
         tidslinje.addNAVdag(
             dato,
-            inntektForDato(dato).let { økonomi.inntekt(it.aktuellDagsinntekt, it.dekningsgrunnlag) }
+            inntektForDato(dato).let { økonomi.inntekt(it.aktuellDagsinntekt, it.dekningsgrunnlag, it.skjæringstidspunkt) }
         )
     }
 
     private fun håndterNAVHelgedag(dato: LocalDate, økonomi: Økonomi) {
-        tidslinje.addHelg(dato, økonomi.inntekt(INGEN))
+        tidslinje.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = inntektForDatoOrNull(dato)?.skjæringstidspunkt))
     }
 
     private fun håndterArbeidsdag(dato: LocalDate) {

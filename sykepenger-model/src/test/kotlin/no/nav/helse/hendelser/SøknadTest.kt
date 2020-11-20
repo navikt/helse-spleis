@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,28 +31,28 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med bare sykdom`() {
-        søknad(Sykdom(1.januar,  10.januar, 100))
+        søknad(Sykdom(1.januar, 10.januar, 100))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad med ferie`() {
-        søknad(Sykdom(1.januar,  10.januar, 100), Ferie(2.januar, 4.januar))
+        søknad(Sykdom(1.januar, 10.januar, 100), Ferie(2.januar, 4.januar))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad med utdanning`() {
-        søknad(Sykdom(1.januar,  10.januar, 100), Utdanning(5.januar, 10.januar))
+        søknad(Sykdom(1.januar, 10.januar, 100), Utdanning(5.januar, 10.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad med papirsykmelding`() {
-        søknad(Sykdom(1.januar,  10.januar, 100), Papirsykmelding(11.januar, 16.januar))
+        søknad(Sykdom(1.januar, 10.januar, 100), Papirsykmelding(11.januar, 16.januar))
         assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
         assertEquals(16, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
@@ -104,7 +105,7 @@ internal class SøknadTest {
 
     @Test
     fun `egenmelding ligger langt utenfor sykdomsvindu`() {
-        søknad(Sykdom(5.januar,  12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
+        søknad(Sykdom(5.januar, 12.januar, 100), Egenmelding(19.desember(2017), 20.desember(2017)))
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse()) { aktivitetslogg.toString() }
         assertEquals(8, søknad.sykdomstidslinje().count())
     }
@@ -133,42 +134,42 @@ internal class SøknadTest {
 
     @Test
     fun `angitt arbeidsgrad kan ikke føre til sykegrad høyere enn graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 21))
+        søknad(Sykdom(1.januar, 31.januar, 20, 21))
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `angitt arbeidsgrad kan føre til lavere sykegrad enn graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 19))
+        søknad(Sykdom(1.januar, 31.januar, 20, 19))
         søknad.valider(EN_PERIODE)
         assertFalse(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `angitt arbeidsgrad kan føre til lik sykegrad som graden fra sykmelding`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 20))
+        søknad(Sykdom(1.januar, 31.januar, 20, 20))
         søknad.valider(EN_PERIODE)
         assertFalse(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `søknad uten permittering får ikke warning`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 20))
+        søknad(Sykdom(1.januar, 31.januar, 20, 20))
         søknad.valider(EN_PERIODE)
         assertFalse(søknad.hasWarningsOrWorse())
     }
 
     @Test
     fun `søknad med permittering får warning`() {
-        søknad(Sykdom(1.januar, 31.januar,  20, 20), permittert = true)
+        søknad(Sykdom(1.januar, 31.januar, 20, 20), permittert = true)
         søknad.valider(EN_PERIODE)
         assertTrue(søknad.hasWarningsOrWorse())
     }
 
     @Test
     fun `søknadsturnering for nye dagtyper`() {
-        søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar,  100))
+        søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar, 100))
 
         assertEquals(10, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
@@ -178,10 +179,19 @@ internal class SøknadTest {
 
     @Test
     fun `turnering mellom arbeidsgiverdager og sykedager`() {
-        søknad(Sykdom(1.januar, 31.januar,  100), Egenmelding(15.januar, 31.januar))
+        søknad(Sykdom(1.januar, 31.januar, 100), Egenmelding(15.januar, 31.januar))
 
         assertEquals(23, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(8, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
+    }
+
+    @Test
+    fun `legger på warning om søknad inneholder foreldete dager`() {
+        søknad(Sykdom(1.januar, 1.mai, 100))
+        søknad.valider(EN_PERIODE)
+        assertEquals(1, søknad.aktivitetslogg.kontekster().size)
+        assertTrue(søknad.aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(søknad.aktivitetslogg.hasErrorsOrWorse())
     }
 
     private fun søknad(vararg perioder: Søknadsperiode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {

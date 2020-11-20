@@ -26,10 +26,29 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     }
 
     @Test
+    fun `infotrygd - spleis - spleis - kort gap - spleis`() {
+        historie(
+            refusjon(17.januar, 20.januar),
+            refusjon(21.januar, 31.januar)
+        )
+        historie.add(AG1, navdager(1.februar, 28.februar))
+        historie.add(AG1, navdager(1.mars, 31.mars))
+        historie.add(AG1, sykedager(1.januar, 16.januar))
+        historie.add(AG1, sykedager(10.april, 30.april))
+        val utbetalingstidslinje = beregn(AG1, 1.april til 30.april, 17.januar, 10.april)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.februar til 31.mars, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, 1.april til 9.april, Arbeidsdag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 10.april til 30.april, NavDag::class, NavHelgDag::class)
+    }
+
+    @Test
     fun `agp infotrygd - spleis`() {
         historie(refusjon(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
         val utbetalingstidslinje = beregn(AG1, 1.februar til 28.februar, 1.januar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.januar til 28.februar, 1.januar)
         assertAlleDager(utbetalingstidslinje, 1.januar til 31.januar, UkjentDag::class)
         assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
     }
@@ -40,6 +59,10 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, sykedager(1.januar, 16.januar))
         historie.add(AG1, sykedager(2.februar, 28.februar))
         val utbetalingstidslinje = beregn(AG1, 2.februar til 28.februar, 1.januar, 1.februar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.januar til 16.januar, 1.januar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 17.januar til 31.januar, null)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.februar til 1.februar, null)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 2.februar til 28.februar, 2.februar)
         assertAlleDager(utbetalingstidslinje, 2.februar til 17.februar, NavDag::class, NavHelgDag::class)
         assertAlleDager(utbetalingstidslinje, 18.februar til 28.februar, NavDag::class, NavHelgDag::class)
     }
@@ -53,6 +76,10 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, navdager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.april, 30.april))
         val utbetalingstidslinje = beregn(AG1, 1.april til 30.april, 1.januar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 17.januar til 31.januar, null)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.mars til 31.mars, null)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.februar til 28.februar, 17.januar)
+        assertSkjæringstidspunkt(utbetalingstidslinje, 1.april til 30.april, 17.januar)
         assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
         assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, UkjentDag::class, Fridag::class)

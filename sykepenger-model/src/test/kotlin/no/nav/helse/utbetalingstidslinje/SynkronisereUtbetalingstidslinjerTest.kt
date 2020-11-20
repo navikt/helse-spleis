@@ -1,7 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -211,6 +214,6 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         inntektsmelding(arbeidsgiver, beløp, dato.plusDays(1))
 
     private fun assertInntekt(expected: Number, dag: Utbetalingsdag) {
-        assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, daglig, _, _, _ -> daglig })
+        assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, _, daglig, _, _, _ -> daglig })
     }
 }

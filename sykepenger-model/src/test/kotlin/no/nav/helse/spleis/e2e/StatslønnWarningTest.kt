@@ -61,7 +61,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
 
         assertTrue(
             inspektør.personLogg.warn().toString()
-                .contains("Det er lagt inn statslønn i Infotrygd, undersøk at sykepengegrunnlaget er fastsatt riktig.")
+                .contains("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
         ) {
             inspektør.personLogg.toString()
         }

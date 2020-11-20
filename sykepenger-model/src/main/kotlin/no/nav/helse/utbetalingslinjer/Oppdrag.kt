@@ -94,6 +94,9 @@ internal class Oppdrag private constructor(
 
     internal fun nettoBeløp() = nettoBeløp
 
+    internal fun tilhører(fagsystemId: String, fagområde: Fagområde) =
+        this.fagsystemId == fagsystemId && this.fagområde == fagområde
+
     internal fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }

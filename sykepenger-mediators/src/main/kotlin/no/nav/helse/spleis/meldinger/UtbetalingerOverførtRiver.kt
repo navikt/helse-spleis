@@ -20,6 +20,7 @@ internal class UtbetalingerOverførtRiver(
     override fun validate(packet: JsonMessage) {
         packet.demandValue("@løsning.${Utbetaling.name}.status", Oppdragstatus.OVERFØRT.name)
         packet.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
+        packet.requireKey("fagsystemId")
         packet.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 

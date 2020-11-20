@@ -308,13 +308,13 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetalingMedInntektsmelding
         )
 
-    internal fun erAvsluttet() =
-        this.tilstand in listOf(
+    internal fun måFerdigstilles() =
+        this.tilstand !in listOf(
+            TilInfotrygd,
             Avsluttet,
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
-            AvventerVilkårsprøvingArbeidsgiversøknad,
-            UtbetalingFeilet
+            AvventerVilkårsprøvingArbeidsgiversøknad
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
@@ -887,7 +887,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.håndterForlengelse(it)
                 }
                 val forlengelse = periodeRettFør != null
-                val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+                val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
                 when {
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                     forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
@@ -1306,7 +1306,7 @@ internal class Vedtaksperiode private constructor(
                             arbeidsgiver.addInntekt(ytelser)
                             ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
                             if (ytelser.statslønn())
-                                ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at sykepengegrunnlaget er fastsatt riktig.")
+                                ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
                         }
                         // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
                         tilstøtende == null -> {
@@ -1596,11 +1596,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(
                 inntektsmelding,
-                if (inntektsmelding.isNotQualified() || vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.periode) && vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(
                         vedtaksperiode
                     ) == null
                 ) {
-                    inntektsmelding.beingQualified()
                     AvventerVilkårsprøvingArbeidsgiversøknad
                 } else
                     AvsluttetUtenUtbetalingMedInntektsmelding
@@ -1749,7 +1748,7 @@ internal class Vedtaksperiode private constructor(
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
                 .filter { it < vedtaksperiode }
-                .all { it.erFerdigBehandlet() }
+                .none { it.måFerdigstilles() }
     }
 }
 

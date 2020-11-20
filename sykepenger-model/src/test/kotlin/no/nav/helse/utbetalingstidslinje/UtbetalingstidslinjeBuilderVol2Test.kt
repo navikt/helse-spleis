@@ -360,7 +360,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
                 .navdager
                 .first()
                 .økonomi
-                .reflection { _, _, dekningsgrunnlag, _, _, _, _ -> dekningsgrunnlag }
+                .reflection { _, _, dekningsgrunnlag, _, _, _, _, _ -> dekningsgrunnlag }
         )
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }
@@ -666,7 +666,8 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             .map { dato ->
                 dato to UtbetalingstidslinjeBuilderVol2.Inntekter(
                     requireNotNull(inntektshistorikkVol2.dekningsgrunnlag(dato, ArbeidsgiverRegler.Companion.NormalArbeidstaker)),
-                    requireNotNull(inntektshistorikkVol2.grunnlagForSykepengegrunnlag(dato))
+                    requireNotNull(inntektshistorikkVol2.grunnlagForSykepengegrunnlag(dato)),
+                    dato
                 )
             }.toMap()
 

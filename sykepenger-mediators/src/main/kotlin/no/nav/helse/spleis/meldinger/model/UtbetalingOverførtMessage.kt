@@ -10,6 +10,7 @@ internal class UtbetalingOverførtMessage(packet: MessageDelegate) : BehovMessag
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
+    private val fagsystemId = packet["fagsystemId"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()
 
@@ -20,6 +21,7 @@ internal class UtbetalingOverførtMessage(packet: MessageDelegate) : BehovMessag
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             orgnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
             avstemmingsnøkkel = avstemmingsnøkkel,
             overføringstidspunkt = overføringstidspunkt
         )

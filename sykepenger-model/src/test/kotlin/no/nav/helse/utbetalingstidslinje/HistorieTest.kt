@@ -104,4 +104,22 @@ internal abstract class HistorieTest {
             }
         }
     }
+
+    protected fun assertSkjæringstidspunkt(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, forventetSkjæringstidspunkt: LocalDate?) {
+        utbetalingstidslinje.subset(periode).also { tidslinje ->
+            assertTrue(tidslinje.all { it.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _ ->
+                skjæringstidspunkt == forventetSkjæringstidspunkt
+            } }) {
+                val ulikeDager = tidslinje.filter {
+                    it.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _ ->
+                        skjæringstidspunkt != forventetSkjæringstidspunkt
+                    }
+                }
+                "Forventet at alle dager skal ha skjæringstidspunkt $forventetSkjæringstidspunkt.\n" +
+                    ulikeDager.joinToString(prefix = "  - ", separator = "\n  - ", postfix = "\n") {
+                        "${it.dato} har ${it.økonomi.reflection { _, _, _, skjæringstidspunkt, _, _, _, _ -> skjæringstidspunkt }}"
+                    } + "\nUtbetalingstidslinje:\n" + tidslinje.toString() + "\n"
+            }
+        }
+    }
 }

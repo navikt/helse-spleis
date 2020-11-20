@@ -7,12 +7,14 @@ internal fun serialiserØkonomi(økonomi: Økonomi) =
         økonomi.reflection { grad,
                              arbeidsgiverBetalingProsent,
                              dekningsgrunnlag,
+                             skjæringstidspunkt,
                              aktuellDagsinntekt,
                              arbeidsgiverbeløp,
                              personbeløp,
                              er6GBegrenset ->
             map["grad"] = grad
             map["arbeidsgiverBetalingProsent"] = arbeidsgiverBetalingProsent
+            map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             map.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
             map.compute("arbeidsgiverbeløp") { _, _ -> arbeidsgiverbeløp }

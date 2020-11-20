@@ -7,6 +7,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.FagsystemId
+import no.nav.helse.utbetalingslinjer.FagsystemIdObserver
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -27,8 +29,9 @@ internal class Arbeidsgiver private constructor(
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
-    private val utbetalinger: MutableList<Utbetaling>
-) : Aktivitetskontekst {
+    private val utbetalinger: MutableList<Utbetaling>,
+    private val fagsystemIder: MutableList<FagsystemId>
+) : Aktivitetskontekst, FagsystemIdObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
@@ -38,40 +41,17 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
-        utbetalinger = mutableListOf()
+        utbetalinger = mutableListOf(),
+        fagsystemIder = mutableListOf()
     )
 
+    init {
+        fagsystemIder.forEach { it.register(this) }
+    }
+
     internal companion object {
-        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-            val treff = filter { it <= vedtaksperiode }.toMutableList()
-            val kandidater = (this - treff).toMutableList()
-            fun predikat(vedtaksperiode: Vedtaksperiode) = treff.any { it.erSykeperiodeRettFør(vedtaksperiode) }
-            while (kandidater.any(::predikat)) {
-                val nyeTreff = kandidater.filter(::predikat)
-                kandidater.removeAll(nyeTreff)
-                treff.addAll(nyeTreff)
-            }
-            return treff.filter { it in this }
-        }
-
-        private fun List<Vedtaksperiode>.senereMedSammeArbeidsgiverperiode2(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-            val remaining = filter(SENERE_EXCLUSIVE(vedtaksperiode)).toMutableList()
-            val sammeArbeidsgiverperiode = (filter { it !in remaining }).toMutableList()
-            while (sammeArbeidsgiverperiode.last().erSykeperiodeRettFør(remaining.first())) {
-                sammeArbeidsgiverperiode.add(remaining.removeAt(0))
-            }
-            return sammeArbeidsgiverperiode
-        }
-
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal val TIDLIGERE = fun(tidligereEnn: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode <= tidligereEnn
-        }
-
-        internal val SENERE = fun(senereEllerLikDenne: Vedtaksperiode): VedtaksperioderFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEllerLikDenne
-        }
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
@@ -84,6 +64,9 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.accept(visitor)
         inntektshistorikkVol2.accept(visitor)
         sykdomshistorikk.accept(visitor)
+        visitor.preVisitFagsystemIder(fagsystemIder)
+        fagsystemIder.forEach { it.accept(visitor) }
+        visitor.postVisitFagsystemIder(fagsystemIder)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -488,7 +471,7 @@ internal class Arbeidsgiver private constructor(
     internal fun overlapper(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
 
     internal fun nåværendeVedtaksperiode(): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { !it.erFerdigBehandlet() }
+        return vedtaksperioder.firstOrNull { it.måFerdigstilles() }
     }
 
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
@@ -521,8 +504,8 @@ internal class Arbeidsgiver private constructor(
             sikkerLogg.info("Forskjellig toString() på utbetalingstidslinjer.\nVol1 = $vol1Linje\nVol2 = $vol2Linje")
 
         vol1Linje.zip(vol2Linje).mapNotNull { (vol1Dag, vol2Dag: Utbetalingstidslinje.Utbetalingsdag) ->
-            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
-            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
 
             if (vol1Dekning != vol2Dekning || vol1Dagsinntekt != vol2Dagsinntekt)
                 "Vol1: ${vol1Dag.dato} [$vol1Dekning, $vol1Dagsinntekt] != Vol2: ${vol2Dag.dato} [$vol2Dekning, $vol2Dagsinntekt]"
@@ -560,7 +543,8 @@ internal class Arbeidsgiver private constructor(
                 sykdomshistorikk: Sykdomshistorikk,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
-                utbetalinger: MutableList<Utbetaling>
+                utbetalinger: List<Utbetaling>,
+                fagsystemIder: List<FagsystemId>
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -570,7 +554,8 @@ internal class Arbeidsgiver private constructor(
                 sykdomshistorikk,
                 vedtaksperioder,
                 forkastede,
-                utbetalinger
+                utbetalinger.toMutableList(),
+                fagsystemIder.toMutableList()
             )
         }
     }
