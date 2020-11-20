@@ -120,7 +120,7 @@ class Inntektsmelding(
             ))
 
     private fun førsteFraværsdagErEtterArbeidsgiverperioden() =
-        arbeidsgiverperioder.isNotEmpty() && (requireNotNull(førsteFraværsdag) !in arbeidsgiverperioder &&
+        arbeidsgiverperioder.isNotEmpty() && førsteFraværsdag != null && (førsteFraværsdag !in arbeidsgiverperioder &&
             førsteFraværsdag.isAfter(
                 arbeidsgivertidslinje(arbeidsgiverperioder, null).merge(beste).periode()?.endInclusive?.plusDays(1)
             ))

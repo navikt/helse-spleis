@@ -567,6 +567,13 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
+        inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
+        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar) }
+        assertDoesNotThrow { inntektsmelding.addInntekt(InntektshistorikkVol2(), 1.januar) }
+    }
+
+    @Test
     fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, beregnetInntekt = 2000.månedlig, refusjonBeløp = 2000.månedlig)
         val inntektshistorikkVol2 = InntektshistorikkVol2()
