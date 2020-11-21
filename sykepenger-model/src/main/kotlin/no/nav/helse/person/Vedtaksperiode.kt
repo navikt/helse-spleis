@@ -1352,7 +1352,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().removeUEND()).hasErrorsOrWorse()) {
+            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().utenUendretLinjer()).hasErrorsOrWorse()) {
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
@@ -1362,7 +1362,7 @@ internal class Vedtaksperiode private constructor(
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             simulering(
                 aktivitetslogg = hendelse,
-                oppdrag = Fagområde.SykepengerRefusjon.utbetalingslinjer(vedtaksperiode.utbetaling()).removeUEND(),
+                oppdrag = Fagområde.SykepengerRefusjon.utbetalingslinjer(vedtaksperiode.utbetaling()).utenUendretLinjer(),
                 maksdato = vedtaksperiode.maksdato,
                 saksbehandler = "Spleis"
             )

@@ -62,7 +62,7 @@ internal class Oppdrag private constructor(
     ) {
         Aktivitetslogg.Aktivitet.Behov.utbetaling(
             aktivitetslogg = aktivitetslogg,
-            oppdrag = removeUEND(),
+            oppdrag = utenUendretLinjer(),
             maksdato = maksdato,
             saksbehandler = saksbehandler,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -74,21 +74,11 @@ internal class Oppdrag private constructor(
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
         Aktivitetslogg.Aktivitet.Behov.simulering(
             aktivitetslogg = aktivitetslogg,
-            oppdrag = removeUEND(),
+            oppdrag = utenUendretLinjer(),
             maksdato = maksdato,
             saksbehandler = saksbehandler
         )
     }
-
-    internal fun removeUEND() = Oppdrag(
-        mottaker,
-        fagområde,
-        linjer.filter { it.erForskjell() }.toMutableList(),
-        fagsystemId,
-        endringskode,
-        sisteArbeidsgiverdag,
-        tidsstempel = tidsstempel
-    )
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
@@ -100,6 +90,8 @@ internal class Oppdrag private constructor(
     internal fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
+
+    internal fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
@@ -125,7 +117,7 @@ internal class Oppdrag private constructor(
         }
 
     internal fun minus(other: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        val tidligere = other.copyWith(other.linjerUtenOpphør())
+        val tidligere = other.kopierMed(other.linjerUtenOpphør())
         return when {
             tidligere.isEmpty() ->
                 this
@@ -186,7 +178,7 @@ internal class Oppdrag private constructor(
     private fun deletionLinje(tidligere: Oppdrag) =
         tidligere.last().deletion(tidligere.førstedato)
 
-    private fun copyWith(linjer: List<Utbetalingslinje>) = Oppdrag(
+    private fun kopierMed(linjer: List<Utbetalingslinje>) = Oppdrag(
         mottaker,
         fagområde,
         linjer.toMutableList(),
