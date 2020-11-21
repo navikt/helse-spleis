@@ -840,6 +840,7 @@ internal data class PersonData(
         private val fagsystemId: String,
         private val endringskode: String,
         private val sisteArbeidsgiverdag: LocalDate?,
+        private val tidsstempel: LocalDateTime,
         private val nettoBeløp: Int
     ) {
         internal fun konverterTilOppdrag(): Oppdrag {
@@ -853,7 +854,7 @@ internal data class PersonData(
                     Endringskode.valueOf(endringskode),
                     sisteArbeidsgiverdag,
                     nettoBeløp,
-                    LocalDateTime.now()
+                    tidsstempel
                 )
         }
     }

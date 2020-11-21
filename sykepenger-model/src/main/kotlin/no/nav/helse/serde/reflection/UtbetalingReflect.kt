@@ -22,6 +22,15 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 }
 
 internal class OppdragReflect(private val oppdrag: Oppdrag) {
+    internal fun toBehovMap() = mutableMapOf(
+        "mottaker" to oppdrag["mottaker"],
+        "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
+        "linjer" to oppdrag.map { UtbetalingslinjeReflect(it).toMap() },
+        "fagsystemId" to oppdrag["fagsystemId"],
+        "endringskode" to oppdrag.get<Endringskode>("endringskode").toString()
+    )
+
+
     internal fun toMap() = mutableMapOf(
         "mottaker" to oppdrag["mottaker"],
         "fagområde" to oppdrag.get<Fagområde>("fagområde").verdi,
@@ -29,6 +38,7 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
         "fagsystemId" to oppdrag["fagsystemId"],
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
         "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
+        "tidsstempel" to oppdrag["tidsstempel"],
         "nettoBeløp" to oppdrag["nettoBeløp"]
     )
 }

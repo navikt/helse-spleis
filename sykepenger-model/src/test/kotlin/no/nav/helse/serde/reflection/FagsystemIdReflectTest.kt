@@ -179,7 +179,8 @@ internal class FagsystemIdReflectTest : AbstractFagsystemIdTest() {
                         fagsystemId = fagsystemIdId,
                         endringskode = "NY",
                         sisteArbeidsgiverdag = null,
-                        nettoBeløp = 1000
+                        nettoBeløp = 1000,
+                        tidsstempel = LocalDateTime.now()
                     ),
                     PersonData.UtbetalingstidslinjeData(
                         (1..16).map { UtbetalingsdagData(ArbeidsgiverperiodeDag, it.januar, 1000.0, 1000.0, 1.januar, null, 100.0, 100.0, 1000, 0, false) } +

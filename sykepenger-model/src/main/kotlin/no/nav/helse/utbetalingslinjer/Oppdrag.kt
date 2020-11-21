@@ -19,7 +19,7 @@ internal class Oppdrag private constructor(
     private var endringskode: Endringskode,
     private val sisteArbeidsgiverdag: LocalDate?,
     private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() },
-    private var tidsstempel: LocalDateTime
+    private val tidsstempel: LocalDateTime
 ) : MutableList<Utbetalingslinje> by linjer {
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
     internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
