@@ -12,9 +12,11 @@ import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
+    private val id: UUID,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
@@ -33,6 +35,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int,
         utbetalinger: List<Utbetaling>
     ) : this(
+        UUID.randomUUID(),
         utbetalingstidslinje,
         buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
@@ -124,6 +127,7 @@ internal class Utbetaling private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun annuller(aktivitetslogg: Aktivitetslogg) = Utbetaling(
+        UUID.randomUUID(),
         utbetalingstidslinje,
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, aktivitetslogg),
         personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),

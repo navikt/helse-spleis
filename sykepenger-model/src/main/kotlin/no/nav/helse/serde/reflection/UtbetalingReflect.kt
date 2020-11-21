@@ -9,12 +9,10 @@ import java.time.LocalDate
 
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
-        "utbetalingstidslinje" to
-            UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
-        "arbeidsgiverOppdrag" to
-            OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
-        "personOppdrag" to
-            OppdragReflect(utbetaling["personOppdrag"]).toMap(),
+        "id" to utbetaling["id"],
+        "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
+        "arbeidsgiverOppdrag" to OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
+        "personOppdrag" to OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"],
         "status" to utbetaling.get<Utbetaling.Status>("status").name,
         "annullert" to utbetaling.get<Boolean>("annullert")

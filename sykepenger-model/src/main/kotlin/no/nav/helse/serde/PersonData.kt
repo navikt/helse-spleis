@@ -813,6 +813,7 @@ internal data class PersonData(
     }
 
     data class UtbetalingData(
+        val id: UUID,
         val utbetalingstidslinje: UtbetalingstidslinjeData,
         val arbeidsgiverOppdrag: OppdragData,
         val personOppdrag: OppdragData,
@@ -824,6 +825,7 @@ internal data class PersonData(
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
             .apply { isAccessible = true }
             .call(
+                id,
                 utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                 arbeidsgiverOppdrag.konverterTilOppdrag(),
                 personOppdrag.konverterTilOppdrag(),
