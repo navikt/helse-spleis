@@ -4,10 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 internal class V50KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 50) {
+    private companion object {
+        private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+    }
+
     override val description: String = "Knytter en vedtaksperiode til en utbetaling"
 
     private val vedtaksperiodeKontekst = "Vedtaksperiode"
@@ -26,7 +31,7 @@ internal class V50KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 50
         val tidsstempelTilVedtaksperiodeId = utbetalingmeldinger(jsonNode)
             .map { aktivitet ->
                 val vedtaksperiodeId = finnVedtaksperiodeId(konteksttyper, kontekstdetaljer, aktivitet)
-                LocalDateTime.parse(aktivitet.path("tidsstempel").asText()) to vedtaksperiodeId
+                LocalDateTime.parse(aktivitet.path("tidsstempel").asText(), tidsstempelformat) to vedtaksperiodeId
             }
             .sortedBy { it.first }
 

@@ -42,7 +42,7 @@ private fun originalJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Utbetalingslinjer bygget vellykket",
         "detaljer": {},
-        "tidsstempel": "2020-11-21T18:39:57.014"
+        "tidsstempel": "2020-11-21 18:39:57.014"
       },
       {
         "kontekster": [
@@ -56,7 +56,7 @@ private fun originalJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Noe skjedde",
         "detaljer": {},
-        "tidsstempel": "2020-11-21T18:39:57.014"
+        "tidsstempel": "2020-11-21 18:39:57.014"
       },
       {
         "kontekster": [
@@ -70,7 +70,7 @@ private fun originalJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Ingen utbetalingslinjer bygget",
         "detaljer": {},
-        "tidsstempel": "2020-11-20T20:00:00.000"
+        "tidsstempel": "2020-11-20 20:00:00.000"
       }
     ],
     "kontekster": [
@@ -230,7 +230,7 @@ private fun expectedJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Utbetalingslinjer bygget vellykket",
         "detaljer": {},
-        "tidsstempel": "2020-11-21T18:39:57.014"
+        "tidsstempel": "2020-11-21 18:39:57.014"
       },
       {
         "kontekster": [
@@ -244,7 +244,7 @@ private fun expectedJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Noe skjedde",
         "detaljer": {},
-        "tidsstempel": "2020-11-21T18:39:57.014"
+        "tidsstempel": "2020-11-21 18:39:57.014"
       },
       {
         "kontekster": [
@@ -258,7 +258,7 @@ private fun expectedJson() =
         "alvorlighetsgrad": "INFO",
         "melding": "Ingen utbetalingslinjer bygget",
         "detaljer": {},
-        "tidsstempel": "2020-11-20T20:00:00.000"
+        "tidsstempel": "2020-11-20 20:00:00.000"
       }
     ],
     "kontekster": [
