@@ -90,10 +90,20 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag`() {
-        opprett(2.NAV, 1.AP, 2.NAV, 2.HELG, 3.NAV)
+        opprett(2.NAV, 2.AP, 2.NAV, 2.HELG, 3.NAV)
 
         assertEquals(1, oppdrag.size)
-        assertLinje(0, 4.januar, 10.januar, null)
+        assertLinje(0, 5.januar, 11.januar, null)
+        assertEquals(4.januar, oppdrag.sisteArbeidsgiverdag)
+    }
+
+    @Test
+    fun `Utbetalingslinjer genereres kun fra dagen etter siste AGP-dag 2`() {
+        opprett(2.NAV, 2.AP, 2.NAV, 2.HELG, 2.AP, 3.NAV)
+
+        assertEquals(1, oppdrag.size)
+        assertLinje(0, 11.januar, 13.januar, null)
+        assertEquals(10.januar, oppdrag.sisteArbeidsgiverdag)
     }
 
     @Test
@@ -167,6 +177,8 @@ internal class OppdragBuilderTest {
         assertEquals(refDelytelseId, oppdrag[index].get<Int?>("refDelytelseId"))
         assertEquals(refFagsystemId, oppdrag[index].refFagsystemId)
     }
+
+    private val Oppdrag.sisteArbeidsgiverdag get() = this.get<LocalDate?>("sisteArbeidsgiverdag")
 
     private fun assertNyLinjeVedGap(gapDay: Utbetalingsdager) {
         opprett(2.NAV, gapDay, 2.NAV, 2.HELG, 3.NAV)

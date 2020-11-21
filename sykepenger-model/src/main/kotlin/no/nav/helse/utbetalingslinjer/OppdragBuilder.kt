@@ -87,7 +87,7 @@ internal class OppdragBuilder(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        sisteArbeidsgiverdag?.let { sisteArbeidsgiverdag = dag.dato }
+        if (sisteArbeidsgiverdag == null) sisteArbeidsgiverdag = dag.dato
         tilstand = Avsluttet
     }
 
