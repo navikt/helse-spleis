@@ -41,7 +41,7 @@ internal class Oppdrag private constructor(
     )
 
     internal constructor(mottaker: String, fagområde: Fagområde) :
-        this(mottaker, fagområde, sisteArbeidsgiverdag = LocalDate.MIN)
+        this(mottaker, fagområde, sisteArbeidsgiverdag = null)
 
     internal fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
@@ -93,6 +93,8 @@ internal class Oppdrag private constructor(
 
     internal fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
+    private fun utenOpphørLinjer() = kopierMed(linjerUtenOpphør())
+
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
     internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
@@ -117,17 +119,16 @@ internal class Oppdrag private constructor(
         }
 
     internal fun minus(other: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
-        val tidligere = other.kopierMed(other.linjerUtenOpphør())
+        val tidligere = other.utenOpphørLinjer()
         return when {
             tidligere.isEmpty() ->
                 this
-            this.isEmpty() &&
-                (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
-                deleteAll(tidligere)
             this.isEmpty() && this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag > tidligere.sistedato ->
                 this
             this.førstedato > tidligere.sistedato ->
                 this
+            this.isEmpty() && (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
+                deleteAll(tidligere)
             this.førstedato > tidligere.førstedato -> {
                 aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
                 deleted(tidligere)
@@ -138,8 +139,7 @@ internal class Oppdrag private constructor(
             }
             this.førstedato == tidligere.førstedato ->
                 ghosted(tidligere)
-            else ->
-                throw IllegalArgumentException("uventet utbetalingslinje forhold")
+            else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
 
