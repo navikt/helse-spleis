@@ -1537,7 +1537,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.error("Feilrespons fra oppdrag")
+            vedtaksperiode.utbetaling().utbetalingFeilet(hendelse)
         }
 
         override fun håndter(

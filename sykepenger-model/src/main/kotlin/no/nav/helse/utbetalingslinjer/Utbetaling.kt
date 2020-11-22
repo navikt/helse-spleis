@@ -88,6 +88,12 @@ internal class Utbetaling private constructor(
         annullert = utbetaling.annullert
     }
 
+    internal fun utbetalingFeilet(aktivitetslogg: IAktivitetslogg) {
+        aktivitetslogg.kontekst(this)
+        aktivitetslogg.error("Feilrespons fra oppdrag")
+        status = UTBETALING_FEILET
+    }
+
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
         if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
         utbetalingOverført.kontekst(this)
