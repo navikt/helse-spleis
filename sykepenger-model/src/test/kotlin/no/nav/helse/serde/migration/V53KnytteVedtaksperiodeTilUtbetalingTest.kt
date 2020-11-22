@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V52KnytteVedtaksperiodeTilUtbetalingTest {
+internal class V53KnytteVedtaksperiodeTilUtbetalingTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -16,7 +16,7 @@ internal class V52KnytteVedtaksperiodeTilUtbetalingTest {
 
     @Test
     fun `lager id på utbetalinger`() {
-        val migrated = listOf(V52KnytteVedtaksperiodeTilUtbetaling())
+        val migrated = listOf(V53KnytteVedtaksperiodeTilUtbetaling())
             .migrate(objectMapper.readTree(originalJson()))
         val expected = objectMapper.readTree(expectedJson())
 
@@ -203,7 +203,9 @@ private fun originalJson() =
             ],
             "forkastede": [
               {
-                "id": "7c253913-6b90-4435-af88-db2ee1909e6f"
+                "vedtaksperiode": {
+                  "id": "7c253913-6b90-4435-af88-db2ee1909e6f"
+                }
               }
             ]
         }
@@ -392,12 +394,14 @@ private fun expectedJson() =
             ],
             "forkastede": [
               {
-                "id": "7c253913-6b90-4435-af88-db2ee1909e6f",
-                "utbetalingId": "9b842ebe-699c-4a57-9265-453ca1ace142"
+                "vedtaksperiode": {
+                  "id": "7c253913-6b90-4435-af88-db2ee1909e6f",
+                  "utbetalingId": "9b842ebe-699c-4a57-9265-453ca1ace142"
+                }
               }
             ]
         }
     ],
-    "skjemaVersjon": 52
+    "skjemaVersjon": 53
 }
 """

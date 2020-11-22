@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-internal class V52KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 52) {
+internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53) {
     private companion object {
         private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     }
@@ -58,13 +58,14 @@ internal class V52KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 52
     }
 
     private fun lagreUtbetalingIdPåVedtaksperiode(arbeidsgiver: JsonNode, vedtaksperiodeId: String, utbetalingId: String) {
-        finnVedtaksperiode(arbeidsgiver.path("vedtaksperioder"), vedtaksperiodeId, utbetalingId)
-        finnVedtaksperiode(arbeidsgiver.path("forkastede"), vedtaksperiodeId, utbetalingId)
+        finnVedtaksperiode(arbeidsgiver.path("vedtaksperioder").toList(), vedtaksperiodeId, utbetalingId)
+        finnVedtaksperiode(arbeidsgiver.path("forkastede").map { it.path("vedtaksperiode") }, vedtaksperiodeId, utbetalingId)
     }
 
-    private fun finnVedtaksperiode(perioder: JsonNode, vedtaksperiodeId: String, utbetalingId: String) {
+    private fun finnVedtaksperiode(perioder: List<JsonNode>, vedtaksperiodeId: String, utbetalingId: String) {
         perioder
             .firstOrNull { it.path("id").asText() == vedtaksperiodeId }
+            ?.takeUnless { it.hasNonNull("utbetalingId") }
             ?.lagreUtbetalingId(utbetalingId)
     }
 
