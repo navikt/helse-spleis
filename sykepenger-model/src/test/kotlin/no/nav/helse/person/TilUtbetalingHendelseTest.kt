@@ -171,7 +171,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            utbetalingsreferanse = "ref",
+            utbetalingsreferanse = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
             status = status,
             melding = "hei",
             saksbehandler = "Z999999",

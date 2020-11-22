@@ -11,6 +11,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.FagsystemId
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -114,6 +115,7 @@ class JsonBuilderTest {
         private lateinit var vedtaksperiodeId: String
         private lateinit var tilstand: TilstandType
         private lateinit var sykdomstidslinje: Sykdomstidslinje
+        private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
 
         fun person(
             fom: LocalDate = 1.januar,
@@ -139,6 +141,7 @@ class JsonBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 fangeVedtaksperiode()
             }
@@ -212,8 +215,23 @@ class JsonBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
+
+        private fun Person.fangeUtbetalinger() {
+            utbetalingsliste.clear()
+            accept(object : PersonVisitor {
+                private lateinit var orgnr: String
+                override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                    orgnr = organisasjonsnummer
+                }
+
+                override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
+                    utbetalingsliste[orgnr] = utbetalinger
+                }
+            })
+        }
 
         private fun Person.fangeVedtaksperiode() {
             accept(object : PersonVisitor {
@@ -428,7 +446,7 @@ class JsonBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            utbetalingsreferanse = "ref",
+            utbetalingsreferanse = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei",
             saksbehandler = "Z999999",

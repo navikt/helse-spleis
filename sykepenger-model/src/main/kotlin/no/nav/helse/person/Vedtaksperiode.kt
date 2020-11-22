@@ -608,34 +608,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
-    private fun sendUtbetaltEvent() {
-        val sykepengegrunnlag =
-            requireNotNull(
-                arbeidsgiver.sykepengegrunnlag(
-                    skjæringstidspunkt,
-                    periode.endInclusive
-                )
-            ) { "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event" }
-        val inntekt =
-            requireNotNull(arbeidsgiver.inntekt(skjæringstidspunkt)) { "Forventet inntekt ved opprettelse av utbetalt-event" }
-        person.vedtaksperiodeUtbetalt(
-            tilUtbetaltEvent(
-                aktørId = aktørId,
-                fødselnummer = fødselsnummer,
-                orgnummer = organisasjonsnummer,
-                utbetaling = utbetaling(),
-                utbetalingstidslinje = utbetalingstidslinje,
-                sykepengegrunnlag = sykepengegrunnlag,
-                inntekt = inntekt,
-                forbrukteSykedager = requireNotNull(forbrukteSykedager),
-                gjenståendeSykedager = requireNotNull(gjenståendeSykedager),
-                godkjentAv = requireNotNull(godkjentAv),
-                automatiskBehandling = requireNotNull(automatiskBehandling),
-                hendelseIder = hendelseIder,
-                periode = periode,
-                maksdato = maksdato
-            )
-        )
+    private fun sendUtbetaltEvent(hendelse: ArbeidstakerHendelse) {
+        val sykepengegrunnlag = requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt, periode.endInclusive)) {
+            "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
+        }
+        val inntekt = requireNotNull(arbeidsgiver.inntekt(skjæringstidspunkt)) {
+            "Forventet inntekt ved opprettelse av utbetalt-event"
+        }
+        utbetaling().ferdigstill(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
@@ -1639,7 +1619,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
-            vedtaksperiode.sendUtbetaltEvent()
+            vedtaksperiode.sendUtbetaltEvent(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(hendelse)
         }
 

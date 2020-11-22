@@ -10,6 +10,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -104,6 +105,21 @@ internal class Utbetaling private constructor(
             "Utbetalingen ble overført til Oppdrag/UR ${utbetalingOverført.overføringstidspunkt}, " +
                 "og har fått avstemmingsnøkkel ${utbetalingOverført.avstemmingsnøkkel}"
         )
+    }
+
+    internal fun ferdigstill(
+        hendelse: ArbeidstakerHendelse,
+        person: Person,
+        periode: Periode,
+        sykepengegrunnlag: Inntekt,
+        inntekt: Inntekt,
+        hendelseIder: List<UUID>
+    ) {
+        // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
+        // skal vi fortsatt drive å sende Utbetalt-event da?
+        check(status in listOf(GODKJENT, UTBETALT)) { "Forventet status GODKJENT eller UTBETALT. Er $status" }
+        val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
+        vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -242,6 +258,35 @@ internal class Utbetaling private constructor(
                 saksbehandler = ident,
                 saksbehandlerEpost = epost,
                 annullering = annullering
+            )
+        }
+
+        fun ferdigstill(
+            hendelse: ArbeidstakerHendelse,
+            utbetaling: Utbetaling,
+            person: Person,
+            periode: Periode,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt,
+            hendelseIder: List<UUID>
+        ) {
+            person.vedtaksperiodeUtbetalt(
+                tilUtbetaltEvent(
+                    aktørId = hendelse.aktørId(),
+                    fødselnummer = hendelse.fødselsnummer(),
+                    orgnummer = hendelse.organisasjonsnummer(),
+                    utbetaling = utbetaling,
+                    utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode),
+                    sykepengegrunnlag = sykepengegrunnlag,
+                    inntekt = inntekt,
+                    forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
+                    gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
+                    godkjentAv = ident,
+                    automatiskBehandling = automatiskBehandling,
+                    hendelseIder = hendelseIder,
+                    periode = periode,
+                    maksdato = utbetaling.maksdato
+                )
             )
         }
     }
