@@ -2,6 +2,7 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -15,7 +16,10 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "personOppdrag" to OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"],
         "status" to utbetaling.get<Utbetaling.Status>("status").name,
-        "annullert" to utbetaling.get<Boolean>("annullert")
+        "annullert" to utbetaling.get<Boolean>("annullert"),
+        "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),
+        "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"),
+        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager")
     )
 }
 

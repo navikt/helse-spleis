@@ -1,7 +1,12 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
@@ -22,7 +27,10 @@ internal class Utbetaling private constructor(
     private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
     private var status: Status,
-    private var annullert: Boolean
+    private var annullert: Boolean,
+    private val maksdato: LocalDate,
+    private val forbrukteSykedager: Int?,
+    private val gjenståendeSykedager: Int?
 ) {
     internal constructor(
         fødselsnummer: String,
@@ -41,7 +49,10 @@ internal class Utbetaling private constructor(
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         LocalDateTime.now(),
         IKKE_UTBETALT,
-        false
+        false,
+        maksdato,
+        forbrukteSykedager,
+        gjenståendeSykedager
     )
 
     internal enum class Status {
@@ -64,6 +75,7 @@ internal class Utbetaling private constructor(
     internal fun personOppdrag() = personOppdrag
 
     companion object {
+        private const val systemident = "SPLEIS"
 
         private fun buildArb(
             organisasjonsnummer: String,
@@ -125,6 +137,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
+    internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     internal fun annuller(aktivitetslogg: Aktivitetslogg) = Utbetaling(
         UUID.randomUUID(),
@@ -133,7 +146,10 @@ internal class Utbetaling private constructor(
         personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),
         LocalDateTime.now(),
         IKKE_UTBETALT,
-        true
+        true,
+        LocalDate.MAX,
+        null,
+        null
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
@@ -142,5 +158,30 @@ internal class Utbetaling private constructor(
 
     internal fun append(organisasjonsnummer: String, bøtte: Historie.Historikkbøtte) {
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
+    }
+
+    internal fun utbetal(hendelse: ArbeidstakerHendelse, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
+        utbetaling(
+            aktivitetslogg = hendelse,
+            oppdrag = arbeidsgiverOppdrag,
+            maksdato = maksdato,
+            saksbehandler = ident,
+            saksbehandlerEpost = epost,
+            godkjenttidspunkt = godkjenttidspunkt,
+            annullering = false
+        )
+    }
+
+    internal fun simuler(hendelse: ArbeidstakerHendelse) {
+        simulering(
+            aktivitetslogg = hendelse,
+            oppdrag = arbeidsgiverOppdrag.utenUendretLinjer(),
+            maksdato = maksdato,
+            saksbehandler = systemident
+        )
+    }
+
+    internal fun valider(simulering: Simulering): IAktivitetslogg {
+        return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
     }
 }

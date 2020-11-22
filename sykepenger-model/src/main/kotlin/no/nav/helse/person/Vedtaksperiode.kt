@@ -15,8 +15,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
@@ -28,7 +26,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -485,15 +482,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse, epost: String) {
-        utbetaling(
-            aktivitetslogg = hendelse,
-            oppdrag = utbetaling().arbeidsgiverOppdrag(),
-            maksdato = maksdato,
-            saksbehandler = godkjentAv!!,
-            saksbehandlerEpost = epost,
-            godkjenttidspunkt = godkjenttidspunkt!!,
-            annullering = false
-        )
+        utbetaling().utbetal(hendelse, godkjentAv!!, epost, godkjenttidspunkt!!)
     }
 
     private fun replayHendelser() {
@@ -575,15 +564,18 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        utbetaling = arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, engineForTimeline, this.periode)
-        maksdato = engineForTimeline.maksdato()
-        gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
-        forbrukteSykedager = engineForTimeline.forbrukteSykedager()
-        personFagsystemId = arbeidsgiver.utbetaling()?.personOppdrag()?.fagsystemId()
-        personNettoBeløp = arbeidsgiver.utbetaling()?.personOppdrag()?.nettoBeløp() ?: 0
-        arbeidsgiverFagsystemId = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.fagsystemId()
-        arbeidsgiverNettoBeløp = arbeidsgiver.utbetaling()?.arbeidsgiverOppdrag()?.nettoBeløp() ?: 0
-        utbetalingstidslinje = arbeidsgiver.nåværendeTidslinje().subset(periode)
+        engineForTimeline.beregnGrenser(periode.endInclusive)
+        val maksdato = engineForTimeline.maksdato().also { maksdato = it }
+        val gjenståendeSykedager = engineForTimeline.gjenståendeSykedager().also { gjenståendeSykedager = it }
+        val forbrukteSykedager = engineForTimeline.forbrukteSykedager().also { forbrukteSykedager = it }
+        val utbetaling = arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, maksdato, forbrukteSykedager, gjenståendeSykedager, periode).also {
+            utbetaling = it
+        }
+        personFagsystemId = utbetaling.personOppdrag().fagsystemId()
+        personNettoBeløp = utbetaling.personOppdrag().nettoBeløp()
+        arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId()
+        arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag().nettoBeløp()
+        utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
 
         when {
             utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
@@ -614,8 +606,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun utbetaling() =
-        arbeidsgiver.utbetaling() ?: throw IllegalStateException("mangler utbetalinger")
+    private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
     private fun sendUtbetaltEvent() {
         val sykepengegrunnlag =
@@ -1355,7 +1346,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (simulering.valider(vedtaksperiode.utbetaling().arbeidsgiverOppdrag().utenUendretLinjer()).hasErrorsOrWorse()) {
+            if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse()) {
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
             }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
@@ -1363,12 +1354,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            simulering(
-                aktivitetslogg = hendelse,
-                oppdrag = Fagområde.SykepengerRefusjon.utbetalingslinjer(vedtaksperiode.utbetaling()).utenUendretLinjer(),
-                maksdato = vedtaksperiode.maksdato,
-                saksbehandler = "Spleis"
-            )
+            vedtaksperiode.utbetaling().simuler(hendelse)
         }
     }
 

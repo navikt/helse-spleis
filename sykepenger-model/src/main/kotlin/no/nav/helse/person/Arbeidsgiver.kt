@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
@@ -89,20 +88,21 @@ internal class Arbeidsgiver private constructor(
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        engineForTimeline: MaksimumSykepengedagerfilter,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
         periode: Periode
     ): Utbetaling {
         val (organisasjonsnummer, utbetalingstidslinje, _) = beregnetUtbetalingstidslinjer.last()
-        engineForTimeline.beregnGrenser(periode.endInclusive)
         return Utbetaling(
             fødselsnummer,
             organisasjonsnummer,
             utbetalingstidslinje,
             periode.endInclusive,
             aktivitetslogg,
-            engineForTimeline.maksdato(),
-            engineForTimeline.forbrukteSykedager(),
-            engineForTimeline.gjenståendeSykedager(),
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
             utbetalinger
         ).also { utbetalinger.add(it) }
     }

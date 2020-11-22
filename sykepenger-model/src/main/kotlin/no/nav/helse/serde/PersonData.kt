@@ -828,7 +828,10 @@ internal data class PersonData(
         val personOppdrag: OppdragData,
         val tidsstempel: LocalDateTime,
         val status: String,
-        val annullert: Boolean
+        val annullert: Boolean,
+        val maksdato: LocalDate?,
+        val forbrukteSykedager: Int?,
+        val gjenståendeSykedager: Int?
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -840,7 +843,10 @@ internal data class PersonData(
                 personOppdrag.konverterTilOppdrag(),
                 tidsstempel,
                 enumValueOf<Utbetaling.Status>(status),
-                annullert
+                annullert,
+                maksdato,
+                forbrukteSykedager,
+                gjenståendeSykedager
             )
     }
 
