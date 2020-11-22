@@ -98,6 +98,22 @@ internal class TestRapid : RapidsConnection() {
                 }
             }
 
+        private val behovmeldinger
+            get() = mutableMapOf<UUID, MutableList<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, JsonNode>>>().apply {
+                events("behov") { message ->
+                    val vedtaksperiodeIdString = message.path("vedtaksperiodeId")
+                        .takeIf { id -> !id.isMissingNode }
+                        ?.asText() ?: return@events
+
+                    val id = UUID.fromString(vedtaksperiodeIdString)
+                    this.getOrPut(id) { mutableListOf() }.apply {
+                        message.path("@behov").onEach {
+                            add(Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
+                        }
+                    }
+                }
+            }
+
         private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)
             if (name == message.path("@event_name").asText()) onEach(message)
@@ -115,8 +131,11 @@ internal class TestRapid : RapidsConnection() {
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+
+        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+            behovmeldinger.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
 
         fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second

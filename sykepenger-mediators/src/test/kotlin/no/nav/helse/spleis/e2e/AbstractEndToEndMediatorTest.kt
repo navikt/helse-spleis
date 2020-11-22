@@ -104,8 +104,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         perioder: List<SoknadsperiodeDTO>,
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, egenmeldinger))
     }
 
@@ -115,8 +115,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList()
     ) {
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertFalse(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser))
     }
 
@@ -132,7 +132,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         saksbehandlerEpost: String = "jan@banan.no",
         automatiskBehandling: Boolean = false
     ) {
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingsgodkjenning(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -152,12 +152,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         opplæringspenger: List<TestMessageFactory.OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<TestMessageFactory.InstitusjonsoppholdTestdata> = emptyList()
     ) {
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagYtelser(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -182,11 +182,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         ),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
     ) {
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -202,7 +202,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun sendSimulering(vedtaksperiodeIndeks: Int, status: SimuleringMessage.Simuleringstatus) {
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Simulering))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagSimulering(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -214,16 +214,15 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendUtbetaling(
         vedtaksperiodeIndeks: Int,
-        fagsystemId: String = "fagsystemid",
         utbetalingOK: Boolean = true,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
         annullert: Boolean = false
     ) {
-        assertTrue(testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = fagsystemId,
+                fagsystemId = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling).path("fagsystemId").asText(),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 saksbehandlerEpost = saksbehandlerEpost,
                 annullering = annullert,

@@ -151,7 +151,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(fagsystemId)
         sendUtbetaling(
             0,
-            fagsystemId = fagsystemId,
             utbetalingOK = true,
             saksbehandlerEpost = "tbd@nav.no",
             annullert = true

@@ -1443,6 +1443,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
+            vedtaksperiode.utbetaling().håndter(utbetaling)
             utbetaling.info(
                 "Utbetalingen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
                     "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}"

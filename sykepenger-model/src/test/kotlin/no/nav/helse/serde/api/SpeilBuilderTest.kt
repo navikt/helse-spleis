@@ -161,6 +161,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                fangeUtbetalinger()
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last()))
 
                 sykmelding(fom = 1.februar, tom = 14.februar).also { (sykmelding, sykmeldingDto) ->
@@ -187,7 +188,7 @@ class SpeilBuilderTest {
         val utbetalinger = vedtaksperioder[1].utbetalteUtbetalinger
 
         // Sjekker at ubetalte utbetalinger er filtrert vekk
-        val utbetalteUtbetalinger = utbetalingsliste.filter { it.erUtbetalt() }
+        val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
         assertEquals(
             utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
@@ -411,19 +412,19 @@ class SpeilBuilderTest {
 
         val utbetalinger = vedtaksperiode.utbetalinger
         assertEquals(
-            utbetalingsliste.first().arbeidsgiverOppdrag().fagsystemId(),
+            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().fagsystemId(),
             utbetalinger.arbeidsgiverUtbetaling!!.fagsystemId
         )
         assertEquals(
-            utbetalingsliste.first().personOppdrag().fagsystemId(),
+            utbetalingsliste.getValue(orgnummer).first().personOppdrag().fagsystemId(),
             utbetalinger.personUtbetaling!!.fagsystemId
         )
         assertEquals(
-            utbetalingsliste.first().arbeidsgiverOppdrag().førstedato,
+            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().førstedato,
             utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().fom
         )
         assertEquals(
-            utbetalingsliste.first().arbeidsgiverOppdrag().sistedato,
+            utbetalingsliste.getValue(orgnummer).first().arbeidsgiverOppdrag().sistedato,
             utbetalinger.arbeidsgiverUtbetaling!!.linjer.first().tom
         )
 
@@ -625,7 +626,7 @@ class SpeilBuilderTest {
         private const val orgnummer = "987654321"
         private const val orgnummer2 = "1234"
         private lateinit var vedtaksperiodeId: String
-        private lateinit var utbetalingsliste: List<Utbetaling>
+        private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
 
         private fun person(
             fom: LocalDate = 1.januar,
@@ -859,7 +860,7 @@ class SpeilBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
 
 
-                val utbetalteUtbetalinger = utbetalingsliste.filter { it.erUtbetalt() }
+                val utbetalteUtbetalinger = utbetalingsliste.getValue(orgnummer).filter { it.erUtbetalt() }
                 håndter(annullering(fagsystemId = utbetalteUtbetalinger.last().arbeidsgiverOppdrag().fagsystemId()))
             }
         }
@@ -1040,9 +1041,15 @@ class SpeilBuilderTest {
         }
 
         private fun Person.fangeUtbetalinger() {
+            utbetalingsliste.clear()
             accept(object : PersonVisitor {
+                private lateinit var orgnr: String
+                override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                    orgnr = organisasjonsnummer
+                }
+
                 override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-                    utbetalingsliste = utbetalinger
+                    utbetalingsliste[orgnr] = utbetalinger
                 }
             })
         }
@@ -1344,7 +1351,7 @@ class SpeilBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            utbetalingsreferanse = "ref",
+            utbetalingsreferanse = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
             melding = "hei",
             saksbehandler = "Z999999",

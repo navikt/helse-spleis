@@ -149,7 +149,7 @@ internal class UtbetalingTest {
                 aktørId = "ignore",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 orgnummer = ORGNUMMER,
-                utbetalingsreferanse = "ref",
+                utbetalingsreferanse = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                 status = AKSEPTERT,
                 melding = "hei",
                 saksbehandler = "Z999999",

@@ -70,7 +70,7 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
-                    utbetalingsreferanse = "ref",
+                    utbetalingsreferanse = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
                     melding = "hei",
                     saksbehandler = "Z999999",

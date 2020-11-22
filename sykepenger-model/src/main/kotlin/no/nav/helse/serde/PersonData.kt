@@ -832,7 +832,9 @@ internal data class PersonData(
         val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
         val gjenståendeSykedager: Int?,
-        val vurdering: VurderingData?
+        val vurdering: VurderingData?,
+        val overføringstidspunkt: LocalDateTime?,
+        val avstemmingsnøkkel: Long?
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -848,7 +850,9 @@ internal data class PersonData(
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,
-                vurdering?.konverterTilVurdering()
+                vurdering?.konverterTilVurdering(),
+                overføringstidspunkt,
+                avstemmingsnøkkel
             )
 
         data class VurderingData(

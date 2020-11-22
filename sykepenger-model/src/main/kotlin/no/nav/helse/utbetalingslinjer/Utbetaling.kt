@@ -1,11 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
@@ -28,8 +26,10 @@ internal class Utbetaling private constructor(
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
     private val gjenståendeSykedager: Int?,
-    private var vurdering: Vurdering?
-) {
+    private var vurdering: Vurdering?,
+    private var overføringstidspunkt: LocalDateTime?,
+    private var avstemmingsnøkkel: Long?
+) : Aktivitetskontekst {
     internal constructor(
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -51,6 +51,8 @@ internal class Utbetaling private constructor(
         maksdato,
         forbrukteSykedager,
         gjenståendeSykedager,
+        null,
+        null,
         null
     )
 
@@ -68,6 +70,7 @@ internal class Utbetaling private constructor(
     internal fun erAnnullert() = annullert
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
+        hendelse.kontekst(this)
         status = if (hendelse.valider().hasErrorsOrWorse()) IKKE_GODKJENT else GODKJENT
         vurdering = Vurdering(
             hendelse.saksbehandler(),
@@ -78,15 +81,32 @@ internal class Utbetaling private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
+        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
+        utbetaling.kontekst(this)
         status = if (utbetaling.hasErrorsOrWorse()) UTBETALING_FEILET else UTBETALT
         annullert = utbetaling.annullert
+    }
+
+    internal fun håndter(utbetalingOverført: UtbetalingOverført) {
+        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
+        utbetalingOverført.kontekst(this)
+        overføringstidspunkt = utbetalingOverført.overføringstidspunkt
+        avstemmingsnøkkel = utbetalingOverført.avstemmingsnøkkel
+        utbetalingOverført.info(
+            "Utbetalingen ble overført til Oppdrag/UR ${utbetalingOverført.overføringstidspunkt}, " +
+                "og har fått avstemmingsnøkkel ${utbetalingOverført.avstemmingsnøkkel}"
+        )
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
     internal fun personOppdrag() = personOppdrag
 
+    override fun toSpesifikkKontekst() =
+        SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
+
     companion object {
+
         private const val systemident = "SPLEIS"
 
         private fun buildArb(
@@ -130,7 +150,6 @@ internal class Utbetaling private constructor(
         internal fun List<Utbetaling>.utbetalte() =
             filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
                 .filter { it.status == UTBETALT }
-
         private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
             filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
                 .any { it.annullert }
@@ -147,8 +166,8 @@ internal class Utbetaling private constructor(
         visitor.postVisitPersonOppdrag(personOppdrag)
         visitor.postVisitUtbetaling(this, tidsstempel)
     }
-
     internal fun utbetalingstidslinje() = utbetalingstidslinje
+
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     internal fun annuller(hendelse: AnnullerUtbetaling) = Utbetaling(
@@ -167,7 +186,9 @@ internal class Utbetaling private constructor(
             hendelse.saksbehandlerEpost,
             hendelse.opprettet,
             false
-        )
+        ),
+        null,
+        null
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
