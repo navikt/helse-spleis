@@ -7,6 +7,7 @@ import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
@@ -19,7 +20,17 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "annullert" to utbetaling.get<Boolean>("annullert"),
         "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),
         "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"),
-        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager")
+        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"),
+        "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() }
+    )
+}
+
+private class VurderingReflect(private val vurdering: Utbetaling.Vurdering) {
+    internal fun toMap() = mapOf(
+        "ident" to vurdering.get<String>("ident"),
+        "epost" to vurdering.get<String>("epost"),
+        "tidspunkt" to vurdering.get<LocalDateTime>("tidspunkt"),
+        "automatiskBehandling" to vurdering.get<Boolean>("automatiskBehandling")
     )
 }
 

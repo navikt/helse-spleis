@@ -482,7 +482,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse, epost: String) {
-        utbetaling().utbetal(hendelse, godkjentAv!!, epost, godkjenttidspunkt!!)
+        utbetaling().utbetal(hendelse)
     }
 
     private fun replayHendelser() {
@@ -1375,7 +1375,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            if (utbetalingsgodkjenning.valider().hasErrorsOrWorse()) return vedtaksperiode.tilstand(
+            vedtaksperiode.utbetaling().håndter(utbetalingsgodkjenning)
+            if (utbetalingsgodkjenning.hasErrorsOrWorse()) return vedtaksperiode.tilstand(
                 utbetalingsgodkjenning,
                 TilInfotrygd
             )

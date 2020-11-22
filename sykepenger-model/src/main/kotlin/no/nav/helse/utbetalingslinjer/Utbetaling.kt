@@ -1,9 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -30,7 +27,8 @@ internal class Utbetaling private constructor(
     private var annullert: Boolean,
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
-    private val gjenståendeSykedager: Int?
+    private val gjenståendeSykedager: Int?,
+    private var vurdering: Vurdering?
 ) {
     internal constructor(
         fødselsnummer: String,
@@ -52,11 +50,15 @@ internal class Utbetaling private constructor(
         false,
         maksdato,
         forbrukteSykedager,
-        gjenståendeSykedager
+        gjenståendeSykedager,
+        null
     )
 
     internal enum class Status {
         IKKE_UTBETALT,
+        IKKE_GODKJENT,
+        GODKJENT,
+        SENDT,
         UTBETALT,
         UTBETALING_FEILET
     }
@@ -64,6 +66,16 @@ internal class Utbetaling private constructor(
     internal fun erUtbetalt() = status == UTBETALT
     internal fun erFeilet() = status == UTBETALING_FEILET
     internal fun erAnnullert() = annullert
+
+    internal fun håndter(hendelse: Utbetalingsgodkjenning) {
+        status = if (hendelse.valider().hasErrorsOrWorse()) IKKE_GODKJENT else GODKJENT
+        vurdering = Vurdering(
+            hendelse.saksbehandler(),
+            hendelse.saksbehandlerEpost(),
+            hendelse.godkjenttidspunkt(),
+            hendelse.automatiskBehandling()
+        )
+    }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         status = if (utbetaling.hasErrorsOrWorse()) UTBETALING_FEILET else UTBETALT
@@ -139,17 +151,23 @@ internal class Utbetaling private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
-    internal fun annuller(aktivitetslogg: Aktivitetslogg) = Utbetaling(
+    internal fun annuller(hendelse: AnnullerUtbetaling) = Utbetaling(
         UUID.randomUUID(),
         utbetalingstidslinje,
-        arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, aktivitetslogg),
-        personOppdrag.emptied().minus(personOppdrag, aktivitetslogg),
+        arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, hendelse),
+        personOppdrag.emptied().minus(personOppdrag, hendelse),
         LocalDateTime.now(),
         IKKE_UTBETALT,
         true,
         LocalDate.MAX,
         null,
-        null
+        null,
+        Vurdering(
+            hendelse.saksbehandlerIdent,
+            hendelse.saksbehandlerEpost,
+            hendelse.opprettet,
+            false
+        )
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
@@ -160,16 +178,10 @@ internal class Utbetaling private constructor(
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
-    internal fun utbetal(hendelse: ArbeidstakerHendelse, ident: String, epost: String, godkjenttidspunkt: LocalDateTime) {
-        utbetaling(
-            aktivitetslogg = hendelse,
-            oppdrag = arbeidsgiverOppdrag,
-            maksdato = maksdato,
-            saksbehandler = ident,
-            saksbehandlerEpost = epost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            annullering = false
-        )
+    internal fun utbetal(hendelse: ArbeidstakerHendelse) {
+        val vurdering = requireNotNull(vurdering) { "Kan ikke overføre oppdrag som ikke er vurdert" }
+        status = SENDT
+        vurdering.utbetale(hendelse, arbeidsgiverOppdrag, maksdato, annullert)
     }
 
     internal fun simuler(hendelse: ArbeidstakerHendelse) {
@@ -183,5 +195,25 @@ internal class Utbetaling private constructor(
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
         return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
+    }
+
+    internal class Vurdering(
+        private val ident: String,
+        private val epost: String,
+        private val tidspunkt: LocalDateTime,
+        private val automatiskBehandling: Boolean
+    ) {
+
+        internal fun utbetale(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate, annullering: Boolean) {
+            utbetaling(
+                aktivitetslogg = aktivitetslogg,
+                oppdrag = oppdrag,
+                maksdato = maksdato.takeUnless { annullering },
+                godkjenttidspunkt = tidspunkt,
+                saksbehandler = ident,
+                saksbehandlerEpost = epost,
+                annullering = annullering
+            )
+        }
     }
 }

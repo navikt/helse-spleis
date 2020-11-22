@@ -831,7 +831,8 @@ internal data class PersonData(
         val annullert: Boolean,
         val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
-        val gjenståendeSykedager: Int?
+        val gjenståendeSykedager: Int?,
+        val vurdering: VurderingData?
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -846,8 +847,25 @@ internal data class PersonData(
                 annullert,
                 maksdato,
                 forbrukteSykedager,
-                gjenståendeSykedager
+                gjenståendeSykedager,
+                vurdering?.konverterTilVurdering()
             )
+
+        data class VurderingData(
+            private val ident: String,
+            private val epost: String,
+            private val tidspunkt: LocalDateTime,
+            private val automatiskBehandling: Boolean
+        ) {
+            internal fun konverterTilVurdering() = Utbetaling.Vurdering::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(
+                    ident,
+                    epost,
+                    tidspunkt,
+                    automatiskBehandling
+                )
+        }
     }
 
     data class OppdragData(

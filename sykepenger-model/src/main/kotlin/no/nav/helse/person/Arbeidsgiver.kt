@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -245,16 +244,9 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
             return
         }
-        val utbetaling = kandidat.annuller(hendelse.aktivitetslogg)
+        val utbetaling = kandidat.annuller(hendelse)
         utbetalinger.add(utbetaling)
-        utbetaling(
-            aktivitetslogg = hendelse.aktivitetslogg,
-            oppdrag = utbetaling.arbeidsgiverOppdrag(),
-            godkjenttidspunkt = hendelse.opprettet,
-            saksbehandler = hendelse.saksbehandlerIdent,
-            saksbehandlerEpost = hendelse.saksbehandlerEpost,
-            annullering = true
-        )
+        utbetaling.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
 

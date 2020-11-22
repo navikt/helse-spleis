@@ -70,7 +70,8 @@ class SerialisertPerson(val json: String) {
             V51PatcheGamleAnnulleringer(),
             V52None(),
             V53KnytteVedtaksperiodeTilUtbetaling(),
-            V54UtvideUtbetaling()
+            V54UtvideUtbetaling(),
+            V55UtvideUtbetalingMedVurdering()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
