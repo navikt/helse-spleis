@@ -14,6 +14,7 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
         private const val vedtaksperiodeKontekst = "Vedtaksperiode"
         private const val vedtaksperiodeId = "vedtaksperiodeId"
         private const val ikkeGodkjentTekst = "Utbetaling markert som ikke godkjent"
+        private const val ingenUtbetalingsdager = "Saken inneholder ingen utbetalingsdager"
     }
 
     override val description: String = "Utvider Utbetaling med vurdering"
@@ -32,7 +33,7 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
             val vedtaksperiodekontekstIndeks = kontekstindeksForVedtaksperioder(perioder, kontekster)
 
             val ikkeGodkjenteUtbetalinger = ikkeGodkjenteUtbetalinger(perioder, vedtaksperiodekontekstIndeks, aktiviteter)
-            val aktiveUtbetalinger = aktiveUtbetalinger(aktive, forkastede)
+            val aktiveUtbetalinger = aktiveUtbetalinger(vedtaksperiodekontekstIndeks, aktiviteter, aktive, forkastede)
 
             arbeidsgiver
                 .path("utbetalinger")
@@ -58,7 +59,7 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
                     if (vurdering == null) it.putNull("vurdering")
                     else {
                         val (ident, tidspunkt, automatiskBehandling) = vurdering
-                        lagVurdering(it, ident, ukjentEpost, tidspunkt, automatiskBehandling)
+                        lagVurdering(it, ident, ukjentEpost, tidspunkt ?: it.path("tidsstempel").asText(), automatiskBehandling)
                     }
                 }
         }
@@ -78,13 +79,20 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
             .put("automatiskBehandling", automatiskBehandling)
     }
 
-    private fun aktiveUtbetalinger(aktive: List<JsonNode>, forkastede: List<JsonNode>): Map<String, Triple<String, String, Boolean>?> {
+    private fun aktiveUtbetalinger(vedtaksperiodekontekstIndeks: Map<String, Int>, aktiviteter: JsonNode, aktive: List<JsonNode>, forkastede: List<JsonNode>): Map<String, Triple<String, String?, Boolean>?> {
         val godkjentForkastede = forkastede.filter { it.hasNonNull("utbetalingId") && it.hasNonNull("godkjentAv") }
         return (godkjentForkastede + aktive.filter { it.hasNonNull("utbetalingId") })
             .map { periode ->
+                val id = periode.path("id").asText()
+                val tidspunkt = periode.path("godkjenttidspunkt")
+                    .asText().takeIf { periode.hasNonNull("godkjenttidspunkt") } ?:
+                finnAktivitetForVedtaksperiode(vedtaksperiodekontekstIndeks, id, ingenUtbetalingsdager, aktiviteter)
+                    ?.let { aktivitet ->
+                        "${LocalDateTime.parse(aktivitet.path("tidsstempel").asText(), tidsstempelformat)}"
+                    }
                 periode.path("utbetalingId").asText() to Triple(
                     first = periode.path("godkjentAv").asText(),
-                    second = periode.path("godkjenttidspunkt").asText(),
+                    second = tidspunkt,
                     third = periode.path("automatiskBehandling").asBoolean()
                 ).takeIf { periode.hasNonNull("godkjentAv") }
             }.toMap()
