@@ -29,6 +29,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.slf4j.LoggerFactory
@@ -60,6 +61,7 @@ internal class Vedtaksperiode private constructor(
     private var inntektsmeldingId: UUID?,
     private var periode: Periode,
     private var sykmeldingsperiode: Periode,
+    private var utbetaling: Utbetaling?,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var personFagsystemId: String?,
     private var personNettoBeløp: Int,
@@ -105,6 +107,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingId = null,
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
+        utbetaling = null,
         utbetalingstidslinje = Utbetalingstidslinje(),
         personFagsystemId = null,
         personNettoBeløp = 0,
@@ -572,7 +575,7 @@ internal class Vedtaksperiode private constructor(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
     ) {
-        arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, engineForTimeline, this.periode)
+        utbetaling = arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, engineForTimeline, this.periode)
         maksdato = engineForTimeline.maksdato()
         gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
         forbrukteSykedager = engineForTimeline.forbrukteSykedager()

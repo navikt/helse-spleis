@@ -6,6 +6,8 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -21,6 +23,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val inntektsmeldingId:UUID? = vedtaksperiode["inntektsmeldingId"]
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
+    private val utbetalingId: UUID? = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap().getValue("id") as UUID }
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
@@ -97,6 +100,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
+        "utbetalingId" to utbetalingId,
         "personFagsystemId" to personFagsystemId,
         "personNettoBeløp" to personNettoBeløp,
         "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,

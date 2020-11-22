@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V50KnytteVedtaksperiodeTilUtbetalingTest {
+internal class V52KnytteVedtaksperiodeTilUtbetalingTest {
     private val objectMapper = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
         .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
@@ -16,7 +16,7 @@ internal class V50KnytteVedtaksperiodeTilUtbetalingTest {
 
     @Test
     fun `lager id på utbetalinger`() {
-        val migrated = listOf(V50KnytteVedtaksperiodeTilUtbetaling())
+        val migrated = listOf(V52KnytteVedtaksperiodeTilUtbetaling())
             .migrate(objectMapper.readTree(originalJson()))
         val expected = objectMapper.readTree(expectedJson())
 
@@ -208,7 +208,7 @@ private fun originalJson() =
             ]
         }
     ],
-    "skjemaVersjon": 49
+    "skjemaVersjon": 50
 }
 """
 
@@ -398,6 +398,6 @@ private fun expectedJson() =
             ]
         }
     ],
-    "skjemaVersjon": 50
+    "skjemaVersjon": 52
 }
 """

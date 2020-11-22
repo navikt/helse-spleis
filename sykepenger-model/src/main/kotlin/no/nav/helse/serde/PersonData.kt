@@ -157,6 +157,7 @@ internal data class PersonData(
         private val forkastedeliste = sortedMapOf<Vedtaksperiode, ForkastetÅrsak>()
         private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
         private val modelFagsystemIder = fagsystemIder?.map { it.konverterTilFagsystemId() } ?: emptyList()
+        private val utbetalingMap = utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
 
         internal fun konverterTilArbeidsgiver(
             person: Person,
@@ -183,7 +184,8 @@ internal data class PersonData(
                     arbeidsgiver,
                     aktørId,
                     fødselsnummer,
-                    this.organisasjonsnummer
+                    this.organisasjonsnummer,
+                    utbetalingMap
                 )
             })
 
@@ -193,7 +195,8 @@ internal data class PersonData(
                     arbeidsgiver,
                     aktørId,
                     fødselsnummer,
-                    this.organisasjonsnummer
+                    this.organisasjonsnummer,
+                    utbetalingMap
                 ) to årsak
             })
             vedtaksperiodeliste.sort()
@@ -526,6 +529,7 @@ internal data class PersonData(
             private val sykmeldingFom: LocalDate,
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
+            private val utbetalingId: String?,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val personFagsystemId: String?,
             private val personNettoBeløp: Int,
@@ -539,8 +543,12 @@ internal data class PersonData(
                 arbeidsgiver: Arbeidsgiver,
                 aktørId: String,
                 fødselsnummer: String,
-                organisasjonsnummer: String
+                organisasjonsnummer: String,
+                utbetalinger: Map<UUID, Utbetaling>
             ): Vedtaksperiode {
+                val utbetaling = utbetalingId
+                    ?.let { UUID.fromString(it) }
+                    ?.let { utbetalinger.getValue(it) }
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(
@@ -566,6 +574,7 @@ internal data class PersonData(
                         inntektsmeldingId,
                         Periode(fom, tom),
                         Periode(sykmeldingFom, sykmeldingTom),
+                        utbetaling,
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         personFagsystemId,
                         personNettoBeløp,

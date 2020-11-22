@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-internal class V50KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 50) {
+internal class V52KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 52) {
     private companion object {
         private val tidsstempelformat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     }
@@ -37,19 +37,24 @@ internal class V50KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 50
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
-                val utbetalingId = utbetaling.path("id").asText()
-                val utbetalingTidsstempel = LocalDateTime.parse(utbetaling.path("tidsstempel").asText())
-                val utbetalingStatus = utbetaling.path("status").asText()
-                val erAnnullering = utbetaling.path("annullert").asBoolean()
-                tidsstempelTilVedtaksperiodeId.lastOrNull { (aktivitetTidsstempel, _) ->
-                    val diff = ChronoUnit.MILLIS.between(aktivitetTidsstempel, utbetalingTidsstempel)
-                    diff in minDiff..maxDiff
-                }?.second?.let { vedtaksperiodeId ->
-                    log.info("Koblet vedtaksperiodeId=$vedtaksperiodeId til utbetaling=$utbetalingId (status=$utbetalingStatus erAnnullering=$erAnnullering opprettet=$utbetalingTidsstempel)")
-                    lagreUtbetalingIdPåVedtaksperiode(arbeidsgiver, vedtaksperiodeId, utbetalingId)
-                } ?: log.info("Kunne ikke koble en vedtaksperiode til utbetaling=$utbetalingId opprettet=$utbetalingTidsstempel status=$utbetalingStatus erAnnullering=$erAnnullering")
+                finnVedtaksperiodeTilUtbetaling(arbeidsgiver, tidsstempelTilVedtaksperiodeId, utbetaling)
             }
         }
+    }
+
+    private fun finnVedtaksperiodeTilUtbetaling(arbeidsgiver: JsonNode, tidsstempelTilVedtaksperiodeId: List<Pair<LocalDateTime, String?>>, utbetaling: JsonNode) {
+        val utbetalingId = utbetaling.path("id").asText()
+        val utbetalingTidsstempel = LocalDateTime.parse(utbetaling.path("tidsstempel").asText())
+        val utbetalingStatus = utbetaling.path("status").asText()
+        val erAnnullering = utbetaling.path("annullert").asBoolean()
+        if (erAnnullering) return // skip annulleringer
+        tidsstempelTilVedtaksperiodeId.lastOrNull { (aktivitetTidsstempel, _) ->
+            val diff = ChronoUnit.MILLIS.between(aktivitetTidsstempel, utbetalingTidsstempel)
+            diff in minDiff..maxDiff
+        }?.second?.let { vedtaksperiodeId ->
+            log.info("Koblet vedtaksperiodeId=$vedtaksperiodeId til utbetaling=$utbetalingId (status=$utbetalingStatus erAnnullering=$erAnnullering opprettet=$utbetalingTidsstempel)")
+            lagreUtbetalingIdPåVedtaksperiode(arbeidsgiver, vedtaksperiodeId, utbetalingId)
+        } ?: log.info("Kunne ikke koble en vedtaksperiode til utbetaling=$utbetalingId opprettet=$utbetalingTidsstempel status=$utbetalingStatus erAnnullering=$erAnnullering")
     }
 
     private fun lagreUtbetalingIdPåVedtaksperiode(arbeidsgiver: JsonNode, vedtaksperiodeId: String, utbetalingId: String) {

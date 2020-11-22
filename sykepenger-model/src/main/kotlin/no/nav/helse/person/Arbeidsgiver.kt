@@ -91,22 +91,20 @@ internal class Arbeidsgiver private constructor(
         fødselsnummer: String,
         engineForTimeline: MaksimumSykepengedagerfilter,
         periode: Periode
-    ){
+    ): Utbetaling {
         val (organisasjonsnummer, utbetalingstidslinje, _) = beregnetUtbetalingstidslinjer.last()
         engineForTimeline.beregnGrenser(periode.endInclusive)
-        utbetalinger.add(
-            Utbetaling(
-                fødselsnummer,
-                organisasjonsnummer,
-                utbetalingstidslinje,
-                periode.endInclusive,
-                aktivitetslogg,
-                engineForTimeline.maksdato(),
-                engineForTimeline.forbrukteSykedager(),
-                engineForTimeline.gjenståendeSykedager(),
-                utbetalinger
-            )
-        )
+        return Utbetaling(
+            fødselsnummer,
+            organisasjonsnummer,
+            utbetalingstidslinje,
+            periode.endInclusive,
+            aktivitetslogg,
+            engineForTimeline.maksdato(),
+            engineForTimeline.forbrukteSykedager(),
+            engineForTimeline.gjenståendeSykedager(),
+            utbetalinger
+        ).also { utbetalinger.add(it) }
     }
 
     internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
