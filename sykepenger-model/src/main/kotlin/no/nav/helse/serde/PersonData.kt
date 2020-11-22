@@ -829,7 +829,7 @@ internal data class PersonData(
         val tidsstempel: LocalDateTime,
         val status: String,
         val annullert: Boolean,
-        val maksdato: LocalDate?,
+        val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
         val gjenståendeSykedager: Int?
     ) {
