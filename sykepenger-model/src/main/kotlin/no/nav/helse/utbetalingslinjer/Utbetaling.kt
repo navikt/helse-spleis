@@ -61,6 +61,7 @@ internal class Utbetaling private constructor(
         IKKE_GODKJENT,
         GODKJENT,
         SENDT,
+        OVERFØRT,
         UTBETALT,
         UTBETALING_FEILET
     }
@@ -90,6 +91,7 @@ internal class Utbetaling private constructor(
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
         if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
         utbetalingOverført.kontekst(this)
+        status = OVERFØRT
         overføringstidspunkt = utbetalingOverført.overføringstidspunkt
         avstemmingsnøkkel = utbetalingOverført.avstemmingsnøkkel
         utbetalingOverført.info(
