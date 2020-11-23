@@ -1,7 +1,11 @@
 package no.nav.helse.person
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.inntekt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -253,10 +257,29 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(arbeidsgiverId, ytelser).addInntektVol2(inntektsopplysninger, ytelser)
     }
 
+    internal fun sykepengegrunnlag(periode: Periode): Inntekt {
+        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
+        val grunnlagForSykepengegrunnlag: Inntekt =
+            if (Toggles.nyInntekt) {
+                arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+            } else {
+                arbeidsgivere.inntekt(skjæringstidspunkt)
+            }
+        return minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, periode.endInclusive))
+    }
+
+    internal fun grunnlagForSykepengegrunnlag(periode: Periode): Inntekt {
+        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
+        return if (Toggles.nyInntekt) {
+            arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+        } else {
+            arbeidsgivere.inntekt(skjæringstidspunkt)
+        }
+    }
+
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        // TODO: hensyntar ikke IT-historikk her
-        val dato = Historie(this).skjæringstidspunkt(periode) ?: periode.start
-        return arbeidsgivere.fold(Inntekt.INGEN) {acc, arbeidsgiver -> acc.plus(arbeidsgiver.grunnlagForSammenligningsgrunnlag(dato))}
+        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
+        return arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
     }
 
     internal fun append(bøtte: Historie.Historikkbøtte) {

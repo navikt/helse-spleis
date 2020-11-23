@@ -145,7 +145,8 @@ internal class Utbetalingstidslinje private constructor(
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.førsteDato(), other.førsteDato())
 
-    internal fun førsteDato() = utbetalingsdager.first().dato
+    internal fun førsteDato() =
+        utbetalingsdager.first().dato
 
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.sisteDato(), other.sisteDato())

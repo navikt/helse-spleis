@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -56,8 +57,16 @@ internal class Arbeidsgiver private constructor(
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
-
         internal val ALLE: VedtaksperioderFilter = { true }
+
+        internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
+            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }.summer()
+
+        internal fun List<Arbeidsgiver>.inntekt(skjæringstidspunkt: LocalDate) =
+            this.mapNotNull { it.inntekt(skjæringstidspunkt) }.summer()
+
+        internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }.summer()
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -317,6 +326,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun inntekt(dato: LocalDate): Inntekt? = inntektshistorikk.inntekt(dato)
 
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
+        if (Toggles.nyInntekt) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart) else inntektshistorikk.inntekt(skjæringstidspunkt)
+
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
@@ -348,9 +360,6 @@ internal class Arbeidsgiver private constructor(
             vilkårsgrunnlag.meldingsreferanseId()
         )
     }
-
-    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, virkningFra: LocalDate = LocalDate.now()) =
-        inntektshistorikk.sykepengegrunnlag(skjæringstidspunkt, virkningFra)
 
     internal fun søppelbøtte(
         hendelse: ArbeidstakerHendelse,
@@ -517,9 +526,6 @@ internal class Arbeidsgiver private constructor(
         return finnSykeperiodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
     }
-
-    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-        inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(dato)
 
     internal fun append(bøtte: Historie.Historikkbøtte) {
         if (harHistorikk()) bøtte.add(organisasjonsnummer, sykdomstidslinje())

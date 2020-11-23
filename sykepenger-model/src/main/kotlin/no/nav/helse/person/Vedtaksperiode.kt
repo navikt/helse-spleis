@@ -372,9 +372,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
-        val beregnetInntekt = arbeidsgiver.inntekt(skjæringstidspunkt) ?: vilkårsgrunnlag.severe(
-            "Finner ikke inntekt for perioden $skjæringstidspunkt"
-        )
+        val beregnetInntekt = person.grunnlagForSykepengegrunnlag(periode)
         if (vilkårsgrunnlag.valider(beregnetInntekt, skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
@@ -571,10 +569,10 @@ internal class Vedtaksperiode private constructor(
     private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
     private fun sendUtbetaltEvent(hendelse: ArbeidstakerHendelse) {
-        val sykepengegrunnlag = requireNotNull(arbeidsgiver.sykepengegrunnlag(skjæringstidspunkt, periode.endInclusive)) {
+        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(periode)) {
             "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
         }
-        val inntekt = requireNotNull(arbeidsgiver.inntekt(skjæringstidspunkt)) {
+        val inntekt = requireNotNull(arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)) {
             "Forventet inntekt ved opprettelse av utbetalt-event"
         }
         utbetaling().ferdigstill(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
