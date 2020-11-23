@@ -50,6 +50,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var forkastetPeriode = false
     private var inVedtaksperiode = false
+    private var inVedtaksperiodeUtbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, List<UUID>>()
 
@@ -98,8 +99,7 @@ internal class TestArbeidsgiverInspektør(
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
@@ -110,15 +110,11 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiodeForkastet[vedtaksperiodeindeks] = forkastetPeriode
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
         this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
-    }
-
-    override fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {
-        if (fagsystemId == null) return
-        fagsystemIder[vedtaksperiodeindeks] = fagsystemId
+        tilstander[vedtaksperiodeindeks] = tilstand.type
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
-        if (inVedtaksperiode) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
+        if (inVedtaksperiode && !inVedtaksperiodeUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
     }
 
     override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
@@ -128,8 +124,7 @@ internal class TestArbeidsgiverInspektør(
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode
     ) {
@@ -142,7 +137,8 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        arbeidsgiverOppdrag.add(oppdrag)
+        if (!inVedtaksperiode) arbeidsgiverOppdrag.add(oppdrag)
+        if (inVedtaksperiode) fagsystemIder[vedtaksperiodeindeks] = oppdrag.fagsystemId()
     }
 
     override fun preVisitOppdrag(
@@ -160,13 +156,33 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
     }
 
-    override fun visitMaksdato(maksdato: LocalDate) {
+    override fun preVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        inVedtaksperiodeUtbetaling = true
+        if (!inVedtaksperiode) return
+        if (gjenståendeSykedager != null) gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
         maksdatoer[vedtaksperiodeindeks] = maksdato
     }
 
-    override fun visitGjenståendeSykedager(gjenståendeSykedager: Int?) {
-        if (gjenståendeSykedager == null) return
-        gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
+    override fun postVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        inVedtaksperiodeUtbetaling = false
     }
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
@@ -195,10 +211,6 @@ internal class TestArbeidsgiverInspektør(
 
     private fun lagreLås(sykdomshistorikk: Sykdomshistorikk) {
         if (!sykdomshistorikk.isEmpty()) sykdomshistorikk.sykdomstidslinje().accept(LåsInspektør())
-    }
-
-    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-        tilstander[vedtaksperiodeindeks] = tilstand.type
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {

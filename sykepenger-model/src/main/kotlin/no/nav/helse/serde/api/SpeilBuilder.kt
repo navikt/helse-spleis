@@ -207,8 +207,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
@@ -216,8 +215,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.preVisitVedtaksperiode(
             vedtaksperiode,
             id,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
+            tilstand,
             periode,
             opprinneligPeriode,
             hendelseIder
@@ -268,19 +266,67 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.visitDataForSimulering(dataForSimuleringResultat)
     }
 
+    override fun preVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        currentState.preVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+    }
+
+    override fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
+        currentState.postVisitTidslinjer(tidslinjer)
+    }
+
+    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        currentState.preVisitArbeidsgiverOppdrag(oppdrag)
+    }
+
+    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        currentState.postVisitArbeidsgiverOppdrag(oppdrag)
+    }
+
+    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+        currentState.preVisitPersonOppdrag(oppdrag)
+    }
+
+    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
+        currentState.postVisitPersonOppdrag(oppdrag)
+    }
+
+    override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
+        currentState.visitVurdering(vurdering, ident, epost, tidspunkt, automatiskBehandling)
+    }
+
+    override fun postVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        currentState.postVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+    }
+
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode
     ) =
         currentState.postVisitVedtaksperiode(
             vedtaksperiode,
             id,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
+            tilstand,
             periode,
             opprinneligPeriode
         )
@@ -343,8 +389,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
-
-    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = currentState.visitTilstand(tilstand)
 
     private interface JsonState : PersonVisitor {}
 
@@ -462,8 +506,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             periode: Periode,
             opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
@@ -505,15 +548,16 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val utbetalinger: List<Utbetaling>,
         private val hendelseIder: List<UUID>
     ) : JsonState {
-        private var fullstendig = false
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
 
-        private var arbeidsgiverFagsystemId: String?
-        private var personFagsystemId: String?
+        private var arbeidsgiverFagsystemId: String? = null
+        private var personFagsystemId: String? = null
+        private var inUtbetaling = false
+        private var utbetalingGodkjent = false
 
         init {
             val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
@@ -523,8 +567,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
             vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
-            arbeidsgiverFagsystemId = vedtaksperiodeReflect.arbeidsgiverFagsystemId
-            personFagsystemId = vedtaksperiodeReflect.personFagsystemId
+            vedtaksperiodeMap["maksdato"] = LocalDate.MAX
         }
 
         private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
@@ -560,6 +603,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private var sisteSykepengedag: LocalDate? = null
 
         override fun preVisit(tidslinje: Utbetalingstidslinje) {
+            if (inUtbetaling) return
             val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
             førsteSykepengedag = tidslinje.førsteSykepengedag()
@@ -567,7 +611,67 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             pushState(UtbetalingstidslinjeState(utbetalingstidslinje, totalbeløpakkumulator))
         }
 
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
+        override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
+            dataForSimuleringResultat?.let {
+                vedtaksperiodeMap["dataForSimulering"] = it.mapTilSimuleringsdataDto()
+            }
+        }
+
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            status: Utbetaling.Status,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            inUtbetaling = true
+            utbetalingGodkjent = status != Utbetaling.Status.IKKE_GODKJENT
+            vedtaksperiodeMap["maksdato"] = maksdato
+            vedtaksperiodeMap["gjenståendeSykedager"] = gjenståendeSykedager
+            vedtaksperiodeMap["forbrukteSykedager"] = forbrukteSykedager
+        }
+
+        override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
+            if (!utbetalingGodkjent) return
+            vedtaksperiodeMap["godkjentAv"] = ident
+            vedtaksperiodeMap["godkjenttidspunkt"] = tidspunkt
+            vedtaksperiodeMap["automatiskBehandling"] = automatiskBehandling
+        }
+
+        override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+            arbeidsgiverFagsystemId = oppdrag.fagsystemId()
+        }
+
+        override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+            personFagsystemId = oppdrag.fagsystemId()
+        }
+
+        override fun postVisitUtbetaling(
+            utbetaling: Utbetaling,
+            status: Utbetaling.Status,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            inUtbetaling = false
+        }
+
+        override fun postVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            periode: Periode,
+            opprinneligPeriode: Periode
+        ) {
+            vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
+            vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
+
             val utbetaling = utbetalinger.findLast { arbeidsgiverFagsystemId != null && it.arbeidsgiverOppdrag().fagsystemId() ==arbeidsgiverFagsystemId }
             vedtaksperiodeMap["tilstand"] =
                 mapTilstander(
@@ -583,29 +687,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     TilstandType.TIL_UTBETALING
                 )
             ) {
-                fullstendig = true
-            } else {
-                vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto(gruppeId))
-            }
-        }
-
-        override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-            dataForSimuleringResultat?.let {
-                vedtaksperiodeMap["dataForSimulering"] = it.mapTilSimuleringsdataDto()
-            }
-        }
-
-        override fun postVisitVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
-            id: UUID,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
-            periode: Periode,
-            opprinneligPeriode: Periode
-        ) {
-            vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
-            vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
-            if (fullstendig) {
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
                         fødselsnummer,
@@ -615,6 +696,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                         gruppeId
                     )
                 )
+            } else {
+                vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto(gruppeId))
             }
             popState()
         }

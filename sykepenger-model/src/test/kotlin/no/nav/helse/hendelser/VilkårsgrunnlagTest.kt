@@ -140,7 +140,14 @@ internal class VilkårsgrunnlagTest {
     private fun hentTilstand(): Vedtaksperiodetilstand? {
         var _tilstand: Vedtaksperiodetilstand? = null
         person.accept(object : PersonVisitor {
-            override fun visitTilstand(tilstand: Vedtaksperiodetilstand) {
+            override fun preVisitVedtaksperiode(
+                vedtaksperiode: Vedtaksperiode,
+                id: UUID,
+                tilstand: Vedtaksperiodetilstand,
+                periode: Periode,
+                opprinneligPeriode: Periode,
+                hendelseIder: List<UUID>
+            ) {
                 _tilstand = tilstand
             }
         })
@@ -153,8 +160,7 @@ internal class VilkårsgrunnlagTest {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
-                arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int,
+                tilstand: Vedtaksperiodetilstand,
                 periode: Periode,
                 opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>

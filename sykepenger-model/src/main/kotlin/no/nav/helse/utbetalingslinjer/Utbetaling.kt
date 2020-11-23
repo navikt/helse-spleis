@@ -175,15 +175,16 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, tidsstempel)
+        visitor.preVisitUtbetaling(this, status, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
         visitor.postVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         visitor.preVisitPersonOppdrag(personOppdrag)
         personOppdrag.accept(visitor)
+        vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
-        visitor.postVisitUtbetaling(this, tidsstempel)
+        visitor.postVisitUtbetaling(this, status, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
@@ -243,6 +244,10 @@ internal class Utbetaling private constructor(
         private val tidspunkt: LocalDateTime,
         private val automatiskBehandling: Boolean
     ) {
+
+        internal fun accept(visitor: UtbetalingVisitor) {
+            visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling)
+        }
 
         internal fun utbetale(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate, annullering: Boolean) {
             utbetaling(

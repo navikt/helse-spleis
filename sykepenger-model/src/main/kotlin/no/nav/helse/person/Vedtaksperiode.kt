@@ -113,30 +113,16 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(
-            this,
-            id,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            periode,
-            sykmeldingsperiode,
-            hendelseIder
-        )
+        visitor.preVisitVedtaksperiode(this, id, tilstand, periode, sykmeldingsperiode, hendelseIder)
         sykdomstidslinje.accept(visitor)
         sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
-        visitor.visitTilstand(tilstand)
-        visitor.visitMaksdato(maksdato)
         visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
-        visitor.visitGjenståendeSykedager(gjenståendeSykedager)
-        visitor.visitForbrukteSykedager(forbrukteSykedager)
-        visitor.visitArbeidsgiverFagsystemId(arbeidsgiverFagsystemId)
-        visitor.visitPersonFagsystemId(personFagsystemId)
-        visitor.visitGodkjentAv(godkjentAv)
+        utbetaling?.accept(visitor)
         visitor.visitSkjæringstidspunkt(skjæringstidspunkt)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, sykmeldingsperiode)
+        visitor.postVisitVedtaksperiode(this, id, tilstand, periode, sykmeldingsperiode)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -1367,13 +1353,7 @@ internal class Vedtaksperiode private constructor(
             ) {
                 vedtaksperiode.godkjenttidspunkt = utbetalingsgodkjenning.godkjenttidspunkt()
                 vedtaksperiode.godkjentAv = utbetalingsgodkjenning.saksbehandler()
-                vedtaksperiode.automatiskBehandling = utbetalingsgodkjenning.automatiskBehandling().also {
-                    if (it) {
-                        utbetalingsgodkjenning.info("Utbetaling markert som godkjent automatisk ${vedtaksperiode.godkjenttidspunkt}")
-                    } else {
-                        utbetalingsgodkjenning.info("Utbetaling markert som godkjent av saksbehandler ${vedtaksperiode.godkjentAv} ${vedtaksperiode.godkjenttidspunkt}")
-                    }
-                }
+                vedtaksperiode.automatiskBehandling = utbetalingsgodkjenning.automatiskBehandling()
             }
         }
 

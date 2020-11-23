@@ -8,6 +8,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -24,6 +25,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
     private val utbetalingId: UUID? = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap().getValue("id") as UUID }
+    private val utbetalingstidslinje = UtbetalingstidslinjeReflect(vedtaksperiode.get<Utbetalingstidslinje>("utbetalingstidslinje")).toMap()
+    private val tilstand = vedtaksperiode.get<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand").type.name
     internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
     private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
     internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
@@ -89,6 +92,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
 
     internal fun toMap() = mutableMapOf(
         "id" to id,
+        "tilstand" to tilstand,
         "maksdato" to maksdato,
         "gjenståendeSykedager" to gjenståendeSykedager,
         "forbrukteSykedager" to forbrukteSykedager,
@@ -101,6 +105,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "utbetalingId" to utbetalingId,
+        "utbetalingstidslinje" to utbetalingstidslinje,
         "personFagsystemId" to personFagsystemId,
         "personNettoBeløp" to personNettoBeløp,
         "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
@@ -110,12 +115,6 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
         "id" to id,
-        "maksdato" to maksdato,
-        "gjenståendeSykedager" to gjenståendeSykedager,
-        "forbrukteSykedager" to forbrukteSykedager,
-        "godkjentAv" to godkjentAv,
-        "godkjenttidspunkt" to godkjenttidspunkt,
-        "automatiskBehandling" to automatiskBehandling,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "inntektsmeldingId" to inntektsmeldingId,
         "inntektFraInntektsmelding" to arbeidsgiver.inntekt(skjæringstidspunkt)?.reflection{ _, månedlig, _, _ -> månedlig },

@@ -11,6 +11,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.FagsystemId
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -258,15 +259,12 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(
-            vedtaksperiode, id, arbeidsgiverNettoBeløp, personNettoBeløp, periode, opprinneligPeriode, hendelseIder
-        )
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, periode, opprinneligPeriode, hendelseIder)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -313,19 +311,54 @@ internal class JsonBuilder : PersonVisitor {
     ) =
         currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
 
+    override fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
+        currentState.postVisitTidslinjer(tidslinjer)
+    }
+
+    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        currentState.preVisitArbeidsgiverOppdrag(oppdrag)
+    }
+
+    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+        currentState.postVisitArbeidsgiverOppdrag(oppdrag)
+    }
+
+    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
+        currentState.preVisitPersonOppdrag(oppdrag)
+    }
+
+    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
+        currentState.postVisitPersonOppdrag(oppdrag)
+    }
+
+    override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
+        currentState.visitVurdering(vurdering, ident, epost, tidspunkt, automatiskBehandling)
+    }
+
+    override fun postVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        currentState.postVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+    }
+
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
+        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         periode: Periode,
         opprinneligPeriode: Periode
     ) =
         currentState.postVisitVedtaksperiode(
             vedtaksperiode,
             id,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
+            tilstand,
             periode,
             opprinneligPeriode
         )
@@ -385,17 +418,24 @@ internal class JsonBuilder : PersonVisitor {
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
         currentState.visitDag(dag, dato, kilde, melding)
 
-    override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) =
-        currentState.visitTilstand(tilstand)
-
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
         currentState.preVisitUtbetalinger(utbetalinger)
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) =
         currentState.postVisitUtbetalinger(utbetalinger)
 
-    override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) =
-        currentState.preVisitUtbetaling(utbetaling, tidsstempel)
+    override fun preVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+        currentState.preVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+    }
 
     private interface JsonState : PersonVisitor {
         fun entering() {}
@@ -530,8 +570,7 @@ internal class JsonBuilder : PersonVisitor {
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             periode: Periode,
             opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
@@ -557,7 +596,16 @@ internal class JsonBuilder : PersonVisitor {
 
     private inner class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : JsonState {
 
-        override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            status: Utbetaling.Status,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
             utbetalinger.add(UtbetalingReflect(utbetaling).toMap())
         }
 
@@ -753,6 +801,8 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
         }
 
+        private var inUtbetaling = false
+
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any>()
             sykdomstidslinje["låstePerioder"] = låstePerioder.map {
@@ -768,21 +818,36 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiodeMap["sykdomshistorikk"] = sykdomshistorikkElementer
         }
 
-        override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
-            vedtaksperiodeMap["tilstand"] = tilstand.type.name
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            status: Utbetaling.Status,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            inUtbetaling = true
         }
 
-        override fun preVisit(tidslinje: Utbetalingstidslinje) {
-            val utbetalingstidslinje = mutableMapOf<String, Any?>()
-            vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinje
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinje))
+        override fun postVisitUtbetaling(
+            utbetaling: Utbetaling,
+            status: Utbetaling.Status,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            inUtbetaling = false
         }
 
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             periode: Periode,
             opprinneligPeriode: Periode
         ) {

@@ -834,8 +834,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             periode: Periode,
             opprinneligPeriode: Periode
         ) {

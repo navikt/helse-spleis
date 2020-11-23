@@ -11,6 +11,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.FagsystemId
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -238,16 +239,12 @@ class JsonBuilderTest {
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
-                    arbeidsgiverNettoBeløp: Int,
-                    personNettoBeløp: Int,
+                    tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
                     periode: Periode,
                     opprinneligPeriode: Periode,
                     hendelseIder: List<UUID>
                 ) {
                     vedtaksperiodeId = id.toString()
-                }
-
-                override fun visitTilstand(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) {
                     JsonBuilderTest.tilstand = tilstand.type
                 }
             })
@@ -256,8 +253,8 @@ class JsonBuilderTest {
         private fun Person.fangeArbeidsgiverFagsystemId(): String {
             var result: String? = null
             accept(object : PersonVisitor {
-                override fun visitArbeidsgiverFagsystemId(fagsystemId: String?) {
-                    result = fagsystemId
+                override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
+                    result = oppdrag.fagsystemId()
                 }
             })
             return requireNotNull(result)

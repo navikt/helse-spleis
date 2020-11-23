@@ -611,8 +611,7 @@ class SpeilBuilderTest {
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
-                arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int,
+                tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
                 periode: Periode,
                 opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>
@@ -1033,8 +1032,7 @@ class SpeilBuilderTest {
                 override fun preVisitVedtaksperiode(
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
-                    arbeidsgiverNettoBeløp: Int,
-                    personNettoBeløp: Int,
+                    tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
                     periode: Periode,
                     opprinneligPeriode: Periode,
                     hendelseIder: List<UUID>

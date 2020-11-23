@@ -95,7 +95,16 @@ private class UtbetaltEventBuilder(
         )
     }
 
-    override fun preVisitUtbetaling(utbetaling: Utbetaling, tidsstempel: LocalDateTime) {
+    override fun preVisitUtbetaling(
+        utbetaling: Utbetaling,
+        status: Utbetaling.Status,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
         opprettet = tidsstempel
     }
 
