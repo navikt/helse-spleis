@@ -511,12 +511,6 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             private val id: UUID,
-            private val maksdato: LocalDate,
-            private val gjenståendeSykedager: Int?,
-            private val forbrukteSykedager: Int?,
-            private val godkjentAv: String?,
-            private val godkjenttidspunkt: LocalDateTime?,
-            private val automatiskBehandling: Boolean?,
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             private val dataForSimulering: DataForSimuleringData?,
@@ -531,10 +525,6 @@ internal data class PersonData(
             private val tilstand: TilstandType,
             private val utbetalingId: String?,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
-            private val personFagsystemId: String?,
-            private val personNettoBeløp: Int,
-            private val arbeidsgiverFagsystemId: String?,
-            private val arbeidsgiverNettoBeløp: Int,
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
         ) {
 
@@ -559,12 +549,6 @@ internal data class PersonData(
                         fødselsnummer,
                         organisasjonsnummer,
                         parseTilstand(this.tilstand),
-                        maksdato,
-                        gjenståendeSykedager,
-                        forbrukteSykedager,
-                        godkjentAv,
-                        godkjenttidspunkt,
-                        automatiskBehandling,
                         skjæringstidspunktFraInfotrygd,
                         dataForVilkårsvurdering?.parseDataForVilkårsvurdering(),
                         dataForSimulering?.parseDataForSimulering(),
@@ -576,10 +560,6 @@ internal data class PersonData(
                         Periode(sykmeldingFom, sykmeldingTom),
                         utbetaling,
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                        personFagsystemId,
-                        personNettoBeløp,
-                        arbeidsgiverFagsystemId,
-                        arbeidsgiverNettoBeløp,
                         forlengelseFraInfotrygd
                     )
             }

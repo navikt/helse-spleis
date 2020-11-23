@@ -43,12 +43,6 @@ internal class Vedtaksperiode private constructor(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
-    private var maksdato: LocalDate,
-    private var gjenståendeSykedager: Int?,
-    private var forbrukteSykedager: Int?,
-    private var godkjentAv: String?,
-    private var godkjenttidspunkt: LocalDateTime?,
-    private var automatiskBehandling: Boolean?,
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
@@ -60,10 +54,6 @@ internal class Vedtaksperiode private constructor(
     private var sykmeldingsperiode: Periode,
     private var utbetaling: Utbetaling?,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var personFagsystemId: String?,
-    private var personNettoBeløp: Int,
-    private var arbeidsgiverFagsystemId: String?,
-    private var arbeidsgiverNettoBeløp: Int,
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
@@ -89,12 +79,6 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = tilstand,
-        maksdato = LocalDate.MAX,
-        gjenståendeSykedager = null,
-        forbrukteSykedager = null,
-        godkjentAv = null,
-        godkjenttidspunkt = null,
-        automatiskBehandling = null,
         skjæringstidspunktFraInfotrygd = null,
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
@@ -105,11 +89,7 @@ internal class Vedtaksperiode private constructor(
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetaling = null,
-        utbetalingstidslinje = Utbetalingstidslinje(),
-        personFagsystemId = null,
-        personNettoBeløp = 0,
-        arbeidsgiverFagsystemId = null,
-        arbeidsgiverNettoBeløp = 0
+        utbetalingstidslinje = Utbetalingstidslinje()
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
@@ -221,7 +201,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        if (!grunnbeløpsregulering.erRelevant(arbeidsgiverFagsystemId, personFagsystemId, skjæringstidspunkt)) return
+        if (!grunnbeløpsregulering.erRelevant(utbetaling().arbeidsgiverOppdrag().fagsystemId(), utbetaling().personOppdrag().fagsystemId(), skjæringstidspunkt)) return
         kontekst(grunnbeløpsregulering)
         tilstand.håndter(this, grunnbeløpsregulering)
     }
@@ -551,16 +531,12 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         engineForTimeline.beregnGrenser(periode.endInclusive)
-        val maksdato = engineForTimeline.maksdato().also { maksdato = it }
-        val gjenståendeSykedager = engineForTimeline.gjenståendeSykedager().also { gjenståendeSykedager = it }
-        val forbrukteSykedager = engineForTimeline.forbrukteSykedager().also { forbrukteSykedager = it }
+        val maksdato = engineForTimeline.maksdato()
+        val gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
+        val forbrukteSykedager = engineForTimeline.forbrukteSykedager()
         val utbetaling = arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, maksdato, forbrukteSykedager, gjenståendeSykedager, periode).also {
             utbetaling = it
         }
-        personFagsystemId = utbetaling.personOppdrag().fagsystemId()
-        personNettoBeløp = utbetaling.personOppdrag().nettoBeløp()
-        arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId()
-        arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag().nettoBeløp()
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
 
         when {
@@ -1342,19 +1318,11 @@ internal class Vedtaksperiode private constructor(
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
             vedtaksperiode.utbetaling().håndter(utbetalingsgodkjenning)
-            if (utbetalingsgodkjenning.hasErrorsOrWorse()) return vedtaksperiode.tilstand(
-                utbetalingsgodkjenning,
-                TilInfotrygd
-            )
-
-            vedtaksperiode.tilstand(
-                utbetalingsgodkjenning,
-                if (!vedtaksperiode.utbetalingstidslinje.harUtbetalinger()) Avsluttet else TilUtbetaling
-            ) {
-                vedtaksperiode.godkjenttidspunkt = utbetalingsgodkjenning.godkjenttidspunkt()
-                vedtaksperiode.godkjentAv = utbetalingsgodkjenning.saksbehandler()
-                vedtaksperiode.automatiskBehandling = utbetalingsgodkjenning.automatiskBehandling()
-            }
+            vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
+                utbetalingsgodkjenning.hasErrorsOrWorse() -> TilInfotrygd
+                vedtaksperiode.utbetalingstidslinje.harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            })
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1463,7 +1431,7 @@ internal class Vedtaksperiode private constructor(
             } else {
                 vedtaksperiode.arbeidsgiver.annullerUtbetaling(
                     utbetaling,
-                    vedtaksperiode.arbeidsgiverFagsystemId!!,
+                    vedtaksperiode.utbetaling().arbeidsgiverOppdrag().fagsystemId(),
                     utbetaling.godkjenttidspunkt,
                     saksbehandlerEpost = utbetaling.saksbehandlerEpost
                 )

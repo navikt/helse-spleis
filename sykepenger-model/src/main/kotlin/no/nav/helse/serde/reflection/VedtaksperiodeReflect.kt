@@ -10,27 +10,17 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
-    internal val id: UUID = vedtaksperiode["id"]
-    private val maksdato: LocalDate = vedtaksperiode["maksdato"]
-    private val gjenståendeSykedager: Int? = vedtaksperiode["gjenståendeSykedager"]
-    private val forbrukteSykedager: Int? = vedtaksperiode["forbrukteSykedager"]
-    private val godkjentAv: String? = vedtaksperiode["godkjentAv"]
-    private val godkjenttidspunkt: LocalDateTime? = vedtaksperiode["godkjenttidspunkt"]
-    private val automatiskBehandling: Boolean? = vedtaksperiode["automatiskBehandling"]
+    private val id: UUID = vedtaksperiode["id"]
     private val inntektsmeldingId:UUID? = vedtaksperiode["inntektsmeldingId"]
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
     private val utbetalingId: UUID? = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap().getValue("id") as UUID }
+    private val utbetaling = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap() }
     private val utbetalingstidslinje = UtbetalingstidslinjeReflect(vedtaksperiode.get<Utbetalingstidslinje>("utbetalingstidslinje")).toMap()
     private val tilstand = vedtaksperiode.get<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand").type.name
-    internal val personFagsystemId: String? = vedtaksperiode["personFagsystemId"]
-    private val personNettoBeløp: Int = vedtaksperiode["personNettoBeløp"]
-    internal val arbeidsgiverFagsystemId: String? = vedtaksperiode["arbeidsgiverFagsystemId"]
-    private val arbeidsgiverNettoBeløp: Int = vedtaksperiode["arbeidsgiverNettoBeløp"]
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
@@ -93,23 +83,14 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     internal fun toMap() = mutableMapOf(
         "id" to id,
         "tilstand" to tilstand,
-        "maksdato" to maksdato,
-        "gjenståendeSykedager" to gjenståendeSykedager,
-        "forbrukteSykedager" to forbrukteSykedager,
-        "godkjentAv" to godkjentAv,
-        "godkjenttidspunkt" to godkjenttidspunkt,
-        "automatiskBehandling" to automatiskBehandling,
         "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
         "inntektsmeldingId" to inntektsmeldingId,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "utbetalingId" to utbetalingId,
+        "utbetaling" to utbetaling, // keep a copy of the json for debug purposes
         "utbetalingstidslinje" to utbetalingstidslinje,
-        "personFagsystemId" to personFagsystemId,
-        "personNettoBeløp" to personNettoBeløp,
-        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-        "arbeidsgiverNettoBeløp" to arbeidsgiverNettoBeløp,
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 
