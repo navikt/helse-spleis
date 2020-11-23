@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
@@ -48,6 +49,24 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
+    @Test fun `utbetalingsgrense resettes ikke når oppholdsdager nås ved sykedager`() {
+        val tidslinje = tidslinjeOf(248.NAV, (25 * 7).ARB, 10.NAV)
+        val periode = 28.februar(2019) til 9.mars(2019)
+        assertEquals(periode.map { it }, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test fun `utbetalingsgrense resettes ved første arbeidsdag`() {
+        val tidslinje = tidslinjeOf(248.NAV, (25 * 7).ARB, 10.NAV, 1.ARB, 10.NAV)
+        val periode = 28.februar(2019) til 9.mars(2019)
+        assertEquals(periode.map { it }, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test fun `utbetalingsgrense resettes ved første arbeidsgiverperiodedag`() {
+        val tidslinje = tidslinjeOf(248.NAV, (25 * 7).ARB, 10.NAV, 1.AP, 10.NAV)
+        val periode = 28.februar(2019) til 9.mars(2019)
+        assertEquals(periode.map { it }, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
     @Test fun `en ubetalt sykedag før opphold`() {
         val tidslinje = tidslinjeOf(249.NAV, (26 * 7).ARB, 10.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
@@ -84,13 +103,33 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018))
     }
 
-    @Test fun `sjekk at 26 uker med syk etter karantene starter utbetaling`() {
+    @Test fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling`() {
         val tidslinje = tidslinjeOf(248.NAV, (26 * 7).NAV, 60.NAV)
+        assertEquals(26*7 + 60, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
+    }
+
+    @Test fun `sjekk at 26 uker med syk etter karantene starter utbetaling etter første arbeidsdag`() {
+        val tidslinje = tidslinjeOf(248.NAV, (26 * 7).NAV, 1.ARB, 60.NAV)
         assertEquals(26*7, tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).size)
     }
 
-    @Test fun `sjekk at 26 uker med syk etter karantene starter utbetaling gammel person`() {
-        val tidslinje = tidslinjeOf(60.NAV, (26 * 7).NAV, 60.NAV)
+    @Test fun `sjekk at sykepenger er oppbrukt når personen fyller 67 år`() {
+        val tidslinje = tidslinjeOf(248.NAV, 10.NAV, startDato = 10.januar.minusDays(248))
+        assertEquals(10, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
+    }
+
+    @Test fun `sjekk at sykepenger er oppbrukt etter at personen har fylt 67 år`() {
+        val tidslinje = tidslinjeOf(71.NAV)
+        assertEquals(1, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
+    }
+
+    @Test fun `sjekk at 26 uker med syk etter karantene ikke starter utbetaling gammel person`() {
+        val tidslinje = tidslinjeOf(70.NAV, (26 * 7).NAV, 60.NAV)
+        assertEquals(26*7 + 60, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
+    }
+
+    @Test fun `sjekk at 26 uker med syk etter karantene starter utbetaling gammel person etter første arbeidsdag`() {
+        val tidslinje = tidslinjeOf(70.NAV, (26 * 7).NAV, 1.ARB, 60.NAV)
         assertEquals(26*7, tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_FNR_2018).size)
     }
 
