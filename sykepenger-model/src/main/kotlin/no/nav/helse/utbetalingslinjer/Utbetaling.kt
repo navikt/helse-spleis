@@ -74,12 +74,7 @@ internal class Utbetaling private constructor(
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         hendelse.kontekst(this)
         status = if (hendelse.valider().hasErrorsOrWorse()) IKKE_GODKJENT else GODKJENT
-        vurdering = Vurdering(
-            hendelse.saksbehandler(),
-            hendelse.saksbehandlerEpost(),
-            hendelse.godkjenttidspunkt(),
-            hendelse.automatiskBehandling()
-        )
+        vurdering = hendelse.vurdering()
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {

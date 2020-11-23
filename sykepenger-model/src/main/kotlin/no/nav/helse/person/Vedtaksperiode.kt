@@ -481,7 +481,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse, epost: String) {
+    private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse) {
         utbetaling().utbetal(hendelse)
     }
 
@@ -1412,8 +1412,7 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            val epost = if (hendelse is Utbetalingsgodkjenning) hendelse.saksbehandlerEpost() else "tbd@nav.no"
-            vedtaksperiode.trengerUtbetaling(hendelse, epost)
+            vedtaksperiode.trengerUtbetaling(hendelse)
         }
 
         override fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1424,10 +1423,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
             vedtaksperiode.utbetaling().håndter(utbetaling)
-            utbetaling.info(
-                "Utbetalingen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
-                    "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}"
-            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1457,7 +1452,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerUtbetaling(påminnelse, "epost@nav.no")
+            vedtaksperiode.trengerUtbetaling(påminnelse)
         }
     }
 
