@@ -298,7 +298,7 @@ internal interface InntekthistorikkVisitor {
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
-    fun preVisitUtbetaling(utbetaling: Utbetaling, status: Utbetaling.Status, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
+    fun preVisitUtbetaling(utbetaling: Utbetaling, tilstand: Utbetaling.Tilstand, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
     fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
@@ -306,7 +306,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {}
-    fun postVisitUtbetaling(utbetaling: Utbetaling, status: Utbetaling.Status, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
+    fun postVisitUtbetaling(utbetaling: Utbetaling, tilstand: Utbetaling.Tilstand, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
 }
 
 internal interface FagsystemIdVisitor : OppdragVisitor, UtbetalingsdagVisitor {

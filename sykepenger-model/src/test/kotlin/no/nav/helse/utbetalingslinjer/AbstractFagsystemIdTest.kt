@@ -191,6 +191,7 @@ internal abstract class AbstractFagsystemIdTest {
             FNR,
             ORGNR,
             inspektør.fagsystemId(fagsystemIdIndeks),
+            "",
             AVSTEMMINGSNØKKEL,
             LocalDateTime.now()
         ).also {

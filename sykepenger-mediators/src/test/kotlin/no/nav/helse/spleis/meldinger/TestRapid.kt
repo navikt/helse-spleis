@@ -99,17 +99,10 @@ internal class TestRapid : RapidsConnection() {
             }
 
         private val behovmeldinger
-            get() = mutableMapOf<UUID, MutableList<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, JsonNode>>>().apply {
+            get() = mutableListOf<Pair<Aktivitetslogg.Aktivitet.Behov.Behovtype, JsonNode>>().apply {
                 events("behov") { message ->
-                    val vedtaksperiodeIdString = message.path("vedtaksperiodeId")
-                        .takeIf { id -> !id.isMissingNode }
-                        ?.asText() ?: return@events
-
-                    val id = UUID.fromString(vedtaksperiodeIdString)
-                    this.getOrPut(id) { mutableListOf() }.apply {
-                        message.path("@behov").onEach {
-                            add(Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
-                        }
+                    message.path("@behov").onEach {
+                        add(Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
                     }
                 }
             }
@@ -134,10 +127,10 @@ internal class TestRapid : RapidsConnection() {
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
 
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-            behovmeldinger.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
+        fun etterspurteBehov(behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+            behovmeldinger.last { it.first == behovtype }.second
 
         fun tilstandForEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).first { it.first == behovtype }.second
+            behov.getValue(vedtaksperiodeId(vedtaksperiodeIndeks)).last { it.first == behovtype }.second
     }
 }

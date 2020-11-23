@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -162,6 +163,17 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         person.håndter(ytelser(1.vedtaksperiode))
         person.håndter(simulering(1.vedtaksperiode))
         person.håndter(utbetalingsgodkjenning(1.vedtaksperiode, true, godkjentAv, automatiskBehandling))
+        person.håndter(UtbetalingOverført(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = 1.vedtaksperiode.toString(),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            orgnummer = ORGNUMMER,
+            fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
+        ))
     }
 
     private fun utbetaling(vedtaksperiodeId: UUID, status: UtbetalingHendelse.Oppdragstatus) =

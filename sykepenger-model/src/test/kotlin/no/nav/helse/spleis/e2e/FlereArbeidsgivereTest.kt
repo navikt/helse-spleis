@@ -4,6 +4,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -402,6 +404,18 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 automatiskBehandling = false
             )
         )
+        person.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = orgnummer.id(0).toString(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                orgnummer = orgnummer,
+                fagsystemId = orgnummer.inspektør.fagsystemId(orgnummer.id(0)),
+                utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+        ))
         person.håndter(
             utbetaling(
                 orgnummer.id(0),

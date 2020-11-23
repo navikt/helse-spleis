@@ -159,7 +159,7 @@ internal class TestArbeidsgiverInspektør(
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
@@ -175,7 +175,7 @@ internal class TestArbeidsgiverInspektør(
 
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,

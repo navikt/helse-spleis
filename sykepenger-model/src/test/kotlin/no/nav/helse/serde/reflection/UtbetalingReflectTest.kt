@@ -1,6 +1,8 @@
 package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.UtbetalingOverført
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.januar
@@ -63,6 +65,35 @@ internal class UtbetalingReflectTest {
             148,
             emptyList()
         ).also { utbetaling ->
+            var utbetalingId: String = ""
+            Utbetalingsgodkjenning(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "ignore",
+                fødselsnummer = "ignore",
+                organisasjonsnummer = "ignore",
+                vedtaksperiodeId = "ignore",
+                saksbehandler = "Z999999",
+                saksbehandlerEpost = "mille.mellomleder@nav.no",
+                utbetalingGodkjent = true,
+                godkjenttidspunkt = LocalDateTime.now(),
+                automatiskBehandling = false
+            ).also {
+                utbetaling.håndter(it)
+                utbetaling.utbetal(it)
+                utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")
+            }
+            utbetaling.håndter(
+                UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                aktørId = "ignore",
+                fødselsnummer = "ignore",
+                orgnummer = "ignore",
+                vedtaksperiodeId = "ignore",
+                fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                utbetalingId = utbetalingId,
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            ))
             utbetaling.håndter(
                 UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),

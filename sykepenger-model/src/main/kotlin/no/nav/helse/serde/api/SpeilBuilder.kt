@@ -268,7 +268,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
@@ -276,7 +276,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        currentState.preVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+        currentState.preVisitUtbetaling(utbetaling, tilstand, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     override fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
@@ -305,7 +305,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
@@ -313,7 +313,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        currentState.postVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+        currentState.postVisitUtbetaling(utbetaling, tilstand, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     override fun postVisitVedtaksperiode(
@@ -619,7 +619,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
-            status: Utbetaling.Status,
+            tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
@@ -628,7 +628,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             gjenståendeSykedager: Int?
         ) {
             inUtbetaling = true
-            utbetalingGodkjent = status != Utbetaling.Status.IKKE_GODKJENT
+            utbetalingGodkjent = tilstand != Utbetaling.IkkeGodkjent
             vedtaksperiodeMap["maksdato"] = maksdato
             vedtaksperiodeMap["gjenståendeSykedager"] = gjenståendeSykedager
             vedtaksperiodeMap["forbrukteSykedager"] = forbrukteSykedager
@@ -651,7 +651,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
-            status: Utbetaling.Status,
+            tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,

@@ -12,6 +12,7 @@ import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.FagsystemTilstandType
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -809,7 +810,6 @@ internal data class PersonData(
         private val tidsstempel: LocalDateTime,
         private val type: String,
         private val status: String,
-        private val annullert: Boolean,
         private val maksdato: LocalDate,
         private val forbrukteSykedager: Int?,
         private val gjenståendeSykedager: Int?,
@@ -827,9 +827,8 @@ internal data class PersonData(
                 arbeidsgiverOppdrag.konverterTilOppdrag(),
                 personOppdrag.konverterTilOppdrag(),
                 tidsstempel,
+                enumValueOf<Utbetalingstatus>(status).tilTilstand(),
                 enumValueOf<Utbetaling.Utbetalingtype>(type),
-                enumValueOf<Utbetaling.Status>(status),
-                annullert,
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,

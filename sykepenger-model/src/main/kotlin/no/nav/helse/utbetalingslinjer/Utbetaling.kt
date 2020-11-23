@@ -6,7 +6,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingslinjer.Utbetaling.Status.*
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -22,9 +21,8 @@ internal class Utbetaling private constructor(
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
+    private var tilstand: Tilstand,
     private val type: Utbetalingtype,
-    private var status: Status,
-    private var annullert: Boolean,
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
     private val gjenståendeSykedager: Int?,
@@ -49,9 +47,8 @@ internal class Utbetaling private constructor(
         buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         LocalDateTime.now(),
+        Ubetalt,
         Utbetalingtype.UTBETALING,
-        IKKE_UTBETALT,
-        false,
         maksdato,
         forbrukteSykedager,
         gjenståendeSykedager,
@@ -63,50 +60,45 @@ internal class Utbetaling private constructor(
 
     internal enum class Utbetalingtype { UTBETALING, ANNULLERING }
 
-    internal enum class Status {
-        IKKE_UTBETALT,
-        IKKE_GODKJENT,
-        GODKJENT,
-        SENDT,
-        OVERFØRT,
-        UTBETALT,
-        GODKJENT_UTEN_UTBETALING,
-        UTBETALING_FEILET
-    }
-
-    internal fun erUtbetalt() = status == UTBETALT
-    internal fun erFeilet() = status == UTBETALING_FEILET
-    internal fun erAnnullert() = annullert
+    internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
+    internal fun erFeilet() = tilstand == UtbetalingFeilet
+    internal fun erAnnullert() = type == Utbetalingtype.ANNULLERING
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         hendelse.kontekst(this)
-        status = if (hendelse.valider().hasErrorsOrWorse()) IKKE_GODKJENT else GODKJENT
-        vurdering = hendelse.vurdering()
+        tilstand.godkjenn(this, hendelse)
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
         utbetaling.kontekst(this)
-        status = if (utbetaling.hasErrorsOrWorse()) UTBETALING_FEILET else UTBETALT
-        annullert = utbetaling.annullert
+        tilstand.kvittér(this, utbetaling)
     }
 
     internal fun utbetalingFeilet(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.kontekst(this)
-        aktivitetslogg.error("Feilrespons fra oppdrag")
-        status = UTBETALING_FEILET
+        tilstand.utbetalingFeilet(this, aktivitetslogg)
     }
 
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
-        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
+        if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
+        if (utbetalingOverført.håndtert(this)) return
         utbetalingOverført.kontekst(this)
-        status = OVERFØRT
-        overføringstidspunkt = utbetalingOverført.overføringstidspunkt
-        avstemmingsnøkkel = utbetalingOverført.avstemmingsnøkkel
-        utbetalingOverført.info(
-            "Utbetalingen ble overført til Oppdrag/UR ${utbetalingOverført.overføringstidspunkt}, " +
-                "og har fått avstemmingsnøkkel ${utbetalingOverført.avstemmingsnøkkel}"
-        )
+        tilstand.overført(this, utbetalingOverført)
+    }
+
+    internal fun utbetal(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(this)
+        tilstand.overfør(this, hendelse)
+    }
+
+    internal fun simuler(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(this)
+        tilstand.simuler(this, hendelse)
+    }
+
+    internal fun valider(simulering: Simulering): IAktivitetslogg {
+        return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
     }
 
     internal fun ferdigstill(
@@ -117,14 +109,7 @@ internal class Utbetaling private constructor(
         inntekt: Inntekt,
         hendelseIder: List<UUID>
     ) {
-        // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
-        // skal vi fortsatt drive å sende Utbetalt-event da?
-        check(avsluttet == null) { "Utbetalingen er allerede avsluttet" }
-        check(status in listOf(GODKJENT, UTBETALT)) { "Forventet status GODKJENT eller UTBETALT. Er $status" }
-        if (status == GODKJENT) status = GODKJENT_UTEN_UTBETALING
-        val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
-        vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
-        avsluttet = LocalDateTime.now()
+        tilstand.avslutt(this, hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -134,8 +119,11 @@ internal class Utbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    companion object {
+    private fun tilstand(neste: Tilstand) {
+        tilstand = neste
+    }
 
+    internal companion object {
         private const val systemident = "SPLEIS"
 
         private fun buildArb(
@@ -178,14 +166,14 @@ internal class Utbetaling private constructor(
 
         internal fun List<Utbetaling>.utbetalte() =
             filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
-                .filter { it.status == UTBETALT }
+                .filter { it.erUtbetalt() }
         private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
             filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
-                .any { it.annullert }
+                .any { it.erAnnullert() }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, status, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.preVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -194,7 +182,7 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
-        visitor.postVisitUtbetaling(this, status, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.postVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
@@ -206,9 +194,8 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, hendelse),
         personOppdrag.emptied().minus(personOppdrag, hendelse),
         LocalDateTime.now(),
+        Godkjent,
         Utbetalingtype.ANNULLERING,
-        IKKE_UTBETALT,
-        true,
         LocalDate.MAX,
         null,
         null,
@@ -231,23 +218,157 @@ internal class Utbetaling private constructor(
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
-    internal fun utbetal(hendelse: ArbeidstakerHendelse) {
+    private fun overfør(aktivitetslogg: IAktivitetslogg) {
         val vurdering = requireNotNull(vurdering) { "Kan ikke overføre oppdrag som ikke er vurdert" }
-        status = SENDT
-        vurdering.utbetale(hendelse, arbeidsgiverOppdrag, maksdato, annullert)
+        vurdering.utbetale(aktivitetslogg, arbeidsgiverOppdrag, maksdato, type == Utbetalingtype.ANNULLERING)
+        tilstand(Sendt)
     }
 
-    internal fun simuler(hendelse: ArbeidstakerHendelse) {
-        simulering(
-            aktivitetslogg = hendelse,
-            oppdrag = arbeidsgiverOppdrag.utenUendretLinjer(),
-            maksdato = maksdato,
-            saksbehandler = systemident
-        )
+    private fun avslutt(
+        hendelse: ArbeidstakerHendelse,
+        person: Person,
+        periode: Periode,
+        sykepengegrunnlag: Inntekt,
+        inntekt: Inntekt,
+        hendelseIder: List<UUID>
+    ) {
+        val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
+        vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        avsluttet = LocalDateTime.now()
     }
 
-    internal fun valider(simulering: Simulering): IAktivitetslogg {
-        return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
+    internal interface Tilstand {
+        fun godkjenn(
+            utbetaling: Utbetaling,
+            hendelse: Utbetalingsgodkjenning
+        ) {
+            throw IllegalStateException("Forventet ikke å utbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            throw IllegalStateException("Forventet ikke å utbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) {
+            throw IllegalStateException("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+            throw IllegalStateException("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
+            throw IllegalStateException("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            throw IllegalStateException("Forventet ikke utbetaling feilet på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            throw IllegalStateException("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun avslutt(
+            utbetaling: Utbetaling,
+            hendelse: ArbeidstakerHendelse,
+            person: Person,
+            periode: Periode,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt,
+            hendelseIder: List<UUID>
+        ) {
+            throw IllegalStateException("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+    }
+
+    internal object Ubetalt : Tilstand {
+        override fun godkjenn(utbetaling: Utbetaling, hendelse: Utbetalingsgodkjenning) {
+            utbetaling.vurdering = hendelse.vurdering()
+            utbetaling.tilstand(if (hendelse.valider().hasErrorsOrWorse()) IkkeGodkjent else Godkjent)
+        }
+
+        override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            simulering(
+                aktivitetslogg = aktivitetslogg,
+                oppdrag = utbetaling.arbeidsgiverOppdrag.utenUendretLinjer(),
+                maksdato = utbetaling.maksdato,
+                saksbehandler = systemident
+            )
+        }
+    }
+
+    internal object IkkeGodkjent : Tilstand {}
+    internal object GodkjentUtenUtbetaling : Tilstand {}
+
+    internal object Godkjent : Tilstand {
+        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            utbetaling.overfør(aktivitetslogg)
+        }
+
+        override fun avslutt(
+            utbetaling: Utbetaling,
+            hendelse: ArbeidstakerHendelse,
+            person: Person,
+            periode: Periode,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt,
+            hendelseIder: List<UUID>
+        ) {
+            // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
+            // skal vi fortsatt drive å sende Utbetalt-event da?
+            utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+            utbetaling.tilstand(GodkjentUtenUtbetaling)
+        }
+    }
+
+    internal object Sendt : Tilstand {
+        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            utbetaling.overfør(aktivitetslogg)
+        }
+
+        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+            utbetaling.overføringstidspunkt = hendelse.overføringstidspunkt
+            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
+            hendelse.info("Utbetalingen ble overført til Oppdrag/UR ${hendelse.overføringstidspunkt}, " +
+                "og har fått avstemmingsnøkkel ${hendelse.avstemmingsnøkkel}")
+            utbetaling.tilstand(Overført)
+        }
+    }
+
+    internal object Overført : Tilstand {
+        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
+            if (hendelse.hasErrorsOrWorse()) return utbetaling.tilstand(UtbetalingFeilet)
+            utbetaling.tilstand(if (utbetaling.type == Utbetalingtype.ANNULLERING) Annullert else Utbetalt)
+        }
+
+        override fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.error("Feilrespons fra oppdrag")
+            utbetaling.tilstand(UtbetalingFeilet)
+        }
+    }
+
+    internal object Annullert : Tilstand {}
+    internal object Utbetalt : Tilstand {
+        override fun avslutt(
+            utbetaling: Utbetaling,
+            hendelse: ArbeidstakerHendelse,
+            person: Person,
+            periode: Periode,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt,
+            hendelseIder: List<UUID>
+        ) {
+            utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        }
+    }
+
+    internal object UtbetalingFeilet : Tilstand {
+        override fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
+
+        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+            utbetaling.overfør(aktivitetslogg)
+        }
     }
 
     internal class Vurdering(

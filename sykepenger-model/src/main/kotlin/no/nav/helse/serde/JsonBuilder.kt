@@ -337,7 +337,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
@@ -345,7 +345,7 @@ internal class JsonBuilder : PersonVisitor {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        currentState.postVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+        currentState.postVisitUtbetaling(utbetaling, tilstand, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     override fun postVisitVedtaksperiode(
@@ -426,7 +426,7 @@ internal class JsonBuilder : PersonVisitor {
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
-        status: Utbetaling.Status,
+        tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
@@ -434,7 +434,7 @@ internal class JsonBuilder : PersonVisitor {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        currentState.preVisitUtbetaling(utbetaling, status, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
+        currentState.preVisitUtbetaling(utbetaling, tilstand, tidsstempel, arbeidsgiverNettoBeløp, personNettoBeløp, maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     private interface JsonState : PersonVisitor {
@@ -598,7 +598,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
-            status: Utbetaling.Status,
+            tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
@@ -820,7 +820,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
-            status: Utbetaling.Status,
+            tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
@@ -833,7 +833,7 @@ internal class JsonBuilder : PersonVisitor {
 
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
-            status: Utbetaling.Status,
+            tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,

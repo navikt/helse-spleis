@@ -30,6 +30,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
@@ -220,9 +221,19 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
         testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingOverført(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Utbetaling).path("fagsystemId").asText(),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 saksbehandlerEpost = saksbehandlerEpost,
                 annullering = annullert,

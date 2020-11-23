@@ -359,6 +359,19 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     ) {
         person.håndter(
+            UtbetalingOverført(
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId.toString(),
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                orgnummer = ORGNUMMER,
+                fagsystemId = fagsystemId,
+                utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        person.håndter(
             utbetaling(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fagsystemId = fagsystemId,

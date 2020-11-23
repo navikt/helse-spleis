@@ -2048,7 +2048,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), gradFraSykmelding = 100), sendtTilNav = 31.januar(2019))
         håndterYtelser(13.vedtaksperiode)   // No history
         håndterUtbetalingsgodkjenning(13.vedtaksperiode, true)
-        håndterUtbetalt(13.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         val utbetaltEvent = observatør.utbetaltEventer.last()
 

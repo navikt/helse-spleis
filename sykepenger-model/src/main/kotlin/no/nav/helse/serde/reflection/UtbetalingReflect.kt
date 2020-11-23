@@ -9,6 +9,25 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+internal enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
+    IKKE_UTBETALT(Utbetaling.Ubetalt),
+    IKKE_GODKJENT(Utbetaling.IkkeGodkjent),
+    GODKJENT(Utbetaling.Godkjent),
+    SENDT(Utbetaling.Sendt),
+    OVERFØRT(Utbetaling.Overført),
+    UTBETALT(Utbetaling.Utbetalt),
+    GODKJENT_UTEN_UTBETALING(Utbetaling.GodkjentUtenUtbetaling),
+    UTBETALING_FEILET(Utbetaling.UtbetalingFeilet),
+    ANNULLERT(Utbetaling.Annullert);
+
+    internal fun tilTilstand() = tilstand
+
+    internal companion object {
+        fun fraTilstand(tilstand: Utbetaling.Tilstand) =
+            values().first { it.tilstand == tilstand }
+    }
+}
+
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "id" to utbetaling["id"],
@@ -16,9 +35,8 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "arbeidsgiverOppdrag" to OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
         "personOppdrag" to OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"],
+        "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")),
         "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
-        "status" to utbetaling.get<Utbetaling.Status>("status").name,
-        "annullert" to utbetaling.get<Boolean>("annullert"),
         "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),
         "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"),
         "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"),

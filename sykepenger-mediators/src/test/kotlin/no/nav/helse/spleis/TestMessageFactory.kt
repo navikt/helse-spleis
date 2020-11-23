@@ -413,6 +413,33 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagUtbetalingOverført(
+        vedtaksperiodeId: UUID,
+        fagsystemId: String,
+        utbetalingId: String,
+        tilstand: TilstandType,
+        avstemmingsnøkkel: Long,
+        overføringstidspunkt: LocalDateTime = LocalDateTime.now()
+    ): String {
+        return lagBehovMedLøsning(
+            behov = listOf("Utbetaling"),
+            tilstand = tilstand,
+            vedtaksperiodeId = vedtaksperiodeId,
+            løsninger = mapOf(
+                "Utbetaling" to mapOf(
+                    "status" to UtbetalingHendelse.Oppdragstatus.OVERFØRT.name,
+                    "beskrivelse" to "",
+                    "avstemmingsnøkkel" to avstemmingsnøkkel,
+                    "overføringstidspunkt" to overføringstidspunkt
+                )
+            ),
+            ekstraFelter = mapOf(
+                "fagsystemId" to fagsystemId,
+                "utbetalingId" to utbetalingId
+            )
+        )
+    }
+
     fun lagAnnullering(fagsystemId: String): String {
         return nyHendelse(
             "annullering", mapOf(

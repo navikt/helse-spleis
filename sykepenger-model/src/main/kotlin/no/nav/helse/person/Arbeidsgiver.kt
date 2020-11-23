@@ -184,6 +184,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
+        utbetalinger.forEach { it.håndter(utbetaling) }
         vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
     }
 

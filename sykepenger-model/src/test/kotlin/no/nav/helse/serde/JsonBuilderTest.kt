@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.FagsystemId
@@ -143,6 +144,7 @@ class JsonBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
+                håndter(overføring(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 fangeVedtaksperiode()
             }
@@ -217,6 +219,7 @@ class JsonBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
+                håndter(overføring(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
@@ -435,6 +438,18 @@ class JsonBuilderTest {
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now(),
             fagsystemId = fagsystemId
+        )
+
+        fun Person.overføring(vedtaksperiodeId: String) = UtbetalingOverført(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            orgnummer = orgnummer,
+            fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
+            utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
         )
 
         fun utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
