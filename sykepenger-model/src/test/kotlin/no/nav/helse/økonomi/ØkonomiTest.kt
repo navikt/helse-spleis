@@ -1,6 +1,7 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -267,6 +268,11 @@ internal class ØkonomiTest {
         }
         assertUtbetaling(a, 221, 0) //454 * 2000 / 4100 ~+1
         assertUtbetaling(b, 233, 0)
+    }
+
+    @Test fun `Beregner ikke dekningsgrad av allerede dekningsgradberegnet inntekt`() {
+        val dekningsgradberegnetInntekt = 1000.månedlig.dekningsgrunnlag(ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        assertSame(dekningsgradberegnetInntekt, dekningsgradberegnetInntekt.dekningsgrunnlag(ArbeidsgiverRegler.Companion.NormalArbeidstaker))
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Int, expectedPerson: Int) {
