@@ -8,14 +8,15 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.*
 
 internal class SimuleringMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val status = Simuleringstatus.valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
-    private val simuleringOK = status == Simuleringstatus.OK
+    private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
+    private val simuleringOK = status == OK
     private val melding = packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText()
     private val simuleringResultat =
         packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
@@ -76,7 +77,8 @@ internal class SimuleringMessage(packet: MessageDelegate) : BehovMessage(packet)
         )
 
     override fun behandle(mediator: IHendelseMediator) {
-        if (status == Simuleringstatus.OPPDRAG_UR_ER_STENGT) return // dont send message into the model if Oppdrag/UR is closed for biz.
+        // dont send message into the model if Oppdrag/UR is closed for biz.
+        if (status in listOf(TEKNISK_FEIL, OPPDRAG_UR_ER_STENGT)) return
         mediator.behandle(this, simulering)
     }
 
