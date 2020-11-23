@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggReflect
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -315,7 +314,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     aktivitetslogg: IAktivitetslogg,
                     periodeFom: LocalDate,
                     periodeTom: LocalDate,
-                    sykepengegrunnlag: Inntekt,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype
                 ) {
@@ -323,7 +321,6 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
                             "periodeFom" to periodeFom.toString(),
                             "periodeTom" to periodeTom.toString(),
-                            "sykepengegrunnlag" to sykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig },
                             "periodetype" to periodetype.name,
                             "warnings" to Aktivitetslogg().apply {
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
