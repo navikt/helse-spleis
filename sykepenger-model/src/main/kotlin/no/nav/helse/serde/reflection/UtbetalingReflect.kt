@@ -16,6 +16,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "arbeidsgiverOppdrag" to OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
         "personOppdrag" to OppdragReflect(utbetaling["personOppdrag"]).toMap(),
         "tidsstempel" to utbetaling["tidsstempel"],
+        "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
         "status" to utbetaling.get<Utbetaling.Status>("status").name,
         "annullert" to utbetaling.get<Boolean>("annullert"),
         "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),

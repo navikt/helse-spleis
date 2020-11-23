@@ -22,6 +22,7 @@ internal class Utbetaling private constructor(
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
+    private val type: Utbetalingtype,
     private var status: Status,
     private var annullert: Boolean,
     private val maksdato: LocalDate,
@@ -48,6 +49,7 @@ internal class Utbetaling private constructor(
         buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
         LocalDateTime.now(),
+        Utbetalingtype.UTBETALING,
         IKKE_UTBETALT,
         false,
         maksdato,
@@ -58,6 +60,8 @@ internal class Utbetaling private constructor(
         null,
         null
     )
+
+    internal enum class Utbetalingtype { UTBETALING, ANNULLERING }
 
     internal enum class Status {
         IKKE_UTBETALT,
@@ -202,6 +206,7 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, hendelse),
         personOppdrag.emptied().minus(personOppdrag, hendelse),
         LocalDateTime.now(),
+        Utbetalingtype.ANNULLERING,
         IKKE_UTBETALT,
         true,
         LocalDate.MAX,
