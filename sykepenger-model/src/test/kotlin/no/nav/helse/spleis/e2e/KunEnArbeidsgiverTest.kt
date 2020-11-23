@@ -40,7 +40,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -75,7 +75,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -106,7 +106,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -153,7 +153,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -203,7 +203,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(13, it.dagtelling[Sykedag::class])
@@ -243,7 +243,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -271,7 +271,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -303,7 +303,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -340,7 +340,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertEquals(INNTEKT, it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(INNTEKT, 2.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -374,8 +374,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertFalse(it.personLogg.hasWarningsOrWorse())
             assertActivities(it)
-            assertTrue(it.inntekter.isEmpty())
-            assertNull(it.inntektshistorikk.inntekt(2.januar))
+            assertInntektForDato(null, 2.januar, it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -422,8 +421,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertNoErrors(it)
             assertFalse(it.personLogg.hasWarningsOrWorse())
             assertActivities(it)
-            assertFalse(it.inntekter.isEmpty())
-            assertNotNull(it.inntektshistorikk.inntekt(27.juli(2020)))
+            assertInntektForDato(45000.månedlig, 27.juli(2020), it)
             assertEquals(2, it.sykdomshistorikk.size)
             assertEquals(21, it.dagtelling[Sykedag::class])
             assertEquals(9, it.dagtelling[SykHelgedag::class])
@@ -455,8 +453,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertFalse(it.inntekter.isEmpty())
-            assertNotNull(it.inntektshistorikk.inntekt(21.september(2020)))
+            assertInntektForDato(INNTEKT, 21.september(2020), it)
             assertEquals(21.september(2020), it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(21465, it.nettoBeløp[0])
         }
@@ -492,9 +489,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertFalse(it.inntekter.isEmpty())
-            assertNotNull(it.inntektshistorikk.inntekt(4.januar))
-            assertNotNull(it.inntektshistorikk.inntekt(24.januar))
+            assertInntektForDato(INNTEKT, 4.januar, it)
+            assertInntektForDato(INNTEKT, 24.januar, it)
             assertEquals(4.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(24.januar, it.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(19, it.dagtelling[Sykedag::class])
@@ -2288,7 +2284,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ny utbetalingsbuilder feiler ikke når sykdomshistorikk inneholder arbeidsgiverperiode som hører til infotrygdperiode`() {
-        Toggles.nyUtbetalingstidslinjebuilder = true
+        Toggles.nyInntekt = true
         håndterSykmelding(Sykmeldingsperiode(28.september(2020), 14.oktober(2020), 30))
         håndterSøknad(Sykdom(28.september(2020), 14.oktober(2020), 30))
         håndterUtbetalingshistorikk(
@@ -2339,7 +2335,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             )
         }
-        Toggles.nyUtbetalingstidslinjebuilder = false
+        Toggles.nyInntekt = false
     }
 
     @Test
@@ -2361,7 +2357,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ny utbetalingsbuilder feiler ikke når IT har kontinuerlig sykdom på tvers av arbeidsgivere`() {
-        Toggles.nyUtbetalingstidslinjebuilder = true
+        Toggles.nyInntekt = true
         håndterSykmelding(Sykmeldingsperiode(28.september(2020), 18.oktober(2020), 100))
         håndterSøknad(Sykdom(28.september(2020), 18.oktober(2020), 100))
         håndterUtbetalingshistorikk(
@@ -2390,6 +2386,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 )
             )
         }
-        Toggles.nyUtbetalingstidslinjebuilder = false
+        Toggles.nyInntekt = false
     }
 }

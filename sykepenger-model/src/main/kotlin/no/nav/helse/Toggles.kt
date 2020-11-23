@@ -1,7 +1,7 @@
 package no.nav.helse
 
 object Toggles {
-    var nyUtbetalingstidslinjebuilder = false
+    var nyInntekt = false
     var replayEnabled = false
     var flereArbeidsgivereEnabled = false
 }

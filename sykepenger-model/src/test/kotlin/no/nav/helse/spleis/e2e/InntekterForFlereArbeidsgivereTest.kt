@@ -25,9 +25,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     private val a3Inspektør get() = TestArbeidsgiverInspektør(person, a3)
     private val a4Inspektør get() = TestArbeidsgiverInspektør(person, a4)
 
-    private val a1InntektInspektør get() = InntektshistorikkVol2Inspektør(person, a1)
-    private val a2InntektInspektør get() = InntektshistorikkVol2Inspektør(person, a2)
-
     @Disabled("Henting av inntekter er ikke implementert riktig")
     @Test
     fun `Inntekter fra flere arbeidsgivere`() {
@@ -158,17 +155,17 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(3, a1InntektInspektør.antallInnslag)
-        assertEquals(1, a2InntektInspektør.antallInnslag)
-        assertEquals(5000.månedlig, a2InntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
-        assertEquals(24500.månedlig, a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
+        assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(
             24000.månedlig,
-            a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
+            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
         )
         assertEquals(
             25000.månedlig,
-            a1InntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
+            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
         )
     }
 

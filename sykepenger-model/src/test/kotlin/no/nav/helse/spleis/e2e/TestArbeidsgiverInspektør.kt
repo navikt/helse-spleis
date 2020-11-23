@@ -37,6 +37,7 @@ internal class TestArbeidsgiverInspektør(
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal lateinit var inntektshistorikk: Inntektshistorikk
+    internal val inntektInspektør get() = InntektshistorikkVol2Inspektør(arbeidsgiver)
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal lateinit var sykdomstidslinje: Sykdomstidslinje
     internal var låstePerioder = emptyList<Periode>()

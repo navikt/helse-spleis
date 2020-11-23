@@ -37,7 +37,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val INNTEKT = 31000.00.månedlig
     }
 
-    fun speilApi () = serializePersonForSpeil(person)
+    fun speilApi() = serializePersonForSpeil(person)
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
@@ -814,6 +814,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         saksbehandlerEpost = "ola.nordmann@nav.no"
     ).apply {
         hendelselogg = this
+    }
+
+    protected fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
+        if (Toggles.nyInntekt) {
+            assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato))
+        } else {
+            forventetInntekt?.also { assertTrue(inspektør.inntekter.isNotEmpty()) }
+            assertEquals(forventetInntekt, inspektør.inntektshistorikk.inntekt(dato))
+        }
     }
 
     private val vedtaksperioderIder = mutableMapOf<Pair<String, Int>, UUID>()
