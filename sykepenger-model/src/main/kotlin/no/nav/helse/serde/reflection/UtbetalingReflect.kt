@@ -23,7 +23,8 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"),
         "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() },
         "overføringstidspunkt" to utbetaling.maybe<LocalDateTime>("overføringstidspunkt"),
-        "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel")
+        "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
+        "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet")
     )
 }
 

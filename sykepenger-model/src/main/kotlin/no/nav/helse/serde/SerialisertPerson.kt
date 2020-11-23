@@ -72,7 +72,8 @@ class SerialisertPerson(val json: String) {
             V53KnytteVedtaksperiodeTilUtbetaling(),
             V54UtvideUtbetaling(),
             V55UtvideUtbetalingMedVurdering(),
-            V56UtvideUtbetalingMedAvstemmingsnøkkel()
+            V56UtvideUtbetalingMedAvstemmingsnøkkel(),
+            V57UtbetalingAvsluttet()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

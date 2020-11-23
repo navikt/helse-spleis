@@ -803,18 +803,19 @@ internal data class PersonData(
 
     data class UtbetalingData(
         val id: UUID,
-        val utbetalingstidslinje: UtbetalingstidslinjeData,
-        val arbeidsgiverOppdrag: OppdragData,
-        val personOppdrag: OppdragData,
-        val tidsstempel: LocalDateTime,
-        val status: String,
-        val annullert: Boolean,
-        val maksdato: LocalDate,
-        val forbrukteSykedager: Int?,
-        val gjenståendeSykedager: Int?,
-        val vurdering: VurderingData?,
-        val overføringstidspunkt: LocalDateTime?,
-        val avstemmingsnøkkel: Long?
+        private val utbetalingstidslinje: UtbetalingstidslinjeData,
+        private val arbeidsgiverOppdrag: OppdragData,
+        private val personOppdrag: OppdragData,
+        private val tidsstempel: LocalDateTime,
+        private val status: String,
+        private val annullert: Boolean,
+        private val maksdato: LocalDate,
+        private val forbrukteSykedager: Int?,
+        private val gjenståendeSykedager: Int?,
+        private val vurdering: VurderingData?,
+        private val overføringstidspunkt: LocalDateTime?,
+        private val avstemmingsnøkkel: Long?,
+        private val avsluttet: LocalDateTime?
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -832,7 +833,8 @@ internal data class PersonData(
                 gjenståendeSykedager,
                 vurdering?.konverterTilVurdering(),
                 overføringstidspunkt,
-                avstemmingsnøkkel
+                avstemmingsnøkkel,
+                avsluttet
             )
 
         data class VurderingData(

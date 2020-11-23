@@ -29,7 +29,8 @@ internal class Utbetaling private constructor(
     private val gjenståendeSykedager: Int?,
     private var vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
-    private var avstemmingsnøkkel: Long?
+    private var avstemmingsnøkkel: Long?,
+    private var avsluttet: LocalDateTime?
 ) : Aktivitetskontekst {
     internal constructor(
         fødselsnummer: String,
@@ -54,6 +55,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager,
         null,
         null,
+        null,
         null
     )
 
@@ -64,6 +66,7 @@ internal class Utbetaling private constructor(
         SENDT,
         OVERFØRT,
         UTBETALT,
+        GODKJENT_UTEN_UTBETALING,
         UTBETALING_FEILET
     }
 
@@ -112,9 +115,12 @@ internal class Utbetaling private constructor(
     ) {
         // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
         // skal vi fortsatt drive å sende Utbetalt-event da?
+        check(avsluttet == null) { "Utbetalingen er allerede avsluttet" }
         check(status in listOf(GODKJENT, UTBETALT)) { "Forventet status GODKJENT eller UTBETALT. Er $status" }
+        if (status == GODKJENT) status = GODKJENT_UTEN_UTBETALING
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
         vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
+        avsluttet = LocalDateTime.now()
     }
 
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -207,6 +213,7 @@ internal class Utbetaling private constructor(
             hendelse.opprettet,
             false
         ),
+        null,
         null,
         null
     )
