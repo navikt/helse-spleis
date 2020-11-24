@@ -237,7 +237,7 @@ internal class Utbetaling private constructor(
     }
 
     private fun overfør(hendelse: ArbeidstakerHendelse) {
-        utbetaling(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
+        vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
     private fun avslutt(
@@ -436,6 +436,10 @@ internal class Utbetaling private constructor(
             utbetaling.observers.forEach {
                 it.utbetalingAnnullert(oppdrag, hendelse, tidspunkt, epost)
             }
+        }
+
+        internal fun overfør(hendelse: ArbeidstakerHendelse, oppdrag: Oppdrag, maksdato: LocalDate?) {
+            utbetaling(hendelse, oppdrag, maksdato, ident)
         }
 
         fun ferdigstill(

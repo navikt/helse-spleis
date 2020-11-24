@@ -55,12 +55,14 @@ internal class Oppdrag private constructor(
 
     internal fun overfør(
         aktivitetslogg: IAktivitetslogg,
-        maksdato: LocalDate?
+        maksdato: LocalDate?,
+        saksbehandler: String
     ) {
         Aktivitetslogg.Aktivitet.Behov.utbetaling(
             aktivitetslogg = aktivitetslogg,
             oppdrag = utenUendretLinjer(),
-            maksdato = maksdato
+            maksdato = maksdato,
+            saksbehandler = saksbehandler
         )
     }
 

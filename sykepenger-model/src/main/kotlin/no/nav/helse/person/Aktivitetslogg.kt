@@ -332,13 +332,17 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                 internal fun utbetaling(
                     aktivitetslogg: IAktivitetslogg,
                     oppdrag: Oppdrag,
-                    maksdato: LocalDate? = null
+                    maksdato: LocalDate? = null,
+                    saksbehandler: String
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Utbetaling,
                         "Trenger å sende utbetaling til Oppdrag",
                         OppdragReflect(oppdrag).toBehovMap().apply {
-                            maksdato?.let { put("maksdato", maksdato.toString()) }
+                            put("saksbehandler", saksbehandler)
+                            maksdato?.let {
+                                put("maksdato", maksdato.toString())
+                            }
                         })
                 }
             }
