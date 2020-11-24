@@ -78,6 +78,14 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvsparkelaareg",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelaareg",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvspock",
                     "role": "PRODUCER"
                 },
