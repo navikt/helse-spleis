@@ -86,6 +86,14 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvsparkelpersoninfo",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvsparkelpersoninfo",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvspock",
                     "role": "PRODUCER"
                 },
