@@ -38,7 +38,7 @@ internal class ArbeidsgiverTest {
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
             12000.månedlig,
-            ArbeidsgiverTestVisitor.inntektshistorikk.inntekt(10.september)
+            arbeidsgiver.grunnlagForSykepengegrunnlag(10.september, 10.september)
         )
     }
 

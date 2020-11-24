@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -37,6 +39,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 a1.id(0),
                 orgnummer = a1,
                 inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                     }
@@ -55,12 +58,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertInntektForDato(15000.månedlig, 1.januar(2017), a1Inspektør)
+        assertInntektForDato(5000.månedlig, 1.januar(2017), a2Inspektør)
+        assertInntektForDato(3000.månedlig, 1.januar(2017), a3Inspektør)
+        assertInntektForDato(2000.månedlig, 1.januar(2017), a4Inspektør)
+        assertInntektForDato(7500.månedlig, 1.juli(2017), a3Inspektør)
+        assertInntektForDato(2500.månedlig, 1.juli(2017), a4Inspektør)
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
     }
@@ -74,7 +77,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 a1.id(0),
                 orgnummer = a1,
                 inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 15000
                     }
@@ -105,6 +108,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 a1.id(0),
                 orgnummer = a1,
                 inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2017) til 1.desember(2017) inntekter {
                         a1 inntekt 9000
                         a1 inntekt 1000
@@ -125,22 +129,23 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        assertEquals(15000.månedlig, a1Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(5000.månedlig, a2Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(3000.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(2000.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.januar(2017)))
-        assertEquals(7500.månedlig, a3Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
-        assertEquals(2500.månedlig, a4Inspektør.inntektshistorikk.inntekt(1.juli(2017)))
+        assertInntektForDato(15000.månedlig, 1.januar(2017), a1Inspektør)
+        assertInntektForDato(5000.månedlig, 1.januar(2017), a2Inspektør)
+        assertInntektForDato(3000.månedlig, 1.januar(2017), a3Inspektør)
+        assertInntektForDato(2000.månedlig, 1.januar(2017), a4Inspektør)
+        assertInntektForDato(7500.månedlig, 1.juli(2017), a3Inspektør)
+        assertInntektForDato(2500.månedlig, 1.juli(2017), a4Inspektør)
 
         assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
     @Test
     fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
+        Toggles.nyInntekt = true
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
         person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
-            inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+            inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
             1.januar(2017) til 1.desember(2017) inntekter {
                 a1 inntekt 24000
             }
@@ -167,6 +172,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             25000.månedlig,
             a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
         )
+
+        Toggles.nyInntekt = false
     }
 
     private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {

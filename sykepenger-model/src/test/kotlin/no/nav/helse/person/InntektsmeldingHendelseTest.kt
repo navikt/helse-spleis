@@ -17,11 +17,19 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `legger inn beregnet inntekt i inntekthistorikk`() {
+    fun `legger inn beregnet inntekt i inntekthistorikk - snart død`() {
         val inntekthistorikk = Inntektshistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk, 1.januar)
         assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.inntekt(1.januar))
+    }
+
+    @Test
+    fun `legger inn beregnet inntekt i inntekthistorikk`() {
+        val inntekthistorikk = InntektshistorikkVol2()
+        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
+            .addInntekt(inntekthistorikk, 1.januar)
+        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
     @Test

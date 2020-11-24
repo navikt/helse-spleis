@@ -10,13 +10,6 @@ import java.util.*
 
 internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendring> = mutableListOf()) {
 
-
-    internal fun clone(): Inntektshistorikk {
-        return Inntektshistorikk().also {
-            it.inntekter.addAll(this.inntekter)
-        }
-    }
-
     internal fun accept(visitor: InntekthistorikkVisitor) {
         visitor.preVisitInntekthistorikk(this)
         inntekter.forEach { it.accept(visitor) }
@@ -32,16 +25,8 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
 
     internal fun inntekt(skjæringstidspunkt: LocalDate) = Inntektsendring.inntekt(inntekter, skjæringstidspunkt)
 
-    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate,  virkningFra: LocalDate = LocalDate.now()) = Inntektsendring.sykepengegrunnlag(inntekter, skjæringstidspunkt, virkningFra)
-
     internal fun dekningsgrunnlag(skjæringstidspunkt: LocalDate, regler: ArbeidsgiverRegler): Inntekt =
         inntekt(skjæringstidspunkt)?.times(regler.dekningsgrad()) ?: Inntekt.INGEN
-
-    internal fun subset(datoer: List<LocalDate>): Inntektshistorikk{
-        return Inntektshistorikk(datoer
-            .mapNotNull { dato -> Inntektsendring.inntektendring(inntekter, dato)?.clone(dato) }
-            .toMutableList())
-    }
 
     internal class Inntektsendring(
         private val fom: LocalDate,
@@ -52,7 +37,7 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
         ) : Comparable<Inntektsendring> {
 
         companion object {
-            internal fun inntektendring(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate) =
+            private fun inntektendring(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate) =
                 (inntekter.lastOrNull { it.fom <= skjæringstidspunkt } ?: inntekter.firstOrNull())
 
             internal fun inntekt(inntekter: List<Inntektsendring>, skjæringstidspunkt: LocalDate) =
@@ -76,9 +61,6 @@ internal class Inntektshistorikk(private val inntekter: MutableList<Inntektsendr
 
         internal fun erRedundantMed(annenInntektsendring: Inntektsendring) =
             annenInntektsendring.fom == fom && annenInntektsendring.kilde == kilde
-
-        internal fun clone(dato: LocalDate) =
-            Inntektsendring(dato, hendelseId, beløp, kilde, tidsstempel)
 
         //Order is significant, compare is used to prioritize records from various sources
         internal enum class Kilde : Comparable<Kilde> {
