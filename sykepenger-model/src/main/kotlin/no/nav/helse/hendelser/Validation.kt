@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
@@ -90,9 +89,9 @@ internal fun Validation.overlappende(
     !person.arbeidsgiverOverlapper(periode, ytelser)
 }
 
-internal fun Validation.harInntektshistorikk(
-    arbeidsgiver: Arbeidsgiver,
-    førsteDag: LocalDate
-) = valider("Vi har ikke inntektshistorikken vi trenger for $førsteDag") {
-    arbeidsgiver.inntekt(førsteDag) != null
+internal fun Validation.harNødvendigInntekt(
+    person: Person,
+    skjæringstidspunkt: LocalDate
+) = valider("Vi har ikke inntektshistorikken vi trenger for $skjæringstidspunkt") {
+    person.harNødvendigInntekt(skjæringstidspunkt)
 }

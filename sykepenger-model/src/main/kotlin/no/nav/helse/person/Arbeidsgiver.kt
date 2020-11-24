@@ -4,6 +4,8 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
+import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
+import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.FagsystemId
@@ -68,6 +70,9 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }.summer()
+
+        internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
+            this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt() }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

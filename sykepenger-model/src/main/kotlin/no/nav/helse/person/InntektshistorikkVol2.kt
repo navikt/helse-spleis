@@ -37,13 +37,13 @@ internal class InntektshistorikkVol2 {
         grunnlagForSykepengegrunnlag(skjæringstidspunkt) ?: grunnlagForSykepengegrunnlagFraInfotrygd(skjæringstidspunkt til dato)
 
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
-        historikk.first().grunnlagForSykepengegrunnlag(dato)
+        historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(dato)
 
     private fun grunnlagForSykepengegrunnlagFraInfotrygd(periode: Periode) =
-        historikk.first().grunnlagForSykepengegrunnlagFraInfotrygd(periode)
+        historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(periode)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-        historikk.first().grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
+        historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato) ?: INGEN
 
     internal fun dekningsgrunnlag(dato: LocalDate, regler: ArbeidsgiverRegler) =
         grunnlagForSykepengegrunnlag(dato)?.times(regler.dekningsgrad())

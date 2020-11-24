@@ -1242,7 +1242,7 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                harInntektshistorikk(arbeidsgiver, vedtaksperiode.periode.start)
+                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     engineForTimeline = ArbeidsgiverUtbetalinger(
@@ -1595,6 +1595,13 @@ internal class Vedtaksperiode private constructor(
             perioder
                 .filter { it < vedtaksperiode }
                 .none { it.måFerdigstilles() }
+
+        internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
+            this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        internal fun List<Vedtaksperiode>.harInntekt() =
+            this.takeIf { it.isNotEmpty() }
+                ?.any { it.arbeidsgiver.grunnlagForSykepengegrunnlag(it.skjæringstidspunkt, it.periode.start) != null } ?: true
     }
 }
 

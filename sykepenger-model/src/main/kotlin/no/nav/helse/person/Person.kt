@@ -5,6 +5,7 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -299,4 +300,6 @@ class Person private constructor(
             Arbeidsgiver(this, arbeidsgiver)
         }
     }
+
+    internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 }
