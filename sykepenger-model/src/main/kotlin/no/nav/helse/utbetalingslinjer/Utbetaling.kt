@@ -193,16 +193,16 @@ internal class Utbetaling private constructor(
 
             return when {
                 kandidat == null -> {
-                    hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
+                    hendelse.error("Finner ingen utbetaling å annullere")
                     null
                 }
                 // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
-                kandidat.arbeidsgiverOppdrag().fagsystemId() != hendelse.fagsystemId -> {
+                !hendelse.erRelevant(kandidat.arbeidsgiverOppdrag().fagsystemId()) -> {
                     hendelse.error("Kan ikke annullere: er ikke siste utbetaling.")
                     null
                 }
                 kandidat.tilstand == UtbetalingFeilet -> {
-                    hendelse.error("Kan ikke annullere: siste utbetaling er feilet %s", hendelse.fagsystemId)
+                    hendelse.error("Kan ikke annullere: siste utbetaling er feilet ${kandidat.arbeidsgiverOppdrag.fagsystemId()}")
                     null
                 }
                 kandidat.type == Utbetalingtype.ANNULLERING -> {
@@ -280,12 +280,7 @@ internal class Utbetaling private constructor(
         LocalDate.MAX,
         null,
         null,
-        Vurdering(
-            hendelse.saksbehandlerIdent,
-            hendelse.saksbehandlerEpost,
-            hendelse.opprettet,
-            false
-        )
+        hendelse.vurdering()
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
