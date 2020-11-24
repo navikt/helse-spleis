@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 /**
  * Retter opp en mangel ved V55.
  */
-internal class V59FiksStatusPåUtbetalinger : JsonMigration(version = 59) {
+internal class V60FiksStatusPåUtbetalinger : JsonMigration(version = 60) {
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
     override val description: String = "Setter riktig status på utbetalinger"

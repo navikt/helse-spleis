@@ -5,11 +5,11 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class V59FiksStatusPåUtbetalingerTest {
+internal class V60FiksStatusPåUtbetalingerTest {
 
     @Test
     fun `retter IKKE_GODKJENT til UTBETALT hvis perioden var utbetalt`() {
-        val migrated = listOf(V59FiksStatusPåUtbetalinger())
+        val migrated = listOf(V60FiksStatusPåUtbetalinger())
             .migrate(serdeObjectMapper.readTree(forkastetTilInfotrygdMedUtbetalingJson))
         val expected = serdeObjectMapper.readTree(expectedForkastetTilInfotrygdMedUtbetalingJson)
 
@@ -18,7 +18,7 @@ internal class V59FiksStatusPåUtbetalingerTest {
 
     @Test
     fun `setter riktig verdi for automatiskGodkjent`() {
-        val migrated = listOf(V59FiksStatusPåUtbetalinger())
+        val migrated = listOf(V60FiksStatusPåUtbetalinger())
             .migrate(serdeObjectMapper.readTree(forkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson))
         val expected = serdeObjectMapper.readTree(expectedForkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson)
 
@@ -101,7 +101,7 @@ private val forkastetTilInfotrygdMedUtbetalingJson =
             ]
         }
     ],
-    "skjemaVersjon": 58
+    "skjemaVersjon": 59
 }
 """
 
@@ -182,7 +182,7 @@ private val expectedForkastetTilInfotrygdMedUtbetalingJson =
             ]
         }
     ],
-    "skjemaVersjon": 59
+    "skjemaVersjon": 60
 }
 """
 
@@ -248,7 +248,7 @@ private val forkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson =
             ]
         }
     ],
-    "skjemaVersjon": 58
+    "skjemaVersjon": 59
 }
 """
 
@@ -316,6 +316,6 @@ private val expectedForkastetTilInfotrygdMedUtbetalingAutomatiskGodkjentJson =
             ]
         }
     ],
-    "skjemaVersjon": 59
+    "skjemaVersjon": 60
 }
 """
