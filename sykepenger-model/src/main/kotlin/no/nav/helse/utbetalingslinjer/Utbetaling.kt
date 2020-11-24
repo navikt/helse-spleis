@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
@@ -95,6 +96,11 @@ internal class Utbetaling private constructor(
     internal fun simuler(hendelse: ArbeidstakerHendelse) {
         hendelse.kontekst(this)
         tilstand.simuler(this, hendelse)
+    }
+
+    internal fun godkjenning(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode, aktivitetslogg: Aktivitetslogg) {
+        hendelse.kontekst(this)
+        tilstand.godkjenning(this, vedtaksperiode, aktivitetslogg, hendelse)
     }
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
@@ -269,6 +275,10 @@ internal class Utbetaling private constructor(
             throw IllegalStateException("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
+        fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
+            throw IllegalStateException("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
         fun avslutt(
             utbetaling: Utbetaling,
             hendelse: ArbeidstakerHendelse,
@@ -294,6 +304,16 @@ internal class Utbetaling private constructor(
                 oppdrag = utbetaling.arbeidsgiverOppdrag.utenUendretLinjer(),
                 maksdato = utbetaling.maksdato,
                 saksbehandler = systemident
+            )
+        }
+
+        override fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
+            godkjenning(
+                aktivitetslogg = hendelse,
+                periodeFom = vedtaksperiode.periode().start,
+                periodeTom = vedtaksperiode.periode().endInclusive,
+                vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
+                periodetype = vedtaksperiode.periodetype()
             )
         }
     }

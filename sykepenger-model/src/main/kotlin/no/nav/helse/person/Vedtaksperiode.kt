@@ -7,7 +7,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavkla
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.inntektsberegning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
@@ -1286,9 +1285,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse()) {
+            if (vedtaksperiode.utbetaling().valider(simulering).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(simulering, TilInfotrygd)
-            }
             vedtaksperiode.dataForSimulering = simulering.simuleringResultat
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
@@ -1332,17 +1330,8 @@ internal class Vedtaksperiode private constructor(
             trengerGodkjenning(påminnelse, vedtaksperiode)
         }
 
-        private fun trengerGodkjenning(
-            hendelse: ArbeidstakerHendelse,
-            vedtaksperiode: Vedtaksperiode
-        ) {
-            godkjenning(
-                aktivitetslogg = hendelse,
-                periodeFom = vedtaksperiode.periode.start,
-                periodeTom = vedtaksperiode.periode.endInclusive,
-                vedtaksperiodeaktivitetslogg = vedtaksperiode.person.aktivitetslogg.logg(vedtaksperiode),
-                periodetype = vedtaksperiode.periodetype()
-            )
+        private fun trengerGodkjenning(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
+            vedtaksperiode.utbetaling().godkjenning(hendelse, vedtaksperiode, vedtaksperiode.person.aktivitetslogg)
         }
     }
 
