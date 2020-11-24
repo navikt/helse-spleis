@@ -6,12 +6,14 @@ import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 data class PersonDTO(
     val aktørId: String,
     val fødselsnummer: String,
-    val arbeidsgivere: List<ArbeidsgiverDTO>
+    val arbeidsgivere: List<ArbeidsgiverDTO>,
+    val inntektsgrunnlag: List<InntektsgrunnlagDTO> = emptyList()
 )
 
 data class AktivitetDTO(
@@ -304,3 +306,57 @@ data class SykepengegrunnlagDTO(
     val grunnbeløp: Int,
     val oppfylt: Boolean?
 )
+
+data class InntektsgrunnlagDTO(
+    val skjæringstidspunkt: LocalDate,
+    val sykepengegrunnlag: Double,
+    val omregnetÅrsinntekt: Double,
+    val sammenligningsgrunnlag: Double,
+    val avviksprosent: Double,
+    val grunnbeløp: Int,
+    val maksUtbetalingPerDag: Int,
+    val inntekter: List<ArbeidsgiverinntektDTO>
+) {
+    data class ArbeidsgiverinntektDTO(
+        val arbeidsgiver: String,
+        val omregnetÅrsinntekt: OmregnetÅrsinntektDTO,
+        val sammenligningsgrunnlag: SammenligningsgrunnlagDTO
+    ) {
+        data class OmregnetÅrsinntektDTO private constructor(
+            val kilde: InntektkildeDTO,
+            val beløp: Double?, //kun gyldig for inntektsmeldingen
+            val månedsbeløp: Double?, //kun gyldig for inntektsmeldingen
+            val sum: Double?, //kun gyldig for A-ordningen
+            val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>? //kun gyldig for A-ordningen
+        ) {
+            constructor(
+                beløp: Double, //kun gyldig for inntektsmeldingen
+                månedsbeløp: Double //kun gyldig for inntektsmeldingen
+            ) : this(InntektkildeDTO.Inntektsmelding, beløp, månedsbeløp, null, null)
+
+            constructor(
+                sum: Double, //kun gyldig for A-ordningen
+                inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO> //kun gyldig for A-ordningen
+            ) : this(InntektkildeDTO.AOrdningen, null, null, sum, inntekterFraAOrdningen)
+
+            enum class InntektkildeDTO {
+                Inntektsmelding, AOrdningen
+            }
+
+            data class InntekterFraAOrdningenDTO(
+                val måned: YearMonth,
+                val sum: Double
+            )
+        }
+
+        data class SammenligningsgrunnlagDTO(
+            val beløp: Double,
+            val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>
+        ) {
+            data class InntekterFraAOrdningenDTO(
+                val måned: YearMonth,
+                val sum: Double
+            )
+        }
+    }
+}
