@@ -371,6 +371,11 @@ internal class Utbetaling private constructor(
     }
 
     internal object Overført : Tilstand {
+        override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            // trenger ikke overføre på nytt ettersom Spenn har godtatt oppdraget,
+            // men vi må nok vente på at Oppdrag/UR sender ut Aksept-kvittering
+        }
+
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             hendelse.valider()
             val erAnnullering = utbetaling.type == Utbetalingtype.ANNULLERING

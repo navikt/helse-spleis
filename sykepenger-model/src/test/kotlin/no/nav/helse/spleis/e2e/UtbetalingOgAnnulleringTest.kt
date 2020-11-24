@@ -209,6 +209,30 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         )
         assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
     }
+    @Test
+    fun `utbetaling med teknisk feil blir stående i til utbetaling og prøver igjen`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING, LocalDateTime.now().minusDays(1))
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING
+        )
+        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
+    }
 
     @Test
     fun `utbetaling med teknisk feil for lenge går til Utbetaling feilet`() {
