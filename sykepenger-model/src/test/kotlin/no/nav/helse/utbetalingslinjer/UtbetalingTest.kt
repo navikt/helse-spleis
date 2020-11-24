@@ -134,7 +134,8 @@ internal class UtbetalingTest {
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = Utbetaling(
+    ) = Utbetaling.lagUtbetaling(
+        tidligere?.let { listOf(tidligere) } ?: emptyList(),
         fødselsnummer,
         orgnummer,
         tidslinje,
@@ -142,8 +143,7 @@ internal class UtbetalingTest {
         aktivitetslogg,
         LocalDate.MAX,
         100,
-        148,
-        tidligere?.let { listOf(tidligere) } ?: emptyList()
+        148
     ).also { utbetaling ->
         var utbetalingId: String = ""
         Utbetalingsgodkjenning(

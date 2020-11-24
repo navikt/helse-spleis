@@ -816,7 +816,9 @@ internal data class PersonData(
         private val vurdering: VurderingData?,
         private val overføringstidspunkt: LocalDateTime?,
         private val avstemmingsnøkkel: Long?,
-        private val avsluttet: LocalDateTime?
+        private val avsluttet: LocalDateTime?,
+        private val forrige: String?,
+        private val neste: String?,
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -835,7 +837,9 @@ internal data class PersonData(
                 vurdering?.konverterTilVurdering(),
                 overføringstidspunkt,
                 avstemmingsnøkkel,
-                avsluttet
+                avsluttet,
+                forrige?.let { UUID.fromString(it) },
+                neste?.let { UUID.fromString(it) }
             )
 
         data class VurderingData(

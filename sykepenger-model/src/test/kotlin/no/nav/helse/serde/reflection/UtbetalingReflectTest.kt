@@ -29,7 +29,8 @@ internal class UtbetalingReflectTest {
     @Test
     fun `Reflect mapper riktige verdier`() {
         map = UtbetalingReflect(
-            Utbetaling(
+            Utbetaling.lagUtbetaling(
+                emptyList(),
                 UNG_PERSON_FNR_2018,
                 ORGNUMMER,
                 tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
@@ -37,8 +38,7 @@ internal class UtbetalingReflectTest {
                 Aktivitetslogg(),
                 LocalDate.MAX,
                 100,
-                148,
-                emptyList()
+                148
             )
         ).toMap()
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
@@ -54,7 +54,8 @@ internal class UtbetalingReflectTest {
 
     @Test
     fun `Reflect mapper riktige verdierm med opphør`() {
-        val tidligereUtbetaling = Utbetaling(
+        val tidligereUtbetaling = Utbetaling.lagUtbetaling(
+            emptyList(),
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
             tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
@@ -62,8 +63,7 @@ internal class UtbetalingReflectTest {
             Aktivitetslogg(),
             LocalDate.MAX,
             100,
-            148,
-            emptyList()
+            148
         ).also { utbetaling ->
             var utbetalingId: String = ""
             Utbetalingsgodkjenning(
@@ -110,7 +110,8 @@ internal class UtbetalingReflectTest {
         }
 
         map = UtbetalingReflect(
-            Utbetaling(
+            Utbetaling.lagUtbetaling(
+                listOf(tidligereUtbetaling),
                 UNG_PERSON_FNR_2018,
                 ORGNUMMER,
                 tidslinjeMedDagsats(tidslinjeOf(2.NAV)),
@@ -118,8 +119,7 @@ internal class UtbetalingReflectTest {
                 Aktivitetslogg(),
                 LocalDate.MAX,
                 100,
-                148,
-                listOf(tidligereUtbetaling)
+                148
             )
         ).toMap()
 

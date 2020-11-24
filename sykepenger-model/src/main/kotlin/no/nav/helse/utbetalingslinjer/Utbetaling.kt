@@ -30,34 +30,42 @@ internal class Utbetaling private constructor(
     private var vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
-    private var avsluttet: LocalDateTime?
+    private var avsluttet: LocalDateTime?,
+    private var forrige: UUID?,
+    private var neste: UUID?
 ) : Aktivitetskontekst {
-    internal constructor(
-        fødselsnummer: String,
-        organisasjonsnummer: String,
+    private constructor(
+        forrige: Utbetaling?,
         utbetalingstidslinje: Utbetalingstidslinje,
-        sisteDato: LocalDate,
-        aktivitetslogg: IAktivitetslogg,
+        arbeidsgiverOppdrag: Oppdrag,
+        personOppdrag: Oppdrag,
+        tilstand: Tilstand,
+        type: Utbetalingtype,
         maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        utbetalinger: List<Utbetaling>
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?,
+        vurdering: Vurdering?
     ) : this(
         UUID.randomUUID(),
         utbetalingstidslinje,
-        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
+        arbeidsgiverOppdrag,
+        personOppdrag,
         LocalDateTime.now(),
-        Ubetalt,
-        Utbetalingtype.UTBETALING,
+        tilstand,
+        type,
         maksdato,
         forbrukteSykedager,
         gjenståendeSykedager,
+        vurdering,
+        null,
         null,
         null,
         null,
         null
-    )
+    ) {
+        forrige?.neste = this.id
+        this.forrige = forrige?.id
+    }
 
     private val observers = mutableListOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
@@ -144,6 +152,33 @@ internal class Utbetaling private constructor(
     internal companion object {
         private const val systemident = "SPLEIS"
 
+        internal fun lagUtbetaling(
+            utbetalinger: List<Utbetaling>,
+            fødselsnummer: String,
+            organisasjonsnummer: String,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            sisteDato: LocalDate,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int
+        ): Utbetaling {
+            val sisteUtbetalte = utbetalinger.utbetalte().lastOrNull()
+            val arbeidsgiverOppdrag = buildArb(sisteUtbetalte?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg)
+            return Utbetaling(
+                sisteUtbetalte?.takeIf { it.arbeidsgiverOppdrag.fagsystemId() == arbeidsgiverOppdrag.fagsystemId() },
+                utbetalingstidslinje,
+                arbeidsgiverOppdrag,
+                buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
+                Ubetalt,
+                Utbetalingtype.UTBETALING,
+                maksdato,
+                forbrukteSykedager,
+                gjenståendeSykedager,
+                null
+            )
+        }
+
         internal fun annuller(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
             if (utbetalinger.any { it.tilstand in listOf(Sendt, Overført) }) {
                 hendelse.error("Kan ikke annullere: det finnes utbetalinger in-flight")
@@ -179,16 +214,16 @@ internal class Utbetaling private constructor(
         }
 
         private fun buildArb(
+            sisteUtbetalte: Oppdrag?,
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg,
-            utbetalinger: List<Utbetaling>
+            aktivitetslogg: IAktivitetslogg
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato)
             .result()
-            .minus(sisteGyldig(utbetalinger) { Oppdrag(organisasjonsnummer, SykepengerRefusjon) }, aktivitetslogg)
+            .minus(sisteUtbetalte ?: Oppdrag(organisasjonsnummer, SykepengerRefusjon), aktivitetslogg)
             .also { oppdrag ->
-                utbetalinger.lastOrNull()?.arbeidsgiverOppdrag?.also { oppdrag.nettoBeløp(it) }
+                if (sisteUtbetalte?.fagsystemId() == oppdrag.fagsystemId()) oppdrag.nettoBeløp(sisteUtbetalte)
                 aktivitetslogg.info(
                     if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
                     else "Utbetalingslinjer bygget vellykket"
@@ -236,11 +271,10 @@ internal class Utbetaling private constructor(
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
 
     internal fun annuller(hendelse: AnnullerUtbetaling) = Utbetaling(
-        UUID.randomUUID(),
+        this,
         utbetalingstidslinje,
         arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, hendelse),
         personOppdrag.emptied().minus(personOppdrag, hendelse),
-        LocalDateTime.now(),
         Godkjent,
         Utbetalingtype.ANNULLERING,
         LocalDate.MAX,
@@ -251,10 +285,7 @@ internal class Utbetaling private constructor(
             hendelse.saksbehandlerEpost,
             hendelse.opprettet,
             false
-        ),
-        null,
-        null,
-        null
+        )
     )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
