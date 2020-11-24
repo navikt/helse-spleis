@@ -237,8 +237,7 @@ internal class Utbetaling private constructor(
     }
 
     private fun overfør(hendelse: ArbeidstakerHendelse) {
-        val vurdering = requireNotNull(vurdering) { "Kan ikke overføre oppdrag som ikke er vurdert" }
-        vurdering.utbetale(hendelse, arbeidsgiverOppdrag, maksdato, type == Utbetalingtype.ANNULLERING)
+        utbetaling(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
     private fun avslutt(
@@ -431,18 +430,6 @@ internal class Utbetaling private constructor(
 
         internal fun accept(visitor: UtbetalingVisitor) {
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling)
-        }
-
-        internal fun utbetale(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate, annullering: Boolean) {
-            utbetaling(
-                aktivitetslogg = aktivitetslogg,
-                oppdrag = oppdrag,
-                maksdato = maksdato.takeUnless { annullering },
-                godkjenttidspunkt = tidspunkt,
-                saksbehandler = ident,
-                saksbehandlerEpost = epost,
-                annullering = annullering
-            )
         }
 
         internal fun annullert(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {

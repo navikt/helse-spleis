@@ -101,14 +101,10 @@ internal class UtbetalingReflectTest {
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
-                    utbetalingsreferanse = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     utbetalingId = utbetalingId,
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-                    melding = "hei",
-                    saksbehandler = "Z999999",
-                    saksbehandlerEpost = "mille.mellomleder@nav.no",
-                    godkjenttidspunkt = LocalDateTime.now(),
-                    annullert = false
+                    melding = "hei"
                 )
             )
         }

@@ -377,9 +377,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             utbetaling(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fagsystemId = fagsystemId,
-                status = status,
-                saksbehandlerEpost = saksbehandlerEpost,
-                annullert = annullert
+                status = status
             )
         )
     }
@@ -435,9 +433,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         fagsystemId: String,
         status: UtbetalingHendelse.Oppdragstatus,
-        orgnummer: String = ORGNUMMER,
-        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
-        annullert: Boolean = false
+        orgnummer: String = ORGNUMMER
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
@@ -445,14 +441,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            utbetalingsreferanse = fagsystemId,
+            fagsystemId = fagsystemId,
             utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst().getValue("utbetalingId"),
             status = status,
-            melding = "hei",
-            saksbehandler = "Z999999",
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = LocalDateTime.now(),
-            annullert = annullert
+            melding = "hei"
         )
 
     protected fun sykmelding(

@@ -75,7 +75,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         sjekkAt(inspektør.personLogg.behov().last()) {
             type er Behovtype.Utbetaling
             detaljer()["maksdato"] er null
-            detaljer()["saksbehandler"] er "Ola Nordmann"
             detaljer()["fagområde"] er "SPREF"
         }
 

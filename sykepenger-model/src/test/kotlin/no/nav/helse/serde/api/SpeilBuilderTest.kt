@@ -1382,14 +1382,10 @@ class SpeilBuilderTest {
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
-            utbetalingsreferanse = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
+            fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-            melding = "hei",
-            saksbehandler = "Z999999",
-            saksbehandlerEpost = "mille.mellomleder@nav.no",
-            godkjenttidspunkt = LocalDateTime.now(),
-            annullert = false
+            melding = "hei"
         )
 
         private fun annullering(fagsystemId: String) = AnnullerUtbetaling(

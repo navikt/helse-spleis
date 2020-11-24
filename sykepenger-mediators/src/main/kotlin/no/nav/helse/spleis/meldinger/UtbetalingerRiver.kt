@@ -15,21 +15,15 @@ internal class UtbetalingerRiver(
     override val behov = listOf(Utbetaling)
     override val riverName = "Utbetaling"
 
+    private val gyldigeStatuser = Oppdragstatus.values()
+        .filterNot { it == Oppdragstatus.OVERFØRT }
+        .map(Enum<*>::name)
+
     override fun validate(packet: JsonMessage) {
         packet.requireKey("@løsning.${Utbetaling.name}")
         // skip OVERFØRT; we don't need to react to it (yet)
-        packet.requireAny(
-            "@løsning.${Utbetaling.name}.status",
-            Oppdragstatus.values().filterNot { it == Oppdragstatus.OVERFØRT }.map(Enum<*>::name)
-        )
-        packet.requireKey(
-            "@løsning.${Utbetaling.name}.beskrivelse",
-            "saksbehandler",
-            "saksbehandlerEpost",
-            "godkjenttidspunkt",
-            "annullering"
-        )
-        packet.requireKey("fagsystemId", "utbetalingId")
+        packet.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
+        packet.requireKey("fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingMessage(JsonMessageDelegate(packet))

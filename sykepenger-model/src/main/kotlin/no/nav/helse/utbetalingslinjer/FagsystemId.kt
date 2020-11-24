@@ -196,7 +196,7 @@ internal class FagsystemId private constructor(
         fun overfør(aktivitetslogg: IAktivitetslogg) {
             val (ident, epost, tidspunkt) = requireNotNull(godkjentAv) { "Utbetalingen må være godkjent før den kan forsøkes overføres på nytt" }
             sendt = LocalDateTime.now()
-            oppdrag.overfør(aktivitetslogg, maksdato, ident, epost, tidspunkt)
+            oppdrag.overfør(aktivitetslogg, maksdato)
         }
 
         fun overført(avstemmingsnøkkel: Long, overføringstidspunkt: LocalDateTime) {

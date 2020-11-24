@@ -51,10 +51,6 @@ internal abstract class AbstractFagsystemIdTest {
     protected fun assertUtbetalingsbehov(maksdato: LocalDate?, saksbehandler: String, saksbehandlerEpost: String, godkjenttidspunkt: LocalDateTime, erAnnullering: Boolean) {
         assertUtbetalingsbehov { utbetalingbehov ->
             assertEquals(maksdato?.toString(), utbetalingbehov["maksdato"])
-            assertEquals(saksbehandler, utbetalingbehov["saksbehandler"])
-            assertEquals(saksbehandlerEpost, utbetalingbehov["saksbehandlerEpost"])
-            assertEquals("$godkjenttidspunkt", utbetalingbehov.getValue("godkjenttidspunkt"))
-            assertEquals(erAnnullering, utbetalingbehov["annullering"] as Boolean)
         }
     }
 
@@ -210,11 +206,7 @@ internal abstract class AbstractFagsystemIdTest {
             inspektør.fagsystemId(fagsystemIdIndeks),
             "",
             oppdragstatus,
-            "",
-            GODKJENTTIDSPUNKT,
-            IDENT,
-            EPOST,
-            false
+            ""
         ).also {
             it.kontekst(person)
             fagsystemIder[fagsystemIdIndeks].håndter(it)

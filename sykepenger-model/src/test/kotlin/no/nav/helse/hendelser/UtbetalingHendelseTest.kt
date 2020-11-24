@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 
 internal class UtbetalingHendelseTest {
@@ -27,10 +26,6 @@ internal class UtbetalingHendelseTest {
         fagsystemId,
         "$utbetalingId",
         UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-        "melding",
-        LocalDateTime.now(),
-        "Z999999",
-        "saksbehandler@nav.no",
-        false
+        "melding"
     )
 }

@@ -183,14 +183,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
-            utbetalingsreferanse = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
-            melding = "hei",
-            saksbehandler = "Z999999",
-            saksbehandlerEpost = "mille.mellomleder@nav.no",
-            godkjenttidspunkt = LocalDateTime.now(),
-            annullert = false
+            melding = "hei"
         ).apply {
             hendelse = this
         }
