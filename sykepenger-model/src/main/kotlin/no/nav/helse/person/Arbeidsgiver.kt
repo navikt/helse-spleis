@@ -7,9 +7,10 @@ import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.FagsystemId
-import no.nav.helse.utbetalingslinjer.FagsystemIdObserver
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
+import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -32,7 +33,7 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val fagsystemIder: MutableList<FagsystemId>,
     private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>
-) : Aktivitetskontekst, FagsystemIdObserver {
+) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
@@ -48,7 +49,7 @@ internal class Arbeidsgiver private constructor(
     )
 
     init {
-        fagsystemIder.forEach { it.register(this) }
+        utbetalinger.forEach { it.register(this) }
     }
 
     internal companion object {
@@ -112,7 +113,12 @@ internal class Arbeidsgiver private constructor(
             forbrukteSykedager,
             gjenståendeSykedager,
             utbetalinger
-        ).also { utbetalinger.add(it) }
+        ).also { nyUtbetaling(it) }
+    }
+
+    private fun nyUtbetaling(utbetaling: Utbetaling, forrige: Utbetaling? = null) {
+        utbetalinger.add(utbetaling)
+        utbetaling.register(this)
     }
 
     internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
@@ -203,14 +209,7 @@ internal class Arbeidsgiver private constructor(
             if (utbetaling.valider().hasErrorsOrWorse()) {
                 utbetaling.warn("Annullering ble ikke gjennomført")
             }
-            utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == utbetaling.utbetalingsreferanse }
-                .håndter(utbetaling)
-            annullerUtbetaling(
-                utbetaling,
-                utbetaling.utbetalingsreferanse,
-                utbetaling.godkjenttidspunkt,
-                utbetaling.saksbehandlerEpost
-            )
+            utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == utbetaling.utbetalingsreferanse }.håndter(utbetaling)
         } else {
             vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
         }
@@ -254,8 +253,7 @@ internal class Arbeidsgiver private constructor(
             hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
             return
         }
-        val utbetaling = kandidat.annuller(hendelse)
-        utbetalinger.add(utbetaling)
+        val utbetaling = kandidat.annuller(hendelse).also { nyUtbetaling(it, kandidat) }
         utbetaling.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
@@ -275,39 +273,30 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.toList().reversed().forEach { it.håndter(hendelse) }
     }
 
-    internal fun annullerUtbetaling(
+    override fun utbetalingAnnullert(
+        oppdrag: Oppdrag,
         hendelse: ArbeidstakerHendelse,
-        fagsystemId: String,
         godkjentTidspunkt: LocalDateTime,
         saksbehandlerEpost: String
     ) {
-
-        val sisteUtbetaling =
-            utbetalinger.reversed().firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == fagsystemId }
-
-        if (sisteUtbetaling != null) {
-            person.annullert(
-                PersonObserver.UtbetalingAnnullertEvent(
-                    fødselsnummer = hendelse.fødselsnummer(),
-                    aktørId = hendelse.aktørId(),
-                    organisasjonsnummer = hendelse.organisasjonsnummer(),
-                    fagsystemId = fagsystemId,
-                    utbetalingslinjer = sisteUtbetaling.let { utbetaling ->
-                        utbetaling.arbeidsgiverOppdrag().map {
-                            PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                                fom = requireNotNull(it.datoStatusFom()),
-                                tom = it.tom,
-                                beløp = it.totalbeløp(),
-                                grad = it.grad
-                            )
-                        }
-                    },
-                    annullertAvSaksbehandler = godkjentTidspunkt,
-                    saksbehandlerEpost = saksbehandlerEpost
-                )
+        person.annullert(
+            PersonObserver.UtbetalingAnnullertEvent(
+                fødselsnummer = hendelse.fødselsnummer(),
+                aktørId = hendelse.aktørId(),
+                organisasjonsnummer = hendelse.organisasjonsnummer(),
+                fagsystemId = oppdrag.fagsystemId(),
+                utbetalingslinjer = oppdrag.map {
+                    PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
+                        fom = requireNotNull(it.datoStatusFom()),
+                        tom = it.tom,
+                        beløp = it.totalbeløp(),
+                        grad = it.grad
+                    )
+                },
+                annullertAvSaksbehandler = godkjentTidspunkt,
+                saksbehandlerEpost = saksbehandlerEpost
             )
-        }
-
+        )
     }
 
     internal fun håndter(hendelse: Rollback) {

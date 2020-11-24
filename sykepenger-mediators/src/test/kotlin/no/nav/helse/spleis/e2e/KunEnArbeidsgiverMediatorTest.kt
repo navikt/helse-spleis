@@ -152,7 +152,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling(
             0,
             utbetalingOK = true,
-            saksbehandlerEpost = "tbd@nav.no",
+            saksbehandlerEpost = "siri.saksbehandler@nav.no",
             annullert = true
         )
 
@@ -161,7 +161,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             requireNotNull(meldinger.firstOrNull { it["@event_name"]?.asText() == "utbetaling_annullert" })
 
         assertEquals(fagsystemId, utbetalingAnnullert["fagsystemId"].asText())
-        assertEquals("tbd@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
+        assertEquals("siri.saksbehandler@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
         assertNotNull(utbetalingAnnullert["annullertAvSaksbehandler"].asText())
 
         assertEquals(19.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["fom"].asText())

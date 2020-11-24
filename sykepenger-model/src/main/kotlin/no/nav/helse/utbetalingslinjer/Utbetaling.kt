@@ -45,8 +45,8 @@ internal class Utbetaling private constructor(
     ) : this(
         UUID.randomUUID(),
         utbetalingstidslinje,
-        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
-        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, maksdato, forbrukteSykedager, gjenståendeSykedager, utbetalinger),
+        buildArb(organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
+        buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
         LocalDateTime.now(),
         Ubetalt,
         Utbetalingtype.UTBETALING,
@@ -59,7 +59,13 @@ internal class Utbetaling private constructor(
         null
     )
 
+    private val observers = mutableListOf<UtbetalingObserver>()
+
     internal enum class Utbetalingtype { UTBETALING, ANNULLERING }
+
+    internal fun register(observer: UtbetalingObserver) {
+        observers.add(observer)
+    }
 
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     internal fun erFeilet() = tilstand == UtbetalingFeilet
@@ -76,9 +82,9 @@ internal class Utbetaling private constructor(
         tilstand.kvittér(this, utbetaling)
     }
 
-    internal fun utbetalingFeilet(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.kontekst(this)
-        tilstand.utbetalingFeilet(this, aktivitetslogg)
+    internal fun utbetalingFeilet(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(this)
+        tilstand.utbetalingFeilet(this, hendelse)
     }
 
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
@@ -125,8 +131,10 @@ internal class Utbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    private fun tilstand(neste: Tilstand) {
+    private fun tilstand(neste: Tilstand, hendelse: ArbeidstakerHendelse) {
+        tilstand.leaving(this, hendelse)
         tilstand = neste
+        tilstand.entering(this, hendelse)
     }
 
     internal companion object {
@@ -137,9 +145,6 @@ internal class Utbetaling private constructor(
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeSykedager: Int,
             utbetalinger: List<Utbetaling>
         ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato)
             .result()
@@ -157,9 +162,6 @@ internal class Utbetaling private constructor(
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
             aktivitetslogg: IAktivitetslogg,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeSykedager: Int,
             utbetalinger: List<Utbetaling>
         ) = Oppdrag(fødselsnummer, Sykepenger)
 
@@ -224,10 +226,10 @@ internal class Utbetaling private constructor(
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
-    private fun overfør(aktivitetslogg: IAktivitetslogg) {
+    private fun overfør(hendelse: ArbeidstakerHendelse) {
         val vurdering = requireNotNull(vurdering) { "Kan ikke overføre oppdrag som ikke er vurdert" }
-        vurdering.utbetale(aktivitetslogg, arbeidsgiverOppdrag, maksdato, type == Utbetalingtype.ANNULLERING)
-        tilstand(Sendt)
+        vurdering.utbetale(hendelse, arbeidsgiverOppdrag, maksdato, type == Utbetalingtype.ANNULLERING)
+        tilstand(Sendt, hendelse)
     }
 
     private fun avslutt(
@@ -251,7 +253,7 @@ internal class Utbetaling private constructor(
             throw IllegalStateException("Forventet ikke å utbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             throw IllegalStateException("Forventet ikke å utbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
@@ -267,7 +269,7 @@ internal class Utbetaling private constructor(
             throw IllegalStateException("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             throw IllegalStateException("Forventet ikke utbetaling feilet på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
@@ -290,12 +292,15 @@ internal class Utbetaling private constructor(
         ) {
             throw IllegalStateException("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
+
+        fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
+        fun leaving(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
     }
 
     internal object Ubetalt : Tilstand {
         override fun godkjenn(utbetaling: Utbetaling, hendelse: Utbetalingsgodkjenning) {
             utbetaling.vurdering = hendelse.vurdering()
-            utbetaling.tilstand(if (hendelse.valider().hasErrorsOrWorse()) IkkeGodkjent else Godkjent)
+            utbetaling.tilstand(if (hendelse.valider().hasErrorsOrWorse()) IkkeGodkjent else Godkjent, hendelse)
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
@@ -322,8 +327,8 @@ internal class Utbetaling private constructor(
     internal object GodkjentUtenUtbetaling : Tilstand {}
 
     internal object Godkjent : Tilstand {
-        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.overfør(aktivitetslogg)
+        override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            utbetaling.overfør(hendelse)
         }
 
         override fun avslutt(
@@ -338,13 +343,13 @@ internal class Utbetaling private constructor(
             // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
             // skal vi fortsatt drive å sende Utbetalt-event da?
             utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
-            utbetaling.tilstand(GodkjentUtenUtbetaling)
+            utbetaling.tilstand(GodkjentUtenUtbetaling, hendelse)
         }
     }
 
     internal object Sendt : Tilstand {
-        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.overfør(aktivitetslogg)
+        override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            utbetaling.overfør(hendelse)
         }
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
@@ -352,23 +357,28 @@ internal class Utbetaling private constructor(
             utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
             hendelse.info("Utbetalingen ble overført til Oppdrag/UR ${hendelse.overføringstidspunkt}, " +
                 "og har fått avstemmingsnøkkel ${hendelse.avstemmingsnøkkel}")
-            utbetaling.tilstand(Overført)
+            utbetaling.tilstand(Overført, hendelse)
         }
     }
 
     internal object Overført : Tilstand {
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            if (hendelse.hasErrorsOrWorse()) return utbetaling.tilstand(UtbetalingFeilet)
-            utbetaling.tilstand(if (utbetaling.type == Utbetalingtype.ANNULLERING) Annullert else Utbetalt)
+            if (hendelse.hasErrorsOrWorse()) return utbetaling.tilstand(UtbetalingFeilet, hendelse)
+            utbetaling.tilstand(if (utbetaling.type == Utbetalingtype.ANNULLERING) Annullert else Utbetalt, hendelse)
         }
 
-        override fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.error("Feilrespons fra oppdrag")
-            utbetaling.tilstand(UtbetalingFeilet)
+        override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            hendelse.error("Feilrespons fra oppdrag")
+            utbetaling.tilstand(UtbetalingFeilet, hendelse)
         }
     }
 
-    internal object Annullert : Tilstand {}
+    internal object Annullert : Tilstand {
+        override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            utbetaling.vurdering?.annullert(hendelse, utbetaling, utbetaling.arbeidsgiverOppdrag)
+        }
+    }
+
     internal object Utbetalt : Tilstand {
         override fun avslutt(
             utbetaling: Utbetaling,
@@ -384,10 +394,10 @@ internal class Utbetaling private constructor(
     }
 
     internal object UtbetalingFeilet : Tilstand {
-        override fun utbetalingFeilet(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
+        override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
 
-        override fun overfør(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.overfør(aktivitetslogg)
+        override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            utbetaling.overfør(hendelse)
         }
     }
 
@@ -412,6 +422,12 @@ internal class Utbetaling private constructor(
                 saksbehandlerEpost = epost,
                 annullering = annullering
             )
+        }
+
+        internal fun annullert(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {
+            utbetaling.observers.forEach {
+                it.utbetalingAnnullert(oppdrag, hendelse, tidspunkt, epost)
+            }
         }
 
         fun ferdigstill(

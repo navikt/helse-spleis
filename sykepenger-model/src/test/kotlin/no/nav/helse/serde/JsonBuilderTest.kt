@@ -32,7 +32,8 @@ class JsonBuilderTest {
             mutableMapOf(
                 Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
                 Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
-                FagsystemId::class.java to FagsystemIdMixin::class.java
+                FagsystemId::class.java to FagsystemIdMixin::class.java,
+                Utbetaling::class.java to UtbetalingMixin::class.java
             )
         )
         .registerModule(JavaTimeModule())
@@ -45,6 +46,9 @@ class JsonBuilderTest {
 
     @JsonIgnoreProperties("observer")
     private class FagsystemIdMixin
+
+    @JsonIgnoreProperties("observers")
+    private class UtbetalingMixin
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {

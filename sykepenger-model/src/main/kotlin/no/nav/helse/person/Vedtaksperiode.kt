@@ -1400,32 +1400,8 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
-            utbetaling.info(
-                "Annulleringen ble overført til Oppdrag/UR ${utbetaling.overføringstidspunkt}, " +
-                    "og har fått avstemmingsnøkkel ${utbetaling.avstemmingsnøkkel}"
-            )
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til annullering")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            if (utbetaling.valider().hasErrorsOrWorse()) {
-                utbetaling.warn("Annullering ble ikke gjennomført")
-            } else {
-                vedtaksperiode.arbeidsgiver.annullerUtbetaling(
-                    utbetaling,
-                    vedtaksperiode.utbetaling().arbeidsgiverOppdrag().fagsystemId(),
-                    utbetaling.godkjenttidspunkt,
-                    saksbehandlerEpost = utbetaling.saksbehandlerEpost
-                )
-                utbetaling.info("Behandler annullering for vedtaksperiode: %s", vedtaksperiode.id.toString())
-                vedtaksperiode.arbeidsgiver.søppelbøtte(utbetaling, Arbeidsgiver.ALLE)
-                vedtaksperiode.invaliderPeriode(utbetaling)
-            }
-
         }
 
         override fun håndter(
@@ -1433,8 +1409,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
-        ) {
-        }
+        ) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }

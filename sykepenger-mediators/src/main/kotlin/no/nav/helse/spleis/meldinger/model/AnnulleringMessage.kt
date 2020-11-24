@@ -19,8 +19,8 @@ internal class AnnulleringMessage(packet: MessageDelegate) : HendelseMessage(pac
             fødselsnummer,
             organisasjonsnummer,
             fagsystemId,
-            saksbehandler.epostadresse,
             saksbehandler.ident,
+            saksbehandler.epostadresse,
             opprettet
         )
 
