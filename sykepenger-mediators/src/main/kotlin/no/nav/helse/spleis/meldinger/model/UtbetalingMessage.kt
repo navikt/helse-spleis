@@ -13,6 +13,7 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fagsystemId = packet["fagsystemId"].asText()
+    private val utbetalingId = packet["utbetalingId"].asText()
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
     private val beskrivelse = packet["@løsning.${Utbetaling.name}.beskrivelse"].asText()
     private val saksbehandler = packet["saksbehandler"].asText()
@@ -28,6 +29,7 @@ internal class UtbetalingMessage(packet: MessageDelegate) : BehovMessage(packet)
             fødselsnummer = fødselsnummer,
             orgnummer = organisasjonsnummer,
             utbetalingsreferanse = fagsystemId,
+            utbetalingId = utbetalingId,
             status = status,
             melding = beskrivelse,
             godkjenttidspunkt = godkjenttidspunkt,

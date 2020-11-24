@@ -70,7 +70,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
-        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return
+        if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }

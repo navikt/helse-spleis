@@ -181,6 +181,7 @@ internal class UtbetalingTest {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 orgnummer = ORGNUMMER,
                 utbetalingsreferanse = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                utbetalingId = utbetalingId,
                 status = AKSEPTERT,
                 melding = "hei",
                 saksbehandler = "Z999999",

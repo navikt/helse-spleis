@@ -184,6 +184,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             utbetalingsreferanse = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
+            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
             melding = "hei",
             saksbehandler = "Z999999",

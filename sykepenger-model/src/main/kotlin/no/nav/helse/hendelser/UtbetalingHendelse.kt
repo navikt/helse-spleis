@@ -12,6 +12,7 @@ class UtbetalingHendelse(
     private val fødselsnummer: String,
     private val orgnummer: String,
     internal val utbetalingsreferanse: String,
+    private val utbetalingId: String,
     private val status: Oppdragstatus,
     private val melding: String,
     internal val godkjenttidspunkt: LocalDateTime,
@@ -32,6 +33,8 @@ class UtbetalingHendelse(
     internal fun skalForsøkesIgjen() = status == FEIL
 
     internal fun erRelevant(fagsystemId: String) = utbetalingsreferanse == fagsystemId
+    internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
+        erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
 
     enum class Oppdragstatus {
         OVERFØRT,

@@ -386,6 +386,7 @@ internal class TestMessageFactory(
     fun lagUtbetaling(
         vedtaksperiodeId: UUID,
         fagsystemId: String,
+        utbetalingId: String,
         tilstand: TilstandType,
         utbetalingOK: Boolean = true,
         saksbehandler: String = "Siri Saksbehandler",
@@ -405,6 +406,7 @@ internal class TestMessageFactory(
             ),
             ekstraFelter = mapOf(
                 "fagsystemId" to fagsystemId,
+                "utbetalingId" to utbetalingId,
                 "saksbehandler" to saksbehandler,
                 "saksbehandlerEpost" to saksbehandlerEpost,
                 "godkjenttidspunkt" to godkjenttidspunkt,

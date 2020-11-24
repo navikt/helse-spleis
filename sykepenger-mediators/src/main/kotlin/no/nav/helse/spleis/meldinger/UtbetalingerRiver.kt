@@ -29,7 +29,7 @@ internal class UtbetalingerRiver(
             "godkjenttidspunkt",
             "annullering"
         )
-        packet.requireKey("fagsystemId")
+        packet.requireKey("fagsystemId", "utbetalingId")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingMessage(JsonMessageDelegate(packet))

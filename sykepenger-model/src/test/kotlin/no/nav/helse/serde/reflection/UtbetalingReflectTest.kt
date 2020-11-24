@@ -102,6 +102,7 @@ internal class UtbetalingReflectTest {
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
                     utbetalingsreferanse = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    utbetalingId = utbetalingId,
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
                     melding = "hei",
                     saksbehandler = "Z999999",

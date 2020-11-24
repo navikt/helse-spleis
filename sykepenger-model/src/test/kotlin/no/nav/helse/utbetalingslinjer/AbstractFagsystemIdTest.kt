@@ -208,6 +208,7 @@ internal abstract class AbstractFagsystemIdTest {
             FNR,
             ORGNR,
             inspektør.fagsystemId(fagsystemIdIndeks),
+            "",
             oppdragstatus,
             "",
             GODKJENTTIDSPUNKT,
