@@ -10,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -531,10 +530,6 @@ internal class JsonBuilder : PersonVisitor {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any?>()
             utbetalingstidslinjer.add(utbetalingstidslinjeMap)
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
-        }
-
-        override fun preVisitFagsystemIder(fagsystemIder: List<FagsystemId>) {
-            arbeidsgiverMap["fagsystemIder"] = fagsystemIder.map { FagsystemIdReflect(it).toMap() }
         }
 
         override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {

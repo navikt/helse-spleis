@@ -9,7 +9,6 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.serde.reflection.FagsystemTilstandType
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -144,7 +143,6 @@ internal data class PersonData(
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
-        private val fagsystemIder: List<FagsystemIdData>?,
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
@@ -157,7 +155,6 @@ internal data class PersonData(
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = sortedMapOf<Vedtaksperiode, ForkastetÅrsak>()
         private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
-        private val modelFagsystemIder = fagsystemIder?.map { it.konverterTilFagsystemId() } ?: emptyList()
         private val utbetalingMap = utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
 
         internal fun konverterTilArbeidsgiver(
@@ -175,7 +172,6 @@ internal data class PersonData(
                 vedtaksperiodeliste,
                 forkastedeliste,
                 modelUtbetalinger,
-                modelFagsystemIder,
                 beregnetUtbetalingstidslinjer.map { it.konverterTilTriple() }
             )
 
@@ -735,70 +731,6 @@ internal data class PersonData(
                     hendelseSykdomstidslinje.createSykdomstidslinje(),
                     beregnetSykdomstidslinje.createSykdomstidslinje()
                 )
-        }
-    }
-
-    data class FagsystemIdData(
-        private val fagsystemId: String,
-        private val fagområde: String,
-        private val mottaker: String,
-        private val tilstand: FagsystemTilstandType,
-        private val utbetalinger: List<UtbetalingData>,
-        private val forkastet: List<UtbetalingData>
-    ) {
-        internal fun konverterTilFagsystemId() = FagsystemId::class.primaryConstructor!!
-            .apply { isAccessible = true }
-            .call(
-                fagsystemId,
-                Fagområde.from(fagområde),
-                mottaker,
-                FagsystemTilstandType.tilTilstand(tilstand),
-                utbetalinger.map { it.konverterTilUtbetaling() },
-                forkastet.map { it.konverterTilUtbetaling() }
-            )
-
-        data class UtbetalingData(
-            private val oppdrag: OppdragData,
-            private val utbetalingstidslinje: UtbetalingstidslinjeData,
-            private val type: FagsystemId.Utbetaling.Utbetalingtype,
-            private val maksdato: LocalDate?,
-            private val forbrukteSykedager: Int,
-            private val gjenståendeSykedager: Int,
-            private val opprettet: LocalDateTime,
-            private val godkjentAv: GodkjentAvData?,
-            private val automatiskBehandlet: Boolean,
-            private val sendt: LocalDateTime?,
-            private val avstemmingsnøkkel: Long?,
-            private val overføringstidspunkt: LocalDateTime?,
-            private val avsluttet: LocalDateTime?
-        ) {
-
-            internal fun konverterTilUtbetaling() = FagsystemId.Utbetaling::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    oppdrag.konverterTilOppdrag(),
-                    utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                    type,
-                    maksdato,
-                    forbrukteSykedager,
-                    gjenståendeSykedager,
-                    opprettet,
-                    godkjentAv?.konverterTilTriple(),
-                    automatiskBehandlet,
-                    sendt,
-                    avstemmingsnøkkel,
-                    overføringstidspunkt,
-                    avsluttet
-                )
-
-            data class GodkjentAvData(
-                private val ident: String,
-                private val epost: String,
-                private val tidsstempel: LocalDateTime
-            ) {
-                internal fun konverterTilTriple() =
-                    Triple(ident, epost, tidsstempel)
-            }
         }
     }
 

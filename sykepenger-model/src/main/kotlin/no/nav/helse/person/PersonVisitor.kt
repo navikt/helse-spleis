@@ -8,7 +8,10 @@ import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
@@ -25,7 +28,7 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor, FagsystemIdVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -33,8 +36,6 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     ) {
     }
 
-    fun preVisitFagsystemIder(fagsystemIder: List<FagsystemId>) {}
-    fun postVisitFagsystemIder(fagsystemIder: List<FagsystemId>) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
@@ -307,17 +308,6 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {}
     fun postVisitUtbetaling(utbetaling: Utbetaling, tilstand: Utbetaling.Tilstand, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
-}
-
-internal interface FagsystemIdVisitor : OppdragVisitor, UtbetalingsdagVisitor {
-    fun preVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, tilstand: String, utbetalingstidslinje: Utbetalingstidslinje, utbetaltTidslinje: Utbetalingstidslinje) {}
-    fun preVisitOppdragsliste() {}
-    fun preVisitUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, opprettet: LocalDateTime, avsluttet: LocalDateTime?) {}
-    fun preVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
-    fun postVisitOppdrag(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje) {}
-    fun postVisitUtbetaling(oppdrag: Oppdrag, utbetalingstidslinje: Utbetalingstidslinje, opprettet: LocalDateTime, avsluttet: LocalDateTime?) {}
-    fun postVisitOppdragsliste() {}
-    fun postVisitFagsystemId(fagsystemId: FagsystemId, id: String, fagområde: Fagområde, tilstand: String, utbetalingstidslinje: Utbetalingstidslinje, utbetaltTidslinje: Utbetalingstidslinje) {}
 }
 
 internal interface OppdragVisitor {

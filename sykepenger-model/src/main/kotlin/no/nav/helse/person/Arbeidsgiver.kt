@@ -8,7 +8,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
@@ -32,7 +31,6 @@ internal class Arbeidsgiver private constructor(
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>,
-    private val fagsystemIder: MutableList<FagsystemId>,
     private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
@@ -45,7 +43,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
         utbetalinger = mutableListOf(),
-        fagsystemIder = mutableListOf(),
         beregnetUtbetalingstidslinjer = mutableListOf()
     )
 
@@ -79,9 +76,6 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.accept(visitor)
         inntektshistorikkVol2.accept(visitor)
         sykdomshistorikk.accept(visitor)
-        visitor.preVisitFagsystemIder(fagsystemIder)
-        fagsystemIder.forEach { it.accept(visitor) }
-        visitor.postVisitFagsystemIder(fagsystemIder)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -220,9 +214,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
-
-        hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
-
+        hendelse.info("Håndterer annullering")
         val annullering = Utbetaling.annuller(utbetalinger, hendelse) ?: return
         nyUtbetaling(annullering)
         annullering.utbetal(hendelse)
@@ -494,7 +486,6 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
                 utbetalinger: List<Utbetaling>,
-                fagsystemIder: List<FagsystemId>,
                 beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>
             ) = Arbeidsgiver(
                 person,
@@ -506,7 +497,6 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder,
                 forkastede,
                 utbetalinger.toMutableList(),
-                fagsystemIder.toMutableList(),
                 beregnetUtbetalingstidslinjer.toMutableList()
             )
         }

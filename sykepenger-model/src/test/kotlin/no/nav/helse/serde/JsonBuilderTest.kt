@@ -11,7 +11,6 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.FagsystemId
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -32,7 +31,6 @@ class JsonBuilderTest {
             mutableMapOf(
                 Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
                 Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
-                FagsystemId::class.java to FagsystemIdMixin::class.java,
                 Utbetaling::class.java to UtbetalingMixin::class.java
             )
         )
@@ -43,9 +41,6 @@ class JsonBuilderTest {
 
     @JsonIgnoreProperties("person", "arbeidsgiver")
     private class VedtaksperiodeMixin
-
-    @JsonIgnoreProperties("observer")
-    private class FagsystemIdMixin
 
     @JsonIgnoreProperties("observers", "forrigeHendelse")
     private class UtbetalingMixin

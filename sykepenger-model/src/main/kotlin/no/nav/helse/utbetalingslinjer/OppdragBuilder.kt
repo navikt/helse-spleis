@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -31,14 +30,6 @@ internal class OppdragBuilder(
         arbeisdsgiverLinjer.zipWithNext { a, b -> b.linkTo(a) }
         arbeisdsgiverLinjer.firstOrNull()?.refFagsystemId = null
         return Oppdrag(mottaker, fagområde, arbeisdsgiverLinjer, fagsystemId, sisteArbeidsgiverdag)
-    }
-
-    internal fun result(fagsystemIder: MutableList<FagsystemId>, observatør: FagsystemIdObserver, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, aktivitetslogg: IAktivitetslogg): FagsystemId? {
-        val oppdrag = result().takeIf(Oppdrag::isNotEmpty) ?: return null
-        return fagsystemIder.firstOrNull { it.utvide(oppdrag, tidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, aktivitetslogg) }
-            ?: (FagsystemId(observatør, fagsystemId, fagområde, mottaker, FagsystemId.Utbetaling.nyUtbetaling(oppdrag, tidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager)).also {
-                fagsystemIder.add(it)
-            })
     }
 
     private val linje get() = arbeisdsgiverLinjer.first()
