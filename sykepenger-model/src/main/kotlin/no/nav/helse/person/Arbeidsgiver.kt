@@ -16,7 +16,6 @@ import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -66,7 +65,7 @@ internal class Arbeidsgiver private constructor(
             this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }.summer()
 
         internal fun List<Arbeidsgiver>.inntekt(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { it.inntekt(skjæringstidspunkt) }.summer()
+            this.mapNotNull { it.inntektshistorikk.inntekt(skjæringstidspunkt) }.summer()
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }.summer()
@@ -311,8 +310,6 @@ internal class Arbeidsgiver private constructor(
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
-
-    internal fun inntekt(dato: LocalDate): Inntekt? = inntektshistorikk.inntekt(dato)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         if (Toggles.nyInntekt) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart) else inntektshistorikk.inntekt(skjæringstidspunkt)

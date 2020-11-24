@@ -2226,7 +2226,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP
         )
-        assertEquals(INNTEKT, inspektør.arbeidsgiver.inntekt(1.februar))
+        assertInntektForDato(INNTEKT, 1.januar, inspektør)
     }
 
     @Test

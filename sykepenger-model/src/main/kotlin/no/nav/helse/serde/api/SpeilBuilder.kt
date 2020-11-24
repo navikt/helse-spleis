@@ -521,7 +521,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
                     utbetalinger = utbetalinger,
-                    hendelseIder = hendelseIder
+                    hendelseIder = hendelseIder,
+                    periode = periode
                 )
             )
         }
@@ -540,6 +541,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     private inner class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
+        periode: Periode,
         private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val gruppeId: UUID,
@@ -561,7 +563,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         init {
             val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
-            vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver))
+            vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver, periode))
             vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
             vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser()
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering

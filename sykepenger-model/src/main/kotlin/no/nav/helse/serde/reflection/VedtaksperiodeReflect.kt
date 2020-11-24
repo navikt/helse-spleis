@@ -1,5 +1,6 @@
 package no.nav.helse.serde.reflection
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver
@@ -94,11 +95,11 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 
-    internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver) = mutableMapOf<String, Any?>(
+    internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver, periode: Periode) = mutableMapOf<String, Any?>(
         "id" to id,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "inntektsmeldingId" to inntektsmeldingId,
-        "inntektFraInntektsmelding" to arbeidsgiver.inntekt(skjæringstidspunkt)?.reflection{ _, månedlig, _, _ -> månedlig },
+        "inntektFraInntektsmelding" to arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)?.reflection{ _, månedlig, _, _ -> månedlig },
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
     )
 }
