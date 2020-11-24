@@ -72,8 +72,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
-    internal fun erFeilet() = tilstand == UtbetalingFeilet
-    internal fun erAnnullert() = type == Utbetalingtype.ANNULLERING
+    internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         hendelse.kontekst(this)
@@ -145,6 +144,40 @@ internal class Utbetaling private constructor(
     internal companion object {
         private const val systemident = "SPLEIS"
 
+        internal fun annuller(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
+            if (utbetalinger.any { it.tilstand in listOf(Sendt, Overført) }) {
+                hendelse.error("Kan ikke annullere: det finnes utbetalinger in-flight")
+                return null
+            }
+
+            val kandidat = utbetalinger.reversed()
+                .filter { utbetaling -> utbetaling.tilstand in listOf(Utbetalt, Annullert, UtbetalingFeilet) }
+                .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
+                .filterNot { it.tilstand == Annullert }
+                .firstOrNull()
+
+            return when {
+                kandidat == null -> {
+                    hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
+                    null
+                }
+                // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
+                kandidat.arbeidsgiverOppdrag().fagsystemId() != hendelse.fagsystemId -> {
+                    hendelse.error("Kan ikke annullere: er ikke siste utbetaling.")
+                    null
+                }
+                kandidat.tilstand == UtbetalingFeilet -> {
+                    hendelse.error("Kan ikke annullere: siste utbetaling er feilet %s", hendelse.fagsystemId)
+                    null
+                }
+                kandidat.type == Utbetalingtype.ANNULLERING -> {
+                    hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
+                    null
+                }
+                else -> kandidat.annuller(hendelse)
+            }
+        }
+
         private fun buildArb(
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
@@ -180,9 +213,10 @@ internal class Utbetaling private constructor(
         internal fun List<Utbetaling>.utbetalte() =
             filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
                 .filter { it.erUtbetalt() }
+
         private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
             filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
-                .any { it.erAnnullert() }
+                .any { it.erAnnullering() }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

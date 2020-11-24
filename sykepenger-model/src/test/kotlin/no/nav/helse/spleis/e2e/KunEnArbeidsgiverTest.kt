@@ -1935,7 +1935,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
 
         assertTrue(inspektør.utbetalinger[0].erUtbetalt())
-        assertTrue(inspektør.utbetalinger[1].erAnnullert())
+        assertTrue(inspektør.utbetalinger[1].erAnnullering())
 
         assertEquals(2, inspektør.utbetalinger.size)
     }

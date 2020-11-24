@@ -162,7 +162,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertEquals(3, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger[2].erAnnullert())
+        assertTrue(inspektør.utbetalinger[2].erAnnullering())
     }
 
     @Test
@@ -183,7 +183,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         assertEquals(2, inspektør.utbetalinger.size)
-        assertFalse(inspektør.utbetalinger[1].erAnnullert())
+        assertFalse(inspektør.utbetalinger[1].erAnnullering())
     }
 
     @Test

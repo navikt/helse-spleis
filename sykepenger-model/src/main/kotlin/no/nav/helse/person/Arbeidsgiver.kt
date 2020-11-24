@@ -120,7 +120,7 @@ internal class Arbeidsgiver private constructor(
         ).also { nyUtbetaling(it) }
     }
 
-    private fun nyUtbetaling(utbetaling: Utbetaling, forrige: Utbetaling? = null) {
+    private fun nyUtbetaling(utbetaling: Utbetaling) {
         utbetalinger.add(utbetaling)
         utbetaling.register(this)
     }
@@ -223,48 +223,11 @@ internal class Arbeidsgiver private constructor(
 
         hendelse.info("Annullerer utbetalinger med fagsystemId ${hendelse.fagsystemId}")
 
-        vedtaksperioder.find { !it.tillatAnullering() }?.let {
-            hendelse.error("Kan ikke annullere, vedtaksperiode blokkerer.")
-            return
-        }
-
-        val annulleringskandidater = annulleringskandidater()
-
-        if (annulleringskandidater.firstOrNull()?.arbeidsgiverOppdrag()?.fagsystemId() != hendelse.fagsystemId) {
-            hendelse.error("Kan ikke annullere, er ikke siste utbetaling.")
-            return
-        }
-
-        // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
-        val kandidat = annulleringskandidater
-            .firstOrNull { it.arbeidsgiverOppdrag().fagsystemId() == hendelse.fagsystemId }
-
-        if (kandidat == null) {
-            hendelse.error("Avvis hvis vi ikke finner fagsystemId %s", hendelse.fagsystemId)
-            return
-        }
-        if (kandidat.erFeilet()) {
-            hendelse.error("Kan ikke annullere. Siste utbetaling er feilet %s", hendelse.fagsystemId)
-            return
-        }
-        if (sisteUtbetaling(hendelse.fagsystemId)?.erAnnullert() == true) {
-            hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
-            return
-        }
-        val utbetaling = kandidat.annuller(hendelse).also { nyUtbetaling(it, kandidat) }
-        utbetaling.utbetal(hendelse)
+        val annullering = Utbetaling.annuller(utbetalinger, hendelse) ?: return
+        nyUtbetaling(annullering)
+        annullering.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
-
-    private fun annulleringskandidater(): List<Utbetaling> {
-        return utbetalinger.reversed()
-            .filter { utbetaling -> utbetaling.erUtbetalt() || utbetaling.erFeilet() }
-            .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
-            .filter { !it.erAnnullert() }
-    }
-
-    private fun sisteUtbetaling(fagsystemId: String) =
-        utbetalinger.findLast { it.arbeidsgiverOppdrag().fagsystemId() == fagsystemId }
 
     internal fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)

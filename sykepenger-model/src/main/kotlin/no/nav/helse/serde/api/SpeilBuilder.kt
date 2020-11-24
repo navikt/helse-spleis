@@ -454,13 +454,21 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
         private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
-        lateinit var utbetalinger: List<Utbetaling>
+        private val utbetalinger = mutableListOf<Pair<Utbetaling, Utbetaling.Tilstand>>()
         var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         var inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
 
-
-        override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-            this.utbetalinger = utbetalinger
+        override fun preVisitUtbetaling(
+            utbetaling: Utbetaling,
+            tilstand: Utbetaling.Tilstand,
+            tidsstempel: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?
+        ) {
+            utbetalinger.add(utbetaling to tilstand)
         }
 
         override fun preVisitHendelseSykdomstidslinje(
@@ -547,7 +555,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val gruppeId: UUID,
         private val fødselsnummer: String,
         private val inntekter: List<Inntektshistorikk.Inntektsendring>,
-        private val utbetalinger: List<Utbetaling>,
+        private val utbetalinger: List<Pair<Utbetaling, Utbetaling.Tilstand>>,
         private val hendelseIder: List<UUID>
     ) : JsonState {
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
@@ -674,7 +682,9 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
             vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()
 
-            val utbetaling = utbetalinger.findLast { arbeidsgiverFagsystemId != null && it.arbeidsgiverOppdrag().fagsystemId() ==arbeidsgiverFagsystemId }
+            val utbetaling = arbeidsgiverFagsystemId?.let {
+                utbetalinger.lastOrNull { (utbetaling, _) -> utbetaling.arbeidsgiverOppdrag().fagsystemId() == arbeidsgiverFagsystemId }
+            }
             vedtaksperiodeMap["tilstand"] =
                 mapTilstander(
                     tilstand = tilstand.type,
@@ -712,11 +722,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private fun byggUtbetalteUtbetalingerForPeriode(): UtbetalingerDTO =
             UtbetalingerDTO(
-                utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
+                utbetalinger.map(Pair<Utbetaling, *>::first).filter { it.erUtbetalt() }.byggUtbetaling(
                     arbeidsgiverFagsystemId,
                     Utbetaling::arbeidsgiverOppdrag
                 ),
-                utbetalinger.filter { it.erUtbetalt() }.byggUtbetaling(
+                utbetalinger.map(Pair<Utbetaling, *>::first).filter { it.erUtbetalt() }.byggUtbetaling(
                     personFagsystemId,
                     Utbetaling::personOppdrag
                 )
