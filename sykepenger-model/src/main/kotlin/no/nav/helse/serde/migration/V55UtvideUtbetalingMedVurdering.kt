@@ -105,7 +105,7 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
     ): Map<String, LocalDateTime?> {
         return perioder
             .filter { it.hasNonNull("utbetalingId") }
-            .filter { it.path("tilstand").asText() == "TIL_INFOTRYGD" }
+            .filter { it.path("tilstand").asText() == "TIL_INFOTRYGD" } // Denne antar feilaktig at alle perioder i TIL_INFOTRYGD ikke er godkjent. V59 retter feilen.
             .map { periode ->
                 val id = periode.path("id").asText()
                 val tidspunkt = finnAktivitetForVedtaksperiode(vedtaksperiodekontekstIndeks, id, ikkeGodkjentTekst, aktiviteter)
