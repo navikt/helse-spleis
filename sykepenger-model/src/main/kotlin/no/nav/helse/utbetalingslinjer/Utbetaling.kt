@@ -60,8 +60,12 @@ internal class Utbetaling private constructor(
     )
 
     private val observers = mutableListOf<UtbetalingObserver>()
+    private var forrigeHendelse: ArbeidstakerHendelse? = null
 
     internal enum class Utbetalingtype { UTBETALING, ANNULLERING }
+
+    private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
+        (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
 
     internal fun register(observer: UtbetalingObserver) {
         observers.add(observer)
@@ -78,6 +82,7 @@ internal class Utbetaling private constructor(
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         if (!utbetaling.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
+        if (harHåndtert(utbetaling)) return
         utbetaling.kontekst(this)
         tilstand.kvittér(this, utbetaling)
     }
@@ -89,7 +94,7 @@ internal class Utbetaling private constructor(
 
     internal fun håndter(utbetalingOverført: UtbetalingOverført) {
         if (!utbetalingOverført.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)) return
-        if (utbetalingOverført.håndtert(this)) return
+        if (harHåndtert(utbetalingOverført)) return
         utbetalingOverført.kontekst(this)
         tilstand.overført(this, utbetalingOverført)
     }
@@ -226,10 +231,14 @@ internal class Utbetaling private constructor(
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
+    private fun overfør(nesteTilstand: Tilstand, hendelse: ArbeidstakerHendelse) {
+        overfør(hendelse)
+        tilstand(nesteTilstand, hendelse)
+    }
+
     private fun overfør(hendelse: ArbeidstakerHendelse) {
         val vurdering = requireNotNull(vurdering) { "Kan ikke overføre oppdrag som ikke er vurdert" }
         vurdering.utbetale(hendelse, arbeidsgiverOppdrag, maksdato, type == Utbetalingtype.ANNULLERING)
-        tilstand(Sendt, hendelse)
     }
 
     private fun avslutt(
@@ -328,7 +337,7 @@ internal class Utbetaling private constructor(
 
     internal object Godkjent : Tilstand {
         override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            utbetaling.overfør(hendelse)
+            utbetaling.overfør(Sendt, hendelse)
         }
 
         override fun avslutt(
@@ -363,8 +372,15 @@ internal class Utbetaling private constructor(
 
     internal object Overført : Tilstand {
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            if (hendelse.hasErrorsOrWorse()) return utbetaling.tilstand(UtbetalingFeilet, hendelse)
-            utbetaling.tilstand(if (utbetaling.type == Utbetalingtype.ANNULLERING) Annullert else Utbetalt, hendelse)
+            hendelse.valider()
+            val erAnnullering = utbetaling.type == Utbetalingtype.ANNULLERING
+            val nesteTilstand = when {
+                hendelse.hasErrorsOrWorse() && !erAnnullering && hendelse.skalForsøkesIgjen() -> return // forventning om at vedtaksperioden står for retry
+                hendelse.hasErrorsOrWorse() -> UtbetalingFeilet
+                erAnnullering -> Annullert
+                else -> Utbetalt
+            }
+            utbetaling.tilstand(nesteTilstand, hendelse)
         }
 
         override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
@@ -397,7 +413,7 @@ internal class Utbetaling private constructor(
         override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
 
         override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            utbetaling.overfør(hendelse)
+            utbetaling.overfør(Overført, hendelse)
         }
     }
 

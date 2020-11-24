@@ -1,10 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
@@ -203,6 +207,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
+        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -264,7 +269,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST)
+        assertEquals(Utbetaling.UtbetalingFeilet, inspektør.utbetalingtilstand(0))
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
+        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -276,7 +284,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             UTBETALING_FEILET,
-            TIL_UTBETALING
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 }

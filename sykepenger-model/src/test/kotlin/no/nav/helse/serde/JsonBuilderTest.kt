@@ -47,7 +47,7 @@ class JsonBuilderTest {
     @JsonIgnoreProperties("observer")
     private class FagsystemIdMixin
 
-    @JsonIgnoreProperties("observers")
+    @JsonIgnoreProperties("observers", "forrigeHendelse")
     private class UtbetalingMixin
 
     @Test

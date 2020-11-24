@@ -36,6 +36,9 @@ class UtbetalingHendelse(
     internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
         erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
 
+    internal fun gjelderFor(vedtaksperiodeId: UUID) =
+        this.vedtaksperiodeId == vedtaksperiodeId.toString()
+
     enum class Oppdragstatus {
         OVERFØRT,
         AKSEPTERT,

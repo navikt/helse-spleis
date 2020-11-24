@@ -199,20 +199,14 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
+        vedtaksperioder.forEach { it.håndter(utbetaling) }
         utbetalinger.forEach { it.håndter(utbetaling) }
-        vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
-        if (utbetaling.annullert) {
-            if (utbetaling.valider().hasErrorsOrWorse()) {
-                utbetaling.warn("Annullering ble ikke gjennomført")
-            }
-            utbetalinger.last { it.arbeidsgiverOppdrag().fagsystemId() == utbetaling.utbetalingsreferanse }.håndter(utbetaling)
-        } else {
-            vedtaksperioder.toList().forEach { it.håndter(utbetaling) }
-        }
+        vedtaksperioder.forEach { it.håndter(utbetaling) }
+        utbetalinger.forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {

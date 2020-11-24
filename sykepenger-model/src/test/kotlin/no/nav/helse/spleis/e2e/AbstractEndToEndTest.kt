@@ -355,22 +355,24 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
         annullert: Boolean = false,
-        fagsystemId: String = inspektør.fagsystemId(vedtaksperiodeId)
-
+        fagsystemId: String = inspektør.fagsystemId(vedtaksperiodeId),
+        sendOverførtKvittering: Boolean = true
     ) {
-        person.håndter(
-            UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId.toString(),
-                aktørId = AKTØRID,
-                fødselsnummer = UNG_PERSON_FNR_2018,
-                orgnummer = ORGNUMMER,
-                fagsystemId = fagsystemId,
-                utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
+        if (sendOverførtKvittering) {
+            person.håndter(
+                UtbetalingOverført(
+                    meldingsreferanseId = UUID.randomUUID(),
+                    vedtaksperiodeId = vedtaksperiodeId.toString(),
+                    aktørId = AKTØRID,
+                    fødselsnummer = UNG_PERSON_FNR_2018,
+                    orgnummer = ORGNUMMER,
+                    fagsystemId = fagsystemId,
+                    utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
+                    avstemmingsnøkkel = 123456L,
+                    overføringstidspunkt = LocalDateTime.now()
+                )
             )
-        )
+        }
         person.håndter(
             utbetaling(
                 vedtaksperiodeId = vedtaksperiodeId,

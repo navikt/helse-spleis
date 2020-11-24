@@ -172,7 +172,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
-        if (id.toString() != utbetaling.vedtaksperiodeId) return
+        if (!utbetaling.gjelderFor(id)) return
         kontekst(utbetaling)
         tilstand.håndter(this, utbetaling)
     }
@@ -1364,16 +1364,18 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            utbetaling.valider()
-            if (utbetaling.skalForsøkesIgjen()) return utbetaling.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
             vedtaksperiode.utbetaling().håndter(utbetaling)
+            if (utbetaling.skalForsøkesIgjen()) return utbetaling.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
 
-            if (utbetaling.hasErrorsOrWorse()) return vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
-                utbetaling.error("Utbetaling ble ikke gjennomført")
-            }
-
-            vedtaksperiode.tilstand(utbetaling, Avsluttet) {
-                utbetaling.info("OK fra Oppdragssystemet")
+            when {
+                utbetaling.hasErrorsOrWorse() -> {
+                    vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
+                        utbetaling.error("Utbetaling ble ikke gjennomført")
+                    }
+                }
+                else -> vedtaksperiode.tilstand(utbetaling, Avsluttet) {
+                    utbetaling.info("OK fra Oppdragssystemet")
+                }
             }
         }
 
@@ -1546,12 +1548,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            if (utbetaling.annullert) {
-                vedtaksperiode.tilstand(utbetaling, TilAnnullering)
-            }
-        }
     }
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {

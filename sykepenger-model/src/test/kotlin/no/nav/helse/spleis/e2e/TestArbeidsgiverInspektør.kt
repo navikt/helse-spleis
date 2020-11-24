@@ -44,6 +44,7 @@ internal class TestArbeidsgiverInspektør(
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
     internal lateinit var utbetalinger: List<Utbetaling>
+    private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
@@ -51,7 +52,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var forkastetPeriode = false
     private var inVedtaksperiode = false
-    private var inVedtaksperiodeUtbetaling = false
+    private var inUtbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, List<UUID>>()
 
@@ -115,7 +116,7 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
-        if (inVedtaksperiode && !inVedtaksperiodeUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
+        if (inVedtaksperiode && !inUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
     }
 
     override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
@@ -167,10 +168,13 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        inVedtaksperiodeUtbetaling = true
-        if (!inVedtaksperiode) return
-        if (gjenståendeSykedager != null) gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
-        maksdatoer[vedtaksperiodeindeks] = maksdato
+        inUtbetaling = true
+        if (!inVedtaksperiode) {
+            utbetalingstilstander.add(tilstand)
+        } else {
+            if (gjenståendeSykedager != null) gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
+            maksdatoer[vedtaksperiodeindeks] = maksdato
+        }
     }
 
     override fun postVisitUtbetaling(
@@ -183,7 +187,7 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        inVedtaksperiodeUtbetaling = false
+        inUtbetaling = false
     }
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
@@ -271,6 +275,8 @@ internal class TestArbeidsgiverInspektør(
 
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
+
+    internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 
