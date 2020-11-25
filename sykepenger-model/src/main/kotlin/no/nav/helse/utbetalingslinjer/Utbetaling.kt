@@ -184,8 +184,12 @@ internal class Utbetaling private constructor(
     }
 
     private fun tilstand(neste: Tilstand, hendelse: ArbeidstakerHendelse) {
+        val forrigeTilstand = tilstand
         tilstand.leaving(this, hendelse)
         tilstand = neste
+        observers.forEach {
+            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, forrigeTilstand, neste)
+        }
         tilstand.entering(this, hendelse)
     }
 
@@ -514,6 +518,10 @@ internal class Utbetaling private constructor(
     }
 
     internal object Utbetalt : Tilstand {
+        override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            utbetaling.vurdering?.utbetalt(hendelse, utbetaling, utbetaling.arbeidsgiverOppdrag)
+        }
+
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
                 utbetaling.utbetalingstidslinje,
@@ -577,7 +585,13 @@ internal class Utbetaling private constructor(
 
         internal fun annullert(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(oppdrag, hendelse, tidspunkt, epost)
+                it.utbetalingAnnullert(utbetaling.id, oppdrag, hendelse, tidspunkt, epost)
+            }
+        }
+
+        internal fun utbetalt(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {
+            utbetaling.observers.forEach {
+                it.utbetalingUtbetalt(utbetaling.id, utbetaling.type, oppdrag, ident, epost, tidspunkt, automatiskBehandling)
             }
         }
 

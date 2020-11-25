@@ -168,6 +168,14 @@ class Person private constructor(
         observers.forEach { it.trengerIkkeInntektsmelding(event) }
     }
 
+    internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtbetalt(event) }
+    }
+
+    internal fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+        observers.forEach { it.utbetalingEndret(event) }
+    }
+
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
@@ -293,13 +301,11 @@ class Person private constructor(
             .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, ytelser, historie) }
             .toMap()
     }
-
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
             Arbeidsgiver(this, arbeidsgiver)
         }
     }
-
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 }

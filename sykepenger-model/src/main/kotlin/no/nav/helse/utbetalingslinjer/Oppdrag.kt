@@ -49,8 +49,8 @@ internal class Oppdrag private constructor(
         visitor.postVisitOppdrag(this, totalbeløp(), nettoBeløp, tidsstempel)
     }
 
+    internal fun mottaker() = mottaker
     internal fun fagområde() = fagområde
-
     internal fun fagsystemId() = fagsystemId
 
     internal fun overfør(

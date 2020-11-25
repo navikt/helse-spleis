@@ -120,6 +120,7 @@ interface PersonObserver {
         val fødselsnummer: String,
         val aktørId: String,
         val organisasjonsnummer: String,
+        val utbetalingId: UUID,
         val fagsystemId: String,
         val utbetalingslinjer: List<Utbetalingslinje>,
         val annullertAvSaksbehandler: LocalDateTime,
@@ -130,8 +131,26 @@ interface PersonObserver {
             val tom: LocalDate,
             val beløp: Int,
             val grad: Double
-        )
+        ) {}
     }
+
+    data class UtbetalingEndretEvent(
+        val utbetalingId: UUID,
+        val type: String,
+        val forrigeStatus: String,
+        val gjeldendeStatus: String,
+        val arbeidsgiverOppdrag: Map<String, Any>
+    ) {}
+
+    data class UtbetalingUtbetaltEvent(
+        val utbetalingId: UUID,
+        val type: String,
+        val ident: String,
+        val epost: String,
+        val tidspunkt: LocalDateTime,
+        val automatiskBehandling: Boolean,
+        val arbeidsgiverOppdrag: Map<String, Any>
+    ) {}
 
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
 
@@ -153,5 +172,7 @@ interface PersonObserver {
 
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
 
+    fun utbetalingEndret(event: UtbetalingEndretEvent) {}
+    fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
 }

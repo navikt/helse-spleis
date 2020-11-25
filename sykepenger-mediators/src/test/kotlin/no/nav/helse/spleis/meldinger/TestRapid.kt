@@ -75,6 +75,21 @@ internal class TestRapid : RapidsConnection() {
                 }
             }
 
+        private val utbetalinger = mutableSetOf<UUID>().apply {
+            events("utbetaling_endret") {
+                add(UUID.fromString(it.path("utbetalingId").asText()))
+            }
+        }
+
+        private val utbetalingtilstander
+            get() = mutableMapOf<UUID, MutableList<String>>().apply {
+                events("utbetaling_endret") {
+                    val id = UUID.fromString(it.path("utbetalingId").asText())
+                    this.getOrPut(id) { mutableListOf(it.path("forrigeStatus").asText()) }
+                        .add(it.path("gjeldendeStatus").asText())
+                }
+            }
+
         private val forkastedeTilstander
             get() = tilstander.filter { it.key in forkastedeVedtaksperiodeIder }
 
@@ -121,6 +136,10 @@ internal class TestRapid : RapidsConnection() {
         fun antall() = messages.size
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
+        fun utbetalingtilstander(utbetalingIndeks: Int) =
+            utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
+                utbetalingtilstander[utbetalingId]?.toList()
+            } ?: emptyList()
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()

@@ -325,6 +325,36 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+                queueMessage(
+                    "utbetaling_endret", JsonMessage.newMessage(
+                        mapOf(
+                            "utbetalingId" to event.utbetalingId,
+                            "type" to event.type,
+                            "forrigeStatus" to event.forrigeStatus,
+                            "gjeldendeStatus" to event.gjeldendeStatus,
+                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag
+                        )
+                    )
+                )
+            }
+
+            override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+                queueMessage(
+                    "utbetaling_utbetalt", JsonMessage.newMessage(
+                        mapOf(
+                            "utbetalingId" to event.utbetalingId,
+                            "type" to event.type,
+                            "ident" to event.ident,
+                            "epost" to event.epost,
+                            "tidspunkt" to event.tidspunkt,
+                            "automatiskBehandling" to event.automatiskBehandling,
+                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag
+                        )
+                    )
+                )
+            }
+
             override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
                 queueMessage(
                     "vedtaksperiode_endret", JsonMessage.newMessage(

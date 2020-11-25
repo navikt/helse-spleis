@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
+import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -260,10 +262,51 @@ internal class Arbeidsgiver private constructor(
         etterutbetaling.utbetal(hendelse)
     }
 
+    override fun utbetalingUtbetalt(
+        id: UUID,
+        type: Utbetaling.Utbetalingtype,
+        oppdrag: Oppdrag,
+        ident: String,
+        epost: String,
+        tidspunkt: LocalDateTime,
+        automatiskBehandling: Boolean
+    ) {
+        person.utbetalingUtbetalt(
+            PersonObserver.UtbetalingUtbetaltEvent(
+                utbetalingId = id,
+                type = type.name,
+                ident = ident,
+                epost = epost,
+                tidspunkt = tidspunkt,
+                automatiskBehandling = automatiskBehandling,
+                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toMap()
+            )
+        )
+    }
+
+    override fun utbetalingEndret(
+        id: UUID,
+        type: Utbetaling.Utbetalingtype,
+        arbeidsgiverOppdrag: Oppdrag,
+        forrigeTilstand: Utbetaling.Tilstand,
+        nesteTilstand: Utbetaling.Tilstand
+    ) {
+        person.utbetalingEndret(
+            PersonObserver.UtbetalingEndretEvent(
+                utbetalingId = id,
+                type = type.name,
+                forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
+                gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
+                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap()
+            )
+        )
+    }
+
     override fun utbetalingAnnullert(
+        id: UUID,
         oppdrag: Oppdrag,
         hendelse: ArbeidstakerHendelse,
-        godkjentTidspunkt: LocalDateTime,
+        godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String
     ) {
         person.annullert(
@@ -272,6 +315,7 @@ internal class Arbeidsgiver private constructor(
                 aktørId = hendelse.aktørId(),
                 organisasjonsnummer = hendelse.organisasjonsnummer(),
                 fagsystemId = oppdrag.fagsystemId(),
+                utbetalingId = id,
                 utbetalingslinjer = oppdrag.map {
                     PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
                         fom = requireNotNull(it.datoStatusFom()),
@@ -280,7 +324,7 @@ internal class Arbeidsgiver private constructor(
                         grad = it.grad
                     )
                 },
-                annullertAvSaksbehandler = godkjentTidspunkt,
+                annullertAvSaksbehandler = godkjenttidspunkt,
                 saksbehandlerEpost = saksbehandlerEpost
             )
         )
