@@ -186,7 +186,9 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fagsystemId = inspektør.utbetalinger.last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
-            melding = "hei"
+            melding = "hei",
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

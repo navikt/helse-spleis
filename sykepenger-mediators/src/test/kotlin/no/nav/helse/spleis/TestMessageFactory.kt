@@ -392,7 +392,9 @@ internal class TestMessageFactory(
         saksbehandler: String = "Siri Saksbehandler",
         saksbehandlerEpost: String = "siri.saksbehandler@nav.no",
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
-        annullering: Boolean = false
+        annullering: Boolean = false,
+        avstemmingsnøkkel: Long = 123456L,
+        overføringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
@@ -401,7 +403,9 @@ internal class TestMessageFactory(
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
-                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else ""
+                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
+                    "avstemmingsnøkkel" to avstemmingsnøkkel,
+                    "overføringstidspunkt" to overføringstidspunkt
                 )
             ),
             ekstraFelter = mapOf(

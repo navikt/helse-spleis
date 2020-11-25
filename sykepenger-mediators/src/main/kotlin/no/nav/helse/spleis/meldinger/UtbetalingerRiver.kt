@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
@@ -24,6 +26,8 @@ internal class UtbetalingerRiver(
         // skip OVERFØRT; we don't need to react to it (yet)
         packet.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
         packet.requireKey("fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
+        packet.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
+        packet.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingMessage(JsonMessageDelegate(packet))

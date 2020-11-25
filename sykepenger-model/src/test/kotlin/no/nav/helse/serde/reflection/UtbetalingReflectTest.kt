@@ -105,7 +105,9 @@ internal class UtbetalingReflectTest {
                     fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     utbetalingId = utbetalingId,
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-                    melding = "hei"
+                    melding = "hei",
+                    avstemmingsnøkkel = 123456L,
+                    overføringstidspunkt = LocalDateTime.now()
                 )
             )
         }
@@ -199,7 +201,9 @@ internal class UtbetalingReflectTest {
                     fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                     utbetalingId = utbetalingId,
                     status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-                    melding = "hei"
+                    melding = "hei",
+                    avstemmingsnøkkel = 123456L,
+                    overføringstidspunkt = LocalDateTime.now()
                 )
             )
         }

@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.*
 import no.nav.helse.person.ArbeidstakerHendelse
+import java.time.LocalDateTime
 import java.util.*
 
 class UtbetalingHendelse(
@@ -13,7 +14,9 @@ class UtbetalingHendelse(
     private val fagsystemId: String,
     private val utbetalingId: String,
     private val status: Oppdragstatus,
-    private val melding: String
+    private val melding: String,
+    internal val avstemmingsnøkkel: Long,
+    internal val overføringstidspunkt: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

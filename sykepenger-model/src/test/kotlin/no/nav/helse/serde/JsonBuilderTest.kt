@@ -459,7 +459,9 @@ class JsonBuilderTest {
             fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-            melding = "hei"
+            melding = "hei",
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
         )
     }
 }

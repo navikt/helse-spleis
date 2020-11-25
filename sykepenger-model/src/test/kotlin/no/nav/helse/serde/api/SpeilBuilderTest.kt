@@ -1386,7 +1386,9 @@ class SpeilBuilderTest {
             fagsystemId = utbetalingsliste.getValue(orgnummer).last().arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
             status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-            melding = "hei"
+            melding = "hei",
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
         )
 
         private fun annullering(fagsystemId: String) = AnnullerUtbetaling(

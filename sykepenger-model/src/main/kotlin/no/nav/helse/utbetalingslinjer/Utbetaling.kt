@@ -228,10 +228,10 @@ internal class Utbetaling private constructor(
                 .lastOrNull()
                 ?.arbeidsgiverOppdrag
                 ?: default()
-
         internal fun List<Utbetaling>.utbetalte() =
             filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
                 .filter { it.erUtbetalt() }
+
         private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
             filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
                 .any { it.erAnnullering() }
@@ -281,6 +281,18 @@ internal class Utbetaling private constructor(
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
         vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         avsluttet = LocalDateTime.now()
+    }
+
+    private fun håndterKvittering(hendelse: UtbetalingHendelse) {
+        hendelse.valider()
+        val erAnnullering = type == Utbetalingtype.ANNULLERING
+        val nesteTilstand = when {
+            hendelse.hasErrorsOrWorse() && !erAnnullering && hendelse.skalForsøkesIgjen() -> return // forventning om at vedtaksperioden står for retry
+            hendelse.hasErrorsOrWorse() -> UtbetalingFeilet
+            erAnnullering -> Annullert
+            else -> Utbetalt
+        }
+        tilstand(nesteTilstand, hendelse)
     }
 
     internal interface Tilstand {
@@ -392,11 +404,20 @@ internal class Utbetaling private constructor(
         }
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            utbetaling.overføringstidspunkt = hendelse.overføringstidspunkt
-            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
-            hendelse.info("Utbetalingen ble overført til Oppdrag/UR ${hendelse.overføringstidspunkt}, " +
-                "og har fått avstemmingsnøkkel ${hendelse.avstemmingsnøkkel}")
+            lagreOverføringsinformasjon(utbetaling, hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.tilstand(Overført, hendelse)
+        }
+
+        override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
+            lagreOverføringsinformasjon(utbetaling, hendelse, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
+            utbetaling.håndterKvittering(hendelse)
+        }
+
+        private fun lagreOverføringsinformasjon(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
+            utbetaling.overføringstidspunkt = tidspunkt
+            utbetaling.avstemmingsnøkkel = avstemmingsnøkkel
+            hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, " +
+                "og har fått avstemmingsnøkkel $avstemmingsnøkkel")
         }
     }
 
@@ -407,15 +428,7 @@ internal class Utbetaling private constructor(
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            hendelse.valider()
-            val erAnnullering = utbetaling.type == Utbetalingtype.ANNULLERING
-            val nesteTilstand = when {
-                hendelse.hasErrorsOrWorse() && !erAnnullering && hendelse.skalForsøkesIgjen() -> return // forventning om at vedtaksperioden står for retry
-                hendelse.hasErrorsOrWorse() -> UtbetalingFeilet
-                erAnnullering -> Annullert
-                else -> Utbetalt
-            }
-            utbetaling.tilstand(nesteTilstand, hendelse)
+            utbetaling.håndterKvittering(hendelse)
         }
 
         override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {

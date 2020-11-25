@@ -183,7 +183,9 @@ internal class UtbetalingTest {
                 fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
                 utbetalingId = utbetalingId,
                 status = AKSEPTERT,
-                melding = "hei"
+                melding = "hei",
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
             )
         )
     }
