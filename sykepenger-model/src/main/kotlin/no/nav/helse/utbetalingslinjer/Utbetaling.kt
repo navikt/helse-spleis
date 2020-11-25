@@ -97,6 +97,10 @@ internal class Utbetaling private constructor(
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
 
+    internal fun harUtbetalinger() =
+        arbeidsgiverOppdrag.utenUendretLinjer().isNotEmpty() ||
+        personOppdrag.utenUendretLinjer().isNotEmpty()
+
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering())

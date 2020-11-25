@@ -1316,7 +1316,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetaling().håndter(utbetalingsgodkjenning)
             vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
                 utbetalingsgodkjenning.hasErrorsOrWorse() -> TilInfotrygd
-                vedtaksperiode.utbetalingstidslinje.harUtbetalinger() -> TilUtbetaling
+                vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
                 else -> Avsluttet
             })
         }
