@@ -25,6 +25,7 @@ class AnnullerUtbetaling(
     internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
 
     internal fun vurdering() = Utbetaling.Vurdering(
+        true,
         saksbehandlerIdent,
         saksbehandlerEpost,
         opprettet,

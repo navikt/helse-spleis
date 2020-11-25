@@ -771,6 +771,7 @@ internal data class PersonData(
             )
 
         data class VurderingData(
+            private val godkjent: Boolean,
             private val ident: String,
             private val epost: String,
             private val tidspunkt: LocalDateTime,
@@ -779,6 +780,7 @@ internal data class PersonData(
             internal fun konverterTilVurdering() = Utbetaling.Vurdering::class.primaryConstructor!!
                 .apply { isAccessible = true }
                 .call(
+                    godkjent,
                     ident,
                     epost,
                     tidspunkt,

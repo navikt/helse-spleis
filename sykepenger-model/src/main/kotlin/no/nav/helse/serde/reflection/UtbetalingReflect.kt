@@ -49,6 +49,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 
 private class VurderingReflect(private val vurdering: Utbetaling.Vurdering) {
     internal fun toMap() = mapOf(
+        "godkjent" to vurdering.get<Boolean>("godkjent"),
         "ident" to vurdering.get<String>("ident"),
         "epost" to vurdering.get<String>("epost"),
         "tidspunkt" to vurdering.get<LocalDateTime>("tidspunkt"),

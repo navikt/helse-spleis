@@ -26,10 +26,11 @@ class Utbetalingsgodkjenning(
     internal fun automatiskBehandling() = automatiskBehandling
 
     internal fun vurdering() = Utbetaling.Vurdering(
-       saksbehandler,
-       saksbehandlerEpost,
-       godkjenttidspunkt,
-       automatiskBehandling
+        utbetalingGodkjent,
+        saksbehandler,
+        saksbehandlerEpost,
+        godkjenttidspunkt,
+        automatiskBehandling
     )
 
     internal fun valider(): Aktivitetslogg {

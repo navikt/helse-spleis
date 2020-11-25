@@ -479,6 +479,7 @@ internal class Utbetaling private constructor(
     }
 
     internal class Vurdering(
+        private val godkjent: Boolean,
         private val ident: String,
         private val epost: String,
         private val tidspunkt: LocalDateTime,
