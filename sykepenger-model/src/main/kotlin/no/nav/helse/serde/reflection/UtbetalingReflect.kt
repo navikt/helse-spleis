@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 internal enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
     IKKE_UTBETALT(Utbetaling.Ubetalt),
@@ -44,8 +43,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() },
         "overføringstidspunkt" to utbetaling.maybe<LocalDateTime>("overføringstidspunkt"),
         "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
-        "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet"),
-        "forrige" to utbetaling.maybe<UUID>("forrige")
+        "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet")
     )
 }
 

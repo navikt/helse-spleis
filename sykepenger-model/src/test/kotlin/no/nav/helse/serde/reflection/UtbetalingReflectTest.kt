@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.betal
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,8 +42,6 @@ internal class UtbetalingReflectTest {
                 148
             )
         ).toMap()
-        assertNull(map["neste"])
-        assertNull(map["forrige"])
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
         assertUtbetalingslinjer("SPREF", "fagområde")
         assertUtbetalingslinjer("NY", "endringskode")
