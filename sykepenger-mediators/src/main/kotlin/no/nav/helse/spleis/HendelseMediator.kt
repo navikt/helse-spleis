@@ -27,10 +27,9 @@ internal class HendelseMediator(
     hendelseRepository: HendelseRepository,
     private val lagrePersonDao: LagrePersonDao
 ) : IHendelseMediator {
-    private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    private val personMediator = PersonMediator(rapidsConnection, personRepository)
+    private val personMediator = PersonMediator(rapidsConnection)
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
     private val replayMediator = ReplayMediator(this, hendelseRepository)
 
@@ -41,6 +40,8 @@ internal class HendelseMediator(
             withMDC(err.kontekst()) {
                 sikkerLogg.error("alvorlig feil i aktivitetslogg: ${err.message}\n\t${message.toJson()}", err)
             }
+        } finally {
+            personMediator.reset()
         }
     }
 
@@ -259,15 +260,16 @@ internal class HendelseMediator(
         behovMediator.håndter(message, hendelse)
     }
 
-    private class PersonMediator(
-        private val rapidsConnection: RapidsConnection,
-        private val personRepository: PersonRepository
-    ) {
+    private class PersonMediator(private val rapidsConnection: RapidsConnection) {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val meldinger = mutableListOf<Pair<String, String>>()
 
         fun observer(person: Person, message: HendelseMessage, hendelse: PersonHendelse) {
             person.addObserver(Observatør(message, hendelse))
+        }
+
+        fun reset() {
+            meldinger.clear()
         }
 
         fun finalize(message: HendelseMessage, hendelse: PersonHendelse) {
@@ -276,7 +278,7 @@ internal class HendelseMediator(
             meldinger.forEach { (fødselsnummer, melding) ->
                 rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $it") })
             }
-            meldinger.clear()
+            reset()
         }
 
         private fun queueMessage(fødselsnummer: String, message: String) {
