@@ -10,10 +10,12 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
@@ -114,8 +116,10 @@ internal class Arbeidsgiver private constructor(
         ).also { nyUtbetaling(it) }
     }
 
-    private fun nyUtbetaling(utbetaling: Utbetaling) {
-        utbetalinger.add(utbetaling)
+    private fun nyUtbetaling(utbetaling: Utbetaling, forrige: Utbetaling? = null) {
+        forrige?.also {
+            utbetalinger.add(utbetalinger.indexOf(forrige) + 1, utbetaling)
+        } ?: utbetalinger.add(utbetaling)
         utbetaling.register(this)
     }
 
@@ -215,16 +219,45 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
-        val annullering = Utbetaling.annuller(utbetalinger, hendelse) ?: return
-        nyUtbetaling(annullering)
+        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
+        val annullering = sisteUtbetalte.annuller(hendelse) ?: return
+        nyUtbetaling(annullering/*, sisteUtbetalte*/)
         annullering.håndter(hendelse)
         annullering.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
 
-    internal fun håndter(hendelse: Grunnbeløpsregulering) {
+    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        vedtaksperioder.toList().reversed().forEach { it.håndter(hendelse) }
+        hendelse.info("Håndterer etterutbetaling")
+        // TODO: trenger IT-historikk for å finne skjæringstidspunkt på eldre utbetalingstidslinjer
+        // som ikke har fått skjæringsdato satt i Økonomi-objektene ennå
+        val skjæringstidspunkter = emptyList<LocalDate>()
+        val sisteUtbetalte = Utbetaling.finnUtbetalingForJustering(
+            arbeidsgiver = this,
+            organisasjonsnummer = organisasjonsnummer,
+            arbeidsgivere = arbeidsgivere.map { it to it.utbetalinger }.toMap(),
+            skjæringstidspunkter = skjæringstidspunkter,
+            hendelse = hendelse
+        ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
+
+        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
+
+        val arbeidsgivertidslinjer = arbeidsgivere.map {
+            it to it.utbetalinger.utbetaltTidslinje()
+        }
+
+        MaksimumUtbetaling(arbeidsgivertidslinjer.map { it.second }.toList(), hendelse, skjæringstidspunkter, LocalDate.now())
+            .betal()
+
+        arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje)
+        }
+
+        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, nåværendeTidslinje()) ?: return
+        nyUtbetaling(etterutbetaling, sisteUtbetalte)
+        etterutbetaling.håndter(hendelse)
+        etterutbetaling.utbetal(hendelse)
     }
 
     override fun utbetalingAnnullert(

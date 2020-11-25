@@ -208,19 +208,20 @@ internal class UtbetalingReflectTest {
             )
         }
 
-        val utbetaling = requireNotNull(Utbetaling.annuller(
+        val hendelse = AnnullerUtbetaling(
+            UUID.randomUUID(),
+            "aktør",
+            "fnr",
+            "orgnr",
+            tidligereUtbetaling.arbeidsgiverOppdrag().fagsystemId(),
+            "ident",
+            "epost",
+            LocalDateTime.now()
+        )
+        val utbetaling = requireNotNull(Utbetaling.finnUtbetalingForAnnullering(
             listOf(tidligereUtbetaling),
-            AnnullerUtbetaling(
-                UUID.randomUUID(),
-                "aktør",
-                "fnr",
-                "orgnr",
-                tidligereUtbetaling.arbeidsgiverOppdrag().fagsystemId(),
-                "ident",
-                "epost",
-                LocalDateTime.now()
-            )
-        )) { "Forventet utbetaling" }
+            hendelse
+        )?.annuller(hendelse)) { "Forventet utbetaling" }
         map = UtbetalingReflect(utbetaling).toMap()
 
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")

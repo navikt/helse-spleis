@@ -464,6 +464,10 @@ internal class Økonomi private constructor(
 
             override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
 
+            override fun betal(økonomi: Økonomi) {
+                økonomi._betal()
+            }
+
             override fun <R> reflection(
                 økonomi: Økonomi,
                 block: (

@@ -29,6 +29,8 @@ class Grunnbeløpsregulering(
         if (!it) håndtert = true
     }
 
+    internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+
     internal fun erRelevant(arbeidsgiverFagsystemId: String?, personFagsystemId: String?, skjæringstidspunkt: LocalDate) =
         relevantFagsystemId(arbeidsgiverFagsystemId, personFagsystemId) && skjæringstidspunkt >= gyldighetsdato
 

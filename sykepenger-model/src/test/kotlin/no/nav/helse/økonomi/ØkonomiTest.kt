@@ -143,7 +143,7 @@ internal class ØkonomiTest {
     }
 
     @Test fun `kan beregne betaling bare en gang`() {
-        assertThrows<IllegalStateException> {
+        assertDoesNotThrow {
             listOf(80.prosent.sykdomsgrad.inntekt(1200.daglig)).betal(1.januar).betal(1.januar)
         }
     }
