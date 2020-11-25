@@ -136,6 +136,14 @@ internal class Utbetaling private constructor(
         tilstand.avslutt(this, hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
     }
 
+    internal fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
+        if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
+            hendelse.error("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
+            return null
+        }
+        return tilstand.annuller(this, hendelse)
+    }
+
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
     internal fun personOppdrag() = personOppdrag
@@ -150,6 +158,7 @@ internal class Utbetaling private constructor(
     }
 
     internal companion object {
+
         private const val systemident = "SPLEIS"
 
         internal fun lagUtbetaling(
@@ -180,7 +189,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun annuller(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            if (utbetalinger.any { it.tilstand in listOf(Sendt, Overført) }) {
+            if (utbetalinger.any { it.tilstand in listOf(Godkjent, Sendt, Overført) }) {
                 hendelse.error("Kan ikke annullere: det finnes utbetalinger in-flight")
                 return null
             }
@@ -189,28 +198,12 @@ internal class Utbetaling private constructor(
                 .filter { utbetaling -> utbetaling.tilstand in listOf(Utbetalt, Annullert, UtbetalingFeilet) }
                 .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
                 .filterNot { it.tilstand == Annullert }
-                .firstOrNull()
-
-            return when {
-                kandidat == null -> {
+                .firstOrNull() ?: run {
                     hendelse.error("Finner ingen utbetaling å annullere")
-                    null
+                    return null
                 }
-                // TODO: Håndterer kun arbeidsgiverOppdrag p.t. Må på sikt håndtere personOppdrag
-                !hendelse.erRelevant(kandidat.arbeidsgiverOppdrag().fagsystemId()) -> {
-                    hendelse.error("Kan ikke annullere: er ikke siste utbetaling.")
-                    null
-                }
-                kandidat.tilstand == UtbetalingFeilet -> {
-                    hendelse.error("Kan ikke annullere: siste utbetaling er feilet ${kandidat.arbeidsgiverOppdrag.fagsystemId()}")
-                    null
-                }
-                kandidat.type == Utbetalingtype.ANNULLERING -> {
-                    hendelse.info("Forsøkte å annullere en utbetaling som allerede er annullert")
-                    null
-                }
-                else -> kandidat.annuller(hendelse)
-            }
+
+            return kandidat.annuller(hendelse)
         }
 
         private fun buildArb(
@@ -248,12 +241,10 @@ internal class Utbetaling private constructor(
         internal fun List<Utbetaling>.utbetalte() =
             filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
                 .filter { it.erUtbetalt() }
-
         private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
             filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
                 .any { it.erAnnullering() }
     }
-
     internal fun accept(visitor: UtbetalingVisitor) {
         visitor.preVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
@@ -266,22 +257,10 @@ internal class Utbetaling private constructor(
         visitor.postVisitPersonOppdrag(personOppdrag)
         visitor.postVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
+
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
-
-    internal fun annuller(hendelse: AnnullerUtbetaling) = Utbetaling(
-        this,
-        utbetalingstidslinje,
-        arbeidsgiverOppdrag.emptied().minus(arbeidsgiverOppdrag, hendelse),
-        personOppdrag.emptied().minus(personOppdrag, hendelse),
-        Godkjent,
-        Utbetalingtype.ANNULLERING,
-        LocalDate.MAX,
-        null,
-        null,
-        hendelse.vurdering()
-    )
 
     internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
         oldtid.add(organisasjonsnummer, utbetalingstidslinje)
@@ -325,8 +304,9 @@ internal class Utbetaling private constructor(
             throw IllegalStateException("Forventet ikke å utbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) {
-            throw IllegalStateException("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling): Utbetaling? {
+            hendelse.error("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            return null
         }
 
         fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
@@ -460,6 +440,20 @@ internal class Utbetaling private constructor(
     }
 
     internal object Utbetalt : Tilstand {
+        override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
+            Utbetaling(
+                utbetaling,
+                utbetaling.utbetalingstidslinje,
+                utbetaling.arbeidsgiverOppdrag.emptied().minus(utbetaling.arbeidsgiverOppdrag, hendelse),
+                utbetaling.personOppdrag.emptied().minus(utbetaling.personOppdrag, hendelse),
+                Godkjent,
+                Utbetalingtype.ANNULLERING,
+                LocalDate.MAX,
+                null,
+                null,
+                hendelse.vurdering()
+            )
+
         override fun avslutt(
             utbetaling: Utbetaling,
             hendelse: ArbeidstakerHendelse,
