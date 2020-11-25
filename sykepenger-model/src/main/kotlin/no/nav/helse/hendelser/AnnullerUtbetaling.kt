@@ -17,6 +17,7 @@ class AnnullerUtbetaling(
     private val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+    private val annullerte = mutableListOf<String>()
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
@@ -30,4 +31,10 @@ class AnnullerUtbetaling(
         opprettet,
         false
     )
+
+    internal fun erAnnullert(fagsystemId: String) {
+        annullerte.add(fagsystemId)
+    }
+
+    internal fun erAnnullertFør(fagsystemId: String) = fagsystemId in annullerte
 }

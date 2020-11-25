@@ -45,8 +45,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "overføringstidspunkt" to utbetaling.maybe<LocalDateTime>("overføringstidspunkt"),
         "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
         "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet"),
-        "forrige" to utbetaling.maybe<UUID>("forrige"),
-        "neste" to utbetaling.maybe<UUID>("neste"),
+        "forrige" to utbetaling.maybe<UUID>("forrige")
     )
 }
 

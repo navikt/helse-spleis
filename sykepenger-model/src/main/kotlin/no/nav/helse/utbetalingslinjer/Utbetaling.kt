@@ -30,12 +30,9 @@ internal class Utbetaling private constructor(
     private var vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
-    private var avsluttet: LocalDateTime?,
-    private var forrige: UUID?,
-    private var neste: UUID?
+    private var avsluttet: LocalDateTime?
 ) : Aktivitetskontekst {
     private constructor(
-        forrige: Utbetaling?,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
@@ -59,13 +56,8 @@ internal class Utbetaling private constructor(
         vurdering,
         null,
         null,
-        null,
-        null,
         null
-    ) {
-        forrige?.neste = this.id
-        this.forrige = forrige?.id
-    }
+    )
 
     private val observers = mutableListOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
@@ -175,7 +167,6 @@ internal class Utbetaling private constructor(
             val sisteUtbetalte = utbetalinger.utbetalte().lastOrNull()
             val arbeidsgiverOppdrag = buildArb(sisteUtbetalte?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg)
             return Utbetaling(
-                sisteUtbetalte?.takeIf { it.arbeidsgiverOppdrag.fagsystemId() == arbeidsgiverOppdrag.fagsystemId() },
                 utbetalingstidslinje,
                 arbeidsgiverOppdrag,
                 buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, utbetalinger),
@@ -442,7 +433,6 @@ internal class Utbetaling private constructor(
     internal object Utbetalt : Tilstand {
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
-                utbetaling,
                 utbetaling.utbetalingstidslinje,
                 utbetaling.arbeidsgiverOppdrag.emptied().minus(utbetaling.arbeidsgiverOppdrag, hendelse),
                 utbetaling.personOppdrag.emptied().minus(utbetaling.personOppdrag, hendelse),
