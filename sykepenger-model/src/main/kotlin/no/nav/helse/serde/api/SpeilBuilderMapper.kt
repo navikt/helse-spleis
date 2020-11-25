@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -61,11 +62,22 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)
 
-internal fun MutableMap<String, Any?>.mapTilPersonDto() = PersonDTO(
-    fødselsnummer = this["fødselsnummer"] as String,
-    aktørId = this["aktørId"] as String,
-    arbeidsgivere = this["arbeidsgivere"].cast()
-)
+internal fun MutableMap<String, Any?>.mapTilPersonDto() =
+    if (Toggles.speilInntekterVol2Enabled) {
+        PersonDTO(
+            fødselsnummer = this["fødselsnummer"] as String,
+            aktørId = this["aktørId"] as String,
+            arbeidsgivere = this["arbeidsgivere"].cast(),
+            inntektsgrunnlag = this["inntektsgrunnlag"].cast()
+        )
+    } else {
+        PersonDTO(
+            fødselsnummer = this["fødselsnummer"] as String,
+            aktørId = this["aktørId"] as String,
+            arbeidsgivere = this["arbeidsgivere"].cast(),
+            inntektsgrunnlag = emptyList()
+        )
+    }
 
 internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto() = ArbeidsgiverDTO(
     organisasjonsnummer = this["organisasjonsnummer"] as String,
@@ -175,7 +187,7 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
     beregnetÅrsinntektFraInntektskomponenten =
-        grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
+    grunnlagsdata.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
     avviksprosent = grunnlagsdata.avviksprosent?.ratio(),
     antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
     harOpptjening = grunnlagsdata.harOpptjening,

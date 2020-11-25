@@ -141,7 +141,7 @@ class Utbetalingshistorikk(
             inntektshistorikk: InntektshistorikkVol2
         ) {
             if (organisasjonsnummer != orgnummer) return
-            inntektshistorikk.invoke {
+            inntektshistorikk {
                 addInfotrygd(
                     sykepengerFom,
                     hendelseId,

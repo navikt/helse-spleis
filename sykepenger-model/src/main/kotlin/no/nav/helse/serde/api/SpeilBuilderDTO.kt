@@ -13,7 +13,7 @@ data class PersonDTO(
     val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>,
-    val inntektsgrunnlag: List<InntektsgrunnlagDTO> = emptyList()
+    val inntektsgrunnlag: List<InntektsgrunnlagDTO>
 )
 
 data class AktivitetDTO(
@@ -324,23 +324,24 @@ data class InntektsgrunnlagDTO(
     ) {
         data class OmregnetÅrsinntektDTO private constructor(
             val kilde: InntektkildeDTO,
-            val beløp: Double?, //kun gyldig for inntektsmeldingen
-            val månedsbeløp: Double?, //kun gyldig for inntektsmeldingen
-            val sum: Double?, //kun gyldig for A-ordningen
+            val beløp: Double,
+            val månedsbeløp: Double?, //kun gyldig for inntektsmeldingen og infotrygd
+            val sumFraAOrdningen: Double?, //kun gyldig for A-ordningen
             val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>? //kun gyldig for A-ordningen
         ) {
             constructor(
-                beløp: Double, //kun gyldig for inntektsmeldingen
+                beløp: Double,
                 månedsbeløp: Double //kun gyldig for inntektsmeldingen
             ) : this(InntektkildeDTO.Inntektsmelding, beløp, månedsbeløp, null, null)
 
             constructor(
-                sum: Double, //kun gyldig for A-ordningen
+                beløp: Double,
+                sumFraAOrdningen: Double, //kun gyldig for A-ordningen
                 inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO> //kun gyldig for A-ordningen
-            ) : this(InntektkildeDTO.AOrdningen, null, null, sum, inntekterFraAOrdningen)
+            ) : this(InntektkildeDTO.AOrdningen, beløp, null, sumFraAOrdningen, inntekterFraAOrdningen)
 
             enum class InntektkildeDTO {
-                Inntektsmelding, AOrdningen
+                Inntektsmelding, Infotrygd, AOrdningen
             }
 
             data class InntekterFraAOrdningenDTO(

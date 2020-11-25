@@ -59,8 +59,8 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                inntektsmelding.grunnlagForSykepengegrunnlag(dato),
-                inntektsmelding.grunnlagForSammenligningsgrunnlag(dato),
+                inntektsmelding.grunnlagForSykepengegrunnlag(dato)?.second,
+                inntektsmelding.grunnlagForSammenligningsgrunnlag(dato)?.second,
                 Kilde.INNTEKTSMELDING
             )
         )
@@ -76,8 +76,8 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                infotrygd.grunnlagForSykepengegrunnlag(dato),
-                infotrygd.grunnlagForSammenligningsgrunnlag(dato),
+                infotrygd.grunnlagForSykepengegrunnlag(dato)?.second,
+                infotrygd.grunnlagForSammenligningsgrunnlag(dato)?.second,
                 Kilde.INFOTRYGD
             )
         )
@@ -117,8 +117,8 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
-                skattComposite.grunnlagForSykepengegrunnlag(skattedato),
-                skattComposite.grunnlagForSammenligningsgrunnlag(skattedato),
+                skattComposite.grunnlagForSykepengegrunnlag(skattedato)?.second,
+                skattComposite.grunnlagForSammenligningsgrunnlag(skattedato)?.second,
                 Kilde.SKATT
             )
         )
