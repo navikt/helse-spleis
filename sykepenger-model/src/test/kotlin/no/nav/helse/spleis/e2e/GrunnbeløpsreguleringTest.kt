@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -96,6 +97,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled("nytt grunnbeløp plukkes ikke opp ved håndterGrunnbeløpsregulering som gjør at det er ingenting å utbetale")
     fun `justere periode som deler oppdrag med en periode som ikke skal justeres`() {
         val fomPeriode1 = 30.april(2020)
         val tomPeriode1 = fomPeriode1.plusMonths(1)

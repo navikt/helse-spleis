@@ -217,6 +217,7 @@ internal class Arbeidsgiver private constructor(
         hendelse.info("Håndterer annullering")
         val annullering = Utbetaling.annuller(utbetalinger, hendelse) ?: return
         nyUtbetaling(annullering)
+        annullering.håndter(hendelse)
         annullering.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
