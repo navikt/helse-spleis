@@ -2,6 +2,9 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
+import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO
+import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,7 +15,7 @@ internal fun inntektsgrunnlag(inntektshistorikk: Map<String, InntektshistorikkVo
     return skjæringstidspunkter
         .map { skjæringstidspunkt ->
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
-                inntektshistorikk.map { (orgnummer, inntekthist) -> Inntektsgrunnlag(skjæringstidspunkt, orgnummer, inntekthist).result() }
+                inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(skjæringstidspunkt, orgnummer, inntekthist) }
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -27,90 +30,105 @@ internal fun inntektsgrunnlag(inntektshistorikk: Map<String, InntektshistorikkVo
         }
 }
 
-private class Inntektsgrunnlag(
-    private val skjæringstidspunkt: LocalDate,
-    private val orgnummer: String,
-    private val inntektshistorikk: InntektshistorikkVol2
-) {
-    fun result(): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-        val (inntektsopplysning, _) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
-        val omregnetÅrsinntektDTO = InternalVisitor(inntektsopplysning).omregnetÅrsinntektDTO
-        return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
-            orgnummer,
-            omregnetÅrsinntektDTO,
-            InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(0.0, emptyList())
+private fun arbeidsgiverinntekt(
+    skjæringstidspunkt: LocalDate,
+    orgnummer: String,
+    inntektshistorikk: InntektshistorikkVol2
+): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
+    val (inntektsopplysning, _) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
+    val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning).omregnetÅrsinntektDTO
+    return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
+        orgnummer,
+        omregnetÅrsinntektDTO,
+        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(0.0, emptyList())
+    )
+}
+
+private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning) : InntekthistorikkVisitor {
+    lateinit var omregnetÅrsinntektDTO: OmregnetÅrsinntektDTO
+    private val skattegreier = mutableListOf<InntekterFraAOrdningenDTO>()
+
+    init {
+        inntektsopplysning.accept(this)
+    }
+
+    override fun visitSaksbehandler(
+        saksbehandler: InntektshistorikkVol2.Saksbehandler,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
+            kilde = InntektkildeDTO.Saksbehandler,
+            beløp = beløp.reflection { årlig, _, _, _ -> årlig },
+            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
         )
     }
 
-    private class InternalVisitor(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning) : InntekthistorikkVisitor {
-        lateinit var omregnetÅrsinntektDTO: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
-        private val skattegreier = mutableListOf<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO>()
+    override fun visitInntektsmelding(
+        inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
+            kilde = InntektkildeDTO.Inntektsmelding,
+            beløp = beløp.reflection { årlig, _, _, _ -> årlig },
+            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
+        )
+    }
 
-        init {
-            inntektsopplysning.accept(this)
-        }
+    override fun visitInfotrygd(
+        infotrygd: InntektshistorikkVol2.Infotrygd,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
+            kilde = InntektkildeDTO.Infotrygd,
+            beløp = beløp.reflection { årlig, _, _, _ -> årlig },
+            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
+        )
+    }
 
-        override fun visitInntektsmelding(
-            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime
-        ) {
-            this.omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
-                beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-                månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
-            )
-        }
+    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+        skattegreier.clear()
+    }
 
-        override fun visitInfotrygd(
-            infotrygd: InntektshistorikkVol2.Infotrygd,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime
-        ) {
-            omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
-                beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-                månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
-            )
-        }
+    override fun visitSkattSykepengegrunnlag(
+        sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) {
+        skattegreier.add(
+            InntekterFraAOrdningenDTO(
+            måned = måned,
+            sum = beløp.reflection { _, mnd, _, _ -> mnd }
+        ))
+    }
 
-        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
-            skattegreier.clear()
-        }
-
-        override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String,
-            tidsstempel: LocalDateTime
-        ) {
-            skattegreier.add(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO(
-                måned = måned,
-                sum = beløp.reflection { _, mnd, _, _ -> mnd }
-            ))
-        }
-
-        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
-            val (_, inntekt) = skattComposite.grunnlagForSykepengegrunnlag(skattComposite.dato)!!
-            omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
-                beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
-                sumFraAOrdningen = skattegreier.sumOf { it.sum },
-                inntekterFraAOrdningen = skattegreier
-                    .groupBy({ it.måned }) { it.sum }
-                    .map { (måned: YearMonth, beløp: List<Double>) ->
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO(
-                            måned = måned,
-                            sum = beløp.sum()
-                        )
-                    }
-            )
-        }
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+        val (_, inntekt) = skattComposite.grunnlagForSykepengegrunnlag(skattComposite.dato)!!
+        omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
+            beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
+            sumFraAOrdningen = skattegreier.sumOf { it.sum },
+            inntekterFraAOrdningen = skattegreier
+                .groupBy({ it.måned }) { it.sum }
+                .map { (måned: YearMonth, beløp: List<Double>) ->
+                    InntekterFraAOrdningenDTO(
+                        måned = måned,
+                        sum = beløp.sum()
+                    )
+                }
+        )
     }
 }

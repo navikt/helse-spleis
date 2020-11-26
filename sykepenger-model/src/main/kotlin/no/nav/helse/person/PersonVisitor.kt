@@ -249,7 +249,15 @@ internal interface InntekthistorikkVisitor {
     fun visitInntektSaksbehandlerVol2(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
-    fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {}
+    fun visitSaksbehandler(
+        saksbehandler: InntektshistorikkVol2.Saksbehandler,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
     fun visitInntektsmelding(
         inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
         dato: LocalDate,
@@ -299,7 +307,18 @@ internal interface InntekthistorikkVisitor {
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
-    fun preVisitUtbetaling(utbetaling: Utbetaling, tilstand: Utbetaling.Tilstand, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
+    fun preVisitUtbetaling(
+        utbetaling: Utbetaling,
+        tilstand: Utbetaling.Tilstand,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+    }
+
     fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {}
     fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {}
@@ -307,7 +326,17 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun postVisitPersonOppdrag(oppdrag: Oppdrag) {}
     fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {}
-    fun postVisitUtbetaling(utbetaling: Utbetaling, tilstand: Utbetaling.Tilstand, tidsstempel: LocalDateTime, arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int, maksdato: LocalDate, forbrukteSykedager: Int?, gjenståendeSykedager: Int?) {}
+    fun postVisitUtbetaling(
+        utbetaling: Utbetaling,
+        tilstand: Utbetaling.Tilstand,
+        tidsstempel: LocalDateTime,
+        arbeidsgiverNettoBeløp: Int,
+        personNettoBeløp: Int,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int?,
+        gjenståendeSykedager: Int?
+    ) {
+    }
 }
 
 internal interface OppdragVisitor {
@@ -316,7 +345,9 @@ internal interface OppdragVisitor {
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
+
     fun visitUtbetalingslinje(
         linje: Utbetalingslinje,
         fom: LocalDate,
@@ -337,5 +368,6 @@ internal interface OppdragVisitor {
         totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime
-    ) {}
+    ) {
+    }
 }

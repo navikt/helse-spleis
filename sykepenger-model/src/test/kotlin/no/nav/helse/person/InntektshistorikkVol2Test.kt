@@ -423,7 +423,13 @@ internal class InntektshistorikkVol2Test {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {
+        override fun visitSaksbehandler(
+            saksbehandler: InntektshistorikkVol2.Saksbehandler,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 

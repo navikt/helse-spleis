@@ -103,8 +103,15 @@ internal class JsonBuilder : PersonVisitor {
     override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag) =
         currentState.preVisitInnslag(innslag)
 
-    override fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) =
-        currentState.visitSaksbehandler(saksbehandler)
+    override fun visitSaksbehandler(
+        saksbehandler: InntektshistorikkVol2.Saksbehandler,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        currentState.visitSaksbehandler(saksbehandler, dato, hendelseId, beløp, tidsstempel)
+    }
 
     override fun visitInntektsmelding(
         inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
@@ -643,7 +650,13 @@ internal class JsonBuilder : PersonVisitor {
 
     private inner class InntektsendringVol2State(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
         JsonState {
-        override fun visitSaksbehandler(saksbehandler: InntektshistorikkVol2.Saksbehandler) {
+        override fun visitSaksbehandler(
+            saksbehandler: InntektshistorikkVol2.Saksbehandler,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
             inntektsopplysninger.add(SaksbehandlerVol2Reflect(saksbehandler).toMap())
         }
 

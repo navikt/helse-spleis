@@ -325,14 +325,15 @@ data class InntektsgrunnlagDTO(
         data class OmregnetÅrsinntektDTO private constructor(
             val kilde: InntektkildeDTO,
             val beløp: Double,
-            val månedsbeløp: Double?, //kun gyldig for inntektsmeldingen og infotrygd
+            val månedsbeløp: Double?, //ikke relevant for A-ordningen
             val sumFraAOrdningen: Double?, //kun gyldig for A-ordningen
             val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>? //kun gyldig for A-ordningen
         ) {
             constructor(
+                kilde: InntektkildeDTO,
                 beløp: Double,
-                månedsbeløp: Double //kun gyldig for inntektsmeldingen
-            ) : this(InntektkildeDTO.Inntektsmelding, beløp, månedsbeløp, null, null)
+                månedsbeløp: Double
+            ) : this(kilde, beløp, månedsbeløp, null, null)
 
             constructor(
                 beløp: Double,
@@ -341,7 +342,7 @@ data class InntektsgrunnlagDTO(
             ) : this(InntektkildeDTO.AOrdningen, beløp, null, sumFraAOrdningen, inntekterFraAOrdningen)
 
             enum class InntektkildeDTO {
-                Inntektsmelding, Infotrygd, AOrdningen
+                Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
             }
 
             data class InntekterFraAOrdningenDTO(

@@ -116,7 +116,7 @@ internal class InntektshistorikkVol2 {
         override val prioritet = 100
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitSaksbehandler(this)
+            visitor.visitSaksbehandler(this, dato, hendelseId, beløp, tidsstempel)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }

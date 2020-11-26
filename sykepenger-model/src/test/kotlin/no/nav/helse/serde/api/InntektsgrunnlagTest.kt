@@ -16,6 +16,25 @@ import java.util.*
 
 internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
+    fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
+        val inntektshistorikk = mapOf(ORGNUMMER to InntektshistorikkVol2().apply {
+            this{
+                addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
+            }
+        })
+        val skjæringstidspunkter = listOf(1.januar)
+
+        val inntektsgrunnlag = inntektsgrunnlag(inntektshistorikk, skjæringstidspunkter)
+
+        assertTrue(inntektsgrunnlag.isNotEmpty())
+        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
+            assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
+        }
+    }
+
+    @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med en inntektsmelding`() {
         val inntektshistorikk = mapOf(ORGNUMMER to InntektshistorikkVol2().apply {
             inntektsmelding(
@@ -29,6 +48,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
             assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
         }
@@ -46,6 +66,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
             assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
         }
@@ -70,6 +91,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig } * 4, omregnetÅrsinntekt.sumFraAOrdningen)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig } * 4 / 3, omregnetÅrsinntekt.beløp)
             omregnetÅrsinntekt.inntekterFraAOrdningen.also {
