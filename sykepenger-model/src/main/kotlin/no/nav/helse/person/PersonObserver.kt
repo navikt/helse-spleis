@@ -139,17 +139,22 @@ interface PersonObserver {
         val type: String,
         val forrigeStatus: String,
         val gjeldendeStatus: String,
-        val arbeidsgiverOppdrag: Map<String, Any>
+        val arbeidsgiverOppdrag: Map<String, Any>,
+        val personOppdrag: Map<String, Any>
     ) {}
 
     data class UtbetalingUtbetaltEvent(
         val utbetalingId: UUID,
         val type: String,
+        val maksdato: LocalDate,
+        val forbrukteSykedager: Int,
+        val gjenståendeSykedager: Int,
         val ident: String,
         val epost: String,
         val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean,
-        val arbeidsgiverOppdrag: Map<String, Any>
+        val arbeidsgiverOppdrag: Map<String, Any>,
+        val personOppdrag: Map<String, Any>
     ) {}
 
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}

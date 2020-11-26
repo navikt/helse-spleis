@@ -335,7 +335,8 @@ internal class HendelseMediator(
                             "type" to event.type,
                             "forrigeStatus" to event.forrigeStatus,
                             "gjeldendeStatus" to event.gjeldendeStatus,
-                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag
+                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                            "personOppdrag" to event.personOppdrag
                         )
                     )
                 )
@@ -347,11 +348,15 @@ internal class HendelseMediator(
                         mapOf(
                             "utbetalingId" to event.utbetalingId,
                             "type" to event.type,
+                            "maksdato" to event.maksdato,
+                            "forbrukteSykedager" to event.forbrukteSykedager,
+                            "gjenståendeSykedager" to event.gjenståendeSykedager,
                             "ident" to event.ident,
                             "epost" to event.epost,
                             "tidspunkt" to event.tidspunkt,
                             "automatiskBehandling" to event.automatiskBehandling,
-                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag
+                            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                            "personOppdrag" to event.personOppdrag
                         )
                     )
                 )

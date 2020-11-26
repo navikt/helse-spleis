@@ -263,7 +263,11 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingUtbetalt(
         id: UUID,
         type: Utbetaling.Utbetalingtype,
-        oppdrag: Oppdrag,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        arbeidsgiverOppdrag: Oppdrag,
+        personOppdrag: Oppdrag,
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
@@ -273,11 +277,15 @@ internal class Arbeidsgiver private constructor(
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
                 ident = ident,
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = OppdragReflect(oppdrag).toMap()
+                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
+                personOppdrag = OppdragReflect(personOppdrag).toMap()
             )
         )
     }
@@ -286,6 +294,7 @@ internal class Arbeidsgiver private constructor(
         id: UUID,
         type: Utbetaling.Utbetalingtype,
         arbeidsgiverOppdrag: Oppdrag,
+        personOppdrag: Oppdrag,
         forrigeTilstand: Utbetaling.Tilstand,
         nesteTilstand: Utbetaling.Tilstand
     ) {
@@ -295,7 +304,8 @@ internal class Arbeidsgiver private constructor(
                 type = type.name,
                 forrigeStatus = Utbetalingstatus.fraTilstand(forrigeTilstand).name,
                 gjeldendeStatus = Utbetalingstatus.fraTilstand(nesteTilstand).name,
-                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap()
+                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
+                personOppdrag = OppdragReflect(personOppdrag).toMap(),
             )
         )
     }

@@ -192,7 +192,7 @@ internal class Utbetaling private constructor(
         tilstand.leaving(this, hendelse)
         tilstand = neste
         observers.forEach {
-            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, forrigeTilstand, neste)
+            it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
         }
         tilstand.entering(this, hendelse)
     }
@@ -525,7 +525,7 @@ internal class Utbetaling private constructor(
 
     internal object Utbetalt : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            utbetaling.vurdering?.utbetalt(hendelse, utbetaling, utbetaling.arbeidsgiverOppdrag)
+            utbetaling.vurdering?.utbetalt(hendelse, utbetaling)
         }
 
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
@@ -595,9 +595,21 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun utbetalt(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {
+        internal fun utbetalt(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
-                it.utbetalingUtbetalt(utbetaling.id, utbetaling.type, oppdrag, ident, epost, tidspunkt, automatiskBehandling)
+                it.utbetalingUtbetalt(
+                    utbetaling.id,
+                    utbetaling.type,
+                    utbetaling.maksdato,
+                    utbetaling.forbrukteSykedager!!,
+                    utbetaling.gjenståendeSykedager!!,
+                    utbetaling.arbeidsgiverOppdrag,
+                    utbetaling.personOppdrag,
+                    ident,
+                    epost,
+                    tidspunkt,
+                    automatiskBehandling
+                )
             }
         }
 
