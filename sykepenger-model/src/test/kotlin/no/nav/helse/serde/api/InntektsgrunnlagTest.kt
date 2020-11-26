@@ -21,6 +21,12 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             this {
                 addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
             }
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(this, 1.januar, UUID.randomUUID()) }
         })
         val skjæringstidspunkter = listOf(1.januar)
 
@@ -41,6 +47,12 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                 id = UUID.randomUUID(),
                 arbeidsgiverperioder = listOf(1.januar til 16.januar)
             ).addInntekt(this, 1.januar)
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(this, 1.januar, UUID.randomUUID()) }
         })
         val skjæringstidspunkter = listOf(1.januar)
 
@@ -59,6 +71,12 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         val inntektshistorikk = mapOf(ORGNUMMER to InntektshistorikkVol2().apply {
             Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
                 .addInntekter(UUID.randomUUID(), ORGNUMMER, this)
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(this, 1.januar, UUID.randomUUID()) }
         })
         val skjæringstidspunkter = listOf(1.januar)
 
@@ -83,6 +101,10 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                 1.oktober(2017) til 1.oktober(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
             }.forEach { it.lagreInntekter(this, 1.januar, UUID.randomUUID()) }
         })
         val skjæringstidspunkter = listOf(1.januar)
@@ -100,6 +122,40 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 2, it[0].sum)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[1].sum)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[2].sum)
+            }
+        }
+    }
+
+    @Test
+    fun `Finner sammenligningsgrunnlag for en arbeidsgiver med en inntektsmelding`() {
+        val inntektshistorikk = mapOf(ORGNUMMER to InntektshistorikkVol2().apply {
+            inntektsmelding(
+                id = UUID.randomUUID(),
+                arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            ).addInntekt(this, 1.januar)
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+                1.desember(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { it.lagreInntekter(this, 1.januar, UUID.randomUUID()) }
+        })
+        val skjæringstidspunkter = listOf(1.januar)
+
+        val inntektsgrunnlag = inntektsgrunnlag(inntektshistorikk, skjæringstidspunkter)
+
+        assertTrue(inntektsgrunnlag.isNotEmpty())
+        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag.also { sammenligningsgrunnlag ->
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, sammenligningsgrunnlag.beløp)
+            sammenligningsgrunnlag.inntekterFraAOrdningen.also {
+                assertEquals(12, it.size)
+                repeat(11) { index ->
+                    assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[index].sum)
+                }
+                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 2, it[11].sum)
             }
         }
     }

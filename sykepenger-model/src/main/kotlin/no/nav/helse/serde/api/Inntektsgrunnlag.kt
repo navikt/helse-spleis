@@ -3,8 +3,8 @@ package no.nav.helse.serde.api
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
-import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
+import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -36,11 +36,14 @@ private fun arbeidsgiverinntekt(
     inntektshistorikk: InntektshistorikkVol2
 ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
     val (inntektsopplysning, inntekt) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
+    val (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) =
+        requireNotNull(inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt))
     val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
+    val sammenligningsgrunnlagDTO = SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
     return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
         orgnummer,
         omregnetÅrsinntektDTO,
-        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(0.0, emptyList())
+        sammenligningsgrunnlagDTO
     )
 }
 
@@ -49,7 +52,7 @@ private class OmregnetÅrsinntektVisitor(
     private val inntekt: Inntekt
 ) : InntekthistorikkVisitor {
     lateinit var omregnetÅrsinntektDTO: OmregnetÅrsinntektDTO
-    private val skattegreier = mutableListOf<InntekterFraAOrdningenDTO>()
+    private val skattegreier = mutableListOf<OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO>()
 
     init {
         inntektsopplysning.accept(this)
@@ -113,10 +116,10 @@ private class OmregnetÅrsinntektVisitor(
         tidsstempel: LocalDateTime
     ) {
         skattegreier.add(
-            InntekterFraAOrdningenDTO(
-            måned = måned,
-            sum = beløp.reflection { _, mnd, _, _ -> mnd }
-        ))
+            OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO(
+                måned = måned,
+                sum = beløp.reflection { _, mnd, _, _ -> mnd }
+            ))
     }
 
     override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
@@ -127,7 +130,55 @@ private class OmregnetÅrsinntektVisitor(
             inntekterFraAOrdningen = skattegreier
                 .groupBy({ it.måned }) { it.sum }
                 .map { (måned: YearMonth, beløp: List<Double>) ->
-                    InntekterFraAOrdningenDTO(
+                    OmregnetÅrsinntektDTO.InntekterFraAOrdningenDTO(
+                        måned = måned,
+                        sum = beløp.sum()
+                    )
+                }
+        )
+    }
+    }
+
+private class SammenligningsgrunnlagVisitor(
+    inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
+    private val inntekt: Inntekt
+) : InntekthistorikkVisitor {
+    lateinit var sammenligningsgrunnlagDTO: SammenligningsgrunnlagDTO
+    private val skattegreier = mutableListOf<SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO>()
+
+    init {
+        inntektsopplysning.accept(this)
+    }
+
+    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+        skattegreier.clear()
+    }
+
+    override fun visitSkattSammenligningsgrunnlag(
+        sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        måned: YearMonth,
+        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        fordel: String,
+        beskrivelse: String,
+        tidsstempel: LocalDateTime
+    ) {
+        skattegreier.add(
+            SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO(
+                måned = måned,
+                sum = beløp.reflection { _, mnd, _, _ -> mnd }
+            ))
+    }
+
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+        sammenligningsgrunnlagDTO = SammenligningsgrunnlagDTO(
+            beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
+            inntekterFraAOrdningen = skattegreier
+                .groupBy({ it.måned }) { it.sum }
+                .map { (måned: YearMonth, beløp: List<Double>) ->
+                    SammenligningsgrunnlagDTO.InntekterFraAOrdningenDTO(
                         måned = måned,
                         sum = beløp.sum()
                     )
