@@ -430,7 +430,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        val annullering = inspektør.utbetaling(1)
+        val annullering = inspektør.utbetaling(2)
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertTrue(annullering.erAnnullering())
         assertEquals(19.januar, annullering.arbeidsgiverOppdrag().førstedato)

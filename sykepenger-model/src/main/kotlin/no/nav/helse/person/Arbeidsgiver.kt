@@ -118,10 +118,8 @@ internal class Arbeidsgiver private constructor(
         ).also { nyUtbetaling(it) }
     }
 
-    private fun nyUtbetaling(utbetaling: Utbetaling, forrige: Utbetaling? = null) {
-        forrige?.also {
-            utbetalinger.add(utbetalinger.indexOf(forrige) + 1, utbetaling)
-        } ?: utbetalinger.add(utbetaling)
+    private fun nyUtbetaling(utbetaling: Utbetaling) {
+        utbetalinger.add(utbetaling)
         utbetaling.register(this)
     }
 
@@ -223,7 +221,7 @@ internal class Arbeidsgiver private constructor(
         hendelse.info("Håndterer annullering")
         val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
         val annullering = sisteUtbetalte.annuller(hendelse) ?: return
-        nyUtbetaling(annullering, sisteUtbetalte)
+        nyUtbetaling(annullering)
         annullering.håndter(hendelse)
         annullering.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
@@ -257,7 +255,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, nåværendeTidslinje()) ?: return
-        nyUtbetaling(etterutbetaling, sisteUtbetalte)
+        nyUtbetaling(etterutbetaling)
         etterutbetaling.håndter(hendelse)
         etterutbetaling.utbetal(hendelse)
     }

@@ -162,7 +162,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertEquals(3, inspektør.utbetalinger.size)
-        assertTrue(inspektør.utbetalinger[1].erAnnullering())
+        assertTrue(inspektør.utbetalinger[2].erAnnullering())
     }
 
     @Test

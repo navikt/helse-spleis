@@ -294,8 +294,14 @@ internal class Utbetaling private constructor(
                 ?: default()
 
         internal fun List<Utbetaling>.utbetalte() =
-            filterNot { harAnnullerte(it.arbeidsgiverOppdrag.fagsystemId()) }
-                .filter { it.erUtbetalt() }
+            this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
+                .mapValues { it.value.sortedBy { it.tidsstempel } }
+                .filter { it.value.any { it.erUtbetalt() } }
+                .mapValues { it.value.first().tidsstempel to it.value.last { it.erUtbetalt() } }
+                .map { (_, utbetaling) -> utbetaling }
+                .filterNot { (_, utbetaling) -> utbetaling.tilstand == Annullert }
+                .sortedBy { (opprettet, _) -> opprettet }
+                .map { (_, utbetaling) -> utbetaling }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()
@@ -304,10 +310,6 @@ internal class Utbetaling private constructor(
                 .map { it.utbetalingstidslinje }
                 .reversed()
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
-        private fun List<Utbetaling>.harAnnullerte(fagsystemId: String) =
-            filter { it.arbeidsgiverOppdrag.fagsystemId() == fagsystemId }
-                .any { it.erAnnullering() }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
