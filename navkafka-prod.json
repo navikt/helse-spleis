@@ -286,6 +286,14 @@
                     "role": "PRODUCER"
                 },
                 {
+                    "member": "srvhelsesparker",
+                    "role": "CONSUMER"
+                },
+                {
+                    "member": "srvhelsesparker",
+                    "role": "PRODUCER"
+                },
+                {
                     "member": "srvspoler",
                     "role": "CONSUMER"
                 },
