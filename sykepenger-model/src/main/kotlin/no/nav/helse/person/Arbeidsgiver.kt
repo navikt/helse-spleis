@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -227,7 +228,7 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(hendelse, ALLE)
     }
 
-    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, historie: Historie, hendelse: Grunnbeløpsregulering) {
+    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer etterutbetaling")
 
@@ -235,6 +236,13 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiver = this,
             hendelse = hendelse
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
+
+        if (!hendelse.harHistorikk) return utbetalingshistorikk(
+            aktivitetslogg = hendelse,
+            periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
+        )
+
+        val historie = Historie(person, hendelse.utbetalingshistorikk())
 
         hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
 

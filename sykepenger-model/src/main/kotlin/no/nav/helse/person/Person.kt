@@ -184,14 +184,7 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
-        if (!hendelse.harHistorikk) {
-            return Aktivitetslogg.Aktivitet.Behov.utbetalingshistorikk(
-                hendelse,
-                LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
-            )
-        }
-        val historie = Historie(this, hendelse.utbetalingshistorikk())
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, historie, hendelse)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse)
             ?: hendelse.error("Finner ikke arbeidsgiver")
     }
 
