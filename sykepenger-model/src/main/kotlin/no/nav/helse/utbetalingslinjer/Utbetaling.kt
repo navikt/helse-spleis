@@ -233,7 +233,9 @@ internal class Utbetaling private constructor(
         ): Utbetaling? {
             val sisteUtbetalte = arbeidsgiver
                 .utbetalteUtbetalinger()
-                .last { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) }
+                .lastOrNull { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null.also {
+                    hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
+            }
 
             val periode = sisteUtbetalte.arbeidsgiverOppdrag.førstedato til sisteUtbetalte.utbetalingstidslinje.sisteDato()
             if (!sisteUtbetalte.utbetalingstidslinje.er6GBegrenset()) {
