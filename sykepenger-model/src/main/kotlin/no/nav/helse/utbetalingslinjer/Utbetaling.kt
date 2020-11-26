@@ -245,19 +245,15 @@ internal class Utbetaling private constructor(
         }
 
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            if (utbetalinger.any { it.tilstand in listOf(Godkjent, Sendt, Overført) }) {
+            if (utbetalinger.any { it.tilstand in listOf(UtbetalingFeilet, Godkjent, Sendt, Overført) }) {
                 hendelse.error("Kan ikke annullere: det finnes utbetalinger in-flight")
                 return null
             }
 
-            return utbetalinger.reversed()
-                .filter { utbetaling -> utbetaling.tilstand in listOf(Utbetalt, Annullert, UtbetalingFeilet) }
-                .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
-                .filterNot { it.tilstand == Annullert }
-                .firstOrNull() ?: run {
-                    hendelse.error("Finner ingen utbetaling å annullere")
-                    return null
-                }
+            return utbetalinger.utbetalte().lastOrNull() ?: run {
+                hendelse.error("Finner ingen utbetaling å annullere")
+                return null
+            }
         }
 
         internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
@@ -286,29 +282,23 @@ internal class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             utbetalinger: List<Utbetaling>
         ) = Oppdrag(fødselsnummer, Sykepenger)
-        private fun sisteGyldig(utbetalinger: List<Utbetaling>, default: () -> Oppdrag) =
-            utbetalinger
-                .utbetalte()
-                .lastOrNull()
-                ?.arbeidsgiverOppdrag
-                ?: default()
 
         internal fun List<Utbetaling>.utbetalte() =
+            sisteUtbetaltePerFagsystemId()
+                .filterNot(Utbetaling::erAnnullering)
+
+        private fun List<Utbetaling>.sisteUtbetaltePerFagsystemId() =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
-                .mapValues { it.value.sortedBy { it.tidsstempel } }
-                .filter { it.value.any { it.erUtbetalt() } }
-                .mapValues { it.value.first().tidsstempel to it.value.last { it.erUtbetalt() } }
-                .map { (_, utbetaling) -> utbetaling }
-                .filterNot { (_, utbetaling) -> utbetaling.tilstand == Annullert }
-                .sortedBy { (opprettet, _) -> opprettet }
-                .map { (_, utbetaling) -> utbetaling }
+                .filter { it.value.any(Utbetaling::erUtbetalt) }
+                .mapValues { it.value.kronologisk() }
+                .mapValues { it.value.first().tidsstempel to it.value.last(Utbetaling::erUtbetalt) }
+                .map { (_, value) -> value }
+                .sortedBy { (førstegangOpprettet, _) -> førstegangOpprettet }
+                .map { (_, sisteUtbetalte) -> sisteUtbetalte }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()
-                .reversed()
-                .distinctBy { it.arbeidsgiverOppdrag().fagsystemId() }
                 .map { it.utbetalingstidslinje }
-                .reversed()
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
     }
 
