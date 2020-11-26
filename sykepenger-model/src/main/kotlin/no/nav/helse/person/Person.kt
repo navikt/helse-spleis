@@ -273,25 +273,17 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(arbeidsgiverId, ytelser).addInntektVol2(inntektsopplysninger, ytelser)
     }
 
-    internal fun sykepengegrunnlag(periode: Periode): Inntekt {
-        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
-        val grunnlagForSykepengegrunnlag: Inntekt =
-            if (Toggles.nyInntekt) {
-                arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
-            } else {
-                arbeidsgivere.inntekt(skjæringstidspunkt)
-            }
-        return minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, periode.endInclusive))
+    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate): Inntekt {
+        val grunnlagForSykepengegrunnlag: Inntekt = grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
+        return minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
     }
 
-    internal fun grunnlagForSykepengegrunnlag(periode: Periode): Inntekt {
-        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
-        return if (Toggles.nyInntekt) {
-            arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
+        if (Toggles.nyInntekt) {
+            arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
         } else {
             arbeidsgivere.inntekt(skjæringstidspunkt)
         }
-    }
 
     internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
         val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
@@ -308,11 +300,13 @@ class Person private constructor(
             .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, ytelser, historie) }
             .toMap()
     }
+
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
             Arbeidsgiver(this, arbeidsgiver)
         }
     }
+
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
 }

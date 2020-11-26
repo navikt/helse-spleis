@@ -2387,4 +2387,33 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         }
         Toggles.nyInntekt = false
     }
+
+    @Test
+    fun `beregner ikke skjæringstidspunktet på nytt for å finne sykepengegrunnlag`() {
+        Toggles.nyInntekt = true
+        håndterSykmelding(Sykmeldingsperiode(1.november(2020), 10.november(2020), 100))
+        håndterSøknad(Sykdom(1.november(2020), 10.november(2020), gradFraSykmelding = 100))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(20.oktober(2020), 31.oktober(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(20.oktober(2020), 22000.månedlig, ORGNUMMER, true)
+            )
+        )
+        håndterYtelser(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(20.oktober(2020), 31.oktober(2020), 1000, 100, ORGNUMMER),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(20.oktober(2020), 22000.månedlig, ORGNUMMER, true)
+            )
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        val utbetaltEvent = observatør.utbetaltEventer.last()
+
+        assertEquals(264000.0, utbetaltEvent.sykepengegrunnlag)
+        Toggles.nyInntekt = false
+    }
 }

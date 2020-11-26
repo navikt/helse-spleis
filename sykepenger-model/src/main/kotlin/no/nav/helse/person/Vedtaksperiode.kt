@@ -371,7 +371,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
-        val beregnetInntekt = person.grunnlagForSykepengegrunnlag(periode)
+        val beregnetInntekt = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
         if (vilkårsgrunnlag.valider(beregnetInntekt, skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
@@ -568,7 +568,7 @@ internal class Vedtaksperiode private constructor(
     private fun utbetaling() = checkNotNull(utbetaling) { "mangler utbetalinger" }
 
     private fun sendUtbetaltEvent(hendelse: ArbeidstakerHendelse) {
-        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(periode)) {
+        val sykepengegrunnlag = requireNotNull(person.sykepengegrunnlag(skjæringstidspunkt, periode.start)) {
             "Forventet sykepengegrunnlag ved opprettelse av utbetalt-event"
         }
         val inntekt = requireNotNull(arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)) {
@@ -627,8 +627,7 @@ internal class Vedtaksperiode private constructor(
             hendelseIder.add(it)
         }
         forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
-        skjæringstidspunktFraInfotrygd =
-            if (forlengelseFraInfotrygd == JA) tilstøtende.skjæringstidspunktFraInfotrygd else null
+        skjæringstidspunktFraInfotrygd = tilstøtende.skjæringstidspunktFraInfotrygd.takeIf { forlengelseFraInfotrygd == JA }
     }
 
     // er fortsatt forlengelse
