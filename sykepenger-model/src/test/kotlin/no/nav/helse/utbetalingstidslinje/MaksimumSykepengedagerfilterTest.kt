@@ -186,24 +186,24 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test fun `teller sykedager med opphold i sykdom`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(10.NAVv2, startDato = 1.mars))
-        val historikk = tidslinjeOf(31.NAVv2, startDato = 1.januar(2018))
+        val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.mars))
+        val historikk = tidslinjeOf(45.NAVv2, startDato = 1.januar(2018))
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
         assertEquals(41, filter.forbrukteSykedager())
     }
 
     @Test fun `teller sykedager med overlapp`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(10.NAVv2, startDato = 1.februar))
-        val historikk = tidslinjeOf(10.ARBv2, 31.NAVv2, startDato = 1.januar(2018))
+        val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.februar))
+        val historikk = tidslinjeOf(12.ARBv2, 45.NAVv2, startDato = 1.januar(2018))
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
         assertEquals(31, filter.forbrukteSykedager())
     }
 
     @Test fun `teller sykedager med konflikt`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(10.NAVv2, startDato = 1.januar))
-        val historikk = tidslinjeOf(10.ARBv2, 31.NAVv2, startDato = 1.januar)
+        val gjeldendePerioder = listOf(tidslinjeOf(12.NAVv2, startDato = 1.januar))
+        val historikk = tidslinjeOf(12.ARBv2, 45.NAVv2, startDato = 1.januar)
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(gjeldendePerioder, historikk) }
         assertEquals(41, filter.forbrukteSykedager())
@@ -213,16 +213,6 @@ internal class MaksimumSykepengedagerfilterTest {
         val filter = maksimumSykepengedagerfilter()
             .also { it.filter(listOf(enAnnenSykdom()), Utbetalingstidslinje()) }
         assertEquals(54, filter.forbrukteSykedager())
-    }
-
-    @Test
-    fun `avviste dager i historikk failer som avviste dager`() {
-        val gjeldendePerioder = listOf(tidslinjeOf(255.NAVv2, startDato = 1.januar))
-        val historikk = tidslinjeOf(248.NAVv2, 1.AVVv2, startDato = 1.januar)
-        val filter = maksimumSykepengedagerfilter()
-            .also { it.filter(gjeldendePerioder, historikk) }
-        assertEquals(248, filter.forbrukteSykedager())
-        assertEquals(7, gjeldendePerioder.first().inspiser.avvisteDager)
     }
 
     private val Utbetalingstidslinje.inspiser get() = UtbetalingsTidslinjeInspektør().also { this.accept(it) }

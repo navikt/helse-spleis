@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 /**
  * Tar høyde for helg i dag-generering.
- * Eks: 10.NAVv2 fra en mandag gir 10 sykedager i 2 hele arbeidsuker + 2 sykHelg-dager
+ * Eks: 12.NAVv2 fra en mandag gir 10 sykedager i 2 hele arbeidsuker + 2 sykHelg-dager
  * */
 internal fun tidslinjeOf(
     vararg utbetalingsdager: Utbetalingsdager,
@@ -19,12 +19,11 @@ internal fun tidslinjeOf(
     utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad) ->
         var dato = startDato
         repeat(antallDager) {
-            while (helgedag != null && dato.erHelg()) {
+            if (helgedag != null && dato.erHelg()) {
                 this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
-                dato = dato.plusDays(1)
+            } else {
+                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
             }
-
-            this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
             dato = dato.plusDays(1)
         }
         dato

@@ -7,7 +7,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingstidslinjeTest {
 
@@ -106,9 +105,19 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(12.januar, tidslinje.sisteDato())
     }
 
+    @Test
+    fun `tidslinje med bare feriedager minus annen tidslinje resulterer i tom tidslinje`() {
+        val tidslinje = tidslinjeOf(12.FRIv2).minus(tidslinjeOf(5.NAVv2, startDato = 8.januar))
+        assertEquals(0, tidslinje.size)
+    }
+
+    @Test
+    fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {
+        val tidslinje = tidslinjeOf(5.NAVv2).minus(tidslinjeOf(5.NAVv2))
+        assertEquals(0, tidslinje.size)
+    }
 
     private fun undersøke(tidslinje: Utbetalingstidslinje) {
         inspektør = UtbetalingstidslinjeInspektør(tidslinje)
     }
-
 }

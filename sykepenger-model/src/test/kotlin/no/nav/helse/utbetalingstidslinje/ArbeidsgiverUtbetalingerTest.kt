@@ -143,8 +143,8 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `historiske utbetalingstidslinjer vurdert i 248 grense`() {
         undersøke(
             PERSON_67_ÅR_FNR_2018,
-            tidslinjeOf(35.UTELATE, 50.NAVv2),
-            tidslinjeOf(7.UTELATE, 20.NAVv2)
+            tidslinjeOf(35.UTELATE, 68.NAVv2),
+            tidslinjeOf(7.UTELATE, 26.NAVv2)
         )
 
         assertEquals(68, inspektør.size)
