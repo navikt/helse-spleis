@@ -94,6 +94,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
+    private fun erAktiv() = erUtbetalt() || tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
@@ -199,7 +200,6 @@ internal class Utbetaling private constructor(
     }
 
     internal companion object {
-
         private const val systemident = "SPLEIS"
 
         internal fun lagUtbetaling(
@@ -214,7 +214,7 @@ internal class Utbetaling private constructor(
             gjenståendeSykedager: Int
         ): Utbetaling {
             return Utbetaling(
-                utbetalinger.utbetalte().lastOrNull(),
+                utbetalinger.aktive().lastOrNull(),
                 fødselsnummer,
                 organisasjonsnummer,
                 utbetalingstidslinje,
@@ -228,31 +228,22 @@ internal class Utbetaling private constructor(
         }
 
         internal fun finnUtbetalingForJustering(
-            arbeidsgiver: Arbeidsgiver,
+            utbetalinger: List<Utbetaling>,
             hendelse: Grunnbeløpsregulering
         ): Utbetaling? {
-            val sisteUtbetalte = arbeidsgiver
-                .utbetalteUtbetalinger()
-                .lastOrNull { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null.also {
-                    hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
+            val sisteUtbetalte = utbetalinger.aktive().lastOrNull { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null.also {
+                hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
             }
-
             val periode = sisteUtbetalte.arbeidsgiverOppdrag.førstedato til sisteUtbetalte.utbetalingstidslinje.sisteDato()
             if (!sisteUtbetalte.utbetalingstidslinje.er6GBegrenset()) {
                 hendelse.info("Utbetalingen for perioden $periode er ikke begrenset av 6G")
                 return null
             }
-
             return sisteUtbetalte
         }
 
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            if (utbetalinger.any { it.tilstand in listOf(UtbetalingFeilet, Godkjent, Sendt, Overført) }) {
-                hendelse.error("Kan ikke annullere: det finnes utbetalinger in-flight")
-                return null
-            }
-
-            return utbetalinger.utbetalte().lastOrNull() ?: run {
+            return utbetalinger.aktive().lastOrNull() ?: run {
                 hendelse.error("Finner ingen utbetaling å annullere")
                 return null
             }
@@ -285,18 +276,24 @@ internal class Utbetaling private constructor(
             utbetalinger: List<Utbetaling>
         ) = Oppdrag(fødselsnummer, Sykepenger)
 
-        internal fun List<Utbetaling>.utbetalte() =
-            sisteUtbetaltePerFagsystemId()
+        internal fun List<Utbetaling>.aktive() =
+            sisteUtbetalteOgAktivePerFagsystemId()
+                .map(Pair<*, Utbetaling>::second)
                 .filterNot(Utbetaling::erAnnullering)
 
-        private fun List<Utbetaling>.sisteUtbetaltePerFagsystemId() =
+        internal fun List<Utbetaling>.utbetalte() =
+            sisteUtbetalteOgAktivePerFagsystemId()
+                .mapNotNull(Pair<Utbetaling?, *>::first)
+                .filterNot(Utbetaling::erAnnullering)
+
+        private fun List<Utbetaling>.sisteUtbetalteOgAktivePerFagsystemId() =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
-                .filter { it.value.any(Utbetaling::erUtbetalt) }
+                .filter { it.value.any(Utbetaling::erAktiv) }
                 .mapValues { it.value.kronologisk() }
-                .mapValues { it.value.first().tidsstempel to it.value.last(Utbetaling::erUtbetalt) }
+                .mapValues { Triple(it.value.first().tidsstempel, it.value.lastOrNull(Utbetaling::erUtbetalt), it.value.last(Utbetaling::erAktiv)) }
                 .map { (_, value) -> value }
                 .sortedBy { (førstegangOpprettet, _) -> førstegangOpprettet }
-                .map { (_, sisteUtbetalte) -> sisteUtbetalte }
+                .map { (_, sisteUtbetalte, sisteAktive) -> sisteUtbetalte to sisteAktive}
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()

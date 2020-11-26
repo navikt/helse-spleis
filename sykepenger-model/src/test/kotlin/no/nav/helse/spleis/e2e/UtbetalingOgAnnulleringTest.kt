@@ -9,7 +9,7 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -35,7 +35,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
 
         assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
@@ -59,7 +59,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -80,7 +80,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        val fagsystemId = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
@@ -115,7 +115,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(20.februar, 7.mars)), førsteFraværsdag = 20.februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
-        val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.utbetalte().last().arbeidsgiverOppdrag().fagsystemId()
+        val fagsystemIdFørsteVedtaksperiode = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
         håndterAnnullerUtbetaling(fagsystemId = fagsystemIdFørsteVedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 

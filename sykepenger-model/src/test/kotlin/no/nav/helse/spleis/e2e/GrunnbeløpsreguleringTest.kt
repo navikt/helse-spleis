@@ -47,6 +47,36 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `ubetalt periode etterutbetales ikke`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020)) // skjæringstidspunkt før 1. mai
+        ubetaltVedtaksperiodeBegrensetAv6G(2, 10.juli(2020), 30.juli(2020)) // gap, ny skjæringstidspunkt 10.juni
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+    }
+
+    @Test
+    fun `ubetalt annullering etterutbetales ikke`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.april(2020), 31.mai(2020)) // skjæringstidspunkt før 1. mai
+        utbetaltVedtaksperiodeBegrensetAv6G(2, 10.juni(2020), 30.juni(2020)) // gap, ny skjæringstidspunkt 10.juni
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        assertEquals(3, inspektør.utbetalinger.size)
+        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+    }
+
+    @Test
+    fun `annullert utbetalig etterutbetales ikke`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.april(2020), 31.mai(2020)) // skjæringstidspunkt før 1. mai
+        utbetaltVedtaksperiodeBegrensetAv6G(2, 10.juni(2020), 30.juni(2020)) // gap, ny skjæringstidspunkt 10.juni
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
+        håndterUtbetalt()
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        assertEquals(3, inspektør.utbetalinger.size)
+        assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+    }
+
+    @Test
     fun `grunnbeløpsregulering ødelegger ikke for oppdragene frem i tid`() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 1.mai(2020), 31.mai(2020))
         utbetaltVedtaksperiodeBegrensetAv6G(2, 5.juli(2020), 31.juli(2020))
@@ -148,7 +178,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun utbetaltVedtaksperiodeBegrensetAv6G(
+    private fun ubetaltVedtaksperiodeBegrensetAv6G(
         vedtaksperiodeIndeks: Int,
         fom: LocalDate,
         tom: LocalDate,
@@ -170,6 +200,19 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
+    }
+
+    private fun utbetaltVedtaksperiodeBegrensetAv6G(
+        vedtaksperiodeIndeks: Int,
+        fom: LocalDate,
+        tom: LocalDate,
+        arbeidsgiverperiode: List<Periode> = listOf(Periode(
+            fom,
+            fom.plusDays(15)
+        )),
+        førsteFraværsdag: LocalDate = fom
+    ) {
+        ubetaltVedtaksperiodeBegrensetAv6G(vedtaksperiodeIndeks, fom, tom, arbeidsgiverperiode, førsteFraværsdag)
         håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)
     }
 

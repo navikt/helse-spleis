@@ -44,7 +44,7 @@ internal class TestArbeidsgiverInspektør(
     internal var låstePerioder = emptyList<Periode>()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
-    internal lateinit var utbetalinger: List<Utbetaling>
+    internal val utbetalinger = mutableListOf<Utbetaling>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
@@ -137,7 +137,7 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        this.utbetalinger = utbetalinger
+        this.utbetalinger.addAll(utbetalinger)
     }
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {

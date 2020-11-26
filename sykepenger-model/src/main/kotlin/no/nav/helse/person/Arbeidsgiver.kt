@@ -233,7 +233,7 @@ internal class Arbeidsgiver private constructor(
         hendelse.info("Håndterer etterutbetaling")
 
         val sisteUtbetalte = Utbetaling.finnUtbetalingForJustering(
-            arbeidsgiver = this,
+            utbetalinger = utbetalinger,
             hendelse = hendelse
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
 

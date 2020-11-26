@@ -9,7 +9,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.*
@@ -388,7 +388,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        inspektør.utbetalinger.utbetalte().also { utbetalinger ->
+        inspektør.utbetalinger.aktive().also { utbetalinger ->
             assertEquals(1, utbetalinger.size)
             UtbetalingstidslinjeInspektør(utbetalinger.first().utbetalingstidslinje()).also {
                 assertEquals(0, it.arbeidsgiverperiodeDagTeller)
