@@ -244,8 +244,6 @@ internal class Arbeidsgiver private constructor(
 
         val historie = Historie(person, hendelse.utbetalingshistorikk())
 
-        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
-
         val arbeidsgivertidslinjer = arbeidsgivere.map {
             it to it.utbetalinger.utbetaltTidslinje()
         }
@@ -257,7 +255,10 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje)
         }
 
-        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, nåværendeTidslinje()) ?: return
+        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, nåværendeTidslinje())
+            ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
+
+        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
         nyUtbetaling(etterutbetaling)
         etterutbetaling.håndter(hendelse)
         etterutbetaling.utbetal(hendelse)
