@@ -20,7 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: Boolean, utbetaling: Pair<Utbetaling, Utbetaling.Tilstand>?) = when (tilstand) {
+internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: Boolean, utbetaling: Utbetaling?) = when (tilstand) {
     TilstandType.START,
     TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
     TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
@@ -47,9 +47,9 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
     TilstandType.AVVENTER_GODKJENNING -> TilstandstypeDTO.Oppgaver
     TilstandType.AVSLUTTET -> when {
         utbetaling == null -> TilstandstypeDTO.IngenUtbetaling
-        utbetaling.second == Utbetaling.Annullert -> TilstandstypeDTO.Annullert
-        utbetaling.first.erAnnullering() && utbetaling.second == Utbetaling.UtbetalingFeilet -> TilstandstypeDTO.AnnulleringFeilet
-        utbetaling.first.erAnnullering() -> TilstandstypeDTO.TilAnnullering
+        utbetaling.erAnnullering() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert
+        utbetaling.erAnnullering() && utbetaling.harFeilet() -> TilstandstypeDTO.AnnulleringFeilet
+        utbetaling.erAnnullering() -> TilstandstypeDTO.TilAnnullering
         utbetalt -> TilstandstypeDTO.Utbetalt
         kunFerie -> TilstandstypeDTO.KunFerie
         else -> TilstandstypeDTO.IngenUtbetaling
