@@ -18,7 +18,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
         val inntektshistorikk = mapOf(ORGNUMMER to InntektshistorikkVol2().apply {
-            this{
+            this {
                 addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
             }
         })
@@ -30,7 +30,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
             assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
-            assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
         }
     }
 
@@ -50,7 +50,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
             assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
-            assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
         }
     }
 
@@ -68,7 +68,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
             assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
-            assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, omregnetÅrsinntekt.månedsbeløp)
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
         }
     }
 
@@ -92,14 +92,14 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
             assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
-            assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig } * 4, omregnetÅrsinntekt.sumFraAOrdningen)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig } * 4 / 3, omregnetÅrsinntekt.beløp)
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 4 / 3, omregnetÅrsinntekt.månedsbeløp)
             omregnetÅrsinntekt.inntekterFraAOrdningen.also {
                 requireNotNull(it)
                 assertEquals(3, it.size)
-                assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig } * 2, it[0].sum)
-                assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, it[1].sum)
-                assertEquals(INNTEKT.reflection { _, månedlig, _, _ -> månedlig }, it[2].sum)
+                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 2, it[0].sum)
+                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[1].sum)
+                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, it[2].sum)
             }
         }
     }

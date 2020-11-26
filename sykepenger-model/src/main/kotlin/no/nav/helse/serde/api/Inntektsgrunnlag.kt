@@ -35,8 +35,8 @@ private fun arbeidsgiverinntekt(
     orgnummer: String,
     inntektshistorikk: InntektshistorikkVol2
 ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-    val (inntektsopplysning, _) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
-    val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning).omregnetÅrsinntektDTO
+    val (inntektsopplysning, inntekt) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
+    val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
     return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
         orgnummer,
         omregnetÅrsinntektDTO,
@@ -44,7 +44,10 @@ private fun arbeidsgiverinntekt(
     )
 }
 
-private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning) : InntekthistorikkVisitor {
+private class OmregnetÅrsinntektVisitor(
+    inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
+    private val inntekt: Inntekt
+) : InntekthistorikkVisitor {
     lateinit var omregnetÅrsinntektDTO: OmregnetÅrsinntektDTO
     private val skattegreier = mutableListOf<InntekterFraAOrdningenDTO>()
 
@@ -62,7 +65,7 @@ private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVo
         omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
             kilde = InntektkildeDTO.Saksbehandler,
             beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
+            månedsbeløp = beløp.reflection { _, mnd, _, _ -> mnd }
         )
     }
 
@@ -76,7 +79,7 @@ private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVo
         omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
             kilde = InntektkildeDTO.Inntektsmelding,
             beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
+            månedsbeløp = beløp.reflection { _, mnd, _, _ -> mnd }
         )
     }
 
@@ -90,7 +93,7 @@ private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVo
         omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
             kilde = InntektkildeDTO.Infotrygd,
             beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-            månedsbeløp = beløp.reflection { _, månedlig, _, _ -> månedlig }
+            månedsbeløp = beløp.reflection { _, mnd, _, _ -> mnd }
         )
     }
 
@@ -117,10 +120,10 @@ private class OmregnetÅrsinntektVisitor(inntektsopplysning: InntektshistorikkVo
     }
 
     override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
-        val (_, inntekt) = skattComposite.grunnlagForSykepengegrunnlag(skattComposite.dato)!!
         omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
+            kilde = InntektkildeDTO.AOrdningen,
             beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
-            sumFraAOrdningen = skattegreier.sumOf { it.sum },
+            månedsbeløp = inntekt.reflection { _, mnd, _, _ -> mnd },
             inntekterFraAOrdningen = skattegreier
                 .groupBy({ it.måned }) { it.sum }
                 .map { (måned: YearMonth, beløp: List<Double>) ->
