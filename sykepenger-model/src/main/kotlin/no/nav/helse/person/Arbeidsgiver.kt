@@ -227,17 +227,12 @@ internal class Arbeidsgiver private constructor(
         søppelbøtte(hendelse, ALLE)
     }
 
-    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
+    internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, historie: Historie, hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer etterutbetaling")
-        // TODO: trenger IT-historikk for å finne skjæringstidspunkt på eldre utbetalingstidslinjer
-        // som ikke har fått skjæringsdato satt i Økonomi-objektene ennå
-        val skjæringstidspunkter = emptyList<LocalDate>()
+
         val sisteUtbetalte = Utbetaling.finnUtbetalingForJustering(
             arbeidsgiver = this,
-            organisasjonsnummer = organisasjonsnummer,
-            arbeidsgivere = arbeidsgivere.map { it to it.utbetalinger }.toMap(),
-            skjæringstidspunkter = skjæringstidspunkter,
             hendelse = hendelse
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
 
@@ -247,7 +242,7 @@ internal class Arbeidsgiver private constructor(
             it to it.utbetalinger.utbetaltTidslinje()
         }
 
-        MaksimumUtbetaling(arbeidsgivertidslinjer.map { it.second }.toList(), hendelse, skjæringstidspunkter, LocalDate.now())
+        MaksimumUtbetaling(arbeidsgivertidslinjer.map { it.second }.toList(), hendelse, historie.skjæringstidspunkter(LocalDate.now()), LocalDate.now())
             .betal()
 
         arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->

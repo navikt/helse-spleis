@@ -112,7 +112,10 @@ internal class Historie() {
         sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
 
     internal fun skjæringstidspunkter(periode: Periode) =
-        Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, sykdomstidslinjer)
+        skjæringstidspunkter(periode.endInclusive)
+
+    internal fun skjæringstidspunkter(kuttdato: LocalDate) =
+        Sykdomstidslinje.skjæringstidspunkter(kuttdato, sykdomstidslinjer)
 
     internal fun utbetalingstidslinje(periode: Periode) =
         (infotrygdbøtte.utbetalingstidslinje() + spleisbøtte.utbetalingstidslinje()).kutt(periode.endInclusive)

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.junit.jupiter.api.fail
 import java.util.*
 
 internal class TestRapid : RapidsConnection() {
@@ -90,6 +91,14 @@ internal class TestRapid : RapidsConnection() {
                 }
             }
 
+        private val utbetalingtyper
+            get() = mutableMapOf<UUID, String>().apply {
+                events("utbetaling_endret") {
+                    val id = UUID.fromString(it.path("utbetalingId").asText())
+                    this[id] = it.path("type").asText()
+                }
+            }
+
         private val forkastedeTilstander
             get() = tilstander.filter { it.key in forkastedeVedtaksperiodeIder }
 
@@ -140,6 +149,10 @@ internal class TestRapid : RapidsConnection() {
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtilstander[utbetalingId]?.toList()
             } ?: emptyList()
+        fun utbetalingtype(utbetalingIndeks: Int) =
+            utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
+                utbetalingtyper[utbetalingId]
+            } ?: fail { "Finner ikke utbetaling" }
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()

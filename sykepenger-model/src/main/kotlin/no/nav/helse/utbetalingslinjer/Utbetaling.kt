@@ -228,9 +228,6 @@ internal class Utbetaling private constructor(
 
         internal fun finnUtbetalingForJustering(
             arbeidsgiver: Arbeidsgiver,
-            organisasjonsnummer: String,
-            arbeidsgivere: Map<Arbeidsgiver, MutableList<Utbetaling>>,
-            skjæringstidspunkter: List<LocalDate>,
             hendelse: Grunnbeløpsregulering
         ): Utbetaling? {
             val sisteUtbetalte = arbeidsgiver

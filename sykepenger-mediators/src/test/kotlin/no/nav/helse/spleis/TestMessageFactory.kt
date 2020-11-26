@@ -106,7 +106,8 @@ internal class TestMessageFactory(
     fun lagInnteksmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList()
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = inntekt,
     ): String {
         val inntektsmelding = Inntektsmelding(
             inntektsmeldingId = UUID.randomUUID().toString(),
@@ -117,8 +118,8 @@ internal class TestMessageFactory(
             arbeidsgiverAktorId = null,
             arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
             arbeidsforholdId = null,
-            beregnetInntekt = inntekt.toBigDecimal(),
-            refusjon = Refusjon(inntekt.toBigDecimal(), null),
+            beregnetInntekt = beregnetInntekt.toBigDecimal(),
+            refusjon = Refusjon(beregnetInntekt.toBigDecimal(), null),
             endringIRefusjoner = emptyList(),
             opphoerAvNaturalytelser = opphørAvNaturalytelser,
             gjenopptakelseNaturalytelser = emptyList(),
@@ -343,6 +344,40 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagEtterbetaling(
+        fagsystemId: String,
+        gyldighetsdato: LocalDate
+    ): String {
+        return nyHendelse(
+            navn = "Etterbetalingskandidat_v1",
+            hendelse = mapOf(
+                "fagsystemId" to fagsystemId,
+                "gyldighetsdato" to gyldighetsdato,
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                ),
+        )
+    }
+
+    fun lagEtterbetalingMedHistorikk(
+        fagsystemId: String,
+        gyldighetsdato: LocalDate
+    ): String {
+        return lagBehovMedLøsning(
+            behov = listOf("Sykepengehistorikk"),
+            løsninger = mapOf(
+                "Sykepengehistorikk" to emptyList<Any>()
+            ),
+            ekstraFelter = mapOf(
+                "fagsystemId" to fagsystemId,
+                "gyldighetsdato" to gyldighetsdato,
+            ),
+            vedtaksperiodeId = null,
+            tilstand = null,
+        )
+    }
+
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
@@ -384,10 +419,10 @@ internal class TestMessageFactory(
     }
 
     fun lagUtbetaling(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: UUID?,
         fagsystemId: String,
         utbetalingId: String,
-        tilstand: TilstandType,
+        tilstand: TilstandType?,
         utbetalingOK: Boolean = true,
         saksbehandler: String = "Siri Saksbehandler",
         saksbehandlerEpost: String = "siri.saksbehandler@nav.no",
@@ -420,10 +455,10 @@ internal class TestMessageFactory(
     }
 
     fun lagUtbetalingOverført(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: UUID?,
         fagsystemId: String,
         utbetalingId: String,
-        tilstand: TilstandType,
+        tilstand: TilstandType?,
         avstemmingsnøkkel: Long,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): String {
@@ -509,21 +544,22 @@ internal class TestMessageFactory(
 
     private fun lagBehovMedLøsning(
         behov: List<String> = listOf(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        tilstand: TilstandType,
+        vedtaksperiodeId: UUID? = UUID.randomUUID(),
+        tilstand: TilstandType?,
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap()
     ) = nyHendelse(
-        "behov", ekstraFelter + mapOf(
+        "behov", ekstraFelter + mutableMapOf(
             "@behov" to behov,
-            "tilstand" to tilstand.name,
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId.toString(),
             "@løsning" to løsninger,
             "@final" to true,
             "@besvart" to LocalDateTime.now()
-        )
+        ).apply {
+            tilstand?.let { this["tilstand"] = it.name }
+            vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
+        }
     )
 }

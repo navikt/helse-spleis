@@ -8,19 +8,20 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.JsonMessageDelegate
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
+import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import java.time.LocalDateTime
 
-internal class UtbetalingshistorikkRiver(
+internal class EtterbetalingerRiverMedHistorikk(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Sykepengehistorikk)
-    override val riverName = "Utbetalingshistorikk"
+    override val riverName = "Kandidat for etterbetaling med historikk"
 
     override fun validate(packet: JsonMessage) {
         packet.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
-        packet.rejectKey("fagsystemId")
+        packet.demandKey("fagsystemId")
+        packet.requireKey("gyldighetsdato")
         packet.requireArray("@løsning.${Sykepengehistorikk.name}") {
             requireArray("inntektsopplysninger") {
                 require("sykepengerFom", JsonNode::asLocalDate)
@@ -34,5 +35,5 @@ internal class UtbetalingshistorikkRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = EtterbetalingMessage(JsonMessageDelegate(packet))
 }

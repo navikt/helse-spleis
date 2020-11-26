@@ -394,7 +394,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
                 gyldighetsdato = gyldighetsdato,
-                fagsystemId = fagsystemId
+                fagsystemId = fagsystemId,
+                aktivitetslogg = Aktivitetslogg(),
+                utbetalingshistorikk = utbetalingshistorikk(UUID.randomUUID())
             )
         )
     }

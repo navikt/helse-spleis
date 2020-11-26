@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
@@ -15,6 +16,7 @@ internal class EtterbetalingerRiver(
 
     override fun validate(packet: JsonMessage) {
         packet.requireKey("aktørId", "fødselsnummer", "fagsystemId", "organisasjonsnummer", "gyldighetsdato")
+        packet.rejectKey("@løsning.${Sykepengehistorikk.name}")
     }
 
     override fun createMessage(packet: JsonMessage) = EtterbetalingMessage(JsonMessageDelegate(packet))

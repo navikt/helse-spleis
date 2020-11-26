@@ -114,11 +114,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         vedtaksperiodeIndeks: Int,
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList()
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = INNTEKT,
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser))
+        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt))
     }
 
     protected fun sendNyPåminnelse(vedtaksperiodeIndeks: Int = -1, tilstandType: TilstandType = TilstandType.START) {
@@ -213,6 +214,30 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendEtterbetaling(
+        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+        gyldighetsdato: LocalDate
+    ) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEtterbetaling(
+                fagsystemId = fagsystemId,
+                gyldighetsdato = gyldighetsdato
+            )
+        )
+    }
+
+    protected fun sendEtterbetalingMedHistorikk(
+        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+        gyldighetsdato: LocalDate
+    ) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEtterbetalingMedHistorikk(
+                fagsystemId = fagsystemId,
+                gyldighetsdato = gyldighetsdato
+            )
+        )
+    }
+
     protected fun sendUtbetaling(
         vedtaksperiodeIndeks: Int,
         utbetalingOK: Boolean = true,
@@ -243,6 +268,34 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendUtbetalingUtenVedtaksperiode(
+        utbetalingOK: Boolean = true,
+        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
+        annullert: Boolean = false
+    ) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingOverført(
+                vedtaksperiodeId = null,
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
+                tilstand = null,
+                avstemmingsnøkkel = 123456L,
+                overføringstidspunkt = LocalDateTime.now()
+            )
+        )
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetaling(
+                vedtaksperiodeId = null,
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
+                tilstand = null,
+                saksbehandlerEpost = saksbehandlerEpost,
+                annullering = annullert,
+                utbetalingOK = utbetalingOK
+            )
+        )
+    }
+
     protected fun sendRollback(personVersjon: Long) {
         testRapid.sendTestMessage(meldingsfabrikk.lagRollback(personVersjon))
     }
@@ -257,6 +310,13 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendOverstyringTidslinje(dager: List<ManuellOverskrivingDag>) {
         testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringTidslinje(dager))
+    }
+
+    protected fun assertUtbetalingtype(utbetalingIndeks: Int, type: String) {
+        assertEquals(
+            type,
+            testRapid.inspektør.utbetalingtype(utbetalingIndeks)
+        )
     }
 
     protected fun assertTilstander(vedtaksperiodeIndeks: Int, vararg tilstand: String) {

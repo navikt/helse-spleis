@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Grunnbeløp
-import no.nav.helse.testhelpers.*
-
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mai
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.*
 
