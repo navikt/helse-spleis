@@ -28,8 +28,9 @@ internal class TestArbeidsgiverInspektør(
     private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val skjæringstidspunkter = mutableMapOf<Int, LocalDate>()
-    private val maksdatoer = mutableMapOf<Int, LocalDate>()
-    private val gjenståendeSykedagerer = mutableMapOf<Int, Int>()
+    private val maksdatoer = mutableListOf<LocalDate>()
+    private val forbrukteSykedagerer = mutableListOf<Int?>()
+    private val gjenståendeSykedagerer = mutableListOf<Int?>()
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val fagsystemIder = mutableMapOf<Int, String>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
@@ -170,11 +171,13 @@ internal class TestArbeidsgiverInspektør(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = true
-        if (!inVedtaksperiode) utbetalingstilstander.add(tilstand)
-        else {
+        if (!inVedtaksperiode) {
+            maksdatoer.add(maksdato)
+            utbetalingstilstander.add(tilstand)
+            forbrukteSykedagerer.add(forbrukteSykedager)
+            gjenståendeSykedagerer.add(gjenståendeSykedager)
+        } else {
             vedtaksperiodeutbetalinger[vedtaksperiodeindeks] = utbetalinger.indexOf(utbetaling)
-            if (gjenståendeSykedager != null) gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
-            maksdatoer[vedtaksperiodeindeks] = maksdato
         }
     }
 
@@ -276,9 +279,11 @@ internal class TestArbeidsgiverInspektør(
 
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
+    private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
 
-    internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.finn(vedtaksperiodeutbetalinger)]
+    internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.utbetalingsindeks]
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
+    internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 
@@ -293,9 +298,15 @@ internal class TestArbeidsgiverInspektør(
     internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.behov().last { it.type == type }
 
-    internal fun maksdato(id: UUID) = id.finn(maksdatoer)
+    internal fun maksdato(indeks: Int) = maksdatoer[indeks]
+    internal fun maksdato(id: UUID) = maksdatoer[id.utbetalingsindeks]
 
-    internal fun gjenståendeSykedager(id: UUID) = id.finn(gjenståendeSykedagerer)
+    internal fun forbrukteSykedager(indeks: Int) = forbrukteSykedagerer[indeks]
+    internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks]
+
+    internal fun gjenståendeSykedager(id: UUID) = gjenståendeSykedagerer[id.utbetalingsindeks] ?: fail {
+        "Vedtaksperiode $id har ikke oppgitt gjenstående sykedager"
+    }
 
     internal fun forlengelseFraInfotrygd(id: UUID) = id.finn(forlengelserFraInfotrygd)
 

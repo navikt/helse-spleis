@@ -33,6 +33,20 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `etterutbetaling har samme data som siste utbetalte`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.april(2020), 31.mai(2020)) // skjæringstidspunkt før 1. mai
+        utbetaltVedtaksperiodeBegrensetAv6G(2, 10.juni(2020), 30.juni(2020)) // gap, ny skjæringstidspunkt 10.juni
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.juli(2020), 31.juli(2020))
+        utbetaltVedtaksperiodeBegrensetAv6G(4, 10.august(2020), 31.august(2020)) // gap, ny skjæringstidspunkt 10. august
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        val etterutbetaling = inspektør.utbetaling(4)
+        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertEquals(inspektør.maksdato(3), inspektør.maksdato(4))
+        assertEquals(inspektør.forbrukteSykedager(3), inspektør.forbrukteSykedager(4))
+        assertEquals(inspektør.gjenståendeSykedager(3), inspektør.gjenståendeSykedager(4))
+    }
+
+    @Test
     fun `grunnbeløpsregulering ødelegger ikke for oppdragene frem i tid`() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 1.mai(2020), 31.mai(2020))
         utbetaltVedtaksperiodeBegrensetAv6G(2, 5.juli(2020), 31.juli(2020))
