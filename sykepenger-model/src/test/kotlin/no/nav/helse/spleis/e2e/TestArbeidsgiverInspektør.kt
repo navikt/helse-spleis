@@ -44,6 +44,7 @@ internal class TestArbeidsgiverInspektør(
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
     internal val inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
     internal lateinit var utbetalinger: List<Utbetaling>
+    private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
@@ -169,9 +170,9 @@ internal class TestArbeidsgiverInspektør(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = true
-        if (!inVedtaksperiode) {
-            utbetalingstilstander.add(tilstand)
-        } else {
+        if (!inVedtaksperiode) utbetalingstilstander.add(tilstand)
+        else {
+            vedtaksperiodeutbetalinger[vedtaksperiodeindeks] = utbetalinger.indexOf(utbetaling)
             if (gjenståendeSykedager != null) gjenståendeSykedagerer[vedtaksperiodeindeks] = gjenståendeSykedager
             maksdatoer[vedtaksperiodeindeks] = maksdato
         }
@@ -276,6 +277,7 @@ internal class TestArbeidsgiverInspektør(
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
 
+    internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.finn(vedtaksperiodeutbetalinger)]
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)

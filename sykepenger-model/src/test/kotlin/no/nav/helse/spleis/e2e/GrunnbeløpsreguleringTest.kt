@@ -33,6 +33,28 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `grunnbeløpsregulering ødelegger ikke for oppdragene frem i tid`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.mai(2020), 31.mai(2020))
+        utbetaltVedtaksperiodeBegrensetAv6G(2, 5.juli(2020), 31.juli(2020))
+        håndterGrunnbeløpsregulering(
+            gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP,
+            fagsystemId = inspektør.utbetalinger.first().arbeidsgiverOppdrag().fagsystemId()
+        )
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
+        inspektør.utbetalinger.also { utbetalinger ->
+            assertEquals(4, utbetalinger.size)
+            assertEquals(inspektør.vedtaksperiodeutbetaling(1.vedtaksperiode), utbetalinger[0])
+            assertEquals(inspektør.vedtaksperiodeutbetaling(2.vedtaksperiode), utbetalinger[2])
+            assertEquals(inspektør.vedtaksperiodeutbetaling(3.vedtaksperiode), utbetalinger[3])
+
+            assertEquals(utbetalinger[0].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[1].arbeidsgiverOppdrag().fagsystemId())
+            assertTrue(utbetalinger[1].erEtterutbetaling())
+            assertNotEquals(utbetalinger[0].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[2].arbeidsgiverOppdrag().fagsystemId())
+            assertEquals(utbetalinger[2].arbeidsgiverOppdrag().fagsystemId(), utbetalinger[3].arbeidsgiverOppdrag().fagsystemId())
+        }
+    }
+
+    @Test
     fun `justere tidligere perioder automatisk ved ny periode etter ny grunnbeløpsvirkning`() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 1.april(2020), 31.mai(2020)) // skjæringstidspunkt før 1. mai
         utbetaltVedtaksperiodeBegrensetAv6G(2, 10.juni(2020), 30.juni(2020)) // gap, ny skjæringstidspunkt 10.juni
