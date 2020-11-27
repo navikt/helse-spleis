@@ -1,9 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -17,6 +15,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     private companion object {
         private val HØY_INNTEKT = 800000.00.årlig
         private val GYLDIGHETSDATO_2020_GRUNNBELØP = 21.september(2020)
+        private const val ORGNUMMER_AG2 = "654326881"
     }
 
     @Test
@@ -28,6 +27,24 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         assertEquals(4, inspektør.utbetalinger.size)
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(5, inspektør.utbetalinger.size)
+        val etterutbetaling = inspektør.utbetalinger.last()
+        assertTrue(etterutbetaling.erEtterutbetaling())
+    }
+
+    @Test
+    fun `ignorerer flere arbeidsgivere uten utbetalinger`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020), inntekter = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                    ORGNUMMER_AG2 inntekt INNTEKT
+                }
+            }
+        ))
+        assertEquals(1, inspektør.utbetalinger.size)
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        assertEquals(2, inspektør.utbetalinger.size)
         val etterutbetaling = inspektør.utbetalinger.last()
         assertTrue(etterutbetaling.erEtterutbetaling())
     }
@@ -48,8 +65,8 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `ubetalt periode etterutbetales ikke`() {
-        utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020)) // skjæringstidspunkt før 1. mai
-        ubetaltVedtaksperiodeBegrensetAv6G(2, 10.juli(2020), 30.juli(2020)) // gap, ny skjæringstidspunkt 10.juni
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020))
+        ubetaltVedtaksperiodeBegrensetAv6G(2, 10.juli(2020), 30.juli(2020))
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(2, inspektør.utbetalinger.size)
         assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
@@ -186,7 +203,15 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             fom,
             fom.plusDays(15)
         )),
-        førsteFraværsdag: LocalDate = fom
+        førsteFraværsdag: LocalDate = fom,
+        inntekter: Inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt HØY_INNTEKT
+                }
+            }
+        )
     ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
@@ -196,7 +221,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             førsteFraværsdag = førsteFraværsdag,
             refusjon = Triple(null, HØY_INNTEKT, emptyList())
         )
-        håndterVilkårsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode, HØY_INNTEKT)
+        håndterVilkårsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = inntekter)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
@@ -210,9 +235,17 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             fom,
             fom.plusDays(15)
         )),
-        førsteFraværsdag: LocalDate = fom
+        førsteFraværsdag: LocalDate = fom,
+        inntekter: Inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt HØY_INNTEKT
+                }
+            }
+        )
     ) {
-        ubetaltVedtaksperiodeBegrensetAv6G(vedtaksperiodeIndeks, fom, tom, arbeidsgiverperiode, førsteFraværsdag)
+        ubetaltVedtaksperiodeBegrensetAv6G(vedtaksperiodeIndeks, fom, tom, arbeidsgiverperiode, førsteFraværsdag, inntekter)
         håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)
     }
 

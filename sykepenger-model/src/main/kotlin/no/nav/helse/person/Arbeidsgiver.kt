@@ -237,31 +237,34 @@ internal class Arbeidsgiver private constructor(
             hendelse = hendelse
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
 
-        if (!hendelse.harHistorikk) return utbetalingshistorikk(
-            aktivitetslogg = hendelse,
-            periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
-        )
+        val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
+        if (!hendelse.harHistorikk) return utbetalingshistorikk(hendelse, periode)
 
-        val historie = Historie(person, hendelse.utbetalingshistorikk())
+        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere,  Historie(person, hendelse.utbetalingshistorikk()), periode)
 
-        val arbeidsgivertidslinjer = arbeidsgivere.map {
-            it to it.utbetalinger.utbetaltTidslinje()
-        }
-
-        MaksimumUtbetaling(arbeidsgivertidslinjer.map { it.second }.toList(), hendelse, historie.skjæringstidspunkter(LocalDate.now()), LocalDate.now())
-            .betal()
-
-        arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
-            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje)
-        }
-
-        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, nåværendeTidslinje())
+        val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, reberegnetTidslinje)
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
 
         hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
         nyUtbetaling(etterutbetaling)
         etterutbetaling.håndter(hendelse)
         etterutbetaling.utbetal(hendelse)
+    }
+
+    private fun reberegnUtbetalte(aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, historie: Historie, periode: Periode): Utbetalingstidslinje {
+        val arbeidsgivertidslinjer = arbeidsgivere
+            .map { it to it.utbetalinger.utbetaltTidslinje() }
+            .filter { it.second.isNotEmpty() }
+            .toMap()
+
+        MaksimumUtbetaling(arbeidsgivertidslinjer.values.toList(), aktivitetslogg, historie.skjæringstidspunkter(periode), periode.endInclusive)
+            .betal()
+
+        arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje)
+        }
+
+        return nåværendeTidslinje()
     }
 
     override fun utbetalingUtbetalt(

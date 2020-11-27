@@ -114,7 +114,7 @@ internal class Historie() {
     internal fun skjæringstidspunkter(periode: Periode) =
         skjæringstidspunkter(periode.endInclusive)
 
-    internal fun skjæringstidspunkter(kuttdato: LocalDate) =
+    private fun skjæringstidspunkter(kuttdato: LocalDate) =
         Sykdomstidslinje.skjæringstidspunkter(kuttdato, sykdomstidslinjer)
 
     internal fun utbetalingstidslinje(periode: Periode) =
