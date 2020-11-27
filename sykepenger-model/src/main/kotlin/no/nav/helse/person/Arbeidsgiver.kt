@@ -13,6 +13,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.fjernFastlåstAnnullering
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
@@ -220,6 +221,9 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
+
+        utbetalinger.fjernFastlåstAnnullering(hendelse)
+
         val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
         val annullering = sisteUtbetalte.annuller(hendelse) ?: return
         nyUtbetaling(annullering)

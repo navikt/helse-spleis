@@ -403,7 +403,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterAnnullerUtbetaling(
         orgnummer: String = ORGNUMMER,
-        fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId()
+        fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
+        opprettet: LocalDateTime = LocalDateTime.now()
     ) {
         person.håndter(
             AnnullerUtbetaling(
@@ -414,7 +415,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 fagsystemId = fagsystemId,
                 saksbehandlerIdent = "Ola Nordmann",
                 saksbehandlerEpost = "tbd@nav.no",
-                opprettet = LocalDateTime.now()
+                opprettet = opprettet
             )
         )
     }

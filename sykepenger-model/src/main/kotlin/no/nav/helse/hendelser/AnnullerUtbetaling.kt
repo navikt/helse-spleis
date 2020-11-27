@@ -14,7 +14,7 @@ class AnnullerUtbetaling(
     private val fagsystemId: String,
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
-    private val opprettet: LocalDateTime,
+    internal val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
 

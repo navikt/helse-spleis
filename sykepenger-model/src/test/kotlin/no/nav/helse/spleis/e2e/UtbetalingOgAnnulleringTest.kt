@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -336,5 +337,30 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `Kan annullere over en fastlåst annullering`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)) // Stale
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+
+        assertTrue(inspektør.utbetalinger.last().erAnnullering())
+        assertEquals(1, observatør.annulleringer.size)
+        assertEquals(3,
+            inspektør.personLogg.behov()
+                .filter { it.detaljer()["fagsystemId"] == inspektør.fagsystemId(1.vedtaksperiode) }
+                .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
+                .size
+        )
+        assertEquals(2, inspektør.utbetalinger.size)
     }
 }
