@@ -524,6 +524,8 @@ internal class Økonomi private constructor(
                 tilstand = HarInntekt
             }
 
+            override fun betal(økonomi: Økonomi) {}
+
             override fun er6GBegrenset(økonomi: Økonomi) = false
 
             override fun <R> reflection(

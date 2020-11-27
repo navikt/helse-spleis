@@ -32,6 +32,31 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `etterutbetale en som gikk til maksdato`() {
+        utbetaltVedtaksperiodeBegrensetAv6G(1, 1.august(2019), 31.august(2019))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(2, 1.september(2019), 30.september(2019))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.oktober(2019), 31.oktober(2019))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(4, 1.november(2019), 30.november(2019))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(5, 1.desember(2019), 31.desember(2019))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(6, 1.januar(2020), 31.januar(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(7, 1.februar(2020), 28.februar(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(8, 1.mars(2020), 31.mars(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(9, 1.april(2020), 30.april(2020))
+
+        utbetaltVedtaksperiodeBegrensetAv6G(10, 14.mai(2020), 31.mai(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(11, 1.juni(2020), 30.juni(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(12, 1.juli(2020), 31.juli(2020))
+        utbetaltForlengetVedtaksperiodeBegrensetAv6G(13, 1.august(2020), 31.august(2020))
+
+        assertEquals(11.august(2020), inspektør.maksdato(13.vedtaksperiode))
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        assertEquals(14, inspektør.utbetalinger.size)
+        val etterutbetaling = inspektør.utbetalinger.last()
+        assertTrue(etterutbetaling.erEtterutbetaling())
+        assertEquals(11.august(2020), etterutbetaling.arbeidsgiverOppdrag().sistedato)
+    }
+
+    @Test
     fun `ignorerer flere arbeidsgivere uten utbetalinger`() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020), inntekter = Inntektsvurdering(
             inntekter = inntektperioder {
