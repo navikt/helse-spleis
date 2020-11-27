@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
@@ -44,6 +45,9 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         Toggles.nyInntekt = false
     }
 
+    private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.InntektTing(sisteDato).also { it.skjæringstidspunkt = this }
+    private infix fun SpeilBuilder.InntektTing.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
+
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
@@ -67,13 +71,18 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode)   // No history
-        val skjæringstidspunkter = mapOf(1.januar to 31.januar)
+        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar avvik 0.0)
 
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, skjæringstidspunkter)
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertEquals(0.0, inntektsgrunnlaget.avviksprosent)
+            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
+            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -105,14 +114,19 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        val skjæringstidspunkter = mapOf(1.januar to 31.januar)
+        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar avvik 7.7)
 
         val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, skjæringstidspunkter)
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
+            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
+            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -148,14 +162,19 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
-        val skjæringstidspunkter = mapOf(1.oktober(2017) to 31.januar)
+        val dataForSkjæringstidspunkt = listOf(1.oktober(2017) og 31.januar)
 
         val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, skjæringstidspunkter)
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.avviksprosent)
+            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
+            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -191,13 +210,18 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 
-        val skjæringstidspunkter = mapOf(1.oktober(2017) to 31.januar)
+        val dataForSkjæringstidspunkt = listOf(1.oktober(2017) og 31.januar)
 
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, skjæringstidspunkter)
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.avviksprosent)
+            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
+            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)

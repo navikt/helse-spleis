@@ -28,9 +28,7 @@ class Prosent private constructor(private val desimal: Double) : Comparable<Pros
         if (this.equals(other)) 0
         else this.desimal.compareTo(other.desimal)
 
-    override fun toString(): String {
-        return "${prosent().roundToInt()}%"
-    }
+    override fun toString() = "${roundToInt()}%"
 
     internal fun ratio() = desimal
 

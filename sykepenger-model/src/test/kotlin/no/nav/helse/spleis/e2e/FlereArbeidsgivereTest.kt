@@ -81,7 +81,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar til 15.februar))
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(1.januar))
     }
 
     @Test
@@ -124,7 +124,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(282500.årlig, person.sammenligningsgrunnlag(15.januar til 5.februar))
+        assertEquals(282500.årlig, person.sammenligningsgrunnlag(2.februar))
     }
 
     @Test
@@ -168,7 +168,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar til 15.februar))
+        assertEquals(318500.årlig, person.sammenligningsgrunnlag(15.januar))
     }
 
     @Test

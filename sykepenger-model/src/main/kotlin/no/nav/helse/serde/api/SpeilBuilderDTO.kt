@@ -312,7 +312,7 @@ data class InntektsgrunnlagDTO(
     val sykepengegrunnlag: Double,
     val omregnetÅrsinntekt: Double,
     val sammenligningsgrunnlag: Double,
-    val avviksprosent: Double,
+    val avviksprosent: Double?,
     val grunnbeløp: Int,
     val maksUtbetalingPerDag: Int,
     val inntekter: List<ArbeidsgiverinntektDTO>

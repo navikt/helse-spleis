@@ -278,8 +278,7 @@ class Person private constructor(
             arbeidsgivere.inntekt(skjæringstidspunkt)
         }
 
-    internal fun sammenligningsgrunnlag(periode: Periode): Inntekt {
-        val skjæringstidspunkt = Historie(this).skjæringstidspunkt(periode) ?: periode.start
+    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
         return arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
     }
 

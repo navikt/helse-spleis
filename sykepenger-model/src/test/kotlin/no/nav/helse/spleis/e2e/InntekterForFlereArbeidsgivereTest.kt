@@ -93,7 +93,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             ))
 
-        assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar til 31.januar))
+        assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar))
     }
 
     @Disabled("Henting av inntekter er ikke implementert riktig")
