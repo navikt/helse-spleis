@@ -2,6 +2,7 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Person
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO
@@ -11,15 +12,20 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal fun inntektsgrunnlag(inntektshistorikk: Map<String, InntektshistorikkVol2>, skjæringstidspunkter: List<LocalDate>): List<InntektsgrunnlagDTO> {
+internal fun inntektsgrunnlag(
+    person: Person,
+    inntektshistorikk: Map<String, InntektshistorikkVol2>,
+    skjæringstidspunkter: Map<LocalDate, LocalDate>
+): List<InntektsgrunnlagDTO> {
     return skjæringstidspunkter
-        .map { skjæringstidspunkt ->
+        .map { (skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden) ->
             val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
                 inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(skjæringstidspunkt, orgnummer, inntekthist) }
 
             InntektsgrunnlagDTO(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = 123.0,
+                sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
+                    .reflection { årlig, _, _, _ -> årlig },
                 omregnetÅrsinntekt = 123.0,
                 sammenligningsgrunnlag = 123.0,
                 avviksprosent = 0.0,
@@ -36,10 +42,11 @@ private fun arbeidsgiverinntekt(
     inntektshistorikk: InntektshistorikkVol2
 ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
     val (inntektsopplysning, inntekt) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt))
-    val (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) =
-        requireNotNull(inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt))
     val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
-    val sammenligningsgrunnlagDTO = SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
+    val sammenligningsgrunnlagDTO =
+        inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
+            SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
+        }
     return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(
         orgnummer,
         omregnetÅrsinntektDTO,
@@ -137,7 +144,7 @@ private class OmregnetÅrsinntektVisitor(
                 }
         )
     }
-    }
+}
 
 private class SammenligningsgrunnlagVisitor(
     inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,

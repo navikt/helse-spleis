@@ -139,7 +139,7 @@ internal class UtbetalingstidslinjeTest {
     }
 
     @Test
-    fun `tidslinje med ekstra NAVdager etter en tidslinje som trekkes fra resulterer i en tidslinje med bare de siste NAVdagene (første helg med NAVdager beholdes)`() {
+    fun `tidslinje med ekstra NAVdager etter en tidslinje som trekkes fra resulterer i en tidslinje med bare de siste NAVdagene`() {
         val tidslinje = tidslinjeOf(7.NAVv2, 7.FRIv2, 7.NAVv2) - tidslinjeOf(7.NAVv2, 7.FRIv2)
         assertEquals(7, tidslinje.size)
         undersøke(tidslinje)

@@ -122,8 +122,10 @@ internal class Utbetalingstidslinje private constructor(
     private fun overlapper(other: Utbetalingstidslinje) = this.periode().overlapperMed(other.periode())
 
     private fun trim() =
-        if (isEmpty() || all { it is UkjentDag || (it is Fridag && it.dato.erHelg()) }) Utbetalingstidslinje()
-        else subset(first { it !is UkjentDag && !(it is Fridag && it.dato.erHelg()) }.dato, sisteDato())
+        if (isEmpty() || all { erUkjentDag(it) }) Utbetalingstidslinje()
+        else subset(first { !erUkjentDag(it) }.dato, sisteDato())
+
+    private fun erUkjentDag(it: Utbetalingsdag) = it is UkjentDag || it is Fridag && it.dato.erHelg()
 
     private fun binde(
         other: Utbetalingstidslinje,
