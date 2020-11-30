@@ -2417,4 +2417,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(264000.0, utbetaltEvent.sykepengegrunnlag)
         Toggles.nyInntekt = false
     }
+
+    @Test
+    fun `Inntektsmelding er gyldig dersom den utvider perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(28.oktober(2020), 8.november(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(28.oktober(2020), 8.november(2020), gradFraSykmelding = 100))
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 22.november(2020), 100))
+        håndterSøknad(Sykdom(9.november(2020), 22.november(2020), gradFraSykmelding = 100))
+
+        håndterInntektsmelding(listOf(Periode(27.oktober(2020), 8.november(2020))), 27.oktober)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
+    }
 }
