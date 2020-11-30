@@ -437,6 +437,22 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals(26.januar, annullering.arbeidsgiverOppdrag().sistedato)
     }
 
+    @Test
+    fun `forlengelse ved inflight annullering`() {
+        /*
+        Tidligere har vi kun basert oss på utbetalinger i en sluttilstand for å beregne ny utbetaling. Om vi hadde en annullering som var in-flight ville denne
+        bli ignorert og det ville bli laget en utbetaling som strakk seg helt tilbake til første del av sammenhengende periode, noe som igjen vil føre til at vi
+        lager en duplikat utbetaling.
+         */
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, TilstandType.AVVENTER_GAP, TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+    }
+
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
         val linjer = mutableListOf<Utbetalingslinje>()

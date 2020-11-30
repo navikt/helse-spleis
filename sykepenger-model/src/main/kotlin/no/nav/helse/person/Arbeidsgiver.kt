@@ -13,9 +13,9 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.fjernFastlåstAnnullering
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetalte
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -125,7 +125,7 @@ internal class Arbeidsgiver private constructor(
         utbetaling.register(this)
     }
 
-    internal fun utbetalteUtbetalinger() = utbetalinger.utbetalte()
+    internal fun utbetalteUtbetalinger() = utbetalinger.aktive()
 
     internal fun nåværendeTidslinje() =
         beregnetUtbetalingstidslinjer.lastOrNull()?.second ?: throw IllegalStateException("mangler utbetalinger")

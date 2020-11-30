@@ -283,26 +283,14 @@ internal class Utbetaling private constructor(
         ) = Oppdrag(fødselsnummer, Sykepenger)
 
         internal fun List<Utbetaling>.aktive() =
-            sisteUtbetalteOgAktivePerFagsystemId()
-                .map(Pair<*, Utbetaling>::second)
-                .filterNot(Utbetaling::erAnnullering)
-
-        internal fun List<Utbetaling>.utbetalte() =
-            sisteUtbetalteOgAktivePerFagsystemId()
-                .mapNotNull(Pair<Utbetaling?, *>::first)
-                .filterNot(Utbetaling::erAnnullering)
-
-        private fun List<Utbetaling>.sisteUtbetalteOgAktivePerFagsystemId() =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
-                .filter { it.value.any(Utbetaling::erAktiv) }
-                .mapValues { it.value.kronologisk() }
-                .mapValues { Triple(it.value.first().tidsstempel, it.value.lastOrNull(Utbetaling::erUtbetalt), it.value.last(Utbetaling::erAktiv)) }
-                .map { (_, value) -> value }
-                .sortedBy { (førstegangOpprettet, _) -> førstegangOpprettet }
-                .map { (_, sisteUtbetalte, sisteAktive) -> sisteUtbetalte to sisteAktive}
+                .map { (_, utbetalinger) -> utbetalinger.kronologisk() }
+                .sortedBy { it.first().tidsstempel }
+                .mapNotNull { it.lastOrNull(Utbetaling::erAktiv) }
+                .filterNot(Utbetaling::erAnnullering)
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
-            utbetalte()
+            aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
