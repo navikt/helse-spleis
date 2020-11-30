@@ -101,6 +101,7 @@ class BehovMediatorTest {
             assertEquals("Arbeidsgiver 1", it["Arbeidsgiver"].asText())
             assertEquals("Vedtaksperiode 1", it["Vedtaksperiode"].asText())
             assertEquals(LocalDate.now().toString(), it["historikkFom"].asText())
+            assertEquals(LocalDate.now().toString(), it[Sykepengehistorikk.name]["historikkFom"].asText())
         }
         objectMapper.readTree(messages[1].second).also {
             assertEquals("behov", it["@event_name"].asText())

@@ -43,6 +43,7 @@ internal class BehovMediator(
                         require(duplikater.isEmpty()) { "Kan ikke produsere behov med duplikate detaljer: $duplikater. Forsøker å sende ut: ${behov.joinToString { it.type.name }}" }
                         behovsliste.add(enkeltbehov.type.name)
                         putAll(enkeltbehov.detaljer())
+                        put(enkeltbehov.type.name, enkeltbehov.detaljer())
                     }
                 }
                 .let { JsonMessage.newMessage(it) }
