@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.UtbetalingOverført
@@ -9,6 +10,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.serde.reflection.UtbetalingReflect
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
@@ -30,6 +32,27 @@ internal class UtbetalingTest {
     @BeforeEach
     private fun initEach() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `sorterer etter når fagsystemIDen ble oppretta`() {
+        val tidslinje = tidslinjeOf(
+            16.AP, 1.NAV, 2.HELG, 5.NAV(1200, 50.0), 7.FRI, 16.AP, 1.NAV,
+            startDato = 1.januar(2020)
+        )
+
+        beregnUtbetalinger(tidslinje)
+
+        val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
+        val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
+        val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre)
+        val andreAnnullert = andre.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", andre.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
+            "Klarte ikke lage annullering"
+        }
+        godkjenn(andreAnnullert)
+
+        assertEquals(listOf(andre, tredje), listOf(tredje, andre, første).aktive())
+        assertEquals(listOf(tredje), listOf(andreAnnullert, tredje, andre, første).aktive())
     }
 
     @Test
@@ -147,20 +170,7 @@ internal class UtbetalingTest {
         148
     ).also { utbetaling ->
         var utbetalingId: String = ""
-        Utbetalingsgodkjenning(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "ignore",
-            fødselsnummer = "ignore",
-            organisasjonsnummer = "ignore",
-            vedtaksperiodeId = "ignore",
-            utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
-            saksbehandler = "Z999999",
-            saksbehandlerEpost = "mille.mellomleder@nav.no",
-            utbetalingGodkjent = true,
-            godkjenttidspunkt = LocalDateTime.now(),
-            automatiskBehandling = false
-        ).also {
-            utbetaling.håndter(it)
+        godkjenn(utbetaling).also {
             utbetaling.utbetal(it)
             utbetalingId = it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()}")
         }
@@ -191,6 +201,23 @@ internal class UtbetalingTest {
             )
         )
     }
+
+    private fun godkjenn(utbetaling: Utbetaling) =
+        Utbetalingsgodkjenning(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "ignore",
+            fødselsnummer = "ignore",
+            organisasjonsnummer = "ignore",
+            vedtaksperiodeId = "ignore",
+            utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+            saksbehandler = "Z999999",
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            utbetalingGodkjent = true,
+            godkjenttidspunkt = LocalDateTime.now(),
+            automatiskBehandling = false
+        ).also {
+            utbetaling.håndter(it)
+        }
 
     private class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         private var linjeteller = 0
