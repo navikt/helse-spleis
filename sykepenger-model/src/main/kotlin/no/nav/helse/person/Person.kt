@@ -91,14 +91,7 @@ class Person private constructor(
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.error("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
             observers.forEach {
-                it.vedtaksperiodeIkkeFunnet(
-                    PersonObserver.VedtaksperiodeIkkeFunnetEvent(
-                        vedtaksperiodeId = UUID.fromString(påminnelse.vedtaksperiodeId),
-                        aktørId = påminnelse.aktørId(),
-                        fødselsnummer = påminnelse.fødselsnummer(),
-                        organisasjonsnummer = påminnelse.organisasjonsnummer()
-                    )
-                )
+                påminnelse.vedtaksperiodeIkkeFunnet(it)
             }
         }
     }
@@ -125,12 +118,12 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
-    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-        observers.forEach { it.vedtaksperiodePåminnet(påminnelse) }
+    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
+        observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, påminnelse) }
     }
 
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
-        observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse, tilstandType) }
+    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, tilstandType: TilstandType) {
+        observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse, vedtaksperiodeId, tilstandType) }
     }
 
     fun vedtaksperiodeAvbrutt(event: PersonObserver.VedtaksperiodeAvbruttEvent) {

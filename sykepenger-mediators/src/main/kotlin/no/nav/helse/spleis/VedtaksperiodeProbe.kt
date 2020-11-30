@@ -2,9 +2,9 @@ package no.nav.helse.spleis
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.PersonObserver
 import org.slf4j.LoggerFactory
+import java.util.*
 
 object VedtaksperiodeProbe : PersonObserver {
 
@@ -21,12 +21,12 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
         log.info(
-            "mottok påminnelse for vedtaksperiode: ${påminnelse.vedtaksperiodeId}",
+            "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
-            keyValue("vedtaksperiodeId", påminnelse.vedtaksperiodeId),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("tilstand", påminnelse.tilstand().name),
             keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
             keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())

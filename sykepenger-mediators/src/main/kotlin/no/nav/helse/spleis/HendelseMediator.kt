@@ -293,26 +293,15 @@ internal class HendelseMediator(
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-            override fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
-                queueMessage(
-                    "vedtaksperiode_påminnet", JsonMessage.newMessage(
-                        mapOf(
-                            "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
-                            "tilstand" to påminnelse.tilstand(),
-                            "antallGangerPåminnet" to påminnelse.antallGangerPåminnet(),
-                            "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt(),
-                            "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt(),
-                            "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt()
-                        )
-                    )
-                )
+            override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
+                queueMessage("vedtaksperiode_påminnet", JsonMessage.newMessage(påminnelse.toMap()))
             }
 
-            override fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, nåværendeTilstand: TilstandType) {
+            override fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {
                 queueMessage(
                     "vedtaksperiode_ikke_påminnet", JsonMessage.newMessage(
                         mapOf(
-                            "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
+                            "vedtaksperiodeId" to vedtaksperiodeId,
                             "tilstand" to nåværendeTilstand
                         )
                     )

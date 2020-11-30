@@ -159,9 +159,9 @@ interface PersonObserver {
 
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
 
-    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {}
+    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
 
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, nåværendeTilstand: TilstandType) {}
+    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
 
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
 

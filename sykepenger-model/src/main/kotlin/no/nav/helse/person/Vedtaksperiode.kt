@@ -178,7 +178,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
-        if (id.toString() != påminnelse.vedtaksperiodeId) return false
+        if (!påminnelse.erRelevant(id)) return false
         kontekst(påminnelse)
         tilstand.påminnelse(this, påminnelse)
         return true
@@ -660,8 +660,8 @@ internal class Vedtaksperiode private constructor(
         this.tilstand != TilUtbetaling
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
-        vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
+        if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, vedtaksperiode.id, type)
+        vedtaksperiode.person.vedtaksperiodePåminnet(vedtaksperiode.id, påminnelse)
         if (LocalDateTime.now() >= makstid(
                 vedtaksperiode,
                 påminnelse.tilstandsendringstidspunkt()
