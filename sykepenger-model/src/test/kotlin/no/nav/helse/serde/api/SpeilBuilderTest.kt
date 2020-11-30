@@ -103,7 +103,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
                 fangeUtbetalinger()
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
@@ -122,7 +122,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
             }
         }
 
@@ -163,7 +163,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
                 fangeUtbetalinger()
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
@@ -183,7 +183,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 fangeUtbetalinger()
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
             }
         }
 
@@ -232,7 +232,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
                 fangeUtbetalinger()
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
@@ -251,7 +251,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeIder.last(), this@run.aktivitetslogg))
 
@@ -273,7 +273,7 @@ class SpeilBuilderTest {
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last()))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeIder.last(), aktivitetslogg = this@run.aktivitetslogg))
             }
         }
 
@@ -362,7 +362,7 @@ class SpeilBuilderTest {
                 )
 
                 håndter(simulering(vedtaksperiodeId = sisteVedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = sisteVedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = sisteVedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
             }
         }
 
@@ -696,7 +696,7 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, automatiskBehandling = automatiskBehandling).also {
+                    utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, automatiskBehandling = automatiskBehandling, aktivitetslogg = this@run.aktivitetslogg).also {
                         håndter(it)
                         if (it.behov().any { it.type == Behovtype.Utbetaling }) {
                             håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, it))
@@ -726,7 +726,7 @@ class SpeilBuilderTest {
                         håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                         fangeUtbetalinger()
                         håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                        utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId).also {
+                        utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg).also {
                             håndter(it)
                             if (it.behov().any { it.type == Behovtype.Utbetaling }) {
                                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, it))
@@ -768,7 +768,7 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
 
@@ -794,7 +794,7 @@ class SpeilBuilderTest {
                         håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                         fangeUtbetalinger()
                         håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                        håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                        håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                         håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                         håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                     }
@@ -824,7 +824,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
 
@@ -849,7 +849,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingGodkjent = false))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, utbetalingGodkjent = false, aktivitetslogg = this@run.aktivitetslogg))
 
                 sykmelding(fom = 1.mars, tom = 31.mars).also { (sykmelding, sykmeldingDTO) ->
                     håndter(sykmelding)
@@ -872,7 +872,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
             }
@@ -901,7 +901,7 @@ class SpeilBuilderTest {
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                 håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
 
@@ -942,7 +942,7 @@ class SpeilBuilderTest {
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                 }
             }
 
@@ -1010,7 +1010,7 @@ class SpeilBuilderTest {
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     fangeUtbetalinger()
                     håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
@@ -1042,7 +1042,7 @@ class SpeilBuilderTest {
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
-                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     fangeUtbetalinger()
                     håndter(overføring(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
                     håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId, this@run.aktivitetslogg))
@@ -1333,7 +1333,8 @@ class SpeilBuilderTest {
         private fun utbetalingsgodkjenning(
             vedtaksperiodeId: String,
             utbetalingGodkjent: Boolean = true,
-            automatiskBehandling: Boolean = false
+            automatiskBehandling: Boolean = false,
+            aktivitetslogg: IAktivitetslogg
         ) =
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
@@ -1341,6 +1342,7 @@ class SpeilBuilderTest {
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
+                utbetalingId = UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
                 utbetalingGodkjent = utbetalingGodkjent,
                 saksbehandler = if (automatiskBehandling) "Automatisk behandlet" else "en_saksbehandler_ident",
                 godkjenttidspunkt = LocalDateTime.now(),

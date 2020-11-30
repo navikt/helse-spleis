@@ -17,6 +17,7 @@ internal class UtbetalingsgodkjenningerRiver(
     override val riverName = "Utbetalingsgodkjenning"
 
     override fun validate(packet: JsonMessage) {
+        packet.requireKey("utbetalingId")
         packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
         packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
         packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")

@@ -380,6 +380,7 @@ internal class TestMessageFactory(
 
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
         tilstand: TilstandType,
         utbetalingGodkjent: Boolean,
         saksbehandlerIdent: String,
@@ -398,6 +399,9 @@ internal class TestMessageFactory(
                     "automatiskBehandling" to automatiskBehandling,
                     "godkjenttidspunkt" to LocalDateTime.now()
                 )
+            ),
+            ekstraFelter = mapOf(
+                "utbetalingId" to utbetalingId
             )
         )
     }

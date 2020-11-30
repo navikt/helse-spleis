@@ -106,6 +106,7 @@ internal class Utbetaling private constructor(
         personOppdrag.utenUendretLinjer().isNotEmpty()
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
+        if (!hendelse.erRelevant(id)) return
         hendelse.valider()
         godkjenn(hendelse, hendelse.vurdering())
     }

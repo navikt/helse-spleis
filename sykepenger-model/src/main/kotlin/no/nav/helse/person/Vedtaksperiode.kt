@@ -148,7 +148,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-        if (id.toString() != utbetalingsgodkjenning.vedtaksperiodeId()) return
+        if (!utbetalingsgodkjenning.erRelevant(id.toString())) return
         kontekst(utbetalingsgodkjenning)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingsgodkjenning)
     }

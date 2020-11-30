@@ -82,6 +82,7 @@ internal class MessageMediatorTest {
     fun utbetalingsgodkjenning() {
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingsgodkjenning(
             vedtaksperiodeId = UUID.randomUUID(),
+            utbetalingId = UUID.randomUUID(),
             tilstand = TilstandType.START,
             utbetalingGodkjent = true,
             saksbehandlerIdent = "en_saksbehandler",

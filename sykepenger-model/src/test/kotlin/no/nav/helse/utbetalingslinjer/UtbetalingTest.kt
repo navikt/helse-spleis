@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.serde.reflection.UtbetalingReflect
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -152,6 +153,7 @@ internal class UtbetalingTest {
             fødselsnummer = "ignore",
             organisasjonsnummer = "ignore",
             vedtaksperiodeId = "ignore",
+            utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
             saksbehandler = "Z999999",
             saksbehandlerEpost = "mille.mellomleder@nav.no",
             utbetalingGodkjent = true,

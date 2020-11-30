@@ -11,6 +11,7 @@ class Utbetalingsgodkjenning(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
+    private val utbetalingId: UUID,
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val saksbehandlerEpost: String,
@@ -19,11 +20,8 @@ class Utbetalingsgodkjenning(
     private val automatiskBehandling: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
-    internal fun vedtaksperiodeId() = vedtaksperiodeId
-    internal fun saksbehandler() = saksbehandler
-    internal fun saksbehandlerEpost() = saksbehandlerEpost
-    internal fun godkjenttidspunkt() = godkjenttidspunkt
-    internal fun automatiskBehandling() = automatiskBehandling
+    internal fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
+    internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
 
     internal fun vurdering() = Utbetaling.Vurdering(
         utbetalingGodkjent,

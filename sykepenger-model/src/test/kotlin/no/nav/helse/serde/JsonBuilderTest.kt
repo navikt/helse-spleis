@@ -166,7 +166,6 @@ class JsonBuilderTest {
                 håndter(inntektsmelding(fom = 1.januar))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
             }
 
         fun forkastedeVedtaksperioderperson(
@@ -403,9 +402,10 @@ class JsonBuilderTest {
             )
         }
 
-        fun utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
+        fun Person.utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = UUID.fromString(this.aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
             aktørId = aktørId,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,

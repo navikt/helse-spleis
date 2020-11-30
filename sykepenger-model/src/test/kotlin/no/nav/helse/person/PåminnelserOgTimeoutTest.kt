@@ -373,6 +373,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
+        utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
+            Behovtype.Godkjenning
+        ).kontekst()}")),
         vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = true,

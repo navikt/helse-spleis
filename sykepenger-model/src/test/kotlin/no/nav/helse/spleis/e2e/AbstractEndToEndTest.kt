@@ -819,6 +819,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
+        utbetalingId = UUID.fromString(inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = utbetalingGodkjent,

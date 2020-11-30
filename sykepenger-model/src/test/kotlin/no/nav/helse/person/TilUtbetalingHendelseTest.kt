@@ -203,6 +203,9 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
+        utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
+            Behovtype.Godkjenning
+        ).kontekst()}")),
         vedtaksperiodeId = "$vedtaksperiodeId",
         saksbehandler = godkjentAv,
         utbetalingGodkjent = godkjent,

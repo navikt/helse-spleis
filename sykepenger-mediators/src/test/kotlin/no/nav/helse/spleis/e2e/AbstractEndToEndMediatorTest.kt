@@ -138,6 +138,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingsgodkjenning(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Godkjenning).path("utbetalingId").asText()),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning),
                 utbetalingGodkjent = godkjent,
                 saksbehandlerIdent = saksbehandlerIdent,

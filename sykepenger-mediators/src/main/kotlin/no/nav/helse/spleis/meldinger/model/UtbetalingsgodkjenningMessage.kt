@@ -5,9 +5,11 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
+import java.util.*
 
 // Understands a JSON message representing a Godkjenning-behov
 internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMessage(packet) {
+    private val utbetalingId = packet["utbetalingId"].asText()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
@@ -23,6 +25,7 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = UUID.fromString(utbetalingId),
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = saksbehandler,
             saksbehandlerEpost = saksbehandlerEpost,
