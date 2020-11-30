@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -7,7 +8,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
 
 internal class UtbetalingOverførtMessage(packet: MessageDelegate) : BehovMessage(packet) {
-    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val fagsystemId = packet["fagsystemId"].asText()

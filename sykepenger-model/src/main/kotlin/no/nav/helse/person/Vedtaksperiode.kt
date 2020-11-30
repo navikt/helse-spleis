@@ -166,7 +166,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
-        if (id.toString() != utbetaling.vedtaksperiodeId) return
+        if (!utbetaling.erRelevant(id)) return
         kontekst(utbetaling)
         tilstand.håndter(this, utbetaling)
     }
