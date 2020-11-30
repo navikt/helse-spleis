@@ -553,6 +553,9 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
+            dataForVilkårsvurdering == null && forlengelseFraInfotrygd != JA  -> {
+                hendelse.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+            }
             else -> {
                 loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerSimulering) {
