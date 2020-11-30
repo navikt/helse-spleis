@@ -598,12 +598,43 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `legger ved felt for automatisk behandling`() {
-        val (person, hendelser) = person(automatiskBehandling = true)
+    fun `legger ved felt for automatisk behandling for riktig periode`() {
+        val fom = 1.januar
+        val tom = 31.januar
+
+        val (person, hendelser) = person(fom, tom, automatiskBehandling = true)
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO
         assertTrue(vedtaksperiode.automatiskBehandlet)
         assertEquals("Automatisk behandlet", vedtaksperiode.godkjentAv)
+
+        val hendelserForForlengelse = hendelser.toMutableList()
+
+        val (forlengelseFom, forlengelseTom) = tom.let { it.plusDays(1) to it.plusDays(14) }
+        person.run {
+            sykmelding(fom = forlengelseFom, tom = forlengelseTom).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+                hendelserForForlengelse.add(sykmeldingDTO)
+            }
+            fangeVedtaksperiodeId()
+            søknad(
+                hendelseId = UUID.randomUUID(),
+                fom = forlengelseFom,
+                tom = forlengelseTom,
+                sendtSøknad = forlengelseFom.plusDays(1).atStartOfDay()
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+                hendelserForForlengelse.add(søknadDTO)
+            }
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+            fangeUtbetalinger()
+            håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+        }
+
+        val forlengelsePersonDTO = serializePersonForSpeil(person, hendelserForForlengelse)
+        val forlengelse = forlengelsePersonDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
+        assertFalse(forlengelse.automatiskBehandlet)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
@@ -638,7 +669,6 @@ class SpeilBuilderTest {
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDate = 1.april,
-            søknadhendelseId: UUID = UUID.randomUUID(),
             påfølgendePerioder: List<ClosedRange<LocalDate>> = emptyList(),
             automatiskBehandling: Boolean = false
         ): Pair<Person, List<HendelseDTO>> =
@@ -650,7 +680,7 @@ class SpeilBuilderTest {
                     }
                     fangeVedtaksperiodeId()
                     søknad(
-                        hendelseId = søknadhendelseId,
+                        hendelseId = UUID.randomUUID(),
                         fom = fom,
                         tom = tom,
                         sendtSøknad = sendtSøknad.atStartOfDay()
@@ -684,7 +714,7 @@ class SpeilBuilderTest {
                         }
                         fangeVedtaksperiodeId()
                         søknad(
-                            hendelseId = søknadhendelseId,
+                            hendelseId = UUID.randomUUID(),
                             fom = periode.start,
                             tom = periode.endInclusive,
                             sendtSøknad = periode.endInclusive.atStartOfDay()

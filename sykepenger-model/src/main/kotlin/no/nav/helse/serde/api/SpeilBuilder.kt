@@ -496,7 +496,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val vedtaksperioder = mutableListOf<VedtaksperiodeDTOBase>()
         private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
         private val utbetalinger = mutableListOf<Utbetaling>()
-        var vedtaksperiodeMap = mutableMapOf<String, Any?>()
         var inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
 
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
@@ -570,7 +569,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                 VedtaksperiodeState(
                     vedtaksperiode = vedtaksperiode,
                     arbeidsgiver = arbeidsgiver,
-                    vedtaksperiodeMap = vedtaksperiodeMap,
                     vedtaksperioder = vedtaksperioder,
                     gruppeId = gruppeIder.getValue(vedtaksperiode),
                     fødselsnummer = fødselsnummer,
@@ -598,7 +596,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         vedtaksperiode: Vedtaksperiode,
         arbeidsgiver: Arbeidsgiver,
         private val periode: Periode,
-        private val vedtaksperiodeMap: MutableMap<String, Any?>,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
         private val gruppeId: UUID,
         private val fødselsnummer: String,
@@ -613,6 +610,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
 
+
+        private val vedtaksperiodeMap = mutableMapOf<String, Any?>()
         private var arbeidsgiverFagsystemId: String? = null
         private var personFagsystemId: String? = null
         private var inUtbetaling = false
@@ -688,7 +687,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             gjenståendeSykedager: Int?
         ) {
             inUtbetaling = true
-            utbetalingGodkjent = tilstand != Utbetaling.IkkeGodkjent
+            utbetalingGodkjent = tilstand !in listOf(Utbetaling.IkkeGodkjent, Utbetaling.Ubetalt)
             vedtaksperiodeMap["maksdato"] = maksdato
             vedtaksperiodeMap["gjenståendeSykedager"] = gjenståendeSykedager
             vedtaksperiodeMap["forbrukteSykedager"] = forbrukteSykedager
