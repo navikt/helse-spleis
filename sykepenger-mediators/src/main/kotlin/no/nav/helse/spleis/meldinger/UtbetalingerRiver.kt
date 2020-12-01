@@ -25,7 +25,7 @@ internal class UtbetalingerRiver(
         packet.requireKey("@løsning.${Utbetaling.name}")
         // skip OVERFØRT; we don't need to react to it (yet)
         packet.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
-        packet.requireKey("fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
+        packet.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
         packet.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
         packet.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }

@@ -100,7 +100,6 @@ class BehovMediatorTest {
             assertEquals(fødselsnummer, it["fødselsnummer"].asText())
             assertEquals("Arbeidsgiver 1", it["Arbeidsgiver"].asText())
             assertEquals("Vedtaksperiode 1", it["Vedtaksperiode"].asText())
-            assertEquals(LocalDate.now().toString(), it["historikkFom"].asText())
             assertEquals(LocalDate.now().toString(), it[Sykepengehistorikk.name]["historikkFom"].asText())
         }
         objectMapper.readTree(messages[1].second).also {
@@ -141,7 +140,7 @@ class BehovMediatorTest {
     }
 
     @Test
-    fun `sjekker etter duplikatverdier`() {
+    fun `kan ikke produsere samme behov flere ganger`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -154,8 +153,8 @@ class BehovMediatorTest {
             )
         )
         hendelse.behov(
-            Foreldrepenger, "Trenger foreldrepengeytelser", mapOf(
-                "historikkFom" to LocalDate.now()
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1)
             )
         )
 

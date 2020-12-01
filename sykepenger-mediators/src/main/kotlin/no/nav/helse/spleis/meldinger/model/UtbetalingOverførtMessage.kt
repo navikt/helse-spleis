@@ -11,7 +11,7 @@ internal class UtbetalingOverførtMessage(packet: MessageDelegate) : BehovMessag
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val fagsystemId = packet["fagsystemId"].asText()
+    private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText()
     private val utbetalingId = packet["utbetalingId"].asText()
     private val avstemmingsnøkkel = packet["@løsning.${Utbetaling.name}.avstemmingsnøkkel"].asLong()
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.name}.overføringstidspunkt"].asLocalDateTime()

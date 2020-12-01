@@ -232,7 +232,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun sendEtterbetaling(
-        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
         gyldighetsdato: LocalDate
     ) {
         testRapid.sendTestMessage(
@@ -244,7 +244,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun sendEtterbetalingMedHistorikk(
-        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+        fagsystemId: String = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
         gyldighetsdato: LocalDate
     ) {
         testRapid.sendTestMessage(
@@ -257,15 +257,13 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendUtbetaling(
         vedtaksperiodeIndeks: Int,
-        utbetalingOK: Boolean = true,
-        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
-        annullert: Boolean = false
+        utbetalingOK: Boolean = true
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingOverført(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
                 utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
                 avstemmingsnøkkel = 123456L,
@@ -275,25 +273,19 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
                 utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
                 tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-                saksbehandlerEpost = saksbehandlerEpost,
-                annullering = annullert,
                 utbetalingOK = utbetalingOK
             )
         )
     }
 
-    protected fun sendUtbetalingUtenVedtaksperiode(
-        utbetalingOK: Boolean = true,
-        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
-        annullert: Boolean = false
-    ) {
+    protected fun sendUtbetalingUtenVedtaksperiode(utbetalingOK: Boolean = true) {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingOverført(
                 vedtaksperiodeId = null,
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
                 utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
                 tilstand = null,
                 avstemmingsnøkkel = 123456L,
@@ -303,11 +295,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
                 vedtaksperiodeId = null,
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("fagsystemId").asText(),
+                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
                 utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
                 tilstand = null,
-                saksbehandlerEpost = saksbehandlerEpost,
-                annullering = annullert,
                 utbetalingOK = utbetalingOK
             )
         )

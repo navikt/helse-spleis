@@ -444,10 +444,6 @@ internal class TestMessageFactory(
         utbetalingId: String,
         tilstand: TilstandType?,
         utbetalingOK: Boolean = true,
-        saksbehandler: String = "Siri Saksbehandler",
-        saksbehandlerEpost: String = "siri.saksbehandler@nav.no",
-        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
-        annullering: Boolean = false,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): String {
@@ -464,12 +460,8 @@ internal class TestMessageFactory(
                 )
             ),
             ekstraFelter = mapOf(
-                "fagsystemId" to fagsystemId,
-                "utbetalingId" to utbetalingId,
-                "saksbehandler" to saksbehandler,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "godkjenttidspunkt" to godkjenttidspunkt,
-                "annullering" to annullering
+                "Utbetaling" to mapOf("fagsystemId" to fagsystemId),
+                "utbetalingId" to utbetalingId
             )
         )
     }
@@ -495,7 +487,7 @@ internal class TestMessageFactory(
                 )
             ),
             ekstraFelter = mapOf(
-                "fagsystemId" to fagsystemId,
+                "Utbetaling" to mapOf("fagsystemId" to fagsystemId),
                 "utbetalingId" to utbetalingId
             )
         )

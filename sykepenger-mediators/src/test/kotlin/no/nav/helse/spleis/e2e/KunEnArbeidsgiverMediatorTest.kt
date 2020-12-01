@@ -172,9 +172,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendAnnullering(fagsystemId)
         sendUtbetaling(
             0,
-            utbetalingOK = true,
-            saksbehandlerEpost = "siri.saksbehandler@nav.no",
-            annullert = true
+            utbetalingOK = true
         )
 
         val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
