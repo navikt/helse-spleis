@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
@@ -27,6 +28,9 @@ class Utbetalingpåminnelse(
             info("Utbetaling blir påminnet")
         }
     }
+
+    internal fun harOversteget(makstid: Duration) =
+        LocalDateTime.now() >= endringstidspunkt.plus(makstid)
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer

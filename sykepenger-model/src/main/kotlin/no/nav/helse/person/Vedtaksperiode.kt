@@ -165,16 +165,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, simulering)
     }
 
-    internal fun håndter(utbetaling: UtbetalingOverført) {
-        if (!utbetaling.erRelevant(id)) return
-        kontekst(utbetaling)
-        tilstand.håndter(this, utbetaling)
-    }
-
-    internal fun håndter(utbetaling: UtbetalingHendelse) {
-        if (!utbetaling.gjelderFor(id)) return
-        kontekst(utbetaling)
-        tilstand.håndter(this, utbetaling)
+    internal fun håndter(hendelse: UtbetalingHendelse) {
+        if (utbetaling?.gjelderFor(hendelse) != true) return
+        kontekst(hendelse)
+        tilstand.håndter(this, hendelse)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -447,10 +441,6 @@ internal class Vedtaksperiode private constructor(
                 tom = this.periode.endInclusive
             )
         )
-    }
-
-    private fun trengerUtbetaling(hendelse: ArbeidstakerHendelse) {
-        utbetaling().utbetal(hendelse)
     }
 
     private fun replayHendelser() {
@@ -778,12 +768,8 @@ internal class Vedtaksperiode private constructor(
             simulering.error("Forventet ikke simulering i %s", type.name)
         }
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
-            utbetaling.error("Forventet ikke utbetaling overført i %s", type.name)
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            utbetaling.error("Forventet ikke utbetaling i %s", type.name)
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
+            hendelse.error("Forventet ikke utbetaling i %s", type.name)
         }
 
         fun håndter(
@@ -1333,14 +1319,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            vedtaksperiode.utbetaling().håndter(utbetalingsgodkjenning)
-            vedtaksperiode.tilstand(
-                utbetalingsgodkjenning, when {
-                    utbetalingsgodkjenning.hasErrorsOrWorse() -> TilInfotrygd
-                    vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
-                    else -> Avsluttet
-                }
-            )
+            vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
+                vedtaksperiode.utbetaling().erAvvist() -> TilInfotrygd
+                vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
+                else -> Avsluttet
+            })
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1365,52 +1348,35 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(7)
+            LocalDateTime.MAX
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerUtbetaling(hendelse)
-        }
-
-        override fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet) {
-                påminnelse.error("Gir opp å forsøke utbetaling")
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingOverført) {
-            vedtaksperiode.utbetaling().håndter(utbetaling)
-        }
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til utbetaling")
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, utbetaling: UtbetalingHendelse) {
-            vedtaksperiode.utbetaling().håndter(utbetaling)
-            if (utbetaling.skalForsøkesIgjen()) return utbetaling.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
-
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
+            val utbetaling = vedtaksperiode.utbetaling()
             when {
-                utbetaling.hasErrorsOrWorse() -> {
-                    vedtaksperiode.tilstand(utbetaling, UtbetalingFeilet) {
-                        utbetaling.error("Utbetaling ble ikke gjennomført")
-                    }
+                utbetaling.harFeilet() -> vedtaksperiode.tilstand(hendelse, UtbetalingFeilet) {
+                    hendelse.error("Utbetaling ble ikke gjennomført")
                 }
-                else -> vedtaksperiode.tilstand(utbetaling, Avsluttet) {
-                    utbetaling.info("OK fra Oppdragssystemet")
+                utbetaling.erUtbetalt() -> vedtaksperiode.tilstand(hendelse, Avsluttet) {
+                    hendelse.info("OK fra Oppdragssystemet")
                 }
+                else -> hendelse.warn("Utbetalingen er ikke gjennomført. Prøver automatisk igjen senere")
             }
         }
 
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
-        ) {
-        }
+        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.utbetaling().erUtbetalt()) vedtaksperiode.tilstand(påminnelse, Avsluttet)
+            val utbetaling = vedtaksperiode.utbetaling()
+            when {
+                utbetaling.erUtbetalt() -> vedtaksperiode.tilstand(påminnelse, Avsluttet)
+                utbetaling.harFeilet() -> vedtaksperiode.tilstand(påminnelse, UtbetalingFeilet)
+            }
         }
     }
 
@@ -1428,13 +1394,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til annullering")
         }
 
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
-        ) {
-        }
+        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1445,26 +1405,25 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.utbetaling().utbetalingFeilet(hendelse)
-        }
+        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
 
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
-        ) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
+            sjekkUtbetalingstatus(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, TilUtbetaling) {
-                påminnelse.info("Forsøker utbetaling på nytt")
-            }
+            sjekkUtbetalingstatus(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")
+        }
+
+        private fun sjekkUtbetalingstatus(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            if (!vedtaksperiode.utbetaling().erUtbetalt()) return
+            vedtaksperiode.tilstand(hendelse, Avsluttet) {
+                hendelse.info("OK fra Oppdragssystemet")
+            }
         }
     }
 

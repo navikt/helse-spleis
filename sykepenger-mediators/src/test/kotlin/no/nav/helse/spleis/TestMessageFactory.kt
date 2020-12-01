@@ -439,18 +439,16 @@ internal class TestMessageFactory(
     }
 
     fun lagUtbetaling(
-        vedtaksperiodeId: UUID?,
         fagsystemId: String,
         utbetalingId: String,
-        tilstand: TilstandType?,
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
-            tilstand = tilstand,
-            vedtaksperiodeId = vedtaksperiodeId,
+            tilstand = null,
+            vedtaksperiodeId = null,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) UtbetalingHendelse.Oppdragstatus.AKSEPTERT.name else UtbetalingHendelse.Oppdragstatus.AVVIST.name,
@@ -467,17 +465,15 @@ internal class TestMessageFactory(
     }
 
     fun lagUtbetalingOverført(
-        vedtaksperiodeId: UUID?,
         fagsystemId: String,
         utbetalingId: String,
-        tilstand: TilstandType?,
         avstemmingsnøkkel: Long,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
     ): String {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
-            tilstand = tilstand,
-            vedtaksperiodeId = vedtaksperiodeId,
+            tilstand = null,
+            vedtaksperiodeId = null,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to UtbetalingHendelse.Oppdragstatus.OVERFØRT.name,

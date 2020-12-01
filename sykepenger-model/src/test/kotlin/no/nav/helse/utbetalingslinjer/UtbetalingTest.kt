@@ -171,7 +171,6 @@ internal class UtbetalingTest {
     ).also { utbetaling ->
         var utbetalingId: String = ""
         godkjenn(utbetaling).also {
-            utbetaling.utbetal(it)
             utbetalingId = it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Behovtype.Utbetaling }.kontekst()}")
         }
         utbetaling.håndter(UtbetalingOverført(

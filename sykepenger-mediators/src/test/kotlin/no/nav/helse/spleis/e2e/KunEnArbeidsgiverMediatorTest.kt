@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -45,7 +45,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendUtbetaling(0)
+        sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertTilstander(
             0,
@@ -83,10 +83,10 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendUtbetaling(0)
+        sendUtbetaling()
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendAnnullering(fagsystemId)
-        sendUtbetaling(0)
+        sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "ANNULLERT")
         assertForkastedeTilstander(
@@ -166,12 +166,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
-        sendUtbetaling(0, utbetalingOK = true)
+        sendUtbetaling(utbetalingOK = true)
 
         val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
         sendAnnullering(fagsystemId)
         sendUtbetaling(
-            0,
             utbetalingOK = true
         )
 
@@ -203,7 +202,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             saksbehandlerIdent = "SYSTEM",
             automatiskBehandling = true
         )
-        sendUtbetaling(0, utbetalingOK = true)
+        sendUtbetaling(utbetalingOK = true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 
@@ -226,7 +225,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             saksbehandlerIdent = "O123456",
             automatiskBehandling = false
         )
-        sendUtbetaling(0, utbetalingOK = true)
+        sendUtbetaling(utbetalingOK = true)
 
         val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
 

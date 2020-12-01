@@ -156,7 +156,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
         sjekkAt(speilApi().arbeidsgivere[0]) {
-            vedtaksperioder[0].tilstand er TilstandstypeDTO.TilUtbetaling
+            vedtaksperioder[0].tilstand er TilstandstypeDTO.Feilet
         }
 
         assertIngenAnnulleringsbehov()

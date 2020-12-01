@@ -110,7 +110,7 @@ internal class RollbackTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendUtbetaling(0)
+        sendUtbetaling()
 
         val tilstandFørRollback = finnHendelser("vedtaksperiode_endret").last()
         assertNotEquals("TIL_INFOTRYGD", tilstandFørRollback["gjeldendeTilstand"].textValue())

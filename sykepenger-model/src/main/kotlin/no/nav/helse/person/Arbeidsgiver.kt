@@ -188,6 +188,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
+        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
         vedtaksperioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
     }
 
@@ -203,14 +204,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
-        vedtaksperioder.forEach { it.håndter(utbetaling) }
         utbetalinger.forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
-        vedtaksperioder.forEach { it.håndter(utbetaling) }
         utbetalinger.forEach { it.håndter(utbetaling) }
+        vedtaksperioder.forEach { it.håndter(utbetaling) }
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -233,7 +233,6 @@ internal class Arbeidsgiver private constructor(
         val annullering = sisteUtbetalte.annuller(hendelse) ?: return
         nyUtbetaling(annullering)
         annullering.håndter(hendelse)
-        annullering.utbetal(hendelse)
         søppelbøtte(hendelse, ALLE)
     }
 
@@ -257,7 +256,6 @@ internal class Arbeidsgiver private constructor(
         hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
         nyUtbetaling(etterutbetaling)
         etterutbetaling.håndter(hendelse)
-        etterutbetaling.utbetal(hendelse)
     }
 
     private fun reberegnUtbetalte(aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, historie: Historie, periode: Periode): Utbetalingstidslinje {

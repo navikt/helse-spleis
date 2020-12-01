@@ -81,7 +81,6 @@ internal class UtbetalingReflectTest {
                 automatiskBehandling = false
             ).also {
                 utbetaling.håndter(it)
-                utbetaling.utbetal(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")
             }
             utbetaling.håndter(
@@ -178,7 +177,6 @@ internal class UtbetalingReflectTest {
                 automatiskBehandling = false
             ).also {
                 utbetaling.håndter(it)
-                utbetaling.utbetal(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")
             }
             utbetaling.håndter(

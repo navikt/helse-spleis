@@ -20,11 +20,11 @@ internal class EtterbetalingMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendUtbetaling(0)
+        sendUtbetaling()
 
         sendEtterbetaling(gyldighetsdato = 1.oktober(2020))
         sendEtterbetalingMedHistorikk(gyldighetsdato = 1.oktober(2020))
-        sendUtbetalingUtenVedtaksperiode()
+        sendUtbetaling()
 
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")

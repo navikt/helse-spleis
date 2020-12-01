@@ -255,49 +255,20 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    protected fun sendUtbetaling(
-        vedtaksperiodeIndeks: Int,
-        utbetalingOK: Boolean = true
-    ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Utbetaling))
+    protected fun sendUtbetaling(utbetalingOK: Boolean = true) {
+        val etterspurteBehov = testRapid.inspektør.etterspurteBehov(Utbetaling)
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingOverført(
-                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
-                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
-                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
+                fagsystemId = etterspurteBehov.path(Utbetaling.name).path("fagsystemId").asText(),
+                utbetalingId = etterspurteBehov.path("utbetalingId").asText(),
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
             )
         )
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetaling(
-                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
-                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
-                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Simulering),
-                utbetalingOK = utbetalingOK
-            )
-        )
-    }
-
-    protected fun sendUtbetalingUtenVedtaksperiode(utbetalingOK: Boolean = true) {
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagUtbetalingOverført(
-                vedtaksperiodeId = null,
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
-                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
-                tilstand = null,
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            )
-        )
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagUtbetaling(
-                vedtaksperiodeId = null,
-                fagsystemId = testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText(),
-                utbetalingId = testRapid.inspektør.etterspurteBehov(Utbetaling).path("utbetalingId").asText(),
-                tilstand = null,
+                fagsystemId = etterspurteBehov.path(Utbetaling.name).path("fagsystemId").asText(),
+                utbetalingId = etterspurteBehov.path("utbetalingId").asText(),
                 utbetalingOK = utbetalingOK
             )
         )
