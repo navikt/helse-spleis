@@ -543,7 +543,7 @@ internal class Utbetaling private constructor(
                 LocalDate.MAX,
                 null,
                 null
-            )
+            ).also { hendelse.info("Oppretter annullering med id ${it.id}") }
 
         override fun etterutbetale(utbetaling: Utbetaling, hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje) =
             Utbetaling(
