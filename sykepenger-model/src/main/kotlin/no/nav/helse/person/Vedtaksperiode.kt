@@ -553,8 +553,14 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
-            dataForVilkårsvurdering == null && forlengelseFraInfotrygd != JA  -> {
-                hendelse.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+            dataForVilkårsvurdering == null && forlengelseFraInfotrygd != JA -> {
+                if (erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
+                    tilstand(hendelse, AvventerVilkårsprøvingGap) {
+                        hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
+                    }
+                } else {
+                    hendelse.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+                }
             }
             else -> {
                 loggHvisForlengelse(hendelse)
@@ -563,6 +569,12 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+    }
+
+    private fun erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding(): Boolean {
+        val sykeperiodeRettFør = arbeidsgiver.finnSykeperiodeRettFør(this) ?: return false
+        if (sykeperiodeRettFør.tilstand == AvsluttetUtenUtbetalingMedInntektsmelding) return true
+        return sykeperiodeRettFør.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
     }
 
     private fun loggHvisForlengelse(logg: IAktivitetslogg) {
@@ -630,7 +642,7 @@ internal class Vedtaksperiode private constructor(
 
     // er forlengelse
     private fun håndterForlengelse(tilstøtende: Vedtaksperiode) {
-        dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering
+        dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering ?: dataForVilkårsvurdering
         inntektsmeldingId = tilstøtende.inntektsmeldingId?.also {
             hendelseIder.add(it)
         }

@@ -1,5 +1,8 @@
 package no.nav.helse.spleis.e2e
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
@@ -267,8 +270,44 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.TEKNISK_FEIL)
-        assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING")
+        assertTilstander(
+            0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING"
+        )
+    }
+
+    @Test
+    fun `forlengelse med utbetalinger uten dataForVilkårsvurdering`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 16.januar, sykmeldingsgrad = 100))
+        sendSøknadArbeidsgiver(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 16.januar, sykmeldingsgrad = 100)))
+        sendNySøknad(SoknadsperiodeDTO(fom = 17.januar, tom = 25.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 17.januar, tom = 25.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendVilkårsgrunnlag(0)
+
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    """
+                    update person set data = jsonb_set(data::jsonb, '{arbeidsgivere,0,vedtaksperioder,0,dataForVilkårsvurdering}', 'null', false);
+                    update person set data = jsonb_set(data::jsonb, '{arbeidsgivere,0,vedtaksperioder,1,dataForVilkårsvurdering}', 'null', false); """
+                )
+                    .asExecute
+            )
+        }
+
+        sendYtelser(1)
+        sendVilkårsgrunnlag(1)
+        sendYtelser(1)
+        assertTilstander(
+            0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD", "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING"
+        )
+        assertTilstander(
+            1, "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE", "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE",
+            "AVVENTER_HISTORIKK", "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING"
+        )
+
     }
 }
 

@@ -111,6 +111,16 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, egenmeldinger))
     }
 
+    protected fun sendSøknadArbeidsgiver(
+        vedtaksperiodeIndeks: Int,
+        perioder: List<SoknadsperiodeDTO>,
+        egenmeldinger: List<PeriodeDTO> = emptyList()
+    ) {
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
+        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadArbeidsgiver(perioder, egenmeldinger))
+    }
+
     protected fun sendInntektsmelding(
         vedtaksperiodeIndeks: Int,
         arbeidsgiverperiode: List<Periode>,
