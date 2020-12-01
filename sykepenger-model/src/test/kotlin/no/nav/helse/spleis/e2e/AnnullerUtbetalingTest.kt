@@ -438,6 +438,25 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `fjern og reannuller feilet annullering`() {
+        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AVVIST, annullert = true)
+
+        assertFalse(inspektør.utbetaling(1).erUtbetalt())
+
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+
+        val utbetalingbehov = inspektør.personLogg.behov().filter { it.type == Behovtype.Utbetaling }
+
+        assertTrue(inspektør.utbetaling(1).erUtbetalt())
+        assertEquals(3, utbetalingbehov.size)
+        assertEquals(utbetalingbehov[1].detaljer()["fagsystemId"], utbetalingbehov[2].detaljer()["fagsystemId"])
+    }
+
+
+    @Test
     fun `forlengelse ved inflight annullering`() {
         /*
         Tidligere har vi kun basert oss på utbetalinger i en sluttilstand for å beregne ny utbetaling. Om vi hadde en annullering som var in-flight ville denne

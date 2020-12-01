@@ -264,6 +264,17 @@ internal class Utbetaling private constructor(
 
         internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
 
+        internal fun MutableList<Utbetaling>.fjernFeiletAnnullering(hendelse: AnnullerUtbetaling) {
+            val utbetaling = this.filter { hendelse.erRelevant(it.arbeidsgiverOppdrag().fagsystemId()) }
+                .lastOrNull(Utbetaling::erAktiv) ?: return
+
+            if (utbetaling.erAnnullering() && utbetaling.harFeilet()) {
+                hendelse.info("Fjernet feilet annullering")
+                log.info("Fjernet feilet annullering med id: ${utbetaling.id} og fagsystemId: ${utbetaling.arbeidsgiverOppdrag().fagsystemId()}")
+                this.remove(utbetaling)
+            }
+        }
+
         private fun buildArb(
             sisteUtbetalte: Oppdrag?,
             organisasjonsnummer: String,
