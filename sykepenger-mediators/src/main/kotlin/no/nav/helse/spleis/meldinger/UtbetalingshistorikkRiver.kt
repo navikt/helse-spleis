@@ -19,6 +19,7 @@ internal class UtbetalingshistorikkRiver(
     override val riverName = "Utbetalingshistorikk"
 
     override fun validate(packet: JsonMessage) {
+        packet.requireKey("vedtaksperiodeId", "tilstand")
         packet.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         packet.rejectKey("fagsystemId")
         packet.requireArray("@løsning.${Sykepengehistorikk.name}") {

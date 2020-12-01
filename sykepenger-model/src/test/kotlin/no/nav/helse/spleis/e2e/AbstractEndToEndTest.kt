@@ -371,7 +371,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             person.håndter(
                 UtbetalingOverført(
                     meldingsreferanseId = UUID.randomUUID(),
-                    vedtaksperiodeId = vedtaksperiodeId.toString(),
                     aktørId = AKTØRID,
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
@@ -449,7 +448,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,

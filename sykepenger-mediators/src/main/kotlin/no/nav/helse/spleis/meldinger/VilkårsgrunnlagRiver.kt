@@ -19,6 +19,7 @@ internal class VilkårsgrunnlagRiver(
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(packet: JsonMessage) {
+        packet.requireKey("vedtaksperiodeId", "tilstand")
         packet.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {

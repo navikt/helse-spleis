@@ -23,7 +23,6 @@ internal abstract class BehovRiver(
         packet.demandValue("@final", true)
         packet.demandAll("@behov", behov.map(Enum<*>::name))
         packet.requireKey("@løsning", "aktørId", "fødselsnummer", "organisasjonsnummer")
-        packet.interestedIn("vedtaksperiodeId", "tilstand")
         packet.require("@besvart", JsonNode::asLocalDateTime)
     }
 }

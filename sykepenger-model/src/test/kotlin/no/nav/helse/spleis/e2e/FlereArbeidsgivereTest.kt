@@ -414,7 +414,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             UtbetalingOverført(
                 meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = orgnummer.id(0).toString(),
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 orgnummer = orgnummer,
@@ -422,7 +421,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
-        ))
+            ))
         person.håndter(
             utbetaling(
                 orgnummer.id(0),

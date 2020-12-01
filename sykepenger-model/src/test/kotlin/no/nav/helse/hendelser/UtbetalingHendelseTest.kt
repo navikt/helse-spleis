@@ -20,7 +20,6 @@ internal class UtbetalingHendelseTest {
 
     private fun utbetalinghendelse(fagsystemId: String, utbetalingId: UUID) = UtbetalingHendelse(
         UUID.randomUUID(),
-        "vedtaksperiodeId",
         "aktørId",
         "fnr",
         "orgnr",

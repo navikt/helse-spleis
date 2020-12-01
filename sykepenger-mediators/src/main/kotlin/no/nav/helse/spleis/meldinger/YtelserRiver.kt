@@ -25,6 +25,7 @@ internal class YtelserRiver(
     override val riverName = "Ytelser"
 
     override fun validate(packet: JsonMessage) {
+        packet.requireKey("vedtaksperiodeId", "tilstand")
         packet.requireKey("@løsning.${Foreldrepenger.name}")
         packet.requireKey("@løsning.${Sykepengehistorikk.name}")
         packet.requireKey("@løsning.${Pleiepenger.name}")

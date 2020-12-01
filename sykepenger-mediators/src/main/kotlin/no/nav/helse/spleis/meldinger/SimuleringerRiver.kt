@@ -15,6 +15,7 @@ internal class SimuleringerRiver(
     override val riverName = "Simulering"
 
     override fun validate(packet: JsonMessage) {
+        packet.requireKey("vedtaksperiodeId", "tilstand")
         packet.requireKey("@løsning.${Simulering.name}.status")
         packet.require("@løsning.${Simulering.name}") { løsning ->
             packet.require("@løsning.${Simulering.name}.status") {

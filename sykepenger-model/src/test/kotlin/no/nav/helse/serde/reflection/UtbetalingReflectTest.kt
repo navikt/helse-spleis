@@ -85,20 +85,18 @@ internal class UtbetalingReflectTest {
             }
             utbetaling.håndter(
                 UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "ignore",
-                fødselsnummer = "ignore",
-                orgnummer = "ignore",
-                vedtaksperiodeId = "ignore",
-                fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
-                utbetalingId = utbetalingId,
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            ))
+                    meldingsreferanseId = UUID.randomUUID(),
+                    aktørId = "ignore",
+                    fødselsnummer = "ignore",
+                    orgnummer = "ignore",
+                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    utbetalingId = utbetalingId,
+                    avstemmingsnøkkel = 123456L,
+                    overføringstidspunkt = LocalDateTime.now()
+                ))
             utbetaling.håndter(
                 UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),
-                    vedtaksperiodeId = "ignore",
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
@@ -181,20 +179,18 @@ internal class UtbetalingReflectTest {
             }
             utbetaling.håndter(
                 UtbetalingOverført(
-                meldingsreferanseId = UUID.randomUUID(),
-                aktørId = "ignore",
-                fødselsnummer = "ignore",
-                orgnummer = "ignore",
-                vedtaksperiodeId = "ignore",
-                fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
-                utbetalingId = utbetalingId,
-                avstemmingsnøkkel = 123456L,
-                overføringstidspunkt = LocalDateTime.now()
-            ))
+                    meldingsreferanseId = UUID.randomUUID(),
+                    aktørId = "ignore",
+                    fødselsnummer = "ignore",
+                    orgnummer = "ignore",
+                    fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
+                    utbetalingId = utbetalingId,
+                    avstemmingsnøkkel = 123456L,
+                    overføringstidspunkt = LocalDateTime.now()
+                ))
             utbetaling.håndter(
                 UtbetalingHendelse(
                     meldingsreferanseId = UUID.randomUUID(),
-                    vedtaksperiodeId = "ignore",
                     aktørId = "ignore",
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,

@@ -178,7 +178,6 @@ internal class UtbetalingTest {
             aktørId = "ignore",
             fødselsnummer = "ignore",
             orgnummer = "ignore",
-            vedtaksperiodeId = "ignore",
             fagsystemId = utbetaling.arbeidsgiverOppdrag().fagsystemId(),
             utbetalingId = utbetalingId,
             avstemmingsnøkkel = 123456L,
@@ -187,7 +186,6 @@ internal class UtbetalingTest {
         utbetaling.håndter(
             UtbetalingHendelse(
                 meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = "ignore",
                 aktørId = "ignore",
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 orgnummer = ORGNUMMER,

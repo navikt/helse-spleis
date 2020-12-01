@@ -1399,7 +1399,6 @@ class SpeilBuilderTest {
 
         private fun overføring(vedtaksperiodeId: String, aktivitetslogg: IAktivitetslogg) = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
@@ -1411,7 +1410,6 @@ class SpeilBuilderTest {
 
         private fun utbetalt(vedtaksperiodeId: String, aktivitetslogg: IAktivitetslogg) = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,

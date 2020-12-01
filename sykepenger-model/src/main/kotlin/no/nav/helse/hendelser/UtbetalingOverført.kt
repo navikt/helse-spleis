@@ -6,7 +6,6 @@ import java.util.*
 
 class UtbetalingOverført(
     meldingsreferanseId: UUID,
-    private val vedtaksperiodeId: String?,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
@@ -20,8 +19,7 @@ class UtbetalingOverført(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
-    internal fun erRelevant(fagsystemId: String) = fagsystemId == this.fagsystemId
     internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
         erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
+    private fun erRelevant(fagsystemId: String) = fagsystemId == this.fagsystemId
 }

@@ -440,7 +440,6 @@ class JsonBuilderTest {
 
         fun Person.overføring(vedtaksperiodeId: String) = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,
@@ -452,7 +451,6 @@ class JsonBuilderTest {
 
         fun Person.utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             orgnummer = orgnummer,

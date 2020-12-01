@@ -19,6 +19,7 @@ internal class EtterbetalingerRiverMedHistorikk(
     override val riverName = "Kandidat for etterbetaling med historikk"
 
     override fun validate(packet: JsonMessage) {
+        packet.interestedIn("vedtaksperiodeId")
         packet.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         packet.demandKey("fagsystemId")
         packet.requireKey("gyldighetsdato")

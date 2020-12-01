@@ -165,7 +165,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         person.håndter(utbetalingsgodkjenning(1.vedtaksperiode, true, godkjentAv, automatiskBehandling))
         person.håndter(UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = 1.vedtaksperiode.toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
@@ -179,7 +178,6 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private fun utbetaling(vedtaksperiodeId: UUID, status: UtbetalingHendelse.Oppdragstatus) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "$vedtaksperiodeId",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,

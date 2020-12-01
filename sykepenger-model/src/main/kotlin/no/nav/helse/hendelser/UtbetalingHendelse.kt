@@ -7,7 +7,6 @@ import java.util.*
 
 class UtbetalingHendelse(
     meldingsreferanseId: UUID,
-    private val vedtaksperiodeId: String?,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val orgnummer: String,
@@ -33,9 +32,6 @@ class UtbetalingHendelse(
     internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
     internal fun erRelevant(fagsystemId: String, utbetalingId: UUID) =
         erRelevant(fagsystemId) && this.utbetalingId == utbetalingId.toString()
-
-    internal fun gjelderFor(vedtaksperiodeId: UUID) =
-        this.vedtaksperiodeId == vedtaksperiodeId.toString()
 
     enum class Oppdragstatus {
         OVERFØRT,
