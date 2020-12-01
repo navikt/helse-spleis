@@ -17,6 +17,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -332,6 +333,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
+    protected fun håndterUtbetalingpåminnelse(
+        utbetalingIndeks: Int,
+        status: Utbetalingstatus,
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
+    ) {
+        person.håndter(utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt))
+    }
+
     protected fun håndterPåminnelse(
         vedtaksperiodeId: UUID,
         påminnetTilstand: TilstandType,
@@ -574,6 +583,25 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ).apply {
             hendelselogg = this
         }
+    }
+
+    private fun utbetalingpåminnelse(
+        utbetalingId: UUID,
+        status: Utbetalingstatus,
+        tilstandsendringstidspunkt: LocalDateTime,
+        orgnummer: String = ORGNUMMER
+    ): Utbetalingpåminnelse {
+        return Utbetalingpåminnelse(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            utbetalingId = utbetalingId,
+            antallGangerPåminnet = 0,
+            status = status,
+            endringstidspunkt = tilstandsendringstidspunkt,
+            påminnelsestidspunkt = LocalDateTime.now()
+        )
     }
 
     private fun påminnelse(

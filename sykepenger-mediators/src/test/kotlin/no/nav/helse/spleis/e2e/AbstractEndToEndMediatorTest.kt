@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestMessageFactory
@@ -120,6 +121,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
         testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt))
+    }
+
+    protected fun sendNyUtbetalingpåminnelse(utbetalingIndeks: Int, status: Utbetalingstatus = Utbetalingstatus.IKKE_UTBETALT) {
+        val utbetalingId = testRapid.inspektør.utbetalingId(utbetalingIndeks)
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingpåminnelse(utbetalingId, status))
     }
 
     protected fun sendNyPåminnelse(vedtaksperiodeIndeks: Int = -1, tilstandType: TilstandType = TilstandType.START) {

@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import io.mockk.mockk
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.TilstandType
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -44,6 +45,12 @@ internal class MessageMediatorTest {
     fun påminnelser() {
         testRapid.sendTestMessage(meldingsfabrikk.lagPåminnelse(UUID.randomUUID(), TilstandType.START))
         assertTrue(hendelseMediator.lestPåminnelse)
+    }
+
+    @Test
+    fun utbetalingpåminnelse() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingpåminnelse(UUID.randomUUID(), Utbetalingstatus.IKKE_UTBETALT))
+        assertTrue(hendelseMediator.lestutbetalingpåminnelse)
     }
 
     @Test

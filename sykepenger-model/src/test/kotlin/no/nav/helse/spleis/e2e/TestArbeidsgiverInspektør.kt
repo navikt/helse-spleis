@@ -47,6 +47,7 @@ internal class TestArbeidsgiverInspektør(
     internal val utbetalinger = mutableListOf<Utbetaling>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
+    private val utbetalingIder = mutableListOf<UUID>()
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
@@ -162,6 +163,7 @@ internal class TestArbeidsgiverInspektør(
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -173,6 +175,7 @@ internal class TestArbeidsgiverInspektør(
         inUtbetaling = true
         if (!inVedtaksperiode) {
             maksdatoer.add(maksdato)
+            utbetalingIder.add(id)
             utbetalingstilstander.add(tilstand)
             forbrukteSykedagerer.add(forbrukteSykedager)
             gjenståendeSykedagerer.add(gjenståendeSykedager)
@@ -183,6 +186,7 @@ internal class TestArbeidsgiverInspektør(
 
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -284,6 +288,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.utbetalingsindeks]
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
+    internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 

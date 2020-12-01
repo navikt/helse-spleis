@@ -84,6 +84,11 @@ class Person private constructor(
         finnArbeidsgiver(utbetaling).håndter(utbetaling)
     }
 
+    fun håndter(påminnelse: Utbetalingpåminnelse) {
+        påminnelse.kontekst(this)
+        finnArbeidsgiver(påminnelse).håndter(påminnelse)
+    }
+
     fun håndter(påminnelse: Påminnelse) {
         try {
             påminnelse.kontekst(this)

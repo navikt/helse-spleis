@@ -213,6 +213,11 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.forEach { it.håndter(utbetaling) }
     }
 
+    internal fun håndter(påminnelse: Utbetalingpåminnelse) {
+        påminnelse.kontekst(this)
+        utbetalinger.forEach { it.håndter(påminnelse) }
+    }
+
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
         return vedtaksperioder.toList().any { it.håndter(påminnelse) }

@@ -274,6 +274,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -284,6 +285,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     ) {
         currentState.preVisitUtbetaling(
             utbetaling,
+            id,
             tilstand,
             tidsstempel,
             arbeidsgiverNettoBeløp,
@@ -320,6 +322,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -330,6 +333,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     ) {
         currentState.postVisitUtbetaling(
             utbetaling,
+            id,
             tilstand,
             tidsstempel,
             arbeidsgiverNettoBeløp,
@@ -506,6 +510,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
+            id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
@@ -678,6 +683,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
+            id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
@@ -710,6 +716,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
+            id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,

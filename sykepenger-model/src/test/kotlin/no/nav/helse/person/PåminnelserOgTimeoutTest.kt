@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -141,7 +142,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning())
         assertEquals(1, hendelse.behov().size)
-        person.håndter(påminnelse(TIL_UTBETALING, 1.vedtaksperiode))
+        person.håndter(utbetalingpåminnelse(inspektør.utbetalingId(0), Utbetalingstatus.SENDT))
         assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
     }
@@ -397,6 +398,20 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now()
+    ).apply {
+        hendelse = this
+    }
+
+    private fun utbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus) = Utbetalingpåminnelse(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "aktørId",
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        organisasjonsnummer = ORGNUMMER,
+        utbetalingId = utbetalingId,
+        status = status,
+        antallGangerPåminnet = 1,
+        endringstidspunkt = LocalDateTime.now(),
+        påminnelsestidspunkt = LocalDateTime.now()
     ).apply {
         hendelse = this
     }

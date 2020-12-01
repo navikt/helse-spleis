@@ -15,6 +15,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestPåminnelse = false
         private set
+    internal var lestutbetalingpåminnelse = false
+        private set
     internal var lestUtbetalingshistorikk = false
         private set
     internal var lestYtelser = false
@@ -48,6 +50,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestSendtSøknad = false
         lestInntektsmelding = false
         lestPåminnelse = false
+        lestutbetalingpåminnelse = false
         lestUtbetalingshistorikk = false
         lestYtelser = false
         lestVilkårsgrunnlag = false
@@ -80,6 +83,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding) {
         lestInntektsmelding = true
+    }
+
+    override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse) {
+        lestutbetalingpåminnelse = true
     }
 
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse) {

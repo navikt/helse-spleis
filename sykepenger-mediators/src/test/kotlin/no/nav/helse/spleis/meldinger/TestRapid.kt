@@ -153,9 +153,12 @@ internal class TestRapid : RapidsConnection() {
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtyper[utbetalingId]
             } ?: fail { "Finner ikke utbetaling" }
+        fun utbetalingId(utbetalingIndeks: Int) = utbetalinger.elementAt(utbetalingIndeks)
+
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
+
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
             behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
 

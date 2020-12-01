@@ -1398,7 +1398,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerUtbetaling(påminnelse)
+            if (vedtaksperiode.utbetaling().erUtbetalt()) vedtaksperiode.tilstand(påminnelse, Avsluttet)
         }
     }
 

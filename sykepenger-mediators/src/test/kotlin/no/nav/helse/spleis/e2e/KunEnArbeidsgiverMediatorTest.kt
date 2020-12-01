@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -53,6 +55,20 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "TIL_UTBETALING",
             "AVSLUTTET"
         )
+    }
+
+    @Test
+    fun `utbetalingpåminnelse`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendNyUtbetalingpåminnelse(0, Utbetalingstatus.SENDT)
+        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT")
+        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
     }
 
     @Test

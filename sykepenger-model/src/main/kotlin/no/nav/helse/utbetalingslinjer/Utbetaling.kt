@@ -5,6 +5,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -149,6 +150,13 @@ internal class Utbetaling private constructor(
         tilstand.godkjenning(this, vedtaksperiode, aktivitetslogg, hendelse)
     }
 
+    internal fun håndter(påminnelse: Utbetalingpåminnelse) {
+        if (!påminnelse.erRelevant(id)) return
+        påminnelse.kontekst(this)
+        if (!påminnelse.gjelderStatus(Utbetalingstatus.fraTilstand(tilstand))) return
+        tilstand.håndter(this, påminnelse)
+    }
+
     internal fun valider(simulering: Simulering): IAktivitetslogg {
         return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
     }
@@ -206,6 +214,7 @@ internal class Utbetaling private constructor(
 
     internal companion object {
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
+
         private const val systemident = "SPLEIS"
 
         internal fun lagUtbetaling(
@@ -293,7 +302,6 @@ internal class Utbetaling private constructor(
             aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
         internal fun MutableList<Utbetaling>.fjernFastlåstAnnullering(hendelse: AnnullerUtbetaling) {
             val utbetaling = this.filter { hendelse.erRelevant(it.arbeidsgiverOppdrag().fagsystemId()) }
                 .lastOrNull(Utbetaling::erAktiv) ?: return
@@ -307,7 +315,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.preVisitUtbetaling(this, id, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -316,7 +324,7 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
-        visitor.postVisitUtbetaling(this, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.postVisitUtbetaling(this, id, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
@@ -355,11 +363,10 @@ internal class Utbetaling private constructor(
 
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
         hendelse.valider()
-        val erAnnullering = type == Utbetalingtype.ANNULLERING
         val nesteTilstand = when {
-            hendelse.hasErrorsOrWorse() && !erAnnullering && hendelse.skalForsøkesIgjen() -> return // forventning om at vedtaksperioden står for retry
+            tilstand == Sendt && hendelse.skalForsøkesIgjen() -> return // utbetaling gjør retry ved neste påminnelse
             hendelse.hasErrorsOrWorse() -> UtbetalingFeilet
-            erAnnullering -> Annullert
+            type == Utbetalingtype.ANNULLERING -> Annullert
             else -> Utbetalt
         }
         tilstand(nesteTilstand, hendelse)
@@ -394,6 +401,10 @@ internal class Utbetaling private constructor(
 
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             throw IllegalStateException("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+            påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
 
         fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
@@ -467,12 +478,20 @@ internal class Utbetaling private constructor(
     }
 
     internal object Godkjent : Tilstand {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+            utbetaling.overfør(Sendt, påminnelse)
+        }
+
         override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             utbetaling.overfør(Sendt, hendelse)
         }
     }
 
     internal object Sendt : Tilstand {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+            utbetaling.overfør(påminnelse)
+        }
+
         override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             utbetaling.overfør(hendelse)
         }
@@ -487,6 +506,11 @@ internal class Utbetaling private constructor(
             utbetaling.håndterKvittering(hendelse)
         }
 
+        override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            hendelse.error("Vedtaksperioden har stått for lenge i Til Utbetaling, og har gitt opp")
+            utbetaling.tilstand(UtbetalingFeilet, hendelse)
+        }
+
         private fun lagreOverføringsinformasjon(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
             utbetaling.overføringstidspunkt = tidspunkt
             utbetaling.avstemmingsnøkkel = avstemmingsnøkkel
@@ -496,6 +520,11 @@ internal class Utbetaling private constructor(
     }
 
     internal object Overført : Tilstand {
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+            // trenger ikke overføre på nytt ettersom Spenn har godtatt oppdraget,
+            // men vi må nok vente på at Oppdrag/UR sender ut Aksept-kvittering
+        }
+
         override fun overfør(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             // trenger ikke overføre på nytt ettersom Spenn har godtatt oppdraget,
             // men vi må nok vente på at Oppdrag/UR sender ut Aksept-kvittering
@@ -503,11 +532,6 @@ internal class Utbetaling private constructor(
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
             utbetaling.håndterKvittering(hendelse)
-        }
-
-        override fun utbetalingFeilet(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            hendelse.error("Feilrespons fra oppdrag")
-            utbetaling.tilstand(UtbetalingFeilet, hendelse)
         }
     }
 

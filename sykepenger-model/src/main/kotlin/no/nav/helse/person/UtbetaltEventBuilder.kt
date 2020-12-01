@@ -97,6 +97,7 @@ private class UtbetaltEventBuilder(
 
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,

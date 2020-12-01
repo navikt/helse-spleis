@@ -42,6 +42,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
             is InntektsmeldingMessage -> INNTEKTSMELDING
             is PåminnelseMessage -> PÅMINNELSE
+            is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
             is YtelserMessage -> YTELSER
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
             is SimuleringMessage -> SIMULERING
@@ -98,6 +99,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_NAV,
         INNTEKTSMELDING,
         PÅMINNELSE,
+        UTBETALINGPÅMINNELSE,
         YTELSER,
         VILKÅRSGRUNNLAG,
         UTBETALINGSGODKJENNING,

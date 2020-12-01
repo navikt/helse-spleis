@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.*
 import no.nav.syfo.kafka.felles.*
@@ -402,6 +403,21 @@ internal class TestMessageFactory(
             ),
             ekstraFelter = mapOf(
                 "utbetalingId" to utbetalingId
+            )
+        )
+    }
+
+    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): String {
+        return nyHendelse(
+            "utbetalingpåminnelse", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "utbetalingId" to utbetalingId,
+                "status" to status.name,
+                "antallGangerPåminnet" to 0,
+                "endringstidspunkt" to LocalDateTime.now(),
+                "påminnelsestidspunkt" to LocalDateTime.now()
             )
         )
     }

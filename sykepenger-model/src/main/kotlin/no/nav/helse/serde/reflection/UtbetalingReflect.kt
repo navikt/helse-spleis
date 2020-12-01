@@ -9,7 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
+enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
     IKKE_UTBETALT(Utbetaling.Ubetalt),
     IKKE_GODKJENT(Utbetaling.IkkeGodkjent),
     GODKJENT(Utbetaling.Godkjent),

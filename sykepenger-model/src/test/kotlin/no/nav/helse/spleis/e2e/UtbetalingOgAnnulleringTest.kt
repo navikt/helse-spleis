@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -193,10 +194,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode) // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL, sendOverførtKvittering = false)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -208,7 +209,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(0))
     }
     @Test
     fun `utbetaling med teknisk feil blir stående i til utbetaling og prøver igjen`() {
@@ -219,8 +220,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL)
-        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING, LocalDateTime.now().minusDays(1))
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL, sendOverførtKvittering = false)
+        håndterUtbetalingpåminnelse(0, Utbetalingstatus.SENDT, LocalDateTime.now().minusDays(1))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -232,7 +233,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-        assertEquals(Utbetaling.Overført, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(0))
     }
 
     @Test
@@ -244,7 +245,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.FEIL, sendOverførtKvittering = false)
         håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING, LocalDateTime.now().minusDays(8))
         assertTilstander(
             1.vedtaksperiode,
@@ -258,6 +259,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             UTBETALING_FEILET
         )
+        assertEquals(Utbetaling.UtbetalingFeilet, inspektør.utbetalingtilstand(0))
     }
 
     @Test

@@ -121,6 +121,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse) {
+        håndter(message, påminnelse) { person ->
+            person.håndter(påminnelse)
+        }
+    }
+
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse) {
         håndter(message, påminnelse) { person ->
             HendelseProbe.onPåminnelse(påminnelse)
@@ -489,6 +495,7 @@ internal interface IHendelseMediator {
     fun behandle(message: SendtSøknadArbeidsgiverMessage, søknad: SøknadArbeidsgiver)
     fun behandle(message: SendtSøknadNavMessage, søknad: Søknad)
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding)
+    fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse)
     fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk)
     fun behandle(message: YtelserMessage, ytelser: Ytelser)

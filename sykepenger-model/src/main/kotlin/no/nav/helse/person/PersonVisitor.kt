@@ -309,6 +309,7 @@ internal interface InntekthistorikkVisitor {
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
@@ -328,6 +329,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {}
     fun postVisitUtbetaling(
         utbetaling: Utbetaling,
+        id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
