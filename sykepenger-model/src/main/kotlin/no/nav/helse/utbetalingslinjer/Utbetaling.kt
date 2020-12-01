@@ -210,8 +210,6 @@ internal class Utbetaling private constructor(
         tilstand.entering(this, hendelse)
     }
 
-    private fun erFastlåst(tidsstempel: LocalDateTime) = this.tilstand == Sendt && this.tidsstempel.plusHours(1).isBefore(tidsstempel)
-
     internal companion object {
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
 
@@ -302,16 +300,6 @@ internal class Utbetaling private constructor(
             aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-        internal fun MutableList<Utbetaling>.fjernFastlåstAnnullering(hendelse: AnnullerUtbetaling) {
-            val utbetaling = this.filter { hendelse.erRelevant(it.arbeidsgiverOppdrag().fagsystemId()) }
-                .lastOrNull(Utbetaling::erAktiv) ?: return
-
-            if (utbetaling.erAnnullering() && utbetaling.erFastlåst(hendelse.opprettet)) {
-                hendelse.info("Fjernet fastlåst annullering")
-                log.info("Fjernet fastlåst annullering med id: ${utbetaling.id} og fagsystemId: ${utbetaling.arbeidsgiverOppdrag().fagsystemId()}")
-                this.remove(utbetaling)
-            }
-        }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

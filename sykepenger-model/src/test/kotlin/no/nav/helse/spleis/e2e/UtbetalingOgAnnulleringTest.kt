@@ -342,7 +342,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kan annullere over en fastlåst annullering`() {
+    fun `Kan ikke annullere over en fastlåst annullering`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
@@ -350,14 +350,14 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)) // Stale
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
 
         assertTrue(inspektør.utbetalinger.last().erAnnullering())
         assertEquals(1, observatør.annulleringer.size)
-        assertEquals(3,
+        assertEquals(2,
             inspektør.personLogg.behov()
                 .filter { it.detaljer()["fagsystemId"] == inspektør.fagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
