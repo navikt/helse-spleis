@@ -86,6 +86,22 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingdetaljer(behov)
     }
 
+    @Test
+    fun annullering() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        sendAnnullering(testRapid.inspektør.etterspurteBehov(Utbetaling).path(Utbetaling.name).path("fagsystemId").asText())
+        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        assertBehov(behov, Utbetaling)
+        assertUtbetalingdetaljer(behov, true)
+    }
+
     private fun assertBehov(behov: JsonNode, vararg typer: Aktivitetslogg.Aktivitet.Behov.Behovtype) {
         val id = behov.path("@id").asText()
         assertEquals("behov", behov.path("@event_name").asText())
@@ -157,7 +173,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val simulering = behov.path(Simulering.name)
         assertDato(simulering.path("maksdato").asText())
         assertTrue(simulering.path("saksbehandler").asText().isNotEmpty())
-        assertOppdragdetaljer(simulering)
+        assertOppdragdetaljer(simulering, false)
     }
 
     private fun assertGodkjenningdetaljer(behov: JsonNode) {
@@ -169,14 +185,14 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("warnings").path("kontekster").isArray)
     }
 
-    private fun assertUtbetalingdetaljer(behov: JsonNode) {
-        val simulering = behov.path(Utbetaling.name)
-        assertDato(simulering.path("maksdato").asText())
-        assertTrue(simulering.path("saksbehandler").asText().isNotEmpty())
-        assertOppdragdetaljer(simulering)
+    private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {
+        val utbetaling = behov.path(Utbetaling.name)
+        if (!erAnnullering) assertDato(utbetaling.path("maksdato").asText())
+        assertTrue(utbetaling.path("saksbehandler").asText().isNotEmpty())
+        assertOppdragdetaljer(utbetaling, erAnnullering)
     }
 
-    private fun assertOppdragdetaljer(oppdrag: JsonNode) {
+    private fun assertOppdragdetaljer(oppdrag: JsonNode, erAnnullering: Boolean) {
         assertTrue(oppdrag.path("mottaker").asText().isNotEmpty())
         assertTrue(oppdrag.path("fagsystemId").asText().isNotEmpty())
         assertTrue(oppdrag.path("fagområde").asText().isNotEmpty())
@@ -192,8 +208,13 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             assertTrue(linje.path("delytelseId").isInt)
             assertTrue(linje.has("refFagsystemId"))
             assertTrue(linje.has("refDelytelseId"))
-            assertTrue(linje.has("datoStatusFom"))
-            assertTrue(linje.has("statuskode"))
+            if (!erAnnullering) {
+                assertTrue(linje.has("datoStatusFom"))
+                assertTrue(linje.has("statuskode"))
+            } else {
+                assertDato(linje.path("datoStatusFom").asText())
+                assertTrue(linje.path("statuskode").asText().isNotEmpty())
+            }
             assertTrue(linje.path("endringskode").asText().isNotEmpty())
             assertTrue(linje.path("klassekode").asText().isNotEmpty())
         }
