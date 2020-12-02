@@ -53,13 +53,14 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                 callIdMdc("callId")
                 filter { call -> call.request.path().startsWith("/api/") }
             }
+            preStopHook(teller)
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
             nais(teller)
             azureAdAppAuthentication(azureConfig)
             val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
-            spleisApi(dataSource, API_BRUKER, teller)
-            spesialistApi(dataSource, API_SERVICE, teller)
+            spleisApi(dataSource, API_BRUKER)
+            spesialistApi(dataSource, API_SERVICE)
         }
     })
 

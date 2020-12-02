@@ -18,14 +18,13 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.UtbetalingDao
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import no.nav.helse.serde.api.InntektsmeldingDTO as SerdeInntektsmeldingDTO
 import no.nav.helse.serde.api.SykmeldingDTO as SerdeSykmeldingDTO
 import no.nav.helse.serde.api.SøknadArbeidsgiverDTO as SerdeSøknadArbeidsgiverDTO
 import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
-internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String, teller: AtomicInteger) {
+internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
     val utbetalingDao = UtbetalingDao(dataSource)
     val personDao = PersonDao(dataSource)
@@ -33,59 +32,44 @@ internal fun Application.spleisApi(dataSource: DataSource, authProviderName: Str
     routing {
         authenticate(authProviderName) {
             get("/api/utbetaling/{utbetalingsreferanse}") {
-                teller.bruk {
-                    utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
-                        ?.let { personDao.hentPersonAktørId(it.aktørId) }
-                        ?.let { call.respond(serializePersonForSpeil(it)) }
-                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                }
+                utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
+                    ?.let { personDao.hentPersonAktørId(it.aktørId) }
+                    ?.let { call.respond(serializePersonForSpeil(it)) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
 
             get("/api/person/{aktørId}") {
-                teller.bruk {
-                    personDao.hentPersonAktørId(call.parameters["aktørId"]!!)
-                        ?.let { håndterPerson(it, hendelseDao) }
-                        ?.let { call.respond(it) }
-                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                }
+                personDao.hentPersonAktørId(call.parameters["aktørId"]!!)
+                    ?.let { håndterPerson(it, hendelseDao) }
+                    ?.let { call.respond(it) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
 
+
             get("/api/person/fnr/{fnr}") {
-                teller.bruk {
-                    personDao.hentPerson(call.parameters["fnr"]!!)
-                        ?.let { håndterPerson(it, hendelseDao) }
-                        ?.let { call.respond(it) }
-                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                }
+                personDao.hentPerson(call.parameters["fnr"]!!)
+                    ?.let { håndterPerson(it, hendelseDao) }
+                    ?.let { call.respond(it) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
+
         }
     }
 }
 
-internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String, teller: AtomicInteger) {
+internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
         authenticate(authProviderName) {
             get("/api/person-snapshot") {
-                teller.bruk {
-                    personDao.hentPerson(call.request.header("fnr")!!)
-                        ?.let { håndterPerson(it, hendelseDao) }
-                        ?.let { call.respond(it) }
-                        ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                }
+                personDao.hentPerson(call.request.header("fnr")!!)
+                    ?.let { håndterPerson(it, hendelseDao) }
+                    ?.let { call.respond(it) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
             }
         }
-    }
-}
-
-private suspend fun AtomicInteger.bruk(block: suspend () -> Unit) {
-    this.incrementAndGet()
-    try {
-        block()
-    } finally {
-        this.decrementAndGet()
     }
 }
 

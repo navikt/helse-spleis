@@ -156,12 +156,14 @@ internal class RestApiTest {
     fun `preStop`() {
         teller.set(3)
         thread {
+            Thread.sleep(900)
             do {
                 Thread.sleep(100)
             } while (teller.decrementAndGet() != 0)
         }
-        val ms = measureTimeMillis { appBaseUrl.handleRequest(HttpMethod.Get, "/stop").responseCode }
-        assertTrue(ms >= 300)
+        val handleRequest = appBaseUrl.handleRequest(HttpMethod.Get, "/stop")
+        val ms = measureTimeMillis { handleRequest.responseCode }
+        assertTrue(ms >= 1400)
     }
 
     private fun String.httpGet(expectedStatus: HttpStatusCode = HttpStatusCode.OK, testBlock: String.() -> Unit = {}) {
