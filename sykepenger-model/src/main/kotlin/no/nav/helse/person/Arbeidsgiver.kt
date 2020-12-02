@@ -570,6 +570,13 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun forrigeAvsluttaPeriode(vedtaksperiode: Vedtaksperiode, historie: Historie): Vedtaksperiode? {
+        val referanse = historie.skjæringstidspunkt(vedtaksperiode.periode()) ?: return null
+        return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
+            // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
+            Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
+    }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

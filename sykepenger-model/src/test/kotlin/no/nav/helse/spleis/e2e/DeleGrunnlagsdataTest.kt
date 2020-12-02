@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.TilstandType.*
@@ -60,15 +61,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlag hentes fra foregående`() {
+    fun `vilkårsgrunnlag deles med foregående`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(5.april, 30.april, 100))
@@ -93,6 +93,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -111,16 +112,19 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlag hentes når perioden ikke er infotrygdforlengelse`() {
+    fun `ingen vilkårsgrunnlag når perioden har opphav i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100), Arbeid(25.februar, 28.februar))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000, 100, ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000, 100, ORGNUMMER))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000, 100, ORGNUMMER))
         assertTilstander(1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -135,10 +139,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
         )
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }
@@ -156,6 +163,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -172,7 +180,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
         )
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
@@ -200,42 +209,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding bryter opp infotrygdforlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER))
-        håndterSimulering(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100), Arbeid(1.mars, 3.mars))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        assertTilstander(2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK
-        )
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-    }
-
-    @Test
     fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100))
@@ -250,6 +223,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
@@ -261,10 +236,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG_FORLENGELSE,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
         )
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
+        assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
     }

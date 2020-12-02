@@ -17,7 +17,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
-import no.nav.helse.person.ForlengelseFraInfotrygd.JA
+import no.nav.helse.person.ForlengelseFraInfotrygd.*
 import no.nav.helse.person.Kildesystem.INFOTRYGD
 import no.nav.helse.person.Kildesystem.SPLEIS
 import no.nav.helse.person.Periodetype.*
@@ -53,7 +53,7 @@ internal class Vedtaksperiode private constructor(
     private var sykmeldingsperiode: Periode,
     private var utbetaling: Utbetaling?,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val skjæringstidspunkt
@@ -278,11 +278,6 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erUtbetalt() ?: false
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetalingstidslinje.harUtbetalinger()
-
-    private fun invaliderPeriode(hendelse: ArbeidstakerHendelse) {
-        hendelse.info("Invaliderer vedtaksperiode: %s", this.id.toString())
-        tilstand(hendelse, TilInfotrygd)
-    }
 
     internal fun periode() = periode
     internal fun opprinneligPeriode() = sykmeldingsperiode
@@ -545,7 +540,7 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
-            dataForVilkårsvurdering == null && forlengelseFraInfotrygd != JA -> {
+            dataForVilkårsvurdering == null && forlengelseFraInfotrygd == NEI -> {
                 if (erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
                     tilstand(hendelse, AvventerVilkårsprøvingGap) {
                         hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
@@ -612,59 +607,10 @@ internal class Vedtaksperiode private constructor(
         tilstandHvisForlengelse: Vedtaksperiodetilstand,
         tilstandHvisGap: Vedtaksperiodetilstand
     ) {
-        arbeidsgiver.finnSykeperiodeRettFør(this)?.also { tilstøtende ->
-            tilstand(hendelse, tilstandHvisForlengelse) {
-                håndterFortsattForlengelse(tilstøtende)
-            }
-        } ?: tilstand(hendelse, tilstandHvisGap) { håndterGapVarForlengelse() }
-    }
-
-    // oppdaget gap, var forlengelse
-    private fun håndterGapVarForlengelse() {
-        dataForVilkårsvurdering = null
-        tilbakestillInntektsmeldingId()
-        håndterGap()
-    }
-
-    // oppdaget/bekreftet gap
-    private fun håndterGap() {
-        forlengelseFraInfotrygd = ForlengelseFraInfotrygd.NEI
-        skjæringstidspunktFraInfotrygd = null
-    }
-
-    // er forlengelse
-    private fun håndterForlengelse(tilstøtende: Vedtaksperiode) {
-        dataForVilkårsvurdering = tilstøtende.dataForVilkårsvurdering ?: dataForVilkårsvurdering
-        inntektsmeldingId = tilstøtende.inntektsmeldingId?.also {
-            hendelseIder.add(it)
-        }
-        forlengelseFraInfotrygd = tilstøtende.forlengelseFraInfotrygd
-        skjæringstidspunktFraInfotrygd = tilstøtende.skjæringstidspunktFraInfotrygd.takeIf { forlengelseFraInfotrygd == JA }
-    }
-
-    // er fortsatt forlengelse
-    private fun håndterFortsattForlengelse(tilstøtende: Vedtaksperiode) {
-        tilbakestillInntektsmeldingId()
-        håndterForlengelse(tilstøtende)
-    }
-
-    // oppdaget forlengelse fra IT, har ikke tilstøtende
-    private fun håndterForlengelseIT(historie: Historie) {
-        tilbakestillInntektsmeldingId()
-        forlengelseFraInfotrygd = JA
-        skjæringstidspunktFraInfotrygd = historie.skjæringstidspunkt(periode)
-    }
-
-    private fun tilbakestillInntektsmeldingId() {
-        inntektsmeldingId?.also {
-            hendelseIder.remove(it)
-            inntektsmeldingId = null
-        }
+        tilstand(hendelse, arbeidsgiver.finnSykeperiodeRettFør(this)?.let { tilstandHvisForlengelse } ?: tilstandHvisGap)
     }
 
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
-    fun tillatAnullering() =
-        this.tilstand != TilUtbetaling
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
         if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, vedtaksperiode.id, type)
@@ -813,9 +759,7 @@ internal class Vedtaksperiode private constructor(
                     return@returnPoint TilInfotrygd
                 }
 
-                val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also {
-                    vedtaksperiode.håndterForlengelse(it)
-                }
+                val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                 val forlengelse = periodeRettFør != null
                 val ferdig =
                     vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
@@ -874,11 +818,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             gjenopptaBehandling: GjenopptaBehandling
         ) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                MottattSykmeldingFerdigForlengelse,
-                MottattSykmeldingFerdigGap
-            )
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, MottattSykmeldingFerdigForlengelse, MottattSykmeldingFerdigGap)
         }
     }
 
@@ -1052,11 +992,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                AvventerHistorikk,
-                AvventerInntektsmeldingFerdigGap
-            )
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, AvventerHistorikk, AvventerInntektsmeldingFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1084,11 +1020,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                MottattSykmeldingFerdigForlengelse,
-                AvventerSøknadFerdigGap
-            )
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, MottattSykmeldingFerdigForlengelse, AvventerSøknadFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1206,8 +1138,12 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser
         ) {
             val historie = Historie(person, ytelser.utbetalingshistorikk())
+            lateinit var skjæringstidspunkt: LocalDate
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
+                valider("Mangler skjæringstidspunkt") {
+                    historie.skjæringstidspunkt(vedtaksperiode.periode)?.also { skjæringstidspunkt = it } != null
+                }
                 validerYtelser(
                     historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
                     ytelser,
@@ -1220,34 +1156,25 @@ internal class Vedtaksperiode private constructor(
                 overlappende(vedtaksperiode.periode, ytelser.opplæringspenger())
                 overlappende(vedtaksperiode.periode, ytelser.institusjonsopphold())
                 onSuccess {
-                    val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
-                    val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
+                    when (val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
+                        in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
+                            vedtaksperiode.forlengelseFraInfotrygd = JA
+                            vedtaksperiode.skjæringstidspunktFraInfotrygd = skjæringstidspunkt
 
-                    when {
-                        periodetype == FØRSTEGANGSBEHANDLING -> {
-                            vedtaksperiode.håndterGap()
-                            ytelser.info("Perioden er en førstegangsbehandling")
-                        }
-                        periodetype == OVERGANG_FRA_IT -> {
-                            vedtaksperiode.håndterForlengelseIT(historie)
-                            arbeidsgiver.addInntekt(ytelser)
-                            ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-                            if (ytelser.statslønn())
-                                ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
-                        }
-                        // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
-                        tilstøtende == null -> {
-                            vedtaksperiode.håndterForlengelseIT(historie)
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i ${periodetype.opphav()}, dog uten tilstøtende - " +
-                                "perioden kommer tilbake etter et opphold i Infotrygd.")
+                            if (periodetype == OVERGANG_FRA_IT) {
+                                arbeidsgiver.addInntekt(ytelser)
+                                ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+                                if (ytelser.statslønn()) ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+                            }
                         }
                         else -> {
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i ${periodetype.opphav()}")
-                            vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
+                            vedtaksperiode.forlengelseFraInfotrygd = NEI
+                            val forrige = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) ?: arbeidsgiver.forrigeAvsluttaPeriode(vedtaksperiode, historie)
+                            if (forrige != null) vedtaksperiode.kopierManglende(forrige)
                         }
                     }
                 }
-                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
+                harNødvendigInntekt(person, skjæringstidspunkt)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     engineForTimeline = ArbeidsgiverUtbetalinger(
@@ -1271,6 +1198,13 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+    }
+
+    private fun kopierManglende(other: Vedtaksperiode) {
+        if (this.inntektsmeldingId == null)
+            this.inntektsmeldingId = other.inntektsmeldingId?.also { this.hendelseIder.add(it) }
+        if (this.dataForVilkårsvurdering == null)
+            this.dataForVilkårsvurdering = other.dataForVilkårsvurdering
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -1565,6 +1499,12 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val log = LoggerFactory.getLogger(Vedtaksperiode::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun finnForrigeAvsluttaPeriode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate, historie: Historie) =
+            perioder
+                .filter { it < vedtaksperiode }
+                .filter { it.utbetaling?.erAvsluttet() == true || it.tilstand == AvsluttetUtenUtbetalingMedInntektsmelding }
+                .lastOrNull { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {

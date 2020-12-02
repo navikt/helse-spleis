@@ -189,6 +189,6 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             TilstandType.TIL_INFOTRYGD
         )
     }
-}
 
-private infix fun LocalDate.til(tom: LocalDate?) = Institusjonsoppholdsperiode(this, tom)
+    private infix fun LocalDate.til(tom: LocalDate?) = Institusjonsoppholdsperiode(this, tom)
+}
