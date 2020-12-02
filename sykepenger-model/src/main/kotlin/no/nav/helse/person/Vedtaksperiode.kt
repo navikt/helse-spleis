@@ -1443,7 +1443,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
+            if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
+            vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.sykmeldingsperiode)
+            vedtaksperiode.oppdaterHistorikk(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

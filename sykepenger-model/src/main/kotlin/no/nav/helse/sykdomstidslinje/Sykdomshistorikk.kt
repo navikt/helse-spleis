@@ -18,6 +18,17 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
+    internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        elementer.add(
+            0, Element.opprett(
+                this,
+                hendelse,
+                if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
+            )
+        )
+        return sykdomstidslinje()
+    }
+
     internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
         if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
             elementer.add(0, Element.opprett(this, hendelse))
@@ -94,6 +105,24 @@ internal class Sykdomshistorikk private constructor(
                 hendelse: SykdomstidslinjeHendelse
             ): Element {
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
+                return Element(
+                    hendelseId = hendelse.meldingsreferanseId(),
+                    tidsstempel = LocalDateTime.now(),
+                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
+                        hendelse,
+                        hendelseSykdomstidslinje
+                    )
+                )
+            }
+
+            internal fun opprett(
+                historikk: Sykdomshistorikk,
+                hendelse: SykdomstidslinjeHendelse,
+                tom: LocalDate
+            ): Element {
+                if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
+                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
                     tidsstempel = LocalDateTime.now(),

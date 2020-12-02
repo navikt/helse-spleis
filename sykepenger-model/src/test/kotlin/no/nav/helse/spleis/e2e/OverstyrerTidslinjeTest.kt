@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,6 +42,48 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+    }
+
+    @Test
+    fun `overstyrer siste utbetalte periode`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterOverstyring(listOf(manuellSykedag(26.januar, 80)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
+            assertEquals(2, oppdrag.size)
+            assertEquals(18.januar, oppdrag[0].fom)
+            assertEquals(25.januar, oppdrag[0].tom)
+            assertEquals(100.0, oppdrag[0].grad)
+
+            assertEquals(26.januar, oppdrag[1].fom)
+            assertEquals(26.januar, oppdrag[1].tom)
+            assertEquals(80.0, oppdrag[1].grad)
+        }
+    }
+
+    @Test
+    fun `får ikke overstyre utbetalt periode som har perioder etter seg`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        assertThrows<Aktivitetslogg.AktivitetException> { håndterOverstyring(listOf(manuellSykedag(26.januar, 80)))  }
     }
 
     @Test
@@ -150,27 +194,6 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomstidslinje.toShortString())
         assertEquals("PPPPP PPPPPPP PPPPNHH NNNNF", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-    }
-
-    @Test
-    fun `overstyrer ikke vedtaksperioder som er avsluttet`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        assertThrows<RuntimeException> {
-            håndterOverstyring(listOf(manuellFeriedag(26.januar)))
-        }
-        assertNotEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertNotEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomstidslinje.toShortString())
-        assertNotEquals("PPPPP PPPPPPP PPPPNHH NNNNF", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
     }
 
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
