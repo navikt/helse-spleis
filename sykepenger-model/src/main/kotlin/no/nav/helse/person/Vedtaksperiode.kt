@@ -219,10 +219,10 @@ internal class Vedtaksperiode private constructor(
         else -> FØRSTEGANGSBEHANDLING
     }
 
-    internal fun ferdig(hendelse: ArbeidstakerHendelse, sendTilInfotrygd: Boolean) {
+    internal fun ferdig(hendelse: ArbeidstakerHendelse, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
+        if (skalGiOpp(årsak, utbetaling)) tilstand(hendelse, TilInfotrygd)
         utbetaling?.forkast(hendelse)
         person.vedtaksperiodeAvbrutt(
             PersonObserver.VedtaksperiodeAvbruttEvent(
@@ -235,15 +235,12 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun skalBytteTilstandVedForkastelse() =
-        this.tilstand !in listOf(
-            TilInfotrygd,
-            Avsluttet,
-            AvsluttetUtenUtbetalingMedInntektsmelding,
-            AvsluttetUtenUtbetaling,
-            AvventerVilkårsprøvingArbeidsgiversøknad,
-            UtbetalingFeilet
-        )
+    private fun skalGiOpp(årsak: ForkastetÅrsak, utbetaling: Utbetaling?): Boolean {
+        if (årsak == ForkastetÅrsak.ERSTATTES) return false
+        if (utbetaling != null && utbetaling.erAvsluttet()) return false
+        if (tilstand == AvsluttetUtenUtbetalingMedInntektsmelding) return false
+        return true
+    }
 
     private fun skalForkastesVedOverlapp() =
         this.tilstand !in listOf(
@@ -810,7 +807,7 @@ internal class Vedtaksperiode private constructor(
                     replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
                         sykmelding,
                         Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
-                        false
+                        ForkastetÅrsak.ERSTATTES
                     )
                 } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
                     return@returnPoint TilInfotrygd
@@ -1549,7 +1546,8 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             vedtaksperiode.arbeidsgiver.søppelbøtte(
                 hendelse,
-                vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode)
+                vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode),
+                ForkastetÅrsak.IKKE_STØTTET
             )
         }
 

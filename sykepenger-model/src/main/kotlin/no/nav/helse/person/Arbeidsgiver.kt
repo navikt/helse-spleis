@@ -4,7 +4,6 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
-import no.nav.helse.person.ForkastetÅrsak.UKJENT
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.serde.reflection.OppdragReflect
@@ -230,7 +229,7 @@ internal class Arbeidsgiver private constructor(
         val annullering = sisteUtbetalte.annuller(hendelse) ?: return
         nyUtbetaling(annullering)
         annullering.håndter(hendelse)
-        søppelbøtte(hendelse, ALLE)
+        søppelbøtte(hendelse, ALLE, ForkastetÅrsak.ANNULLERING)
     }
 
     internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
@@ -351,7 +350,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
-        søppelbøtte(RollbackArbeidsgiver(organisasjonsnummer, hendelse), ALLE)
+        søppelbøtte(RollbackArbeidsgiver(organisasjonsnummer, hendelse), ALLE, ForkastetÅrsak.IKKE_STØTTET)
     }
 
     internal fun håndter(hendelse: OverstyrTidslinje) {
@@ -401,14 +400,14 @@ internal class Arbeidsgiver private constructor(
     internal fun søppelbøtte(
         hendelse: ArbeidstakerHendelse,
         filter: VedtaksperioderFilter,
-        sendTilInfotrygd: Boolean = true
+        årsak: ForkastetÅrsak
     ): List<Vedtaksperiode> {
-        return forkast(filter)
+        return forkast(filter, årsak)
             .takeIf { it.isNotEmpty() }
             ?.also { perioder ->
                 perioder
                     .forEach {
-                        it.ferdig(hendelse, sendTilInfotrygd)
+                        it.ferdig(hendelse, årsak)
                         sykdomshistorikk.fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
@@ -418,11 +417,11 @@ internal class Arbeidsgiver private constructor(
             ?: listOf()
     }
 
-    private fun forkast(filter: VedtaksperioderFilter) = vedtaksperioder
+    private fun forkast(filter: VedtaksperioderFilter, årsak: ForkastetÅrsak) = vedtaksperioder
         .filter(filter)
         .also { perioder ->
             vedtaksperioder.removeAll(perioder)
-            forkastede.putAll(perioder.map { it to UKJENT })
+            forkastede.putAll(perioder.map { it to årsak })
         }
 
     private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
