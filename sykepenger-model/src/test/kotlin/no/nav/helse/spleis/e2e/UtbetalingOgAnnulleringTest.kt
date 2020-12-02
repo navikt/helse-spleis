@@ -13,64 +13,10 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
-
-    @Disabled("Slik skal det virke etter at annullering trigger replay")
-    @Test
-    fun `annullerer første periode i en ikke-sammenhengende utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(30.januar, 15.februar, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(30.januar, 15.februar, 100))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 30.januar)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)   // No history
-        håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
-
-        assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
-    }
-
-    @Disabled("Slik skal det virke etter at annullering trigger replay")
-    @Test
-    fun `annullerer første periode i en ikke-sammenhengende utbetaling med mer enn 16 dager gap`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(15.februar, 15.mars, 100))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(15.februar, 2.mars)), førsteFraværsdag = 15.februar)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)   // No history
-        håndterSimulering(2.vedtaksperiode)
-        val fagsystemId = inspektør.utbetalinger.aktive().last().arbeidsgiverOppdrag().fagsystemId()
-        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-
-        assertEquals(26.januar, observatør.annulleringer[0].utbetalingslinjer.last().tom)
-        assertEquals(15.mars, observatør.utbetaltEventer.last().tom)
-        assertEquals(1, observatør.utbetaltEventer.last().oppdrag.first().utbetalingslinjer.size)
-        assertEquals(0, observatør.utbetaltEventer.last().oppdrag.last().utbetalingslinjer.size)
-    }
 
     @Test
     fun `annullerer første periode før andre periode starter i en ikke-sammenhengende utbetaling med mer enn 16 dager gap`() {
