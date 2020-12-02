@@ -183,6 +183,11 @@ internal class Utbetaling private constructor(
         return tilstand.etterutbetale(this, hendelse, utbetalingstidslinje)
     }
 
+    internal fun forkast(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(this)
+        tilstand.forkast(this, hendelse)
+    }
+
     internal fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
 
     internal fun personOppdrag() = personOppdrag
@@ -367,6 +372,10 @@ internal class Utbetaling private constructor(
     }
 
     internal interface Tilstand {
+        fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
         fun godkjenn(
             utbetaling: Utbetaling,
             hendelse: ArbeidstakerHendelse,
@@ -421,6 +430,11 @@ internal class Utbetaling private constructor(
     }
 
     internal object Ubetalt : Tilstand {
+        override fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+            hendelse.info("Forkaster utbetaling")
+            utbetaling.tilstand(Forkastet, hendelse)
+        }
+
         override fun godkjenn(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
             utbetaling.tilstand(vurdering.avgjør(utbetaling), hendelse)
@@ -446,7 +460,6 @@ internal class Utbetaling private constructor(
         }
     }
 
-    internal object IkkeGodkjent : Tilstand {}
     internal object GodkjentUtenUtbetaling : Tilstand {
         override fun avslutt(
             utbetaling: Utbetaling,
@@ -568,6 +581,9 @@ internal class Utbetaling private constructor(
             utbetaling.overfør(Overført, påminnelse)
         }
     }
+
+    internal object IkkeGodkjent : Tilstand {}
+    internal object Forkastet : Tilstand {}
 
     internal class Vurdering(
         private val godkjent: Boolean,

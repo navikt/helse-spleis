@@ -5,9 +5,9 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -33,6 +33,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT_AS_INT, 100, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
+        assertTrue(inspektør.utbetalinger.isEmpty())
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -54,7 +55,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(29.januar, 23.februar, 100))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
-
+        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(0))
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
@@ -299,7 +300,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             TIL_INFOTRYGD
         )
-        Assertions.assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
     }
 
     @Test

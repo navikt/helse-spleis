@@ -223,6 +223,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         if (sendTilInfotrygd && skalBytteTilstandVedForkastelse()) tilstand(hendelse, TilInfotrygd)
+        utbetaling?.forkast(hendelse)
         person.vedtaksperiodeAvbrutt(
             PersonObserver.VedtaksperiodeAvbruttEvent(
                 vedtaksperiodeId = id,
@@ -523,10 +524,14 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         engineForTimeline.beregnGrenser(periode.endInclusive)
-        val maksdato = engineForTimeline.maksdato()
-        val gjenståendeSykedager = engineForTimeline.gjenståendeSykedager()
-        val forbrukteSykedager = engineForTimeline.forbrukteSykedager()
-        val utbetaling = arbeidsgiver.lagUtbetaling(hendelse, fødselsnummer, maksdato, forbrukteSykedager, gjenståendeSykedager, periode).also {
+        val utbetaling = arbeidsgiver.lagUtbetaling(
+            aktivitetslogg = hendelse,
+            fødselsnummer = fødselsnummer,
+            maksdato = engineForTimeline.maksdato(),
+            forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
+            gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
+            periode = periode
+        ).also {
             utbetaling = it
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
@@ -1188,6 +1193,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerYtelser(hendelse)
             vedtaksperiode.trengerPersoninfo(hendelse)
+            vedtaksperiode.utbetaling?.forkast(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 

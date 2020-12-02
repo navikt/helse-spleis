@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
@@ -10,6 +11,19 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `kan ikke utbetale overstyrt utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+    }
 
     @Test
     fun `overstyrer sykedag på slutten av perioden`() {
@@ -20,8 +34,11 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -34,7 +51,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellArbeidsgiverdag(18.januar)))
-
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
         assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)   // No history

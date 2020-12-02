@@ -18,7 +18,8 @@ enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
     UTBETALT(Utbetaling.Utbetalt),
     GODKJENT_UTEN_UTBETALING(Utbetaling.GodkjentUtenUtbetaling),
     UTBETALING_FEILET(Utbetaling.UtbetalingFeilet),
-    ANNULLERT(Utbetaling.Annullert);
+    ANNULLERT(Utbetaling.Annullert),
+    FORKASTET(Utbetaling.Forkastet);
 
     internal fun tilTilstand() = tilstand
 
