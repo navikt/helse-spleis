@@ -285,9 +285,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
     }
 
-    @Disabled("Slik skal det virke etter at annullering trigger replay")
     @Test
-    fun `Annullering av én periode fører kun til at sammehengende perioder blir satt i tilstand TilInfotrygd`() {
+    fun `Annullering av én periode fører kun til at sammehengende utbetalte perioder blir forkastet og værende i Avsluttet`() {
         nyttVedtak(3.januar, 26.januar, 100, 3.januar)
         forlengVedtak(27.januar, 30.januar, 100)
         nyttVedtak(1.mars, 20.mars, 100, 1.mars)
@@ -297,15 +296,16 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
         }
         val behovTeller = inspektør.personLogg.behov().size
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.first().fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         inspektør.also {
             assertFalse(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
             assertEquals(1, it.personLogg.behov().size - behovTeller, it.personLogg.toString())
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
-            assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(2.vedtaksperiode))
-            assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+            assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+            assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
         }
     }
 
