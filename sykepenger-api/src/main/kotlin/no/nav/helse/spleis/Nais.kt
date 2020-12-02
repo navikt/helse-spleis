@@ -47,9 +47,8 @@ internal fun Application.nais(teller: AtomicInteger) {
 
         get("/stop") {
             log.info(""""Stop" er kalt. Antall aktive kall er ${teller.get()}""")
-            delay(900)
-            do { delay(100) } while (teller.get() != 0)
-            delay(200)
+            delay(20000)
+            log.info("""Svarer på "stop". Antall aktive kall er ${teller.get()}""")
             call.respondText("STOPPED", ContentType.Text.Plain)
         }
         get("/metrics") {

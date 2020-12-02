@@ -152,6 +152,7 @@ internal class RestApiTest {
         await().atMost(5, SECONDS).untilAsserted { "/api/utbetaling/$UTBETALINGSREF".httpGet(HttpStatusCode.OK) }
     }
 
+    @Disabled("Tester bruk av preStopHook")
     @Test
     fun `preStop`() {
         teller.set(3)
