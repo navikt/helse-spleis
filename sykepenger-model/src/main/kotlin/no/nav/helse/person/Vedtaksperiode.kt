@@ -17,6 +17,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
+import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForlengelseFraInfotrygd.*
 import no.nav.helse.person.Kildesystem.INFOTRYGD
 import no.nav.helse.person.Kildesystem.SPLEIS
@@ -218,7 +219,7 @@ internal class Vedtaksperiode private constructor(
     internal fun ferdig(hendelse: ArbeidstakerHendelse, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if (skalGiOpp(årsak, utbetaling)) tilstand(hendelse, TilInfotrygd)
+        if (årsak !== ERSTATTES && !erAvsluttet()) tilstand(hendelse, TilInfotrygd)
         utbetaling?.forkast(hendelse)
         person.vedtaksperiodeAvbrutt(
             PersonObserver.VedtaksperiodeAvbruttEvent(
@@ -231,12 +232,8 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun skalGiOpp(årsak: ForkastetÅrsak, utbetaling: Utbetaling?): Boolean {
-        if (årsak == ForkastetÅrsak.ERSTATTES) return false
-        if (utbetaling != null && utbetaling.erAvsluttet()) return false
-        if (tilstand == AvsluttetUtenUtbetalingMedInntektsmelding) return false
-        return true
-    }
+    private fun erAvsluttet() =
+        utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetalingMedInntektsmelding
 
     private fun skalForkastesVedOverlapp() =
         this.tilstand !in listOf(
@@ -736,7 +733,7 @@ internal class Vedtaksperiode private constructor(
                     replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
                         sykmelding,
                         Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
-                        ForkastetÅrsak.ERSTATTES
+                        ERSTATTES
                     )
                 } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
                     return@returnPoint TilInfotrygd
@@ -1489,7 +1486,7 @@ internal class Vedtaksperiode private constructor(
         internal fun finnForrigeAvsluttaPeriode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate, historie: Historie) =
             perioder
                 .filter { it < vedtaksperiode }
-                .filter { it.utbetaling?.erAvsluttet() == true || it.tilstand == AvsluttetUtenUtbetalingMedInntektsmelding }
+                .filter { it.erAvsluttet() }
                 .lastOrNull { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
