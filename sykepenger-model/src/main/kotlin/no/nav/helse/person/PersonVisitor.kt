@@ -28,7 +28,7 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -50,7 +50,7 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Vedtaksperiode
     }
 }
 
-internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomshistorikkVisitor, UtbetalingsdagVisitor {
+internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,

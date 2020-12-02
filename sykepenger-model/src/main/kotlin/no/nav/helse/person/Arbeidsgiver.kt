@@ -132,18 +132,12 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer.add(Triple(organisasjonsnummer, utbetalingstidslinje, LocalDateTime.now()))
     }
 
-    private fun validerSykdomstidslinjer() = vedtaksperioder.forEach {
-        it.validerSykdomstidslinje(sykdomshistorikk.sykdomstidslinje())
-    }
-
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
         if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it }) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             vedtaksperioder.sort()
-        } else {
-            validerSykdomstidslinjer()
         }
     }
 
@@ -151,8 +145,6 @@ internal class Arbeidsgiver private constructor(
         søknad.kontekst(this)
         if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
-        } else {
-            validerSykdomstidslinjer()
         }
     }
 
@@ -160,8 +152,6 @@ internal class Arbeidsgiver private constructor(
         søknad.kontekst(this)
         if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
-        } else {
-            validerSykdomstidslinjer()
         }
     }
 
@@ -169,8 +159,6 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kontekst(this)
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
-        } else {
-            validerSykdomstidslinjer()
         }
     }
 

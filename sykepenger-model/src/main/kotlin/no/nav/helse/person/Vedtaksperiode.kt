@@ -22,7 +22,6 @@ import no.nav.helse.person.Kildesystem.INFOTRYGD
 import no.nav.helse.person.Kildesystem.SPLEIS
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -45,7 +44,6 @@ internal class Vedtaksperiode private constructor(
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
-    private val sykdomshistorikk: Sykdomshistorikk,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
     private var inntektsmeldingId: UUID?,
@@ -81,7 +79,6 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunktFraInfotrygd = null,
         dataForVilkårsvurdering = null,
         dataForSimulering = null,
-        sykdomshistorikk = Sykdomshistorikk(),
         sykdomstidslinje = Sykdomstidslinje(),
         hendelseIder = mutableListOf(),
         inntektsmeldingId = null,
@@ -94,7 +91,6 @@ internal class Vedtaksperiode private constructor(
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(this, id, tilstand, periode, sykmeldingsperiode, hendelseIder)
         sykdomstidslinje.accept(visitor)
-        sykdomshistorikk.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
         utbetaling?.accept(visitor)
@@ -334,7 +330,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        sykdomshistorikk.håndter(hendelse)
+        hendelse.padLeft(periode.start)
+        hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
         hendelseIder.add(hendelse.meldingsreferanseId())
     }
@@ -586,20 +583,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
         if (tilstand == AvventerArbeidsgivere) tilstand(hendelse, AvventerHistorikk)
-    }
-
-    internal fun validerSykdomstidslinje(arbeidsgiverSykdomstidslinje: Sykdomstidslinje) {
-        if (sykdomshistorikk.sykdomstidslinje().subset(periode()).toShortString() != arbeidsgiverSykdomstidslinje.subset(periode())
-                .toShortString()
-        ) {
-            log.warn("Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje")
-            sikkerLogg.warn(
-                "Sykdomstidslinje på vedtaksperiode er ikke lik arbeidsgiver sin avgrensede sykdomstidslinje."
-                    + "vedtaksperiodeId=$id, aktørId=$aktørId, fødselsnummer=$fødselsnummer, " +
-                    "arbeidsgivertidslinje=[${arbeidsgiverSykdomstidslinje.subset(periode())}], vedtaksperiodetidslinje=[${sykdomshistorikk.sykdomstidslinje().subset(periode())}], " +
-                    "periode=${periode()}"
-            )
-        }
     }
 
     private fun håndterMuligForlengelse(

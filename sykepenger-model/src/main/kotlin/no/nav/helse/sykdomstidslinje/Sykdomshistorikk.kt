@@ -100,8 +100,10 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
-            internal fun opprett(historikk: Sykdomshistorikk,
-                          hendelse: SykdomstidslinjeHendelse): Element {
+            internal fun opprett(
+                historikk: Sykdomshistorikk,
+                hendelse: SykdomstidslinjeHendelse
+            ): Element {
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
