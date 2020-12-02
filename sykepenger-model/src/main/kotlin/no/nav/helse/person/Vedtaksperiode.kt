@@ -1222,11 +1222,6 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     val tilstøtende = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                     val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
-                    val opphav = if (periodetype.opphav() == SPLEIS) "ny løsning" else "Infotrygd"
-
-                    if (historie.erPingPong(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
-                        ytelser.warn("Perioden forlenger en behandling i $opphav, og har historikk i ${if (periodetype.opphav() == SPLEIS) "Infotrygd" else "ny løsning"} også: Undersøk at antall dager igjen er beregnet riktig.")
-                    }
 
                     when {
                         periodetype == FØRSTEGANGSBEHANDLING -> {
@@ -1243,10 +1238,11 @@ internal class Vedtaksperiode private constructor(
                         // vi er en forlengelse av et slag, men har ingen tilstøtende (Infotrygd-periode foran)
                         tilstøtende == null -> {
                             vedtaksperiode.håndterForlengelseIT(historie)
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav, dog uten tilstøtende")
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i ${periodetype.opphav()}, dog uten tilstøtende - " +
+                                "perioden kommer tilbake etter et opphold i Infotrygd.")
                         }
                         else -> {
-                            ytelser.info("Perioden er en forlengelse av en periode med opphav i $opphav")
+                            ytelser.info("Perioden er en forlengelse av en periode med opphav i ${periodetype.opphav()}")
                             vedtaksperiode.håndterFortsattForlengelse(tilstøtende)
                         }
                     }

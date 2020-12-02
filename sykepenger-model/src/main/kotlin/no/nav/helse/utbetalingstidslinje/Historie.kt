@@ -86,19 +86,6 @@ internal class Historie() {
     internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)
 
-    internal fun erPingPong(orgnr: String, periode: Periode): Boolean {
-        val periodetype = periodetype(orgnr, periode)
-        if (periodetype !in listOf(FORLENGELSE, INFOTRYGDFORLENGELSE)) return false
-        val skjæringstidspunkt = skjæringstidspunkt(periode) ?: return false
-        val antallBruddstykker = infotrygdbøtte
-            .sykdomstidslinje(orgnr)
-            .skjæringstidspunkter(periode.endInclusive)
-            .filter { dato -> dato >= skjæringstidspunkt && dato > periode.start.minusMonths(6) }
-            .size
-        if (periodetype == INFOTRYGDFORLENGELSE) return antallBruddstykker > 1
-        return antallBruddstykker >= 1
-    }
-
     internal fun sammenhengendePeriode(periode: Periode) =
         skjæringstidspunkt(periode)?.let { periode.oppdaterFom(it) } ?: periode
 
