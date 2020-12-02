@@ -28,7 +28,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -188,17 +187,6 @@ internal class Vedtaksperiode private constructor(
         if (!it) return it
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
-    }
-
-    internal fun håndter(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        if (!grunnbeløpsregulering.erRelevant(
-                utbetaling().arbeidsgiverOppdrag().fagsystemId(),
-                utbetaling().personOppdrag().fagsystemId(),
-                skjæringstidspunkt
-            )
-        ) return
-        kontekst(grunnbeløpsregulering)
-        tilstand.håndter(this, grunnbeløpsregulering)
     }
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
@@ -442,10 +430,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun regulerGrunnbeløp(grunnbeløpsregulering: Grunnbeløpsregulering) {
-        tilstand(grunnbeløpsregulering, AvventerHistorikk)
-    }
-
     private fun emitVedtaksperiodeEndret(
         currentState: Vedtaksperiodetilstand,
         hendelseaktivitetslogg: Aktivitetslogg,
@@ -659,9 +643,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
         }
 
         fun håndter(
@@ -1425,12 +1406,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, grunnbeløpsregulering: Grunnbeløpsregulering) {
-            if (grunnbeløpsregulering.håndtert()) return grunnbeløpsregulering.info("Grunnbeløpsreguleringen er håndtert av en annen periode")
-            grunnbeløpsregulering.info("Foretar grunnbeløpsregulering")
-            vedtaksperiode.regulerGrunnbeløp(grunnbeløpsregulering)
-        }
-
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1480,9 +1455,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
-        private val log = LoggerFactory.getLogger(Vedtaksperiode::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
         internal fun finnForrigeAvsluttaPeriode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate, historie: Historie) =
             perioder
                 .filter { it < vedtaksperiode }
