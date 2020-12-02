@@ -1,14 +1,10 @@
 package no.nav.helse.spleis
 
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.http.ContentType
-import io.ktor.metrics.micrometer.MicrometerMetrics
-import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.metrics.micrometer.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
@@ -20,8 +16,10 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
+import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicInteger
 
-internal fun Application.nais() {
+internal fun Application.nais(teller: AtomicInteger) {
     install(MicrometerMetrics) {
         registry = PrometheusMeterRegistry(
             PrometheusConfig.DEFAULT,
@@ -42,15 +40,16 @@ internal fun Application.nais() {
         get("/isalive") {
             call.respondText("ALIVE", ContentType.Text.Plain)
         }
-    }
 
-    routing {
         get("/isready") {
             call.respondText("READY", ContentType.Text.Plain)
         }
-    }
 
-    routing {
+        get("/stop") {
+            log.info(""""Stop" er kalt. Antall aktive kall er ${teller.get()}""")
+            do { delay(100) } while (teller.get() != 0)
+            call.respondText("STOPPED", ContentType.Text.Plain)
+        }
         get("/metrics") {
             val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: emptySet()
             call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {

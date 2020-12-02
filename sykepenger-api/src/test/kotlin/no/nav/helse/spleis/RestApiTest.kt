@@ -6,10 +6,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Authorization
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -22,6 +21,7 @@ import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.io.TempDir
 import java.net.Socket
@@ -29,7 +29,10 @@ import java.nio.file.Path
 import java.sql.Connection
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
+import kotlin.concurrent.thread
+import kotlin.system.measureTimeMillis
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -50,6 +53,7 @@ internal class RestApiTest {
 
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
+    private val teller = AtomicInteger()
 
     @BeforeAll
     internal fun `start embedded environment`(@TempDir postgresPath: Path) {
@@ -87,7 +91,6 @@ internal class RestApiTest {
             .configure()
             .dataSource(dataSource)
             .load()
-
         app = createApp(
             KtorConfig(httpPort = randomPort),
             AzureAdAppConfig(
@@ -98,7 +101,8 @@ internal class RestApiTest {
             ),
             DataSourceConfiguration(
                 jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
-            )
+            ),
+            teller
         )
 
         app.start(wait = false)
@@ -119,6 +123,8 @@ internal class RestApiTest {
 
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018))
         dataSource.lagreUtbetaling(AKTØRID, ORGNUMMER, UTBETALINGSREF, UUID.randomUUID())
+
+        teller.set(0)
     }
 
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
@@ -144,6 +150,18 @@ internal class RestApiTest {
     @Test
     fun `hent utbetaling`() {
         await().atMost(5, SECONDS).untilAsserted { "/api/utbetaling/$UTBETALINGSREF".httpGet(HttpStatusCode.OK) }
+    }
+
+    @Test
+    fun `preStop`() {
+        teller.set(3)
+        thread {
+            do {
+                Thread.sleep(100)
+            } while (teller.decrementAndGet() != 0)
+        }
+        val ms = measureTimeMillis { appBaseUrl.handleRequest(HttpMethod.Get, "/stop").responseCode }
+        assertTrue(ms >= 300)
     }
 
     private fun String.httpGet(expectedStatus: HttpStatusCode = HttpStatusCode.OK, testBlock: String.() -> Unit = {}) {
