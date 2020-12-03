@@ -1,13 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -20,21 +18,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
-
-    @Test
-    fun `påminnelse for vedtaksperiode som ikke finnes`() {
-        sendNyPåminnelse()
-        assertEquals(1, testRapid.inspektør.antall())
-        assertEquals("vedtaksperiode_ikke_funnet", testRapid.inspektør.melding(0).path("@event_name").asText())
-    }
-
-    @Test
-    fun `påminnelse for feil tilstand`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendNyPåminnelse(0)
-        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(1).path("@event_name").asText())
-        assertEquals("MOTTATT_SYKMELDING_FERDIG_GAP", testRapid.inspektør.melding(1).path("tilstand").asText())
-    }
 
     @Test
     fun `ingen historie med Søknad først`() {
@@ -80,20 +63,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
             "TIL_INFOTRYGD"
         )
-    }
-
-    @Test
-    fun `utbetalingpåminnelse`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0)
-        sendNyUtbetalingpåminnelse(0, Utbetalingstatus.SENDT)
-        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT")
-        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
     }
 
     @Test

@@ -138,9 +138,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingpåminnelse(utbetalingId, status))
     }
 
-    protected fun sendNyPåminnelse(vedtaksperiodeIndeks: Int = -1, tilstandType: TilstandType = TilstandType.START) {
+    protected fun sendNyPåminnelse(vedtaksperiodeIndeks: Int = -1, tilstandType: TilstandType = TilstandType.START): UUID {
         val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
         testRapid.sendTestMessage(meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType))
+        return vedtaksperiodeId
     }
 
     protected fun sendUtbetalingsgodkjenning(
