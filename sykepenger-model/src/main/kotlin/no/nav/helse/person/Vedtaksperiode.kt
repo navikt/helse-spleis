@@ -1126,8 +1126,7 @@ internal class Vedtaksperiode private constructor(
                         }
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
-                            val forrige = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) ?: arbeidsgiver.forrigeAvsluttaPeriode(vedtaksperiode, historie)
-                            if (forrige != null) vedtaksperiode.kopierManglende(forrige)
+                            arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode, historie)?.also { vedtaksperiode.kopierManglende(it) }
                             if (vedtaksperiode.dataForVilkårsvurdering == null && !vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
                                 ytelser.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
                             }
@@ -1458,7 +1457,8 @@ internal class Vedtaksperiode private constructor(
             perioder
                 .filter { it < vedtaksperiode }
                 .filter { it.erAvsluttet() }
-                .lastOrNull { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
+                .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
+                .lastOrNull { it.dataForVilkårsvurdering != null }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {

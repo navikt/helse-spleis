@@ -558,7 +558,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun forrigeAvsluttaPeriode(vedtaksperiode: Vedtaksperiode, historie: Historie): Vedtaksperiode? {
+    internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode, historie: Historie): Vedtaksperiode? {
         val referanse = historie.skjæringstidspunkt(vedtaksperiode.periode()) ?: return null
         return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
             // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
