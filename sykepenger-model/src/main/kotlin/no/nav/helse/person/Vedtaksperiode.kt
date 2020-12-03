@@ -518,13 +518,9 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
-            dataForVilkårsvurdering == null && forlengelseFraInfotrygd == NEI -> {
-                if (erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
-                    tilstand(hendelse, AvventerVilkårsprøvingGap) {
-                        hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
-                    }
-                } else {
-                    hendelse.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+            dataForVilkårsvurdering == null && erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding() -> {
+                tilstand(hendelse, AvventerVilkårsprøvingGap) {
+                    hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
                 }
             }
             else -> {
@@ -1132,6 +1128,9 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
                             val forrige = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) ?: arbeidsgiver.forrigeAvsluttaPeriode(vedtaksperiode, historie)
                             if (forrige != null) vedtaksperiode.kopierManglende(forrige)
+                            if (vedtaksperiode.dataForVilkårsvurdering == null && !vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
+                                ytelser.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+                            }
                         }
                     }
                 }
