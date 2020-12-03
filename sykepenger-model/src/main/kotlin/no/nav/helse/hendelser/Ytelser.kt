@@ -1,7 +1,11 @@
 package no.nav.helse.hendelser
 
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Person
+import java.time.LocalDate
 import java.util.*
 
 class Ytelser(
@@ -36,8 +40,8 @@ class Ytelser(
 
     internal fun statslønn() = statslønn
 
-    internal fun valider(periode: Periode, periodetype: Periodetype) =
-        utbetalingshistorikk.valider(periode, periodetype)
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?) =
+        utbetalingshistorikk.valider(periode, skjæringstidspunkt)
 
     internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
         utbetalingshistorikk().addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)

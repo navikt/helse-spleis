@@ -35,9 +35,9 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun valider(periode: no.nav.helse.hendelser.Periode, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(periode: no.nav.helse.hendelser.Periode, skjæringstidspunkt: LocalDate?): Aktivitetslogg {
         Periode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer)
-        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, periode)
+        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, skjæringstidspunkt, periode)
         return aktivitetslogg
     }
 
@@ -78,15 +78,32 @@ class Utbetalingshistorikk(
             fun valider(
                 liste: List<Inntektsopplysning>,
                 aktivitetslogg: Aktivitetslogg,
+                skjæringstidspunkt: LocalDate?,
                 periode: no.nav.helse.hendelser.Periode
             ) {
-                liste
-                    .filter { it.sykepengerFom >= periode.start.minusMonths(12) }
+                liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
+                liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
+            }
+
+            private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
+                periode: no.nav.helse.hendelser.Periode,
+                aktivitetslogg: Aktivitetslogg
+            ) {
+                filter { it.sykepengerFom >= periode.start.minusMonths(12) }
                     .distinctBy { it.orgnummer }
-                    .onEach { it.valider(aktivitetslogg, periode) }
                     .also {
                         if (it.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd innen 12 måneder fra perioden")
                     }
+            }
+
+            private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
+                skjæringstidspunkt: LocalDate?,
+                aktivitetslogg: Aktivitetslogg,
+                periode: no.nav.helse.hendelser.Periode
+            ) {
+                filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
+                    .forEach { it.valider(aktivitetslogg, periode) }
+                if (this.isNotEmpty() && skjæringstidspunkt == null) sikkerLogg.info("Har inntekt i Infotrygd og skjæringstidspunkt er null")
             }
 
             internal fun addInntekter(

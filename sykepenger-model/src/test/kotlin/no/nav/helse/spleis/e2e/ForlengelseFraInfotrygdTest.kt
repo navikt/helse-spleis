@@ -680,4 +680,27 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertEquals(20.november(2019), inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(20.november(2019), inspektør.skjæringstidspunkt(3.vedtaksperiode))
     }
+
+    @Test
+    fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() {
+        håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020), 100))
+        håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100))
+        val historikk = arrayOf(
+            Utbetalingshistorikk.Periode.Utbetaling(7.oktober(2019), 1.juli(2020), 1000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.Ferie(2.juli(2020), 2.september(2020)),
+            Utbetalingshistorikk.Periode.Utbetaling(3.september(2020), 22.oktober(2020), 1000, 100, ORGNUMMER)
+        )
+        val inntektsopplysning = listOf(
+            Inntektsopplysning(7.oktober(2019), INNTEKT, ORGNUMMER, false)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = historikk, inntektshistorikk = inntektsopplysning)
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            TIL_INFOTRYGD
+        )
+    }
 }

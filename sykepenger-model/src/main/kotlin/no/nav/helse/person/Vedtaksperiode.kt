@@ -647,7 +647,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode, vedtaksperiode.periodetype()).hasErrorsOrWorse())
+            val skjæringstidspunkt = Historie(person, utbetalingshistorikk).skjæringstidspunkt(vedtaksperiode.periode)
+            if (utbetalingshistorikk.valider(vedtaksperiode.periode, skjæringstidspunkt).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
         }
@@ -884,7 +885,7 @@ internal class Vedtaksperiode private constructor(
                     historie.avgrensetPeriode(
                         vedtaksperiode.organisasjonsnummer,
                         vedtaksperiode.periode
-                    ), utbetalingshistorikk, vedtaksperiode.periodetype()
+                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
                 )
                 lateinit var nesteTilstand: Vedtaksperiodetilstand
                 onSuccess {
@@ -1104,7 +1105,7 @@ internal class Vedtaksperiode private constructor(
                 validerYtelser(
                     historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
                     ytelser,
-                    vedtaksperiode.periodetype()
+                    skjæringstidspunkt
                 )
                 onSuccess { ytelser.addInntekter(person) }
                 overlappende(vedtaksperiode.periode, ytelser.foreldrepenger())

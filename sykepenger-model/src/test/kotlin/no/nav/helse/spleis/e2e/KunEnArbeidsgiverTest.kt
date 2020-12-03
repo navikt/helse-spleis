@@ -2430,4 +2430,25 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
     }
+
+    @Test
+    fun `Person uten skjæringstidspunkt feiler ikke i validering av Utbetalingshistorikk`() {
+        håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020), 100))
+        håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100), Ferie(23.oktober(2020), 18.november(2020)))
+        val historikk = arrayOf(
+            Utbetalingshistorikk.Periode.Tilbakeført(3.september(2020), 18.oktober(2020))
+        )
+        val inntektsopplysning = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(3.september(2020), INNTEKT, ORGNUMMER, true)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = historikk, inntektshistorikk = inntektsopplysning)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+        )
+    }
 }
