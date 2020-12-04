@@ -1,7 +1,8 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -58,7 +59,7 @@ internal class Oppdrag private constructor(
         maksdato: LocalDate?,
         saksbehandler: String
     ) {
-        Aktivitetslogg.Aktivitet.Behov.utbetaling(
+        utbetaling(
             aktivitetslogg = aktivitetslogg,
             oppdrag = utenUendretLinjer(),
             maksdato = maksdato,
@@ -67,7 +68,7 @@ internal class Oppdrag private constructor(
     }
 
     internal fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
-        Aktivitetslogg.Aktivitet.Behov.simulering(
+        simulering(
             aktivitetslogg = aktivitetslogg,
             oppdrag = utenUendretLinjer(),
             maksdato = maksdato,
@@ -86,7 +87,12 @@ internal class Oppdrag private constructor(
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
     }
 
-    internal fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
+    internal fun harUtbetalinger() = utenUendretLinjer().isNotEmpty()
+
+    internal fun sammenlignMed(simulering: Simulering) =
+        simulering.valider(utenUendretLinjer())
+
+    private fun utenUendretLinjer() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     private fun utenOpphørLinjer() = kopierMed(linjerUtenOpphør())
 
@@ -148,10 +154,10 @@ internal class Oppdrag private constructor(
         nåværende.first().linkTo(tidligere.last())
         nåværende.zipWithNext { a, b -> b.linkTo(a) }
     }
-
     private lateinit var tilstand: Tilstand
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
+
     private var deletion: Pair<Int, Utbetalingslinje>? = null
 
     private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =

@@ -3,8 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
@@ -106,8 +104,7 @@ internal class Utbetaling private constructor(
     internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
 
     internal fun harUtbetalinger() =
-        arbeidsgiverOppdrag.utenUendretLinjer().isNotEmpty() ||
-        personOppdrag.utenUendretLinjer().isNotEmpty()
+        arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         if (!hendelse.erRelevant(id)) return
@@ -154,7 +151,7 @@ internal class Utbetaling private constructor(
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), id)
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
-        return simulering.valider(arbeidsgiverOppdrag.utenUendretLinjer())
+        return arbeidsgiverOppdrag.sammenlignMed(simulering)
     }
 
     internal fun ferdigstill(
@@ -431,12 +428,7 @@ internal class Utbetaling private constructor(
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            simulering(
-                aktivitetslogg = aktivitetslogg,
-                oppdrag = utbetaling.arbeidsgiverOppdrag.utenUendretLinjer(),
-                maksdato = utbetaling.maksdato,
-                saksbehandler = systemident
-            )
+            utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
         override fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
@@ -550,7 +542,7 @@ internal class Utbetaling private constructor(
                 maksdato = utbetaling.maksdato,
                 forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager)
-            ).takeIf { it.arbeidsgiverOppdrag.utenUendretLinjer().isNotEmpty() }
+            ).takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
 
         override fun avslutt(
             utbetaling: Utbetaling,
@@ -615,7 +607,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun overfør(hendelse: ArbeidstakerHendelse, oppdrag: Oppdrag, maksdato: LocalDate?) {
-            utbetaling(hendelse, oppdrag, maksdato, ident)
+            oppdrag.overfør(hendelse, maksdato, ident)
         }
 
         internal fun avgjør(utbetaling: Utbetaling) =
