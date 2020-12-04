@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +33,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.NY, actual.endringskode)
+        assertEquals(NY, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -43,7 +44,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.NY, actual.endringskode)
+        assertEquals(NY, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -54,11 +55,11 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(ENDR, actual.endringskode)
         assertEquals(original.fagsystemId, actual[0].refFagsystemId)
         assertEquals(original[0].id, actual[0].refId)
         assertEquals(original[0].id + 1, actual[0].id)
-        assertEquals(Endringskode.NY, actual[0].endringskode)
+        assertEquals(NY, actual[0].endringskode)
 
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -70,12 +71,177 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 13.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[0].id, actual[0].id)
         assertNull(actual[0].refId)
         assertNull(actual[0].refFagsystemId)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `trekke periode tilbake`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 13.januar)
+        val actual = recalculated - original
+        val revised = original - actual
+
+        assertEquals(1, revised.size)
+        assertEquals(1.januar, revised.last().fom)
+        assertEquals(5.januar, revised.last().tom)
+        assertEquals(ENDR, revised.last().endringskode)
+        assertNull(revised.last().datoStatusFom)
+    }
+
+    @Test
+    fun `trekke periode tilbake med opphold`() {
+        val original = linjer(1.januar to 5.januar)
+        val recalculated = linjer(1.januar to 5.januar, 8.januar to 13.januar)
+        val actual = recalculated - original
+        val revised = original - actual
+
+        assertEquals(1, revised.size)
+        assertEquals(1.januar, revised.first().fom)
+        assertEquals(5.januar, revised.first().tom)
+        assertEquals(NY, revised.first().endringskode)
+        assertNull(revised.first().datoStatusFom)
+        assertEquals(actual.last().id + 1, revised.first().id)
+        assertEquals(actual.last().id, revised.first().refId)
+    }
+
+    @Test
+    fun `trekke periode tilbake potpourri 1`() {
+        val original = linjer(1.januar to 5.januar)
+        val intermediate = linjer(1.januar to 5.januar, 8.januar to 13.januar)
+        val extended = intermediate - original
+        val recalculated = linjer(1.januar to 5.januar, 8.januar to 20.januar, 28.januar to 5.februar)
+        val actual = recalculated - extended
+        val revised = original - actual
+
+        assertEquals(1, revised.size)
+
+        assertEquals(1.januar, revised.first().fom)
+        assertEquals(5.januar, revised.first().tom)
+        assertEquals(NY, revised.first().endringskode)
+        assertNull(revised.first().datoStatusFom)
+        assertEquals(actual.last().id, revised.first().refId)
+        assertEquals(actual.last().id + 1, revised.first().id)
+    }
+
+    @Test
+    fun `trekke periode tilbake potpourri 2`() {
+        val original = linjer(1.januar to 5.januar)
+        val intermediate = linjer(1.januar to 5.januar, 8.januar to 13.januar)
+        val extended = intermediate - original
+
+        val recalculated = linjer(1.januar to 5.januar, 8.januar to 20.januar, 23.januar to 26.januar, 28.januar to 5.februar)
+        val actual = recalculated - extended
+
+        val tilbakeført = linjer(1.januar to 5.januar, 8.januar to 13.januar)
+        val revised = tilbakeført - actual
+
+        assertEquals(3, revised.size)
+
+        assertEquals(1.januar, revised[0].fom)
+        assertEquals(5.januar, revised[0].tom)
+        assertEquals(UEND, revised[0].endringskode)
+        assertNull(revised[0].datoStatusFom)
+        assertEquals(1, revised[0].id)
+        assertNull(revised[0].refId)
+
+        assertEquals(28.januar, revised[1].fom)
+        assertEquals(5.februar, revised[1].tom)
+        assertEquals(ENDR, revised[1].endringskode)
+        assertEquals(8.januar, revised[1].datoStatusFom)
+        assertEquals(4, revised[1].id)
+        assertNull(revised[1].refId)
+
+        assertEquals(8.januar, revised[2].fom)
+        assertEquals(13.januar, revised[2].tom)
+        assertEquals(NY, revised[2].endringskode)
+        assertNull(revised[2].datoStatusFom)
+        assertEquals(revised[1].id + 1, revised[2].id)
+        assertEquals(revised[1].id, revised[2].refId)
+    }
+
+    @Test
+    fun `trekke periode frem potpourri 1`() {
+        val original = linjer(1.januar to 5.januar, 8.januar to 20.januar, 23.januar to 26.januar, 28.januar to 5.februar)
+        val tilbakeført = linjer(1.januar to 6.januar, 8.januar to 13.januar)
+        val revised = tilbakeført - original
+
+        assertEquals(3, revised.size)
+
+        assertEquals(28.januar, revised[0].fom)
+        assertEquals(5.februar, revised[0].tom)
+        assertEquals(ENDR, revised[0].endringskode)
+        assertEquals(1.januar, revised[0].datoStatusFom)
+        assertEquals(4, revised[0].id)
+        assertNull(revised[0].refId)
+
+        assertEquals(1.januar, revised[1].fom)
+        assertEquals(6.januar, revised[1].tom)
+        assertEquals(NY, revised[1].endringskode)
+        assertNull(revised[1].datoStatusFom)
+        assertEquals(revised[0].id + 1, revised[1].id)
+        assertEquals(revised[0].id, revised[1].refId)
+
+        assertEquals(8.januar, revised[2].fom)
+        assertEquals(13.januar, revised[2].tom)
+        assertEquals(NY, revised[2].endringskode)
+        assertNull(revised[2].datoStatusFom)
+        assertEquals(revised[1].id + 1, revised[2].id)
+        assertEquals(revised[1].id, revised[2].refId)
+    }
+
+    @Test
+    fun `trekke periode tilbake potpourri 3`() {
+        val original = linjer(1.januar to 5.januar)
+        val intermediate = linjer(1.januar to 5.januar, 8.januar to 13.januar)
+        val extended = intermediate - original
+
+        val recalculated = linjer(1.januar to 5.januar, 8.januar to 13.januar, 23.januar to 5.februar)
+        val actual = recalculated - extended
+
+        val tilbakeført = linjer(1.januar to 5.januar, 8.januar to 13.januar, 23.januar to 26.januar, 1.februar to 5.februar)
+        val revised = tilbakeført - actual
+
+        /*
+            mulige utfall, alle OK:
+
+            Sende opphør på siste linje
+            - Linje 3, ENDR, OPPH, datoStatusFom=27.januar
+            - Linje 4, NY, 1.februar - 5.februar
+         */
+        assertEquals(4, revised.size)
+
+        assertEquals(1.januar, revised[0].fom)
+        assertEquals(5.januar, revised[0].tom)
+        assertEquals(UEND, revised[0].endringskode)
+        assertNull(revised[0].datoStatusFom)
+        assertEquals(1, revised[0].id)
+        assertNull(revised[0].refId)
+
+        assertEquals(8.januar, revised[1].fom)
+        assertEquals(13.januar, revised[1].tom)
+        assertEquals(UEND, revised[1].endringskode)
+        assertNull(revised[1].datoStatusFom)
+        assertEquals(revised[0].id + 1, revised[1].id)
+        assertEquals(revised[0].id, revised[1].refId)
+
+        assertEquals(23.januar, revised[2].fom)
+        assertEquals(26.januar, revised[2].tom)
+        assertEquals(ENDR, revised[2].endringskode)
+        assertNull(revised[2].datoStatusFom)
+        assertEquals(revised[1].id + 1, revised[2].id)
+        assertNull(revised[2].refId)
+
+        assertEquals(1.februar, revised[3].fom)
+        assertEquals(5.februar, revised[3].tom)
+        assertNull(revised[3].datoStatusFom)
+        assertEquals(NY, revised[3].endringskode)
+        assertEquals(revised[2].id + 1, revised[3].id)
+        assertEquals(revised[2].id, revised[3].refId)
     }
 
     @Test
@@ -85,9 +251,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id, actual[1].refId)
         assertEquals(original[0].id + 1, actual[1].id)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -100,9 +266,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.NY, actual[0].endringskode)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(NY, actual[0].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -115,9 +281,9 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.NY, actual[0].endringskode)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(NY, actual[0].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -141,12 +307,12 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(intermediate.fagsystemId, actual.fagsystemId)
 
         assertEquals(original[0].id, actual[0].id)
-        assertEquals(Endringskode.NY, original[0].endringskode)
-        assertEquals(Endringskode.ENDR, intermediate[0].endringskode)
+        assertEquals(NY, original[0].endringskode)
+        assertEquals(ENDR, intermediate[0].endringskode)
 
         assertEquals(original[0].id + 1, actual[1].id)
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -166,20 +332,20 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(ENDR, actual.endringskode)
 
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
+        assertEquals(UEND, actual[0].endringskode)
         assertNull(actual[0].refId)
 
-        assertEquals(Endringskode.ENDR, actual[1].endringskode)
+        assertEquals(ENDR, actual[1].endringskode)
         assertNull(actual[1].refId)
         assertNull(actual[1].refFagsystemId)
 
-        assertEquals(Endringskode.NY, actual[2].endringskode)
+        assertEquals(NY, actual[2].endringskode)
         assertEquals(original[2].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(original[2].id, actual[2].refId)
 
-        assertEquals(Endringskode.NY, actual[3].endringskode)
+        assertEquals(NY, actual[3].endringskode)
         assertEquals(actual[2].id + 1, actual[3].id)
         assertEquals(actual[2].id, actual[3].refId)
 
@@ -205,11 +371,11 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(Endringskode.ENDR, actual[1].endringskode)
-        assertEquals(Endringskode.NY, actual[2].endringskode)
-        assertEquals(Endringskode.NY, actual[3].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(ENDR, actual[1].endringskode)
+        assertEquals(NY, actual[2].endringskode)
+        assertEquals(NY, actual[3].endringskode)
         assertEquals(original[5].id + 1, actual[2].id)  // chained off of last of original
         assertEquals(actual[2].id + 1, actual[3].id)
 
@@ -223,8 +389,8 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 10.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.NY, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(NY, actual[0].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
 
@@ -238,8 +404,8 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 3.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.NY, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(NY, actual[0].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
 
@@ -262,16 +428,16 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
 
         assertEquals(original[0].id, actual[0].id)
-        assertEquals(original[1].id, actual[1].id)
+        assertEquals(original[2].id, actual[1].id)
         assertEquals(original[2].id + 1, actual[2].id)
 
-        assertEquals(Endringskode.NY, original[0].endringskode)
-        assertEquals(Endringskode.NY, original[1].endringskode)
-        assertEquals(Endringskode.NY, original[2].endringskode)
+        assertEquals(NY, original[0].endringskode)
+        assertEquals(NY, original[1].endringskode)
+        assertEquals(NY, original[2].endringskode)
 
-        assertEquals(Endringskode.UEND, actual[0].endringskode)
-        assertEquals(Endringskode.ENDR, actual[1].endringskode)
-        assertEquals(Endringskode.NY, actual[2].endringskode)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(ENDR, actual[1].endringskode)
+        assertEquals(NY, actual[2].endringskode)
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -287,13 +453,13 @@ internal class UtbetalingslinjeForskjellTest {
             , actual
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[1].id, actual[0].id)
         assertEquals(null, actual[0].refId)
         assertEquals(null, actual[0].refFagsystemId)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
 
@@ -309,12 +475,12 @@ internal class UtbetalingslinjeForskjellTest {
             6.januar to 19.januar grad 50
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
 
@@ -330,12 +496,12 @@ internal class UtbetalingslinjeForskjellTest {
             6.januar to 19.januar grad 50
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[1].id + 1, actual[1].id)
         assertEquals(original[1].id, actual[1].refId)
 
@@ -351,8 +517,8 @@ internal class UtbetalingslinjeForskjellTest {
             actual
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
@@ -370,8 +536,8 @@ internal class UtbetalingslinjeForskjellTest {
             actual
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[1].id, actual[0].id)
         assertEquals(null, actual[0].refId)
         assertEquals(1.januar, actual[0].datoStatusFom)
@@ -386,7 +552,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(recalculated, actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.NY, actual.endringskode)
+        assertEquals(NY, actual.endringskode)
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -395,19 +561,12 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(1.januar to 12.januar)
         val recalculated = linjer(1.januar to 5.januar)
         val actual = recalculated - original
-        assertUtbetalinger(linjer(
-            1.januar to 12.januar,
-            1.januar to 5.januar
-        ), actual)
+        assertUtbetalinger(linjer(1.januar to 5.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(original[0].id, actual[0].id)
-        assertEquals(1.januar, actual[0].datoStatusFom)
         assertNull(actual[0].refId)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
-        assertEquals(original[0].id + 1, actual[1].id)
-        assertEquals(original[0].id, actual[1].refId)
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -417,20 +576,20 @@ internal class UtbetalingslinjeForskjellTest {
         val recalculated = linjer(1.januar to 5.januar, 7.januar to 10.januar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(
-            1.januar to 12.januar,
             1.januar to 5.januar,
             7.januar to 10.januar
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
-        assertEquals(1.januar, actual[0].datoStatusFom)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
+        assertEquals(1.januar, actual[0].fom)
+        assertEquals(5.januar, actual[0].tom)
         assertEquals(original[0].id, actual[0].id)
         assertNull(actual[0].refId)
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
+        assertEquals(7.januar, actual[1].fom)
+        assertEquals(10.januar, actual[1].tom)
         assertLink(actual[1], original[0])
-        assertEquals(Endringskode.NY, actual[2].endringskode)
-        assertLink(actual[2], actual[1])
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -447,23 +606,25 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
 
         assertUtbetalinger(linjer(
-            8.januar to 12.januar,
             1.januar to 5.januar,
             8.januar to 10.januar
         ), actual)
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
-        assertEquals(original[1].id, actual[0].id)
+        assertEquals(ENDR, actual.endringskode)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(original[0].id, actual[0].id)
         assertEquals(null, actual[0].refId)
-        assertEquals(8.januar, actual[0].datoStatusFom)
-        assertEquals(Endringskode.UEND, actual[1].endringskode)
-        assertEquals(original[0].id, actual[1].id)
+        assertNull(actual[0].datoStatusFom)
+        assertEquals(1.januar, actual[0].fom)
+        assertEquals(5.januar, actual[0].tom)
+        assertEquals(original[1].id, actual[1].id)
         assertNull(actual[1].refId)
-        assertEquals(Endringskode.NY, actual[2].endringskode)
-        assertEquals(actual[0].id + 1, actual[2].id)
-        assertEquals(actual[0].id, actual[2].refId)
+        assertEquals(ENDR, actual[1].endringskode)
+        assertEquals(8.januar, actual[1].fom)
+        assertEquals(10.januar, actual[1].tom)
+        assertEquals(actual[0].id + 1, actual[1].id)
+        assertNull(actual[1].refId)
 
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -477,14 +638,14 @@ internal class UtbetalingslinjeForskjellTest {
             3.januar to 9.januar
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(ENDR, actual.endringskode)
 
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[0].id, actual[0].id)
         assertNull(actual[0].refId)
 
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[1].id)
         assertEquals(original[0].id, actual[1].refId)
 
@@ -511,18 +672,18 @@ internal class UtbetalingslinjeForskjellTest {
         ), actual)
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(ENDR, actual.endringskode)
 
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[3].id, actual[0].id)
         assertEquals(null, actual[0].refId)
 
-        assertEquals(Endringskode.NY, actual[1].endringskode)
+        assertEquals(NY, actual[1].endringskode)
         assertEquals(original[3].id + 1, actual[1].id)
         assertEquals(original[3].id, actual[1].refId)
 
-        assertEquals(Endringskode.NY, actual[2].endringskode)
+        assertEquals(NY, actual[2].endringskode)
         assertEquals(actual[1].id + 1, actual[2].id)
         assertEquals(actual[1].id, actual[2].refId)
 
@@ -545,9 +706,9 @@ internal class UtbetalingslinjeForskjellTest {
         )
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(Endringskode.ENDR, actual.endringskode)
+        assertEquals(ENDR, actual.endringskode)
 
-        assertEquals(Endringskode.ENDR, actual[0].endringskode)
+        assertEquals(ENDR, actual[0].endringskode)
         assertEquals(1.januar, actual[0].datoStatusFom)
         assertEquals(original[3].id, actual[0].id)
         assertEquals(null, actual[0].refId)

@@ -150,10 +150,9 @@ internal class Oppdrag private constructor(
     }
 
     private lateinit var tilstand: Tilstand
-
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
-
     private lateinit var linkTo: Utbetalingslinje
+    private var deletion: Pair<Int, Utbetalingslinje>? = null
 
     private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =
         this.also { nåværende ->
@@ -161,7 +160,7 @@ internal class Oppdrag private constructor(
             nåværende.kobleTil(tidligere)
             nåværende.kopierLikeLinjer(tidligere)
             nåværende.håndterLengreNåværende(tidligere)
-            deletion?.let { this.add(0, it) }
+            deletion?.let { (index, linje) -> this.add(index, linje) }
         }
 
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
@@ -182,8 +181,6 @@ internal class Oppdrag private constructor(
         sisteArbeidsgiverdag,
         tidsstempel = tidsstempel
     )
-
-    private var deletion: Utbetalingslinje? = null
 
     private fun kopierLikeLinjer(tidligere: Oppdrag) {
         tilstand = if (tidligere.sistedato > this.sistedato) Slett() else Identisk()
@@ -220,16 +217,24 @@ internal class Oppdrag private constructor(
         )
     }
 
-    private inner class Identisk : Tilstand {
+    private fun slett(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        sisteLinjeITidligereOppdrag.deletion(tidligere.fom).also {
+            deletion = indexOf(nåværende) to it
+            linkTo = it
+        }
+    }
+
+    private inner class Identisk() : Tilstand {
         override fun forskjell(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje
         ) {
-            if (nåværende.equals(tidligere)) return nåværende.ghostFrom(tidligere)
+            if (nåværende == tidligere) return nåværende.ghostFrom(tidligere)
             if (nåværende.kunTomForskjelligFra(tidligere)) {
-                nåværende.utvidTom(tidligere)
-                tilstand = Ny()
-                return
+                if (tidligere == sisteLinjeITidligereOppdrag) return nåværende.utvidTom(tidligere).also {
+                    tilstand = Ny()
+                }
+                slett(nåværende, tidligere)
             }
             nåværende.linkTo(linkTo)
             linkTo = nåværende
@@ -237,13 +242,19 @@ internal class Oppdrag private constructor(
         }
     }
 
-    private inner class Slett : Tilstand {
+    private inner class Slett() : Tilstand {
         override fun forskjell(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje
         ) {
-            if (nåværende.equals(tidligere)) return nåværende.ghostFrom(tidligere)
-            deletion = sisteLinjeITidligereOppdrag.deletion(tidligere.fom).also { nåværende.linkTo(it) }
+            if (nåværende == tidligere) {
+                if (nåværende == last()) return nåværende.linkTo(linkTo)
+                return nåværende.ghostFrom(tidligere)
+            }
+            if (nåværende.kunTomForskjelligFra(tidligere) && tidligere == sisteLinjeITidligereOppdrag)
+                return nåværende.utvidTom(tidligere)
+            slett(nåværende, tidligere)
+            nåværende.linkTo(linkTo)
             linkTo = nåværende
             tilstand = Ny()
         }

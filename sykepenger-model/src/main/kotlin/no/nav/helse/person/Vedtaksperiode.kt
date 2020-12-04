@@ -507,12 +507,12 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
 
         when {
-            utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
+            !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
             }
-            !utbetalingstidslinje.harUtbetalinger() -> {
+            !utbetaling().harUtbetalinger() && !utbetalingstidslinje.harUtbetalinger() -> {
                 loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerGodkjenning) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")

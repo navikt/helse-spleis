@@ -6,8 +6,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -69,6 +68,65 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             assertEquals(26.januar, oppdrag[1].fom)
             assertEquals(26.januar, oppdrag[1].tom)
             assertEquals(80.0, oppdrag[1].grad)
+        }
+    }
+
+    @Test
+    fun `overstyrer siste utbetalte periode med bare ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterOverstyring((3.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            assertEquals(18.januar, oppdrag[0].fom)
+            assertEquals(26.januar, oppdrag[0].tom)
+            assertEquals(18.januar, oppdrag[0].datoStatusFom())
+            assertTrue(oppdrag[0].erOpphør())
+        }
+    }
+
+    @Test
+    fun `overstyrer siste utbetalte periode i en forlengelse med bare ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 23.februar, 100))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        håndterOverstyring((29.januar til 23.februar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(2))
+        inspektør.utbetaling(2).arbeidsgiverOppdrag().also { oppdrag ->
+            assertEquals(1, oppdrag.size)
+            assertEquals(18.januar, oppdrag[0].fom)
+            assertEquals(26.januar, oppdrag[0].tom)
+            assertTrue(oppdrag[0].erForskjell())
+            assertEquals(100.0, oppdrag[0].grad)
         }
     }
 
