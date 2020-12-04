@@ -15,7 +15,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -67,9 +66,10 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
 
         sjekkAt(TestOppdragInspektør(inspektør.arbeidsgiverOppdrag[1])) {
-            linjer[0] er Utbetalingslinje(19.januar, 26.januar, 1431, 1431, 100.0)
-            endringskoder[0] er Endringskode.ENDR
-            refFagsystemIder[0] er null
+            assertEquals(19.januar, linjer[0].fom)
+            assertEquals(26.januar, linjer[0].tom)
+            assertEquals(19.januar, linjer[0].datoStatusFom())
+            assertTrue(linjer[0].erOpphør())
         }
 
         sjekkAt(inspektør.personLogg.behov().last()) {

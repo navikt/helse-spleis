@@ -139,7 +139,7 @@ internal class Oppdrag private constructor(
                 appended(tidligere)
             }
             this.førstedato == tidligere.førstedato ->
-                ghosted(tidligere)
+                ghosted(other)
             else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
@@ -254,9 +254,25 @@ internal class Oppdrag private constructor(
             tidligere: Utbetalingslinje
         ) {
             if (nåværende == tidligere) {
-                if (nåværende == last()) return nåværende.linkTo(linkTo)
-                return nåværende.ghostFrom(tidligere)
+                if (nåværende == first() && nåværende == last()) return nåværende.linkTo(linkTo)
+                nåværende.ghostFrom(tidligere)
+
+                if (nåværende == last()) {
+                    sisteLinjeITidligereOppdrag.deletion(tidligere.tom.plusDays(1)).also {
+                        deletion = size to it
+                        linkTo = it
+                    }
+                }
+
+                return
             }
+            // alternativ 2: link alt til siste, dette vil sende linjene på nytt
+            // og effektivt slette den som er forskjell, men potensielt sende maange linjer på nytt (uønsket av Oppdrag/UR)
+            /*if (nåværende == tidligere) {
+                nåværende.linkTo(linkTo)
+                linkTo = nåværende
+                return
+            }*/
             if (nåværende.kunTomForskjelligFra(tidligere) && tidligere == sisteLinjeITidligereOppdrag)
                 return nåværende.utvidTom(tidligere)
             slett(nåværende, tidligere)

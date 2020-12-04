@@ -110,6 +110,98 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `trekke siste periode tilbake`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            15.januar to 25.januar
+        )
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar
+        )
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            15.januar to 25.januar
+        ), actual)
+        assertEquals(3, actual.size)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(1, actual[0].id)
+
+        assertEquals(UEND, actual[1].endringskode)
+        assertEquals(actual[0].id + 1, actual[1].id)
+        assertEquals(ENDR, actual[2].endringskode)
+        assertEquals(actual[1].id + 1, actual[2].id)
+        assertEquals(14.januar, actual[2].datoStatusFom)
+    }
+
+    @Test
+    fun `trekke siste periode tilbake, så frem igjen`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            15.januar to 25.januar
+        )
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar
+        )
+        val revised = recalculated - original
+        val actual = original - revised
+        assertUtbetalinger(linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            15.januar to 25.januar
+        ), actual)
+        assertEquals(3, actual.size)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(1, actual[0].id)
+
+        assertEquals(UEND, actual[1].endringskode)
+        assertEquals(actual[0].id + 1, actual[1].id)
+        assertEquals(NY, actual[2].endringskode)
+        assertEquals(revised[2].id + 1, actual[2].id)
+        assertEquals(revised[2].id, actual[2].refId)
+    }
+
+    @Test
+    fun `trekke siste periode tilbake, så forlenge siste periode`() {
+        val original = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            15.januar to 25.januar
+        )
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar
+        )
+        val revised = recalculated - original
+        val extended = linjer(
+            1.januar to 5.januar,
+            8.januar to 25.januar
+        )
+        val actual = extended - revised
+        assertUtbetalinger(linjer(
+            1.januar to 5.januar,
+            15.januar to 25.januar,
+            8.januar to 25.januar
+        ), actual)
+        assertEquals(3, actual.size)
+        assertEquals(UEND, actual[0].endringskode)
+        assertEquals(1, actual[0].id)
+
+        assertEquals(ENDR, actual[1].endringskode)
+        assertEquals(revised[1].id + 1, actual[1].id)
+        assertEquals(8.januar, actual[1].datoStatusFom)
+
+        assertEquals(NY, actual[2].endringskode)
+        assertEquals(actual[1].id + 1, actual[2].id)
+        assertEquals(actual[1].id, actual[2].refId)
+    }
+
+    @Test
     fun `trekke periode tilbake potpourri 1`() {
         val original = linjer(1.januar to 5.januar)
         val intermediate = linjer(1.januar to 5.januar, 8.januar to 13.januar)

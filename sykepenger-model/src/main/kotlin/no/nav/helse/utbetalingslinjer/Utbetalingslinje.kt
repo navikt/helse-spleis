@@ -65,12 +65,14 @@ internal class Utbetalingslinje internal constructor(
         this.fom == other.fom &&
             this.tom == other.tom &&
             this.beløp == other.beløp &&
-            this.grad == other.grad
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
     internal fun kunTomForskjelligFra(other: Utbetalingslinje) =
         this.fom == other.fom &&
             this.beløp == other.beløp &&
-            this.grad == other.grad
+            this.grad == other.grad &&
+            this.datoStatusFom == other.datoStatusFom
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +
@@ -95,6 +97,7 @@ internal class Utbetalingslinje internal constructor(
         this.refDelytelseId = tidligere.refDelytelseId
         this.klassekode = tidligere.klassekode
         this.endringskode = linjetype
+        this.datoStatusFom = tidligere.datoStatusFom
     }
 
     internal fun erForskjell() = endringskode != UEND
