@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
+import java.util.*
 
 internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
@@ -2450,5 +2451,28 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GAP,
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP
         )
+    }
+
+    @Test
+    fun `periode i AVVENTER_HISTORIKK uten vilkårsprøving kastes til IT`() {
+        håndterSykmelding(Sykmeldingsperiode(26.oktober(2020), 30.oktober(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(26.oktober(2020), 30.oktober(2020), 100))
+
+        håndterSykmelding(Sykmeldingsperiode(31.oktober(2020), 8.november(2020), 100))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(31.oktober(2020), 8.november(2020), 100))
+        håndterInntektsmelding(listOf(Periode(26.oktober(2020), 11.november(2020))), refusjon = Triple(null, 0.månedlig, emptyList()), beregnetInntekt = INNTEKT)
+
+        // Må legge arbeidsgiverperioden fra inntektsperioden inn igjen fordi gammel bug gjorde at det fantes tilfeller av dette i databasen.
+        inspektør.sykdomshistorikk.nyHåndter(inntektsmelding(UUID.randomUUID(), listOf(26.oktober(2020) til 11.november(2020)), førsteFraværsdag = 26.oktober(2020)))
+
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 13.november(2020), 100))
+        håndterSøknad(Sykdom(9.november(2020), 13.november(2020), 100))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
 }

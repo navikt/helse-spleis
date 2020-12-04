@@ -1128,8 +1128,8 @@ internal class Vedtaksperiode private constructor(
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
                             arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode, historie)?.also { vedtaksperiode.kopierManglende(it) }
-                            if (vedtaksperiode.dataForVilkårsvurdering == null && !vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()) {
-                                ytelser.severe("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""")
+                            valider("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""") {
+                                vedtaksperiode.dataForVilkårsvurdering != null || vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
                             }
                         }
                     }
