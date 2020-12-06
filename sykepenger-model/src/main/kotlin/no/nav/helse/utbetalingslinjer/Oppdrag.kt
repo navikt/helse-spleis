@@ -104,7 +104,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    internal fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
+    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
 
     private fun dagSatser(resultat: Simulering.SimuleringResultat, fom: LocalDate, tom: LocalDate) =
         resultat.perioder.flatMap {
@@ -158,15 +158,12 @@ internal class Oppdrag private constructor(
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
 
-    private var deletion: Pair<Int, Utbetalingslinje>? = null
-
     private fun ghosted(tidligere: Oppdrag, linkTo: Utbetalingslinje = tidligere.last()) =
         this.also { nåværende ->
             this.linkTo = linkTo
             nåværende.kobleTil(tidligere)
             nåværende.kopierLikeLinjer(tidligere)
             nåværende.håndterLengreNåværende(tidligere)
-            deletion?.let { (index, linje) -> this.add(index, linje) }
         }
 
     private fun deleted(tidligere: Oppdrag) = this.also { nåværende ->
