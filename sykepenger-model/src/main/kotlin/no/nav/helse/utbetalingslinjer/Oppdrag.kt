@@ -139,7 +139,7 @@ internal class Oppdrag private constructor(
                 appended(tidligere)
             }
             this.førstedato == tidligere.førstedato ->
-                ghosted(other)
+                ghosted(tidligere)
             else -> throw IllegalArgumentException("uventet utbetalingslinje forhold")
         }
     }
@@ -223,11 +223,16 @@ internal class Oppdrag private constructor(
         )
     }
 
-    private fun slett(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
-        sisteLinjeITidligereOppdrag.deletion(tidligere.fom).also {
-            deletion = indexOf(nåværende) to it
-            linkTo = it
+    private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
+        if (nåværende.kunTomForskjelligFra(tidligere)) {
+            if (tidligere != sisteLinjeITidligereOppdrag && nåværende == last()) return nåværende.linkTo(linkTo)
+            nåværende.utvidTom(tidligere)
+            return
         }
+        if (tidligere.fom < nåværende.fom) deletion = indexOf(nåværende) to tidligere.deletion(tidligere.fom)
+        nåværende.linkTo(linkTo)
+        linkTo = nåværende
+        tilstand = Ny()
     }
 
     private inner class Identisk() : Tilstand {
@@ -236,15 +241,7 @@ internal class Oppdrag private constructor(
             tidligere: Utbetalingslinje
         ) {
             if (nåværende == tidligere) return nåværende.ghostFrom(tidligere)
-            if (nåværende.kunTomForskjelligFra(tidligere)) {
-                if (tidligere == sisteLinjeITidligereOppdrag) return nåværende.utvidTom(tidligere).also {
-                    tilstand = Ny()
-                }
-                slett(nåværende, tidligere)
-            }
-            nåværende.linkTo(linkTo)
-            linkTo = nåværende
-            tilstand = Ny()
+            håndterUlikhet(nåværende, tidligere)
         }
     }
 
@@ -254,31 +251,10 @@ internal class Oppdrag private constructor(
             tidligere: Utbetalingslinje
         ) {
             if (nåværende == tidligere) {
-                if (nåværende == first() && nåværende == last()) return nåværende.linkTo(linkTo)
-                nåværende.ghostFrom(tidligere)
-
-                if (nåværende == last()) {
-                    sisteLinjeITidligereOppdrag.deletion(tidligere.tom.plusDays(1)).also {
-                        deletion = size to it
-                        linkTo = it
-                    }
-                }
-
-                return
+                if (nåværende == last()) return nåværende.linkTo(linkTo)
+                return nåværende.ghostFrom(tidligere)
             }
-            // alternativ 2: link alt til siste, dette vil sende linjene på nytt
-            // og effektivt slette den som er forskjell, men potensielt sende maange linjer på nytt (uønsket av Oppdrag/UR)
-            /*if (nåværende == tidligere) {
-                nåværende.linkTo(linkTo)
-                linkTo = nåværende
-                return
-            }*/
-            if (nåværende.kunTomForskjelligFra(tidligere) && tidligere == sisteLinjeITidligereOppdrag)
-                return nåværende.utvidTom(tidligere)
-            slett(nåværende, tidligere)
-            nåværende.linkTo(linkTo)
-            linkTo = nåværende
-            tilstand = Ny()
+            håndterUlikhet(nåværende, tidligere)
         }
     }
 
