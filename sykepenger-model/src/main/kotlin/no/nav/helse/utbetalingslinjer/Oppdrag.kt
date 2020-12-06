@@ -224,12 +224,8 @@ internal class Oppdrag private constructor(
     }
 
     private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje) {
-        if (nåværende.kunTomForskjelligFra(tidligere)) {
-            if (tidligere != sisteLinjeITidligereOppdrag && nåværende == last()) return nåværende.linkTo(linkTo)
-            nåværende.utvidTom(tidligere)
-            return
-        }
-        if (tidligere.fom < nåværende.fom) deletion = indexOf(nåværende) to tidligere.deletion(tidligere.fom)
+        if (nåværende.kunTomForskjelligFra(tidligere) && tidligere == sisteLinjeITidligereOppdrag)
+            return nåværende.utvidTom(tidligere)
         nåværende.linkTo(linkTo)
         linkTo = nåværende
         tilstand = Ny()

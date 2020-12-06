@@ -60,8 +60,8 @@ internal class UtbetalingReflectTest {
             emptyList(),
             UNG_PERSON_FNR_2018,
             ORGNUMMER,
-            tidslinjeMedDagsats(tidslinjeOf(4.NAV, 1.FRI, 4.NAV, 1.FRI, 4.NAV)),
-            14.januar,
+            tidslinjeMedDagsats(tidslinjeOf(5.NAV)),
+            5.januar,
             Aktivitetslogg(),
             LocalDate.MAX,
             100,
@@ -117,8 +117,8 @@ internal class UtbetalingReflectTest {
                 listOf(tidligereUtbetaling),
                 UNG_PERSON_FNR_2018,
                 ORGNUMMER,
-                tidslinjeMedDagsats(tidslinjeOf(9.NAV, 1.FRI, 4.NAV)),
-                14.januar,
+                tidslinjeMedDagsats(tidslinjeOf(1.FRI, 4.NAV)),
+                5.januar,
                 Aktivitetslogg(),
                 LocalDate.MAX,
                 100,
@@ -130,31 +130,23 @@ internal class UtbetalingReflectTest {
         assertUtbetalingslinjer("SPREF", "fagområde")
         assertUtbetalingslinjer("ENDR", "endringskode")
         assertUtbetalingslinje(0, 1.januar.toString(), "fom")
-        assertUtbetalingslinje(0, 9.januar.toString(), "tom")
-        assertUtbetalingslinje(0, null, "statuskode")
-        assertUtbetalingslinje(0, null, "datoStatusFom")
+        assertUtbetalingslinje(0, 5.januar.toString(), "tom")
+        assertUtbetalingslinje(0, "OPPH", "statuskode")
+        assertUtbetalingslinje(0, 1.januar.toString(), "datoStatusFom")
         assertUtbetalingslinje(0, 1, "delytelseId")
         assertUtbetalingslinje(0, null, "refDelytelseId")
         assertUtbetalingslinje(0, "ENDR", "endringskode")
         assertUtbetalingslinje(0, "SPREFAG-IOP", "klassekode")
 
-        assertUtbetalingslinje(1, 6.januar.toString(), "fom")
-        assertUtbetalingslinje(1, 9.januar.toString(), "tom")
-        assertUtbetalingslinje(1, "OPPH", "statuskode")
-        assertUtbetalingslinje(1, 6.januar.toString(), "datoStatusFom")
+        assertUtbetalingslinje(1, 2.januar.toString(), "fom")
+        assertUtbetalingslinje(1, 5.januar.toString(), "tom")
+        assertUtbetalingslinje(1, null, "statuskode")
+        assertUtbetalingslinje(1, null, "datoStatusFom")
         assertUtbetalingslinje(1, 2, "delytelseId")
-        assertUtbetalingslinje(1, null, "refDelytelseId")
-        assertUtbetalingslinje(1, "ENDR", "endringskode")
+        assertUtbetalingslinje(1, 1, "refDelytelseId")
+        assertUtbetalingslinje(1, tidligereUtbetaling.arbeidsgiverOppdrag().fagsystemId(), "refFagsystemId")
+        assertUtbetalingslinje(1, "NY", "endringskode")
         assertUtbetalingslinje(1, "SPREFAG-IOP", "klassekode")
-
-        assertUtbetalingslinje(2, 11.januar.toString(), "fom")
-        assertUtbetalingslinje(2, 14.januar.toString(), "tom")
-        assertUtbetalingslinje(2, null, "statuskode")
-        assertUtbetalingslinje(2, null, "datoStatusFom")
-        assertUtbetalingslinje(2, 4, "delytelseId")
-        assertUtbetalingslinje(2, 3, "refDelytelseId")
-        assertUtbetalingslinje(2, "NY", "endringskode")
-        assertUtbetalingslinje(2, "SPREFAG-IOP", "klassekode")
     }
 
     @Test
