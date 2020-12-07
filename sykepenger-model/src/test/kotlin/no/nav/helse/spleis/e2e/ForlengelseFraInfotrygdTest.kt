@@ -12,7 +12,9 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
@@ -702,5 +704,46 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_GAP,
             TIL_INFOTRYGD
         )
+    }
+
+    @Disabled("https://trello.com/c/viOcLHL2")
+    @Test
+    fun `ping-pong hvor infotrygd perioden slutter på maksdato skal ikke føre til en automatisk annullering`() {
+        val fom1 = 1.juni
+        val tom1 = 30.juni
+        håndterSykmelding(Sykmeldingsperiode(fom1, tom1, 100))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(fom1, tom1, 100))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.Utbetaling(1.januar, 31.mai, 1200, 100, ORGNUMMER)
+        )
+        håndterYtelser(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Periode.Utbetaling(1.januar, 31.mai, 1200, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Inntektsopplysning(1.januar, 1200.daglig, ORGNUMMER, true, null))
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+
+        val fom2 = 13.desember
+        val tom2 = 31.desember
+        håndterSykmelding(Sykmeldingsperiode(fom2, tom2, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(fom2, tom2, 100))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Periode.Utbetaling(1.januar, 31.mai, 1200, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.Utbetaling(1.juli, 12.desember, 1200, 100, ORGNUMMER)
+        )
+        håndterYtelser(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Periode.Utbetaling(1.januar, 31.mai, 1200, 100, ORGNUMMER),
+            Utbetalingshistorikk.Periode.Utbetaling(1.juli, 12.desember, 1200, 100, ORGNUMMER),
+            inntektshistorikk = listOf(Inntektsopplysning(1.januar, 1200.daglig, ORGNUMMER, true, null))
+        )
+
+        // Dette fører til at siste utbetaling er en annullering, vi er ikke 100% sikre på hvilke tilstand vedtaksperioden _egentlig_ skal være i
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 }
