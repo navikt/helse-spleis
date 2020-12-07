@@ -187,6 +187,10 @@ class Inntektsmelding(
 
     internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.skjæringstidspunkt() in periode
 
+    internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver){
+        refusjon.cacheRefusjon(arbeidsgiver, beregnetInntekt, sykdomstidslinje.førsteDag())
+    }
+
     class Refusjon(
         private val opphørsdato: LocalDate?,
         private val inntekt: Inntekt?,
@@ -214,5 +218,12 @@ class Inntektsmelding(
 
         private fun endrerRefusjon(periode: Periode) =
             endringerIRefusjon.any { it in periode }
+
+        internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver, beregnetInntekt: Inntekt, førsteDagIArbeidsgiverperioden: LocalDate) {
+            val refusjonsopphørsdato =
+                if (beregnetInntekt != inntekt) førsteDagIArbeidsgiverperioden
+                else (endringerIRefusjon + opphørsdato).filterNotNull().minOrNull()
+            arbeidsgiver.cacheRefusjon(refusjonsopphørsdato)
+        }
     }
 }

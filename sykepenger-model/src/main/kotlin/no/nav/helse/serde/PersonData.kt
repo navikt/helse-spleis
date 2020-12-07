@@ -143,7 +143,8 @@ internal data class PersonData(
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
-        private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>
+        private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
+        private val refusjonOpphører: List<LocalDate?> = emptyList()
     ) {
         private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektData.parseInntekter(inntekter, this)
@@ -172,7 +173,8 @@ internal data class PersonData(
                 vedtaksperiodeliste,
                 forkastedeliste,
                 modelUtbetalinger,
-                beregnetUtbetalingstidslinjer.map { it.konverterTilTriple() }
+                beregnetUtbetalingstidslinjer.map { it.konverterTilTriple() },
+                refusjonOpphører
             )
 
             vedtaksperiodeliste.addAll(this.vedtaksperioder.map {

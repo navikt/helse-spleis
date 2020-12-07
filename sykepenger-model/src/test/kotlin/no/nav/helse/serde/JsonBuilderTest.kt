@@ -87,6 +87,11 @@ class JsonBuilderTest {
     }
 
     @Test
+    fun `med opphør av refusjon`() {
+        testSerialiseringAvPerson(refusjonOpphørerPerson())
+    }
+
+    @Test
     fun `gjenoppbygd person med friske helgedager er lik opprinnelig person med friske helgedager`() {
         testSerialiseringAvPerson(friskeHelgedagerPerson())
     }
@@ -220,6 +225,22 @@ class JsonBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
             }
 
+        fun refusjonOpphørerPerson(
+            søknadhendelseId: UUID = UUID.randomUUID()
+        ): Person =
+            Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = 1.januar, tom = 9.januar))
+                fangeVedtaksperiode()
+                håndter(
+                    søknad(
+                        fom = 1.januar,
+                        tom = 9.januar,
+                        hendelseId = søknadhendelseId
+                    )
+                )
+                håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(4.januar, 31000.månedlig, emptyList())))
+            }
+
         private fun Person.fangeUtbetalinger() {
             utbetalingsliste.clear()
             accept(object : PersonVisitor {
@@ -304,10 +325,11 @@ class JsonBuilderTest {
         fun inntektsmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate,
-            perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15)))
+            perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList())
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
-            refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
+            refusjon = refusjon,
             orgnummer = orgnummer,
             fødselsnummer = fnr,
             aktørId = aktørId,

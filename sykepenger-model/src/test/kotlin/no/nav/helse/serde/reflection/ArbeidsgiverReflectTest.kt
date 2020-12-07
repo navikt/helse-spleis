@@ -16,7 +16,7 @@ internal class ArbeidsgiverReflectTest {
     @Test
     fun `mapper Arbeidsgiver til map`() {
         val map = ArbeidsgiverReflect(arbeidsgiver).toMap()
-        assertEquals(3 , map.size)
+        assertEquals(4, map.size)
         assertEquals(ORGNR, map["organisasjonsnummer"])
         assertTrue(map["beregnetUtbetalingstidslinjer"] is List<*>)
     }

@@ -122,13 +122,20 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, søknad)
     }
 
-    internal fun håndter(inntektsmelding: Inntektsmelding) = overlapperMedInntektsmelding(inntektsmelding).also {
-        if (!it) {
-            inntektsmelding.trimLeft(periode.endInclusive)
-            return it
+    internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
+        if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
+            inntektsmelding.error("Refusjon opphører i perioden")
+            tilstand(inntektsmelding, TilInfotrygd)
         }
-        kontekst(inntektsmelding)
-        tilstand.håndter(this, inntektsmelding)
+
+        return overlapperMedInntektsmelding(inntektsmelding).also {
+            if (!it) {
+                inntektsmelding.trimLeft(periode.endInclusive)
+                return it
+            }
+            kontekst(inntektsmelding)
+            tilstand.håndter(this, inntektsmelding)
+        }
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
@@ -721,7 +728,9 @@ internal class Vedtaksperiode private constructor(
                 val forlengelse = periodeRettFør != null
                 val ferdig =
                     vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
+                val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
                 when {
+                    forlengelse && refusjonOpphørt -> TilInfotrygd
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                     forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
                     !forlengelse && ferdig -> MottattSykmeldingFerdigGap

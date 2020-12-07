@@ -35,7 +35,8 @@ internal class Arbeidsgiver private constructor(
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
     private val utbetalinger: MutableList<Utbetaling>,
-    private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>
+    private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
+    private val refusjonOpphører: MutableList<LocalDate?>
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
         person = person,
@@ -47,7 +48,8 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder = mutableListOf(),
         forkastede = sortedMapOf(),
         utbetalinger = mutableListOf(),
-        beregnetUtbetalingstidslinjer = mutableListOf()
+        beregnetUtbetalingstidslinjer = mutableListOf(),
+        refusjonOpphører = mutableListOf()
     )
 
     init {
@@ -155,8 +157,17 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {
+        return refusjonOpphører.firstOrNull()?.let { it <= periodeTom } ?: false
+    }
+
+    internal fun cacheRefusjon(opphørsdato: LocalDate?) {
+        if (refusjonOpphører.firstOrNull() != opphørsdato) refusjonOpphører.add(0, opphørsdato)
+    }
+
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
+        inntektsmelding.cacheRefusjon(this)
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
@@ -577,7 +588,8 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
                 utbetalinger: List<Utbetaling>,
-                beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>
+                beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
+                refusjonOpphører: List<LocalDate?>
             ) = Arbeidsgiver(
                 person,
                 organisasjonsnummer,
@@ -588,7 +600,8 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder,
                 forkastede,
                 utbetalinger.toMutableList(),
-                beregnetUtbetalingstidslinjer.toMutableList()
+                beregnetUtbetalingstidslinjer.toMutableList(),
+                refusjonOpphører.toMutableList()
             )
         }
     }
