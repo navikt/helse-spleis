@@ -1111,6 +1111,9 @@ internal class Vedtaksperiode private constructor(
                 valider("Mangler skjæringstidspunkt") {
                     historie.skjæringstidspunkt(vedtaksperiode.periode)?.also { skjæringstidspunkt = it } != null
                 }
+                onSuccess {
+                    vedtaksperiode.skjæringstidspunktFraInfotrygd = skjæringstidspunkt
+                }
                 validerYtelser(
                     historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
                     ytelser,
@@ -1126,7 +1129,6 @@ internal class Vedtaksperiode private constructor(
                     when (val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
                             vedtaksperiode.forlengelseFraInfotrygd = JA
-                            vedtaksperiode.skjæringstidspunktFraInfotrygd = skjæringstidspunkt
 
                             if (periodetype == OVERGANG_FRA_IT) {
                                 arbeidsgiver.addInntekt(ytelser)
