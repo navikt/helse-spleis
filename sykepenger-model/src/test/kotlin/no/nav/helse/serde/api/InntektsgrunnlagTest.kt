@@ -45,8 +45,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         Toggles.NyInntekt.enabled = false
     }
 
-    private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.InntektTing(sisteDato).also { it.skjæringstidspunkt = this }
-    private infix fun SpeilBuilder.InntektTing.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
+    private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.NøkkeldataOmInntekt(sisteDato).also { it.skjæringstidspunkt = this }
+    private infix fun SpeilBuilder.NøkkeldataOmInntekt.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
 
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
@@ -81,8 +81,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(0.0, inntektsgrunnlaget.avviksprosent)
-            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
-            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -125,8 +124,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
-            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
-            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -173,8 +171,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
-            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -220,8 +217,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(93634, inntektsgrunnlaget.grunnbeløp)
-            assertEquals(1431, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)

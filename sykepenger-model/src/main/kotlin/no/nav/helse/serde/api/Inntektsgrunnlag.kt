@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Person
@@ -16,25 +15,24 @@ import java.util.*
 internal fun inntektsgrunnlag(
     person: Person,
     inntektshistorikk: Map<String, InntektshistorikkVol2>,
-    dataForSkjæringstidspunkt: List<SpeilBuilder.InntektTing>
-) = dataForSkjæringstidspunkt.map { inntektTing ->
+    dataForSkjæringstidspunkt: List<SpeilBuilder.NøkkeldataOmInntekt>
+) = dataForSkjæringstidspunkt.map { nøkkeldata ->
     val sykepengegrunnlag =
-        person.sykepengegrunnlag(inntektTing.skjæringstidspunkt, inntektTing.sisteDagISammenhengendePeriode)
+        person.sykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
     val grunnlagForSykepengegrunnlag =
-        person.grunnlagForSykepengegrunnlag(inntektTing.skjæringstidspunkt, inntektTing.sisteDagISammenhengendePeriode)
-    val sammenligningsgrunnlag = person.sammenligningsgrunnlag(inntektTing.skjæringstidspunkt)
+        person.grunnlagForSykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
+    val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
     val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
-        inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(inntektTing.skjæringstidspunkt, orgnummer, inntekthist) }
+        inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, orgnummer, inntekthist) }
 
     InntektsgrunnlagDTO(
-        skjæringstidspunkt = inntektTing.skjæringstidspunkt,
+        skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
         sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
         omregnetÅrsinntekt = grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
         sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-        avviksprosent = inntektTing.avviksprosent,
-        grunnbeløp = Grunnbeløp.`1G`.beløp(inntektTing.skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig }.toInt(),
-        maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, _, daglig -> daglig },
+        avviksprosent = nøkkeldata.avviksprosent,
+        maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
         inntekter = arbeidsgiverinntekt
     )
 }

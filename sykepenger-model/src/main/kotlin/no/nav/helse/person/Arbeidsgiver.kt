@@ -362,9 +362,8 @@ internal class Arbeidsgiver private constructor(
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        if (Toggles.NyInntekt.enabled) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart) else inntektshistorikk.inntekt(
-            skjæringstidspunkt
-        )
+        if (Toggles.NyInntekt.enabled) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
+        else inntektshistorikk.inntekt(skjæringstidspunkt)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)

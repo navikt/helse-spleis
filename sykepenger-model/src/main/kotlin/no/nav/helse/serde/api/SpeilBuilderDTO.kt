@@ -313,8 +313,7 @@ data class InntektsgrunnlagDTO(
     val omregnetÅrsinntekt: Double,
     val sammenligningsgrunnlag: Double,
     val avviksprosent: Double?,
-    val grunnbeløp: Int,
-    val maksUtbetalingPerDag: Int,
+    val maksUtbetalingPerDag: Double,
     val inntekter: List<ArbeidsgiverinntektDTO>
 ) {
     data class ArbeidsgiverinntektDTO(

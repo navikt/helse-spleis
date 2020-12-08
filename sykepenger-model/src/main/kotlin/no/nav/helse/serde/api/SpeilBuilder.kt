@@ -348,6 +348,10 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         currentState.visitSkjæringstidspunkt(skjæringstidspunkt)
     }
 
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
+        currentState.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
+    }
+
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -451,7 +455,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private val arbeidsgivere = mutableListOf<ArbeidsgiverDTO>()
         private val inntektshistorikk = mutableMapOf<String, InntektshistorikkVol2>()
-        private val skjæringstidspunkter = mutableListOf<InntektTing>()
+        private val skjæringstidspunkter = mutableListOf<NøkkeldataOmInntekt>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
@@ -491,7 +495,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val fødselsnummer: String,
         private val arbeidsgivere: MutableList<ArbeidsgiverDTO>,
         private val inntektshistorikk: MutableMap<String, InntektshistorikkVol2>,
-        private val skjæringstidspunkter: MutableList<InntektTing>
+        private val skjæringstidspunkter: MutableList<NøkkeldataOmInntekt>
     ) : JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
@@ -607,7 +611,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val inntekter: List<Inntektshistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
         private val hendelseIder: List<UUID>,
-        private val skjæringstidspunkter: MutableList<InntektTing>
+        private val skjæringstidspunkter: MutableList<NøkkeldataOmInntekt>
     ) : JsonState {
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
@@ -631,7 +635,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
             vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
             vedtaksperiodeMap["maksdato"] = LocalDate.MAX
-            skjæringstidspunkter.add(InntektTing(sisteDagISammenhengendePeriode = periode.endInclusive))
+            skjæringstidspunkter.add(NøkkeldataOmInntekt(sisteDagISammenhengendePeriode = periode.endInclusive))
         }
 
         private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
@@ -1035,7 +1039,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
     }
 
-    internal class InntektTing(
+    internal class NøkkeldataOmInntekt(
         val sisteDagISammenhengendePeriode: LocalDate
     ) {
         lateinit var skjæringstidspunkt: LocalDate
