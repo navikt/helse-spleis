@@ -131,7 +131,7 @@ internal class Oppdrag private constructor(
             this.isEmpty() && (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
                 deleteAll(tidligere)
             this.førstedato > tidligere.førstedato -> {
-                aktivitetslogg.warn("Utbetaling fra og med dato er endret. Kontroller simuleringen")
+                aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
                 deleted(tidligere)
             }
             this.førstedato < tidligere.førstedato -> {
