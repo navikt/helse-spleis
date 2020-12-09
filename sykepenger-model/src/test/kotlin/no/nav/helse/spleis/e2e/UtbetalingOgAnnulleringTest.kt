@@ -1,17 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -322,5 +319,55 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)   // No history
         val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
         assertEquals(3.januar to 26.januar, utbetalingUtbetalingstidslinje.førsteDato() to utbetalingUtbetalingstidslinje.sisteDato())
+    }
+
+    @Test
+    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
+        (10.juni to 30.juni).also { (fom, tom) ->
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+            håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(fom til fom.plusDays(15)))
+        }
+        (1.juli to 31.juli).also { (fom, tom) ->
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+        }
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode) // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterPåminnelse(2.vedtaksperiode, TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(3)) // forkast
+
+        (1.august to 31.august).also { (fom, tom) ->
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100))
+        }
+        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000, 100, ORGNUMMER))
+        håndterYtelser(3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000, 100, ORGNUMMER))
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
+        håndterUtbetalt(3.vedtaksperiode)
+
+        inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
+            assertEquals(10.juni, utbetalingUtbetalingstidslinje.førsteDato())
+            assertEquals(30.juni, utbetalingUtbetalingstidslinje.sisteDato())
+        }
+        inspektør.utbetaling(0).also { utbetaling ->
+            assertEquals(26.juni, utbetaling.arbeidsgiverOppdrag().førstedato)
+            assertEquals(30.juni, utbetaling.arbeidsgiverOppdrag().sistedato)
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+        }
+        inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
+            assertEquals(10.juni, utbetalingUtbetalingstidslinje.førsteDato())
+            assertEquals(31.august, utbetalingUtbetalingstidslinje.sisteDato())
+            assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[1.juli]::class)
+            assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[31.juli]::class)
+        }
+        inspektør.utbetaling(1).also { utbetaling ->
+            assertEquals(1.august, utbetaling.arbeidsgiverOppdrag().førstedato)
+            assertEquals(31.august, utbetaling.arbeidsgiverOppdrag().sistedato)
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+        }
     }
 }

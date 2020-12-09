@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
+import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -10,6 +11,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     private companion object {
@@ -95,6 +97,57 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         assertEquals(2, inspektør.utbetalinger.size)
         assertTrue(inspektør.utbetalinger.none { it.erEtterutbetaling() })
+    }
+
+    @Test
+    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
+        (10.juni(2020) to 30.juni(2020)).also { (fom, tom) ->
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+            håndterInntektsmeldingMedValidering(
+                1.vedtaksperiode,
+                listOf(fom til fom.plusDays(15)),
+                førsteFraværsdag = fom,
+                refusjon = Triple(null, HØY_INNTEKT, emptyList())
+            )
+        }
+        (1.juli(2020) to 30.juli(2020)).also { (fom, tom) ->
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+        }
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt HØY_INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode) // No history
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+        håndterPåminnelse(2.vedtaksperiode, TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(3)) // forkast
+
+        håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
+        inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
+            assertEquals(10.juni(2020), utbetalingUtbetalingstidslinje.førsteDato())
+            assertEquals(30.juni(2020), utbetalingUtbetalingstidslinje.sisteDato())
+        }
+        inspektør.utbetaling(0).also { utbetaling ->
+            assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)
+            assertEquals(30.juni(2020), utbetaling.arbeidsgiverOppdrag().sistedato)
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+        }
+        inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
+            assertEquals(10.juni(2020), utbetalingUtbetalingstidslinje.førsteDato())
+            assertEquals(30.juni(2020), utbetalingUtbetalingstidslinje.sisteDato())
+        }
+        inspektør.utbetaling(1).also { utbetaling ->
+            assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)
+            assertEquals(30.juni(2020), utbetaling.arbeidsgiverOppdrag().sistedato)
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
+        }
     }
 
     @Test
