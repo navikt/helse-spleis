@@ -455,7 +455,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         private val arbeidsgivere = mutableListOf<ArbeidsgiverDTO>()
         private val inntektshistorikk = mutableMapOf<String, InntektshistorikkVol2>()
-        private val skjæringstidspunkter = mutableListOf<NøkkeldataOmInntekt>()
+        private val nøkkeldataOmInntekter = mutableListOf<NøkkeldataOmInntekt>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
@@ -468,7 +468,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         ) {
             if (!arbeidsgiver.harHistorikk()) return
             val arbeidsgiverMap = mutableMapOf<String, Any?>()
-            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere, inntektshistorikk, skjæringstidspunkter))
+            pushState(ArbeidsgiverState(arbeidsgiver, arbeidsgiverMap, fødselsnummer, arbeidsgivere, inntektshistorikk, nøkkeldataOmInntekter))
         }
 
         override fun postVisitPerson(
@@ -480,7 +480,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                 personMap["inntektsgrunnlag"] = inntektsgrunnlag(
                     person,
                     inntektshistorikk,
-                    skjæringstidspunkter
+                    nøkkeldataOmInntekter
                         .groupBy { it.skjæringstidspunkt }
                         .mapNotNull { (_, value) -> value.maxByOrNull { it.sisteDagISammenhengendePeriode } }
                 )
@@ -495,7 +495,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val fødselsnummer: String,
         private val arbeidsgivere: MutableList<ArbeidsgiverDTO>,
         private val inntektshistorikk: MutableMap<String, InntektshistorikkVol2>,
-        private val skjæringstidspunkter: MutableList<NøkkeldataOmInntekt>
+        private val nøkkeldataOmInntekter: MutableList<NøkkeldataOmInntekt>
     ) : JsonState {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
@@ -585,7 +585,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     utbetalinger = utbetalinger,
                     hendelseIder = hendelseIder,
                     periode = periode,
-                    skjæringstidspunkter = skjæringstidspunkter
+                    nøkkeldataOmInntekter = nøkkeldataOmInntekter
                 )
             )
         }
@@ -611,7 +611,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val inntekter: List<Inntektshistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
         private val hendelseIder: List<UUID>,
-        private val skjæringstidspunkter: MutableList<NøkkeldataOmInntekt>
+        private val nøkkeldataOmInntekter: MutableList<NøkkeldataOmInntekt>
     ) : JsonState {
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
@@ -625,6 +625,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private var personFagsystemId: String? = null
         private var inUtbetaling = false
         private var utbetalingGodkjent = false
+        private val nøkkeldataOmInntekt = NøkkeldataOmInntekt(sisteDagISammenhengendePeriode = periode.endInclusive)
 
         init {
             val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
@@ -635,7 +636,6 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
             vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
             vedtaksperiodeMap["maksdato"] = LocalDate.MAX
-            skjæringstidspunkter.add(NøkkeldataOmInntekt(sisteDagISammenhengendePeriode = periode.endInclusive))
         }
 
         private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
@@ -734,13 +734,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
 
         override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
             if (Toggles.SpeilInntekterVol2Enabled.enabled) {
-                skjæringstidspunkter.last().skjæringstidspunkt = skjæringstidspunkt
+                nøkkeldataOmInntekt.skjæringstidspunkt = skjæringstidspunkt
             }
         }
 
         override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
             if (Toggles.SpeilInntekterVol2Enabled.enabled) {
-                skjæringstidspunkter.last().avviksprosent = dataForVilkårsvurdering?.avviksprosent?.prosent()
+                nøkkeldataOmInntekt.avviksprosent = dataForVilkårsvurdering?.avviksprosent?.prosent()
             }
         }
 
@@ -774,6 +774,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
                     TilstandType.TIL_UTBETALING
                 )
             ) {
+                nøkkeldataOmInntekter.add(nøkkeldataOmInntekt)
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
                         fødselsnummer,
