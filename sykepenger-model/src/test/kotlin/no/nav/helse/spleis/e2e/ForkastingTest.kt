@@ -107,16 +107,16 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmelding i omvendt rekkefølge kaster ut etterfølgende som ikke er avsluttet`() {
-        Toggles.replayEnabled = true
-
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP
-        )
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        Toggles.ReplayEnabled.enable {
+            håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100))
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 5.januar, 100))
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP
+            )
+            assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+        }
     }
 
     @Test
@@ -239,29 +239,29 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Håndterer ny sykmelding som ligger tidligere i tid *uten forlengelse*`() {
-        Toggles.replayEnabled = true
-
-        håndterSykmelding(Sykmeldingsperiode(24.mars(2020), 29.mars(2020), 100))
-        håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
-        håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))
-        håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100))
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP
-        )
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
-        )
-        assertForkastetPeriodeTilstander(
-            3.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP
-        )
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertReplayAv(1.vedtaksperiode, 2.vedtaksperiode, 3.vedtaksperiode)
+        Toggles.ReplayEnabled.enable {
+            håndterSykmelding(Sykmeldingsperiode(24.mars(2020), 29.mars(2020), 100))
+            håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100))
+            håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100))
+            håndterSykmelding(Sykmeldingsperiode(19.mars(2020), 22.mars(2020), 100))
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP
+            )
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+            )
+            assertForkastetPeriodeTilstander(
+                3.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_UFERDIG_GAP
+            )
+            assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
+            assertReplayAv(1.vedtaksperiode, 2.vedtaksperiode, 3.vedtaksperiode)
+        }
     }
 
     @Test

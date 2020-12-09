@@ -37,12 +37,12 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.nyInntekt = true
+        Toggles.NyInntekt.enabled = true
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.nyInntekt = false
+        Toggles.NyInntekt.enabled = false
     }
 
     private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.InntektTing(sisteDato).also { it.skjæringstidspunkt = this }

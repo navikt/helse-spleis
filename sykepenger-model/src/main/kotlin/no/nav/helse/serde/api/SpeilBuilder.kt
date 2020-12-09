@@ -472,7 +472,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             aktørId: String,
             fødselsnummer: String
         ) {
-            if (Toggles.speilInntekterVol2Enabled) {
+            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
                 personMap["inntektsgrunnlag"] = inntektsgrunnlag(
                     person,
                     inntektshistorikk,
@@ -503,7 +503,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         var inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
 
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
-            if (Toggles.speilInntekterVol2Enabled) {
+            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
                 this.inntektshistorikk[arbeidsgiver.organisasjonsnummer()] = inntektshistorikk
             }
         }
@@ -729,13 +729,13 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
 
         override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-            if (Toggles.speilInntekterVol2Enabled) {
+            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
                 skjæringstidspunkter.last().skjæringstidspunkt = skjæringstidspunkt
             }
         }
 
         override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
-            if (Toggles.speilInntekterVol2Enabled) {
+            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
                 skjæringstidspunkter.last().avviksprosent = dataForVilkårsvurdering?.avviksprosent?.prosent()
             }
         }

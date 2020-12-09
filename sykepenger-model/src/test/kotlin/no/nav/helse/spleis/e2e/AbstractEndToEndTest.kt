@@ -23,7 +23,6 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
@@ -52,7 +51,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         val refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>>
     )
 
-    fun <T>sjekkAt(t: T, init: T.() -> Unit) {
+    fun <T> sjekkAt(t: T, init: T.() -> Unit) {
         t.init()
     }
 
@@ -61,11 +60,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         sykmeldinger.clear()
         søknader.clear()
         inntektsmeldinger.clear()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.replayEnabled = false
     }
 
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) {
@@ -375,7 +369,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     fødselsnummer = UNG_PERSON_FNR_2018,
                     orgnummer = ORGNUMMER,
                     fagsystemId = fagsystemId,
-                    utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
+                    utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"]
+                        ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
                     avstemmingsnøkkel = 123456L,
                     overføringstidspunkt = LocalDateTime.now()
                 )
@@ -845,7 +840,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")),
+        utbetalingId = UUID.fromString(
+            inspektør.sisteBehov(Godkjenning).kontekst()["utbetalingId"]
+                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Godkjenning).kontekst()}")
+        ),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
         utbetalingGodkjent = utbetalingGodkjent,
@@ -857,7 +855,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-        if (Toggles.nyInntekt) {
+        if (Toggles.NyInntekt.enabled) {
             assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato))
         } else {
             forventetInntekt?.also { assertTrue(inspektør.inntekter.isNotEmpty()) }

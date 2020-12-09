@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggles.replayEnabled
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -711,7 +711,7 @@ internal class Vedtaksperiode private constructor(
             var replays: List<Vedtaksperiode> = emptyList()
 
             vedtaksperiode.håndter(sykmelding) returnPoint@{
-                if (replayEnabled) {
+                if (Toggles.ReplayEnabled.enabled) {
                     if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode)) {
                         return@returnPoint TilInfotrygd
                     }
@@ -739,7 +739,7 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             sykmelding.info("Fullført behandling av sykmelding")
-            if (replayEnabled) {
+            if (Toggles.ReplayEnabled.enabled) {
                 replays.forEach { periode ->
                     periode.replayHendelser()
                 }

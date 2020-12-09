@@ -44,7 +44,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.flereArbeidsgivereEnabled) return invaliderAllePerioder(hendelse)
+        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereEnabled.enabled) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -268,7 +268,7 @@ class Person private constructor(
     }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        if (Toggles.nyInntekt) {
+        if (Toggles.NyInntekt.enabled) {
             arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
         } else {
             arbeidsgivere.inntekt(skjæringstidspunkt)

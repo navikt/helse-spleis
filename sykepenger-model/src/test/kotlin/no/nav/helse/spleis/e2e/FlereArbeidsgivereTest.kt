@@ -30,14 +30,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.flereArbeidsgivereEnabled = true
-        Toggles.nyInntekt = true
+        Toggles.FlereArbeidsgivereEnabled.enabled = true
+        Toggles.NyInntekt.enabled = true
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.flereArbeidsgivereEnabled = false
-        Toggles.nyInntekt = false
+        Toggles.FlereArbeidsgivereEnabled.enabled = false
+        Toggles.NyInntekt.enabled = false
     }
 
     @Test
@@ -421,7 +421,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
                 avstemmingsnøkkel = 123456L,
                 overføringstidspunkt = LocalDateTime.now()
-            ))
+            )
+        )
         person.håndter(
             utbetaling(
                 orgnummer.id(0),

@@ -362,7 +362,9 @@ internal class Arbeidsgiver private constructor(
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        if (Toggles.nyInntekt) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart) else inntektshistorikk.inntekt(skjæringstidspunkt)
+        if (Toggles.NyInntekt.enabled) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart) else inntektshistorikk.inntekt(
+            skjæringstidspunkt
+        )
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
@@ -517,7 +519,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
-        if (Toggles.nyInntekt) return historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
+        if (Toggles.NyInntekt.enabled) return historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
         val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
         try {
             val sammenhengendePeriode = historie.sammenhengendePeriode(periode)

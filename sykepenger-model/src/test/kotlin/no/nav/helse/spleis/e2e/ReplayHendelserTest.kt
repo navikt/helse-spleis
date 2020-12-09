@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +19,12 @@ import org.junit.jupiter.api.Test
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
     @BeforeEach
     fun prepare() {
-        Toggles.replayEnabled = true
+        Toggles.ReplayEnabled.enabled = true
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Toggles.ReplayEnabled.enabled = false
     }
 
     @Test

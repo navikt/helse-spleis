@@ -63,7 +63,7 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
 internal fun mapBegrunnelse(begrunnelse: Begrunnelse) = BegrunnelseDTO.valueOf(begrunnelse.name)
 
 internal fun MutableMap<String, Any?>.mapTilPersonDto() =
-    if (Toggles.speilInntekterVol2Enabled) {
+    if (Toggles.SpeilInntekterVol2Enabled.enabled) {
         PersonDTO(
             fødselsnummer = this["fødselsnummer"] as String,
             aktørId = this["aktørId"] as String,

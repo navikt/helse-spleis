@@ -141,39 +141,38 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
-        Toggles.nyInntekt = true
-        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        Toggles.NyInntekt.enable {
+            nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
-        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
-            inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-            1.januar(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 24000
-            }
-        }))
+            person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 24000
+                }
+            }))
 
-        person.håndter(
-            ytelser(
-                a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
-                    Utbetalingshistorikk.Inntektsopplysning(1.januar, 24500.månedlig, a1, true),
-                    Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 5000.månedlig, a2, true)
+            person.håndter(
+                ytelser(
+                    a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
+                        Utbetalingshistorikk.Inntektsopplysning(1.januar, 24500.månedlig, a1, true),
+                        Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 5000.månedlig, a2, true)
+                    )
                 )
             )
-        )
 
-        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
-        assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
-        assertEquals(
-            24000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
-        )
-        assertEquals(
-            25000.månedlig,
-            a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
-        )
-
-        Toggles.nyInntekt = false
+            assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+            assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
+            assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.first()?.sykepengegrunnlag)
+            assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+            assertEquals(
+                24000.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.SKATT }?.sammenligningsgrunnlag
+            )
+            assertEquals(
+                25000.månedlig,
+                a1Inspektør.inntektInspektør.sisteInnslag?.first { it.kilde == Kilde.INNTEKTSMELDING }?.sykepengegrunnlag
+            )
+        }
     }
 
     private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {
