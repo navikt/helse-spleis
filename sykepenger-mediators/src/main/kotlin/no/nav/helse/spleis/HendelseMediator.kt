@@ -134,6 +134,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse) {
+        håndter(message, påminnelse) { person ->
+            person.håndter(påminnelse)
+        }
+    }
+
     override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling) {
         håndter(message, annullerUtbetaling) { person ->
             HendelseProbe.onAnnullerUtbetaling()
@@ -225,7 +231,7 @@ internal class HendelseMediator(
         }
     }
 
-    private fun <Hendelse : ArbeidstakerHendelse> håndter(
+    private fun <Hendelse : PersonHendelse> håndter(
         message: HendelseMessage,
         hendelse: Hendelse,
         handler: (Person) -> Unit
@@ -236,7 +242,7 @@ internal class HendelseMediator(
         }
     }
 
-    private fun person(message: HendelseMessage, hendelse: ArbeidstakerHendelse): Person {
+    private fun person(message: HendelseMessage, hendelse: PersonHendelse): Person {
         return initPerson(
             personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
                 aktørId = hendelse.aktørId(),
@@ -497,6 +503,7 @@ internal interface IHendelseMediator {
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse)
+    fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse)
     fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk)
     fun behandle(message: YtelserMessage, ytelser: Ytelser)
     fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag)

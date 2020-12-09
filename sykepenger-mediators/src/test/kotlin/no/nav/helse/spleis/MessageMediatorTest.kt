@@ -48,6 +48,12 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun personpåminnelse() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagPersonPåminnelse())
+        assertTrue(hendelseMediator.lestPersonpåminnelse)
+    }
+
+    @Test
     fun utbetalingpåminnelse() {
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingpåminnelse(UUID.randomUUID(), Utbetalingstatus.IKKE_UTBETALT))
         assertTrue(hendelseMediator.lestutbetalingpåminnelse)

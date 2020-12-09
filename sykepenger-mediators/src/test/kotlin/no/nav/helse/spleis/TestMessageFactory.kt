@@ -450,6 +450,15 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagPersonPåminnelse(): String {
+        return nyHendelse(
+            "person_påminnelse", mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer
+            )
+        )
+    }
+
     fun lagUtbetaling(
         fagsystemId: String,
         utbetalingId: String,

@@ -32,6 +32,7 @@ internal class MessageMediator(
             UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)
             PåminnelserRiver(it, this)
+            PersonPåminnelserRiver(it, this)
             UtbetalingpåminnelserRiver(it, this)
             SimuleringerRiver(it, this)
             AnnullerUtbetalingerRiver(it, this)
