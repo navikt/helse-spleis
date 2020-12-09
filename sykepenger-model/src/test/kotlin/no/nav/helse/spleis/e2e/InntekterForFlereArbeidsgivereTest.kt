@@ -225,8 +225,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 )
                 else arbeidsforhold
             ),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelselogg = this
         }

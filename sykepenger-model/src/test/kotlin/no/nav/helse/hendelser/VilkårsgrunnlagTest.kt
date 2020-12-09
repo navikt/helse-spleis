@@ -183,9 +183,7 @@ internal class VilkårsgrunnlagTest {
                 4.desember(2017)
             )
         ),
-        dagpenger: List<Periode> = emptyList(),
-        arbeidsavklaringspenger: List<Periode> = emptyList()
-
+        dagpenger: List<Periode> = emptyList()
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId(),
@@ -195,10 +193,7 @@ internal class VilkårsgrunnlagTest {
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-        dagpenger = Dagpenger(dagpenger),
-        arbeidsavklaringspenger = Arbeidsavklaringspenger(
-            arbeidsavklaringspenger
-        )
+        dagpenger = Dagpenger(dagpenger)
     )
 
     private fun sykmelding() = Sykmelding(

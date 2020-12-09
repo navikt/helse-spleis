@@ -260,6 +260,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             ),
             aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }
@@ -329,8 +330,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                     )
                 )
             ),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelse = this
         }

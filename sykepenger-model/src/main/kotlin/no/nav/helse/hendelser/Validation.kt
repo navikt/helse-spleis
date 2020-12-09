@@ -32,7 +32,7 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
 internal fun Validation.validerYtelser(
     periode: Periode,
     ytelser: Ytelser,
-    skjæringstidspunkt: LocalDate?
+    skjæringstidspunkt: LocalDate
 ) = valider {
     !ytelser.valider(periode, skjæringstidspunkt).hasErrorsOrWorse()
 }

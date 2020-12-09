@@ -94,7 +94,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 aktivitetslogg = it
             ),
             aktivitetslogg = it,
-            dødsinfo = Dødsinfo(null)
+            dødsinfo = Dødsinfo(null),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }
@@ -164,8 +165,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                     )
                 )
             ),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelse = this
         }

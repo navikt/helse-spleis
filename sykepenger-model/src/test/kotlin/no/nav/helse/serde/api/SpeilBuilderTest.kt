@@ -568,7 +568,7 @@ class SpeilBuilderTest {
 
     @Test
     fun `Sender med varsler for tidligere periode som er avsluttet uten utbetaling`() {
-        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling(aap = listOf(Periode(1.september(2017), 30.september(2017))))
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
@@ -971,14 +971,8 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
-                    håndter(
-                        vilkårsgrunnlag(
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            // Fremprovoserer en warning
-                            arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60))
-                        )
-                    )
-                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60))))
                     fangeUtbetalinger()
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
@@ -1016,7 +1010,7 @@ class SpeilBuilderTest {
 
         private fun ingenutbetalingPåfølgendeBetaling(
             søknadhendelseId: UUID = UUID.randomUUID(),
-            aap: List<Periode> = emptyList()
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
         ): Pair<Person, List<HendelseDTO>> =
             Person(aktørId, fnr).run {
                 this to mutableListOf<HendelseDTO>().apply {
@@ -1045,7 +1039,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
-                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, arbeidsavklaringspenger = aap))
+                    håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, medlemskapstatus = medlemskapstatus))
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -1229,7 +1223,7 @@ class SpeilBuilderTest {
 
         private fun vilkårsgrunnlag(
             vedtaksperiodeId: String,
-            arbeidsavklaringspenger: List<Periode> = emptyList()
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
         ) = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -1250,9 +1244,8 @@ class SpeilBuilderTest {
                     )
                 )
             ),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
+            dagpenger = Dagpenger(emptyList())
         )
 
         private fun vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId: String) = Vilkårsgrunnlag(
@@ -1278,8 +1271,7 @@ class SpeilBuilderTest {
                 )
             ),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList())
         )
 
         private fun ytelser(
@@ -1294,7 +1286,8 @@ class SpeilBuilderTest {
                     orgnummer,
                     true
                 )
-            )
+            ),
+            arbeidsavklaringspenger: List<Periode> = emptyList()
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
@@ -1339,6 +1332,7 @@ class SpeilBuilderTest {
                 ),
                 aktivitetslogg = it,
                 dødsinfo = Dødsinfo(null),
+                arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
             )
         }
 

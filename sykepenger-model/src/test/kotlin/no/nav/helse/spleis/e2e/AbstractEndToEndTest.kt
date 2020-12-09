@@ -247,15 +247,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     orgnummer inntekt inntekt
                 }
             }
-        ),
-        arbeidsavklaringspenger: List<Periode> = emptyList()
+        )
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(vedtaksperiodeId, behovtype, Vilkårsgrunnlag::class)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
         assertEtterspurt(Behovtype.Dagpenger)
-        assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
         assertEtterspurt(Medlemskap)
         person.håndter(
             vilkårsgrunnlag(
@@ -263,8 +261,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 arbeidsforhold,
                 medlemskapstatus,
                 orgnummer,
-                inntektsvurdering,
-                arbeidsavklaringspenger
+                inntektsvurdering
             )
         )
     }
@@ -300,7 +297,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
-        statslønn: Boolean = false
+        statslønn: Boolean = false,
+        arbeidsavklaringspenger: List<Periode> = emptyList()
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
@@ -310,6 +308,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEtterspurt(Behovtype.Pleiepenger)
         assertEtterspurt(Behovtype.Omsorgspenger)
         assertEtterspurt(Behovtype.Opplæringspenger)
+        assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
         assertEtterspurt(Behovtype.Institusjonsopphold)
         person.håndter(
             ytelser(
@@ -322,7 +321,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
                 dødsdato = dødsdato,
-                statslønn = statslønn
+                statslønn = statslønn,
+                arbeidsavklaringspenger = arbeidsavklaringspenger
             )
         )
     }
@@ -554,8 +554,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsforhold: List<Opptjeningvurdering.Arbeidsforhold> = emptyList(),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        inntektsvurdering: Inntektsvurdering,
-        arbeidsavklaringspenger: List<Periode> = emptyList()
+        inntektsvurdering: Inntektsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -571,8 +570,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 )
                 else arbeidsforhold
             ),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelselogg = this
         }
@@ -649,7 +647,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
-        statslønn: Boolean = false
+        statslønn: Boolean = false,
+        arbeidsavklaringspenger: List<Periode> = emptyList()
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -693,6 +692,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             ),
             aktivitetslogg = aktivitetslogg,
             dødsinfo = Dødsinfo(dødsdato),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
         ).apply {
             hendelselogg = this
         }

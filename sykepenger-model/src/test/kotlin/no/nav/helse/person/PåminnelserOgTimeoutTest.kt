@@ -72,12 +72,11 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
-        assertEquals(5, hendelse.behov().size)
+        assertEquals(4, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING_GAP, 1.vedtaksperiode))
         assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(5, hendelse.behov().size)
+        assertEquals(4, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dagpenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.InntekterForSammenligningsgrunnlag))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opptjening))
     }
@@ -88,14 +87,15 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(vilkårsgrunnlag())
-        assertEquals(7, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(7, hendelse.behov().size)
+        assertEquals(8, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Arbeidsavklaringspenger))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dødsinfo))
@@ -264,8 +264,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                     )
                 )
             ),
-            dagpenger = Dagpenger(emptyList()),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelse = this
         }
@@ -363,7 +362,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 aktivitetslogg = Aktivitetslogg()
             ),
             aktivitetslogg = Aktivitetslogg(),
-            dødsinfo = Dødsinfo(null)
+            dødsinfo = Dødsinfo(null),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         ).apply {
             hendelse = this
         }

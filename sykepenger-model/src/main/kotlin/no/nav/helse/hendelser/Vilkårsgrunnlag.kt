@@ -18,9 +18,8 @@ class Vilkårsgrunnlag(
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
-    private val dagpenger: Dagpenger,
-    private val arbeidsavklaringspenger: Arbeidsavklaringspenger
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+    private val dagpenger: Dagpenger
+    ) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var grunnlagsdata: Grunnlagsdata? = null
 
     override fun aktørId() = aktørId
@@ -43,7 +42,6 @@ class Vilkårsgrunnlag(
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus
         )
         dagpenger.valider(aktivitetslogg, skjæringstidspunkt)
-        arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt)
         return aktivitetslogg
     }
 

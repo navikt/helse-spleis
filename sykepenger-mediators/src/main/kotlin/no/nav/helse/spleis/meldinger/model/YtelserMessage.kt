@@ -11,6 +11,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
+import java.time.LocalDate
 
 // Understands a JSON message representing an Ytelserbehov
 internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
@@ -18,6 +19,8 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
+    private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
+    private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val aktivitetslogg = Aktivitetslogg()
     private val utbetalingshistorikk = UtbetalingshistorikkMessage(packet)
@@ -56,6 +59,15 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val dødsinfo =
         Dødsinfo(packet["@løsning.${Behovtype.Dødsinfo.name}"].path("dødsdato").asOptionalLocalDate())
 
+    init {
+        packet["@løsning.${Behovtype.Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
+            .partition { it.first <= it.second }
+            .also {
+                arbeidsavklaringspenger = it.first
+                ugyldigeArbeidsavklaringspengeperioder = it.second
+            }
+    }
+
 
     private val ytelser
         get() = Ytelser(
@@ -72,10 +84,21 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
             institusjonsopphold = institusjonsopphold,
             dødsinfo = dødsinfo,
             statslønn = statslønn,
-            aktivitetslogg = aktivitetslogg
-        )
+            aktivitetslogg = aktivitetslogg,
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
+            })
+        ).also {
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
+        }
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, ytelser)
     }
+
+    private fun asDatePair(jsonNode: JsonNode) =
+        jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 }

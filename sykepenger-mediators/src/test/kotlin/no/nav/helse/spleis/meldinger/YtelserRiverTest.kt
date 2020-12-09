@@ -50,6 +50,11 @@ internal class YtelserRiverTest : RiverTest() {
     fun `Ignorerer løsning uten dødsinfo`() {
         assertIgnored(utenDødsinfo)
     }
+
+    @Test
+    fun `Ignorerer løsning uten arbeidsavklaringspenger`() {
+        assertIgnored(utenArbeidsavklaringspenger)
+    }
 }
 
 @Language("JSON")
@@ -72,7 +77,8 @@ private val json = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Dødsinfo"
+        "Dødsinfo",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -147,6 +153,14 @@ private val json = """
         ],
         "Dødsinfo": {
           "dødsdato": "2019-12-01"
+        },
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": [
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12"
+            }
+          ]
         }
       },
       "@final": true,
@@ -174,7 +188,8 @@ private val ukjentPeriode = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Dødsinfo"
+        "Dødsinfo",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -236,6 +251,9 @@ private val ukjentPeriode = """
         "Institusjonsopphold": [],
         "Dødsinfo": {
           "dødsdato": null
+        },
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
         }
       },
       "@final": true,
@@ -263,7 +281,8 @@ private val ugyldigPeriode = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Dødsinfo"
+        "Dødsinfo",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -325,6 +344,9 @@ private val ugyldigPeriode = """
         "Institusjonsopphold": [],
         "Dødsinfo": {
           "dødsdato": null
+        },
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
         }
       },
       "@final": true,
@@ -351,7 +373,8 @@ private val utenPleiepenger = """
         "Pleiepenger",
         "Omsorgspenger",
         "Opplæringspenger",
-        "Institusjonsopphold"
+        "Institusjonsopphold",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -397,7 +420,10 @@ private val utenPleiepenger = """
         ],
         "Opplæringspenger": [],
         "Omsorgspenger": [],
-        "Institusjonsopphold": []
+        "Institusjonsopphold": [],
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
+        }
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -423,7 +449,8 @@ private val utenOmsorgspenger = """
         "Pleiepenger",
         "Omsorgspenger",
         "Opplæringspenger",
-        "Institusjonsopphold"
+        "Institusjonsopphold",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -469,7 +496,10 @@ private val utenOmsorgspenger = """
         ],
         "Pleiepenger": [],
         "Opplæringspenger": [],
-        "Institusjonsopphold": []
+        "Institusjonsopphold": [],
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
+        }
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -495,7 +525,8 @@ private val utenOpplæringspenger = """
         "Pleiepenger",
         "Omsorgspenger",
         "Opplæringspenger",
-        "Institusjonsopphold"
+        "Institusjonsopphold",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -541,7 +572,10 @@ private val utenOpplæringspenger = """
         ],
         "Pleiepenger": [],
         "Omsorgspenger": [],
-        "Institusjonsopphold": []
+        "Institusjonsopphold": [],
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
+        }
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -567,7 +601,8 @@ private val utenInstitusjonsopphold = """
         "Pleiepenger",
         "Omsorgspenger",
         "Opplæringspenger",
-        "Institusjonsopphold"
+        "Institusjonsopphold",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -613,7 +648,10 @@ private val utenInstitusjonsopphold = """
         ],
         "Pleiepenger": [],
         "Opplæringspenger": [],
-        "Omsorgspenger": []
+        "Omsorgspenger": [],
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
+        }
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -641,7 +679,111 @@ private val utenDødsinfo = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Dødsinfo"
+        "Dødsinfo",
+        "Arbeidsavklaringspenger"
+      ],
+      "@id": "${UUID.randomUUID()}",
+      "@opprettet": "2020-01-24T11:25:00",
+      "hendelse": "Ytelser",
+      "aktørId": "aktørId",
+      "fødselsnummer": "08127411111",
+      "organisasjonsnummer": "orgnummer",
+      "vedtaksperiodeId": "${UUID.randomUUID()}",
+      "@løsning": {
+        "Foreldrepenger": {
+          "Foreldrepengeytelse": null,
+          "Svangerskapsytelse": null
+        },
+        "Sykepengehistorikk": [
+          {
+            "fom": "2019-03-11",
+            "tom": "2019-04-12",
+            "grad": "100",
+            "inntektsopplysninger": [
+              {
+                "sykepengerFom": "2019-03-27",
+                "inntekt": 36000,
+                "orgnummer": "orgnummer",
+                "refusjonTom": null,
+                "refusjonTilArbeidsgiver": true
+              }
+            ],
+            "utbetalteSykeperioder": [
+              {
+                "fom": "2019-03-28",
+                "tom": "2019-04-12",
+                "utbetalingsGrad": "100",
+                "oppgjorsType": "",
+                "utbetalt": "2019-04-23",
+                "dagsats": 1400.0,
+                "typeKode": "5",
+                "typeTekst": "ArbRef",
+                "orgnummer": "orgnummer",
+                "inntektPerMåned": 36000
+              }
+            ]
+          }
+        ],
+        "Pleiepenger": [
+          {
+            "fom": "2019-03-11",
+            "tom": "2019-04-12",
+            "grad": "100"
+          }
+        ],
+        "Omsorgspenger": [
+          {
+            "fom": "2019-03-11",
+            "tom": "2019-04-12",
+            "grad": "100"
+          }
+        ],
+        "Opplæringspenger": [
+          {
+            "fom": "2019-03-11",
+            "tom": "2019-04-12",
+            "grad": "100"
+          }
+        ],
+        "Institusjonsopphold": [
+          {
+            "startdato": "2019-03-11",
+            "faktiskSluttdato": "2019-04-12",
+            "institusjonstype": "FO",
+            "kategori": "S"
+          }
+        ],
+        "Arbeidsavklaringspenger": {
+          "meldekortperioder": []
+        }
+      },
+      "@final": true,
+      "@besvart": "2020-01-24T11:25:00"
+    }
+"""
+
+@Language("JSON")
+private val utenArbeidsavklaringspenger = """
+  {
+      "@event_name": "behov",
+      "tilstand": "AVVENTER_HISTORIKK",
+      "historikkFom": "2014-12-08",
+      "historikkTom": "2019-12-08",
+      "pleiepengerFom": "2014-12-08",
+      "pleiepengerTom": "2019-12-08",
+      "omsorgspengerFom": "2014-12-08",
+      "omsorgspengerTom": "2019-12-08",
+      "opplæringspengerFom": "2014-12-08",
+      "opplæringspengerTom": "2019-12-08",
+      "@behov": [
+        "Sykepengehistorikk",
+        "Foreldrepenger",
+        "Pleiepenger",
+        "Omsorgspenger",
+        "Opplæringspenger",
+        "Institusjonsopphold",
+        "Dødsinfo",
+        "Arbeidsavklaringspenger"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",

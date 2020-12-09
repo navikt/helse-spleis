@@ -188,6 +188,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             ),
             aktivitetslogg = aktivitetslogg,
             dødsinfo = Dødsinfo(null),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
         )
     }
 

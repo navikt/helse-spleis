@@ -170,13 +170,19 @@ internal class TestMessageFactory(
         val kategori: String
     )
 
+    class ArbeidsavklaringspengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
         pleiepenger: List<PleiepengerTestdata> = emptyList(),
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
-        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList()
+        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
+        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList()
     ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -188,6 +194,7 @@ internal class TestMessageFactory(
                 "Omsorgspenger",
                 "Opplæringspenger",
                 "Institusjonsopphold",
+                "Arbeidsavklaringspenger",
                 "Dødsinfo"
             ),
             løsninger = mapOf(
@@ -224,7 +231,15 @@ internal class TestMessageFactory(
                         "institusjonstype" to data.institusjonstype,
                         "kategori" to data.kategori
                     )
-                }
+                },
+                Arbeidsavklaringspenger.name to mapOf(
+                    "meldekortperioder" to arbeidsavklaringspenger.map { data ->
+                        mapOf(
+                            "fom" to data.fom,
+                            "tom" to data.tom
+                        )
+                    }
+                ),
             )
         )
     }
@@ -271,9 +286,6 @@ internal class TestMessageFactory(
                     )
                 },
                 Dagpenger.name to mapOf(
-                    "meldekortperioder" to emptyList<Any>()
-                ),
-                Arbeidsavklaringspenger.name to mapOf(
                     "meldekortperioder" to emptyList<Any>()
                 ),
                 Medlemskap.name to mapOf<String, Any>(
