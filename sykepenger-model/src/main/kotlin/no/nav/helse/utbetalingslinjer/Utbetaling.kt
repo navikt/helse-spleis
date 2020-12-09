@@ -72,7 +72,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int,
         forrige: Utbetaling?
     ) : this(
-        utbetalingstidslinje,
+        utbetalingstidslinje.kutt(sisteDato),
         buildArb(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
         type,

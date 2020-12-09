@@ -311,4 +311,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         )
         assertEquals(2, inspektør.utbetalinger.size)
     }
+
+    @Test
+    fun `utbetaling med ubetalt periode etterpå inkluderer ikke dager etter perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)   // No history
+        val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
+        assertEquals(3.januar to 26.januar, utbetalingUtbetalingstidslinje.førsteDato() to utbetalingUtbetalingstidslinje.sisteDato())
+    }
 }
