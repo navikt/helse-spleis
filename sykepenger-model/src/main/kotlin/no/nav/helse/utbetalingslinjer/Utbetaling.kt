@@ -60,7 +60,7 @@ internal class Utbetaling private constructor(
     )
 
     private constructor(
-        forrige: Utbetaling?,
+        sisteAktive: Utbetaling?,
         fødselsnummer: String,
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
@@ -69,10 +69,11 @@ internal class Utbetaling private constructor(
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
-        gjenståendeSykedager: Int
+        gjenståendeSykedager: Int,
+        forrige: Utbetaling?
     ) : this(
         utbetalingstidslinje,
-        buildArb(forrige?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg),
+        buildArb(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
         type,
         maksdato,
@@ -222,7 +223,8 @@ internal class Utbetaling private constructor(
             aktivitetslogg: IAktivitetslogg,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
-            gjenståendeSykedager: Int
+            gjenståendeSykedager: Int,
+            forrige: Utbetaling? = null
         ): Utbetaling {
             return Utbetaling(
                 utbetalinger.aktive().lastOrNull(),
@@ -234,7 +236,8 @@ internal class Utbetaling private constructor(
                 aktivitetslogg,
                 maksdato,
                 forbrukteSykedager,
-                gjenståendeSykedager
+                gjenståendeSykedager,
+                forrige?.takeIf(Utbetaling::erAktiv)
             )
         }
 
@@ -263,21 +266,28 @@ internal class Utbetaling private constructor(
         internal fun List<Utbetaling>.kronologisk() = this.sortedBy { it.tidsstempel }
 
         private fun buildArb(
-            sisteUtbetalte: Oppdrag?,
+            sisteAktive: Oppdrag?,
             organisasjonsnummer: String,
             tidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
-            aktivitetslogg: IAktivitetslogg
-        ) = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato)
-            .result()
-            .minus(sisteUtbetalte ?: Oppdrag(organisasjonsnummer, SykepengerRefusjon), aktivitetslogg)
-            .also { oppdrag ->
-                if (sisteUtbetalte?.fagsystemId() == oppdrag.fagsystemId()) oppdrag.nettoBeløp(sisteUtbetalte)
-                aktivitetslogg.info(
-                    if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
-                    else "Utbetalingslinjer bygget vellykket"
-                )
-            }
+            aktivitetslogg: IAktivitetslogg,
+            forrige: Oppdrag?
+        ): Oppdrag {
+            val tidligere = forrige ?: sisteAktive
+            val result = OppdragBuilder(tidslinje, organisasjonsnummer, SykepengerRefusjon, sisteDato, forrige?.fagsystemId()).result()
+            val oppdrag = tidligere?.let {
+                result.minus(tidligere, aktivitetslogg)
+            }?.also {
+                if (tidligere.fagsystemId() == it.fagsystemId()) it.nettoBeløp(tidligere)
+            } ?: result
+
+            aktivitetslogg.info(
+                if (oppdrag.isEmpty()) "Ingen utbetalingslinjer bygget"
+                else "Utbetalingslinjer bygget vellykket"
+            )
+
+            return oppdrag
+        }
 
         private fun buildPerson(        // TODO("To be completed when payments to employees is supported")
             fødselsnummer: String,
@@ -522,8 +532,8 @@ internal class Utbetaling private constructor(
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
                 utbetaling.utbetalingstidslinje,
-                utbetaling.arbeidsgiverOppdrag.emptied().minus(utbetaling.arbeidsgiverOppdrag, hendelse),
-                utbetaling.personOppdrag.emptied().minus(utbetaling.personOppdrag, hendelse),
+                utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
+                utbetaling.personOppdrag.annuller(hendelse),
                 Utbetalingtype.ANNULLERING,
                 LocalDate.MAX,
                 null,
@@ -532,7 +542,7 @@ internal class Utbetaling private constructor(
 
         override fun etterutbetale(utbetaling: Utbetaling, hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje) =
             Utbetaling(
-                forrige = utbetaling,
+                sisteAktive = null,
                 fødselsnummer = hendelse.fødselsnummer(),
                 organisasjonsnummer = hendelse.organisasjonsnummer(),
                 utbetalingstidslinje = utbetalingstidslinje.kutt(utbetaling.periode.endInclusive),
@@ -541,7 +551,8 @@ internal class Utbetaling private constructor(
                 aktivitetslogg = hendelse,
                 maksdato = utbetaling.maksdato,
                 forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
-                gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager)
+                gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
+                forrige = utbetaling
             ).takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
 
         override fun avslutt(

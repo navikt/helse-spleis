@@ -54,6 +54,13 @@ internal class Oppdrag private constructor(
     internal fun fagområde() = fagområde
     internal fun fagsystemId() = fagsystemId
 
+    internal operator fun contains(other: Oppdrag) =
+        this.tilhører(other) || this.overlapperMed(other)
+    private fun tilhører(other: Oppdrag) =
+        this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
+    private fun overlapperMed(other: Oppdrag) =
+        maxOf(this.førstedato, other.førstedato) <= minOf(this.sistedato, other.sistedato)
+
     internal fun overfør(
         aktivitetslogg: IAktivitetslogg,
         maksdato: LocalDate?,
@@ -79,9 +86,6 @@ internal class Oppdrag private constructor(
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
 
     internal fun nettoBeløp() = nettoBeløp
-
-    internal fun tilhører(fagsystemId: String, fagområde: Fagområde) =
-        this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
     internal fun nettoBeløp(tidligere: Oppdrag) {
         nettoBeløp = this.totalbeløp() - tidligere.totalbeløp()
@@ -119,16 +123,24 @@ internal class Oppdrag private constructor(
             }
         }
 
+    internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
+        return emptied().minus(this, aktivitetslogg)
+    }
+
+    private fun emptied(): Oppdrag =
+        Oppdrag(
+            mottaker = mottaker,
+            fagområde = fagområde,
+            fagsystemId = fagsystemId,
+            sisteArbeidsgiverdag = sisteArbeidsgiverdag
+        )
+
     internal fun minus(other: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
         val tidligere = other.utenOpphørLinjer()
         return when {
-            tidligere.isEmpty() ->
+            tidligere.isEmpty() || this !in other ->
                 this
-            this.isEmpty() && this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag > tidligere.sistedato ->
-                this
-            this.førstedato > tidligere.sistedato ->
-                this
-            this.isEmpty() && (this.sisteArbeidsgiverdag == null || this.sisteArbeidsgiverdag < tidligere.sistedato) ->
+            this.isEmpty() ->
                 deleteAll(tidligere)
             this.førstedato > tidligere.førstedato -> {
                 aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
@@ -154,6 +166,7 @@ internal class Oppdrag private constructor(
         nåværende.first().linkTo(tidligere.last())
         nåværende.zipWithNext { a, b -> b.linkTo(a) }
     }
+
     private lateinit var tilstand: Tilstand
     private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
     private lateinit var linkTo: Utbetalingslinje
@@ -204,14 +217,6 @@ internal class Oppdrag private constructor(
         this.forEach { it.refFagsystemId = tidligere.fagsystemId }
         this.endringskode = Endringskode.ENDR
     }
-
-    internal fun emptied(): Oppdrag =
-        Oppdrag(
-            mottaker = mottaker,
-            fagområde = fagområde,
-            fagsystemId = fagsystemId,
-            sisteArbeidsgiverdag = sisteArbeidsgiverdag
-        )
 
     private interface Tilstand {
         fun forskjell(

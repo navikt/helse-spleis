@@ -495,7 +495,6 @@ internal class Vedtaksperiode private constructor(
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
-    //Hent resultat fra beregning (harvest results). Savner Fred 😢
     private fun høstingsresultater(
         engineForTimeline: MaksimumSykepengedagerfilter,
         hendelse: ArbeidstakerHendelse
@@ -507,7 +506,8 @@ internal class Vedtaksperiode private constructor(
             maksdato = engineForTimeline.maksdato(),
             forbrukteSykedager = engineForTimeline.forbrukteSykedager(),
             gjenståendeSykedager = engineForTimeline.gjenståendeSykedager(),
-            periode = periode
+            periode = periode,
+            forrige = utbetaling
         ).also {
             utbetaling = it
         }

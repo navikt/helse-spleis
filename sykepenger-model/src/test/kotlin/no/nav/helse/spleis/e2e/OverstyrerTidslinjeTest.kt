@@ -40,6 +40,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertNotEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
         assertEquals("SSSSHH SSSSSHH SSSSSHH SSUFS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
@@ -59,6 +60,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
         inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
             assertEquals(2, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
@@ -87,6 +89,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
         inspektør.utbetaling(1).arbeidsgiverOppdrag().also { oppdrag ->
             assertEquals(1, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
@@ -121,6 +124,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(2))
+        assertEquals(inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(2).arbeidsgiverOppdrag().fagsystemId())
         inspektør.utbetaling(2).arbeidsgiverOppdrag().also { oppdrag ->
             assertEquals(1, oppdrag.size)
             assertEquals(18.januar, oppdrag[0].fom)
@@ -172,6 +176,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
         )
+        assertNotEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag().fagsystemId(), inspektør.utbetaling(1).arbeidsgiverOppdrag().fagsystemId())
         assertEquals(19.januar, inspektør.utbetalinger.last().utbetalingstidslinje().førsteSykepengedag())
     }
 

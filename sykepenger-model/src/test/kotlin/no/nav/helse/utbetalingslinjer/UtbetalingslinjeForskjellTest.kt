@@ -5,10 +5,12 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class UtbetalingslinjeForskjellTest {
 
@@ -504,9 +506,21 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
-    fun `fom og tom endres medfører implisit annullering av linjer etter tom hos Oppdrag`() {
+    fun `ingen overlapp og ulik fagsystemId`() {
         val original = linjer(5.januar to 10.januar)
         val recalculated = linjer(1.januar to 3.januar)
+        val actual = recalculated - original
+        assertUtbetalinger(linjer(1.januar to 3.januar), actual)
+        assertNotEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(NY, actual.endringskode)
+        assertNyLinje(actual[0], null)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `fom og tom ulik og samme fagsystemId`() {
+        val original = linjer(5.januar to 10.januar)
+        val recalculated = linjer(1.januar to 3.januar, other = original)
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 3.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -514,7 +528,6 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(NY, actual[0].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)
         assertEquals(original[0].id, actual[0].refId)
-
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -596,38 +609,8 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
         val recalculated = tomtOppdrag()
         val actual = recalculated - original
-        assertUtbetalinger(
-            linjer(4.januar to 12.januar grad 50),
-            actual
-        )
-        assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertOpphør(actual[0], 1.januar, original.last())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
-    }
-
-    @Test fun `ny er tom uten sisteArbeidsgiverdag`() {
-        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
-        val recalculated = tomtOppdrag(null)
-        val actual = recalculated - original
-        assertUtbetalinger(
-            linjer(4.januar to 12.januar grad 50),
-            actual
-        )
-        assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(ENDR, actual.endringskode)
-        assertOpphør(actual[0], 1.januar, original.last())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
-    }
-
-    @Test fun `ny er tom og sisteArbeidsgiverdag er etter tidligere`() {
-        val original = linjer(1.januar to 3.januar, 4.januar to 12.januar grad 50)
-        val recalculated = tomtOppdrag(1.februar)
-        val actual = recalculated - original
-        assertUtbetalinger(recalculated, actual)
+        assertUtbetalinger(tomtOppdrag(), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
-        assertEquals(NY, actual.endringskode)
-        assertNyLinje(original[0], null)
-        assertNyLinje(original[1], original[0])
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -732,7 +715,7 @@ internal class UtbetalingslinjeForskjellTest {
             13.januar to 19.januar,
             20.januar to 31.januar
         )
-        val new = tomtOppdrag()
+        val new = tomtOppdrag(original.fagsystemId())
         val actual = new - original
         assertUtbetalinger(
             linjer(20.januar to 31.januar),
@@ -767,7 +750,7 @@ internal class UtbetalingslinjeForskjellTest {
         val original = linjer(
             1.januar to 5.januar
         )
-        val new = tomtOppdrag()
+        val new = tomtOppdrag(original.fagsystemId())
 
         val actual = new - original
 
@@ -775,8 +758,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
 
-    private fun tomtOppdrag(sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId, sisteArbeidsgiverdag = null)
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 
@@ -800,8 +783,8 @@ internal class UtbetalingslinjeForskjellTest {
         }
     }
 
-    private fun linjer(vararg linjer: TestUtbetalingslinje) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
+    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.map { it.asUtbetalingslinje() }, fagsystemId = other?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag = 31.desember(2017)).also { oppdrag ->
             oppdrag.zipWithNext { a, b -> b.linkTo(a) }
             oppdrag.forEach { if(it.refId != null) it.refFagsystemId = oppdrag.fagsystemId() }
         }

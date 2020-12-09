@@ -15,8 +15,9 @@ internal class OppdragBuilder(
     private val mottaker: String,
     private val fagområde: Fagområde,
     sisteDato: LocalDate = tidslinje.sisteDato(),
-    private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
+    fagsystemId: String? = null
 ) : UtbetalingsdagVisitor {
+    private val fagsystemId = fagsystemId ?: genererUtbetalingsreferanse(UUID.randomUUID())
     private val arbeisdsgiverLinjer = mutableListOf<Utbetalingslinje>()
     private var tilstand: Tilstand = MellomLinjer()
     private var sisteArbeidsgiverdag: LocalDate? = null

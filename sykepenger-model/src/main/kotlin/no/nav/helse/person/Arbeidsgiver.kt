@@ -104,7 +104,8 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        periode: Periode
+        periode: Periode,
+        forrige: Utbetaling?
     ): Utbetaling {
         val (organisasjonsnummer, utbetalingstidslinje, _) = beregnetUtbetalingstidslinjer.last()
         return Utbetaling.lagUtbetaling(
@@ -116,7 +117,8 @@ internal class Arbeidsgiver private constructor(
             aktivitetslogg,
             maksdato,
             forbrukteSykedager,
-            gjenståendeSykedager
+            gjenståendeSykedager,
+            forrige
         ).also { nyUtbetaling(it) }
     }
 
