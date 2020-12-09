@@ -1,10 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
-import no.nav.helse.hendelser.UtbetalingOverført
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
@@ -32,6 +29,34 @@ internal class UtbetalingTest {
     @BeforeEach
     private fun initEach() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `utbetalinger inkluderer ikke dager etter siste dato`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV)
+        beregnUtbetalinger(tidslinje)
+
+        val sisteDato = 21.januar
+        val utbetaling = Utbetaling.lagUtbetaling(
+            emptyList(),
+            UNG_PERSON_FNR_2018,
+            ORGNUMMER,
+            tidslinje,
+            sisteDato,
+            aktivitetslogg,
+            LocalDate.MAX,
+            100,
+            148
+        )
+        lateinit var utbetalingstidslinje: Utbetalingstidslinje
+        utbetaling.accept(object : UtbetalingVisitor {
+            override fun preVisit(tidslinje: Utbetalingstidslinje) {
+                utbetalingstidslinje = tidslinje
+            }
+        })
+        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
+        assertEquals(sisteDato, utbetalingstidslinje.sisteDato())
+        assertEquals(17.januar til sisteDato, utbetaling.periode)
     }
 
     @Test
