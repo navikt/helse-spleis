@@ -368,12 +368,6 @@ internal class Utbetaling private constructor(
         tilstand(nesteTilstand, hendelse)
     }
 
-    fun forkastØdelagt(aktivitetslogg: IAktivitetslogg, ødelagteEtterutbetalinger: List<String>) {
-        if (id.toString() !in ødelagteEtterutbetalinger) return
-        aktivitetslogg.info("Forkaster utbetaling fordi den er markert som ødelagt")
-        tilstand(Forkastet, aktivitetslogg)
-    }
-
     internal interface Tilstand {
         fun forkast(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")

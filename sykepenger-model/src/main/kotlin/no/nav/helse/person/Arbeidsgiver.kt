@@ -575,10 +575,6 @@ internal class Arbeidsgiver private constructor(
             Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
     }
 
-    fun forkastØdelagteEtterutbetalinger(hendelse: PersonHendelse, ødelagteEtterutbetalinger: List<String>) {
-        utbetalinger.forEach { it.forkastØdelagt(hendelse, ødelagteEtterutbetalinger) }
-    }
-
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(
