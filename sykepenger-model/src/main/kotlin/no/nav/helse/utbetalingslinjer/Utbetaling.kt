@@ -199,7 +199,7 @@ internal class Utbetaling private constructor(
         tilstand.godkjenn(this, hendelse, vurdering)
     }
 
-    private fun tilstand(neste: Tilstand, hendelse: ArbeidstakerHendelse) {
+    private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
         val forrigeTilstand = tilstand
         tilstand.leaving(this, hendelse)
         tilstand = neste
@@ -335,12 +335,12 @@ internal class Utbetaling private constructor(
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)
     }
 
-    private fun overfør(nesteTilstand: Tilstand, hendelse: ArbeidstakerHendelse) {
+    private fun overfør(nesteTilstand: Tilstand, hendelse: IAktivitetslogg) {
         overfør(hendelse)
         tilstand(nesteTilstand, hendelse)
     }
 
-    private fun overfør(hendelse: ArbeidstakerHendelse) {
+    private fun overfør(hendelse: IAktivitetslogg) {
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
@@ -366,6 +366,12 @@ internal class Utbetaling private constructor(
             else -> Utbetalt
         }
         tilstand(nesteTilstand, hendelse)
+    }
+
+    fun forkastØdelagt(aktivitetslogg: IAktivitetslogg, ødelagteEtterutbetalinger: List<String>) {
+        if (id.toString() !in ødelagteEtterutbetalinger) return
+        aktivitetslogg.info("Forkaster utbetaling fordi den er markert som ødelagt")
+        tilstand(Forkastet, aktivitetslogg)
     }
 
     internal interface Tilstand {
@@ -422,8 +428,8 @@ internal class Utbetaling private constructor(
         ) {
             throw IllegalStateException("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
-        fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
-        fun leaving(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {}
+        fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
+        fun leaving(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
     internal object Ubetalt : Tilstand {
@@ -469,7 +475,7 @@ internal class Utbetaling private constructor(
     }
 
     internal object Godkjent : Tilstand {
-        override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.overfør(Sendt, hendelse)
         }
 
@@ -519,14 +525,14 @@ internal class Utbetaling private constructor(
     }
 
     internal object Annullert : Tilstand {
-        override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            utbetaling.vurdering?.annullert(hendelse, utbetaling, utbetaling.arbeidsgiverOppdrag)
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.vurdering?.annullert(utbetaling, utbetaling.arbeidsgiverOppdrag)
         }
     }
 
     internal object Utbetalt : Tilstand {
-        override fun entering(utbetaling: Utbetaling, hendelse: ArbeidstakerHendelse) {
-            utbetaling.vurdering?.utbetalt(hendelse, utbetaling)
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.vurdering?.utbetalt(utbetaling)
         }
 
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
@@ -598,13 +604,13 @@ internal class Utbetaling private constructor(
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling)
         }
 
-        internal fun annullert(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, oppdrag: Oppdrag) {
+        internal fun annullert(utbetaling: Utbetaling, oppdrag: Oppdrag) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(utbetaling.id, oppdrag, hendelse, tidspunkt, epost)
+                it.utbetalingAnnullert(utbetaling.id, oppdrag, tidspunkt, epost)
             }
         }
 
-        internal fun utbetalt(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
+        internal fun utbetalt(utbetaling: Utbetaling) {
             utbetaling.observers.forEach {
                 it.utbetalingUtbetalt(
                     utbetaling.id,
@@ -622,7 +628,7 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun overfør(hendelse: ArbeidstakerHendelse, oppdrag: Oppdrag, maksdato: LocalDate?) {
+        internal fun overfør(hendelse: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
             oppdrag.overfør(hendelse, maksdato, ident)
         }
 

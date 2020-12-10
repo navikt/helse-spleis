@@ -92,6 +92,31 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(this)
         påminnelse.info("Håndterer påminnelse for person")
+        val ødelagteEtterutbetalinger = listOf(
+            "bd9ae6a9-b795-4797-a014-3ebec5075914",
+            "9ccf9d64-02dc-44c6-8f5c-6775d65fe15a",
+            "85cc6a5f-f757-4fcb-bcf8-203c68548aea",
+            "e20c2953-40fe-4eec-8856-ac8547c1a261",
+            "ad14d03e-2a00-49f8-a3b8-6343269a4ac1",
+            "d6608498-1e65-4783-a783-9249a340512f",
+            "1748d47d-bb39-41e4-9175-506ff7a8e42b",
+            "b04535ff-d93b-47ea-b767-6be8edf0bbe8",
+            "2a52fc13-e5ac-42da-961c-57c04699139a",
+            "7f503310-8ef3-4bd3-a781-421d166bc3c3",
+            "308b5d00-e540-4666-a514-217516d69e68",
+            "1f1a8079-a2e6-4442-969b-7c191adc3a35",
+            "0b84bac7-c513-44cd-bdd8-6822d758dee2",
+            "29da1f53-43a1-4741-b3cf-375276cb9d76",
+            "dc056caa-6a02-478e-b1d6-7b34ec16f190",
+            "b6b28b35-3dd1-4bce-9190-7fa4af02d5aa",
+            "bde2cf61-756d-460e-9ae4-7ee554d1c83a",
+            "eba9aa69-051d-4363-9b07-5cb515ad16c9",
+            "96ab58e4-0d99-4d20-b62e-f94df627fe3d",
+            "f4bb531c-abcc-4bd7-b28d-90cbfae201ce",
+            "5f200995-676d-4985-8b9d-39751ed0cfc9",
+            "5741b580-19f4-4f9b-9d86-3c5fb9d088e5"
+        )
+        arbeidsgivere.forEach { it.forkastØdelagteEtterutbetalinger(påminnelse, ødelagteEtterutbetalinger) }
     }
 
     fun håndter(påminnelse: Påminnelse) {

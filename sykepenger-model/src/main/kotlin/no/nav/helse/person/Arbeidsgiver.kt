@@ -324,15 +324,11 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingAnnullert(
         id: UUID,
         oppdrag: Oppdrag,
-        hendelse: ArbeidstakerHendelse,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
-                fødselsnummer = hendelse.fødselsnummer(),
-                aktørId = hendelse.aktørId(),
-                organisasjonsnummer = hendelse.organisasjonsnummer(),
                 fagsystemId = oppdrag.fagsystemId(),
                 utbetalingId = id,
                 utbetalingslinjer = oppdrag.map {
@@ -577,6 +573,10 @@ internal class Arbeidsgiver private constructor(
         return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
             // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
             Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
+    }
+
+    fun forkastØdelagteEtterutbetalinger(hendelse: PersonHendelse, ødelagteEtterutbetalinger: List<String>) {
+        utbetalinger.forEach { it.forkastØdelagt(hendelse, ødelagteEtterutbetalinger) }
     }
 
     internal class JsonRestorer private constructor() {

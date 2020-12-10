@@ -80,6 +80,13 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "ANNULLERT")
+        val annulleringsmelding = (0 until testRapid.inspektør.antall()).map {
+            testRapid.inspektør.melding(it)
+        }.first { it.path("@event_name").asText() == "utbetaling_annullert" }
+
+        assertEquals(UNG_PERSON_FNR_2018, annulleringsmelding.path("fødselsnummer").asText())
+        assertEquals(AKTØRID, annulleringsmelding.path("aktørId").asText())
+        assertEquals(ORGNUMMER, annulleringsmelding.path("organisasjonsnummer").asText())
         assertForkastedeTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",

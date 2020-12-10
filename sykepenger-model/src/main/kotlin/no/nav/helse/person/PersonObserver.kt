@@ -117,9 +117,6 @@ interface PersonObserver {
     )
 
     data class UtbetalingAnnullertEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
-        val organisasjonsnummer: String,
         val utbetalingId: UUID,
         val fagsystemId: String,
         val utbetalingslinjer: List<Utbetalingslinje>,
