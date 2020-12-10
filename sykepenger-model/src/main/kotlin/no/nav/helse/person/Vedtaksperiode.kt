@@ -232,6 +232,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun skalForkastesVedOverlapp() =
         this.tilstand !in listOf(
+            TilUtbetaling,
             Avsluttet,
             AvsluttetUtenUtbetalingMedInntektsmelding,
             AvsluttetUtenUtbetaling,
