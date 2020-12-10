@@ -28,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -1045,6 +1046,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndter(inntektsmelding) { AvventerVilkårsprøvingGap }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.arbeidsgiver.finnForkastedeTilstøtende(vedtaksperiode)?.also {
+                sikkerLogg.info("${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode")
+            }
+            vedtaksperiode.trengerKortHistorikkFraInfotrygd(påminnelse)
+        }
+
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerInntektsmelding()
         }
@@ -1466,6 +1474,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         internal fun finnForrigeAvsluttaPeriode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate, historie: Historie) =
             perioder
                 .filter { it < vedtaksperiode }

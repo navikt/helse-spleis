@@ -455,6 +455,8 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
+    internal fun finnForkastedeTilstøtende(vedtaksperiode: Vedtaksperiode) = forkastede.keys.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode)}
+
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
