@@ -553,7 +553,12 @@ internal class Utbetaling private constructor(
                 forbrukteSykedager = requireNotNull(utbetaling.forbrukteSykedager),
                 gjenståendeSykedager = requireNotNull(utbetaling.gjenståendeSykedager),
                 forrige = utbetaling
-            ).takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
+            )
+                .takeIf { it.arbeidsgiverOppdrag.harUtbetalinger() }
+                ?.also {
+                    if (it.arbeidsgiverOppdrag.sistedato != utbetaling.arbeidsgiverOppdrag.sistedato)
+                        hendelse.severe("Etterutbetaling har utvidet eller kortet ned oppdraget")
+                }
 
         override fun avslutt(
             utbetaling: Utbetaling,
