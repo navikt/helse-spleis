@@ -1048,7 +1048,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.arbeidsgiver.finnForkastedeTilstøtende(vedtaksperiode)?.also {
-                sikkerLogg.info("${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode")
+                sikkerLogg.info(
+                    "${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode. Fant forkastet periode foran med vedtaksperiode ${it.id} og tilstand ${it.tilstand.type.name}"
+                )
             }
             vedtaksperiode.trengerKortHistorikkFraInfotrygd(påminnelse)
         }
