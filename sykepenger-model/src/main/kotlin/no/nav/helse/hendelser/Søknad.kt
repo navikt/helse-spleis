@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.søknadDagturnering
+import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -104,21 +105,20 @@ class Søknad constructor(
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
-            private val gradFraSykmelding: Int,
-            faktiskSykdomsgrad: Int? = null
+            private val sykmeldingsgrad: Prosentdel,
+            arbeidshelse: Prosentdel? = null
         ) : Søknadsperiode(fom, tom) {
-            private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
-            override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {
-                if (grad > 100) aktivitetslogg.severe("Utregnet grad er over 100")
-                if (grad < 0) aktivitetslogg.severe("Utregnet sykdomsgrad er et negativt tall")
-            }
+            private val søknadsgrad = arbeidshelse?.not()
+            private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
+
+            override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {}
 
             override fun valider(søknad: Søknad) {
-                if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, grad, kilde)
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, sykdomsgrad, kilde)
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {

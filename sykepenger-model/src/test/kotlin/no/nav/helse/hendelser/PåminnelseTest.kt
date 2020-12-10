@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.*
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -58,7 +59,7 @@ internal class PåminnelseTest {
             fødselsnummer,
             aktørId,
             orgnummer,
-            listOf(Sykmeldingsperiode(1.januar, 6.januar, 100)),
+            listOf(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent)),
             mottatt = 1.april.atStartOfDay()
         )
     }

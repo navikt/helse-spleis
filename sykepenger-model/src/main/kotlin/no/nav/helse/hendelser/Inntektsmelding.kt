@@ -7,6 +7,7 @@ import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 import java.util.*
 
@@ -78,9 +79,9 @@ class Inntektsmelding(
         ferieperioder.map { it.asFerietidslinje() }
 
     private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<Sykdomstidslinje> =
-        listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, 100, kilde) } ?: Sykdomstidslinje())
+        listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, 100.prosent, kilde) } ?: Sykdomstidslinje())
 
-    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, 100, kilde)
+    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, 100.prosent, kilde)
     private fun Periode.asFerietidslinje() = Sykdomstidslinje.feriedager(start, endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje

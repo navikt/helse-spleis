@@ -5,6 +5,7 @@ import no.nav.helse.testhelpers.juli
 import no.nav.helse.testhelpers.oktober
 import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -22,19 +23,14 @@ internal class VedtaksperiodeTest {
     @Test
     fun `eksisterende vedtaksperiode godtar ikke søknader som ikke overlapper tidslinje i sykmelding`() {
         val vedtaksperiode = periodeFor(
-            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100.prosent)))
         )
 
         assertFalse(
             vedtaksperiode.håndter(
                 søknad(
                     perioder = listOf(
-                        Søknad.Søknadsperiode.Sykdom(
-                            fom = 21.juli,
-                            tom = 25.juli,
-                            gradFraSykmelding = 100,
-                            faktiskSykdomsgrad = null
-                        )
+                        Søknad.Søknadsperiode.Sykdom(21.juli, 25.juli, 100.prosent)
                     )
                 )
             )
@@ -63,7 +59,7 @@ internal class VedtaksperiodeTest {
     @Test
     fun `om en inntektsmelding ikke er mottat skal skjæringstidspunkt beregnes`() {
         val vedtaksperiode = periodeFor(
-            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100)))
+            sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100.prosent)))
         )
 
         assertEquals(1.juli, skjæringstidspunkt(vedtaksperiode))
@@ -101,19 +97,19 @@ internal class VedtaksperiodeTest {
         fnr: String = fødselsnummer,
         aktørId: String = aktør,
         orgnummer: String = organisasjonsnummer,
-        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(16.september, 5.oktober, 100))
+        perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(16.september, 5.oktober, 100.prosent))
     ) = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = perioder,
-        mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+        mottatt = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(
         perioder: List<Søknad.Søknadsperiode> = listOf(
-            Søknad.Søknadsperiode.Sykdom(16.september, 5.oktober, 100)
+            Søknad.Søknadsperiode.Sykdom(16.september, 5.oktober, 100.prosent)
         )
     ) =
         Søknad(

@@ -6,6 +6,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling er godkjent av saksbehandler`() {
         håndterGodkjenning(SAKSBEHANDLER_IDENT, false)
-        person.håndter(utbetaling(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
         assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
@@ -93,7 +94,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling er godkjent automatisk`() {
         håndterGodkjenning("SYSTEM", true)
-        person.håndter(utbetaling(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AKSEPTERT))
         assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
 
         assertEquals(2, observatør.utbetaltEventer.first().oppdrag.size)
@@ -147,7 +148,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     @Test
     fun `utbetaling ikke godkjent`() {
         håndterGodkjenning()
-        person.håndter(utbetaling(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AVVIST))
+        person.håndter(utbetaling(UtbetalingHendelse.Oppdragstatus.AVVIST))
         assertEquals(TilstandType.UTBETALING_FEILET, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(observatør.utbetaltEventer.isEmpty())
     }
@@ -175,7 +176,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         ))
     }
 
-    private fun utbetaling(vedtaksperiodeId: UUID, status: UtbetalingHendelse.Oppdragstatus) =
+    private fun utbetaling(status: UtbetalingHendelse.Oppdragstatus) =
         UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
@@ -273,7 +274,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100)),
+            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             mottatt = førsteSykedag.plusMonths(3).atStartOfDay()
         ).apply {
             hendelse = this
@@ -285,7 +286,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100)),
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             harAndreInntektskilder = false,
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false

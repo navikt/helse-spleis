@@ -10,7 +10,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.override
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -228,7 +228,7 @@ internal class Sykdomstidslinje private constructor(
         internal fun sykedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number,
+            grad: Prosentdel,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
@@ -237,7 +237,7 @@ internal class Sykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, Dag>(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                                Økonomi.sykdomsgrad(grad).let { økonomi ->
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else Sykedag(it, økonomi, kilde)
                                 }
 
@@ -248,7 +248,6 @@ internal class Sykdomstidslinje private constructor(
         internal fun ukjent(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
@@ -264,7 +263,7 @@ internal class Sykdomstidslinje private constructor(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             avskjæringsdato: LocalDate,
-            grad: Number,
+            grad: Prosentdel,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
@@ -273,7 +272,7 @@ internal class Sykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, Dag>(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                                Økonomi.sykdomsgrad(grad).let { økonomi ->
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else sykedag(
                                         it,
                                         avskjæringsdato,
@@ -295,7 +294,7 @@ internal class Sykdomstidslinje private constructor(
         internal fun foreldetSykedag(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number,
+            grad: Prosentdel,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
@@ -304,7 +303,7 @@ internal class Sykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, Dag>(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                                Økonomi.sykdomsgrad(grad).let { økonomi ->
                                     if (it.erHelg()) SykHelgedag(it, økonomi, kilde) else ForeldetSykedag(
                                         it,
                                         økonomi,
@@ -318,7 +317,7 @@ internal class Sykdomstidslinje private constructor(
         internal fun arbeidsgiverdager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
-            grad: Number,
+            grad: Prosentdel,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
@@ -327,7 +326,7 @@ internal class Sykdomstidslinje private constructor(
                         toMap<LocalDate, LocalDate, Dag>(
                             { it },
                             {
-                                Økonomi.sykdomsgrad(grad.prosent).let { økonomi ->
+                                Økonomi.sykdomsgrad(grad).let { økonomi ->
                                     if (it.erHelg()) ArbeidsgiverHelgedag(it, økonomi, kilde)
                                     else Arbeidsgiverdag(it, økonomi, kilde)
                                 }

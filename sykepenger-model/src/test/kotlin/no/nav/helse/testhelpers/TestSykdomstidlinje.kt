@@ -5,16 +5,18 @@ import no.nav.helse.sykdomstidslinje.BesteStrategy
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 
 internal class TestSykdomstidslinje(
     private val førsteDato: LocalDate,
     private val sisteDato: LocalDate,
-    private val daggenerator: (LocalDate, LocalDate, Number, Hendelseskilde) -> Sykdomstidslinje
+    private val daggenerator: (LocalDate, LocalDate, Prosentdel, Hendelseskilde) -> Sykdomstidslinje
 ) {
-    private var grad: Double = 100.0
+    private var grad: Prosentdel = 100.prosent
 
-    internal infix fun grad(grad: Number) = this.also { it.grad = grad.toDouble() }
+    internal infix fun grad(grad: Number) = this.also { it.grad = grad.prosent }
 
     internal fun asSykdomstidslinje(kilde: Hendelseskilde = TestEvent.testkilde) = daggenerator(førsteDato, sisteDato, grad, kilde)
     internal infix fun merge(annen: TestSykdomstidslinje) = this.asSykdomstidslinje().merge(annen)
@@ -35,7 +37,9 @@ internal infix fun LocalDate.ferieTil(sisteDato: LocalDate) =
 
 internal infix fun LocalDate.sykTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::sykedager)
 
-internal infix fun LocalDate.ukjentTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::ukjent)
+internal infix fun LocalDate.ukjentTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato) { førstedato, sistedato, _, kilde ->
+    Sykdomstidslinje.ukjent(førstedato, sistedato, kilde)
+}
 
 internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager )
 

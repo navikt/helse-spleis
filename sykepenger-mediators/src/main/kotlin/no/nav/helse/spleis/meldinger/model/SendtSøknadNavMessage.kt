@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
-import kotlin.math.max
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing a Søknad that is sent to NAV
 internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(packet) {
@@ -24,14 +24,17 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
             tom = it.path("tom").asLocalDate()
         )
     }
-    private val søknadsperioder = packet["soknadsperioder"].map {
+    private val søknadsperioder = packet["soknadsperioder"].map { periode ->
+        val arbeidshelse = periode.path("faktiskGrad")
+            .takeIf(JsonNode::isIntegralNumber)
+            ?.asInt()
+            ?.coerceIn(0, 100)
+            ?.prosent
         Søknadsperiode.Sykdom(
-            fom = it.path("fom").asLocalDate(),
-            tom = it.path("tom").asLocalDate(),
-            gradFraSykmelding = it.path("sykmeldingsgrad").asInt(),
-            faktiskSykdomsgrad = it.path("faktiskGrad").takeIf(JsonNode::isIntegralNumber)?.asInt()?.let {
-                max(100 - it, 0)
-            }
+            fom = periode.path("fom").asLocalDate(),
+            tom = periode.path("tom").asLocalDate(),
+            sykmeldingsgrad = periode.path("sykmeldingsgrad").asInt().prosent,
+            arbeidshelse = arbeidshelse
         )
     }
     private val egenmeldinger = packet["egenmeldinger"].map {

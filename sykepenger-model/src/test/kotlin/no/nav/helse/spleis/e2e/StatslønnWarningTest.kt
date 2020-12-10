@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -15,9 +16,9 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ikke warning ved statslønn når det ikke er overgang`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknad(Sykdom(1.januar, 31.januar, gradFraSykmelding = 100), sendtTilNav = 18.februar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
         håndterSimulering(1.vedtaksperiode)
@@ -30,9 +31,9 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
 
     @Test
     fun `Warning ved statslønn`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknad(Sykdom(1.januar, 31.januar, gradFraSykmelding = 100), sendtTilNav = 18.februar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,

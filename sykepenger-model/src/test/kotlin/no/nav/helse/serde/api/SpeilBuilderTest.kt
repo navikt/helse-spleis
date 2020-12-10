@@ -12,6 +12,7 @@ import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -1145,7 +1146,7 @@ class SpeilBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100)),
+            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
             mottatt = fom.plusMonths(3).atStartOfDay()
         ) to SykmeldingDTO(
             id = hendelseId.toString(),
@@ -1165,7 +1166,7 @@ class SpeilBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100)) + andrePerioder,
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent)) + andrePerioder,
             harAndreInntektskilder = false,
             sendtTilNAV = sendtSøknad,
             permittert = false
@@ -1187,7 +1188,7 @@ class SpeilBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100, 100))
+            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(fom, tom, 100.prosent, 0.prosent))
         ) to SøknadArbeidsgiverDTO(
             id = hendelseId.toString(),
             fom = fom,

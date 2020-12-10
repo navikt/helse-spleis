@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -29,39 +30,39 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
     @Test
     fun `Replay av etterfølgende skjer umiddelbart når ny sykmelding kommer inn`() {
-        håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 25.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 25.januar, 100.prosent))
         assertAntallReplays(1)
     }
 
     @Test
     fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
     fun `Støtter ikke replay for flere arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100), orgnummer = "ANNET ORGNUMMER")
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent), orgnummer = "ANNET ORGNUMMER")
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
 
     @Test
     fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved mer enn 16 dagers gap (ny arbeidsgiverperiode) da det ikke støttes ennå`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
     fun `ny, tidligere sykmelding medfører replay av etterfølgende perioder når det er gap mindre enn 16 dager`() {
-        val opprinnelig = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 27.februar, 100))
+        val opprinnelig = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 27.februar, 100.prosent))
         replaySykmelding(opprinnelig)
 
         assertReplayAv(1.vedtaksperiode)
@@ -74,8 +75,8 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrekte tidslinjer ved replay av utbetalt vedtaksperiode`() {
-        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100))
-        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 28.februar, 100))
+        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(28.januar, 28.februar, 100.prosent))
+        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(28.januar, 28.februar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 28.januar,
@@ -89,7 +90,7 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -111,7 +112,7 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
         assertAntallReplays(1)
         assertReplayAv(1.vedtaksperiode)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.januar,

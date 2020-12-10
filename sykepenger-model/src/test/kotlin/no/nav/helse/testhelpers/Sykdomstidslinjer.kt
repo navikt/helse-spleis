@@ -23,7 +23,7 @@ internal val Int.S
     get() = Sykdomstidslinje.sykedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
-        100.0,
+        100.prosent,
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
@@ -31,7 +31,7 @@ internal val Int.U
     get() = Sykdomstidslinje.arbeidsgiverdager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
-        100.0,
+        100.prosent,
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
@@ -39,7 +39,7 @@ internal val Int.K
     get() = Sykdomstidslinje.foreldetSykedag(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
-        100.0,
+        100.prosent,
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 

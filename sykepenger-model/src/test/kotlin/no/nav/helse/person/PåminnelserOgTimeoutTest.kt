@@ -10,6 +10,7 @@ import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
     @Test
     fun `påminnelse i mottatt sykmelding innenfor makstid`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
         person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
@@ -48,9 +49,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
     @Test
     fun `påminnelse i mottatt søknad innenfor makstid`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(nå.minusDays(30), nå, 100.prosent)))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -60,7 +61,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
     @Test
     fun `påminnelse i mottatt inntektsmelding`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
         person.håndter(inntektsmelding(Periode(nå.minusDays(30), nå.minusDays(14))))
         person.håndter(påminnelse(AVVENTER_SØKNAD_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
@@ -186,7 +187,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             Søknad.Søknadsperiode.Sykdom(
                 1.januar,
                 20.januar,
-                100
+                100.prosent
             )
         )
     ) =
@@ -208,7 +209,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             Sykmeldingsperiode(
                 1.januar,
                 20.januar,
-                100
+                100.prosent
             )
         )
     ) =
@@ -218,7 +219,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = ORGNUMMER,
             sykeperioder = perioder.toList(),
-            mottatt = perioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelse = this
         }

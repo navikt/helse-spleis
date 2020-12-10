@@ -61,7 +61,7 @@ class Utbetalingshistorikk(
         Periode.Utbetalingsperiode.historiskePerioder(utbetalinger, inntektshistorikk)
             .slåSammen()
             .map { periode ->
-                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100.prosent, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
             }
 
     class Inntektsopplysning(
@@ -228,7 +228,7 @@ class Utbetalingshistorikk(
             }
 
             override fun sykdomstidslinje() =
-                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
+                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad.prosent, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Double) {
                 if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(Inntekt.INGEN))

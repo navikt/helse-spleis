@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -141,7 +142,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
-            sykeperioder = listOf(Sykmeldingsperiode(periode.start, periode.endInclusive, 100)),
+            sykeperioder = listOf(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)),
             mottatt = periode.endInclusive.atStartOfDay()
         )
     }

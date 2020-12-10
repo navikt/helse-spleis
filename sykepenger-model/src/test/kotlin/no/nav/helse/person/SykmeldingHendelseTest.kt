@@ -2,10 +2,9 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -14,7 +13,7 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Vedtaksperiode`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertTrue(inspektør.personLogg.hasActivities())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -24,8 +23,8 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `En ny Sykmelding er ugyldig`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -34,8 +33,8 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `To søknader uten overlapp`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertTrue(inspektør.personLogg.hasActivities())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
@@ -46,8 +45,8 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `Overlappende sykmelding, går til Infotrygd`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100)))
-        person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 6.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
+        person.håndter(sykmelding(Sykmeldingsperiode(4.januar, 6.januar, 100.prosent)))
         assertTrue(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -60,7 +59,7 @@ internal class SykmeldingHendelseTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+            sykeperioder = sykeperioder.toList(),
+            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
 }

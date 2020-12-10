@@ -12,7 +12,8 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosent.Companion.prosent
+import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +43,7 @@ internal class VilkårsgrunnlagTest {
     fun `samme inntekt fra inntektskomponenten og inntektsmelding lagres i vedtaksperioden`() {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0.prosent, dataForVilkårsvurdering()?.avviksprosent)
+        assertEquals(Prosent.ratio(0.0), dataForVilkårsvurdering()?.avviksprosent)
         assertEquals(12000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
     }
 
@@ -55,7 +56,7 @@ internal class VilkårsgrunnlagTest {
                 }}
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(20.prosent, dataForVilkårsvurdering()?.avviksprosent)
+        assertEquals(Prosent.ratio(0.2), dataForVilkårsvurdering()?.avviksprosent)
         assertEquals(15000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
@@ -199,7 +200,7 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100)),
+        sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
         mottatt = 1.april.atStartOfDay()
     )
 
@@ -208,7 +209,7 @@ internal class VilkårsgrunnlagTest {
         fnr = fødselsnummer,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        perioder = listOf(Søknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100)),
+        perioder = listOf(Søknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100.prosent)),
         harAndreInntektskilder = false,
         sendtTilNAV = 30.januar.atStartOfDay(),
         permittert = false

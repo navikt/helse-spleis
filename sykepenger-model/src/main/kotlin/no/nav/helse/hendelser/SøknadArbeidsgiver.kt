@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.util.*
 
@@ -51,20 +52,20 @@ class SøknadArbeidsgiver constructor(
     class Søknadsperiode(
         internal val fom: LocalDate,
         internal val tom: LocalDate,
-        private val gradFraSykmelding: Int,
-        faktiskGrad: Int? = null
+        private val sykmeldingsgrad: Prosentdel,
+        arbeidshelse: Prosentdel? = null
     ) {
-        private val faktiskSykdomsgrad = faktiskGrad?.let { 100 - it }
-        private val grad = (faktiskSykdomsgrad ?: gradFraSykmelding).toDouble()
+        private val søknadsgrad = arbeidshelse?.not()
+        private val grad = søknadsgrad ?: sykmeldingsgrad
 
         internal fun valider(søknad: SøknadArbeidsgiver, beskjed: String) {
             if (fom < søknad.fom || tom > søknad.tom) søknad.error(beskjed)
         }
 
         internal fun valider(søknad: SøknadArbeidsgiver) {
-            if (grad > gradFraSykmelding) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+            if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
         }
 
-        internal fun sykdomstidslinje(kilde: Hendelseskilde) = Sykdomstidslinje.sykedager(fom, tom, gradFraSykmelding, kilde)
+        internal fun sykdomstidslinje(kilde: Hendelseskilde) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
     }
 }

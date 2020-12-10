@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.sykedager
 import no.nav.helse.testhelpers.TestEvent.Companion.sykmelding
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -31,5 +32,5 @@ internal class SjekkAv16DagersGapTest {
     }
 
     private fun syk(periode: Periode) =
-        sykedager(periode.start, periode.endInclusive, 100.0, sykmelding)
+        sykedager(periode.start, periode.endInclusive, 100.prosent, sykmelding)
 }

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -20,8 +21,8 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `kan sende inn søknad før periode er gått ut`() {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100))
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode) // No history

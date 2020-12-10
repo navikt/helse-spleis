@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -73,7 +74,7 @@ internal class ForeldetSykedagTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(Sykdom(18.januar, 14.februar, 100)), // 10 sykedag januar & februar
+            perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
             harAndreInntektskilder = false,
             sendtTilNAV = sendtTilNAV.atStartOfDay(),
             permittert = false
@@ -86,7 +87,7 @@ internal class ForeldetSykedagTest {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
-            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(18.januar, 14.februar, 100)) // 10 sykedag januar & februar
+            perioder = listOf(SøknadArbeidsgiver.Søknadsperiode(18.januar, 14.februar, 100.prosent)) // 10 sykedag januar & februar
         )
     }
 
@@ -95,8 +96,8 @@ internal class ForeldetSykedagTest {
     }
 
     private class TestInspektør(søknad: SykdomstidslinjeHendelse) : SykdomstidslinjeVisitor {
-        internal var dagerTeller = 0
-        internal val dagstypeTeller = mutableMapOf<KClass<out Dag>, Int>()
+        var dagerTeller = 0
+        val dagstypeTeller = mutableMapOf<KClass<out Dag>, Int>()
 
         init {
             søknad.sykdomstidslinje().accept(this)

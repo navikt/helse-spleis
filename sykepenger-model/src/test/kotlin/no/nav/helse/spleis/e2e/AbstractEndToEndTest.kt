@@ -23,6 +23,8 @@ import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
@@ -468,7 +470,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             sykeperioder = listOf(*sykeperioder),
-            mottatt = mottatt ?: sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+            mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -480,8 +482,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fnr = UNG_PERSON_FNR_2018,
             aktørId = AKTØRID,
             orgnummer = orgnummer,
-            sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.minOfOrNull { it.fom }?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
+            sykeperioder = sykeperioder.toList(),
+            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusYears(2)?.atStartOfDay() ?: LocalDateTime.now()
         ).apply {
             hendelselogg = this
         }
@@ -715,7 +717,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
 
 
-    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100, førsteFraværsdag: LocalDate = fom) {
+    protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, førsteFraværsdag: LocalDate = fom) {
         val id = tilGodkjent(fom, tom, grad, førsteFraværsdag)
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
@@ -723,7 +725,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun tilGodkjent(
         fom: LocalDate,
         tom: LocalDate,
-        grad: Int,
+        grad: Prosentdel,
         førsteFraværsdag: LocalDate
     ): UUID {
         val id = tilSimulert(fom, tom, grad, førsteFraværsdag)
@@ -734,7 +736,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun tilSimulert(
         fom: LocalDate,
         tom: LocalDate,
-        grad: Int,
+        grad: Prosentdel,
         førsteFraværsdag: LocalDate
     ): UUID {
         val id = tilYtelser(fom, tom, grad, førsteFraværsdag)
@@ -745,7 +747,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun tilYtelser(
         fom: LocalDate,
         tom: LocalDate,
-        grad: Int,
+        grad: Prosentdel,
         førsteFraværsdag: LocalDate
     ): UUID {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
@@ -762,7 +764,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
 
-    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
+    protected fun forlengVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
@@ -772,7 +774,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         håndterUtbetalt(id, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
     }
 
-    protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Int = 100) {
+    protected fun forlengPeriode(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
         val id = observatør.sisteVedtaksperiode()
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))

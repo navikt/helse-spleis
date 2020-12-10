@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiv
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.testhelpers.*
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -19,8 +20,8 @@ internal class PingPongTest : AbstractEndToEndTest() {
     fun `Forlengelser av infotrygd overgang har samme maksdato som forrige`() {
         val historikk1 = RefusjonTilArbeidsgiver(20.november(2019), 29.mai(2020), 1145, 100, ORGNUMMER)
 
-        håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100))
-        håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100.prosent))
+        håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk1)
         håndterYtelser(1.vedtaksperiode, historikk1)
         håndterSimulering(1.vedtaksperiode)
@@ -29,9 +30,9 @@ internal class PingPongTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
 
-        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 9.juli(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 9.juli(2020), 100.prosent))
         håndterSøknad(
-            Sykdom(22.juni(2020), 9.juli(2020), 100)
+            Sykdom(22.juni(2020), 9.juli(2020), 100.prosent)
         )
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk1)
         håndterYtelser(2.vedtaksperiode, historikk1)
@@ -40,8 +41,8 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
         val historikk2 = RefusjonTilArbeidsgiver(22.juni(2020), 17.august(2020), 1145, 100, ORGNUMMER)
 
-        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100))
-        håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100))
+        håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
+        håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk2)
         håndterYtelser(3.vedtaksperiode, historikk2, historikk1)
         håndterSimulering(3.vedtaksperiode)
@@ -55,10 +56,10 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
     @Test
     fun `riktig skjæringstidspunkt ved spleis - infotrygd - spleis`() {
-        nyttVedtak(1.januar, 31.januar, 100)
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             RefusjonTilArbeidsgiver(1.februar, 28.februar, 1000, 100, ORGNUMMER),

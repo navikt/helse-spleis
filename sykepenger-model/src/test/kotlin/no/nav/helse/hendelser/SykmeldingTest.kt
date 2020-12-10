@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.juli
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,7 +21,7 @@ internal class SykmeldingTest {
 
     @Test
     fun `sykdomsgrad som er 100% støttes`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100), Sykmeldingsperiode(12.januar, 16.januar, 100))
+        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
         assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
         assertEquals(1, sykmelding.sykdomstidslinje().filterIsInstance<UkjentDag>().size)
@@ -28,7 +29,7 @@ internal class SykmeldingTest {
 
     @Test
     fun `sykdomsgrad under 100% støttes`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50), Sykmeldingsperiode(12.januar, 16.januar, 100))
+        sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
         assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
     }
 
@@ -40,30 +41,30 @@ internal class SykmeldingTest {
     @Test
     fun `overlappende sykeperioder`() {
         assertThrows<Aktivitetslogg.AktivitetException> {
-            sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100), Sykmeldingsperiode(1.januar, 12.januar, 100))
+            sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100.prosent), Sykmeldingsperiode(1.januar, 12.januar, 100.prosent))
         }
     }
 
     @Test
     fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 1.juli.atStartOfDay())
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 1.juli.atStartOfDay())
         assertFalse(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     @Test
     fun `sykmelding eldre enn 6 måneder får error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100), mottatt = 2.juli.atStartOfDay())
+        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 2.juli.atStartOfDay())
         assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
-        val tidligsteFom = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay()
+        val tidligsteFom = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay()
         sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
-            sykeperioder = listOf(*sykeperioder),
+            sykeperioder = sykeperioder.toList(),
             mottatt = mottatt ?: tidligsteFom ?: LocalDateTime.now()
         )
     }

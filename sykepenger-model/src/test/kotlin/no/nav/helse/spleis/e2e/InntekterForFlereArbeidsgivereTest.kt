@@ -8,6 +8,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -179,7 +180,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             sykmelding(
                 UUID.randomUUID(),
-                Sykmeldingsperiode(periode.start, periode.endInclusive, 100),
+                Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent),
                 orgnummer = orgnummer,
                 mottatt = periode.endInclusive.atStartOfDay()
             )
@@ -187,7 +188,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             søknad(
                 UUID.randomUUID(),
-                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100),
+                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
                 orgnummer = orgnummer
             )
         )

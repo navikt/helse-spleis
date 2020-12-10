@@ -14,6 +14,7 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -24,7 +25,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvis hvis arbeidsgiver er ukjent`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(orgnummer = "999999")
         inspektør.also {
             assertTrue(it.personLogg.hasErrorsOrWorse(), it.personLogg.toString())
@@ -33,7 +34,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvis hvis vi ikke finner fagsystemId`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = "unknown")
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, it.sisteTilstand(1.vedtaksperiode))
@@ -42,7 +43,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `annuller siste utbetaling`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val behovTeller = inspektør.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt(inspektør) {
@@ -86,8 +87,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annuller flere fagsystemid for samme arbeidsgiver`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        nyttVedtak(1.mars, 31.mars, 100, 1.mars)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        nyttVedtak(1.mars, 31.mars, 100.prosent, 1.mars)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
@@ -131,7 +132,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annuller oppdrag som er under utbetaling feiler`() {
-        tilGodkjent(3.januar, 26.januar, 100, 3.januar)
+        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         sjekkAt(inspektør) {
@@ -147,7 +148,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annuller av oppdrag med feilet utbetaling feiler`() {
-        tilGodkjent(3.januar, 26.januar, 100, 3.januar)
+        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.FEIL)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
@@ -165,8 +166,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Kan ikke annullere hvis noen vedtaksperioder er til utbetaling`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        tilGodkjent(1.mars, 31.mars, 100, 1.mars)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
 
@@ -189,7 +190,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.FEIL, annullert = true)
 
@@ -205,7 +206,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
         }
@@ -219,9 +220,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annullering av én periode fører til at alle avsluttede sammenhengende perioder blir satt i tilstand TilAnnullering`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        forlengVedtak(27.januar, 31.januar, 100)
-        forlengPeriode(1.februar, 20.februar, 100)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        forlengVedtak(27.januar, 31.januar, 100.prosent)
+        forlengPeriode(1.februar, 20.februar, 100.prosent)
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -255,7 +256,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som håndterer godkjent annullering i TilAnnullering blir forkastet`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling()
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -271,7 +272,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som håndterer avvist annullering i TilAnnullering blir værende i TilAnnullering`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -287,9 +288,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annullering av én periode fører kun til at sammehengende utbetalte perioder blir forkastet og værende i Avsluttet`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        forlengVedtak(27.januar, 30.januar, 100)
-        nyttVedtak(1.mars, 20.mars, 100, 1.mars)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        forlengVedtak(27.januar, 30.januar, 100.prosent)
+        nyttVedtak(1.mars, 20.mars, 100.prosent, 1.mars)
         inspektør.also {
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
@@ -311,7 +312,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `publiserer et event ved annullering`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(
             1.vedtaksperiode,
@@ -335,9 +336,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `publiserer kun ett event ved annullering av utbetaling som strekker seg over flere vedtaksperioder`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
-        forlengVedtak(27.januar, 20.februar, 100)
+        forlengVedtak(27.januar, 20.februar, 100.prosent)
         assertEquals(2, inspektør.vedtaksperiodeTeller)
 
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
@@ -368,8 +369,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `setter datoStatusFom som fom dato i annullering hvor graden endres`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        forlengVedtak(27.januar, 20.februar, 30)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        forlengVedtak(27.januar, 20.februar, 30.prosent)
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         val fagsystemId = inspektør.fagsystemId(2.vedtaksperiode)
 
@@ -391,8 +392,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan ikke annullere utbetalingsreferanser som ikke er siste`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        nyttVedtak(3.mars, 26.mars, 100, 3.mars)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        nyttVedtak(3.mars, 26.mars, 100.prosent, 3.mars)
 
         val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
         håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
@@ -404,8 +405,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `annulerer flere fagsystemider baklengs`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        nyttVedtak(1.mars, 31.mars, 100, 1.mars)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        nyttVedtak(1.mars, 31.mars, 100.prosent, 1.mars)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(2.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
@@ -422,9 +423,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `annuller over ikke utbetalt forlengelse`() {
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100))
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 31.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
@@ -444,11 +445,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         bli ignorert og det ville bli laget en utbetaling som strakk seg helt tilbake til første del av sammenhengende periode, noe som igjen vil føre til at vi
         lager en duplikat utbetaling.
          */
-        nyttVedtak(3.januar, 26.januar, 100, 3.januar)
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
 
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, TilstandType.AVVENTER_GAP, TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
     }

@@ -14,6 +14,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -185,7 +186,7 @@ class JsonBuilderTest {
                         tom = 9.januar,
                         sendtSøknad = sendtSøknad.atStartOfDay(),
                         perioder = listOf(
-                            Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100),
+                            Søknad.Søknadsperiode.Sykdom(1.januar, 9.januar, 100.prosent),
                             Søknad.Søknadsperiode.Permisjon(1.januar, 9.januar)
                         ),
                         hendelseId = søknadhendelseId
@@ -301,7 +302,7 @@ class JsonBuilderTest {
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100)),
+            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
             mottatt = fom.plusMonths(3).atStartOfDay()
         )
 
@@ -310,7 +311,7 @@ class JsonBuilderTest {
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
-            perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100))
+            perioder: List<Søknad.Søknadsperiode> = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,

@@ -14,6 +14,7 @@ import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -21,14 +22,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(5.april, 30.april, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(5.april, 30.april, 100.prosent))
         val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         val inntektsmelding2Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 5.april)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -62,16 +63,16 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med foregående`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(5.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(5.april, 30.april, 100))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(5.april, 30.april, 100.prosent))
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
@@ -81,10 +82,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag hentes ikke når perioden er overgang fra IT`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000, 100, ORGNUMMER)
@@ -113,10 +114,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `ingen vilkårsgrunnlag når perioden har opphav i Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100), Arbeid(25.februar, 28.februar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
         håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000, 100, ORGNUMMER))
         håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000, 100, ORGNUMMER))
         håndterSimulering(1.vedtaksperiode)
@@ -152,14 +153,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding bryter ikke opp forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(18.januar, 1.februar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
@@ -192,11 +193,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `setter ikke inntektsmeldingId flere ganger`() {
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.februar, 28.februar, 100.prosent))
 
-        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100))
-        val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100))
+        val sykmeldingId = håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -210,13 +211,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100),
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 21.januar, 100.prosent),
             Arbeid(18.januar, 21.januar)
         )
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(22.januar, 22.februar, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(22.januar, 22.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 22.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode) // No history
@@ -249,10 +250,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `får egen vilkårsgrunnlag selv når inntektsmelding overlapper, men er gap mellom periodene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 4.januar, 100))
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 4.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100.prosent))
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)

@@ -15,6 +15,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -90,7 +91,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         fnr = fnr,
         aktørId = aktørId,
         orgnummer = orgnummer,
-        sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100)),
+        sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
         mottatt = 4.april.atStartOfDay()
     )
 
@@ -100,7 +101,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(
-            Søknad.Søknadsperiode.Sykdom(1.januar,  2.januar, 100),
+            Søknad.Søknadsperiode.Sykdom(1.januar,  2.januar, 100.prosent),
             Søknad.Søknadsperiode.Egenmelding(2.januar, 2.januar),
             Søknad.Søknadsperiode.Arbeid(3.januar, 3.januar),
             Søknad.Søknadsperiode.Ferie(4.januar, 4.januar),

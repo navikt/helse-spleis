@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 import java.util.*
 
@@ -34,7 +35,7 @@ class OverstyrTidslinje(
                 Dagtype.Sykedag -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
-                    grad = it.grad!!, // Sykedager må ha grad
+                    grad = it.grad!!.prosent, // Sykedager må ha grad
                     kilde = kilde
                 )
                 Dagtype.Feriedag -> Sykdomstidslinje.feriedager(
@@ -45,7 +46,7 @@ class OverstyrTidslinje(
                 Dagtype.Egenmeldingsdag -> Sykdomstidslinje.arbeidsgiverdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
-                    grad = 100,
+                    grad = 100.prosent,
                     kilde = kilde
                 )
             }

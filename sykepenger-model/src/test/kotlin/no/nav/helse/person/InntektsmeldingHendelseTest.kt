@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -34,7 +35,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         person.håndter(inntektsmelding(førsteFraværsdag = 1.januar))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -43,7 +44,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `inntektsmelding før søknad`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -51,8 +52,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `inntektsmelding etter søknad`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -61,9 +62,9 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `søknad etter inntektsmelding`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
-        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100)))
+        person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -78,7 +79,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `flere inntektsmeldinger`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
         assertTrue(inspektør.personLogg.hasWarningsOrWorse())
@@ -103,7 +104,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
-        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100)))
+        person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
@@ -132,8 +133,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         fnr = UNG_PERSON_FNR_2018,
         aktørId = AKTØRID,
         orgnummer = orgnr,
-        sykeperioder = listOf(*sykeperioder),
-        mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+        sykeperioder = sykeperioder.toList(),
+        mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
     )
 
     private fun søknad(vararg perioder: Søknad.Søknadsperiode, orgnummer: String = ORGNUMMER) =

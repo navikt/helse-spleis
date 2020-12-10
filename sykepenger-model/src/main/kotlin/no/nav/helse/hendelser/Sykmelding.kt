@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -21,26 +22,22 @@ class Sykmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykdomstidslinje: Sykdomstidslinje
+    private val periode: Periode
 
     init {
         if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
-        sykdomstidslinje = sykeperioder.map { (fom, tom, grad) ->
-            Sykdomstidslinje.sykedager(fom, tom, grad, this.kilde)
-        }
-            .merge(noOverlap)
-            .also { tidslinje ->
-                if (tidslinje.any { it is Dag.ProblemDag }) severe("Sykeperioder overlapper")
-            }
+        sykdomstidslinje = Sykmeldingsperiode.tidslinje(this, sykeperioder)
+        periode = requireNotNull(sykdomstidslinje.periode())
     }
 
-    override fun periode() = Periode(fom = sykdomstidslinje.førsteDag(), tom = sykdomstidslinje.sisteDag())
+    override fun periode() = periode
 
     override fun valider(periode: Periode): Aktivitetslogg {
         forGammel()
         return aktivitetslogg
     }
 
-    internal fun forGammel() = (sykdomstidslinje.førsteDag() < mottatt.toLocalDate().minusMonths(6)).also {
+    internal fun forGammel() = (periode.start < mottatt.toLocalDate().minusMonths(6)).also {
         if (it) error("Sykmelding kan ikke være eldre enn 6 måneder fra mottattdato")
     }
 
@@ -61,8 +58,25 @@ class Sykmelding(
     }
 }
 
-data class Sykmeldingsperiode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val grad: Int
-)
+class Sykmeldingsperiode(
+    private val fom: LocalDate,
+    private val tom: LocalDate,
+    private val grad: Prosentdel
+) {
+    internal fun tidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+        Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
+
+    internal companion object {
+        internal fun tidslinje(sykmelding: Sykmelding, perioder: List<Sykmeldingsperiode>) =
+            perioder.map { it.tidslinje(sykmelding.kilde) }
+                .merge(noOverlap)
+                .also { tidslinje ->
+                    if (tidslinje.any { it is Dag.ProblemDag }) sykmelding.severe("Sykeperioder overlapper")
+                }
+
+        internal fun periode(perioder: List<Sykmeldingsperiode>) =
+            perioder.minOfOrNull { it.fom }?.let { fom ->
+                fom til perioder.maxOf { it.tom }
+            }
+    }
+}

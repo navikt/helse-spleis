@@ -8,6 +8,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -102,8 +103,8 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
     @Test
     fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
         (10.juni(2020) to 30.juni(2020)).also { (fom, tom) ->
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
             håndterInntektsmeldingMedValidering(
                 1.vedtaksperiode,
                 listOf(fom til fom.plusDays(15)),
@@ -112,7 +113,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             )
         }
         (1.juli(2020) to 30.juli(2020)).also { (fom, tom) ->
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         }
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -291,8 +292,8 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             }
         )
     ) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
         håndterInntektsmeldingMedValidering(
             vedtaksperiodeIndeks.vedtaksperiode,
             arbeidsgiverperiode,
@@ -332,8 +333,8 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         fom: LocalDate,
         tom: LocalDate
     ) {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, gradFraSykmelding = 100), sendtTilNav = tom)
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNav = tom)
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)

@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -13,8 +14,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     */
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             0,
             TilstandType.START,
@@ -22,9 +23,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
         )
 
-        håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.mars, 26.mars, 100))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.mars, 26.mars, 100.prosent))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
@@ -51,8 +52,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
      */
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 10.januar, 100.prosent))
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
@@ -60,8 +61,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
         )
 
-        håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.mars, 7.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.mars, 7.mars, 100.prosent))
         assertTilstander(
             2.vedtaksperiode,
             TilstandType.START,
@@ -69,7 +70,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
         )
 
-        håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars, 100))
+        håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(3.vedtaksperiode, arbeidsgiverperioder = listOf(Periode(3.mars, 18.mars)))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
 
@@ -82,7 +83,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
 
-        håndterSøknadMedValidering(3.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(8.mars, 26.mars, 100))
+        håndterSøknadMedValidering(3.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(8.mars, 26.mars, 100.prosent))
         håndterYtelser(3.vedtaksperiode)   // No history
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)

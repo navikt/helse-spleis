@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.september
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -33,7 +34,7 @@ internal class ArbeidsgiverTest {
         )
         val person = Person("aktørId", "fnr")
         val arbeidsgiver = Arbeidsgiver(person, "12345678")
-        arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100)))
+        arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100.prosent)))
         arbeidsgiver.håndter(inntektsmelding)
         arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
@@ -48,8 +49,8 @@ internal class ArbeidsgiverTest {
             fnr = "fnr",
             aktørId = "aktørId",
             orgnummer = "orgnr",
-            sykeperioder = listOf(*sykeperioder),
-            mottatt = sykeperioder.minOfOrNull { it.fom }?.atStartOfDay() ?: LocalDateTime.now()
+            sykeperioder = sykeperioder.toList(),
+            mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
 
