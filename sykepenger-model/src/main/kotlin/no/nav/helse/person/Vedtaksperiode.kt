@@ -379,6 +379,7 @@ internal class Vedtaksperiode private constructor(
         opplæringspenger(hendelse, periode)
         institusjonsopphold(hendelse, periode)
         arbeidsavklaringspenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
+        dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
     }
 
     private fun trengerPersoninfo(hendelse: ArbeidstakerHendelse) {
@@ -397,7 +398,6 @@ internal class Vedtaksperiode private constructor(
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntektsberegning(hendelse, beregningSlutt.minusMonths(11), beregningSlutt)
         opptjening(hendelse)
-        dagpenger(hendelse, periode.start.minusMonths(6), periode.endInclusive)
         medlemskap(hendelse, periode.start, periode.endInclusive)
     }
 

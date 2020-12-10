@@ -138,7 +138,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             ),
             aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+            dagpenger = Dagpenger(emptyList())
         ).apply {
             hendelse = this
         }
@@ -208,8 +209,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                         1.januar(2017)
                     )
                 )
-            ),
-            dagpenger = Dagpenger(emptyList())
+            )
         ).apply {
             hendelse = this
         }

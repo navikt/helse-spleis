@@ -21,7 +21,8 @@ internal class YtelserRiver(
         Opplæringspenger,
         Institusjonsopphold,
         Dødsinfo,
-        Arbeidsavklaringspenger
+        Arbeidsavklaringspenger,
+        Dagpenger
     )
     override val riverName = "Ytelser"
 
@@ -67,6 +68,10 @@ internal class YtelserRiver(
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
         packet.requireArray("@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
+        }
+        packet.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }

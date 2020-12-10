@@ -1,18 +1,18 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Opptjeningvurdering
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import java.time.LocalDate
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
 internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(packet) {
@@ -20,8 +20,6 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
-    private val dagpenger: List<Pair<LocalDate, LocalDate>>
-    private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val inntekter = packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"]
         .flatMap { måned ->
@@ -71,16 +69,6 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
         else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
     }
 
-    init {
-        packet["@løsning.${Dagpenger.name}.meldekortperioder"]
-            .map(::asDatePair)
-            .partition { it.first <= it.second }
-            .also {
-                dagpenger = it.first
-                ugyldigeDagpengeperioder = it.second
-            }
-    }
-
     private val vilkårsgrunnlag
         get() = Vilkårsgrunnlag(
             meldingsreferanseId = this.id,
@@ -96,21 +84,11 @@ internal class VilkårsgrunnlagMessage(packet: MessageDelegate) : BehovMessage(p
             ),
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
-            ),
-            dagpenger = no.nav.helse.hendelser.Dagpenger(dagpenger.map {
-                Periode(
-                    it.first,
-                    it.second
-                )
-            })
-        ).also {
-            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
-        }
+            )
+        )
 
     override fun behandle(mediator: IHendelseMediator) {
         mediator.behandle(this, vilkårsgrunnlag)
     }
 
-    private fun asDatePair(jsonNode: JsonNode) =
-        jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 }

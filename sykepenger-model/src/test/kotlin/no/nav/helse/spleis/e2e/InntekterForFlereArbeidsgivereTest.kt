@@ -224,8 +224,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                     Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))
                 )
                 else arbeidsforhold
-            ),
-            dagpenger = Dagpenger(emptyList())
+            )
         ).apply {
             hendelselogg = this
         }

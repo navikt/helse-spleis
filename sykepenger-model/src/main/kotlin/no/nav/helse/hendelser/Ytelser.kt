@@ -23,6 +23,7 @@ class Ytelser(
     private val dødsinfo: Dødsinfo,
     private val statslønn: Boolean = false,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
+    private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
@@ -44,6 +45,7 @@ class Ytelser(
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Aktivitetslogg {
         utbetalingshistorikk.valider(periode, skjæringstidspunkt)
         arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt)
+        dagpenger.valider(aktivitetslogg, skjæringstidspunkt)
         return aktivitetslogg
     }
 

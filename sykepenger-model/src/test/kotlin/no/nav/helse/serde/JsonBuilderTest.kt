@@ -360,8 +360,7 @@ class JsonBuilderTest {
                     )
                 )
             ),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            dagpenger = Dagpenger(emptyList())
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
 
         fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
@@ -420,7 +419,8 @@ class JsonBuilderTest {
                 ),
                 aktivitetslogg = it,
                 dødsinfo = Dødsinfo(null),
-                arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+                arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+                dagpenger = Dagpenger(emptyList())
             )
         }
 

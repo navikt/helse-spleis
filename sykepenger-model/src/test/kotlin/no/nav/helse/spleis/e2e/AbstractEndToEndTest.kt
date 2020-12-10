@@ -253,7 +253,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             assertEtterspurt(vedtaksperiodeId, behovtype, Vilkårsgrunnlag::class)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
-        assertEtterspurt(Behovtype.Dagpenger)
         assertEtterspurt(Medlemskap)
         person.håndter(
             vilkårsgrunnlag(
@@ -298,7 +297,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
         statslønn: Boolean = false,
-        arbeidsavklaringspenger: List<Periode> = emptyList()
+        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        dagpenger: List<Periode> = emptyList()
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
@@ -309,6 +309,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEtterspurt(Behovtype.Omsorgspenger)
         assertEtterspurt(Behovtype.Opplæringspenger)
         assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
+        assertEtterspurt(Behovtype.Dagpenger)
         assertEtterspurt(Behovtype.Institusjonsopphold)
         person.håndter(
             ytelser(
@@ -322,7 +323,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
                 dødsdato = dødsdato,
                 statslønn = statslønn,
-                arbeidsavklaringspenger = arbeidsavklaringspenger
+                arbeidsavklaringspenger = arbeidsavklaringspenger,
+                dagpenger = dagpenger
             )
         )
     }
@@ -569,8 +571,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     Opptjeningvurdering.Arbeidsforhold(orgnummer, 1.januar(2017))
                 )
                 else arbeidsforhold
-            ),
-            dagpenger = Dagpenger(emptyList())
+            )
         ).apply {
             hendelselogg = this
         }
@@ -648,7 +649,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
         statslønn: Boolean = false,
-        arbeidsavklaringspenger: List<Periode> = emptyList()
+        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        dagpenger: List<Periode> = emptyList()
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -692,7 +694,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             ),
             aktivitetslogg = aktivitetslogg,
             dødsinfo = Dødsinfo(dødsdato),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            dagpenger = Dagpenger(dagpenger)
         ).apply {
             hendelselogg = this
         }

@@ -175,6 +175,11 @@ internal class TestMessageFactory(
         val tom: LocalDate
     )
 
+    class DagpengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
     fun lagYtelser(
         vedtaksperiodeId: UUID,
         tilstand: TilstandType,
@@ -182,7 +187,8 @@ internal class TestMessageFactory(
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList()
+        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
+        dagpenger: List<DagpengerTestdata> = emptyList()
     ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -195,7 +201,8 @@ internal class TestMessageFactory(
                 "Opplæringspenger",
                 "Institusjonsopphold",
                 "Arbeidsavklaringspenger",
-                "Dødsinfo"
+                "Dødsinfo",
+                "Dagpenger"
             ),
             løsninger = mapOf(
                 "Sykepengehistorikk" to emptyList<Any>(),
@@ -240,6 +247,14 @@ internal class TestMessageFactory(
                         )
                     }
                 ),
+                Dagpenger.name to mapOf(
+                    "meldekortperioder" to dagpenger.map { data ->
+                        mapOf(
+                            "fom" to data.fom,
+                            "tom" to data.tom
+                        )
+                    }
+                )
             )
         )
     }
@@ -255,7 +270,6 @@ internal class TestMessageFactory(
             behov = listOf(
                 InntekterForSammenligningsgrunnlag.name,
                 Opptjening.name,
-                Dagpenger.name,
                 Arbeidsavklaringspenger.name,
                 Medlemskap.name
             ),
@@ -285,9 +299,6 @@ internal class TestMessageFactory(
                         "ansattTil" to it.third
                     )
                 },
-                Dagpenger.name to mapOf(
-                    "meldekortperioder" to emptyList<Any>()
-                ),
                 Medlemskap.name to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(
                         "svar" to when (medlemskapstatus) {

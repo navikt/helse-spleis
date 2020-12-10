@@ -171,7 +171,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         omsorgspenger: List<TestMessageFactory.OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<TestMessageFactory.OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<TestMessageFactory.InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<TestMessageFactory.ArbeidsavklaringspengerTestdata> = emptyList()
+        arbeidsavklaringspenger: List<TestMessageFactory.ArbeidsavklaringspengerTestdata> = emptyList(),
+        dagpenger: List<TestMessageFactory.DagpengerTestdata> = emptyList()
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
@@ -179,6 +180,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagYtelser(
@@ -188,7 +190,8 @@ internal abstract class AbstractEndToEndMediatorTest {
                 omsorgspenger = omsorgspenger,
                 opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
-                arbeidsavklaringspenger = arbeidsavklaringspenger
+                arbeidsavklaringspenger = arbeidsavklaringspenger,
+                dagpenger = dagpenger
             )
         )
     }
@@ -207,7 +210,6 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVilkårsgrunnlag(

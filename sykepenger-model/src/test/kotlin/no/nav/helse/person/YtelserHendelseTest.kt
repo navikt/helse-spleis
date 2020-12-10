@@ -201,7 +201,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             ),
             aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList())
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+            dagpenger = Dagpenger(emptyList())
         )
     }
 
@@ -265,8 +266,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 listOf(
                     Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017))
                 )
-            ),
-            dagpenger = Dagpenger(emptyList())
+            )
         )
 
     private fun simulering() =

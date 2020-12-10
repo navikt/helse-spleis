@@ -14,7 +14,7 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(InntekterForSammenligningsgrunnlag, Opptjening, Dagpenger, Medlemskap)
+    override val behov = listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"
 
@@ -35,10 +35,6 @@ internal class VilkårsgrunnlagRiver(
             requireKey("orgnummer")
             require("ansattSiden", JsonNode::asLocalDate)
             interestedIn("ansattTil") { it.asLocalDate() }
-        }
-        packet.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
         }
     }
 

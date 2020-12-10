@@ -17,8 +17,7 @@ class Vilkårsgrunnlag(
     private val orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
-    private val medlemskapsvurdering: Medlemskapsvurdering,
-    private val dagpenger: Dagpenger
+    private val medlemskapsvurdering: Medlemskapsvurdering
     ) : ArbeidstakerHendelse(meldingsreferanseId) {
     private var grunnlagsdata: Grunnlagsdata? = null
 
@@ -41,7 +40,6 @@ class Vilkårsgrunnlag(
             harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus
         )
-        dagpenger.valider(aktivitetslogg, skjæringstidspunkt)
         return aktivitetslogg
     }
 

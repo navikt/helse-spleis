@@ -1244,8 +1244,7 @@ class SpeilBuilderTest {
                     )
                 )
             ),
-            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            dagpenger = Dagpenger(emptyList())
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus)
         )
 
         private fun vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId: String) = Vilkårsgrunnlag(
@@ -1270,8 +1269,7 @@ class SpeilBuilderTest {
                     )
                 )
             ),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            dagpenger = Dagpenger(emptyList())
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
         )
 
         private fun ytelser(
@@ -1332,7 +1330,8 @@ class SpeilBuilderTest {
                 ),
                 aktivitetslogg = it,
                 dødsinfo = Dødsinfo(null),
-                arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger)
+                arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+                dagpenger = Dagpenger(emptyList())
             )
         }
 

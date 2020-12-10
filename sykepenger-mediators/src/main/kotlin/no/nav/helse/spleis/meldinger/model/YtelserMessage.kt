@@ -21,6 +21,8 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
     private val aktørId = packet["aktørId"].asText()
     private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
+    private val dagpenger: List<Pair<LocalDate, LocalDate>>
+    private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val aktivitetslogg = Aktivitetslogg()
     private val utbetalingshistorikk = UtbetalingshistorikkMessage(packet)
@@ -66,6 +68,13 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
                 arbeidsavklaringspenger = it.first
                 ugyldigeArbeidsavklaringspengeperioder = it.second
             }
+        packet["@løsning.${Behovtype.Dagpenger.name}.meldekortperioder"]
+            .map(::asDatePair)
+            .partition { it.first <= it.second }
+            .also {
+                dagpenger = it.first
+                ugyldigeDagpengeperioder = it.second
+            }
     }
 
 
@@ -90,9 +99,16 @@ internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
                     it.first,
                     it.second
                 )
+            }),
+            dagpenger = Dagpenger(dagpenger.map {
+                Periode(
+                    it.first,
+                    it.second
+                )
             })
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
+            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
         }
 
     override fun behandle(mediator: IHendelseMediator) {
