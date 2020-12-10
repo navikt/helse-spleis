@@ -81,7 +81,8 @@ class SerialisertPerson(val json: String) {
             V62VurderingGodkjentBoolean(),
             V63EndreUtbetalingId(),
             V64FeilStatusOgTypePåAnnulleringer(),
-            V65SjekkeEtterutbetalingerForFeil()
+            V65None(),
+            V66SjekkeEtterutbetalingerForFeil()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
