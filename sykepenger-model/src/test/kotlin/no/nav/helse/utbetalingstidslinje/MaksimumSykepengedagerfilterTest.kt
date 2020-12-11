@@ -37,6 +37,13 @@ internal class MaksimumSykepengedagerfilterTest {
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
+    @Test fun `stopper betaling etter 248 dager inkl persontidslinje`() {
+        val persontidslinje = tidslinjeOf(247.NAV)
+        val tidslinje = tidslinjeOf(2.NAV, startDato = persontidslinje.sisteDato().plusDays(1))
+        assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = persontidslinje))
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+    }
+
     @Test fun `stopper betaling etter 248 dager `() {
         val tidslinje = tidslinjeOf(249.NAV)
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 1.mars)))
@@ -271,14 +278,14 @@ internal class MaksimumSykepengedagerfilterTest {
         )
     }
 
-    private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String, periode: Periode = Periode(1.januar, 31.desember)): List<LocalDate> {
+    private fun Utbetalingstidslinje.utbetalingsavgrenser(fnr: String, periode: Periode = Periode(1.januar, 31.desember), personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()): List<LocalDate> {
         MaksimumSykepengedagerfilter(
             Alder(fnr),
             NormalArbeidstaker,
             periode,
             aktivitetslogg
         ).also {
-            it.filter(listOf(this), tidslinjeOf())
+            it.filter(listOf(this), personTidslinje)
             it.beregnGrenser(periode.endInclusive)
         }
         return AvvisteDager(this).datoer

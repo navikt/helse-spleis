@@ -2263,7 +2263,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             5.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(9.mai(2018), 31.mai(2018), 1621.daglig, 100.prosent, "0"),
+            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(9.mai(2018), 31.mai(2018), 1621.daglig, 100.prosent, UNG_PERSON_FNR_2018),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(9.mai(2018), 40000.månedlig, "0", true)
             )

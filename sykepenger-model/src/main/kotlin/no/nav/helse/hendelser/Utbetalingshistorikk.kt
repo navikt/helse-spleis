@@ -1,28 +1,25 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
+import no.nav.helse.utbetalingstidslinje.Historie.Companion.PERSONLIG
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.hendelser.Periode as ModellPeriode
 
 class Utbetalingshistorikk(
     meldingsreferanseId: UUID,
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    internal val vedtaksperiodeId: String,
+    private val vedtaksperiodeId: String,
     utbetalinger: List<Infotrygdperiode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
@@ -33,7 +30,10 @@ class Utbetalingshistorikk(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
 
-    internal fun valider(periode: no.nav.helse.hendelser.Periode, skjæringstidspunkt: LocalDate?): Aktivitetslogg {
+    internal fun erRelevant(vedtaksperiodeId: UUID) =
+        vedtaksperiodeId.toString() == this.vedtaksperiodeId
+
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?): Aktivitetslogg {
         Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer)
         Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, skjæringstidspunkt, periode)
         return aktivitetslogg
@@ -55,13 +55,6 @@ class Utbetalingshistorikk(
         Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
     }
 
-    internal fun historiskeTidslinjer() =
-        Infotrygdperiode.Utbetalingsperiode.historiskePerioder(utbetalinger, inntektshistorikk)
-            .slåSammen()
-            .map { periode ->
-                Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, 100.prosent, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
-            }
-
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Inntekt,
@@ -77,14 +70,14 @@ class Utbetalingshistorikk(
                 liste: List<Inntektsopplysning>,
                 aktivitetslogg: Aktivitetslogg,
                 skjæringstidspunkt: LocalDate?,
-                periode: no.nav.helse.hendelser.Periode
+                periode: Periode
             ) {
                 liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
                 liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
             }
 
             private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
-                periode: no.nav.helse.hendelser.Periode,
+                periode: Periode,
                 aktivitetslogg: Aktivitetslogg
             ) {
                 filter { it.sykepengerFom >= periode.start.minusMonths(12) }
@@ -97,7 +90,7 @@ class Utbetalingshistorikk(
             private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
                 skjæringstidspunkt: LocalDate?,
                 aktivitetslogg: Aktivitetslogg,
-                periode: no.nav.helse.hendelser.Periode
+                periode: Periode
             ) {
                 filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
                     .forEach { it.valider(aktivitetslogg, periode) }
@@ -125,16 +118,9 @@ class Utbetalingshistorikk(
                     }
                 }
             }
-
-            fun finnNærmeste(organisasjonsnummer: String, periode: ModellPeriode, inntektshistorikk: List<Inntektsopplysning>) =
-                inntektshistorikk
-                    .filter { it.orgnummer == organisasjonsnummer }
-                    .filter { it.sykepengerFom <= periode.start }
-                    .maxOfOrNull { it.sykepengerFom }
-                    .also { if (it == null) sikkerLogg.info("Har utbetaling, men ikke inntektsopplysning, for $organisasjonsnummer") }
         }
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: no.nav.helse.hendelser.Periode) {
+        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode) {
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             if (refusjonTom != null && periode.slutterEtter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
@@ -149,7 +135,6 @@ class Utbetalingshistorikk(
                 Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
             )
         }
-
         internal fun addInntekter(
             hendelseId: UUID,
             organisasjonsnummer: String,
@@ -166,12 +151,6 @@ class Utbetalingshistorikk(
         }
     }
 
-    internal fun append(oldtid: Oldtidsutbetalinger) {
-        utbetalinger.forEach {
-            it.append(oldtid)
-        }
-    }
-
     internal fun append(oldtid: Historie.Historikkbøtte) {
         utbetalinger.forEach {
             it.append(oldtid)
@@ -183,17 +162,16 @@ class Utbetalingshistorikk(
             fun sorter(liste: List<Infotrygdperiode>) = liste.sortedBy { it.periode.start }
         }
 
-        protected val periode = ModellPeriode(fom, tom)
+        protected val periode = Periode(fom, tom)
 
         internal open fun tidslinje() = Utbetalingstidslinje()
         internal open fun sykdomstidslinje() = Sykdomstidslinje()
 
-        internal open fun append(oldtid: Oldtidsutbetalinger) {}
         internal open fun append(oldtid: Historie.Historikkbøtte) {}
 
         internal open fun valider(
             aktivitetslogg: Aktivitetslogg,
-            other: no.nav.helse.hendelser.Periode,
+            other: Periode,
             organisasjonsnummer: String
         ) {}
 
@@ -217,7 +195,7 @@ class Utbetalingshistorikk(
 
             override fun valider(
                 aktivitetslogg: Aktivitetslogg,
-                other: no.nav.helse.hendelser.Periode,
+                other: Periode,
                 organisasjonsnummer: String
             ) {
                 if (organisasjonsnummer != orgnr) return
@@ -233,23 +211,10 @@ class Utbetalingshistorikk(
             }
 
             internal companion object {
-
-                fun historiskePerioder(perioder: List<Infotrygdperiode>, inntektshistorikk: List<Inntektsopplysning>) =
-                    perioder.filterIsInstance<Utbetalingsperiode>()
-                        .map {
-                            it.periode.oppdaterFom(
-                                Inntektsopplysning.finnNærmeste(
-                                    it.orgnr,
-                                    it.periode,
-                                    inntektshistorikk
-                                ) ?: it.periode.start
-                            )
-                        }
-
                 fun valider(
                     liste: List<Infotrygdperiode>,
                     aktivitetslogg: Aktivitetslogg,
-                    periode: no.nav.helse.hendelser.Periode,
+                    periode: Periode,
                     organisasjonsnummer: String
                 ): Aktivitetslogg {
                     if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
@@ -261,7 +226,7 @@ class Utbetalingshistorikk(
                 }
 
                 private fun List<Infotrygdperiode>.harForegåendeFraAnnenArbeidsgiver(
-                    periode: no.nav.helse.hendelser.Periode,
+                    periode: Periode,
                     organisasjonsnummer: String
                 ) =
                     this
@@ -276,36 +241,30 @@ class Utbetalingshistorikk(
             tom: LocalDate,
             inntekt: Inntekt,
             grad: Prosentdel,
-            private val orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {
-            override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.add(orgnummer, tidslinje())
-            }
-        }
+            orgnummer: String
+        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {}
 
         class ReduksjonArbeidsgiverRefusjon(
             fom: LocalDate,
             tom: LocalDate,
             inntekt: Inntekt,
             grad: Prosentdel,
-            private val orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {
-            override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.add(orgnummer, tidslinje())
+            orgnummer: String
+        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {}
+
+        class Utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
+            Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
+            override fun append(oldtid: Historie.Historikkbøtte) {
+                oldtid.add(orgnummer = PERSONLIG, tidslinje = tidslinje())
+                oldtid.add(orgnummer = PERSONLIG, tidslinje = sykdomstidslinje())
             }
         }
 
-        class Utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, orgnummer: String) :
-            Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {
-            override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.add(tidslinje = tidslinje())
-            }
-        }
-
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, orgnummer: String) :
-            Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {
-            override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.add(tidslinje = tidslinje())
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
+            Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
+            override fun append(oldtid: Historie.Historikkbøtte) {
+                oldtid.add(orgnummer = PERSONLIG, tidslinje = tidslinje())
+                oldtid.add(orgnummer = PERSONLIG, tidslinje = sykdomstidslinje())
             }
         }
 
@@ -315,10 +274,6 @@ class Utbetalingshistorikk(
 
             override fun sykdomstidslinje() =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
-
-            override fun append(oldtid: Oldtidsutbetalinger) {
-                oldtid.add(tidslinje = tidslinje())
-            }
 
             override fun append(oldtid: Historie.Historikkbøtte) {
                 oldtid.add(tidslinje = tidslinje())
@@ -337,7 +292,7 @@ class Utbetalingshistorikk(
         class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
             override fun valider(
                 aktivitetslogg: Aktivitetslogg,
-                other: no.nav.helse.hendelser.Periode,
+                other: Periode,
                 organisasjonsnummer: String
             ) {
                 if (periode.endInclusive < other.start.minusDays(18)) return
@@ -352,7 +307,7 @@ class Utbetalingshistorikk(
             IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
             override fun valider(
                 aktivitetslogg: Aktivitetslogg,
-                other: no.nav.helse.hendelser.Periode,
+                other: Periode,
                 organisasjonsnummer: String
             ) {
                 val tekst = when {

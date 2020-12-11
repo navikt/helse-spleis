@@ -560,7 +560,7 @@ internal class Arbeidsgiver private constructor(
             ?.also(sikkerLogg::info)
     }
 
-    fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {
+    internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null
             && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
     }

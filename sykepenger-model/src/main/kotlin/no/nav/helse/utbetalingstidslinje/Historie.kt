@@ -38,7 +38,7 @@ internal class Historie() {
         val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
             skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
-            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
+            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) || infotrygdbøtte.erUtbetaltDag(PERSONLIG, skjæringstidspunkt) -> {
                 val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
                 when {
                     spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> INFOTRYGDFORLENGELSE
@@ -96,7 +96,7 @@ internal class Historie() {
         Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, sykdomstidslinjer)
 
     private fun skjæringstidspunkt(orgnr: String, periode: Periode) =
-        sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        sykdomstidslinje(orgnr).merge(sykdomstidslinje(PERSONLIG), replace).skjæringstidspunkt(periode.endInclusive) ?: periode.start
 
     internal fun skjæringstidspunkter(periode: Periode) =
         skjæringstidspunkter(periode.endInclusive)
@@ -126,8 +126,9 @@ internal class Historie() {
     private fun sykdomstidslinje(orgnummer: String) =
         infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
 
-    private companion object {
+    internal companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
+        internal const val PERSONLIG = "PERSONLIG"
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
     }

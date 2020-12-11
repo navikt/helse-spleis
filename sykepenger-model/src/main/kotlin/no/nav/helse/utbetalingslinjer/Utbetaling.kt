@@ -7,7 +7,6 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.Oldtidsutbetalinger
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.Logger
@@ -326,10 +325,6 @@ internal class Utbetaling private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
-
-    internal fun append(organisasjonsnummer: String, oldtid: Oldtidsutbetalinger) {
-        oldtid.add(organisasjonsnummer, utbetalingstidslinje)
-    }
 
     internal fun append(organisasjonsnummer: String, bøtte: Historie.Historikkbøtte) {
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)

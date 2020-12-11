@@ -113,4 +113,14 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         assertEquals(1.mars, utbetalingstidslinje.førsteDato())
         assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, NavDag::class, NavHelgDag::class)
     }
+
+    @Test
+    fun `Historisk utbetaling til bruker skal ikke bli med i utbetalingstidslinje for arbeidsgiver`() {
+        historie(bruker(1.januar, 31.januar))
+        historie.add(AG1, tidslinjeOf(2.NAV, 2.HELG, 5.NAV, startDato = 1.mars))
+        beregn(AG1, 1.mars til 9.mars, 1.mars).also {
+            assertEquals(1.mars, it.førsteDato())
+            assertEquals(9.mars, it.sisteDato())
+        }
+    }
 }

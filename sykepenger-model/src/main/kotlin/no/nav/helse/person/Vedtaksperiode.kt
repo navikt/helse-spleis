@@ -140,7 +140,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
-        if (id.toString() != utbetalingshistorikk.vedtaksperiodeId) return
+        if (!utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk)
     }

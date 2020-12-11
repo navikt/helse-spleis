@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -41,7 +42,11 @@ internal class MaksimumSykepengedagerfilter(
         tidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(personTidslinje) { venstre, høyre ->
-                if (venstre !is Utbetalingstidslinje.Utbetalingsdag.UkjentDag) venstre else høyre
+                when {
+                    høyre is NavDag -> høyre
+                    venstre !is UkjentDag -> venstre
+                    else -> høyre
+                }
             }
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
@@ -121,7 +126,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+        dag: UkjentDag,
         dato: LocalDate,
         økonomi: Økonomi
     ) {

@@ -82,41 +82,6 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `historisk tidslinje`() {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(29.januar(2018), 18.februar(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(19.februar(2018), 18.mars(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(19.mars(2018), 2.april(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(3.april(2018), 14.mai(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(15.mai(2018), 3.juni(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(4.juni(2018), 22.juni(2018), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(18.mars(2020), 31.mars(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.april(2020), 30.april(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.mai(2020), 31.mai(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.juli(2020), 31.august(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.juli(2020), 1234.månedlig, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(18.mars(2020), 1234.månedlig, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(29.januar(2018), 1234.månedlig, ORGNUMMER, true)
-            )
-        )
-
-        val tidslinjer = utbetalingshistorikk.historiskeTidslinjer()
-        assertEquals(3, tidslinjer.size)
-        assertEquals(29.januar(2018), tidslinjer.first().førsteDag())
-        assertEquals(22.juni(2018), tidslinjer.first().sisteDag())
-
-        assertEquals(18.mars(2020), tidslinjer[1].førsteDag())
-        assertEquals(31.mai(2020), tidslinjer[1].sisteDag())
-
-        assertEquals(1.juli(2020), tidslinjer.last().førsteDag())
-        assertEquals(31.august(2020), tidslinjer.last().sisteDag())
-    }
-
-    @Test
     fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
             RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig,  100.prosent,  "1234"),
@@ -404,42 +369,6 @@ class UtbetalingshistorikkTest {
 
         utbetalingshistorikk.valider(Periode(1.august, 1.august), 1.august)
         assertFalse(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
-    }
-
-    @Test
-    fun `historisk perioder`() {
-        val AG1 = "AG1orgnr"
-        val AG2 = "AG2orgnr"
-        val AG3 = "AG3orgnr"
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(5.januar, 10.januar, 1234.daglig,  100.prosent,  AG1),
-            RefusjonTilArbeidsgiver(15.januar, 20.januar, 1234.daglig,  100.prosent,  AG1),
-            RefusjonTilArbeidsgiver(10.februar, 20.februar, 1234.daglig,  100.prosent,  AG2)
-        )
-        val inntektshistorikk = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, AG1, true),
-            Utbetalingshistorikk.Inntektsopplysning(1.februar, 1234.månedlig, AG3, true)
-        )
-
-        val historiskePerioder = Utbetalingshistorikk.Infotrygdperiode.Utbetalingsperiode.historiskePerioder(utbetalinger, inntektshistorikk)
-
-        assertEquals(3, historiskePerioder.size)
-        assertEquals(1.januar, historiskePerioder[0].start)
-        assertEquals(1.januar, historiskePerioder[1].start)
-        assertEquals(10.februar, historiskePerioder[2].start)
-    }
-
-    @Test
-    fun `finner nærmeste inntektsopplysning`() {
-        val inntektsopplysninger = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(10.januar, 1234.månedlig, ORGNUMMER, true),
-            Utbetalingshistorikk.Inntektsopplysning(10.februar, 1234.månedlig, ORGNUMMER, true),
-            Utbetalingshistorikk.Inntektsopplysning(10.mars, 1234.månedlig, "annet orgnr", true))
-
-        assertEquals(10.januar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(10.januar, 28.februar), inntektsopplysninger))
-        assertNull(Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(9.januar, 28.februar), inntektsopplysninger))
-        assertEquals(10.februar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(15.februar, 31.mars), inntektsopplysninger))
-        assertEquals(10.februar, Utbetalingshistorikk.Inntektsopplysning.finnNærmeste(ORGNUMMER, Periode(15.mars, 31.mars), inntektsopplysninger))
     }
 
     @Test
