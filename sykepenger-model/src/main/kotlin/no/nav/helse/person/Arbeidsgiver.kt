@@ -71,7 +71,9 @@ internal class Arbeidsgiver private constructor(
             this.mapNotNull { it.inntektshistorikk.inntekt(skjæringstidspunkt) }.summer()
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-            this.map { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }.summer()
+            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }
+                .takeIf { it.isNotEmpty() }
+                ?.summer()
 
         internal fun List<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt() }

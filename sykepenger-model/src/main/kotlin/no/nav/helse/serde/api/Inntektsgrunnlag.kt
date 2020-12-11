@@ -30,7 +30,7 @@ internal fun inntektsgrunnlag(
         skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
         sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
         omregnetÅrsinntekt = grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-        sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+        sammenligningsgrunnlag = sammenligningsgrunnlag?.reflection { årlig, _, _, _ -> årlig },
         avviksprosent = nøkkeldata.avviksprosent,
         maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
         inntekter = arbeidsgiverinntekt

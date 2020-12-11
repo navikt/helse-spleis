@@ -311,7 +311,7 @@ data class InntektsgrunnlagDTO(
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlag: Double,
     val omregnetÅrsinntekt: Double,
-    val sammenligningsgrunnlag: Double,
+    val sammenligningsgrunnlag: Double?,
     val avviksprosent: Double?,
     val maksUtbetalingPerDag: Double,
     val inntekter: List<ArbeidsgiverinntektDTO>

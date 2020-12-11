@@ -7,7 +7,6 @@ import no.nav.helse.appender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,8 +46,8 @@ internal class InntektshistorikkVol2 {
     private fun grunnlagForSykepengegrunnlagFraInfotrygdMedMetadata(periode: Periode): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(periode)
 
-    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt =
-        grunnlagForSammenligningsgrunnlagMedMetadata(dato)?.second ?: INGEN
+    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntekt? =
+        grunnlagForSammenligningsgrunnlagMedMetadata(dato)?.second
 
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)

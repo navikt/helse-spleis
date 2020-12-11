@@ -279,7 +279,7 @@ class Person private constructor(
             arbeidsgivere.inntekt(skjæringstidspunkt)
         }
 
-    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
+    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt? {
         return arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
     }
 

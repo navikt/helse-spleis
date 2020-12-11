@@ -171,7 +171,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
-            assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
@@ -217,7 +217,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
-            assertEquals(0.0, inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
