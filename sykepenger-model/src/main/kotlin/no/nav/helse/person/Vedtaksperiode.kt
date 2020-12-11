@@ -656,8 +656,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
-            val skjæringstidspunkt = Historie(person, utbetalingshistorikk).skjæringstidspunkt(vedtaksperiode.periode)
-            if (utbetalingshistorikk.valider(vedtaksperiode.periode, skjæringstidspunkt).hasErrorsOrWorse())
+            val historie = Historie(person, utbetalingshistorikk)
+            val skjæringstidspunkt = historie.skjæringstidspunkt(vedtaksperiode.periode)
+            if (utbetalingshistorikk.valider(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), skjæringstidspunkt).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
         }

@@ -5,7 +5,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.Historie.Companion.PERSONLIG
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
@@ -255,16 +254,16 @@ class Utbetalingshistorikk(
         class Utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
             Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
             override fun append(oldtid: Historie.Historikkbøtte) {
-                oldtid.add(orgnummer = PERSONLIG, tidslinje = tidslinje())
-                oldtid.add(orgnummer = PERSONLIG, tidslinje = sykdomstidslinje())
+                oldtid.add(tidslinje = tidslinje())
+                oldtid.add(tidslinje = sykdomstidslinje())
             }
         }
 
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
             Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
             override fun append(oldtid: Historie.Historikkbøtte) {
-                oldtid.add(orgnummer = PERSONLIG, tidslinje = tidslinje())
-                oldtid.add(orgnummer = PERSONLIG, tidslinje = sykdomstidslinje())
+                oldtid.add(tidslinje = tidslinje())
+                oldtid.add(tidslinje = sykdomstidslinje())
             }
         }
 

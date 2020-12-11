@@ -123,4 +123,18 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             assertEquals(9.mars, it.sisteDato())
         }
     }
+
+    @Test
+    fun `beregner ikke ny arbeidsgiverperiode etter brukerutbetaling`() {
+        historie(
+            refusjon(1.januar, 30.april),
+            bruker(1.mai, 30.mai)
+        )
+        historie.add(AG1, sykedager(1.juni, 30.juni))
+        beregn(AG1, 1.mars til 1.juni, 30.juni).also {
+            assertAlleDager(it, 1.juni til 30.juni, NavDag::class, NavHelgDag::class)
+            assertEquals(1.juni, it.førsteDato())
+            assertEquals(30.juni, it.sisteDato())
+        }
+    }
 }

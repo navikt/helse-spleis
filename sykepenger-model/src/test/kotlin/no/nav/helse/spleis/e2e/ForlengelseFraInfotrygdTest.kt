@@ -237,7 +237,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
     }
 
-
     @Test
     fun `tidligere utbetalinger i spleis som er forkastet blir tatt med som en del av utbetalingshistorikken`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

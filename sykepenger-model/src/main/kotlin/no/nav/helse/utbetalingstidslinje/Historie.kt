@@ -38,7 +38,7 @@ internal class Historie() {
         val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
             skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
-            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) || infotrygdbøtte.erUtbetaltDag(PERSONLIG, skjæringstidspunkt) -> {
+            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
                 val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
                 when {
                     spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> INFOTRYGDFORLENGELSE
@@ -62,6 +62,7 @@ internal class Historie() {
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
             .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
+            .let { it.gjøreKortere(minOf(it.førsteSykepengedag() ?: LocalDate.MAX, spleisbøtte.tidligsteDato(organisasjonsnummer))) }
     }
 
     internal fun beregnUtbetalingstidslinjeVol2(
@@ -78,6 +79,7 @@ internal class Historie() {
             arbeidsgiverRegler = arbeidsgiverRegler
         ).result(sykdomstidslinje(organisasjonsnummer))
             .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
+            .let { it.gjøreKortere(minOf(it.førsteSykepengedag() ?: LocalDate.MAX, spleisbøtte.tidligsteDato(organisasjonsnummer))) }
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
@@ -96,7 +98,7 @@ internal class Historie() {
         Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, sykdomstidslinjer)
 
     private fun skjæringstidspunkt(orgnr: String, periode: Periode) =
-        sykdomstidslinje(orgnr).merge(sykdomstidslinje(PERSONLIG), replace).skjæringstidspunkt(periode.endInclusive) ?: periode.start
+        sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
 
     internal fun skjæringstidspunkter(periode: Periode) =
         skjæringstidspunkter(periode.endInclusive)
@@ -128,7 +130,6 @@ internal class Historie() {
 
     internal companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
-        internal const val PERSONLIG = "PERSONLIG"
         private fun Utbetalingsdag.erSykedag() =
             this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
     }
@@ -136,6 +137,12 @@ internal class Historie() {
     internal class Historikkbøtte(private val konverterUtbetalingstidslinje: Boolean = false) {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
+
+        internal fun tidligsteDato(orgnummer: String): LocalDate {
+            val førsteUtbetalingsdag = utbetalingstidslinje(orgnummer).førsteSykepengedag()
+            val førsteSykdomstidslinjedag = sykdomstidslinje(orgnummer).periode()?.start
+            return listOfNotNull(førsteUtbetalingsdag, førsteSykdomstidslinjedag).minOrNull() ?: LocalDate.MIN
+        }
 
         internal fun sykdomstidslinjer() = sykdomstidslinjer.values.toList()
         internal fun sykdomstidslinje(orgnummer: String) =
