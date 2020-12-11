@@ -10,7 +10,7 @@ import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
-internal class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal open class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
     override val fødselsnummer = packet["arbeidstakerFnr"].asText()
     private val refusjon = Inntektsmelding.Refusjon(
         inntekt = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
@@ -28,7 +28,7 @@ internal class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMessage
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
 
-    private val inntektsmelding get() = Inntektsmelding(
+    protected val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = this.id,
         refusjon = refusjon,
         orgnummer = orgnummer,

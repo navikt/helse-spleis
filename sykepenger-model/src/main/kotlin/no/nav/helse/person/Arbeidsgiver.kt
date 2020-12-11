@@ -177,6 +177,12 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
+    internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
+        inntektsmelding.wrapped.kontekst(this)
+        inntektsmelding.wrapped.cacheRefusjon(this)
+        vedtaksperioder.toList().forEach { it.håndter(inntektsmelding.wrapped) }
+    }
+
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk) }

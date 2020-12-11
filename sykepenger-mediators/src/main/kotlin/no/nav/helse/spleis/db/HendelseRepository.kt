@@ -25,7 +25,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    fun gjennopprettMelding(hendelseId: UUID): HendelseMessage? = finnMelding(hendelseId)?.let {(_, type, data) ->
+    fun gjennopprettMelding(hendelseId: UUID): HendelseMessage? = finnMelding(hendelseId)?.let { (_, type, data) ->
         when (type) {
             NY_SØKNAD -> NySøknadMessage(JsonNodeDelegate(data))
             SENDT_SØKNAD_NAV -> SendtSøknadNavMessage(JsonNodeDelegate(data))
@@ -34,6 +34,10 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             else -> null
         }
     }
+
+    fun gjennopprettInntektsmelding(fnr: String): List<HendelseMessage> = finnMeldinger(fnr).map { data ->
+            InntektsmeldingReplayMessage(JsonNodeDelegate(data))
+        }
 
     fun lagreMelding(melding: HendelseMessage) {
         val type = when (melding) {
@@ -76,6 +80,18 @@ internal class HendelseRepository(private val dataSource: DataSource) {
                     }.asSingle
             )
 
+        }
+
+    private fun finnMeldinger(fnr: String): List<JsonNode> =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
+                    fnr
+                )
+                    .map { objectMapper.readTree(it.string("data")) }
+                    .asList
+            )
         }
 
     private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {

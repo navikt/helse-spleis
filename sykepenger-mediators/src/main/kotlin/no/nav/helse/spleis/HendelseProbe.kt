@@ -48,6 +48,10 @@ object HendelseProbe {
         tell("Inntektsmelding")
     }
 
+    fun onInntektsmeldingReplay() {
+        tell("InntektsmeldingReplay")
+    }
+
     fun onSykmelding() {
         tell("Sykmelding")
     }

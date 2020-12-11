@@ -36,6 +36,8 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
+    fun håndter(inntektsmelding: InntektsmeldingReplay) = håndter(inntektsmelding, "replay av inntektsmelding")
+
     private fun håndter(
         hendelse: SykdomstidslinjeHendelse,
         hendelsesmelding: String,
@@ -158,6 +160,12 @@ class Person private constructor(
     fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
         observers.forEach {
             it.vedtaksperiodeReplay(event)
+        }
+    }
+
+    fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
+        observers.forEach {
+            it.inntektsmeldingReplay(event)
         }
     }
 

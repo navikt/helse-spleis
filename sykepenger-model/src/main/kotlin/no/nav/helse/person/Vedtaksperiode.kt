@@ -1052,6 +1052,9 @@ internal class Vedtaksperiode private constructor(
                 sikkerLogg.info(
                     "${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode. Fant forkastet periode foran med vedtaksperiode ${it.id} og tilstand ${it.tilstand.type.name}"
                 )
+                if(it.tilstand == TilInfotrygd) {
+                    vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer))
+                }
             }
             vedtaksperiode.trengerKortHistorikkFraInfotrygd(påminnelse)
         }

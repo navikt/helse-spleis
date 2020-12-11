@@ -109,6 +109,7 @@ internal class TestMessageFactory(
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
+        opphørsdatoForRefusjon: LocalDate? = null
     ): String {
         val inntektsmelding = Inntektsmelding(
             inntektsmeldingId = UUID.randomUUID().toString(),
@@ -120,7 +121,7 @@ internal class TestMessageFactory(
             arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
             arbeidsforholdId = null,
             beregnetInntekt = beregnetInntekt.toBigDecimal(),
-            refusjon = Refusjon(beregnetInntekt.toBigDecimal(), null),
+            refusjon = Refusjon(beregnetInntekt.toBigDecimal(), opphørsdatoForRefusjon),
             endringIRefusjoner = emptyList(),
             opphoerAvNaturalytelser = opphørAvNaturalytelser,
             gjenopptakelseNaturalytelser = emptyList(),

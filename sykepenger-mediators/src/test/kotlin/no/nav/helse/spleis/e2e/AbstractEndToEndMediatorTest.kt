@@ -127,10 +127,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
+        opphørsdatoForRefusjon: LocalDate? = null
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt))
+        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon))
     }
 
     protected fun sendNyUtbetalingpåminnelse(utbetalingIndeks: Int, status: Utbetalingstatus = Utbetalingstatus.IKKE_UTBETALT) {
@@ -194,6 +195,16 @@ internal abstract class AbstractEndToEndMediatorTest {
                 dagpenger = dagpenger
             )
         )
+    }
+
+    protected fun sendUtbetalingshistorikk(
+        vedtaksperiodeIndeks: Int
+    ){
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingshistorikk(
+            testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            TilstandType.AVVENTER_GAP
+        ))
     }
 
     protected fun sendVilkårsgrunnlag(

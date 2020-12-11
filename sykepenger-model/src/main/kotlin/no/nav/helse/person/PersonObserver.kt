@@ -20,6 +20,10 @@ interface PersonObserver {
         val hendelseIder: List<UUID>
     )
 
+    data class InntektsmeldingReplayEvent(
+        val fnr: String
+    )
+
     data class VedtaksperiodeIkkeFunnetEvent(
         val vedtaksperiodeId: UUID,
         val aktørId: String,
@@ -83,7 +87,7 @@ interface PersonObserver {
             )
         }
 
-        data class  IkkeUtbetaltDag(
+        data class IkkeUtbetaltDag(
             val dato: LocalDate,
             val type: Type
         ) {
@@ -128,7 +132,7 @@ interface PersonObserver {
             val tom: LocalDate,
             val beløp: Int,
             val grad: Double
-        ) {}
+        )
     }
 
     data class UtbetalingEndretEvent(
@@ -138,7 +142,7 @@ interface PersonObserver {
         val gjeldendeStatus: String,
         val arbeidsgiverOppdrag: Map<String, Any>,
         val personOppdrag: Map<String, Any>
-    ) {}
+    )
 
     data class UtbetalingUtbetaltEvent(
         val utbetalingId: UUID,
@@ -152,28 +156,19 @@ interface PersonObserver {
         val automatiskBehandling: Boolean,
         val arbeidsgiverOppdrag: Map<String, Any>,
         val personOppdrag: Map<String, Any>
-    ) {}
+    )
 
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
-
+    fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
-
     fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
-
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
-
     fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}
-
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
-
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
-
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
-
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
-
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
-
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
