@@ -55,14 +55,13 @@ internal class Historie() {
         inntektshistorikk: Inntektshistorikk,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-        return UtbetalingstidslinjeBuilder(
+        val builder = UtbetalingstidslinjeBuilder(
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             skjæringstidspunkter = skjæringstidspunkter(periode),
             arbeidsgiverRegler = arbeidsgiverRegler
-        ).result(sykdomstidslinje(organisasjonsnummer))
-            .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
-            .let { it.gjøreKortere(minOf(it.førsteSykepengedag() ?: LocalDate.MAX, spleisbøtte.tidligsteDato(organisasjonsnummer))) }
+        )
+        return byggUtbetalingstidslinje(organisasjonsnummer, builder::result)
     }
 
     internal fun beregnUtbetalingstidslinjeVol2(
@@ -71,16 +70,20 @@ internal class Historie() {
         inntektshistorikk: InntektshistorikkVol2,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-        return UtbetalingstidslinjeBuilderVol2(
+        val builder = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = sammenhengendePeriode(periode),
             skjæringstidspunkter = skjæringstidspunkter(periode),
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
-        ).result(sykdomstidslinje(organisasjonsnummer))
+        )
+        return byggUtbetalingstidslinje(organisasjonsnummer, builder::result)
+    }
+
+    private fun byggUtbetalingstidslinje(organisasjonsnummer: String, builder: (Sykdomstidslinje) -> Utbetalingstidslinje) =
+        builder(sykdomstidslinje(organisasjonsnummer))
             .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
             .let { it.gjøreKortere(minOf(it.førsteSykepengedag() ?: LocalDate.MAX, spleisbøtte.tidligsteDato(organisasjonsnummer))) }
-    }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) != FØRSTEGANGSBEHANDLING
