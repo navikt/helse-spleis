@@ -2,13 +2,14 @@ package no.nav.helse.person
 
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -334,7 +335,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
-                utbetalinger = listOf(RefusjonTilArbeidsgiver(17.januar(2017), 20.januar(2017), 1000, 100, ORGNUMMER)),
+                utbetalinger = listOf(RefusjonTilArbeidsgiver(17.januar(2017), 20.januar(2017), 1000.daglig,  100.prosent,  ORGNUMMER)),
                 inntektshistorikk = listOf(
                     Utbetalingshistorikk.Inntektsopplysning(1.januar(2017), 31000.månedlig, ORGNUMMER, true)
                 ),

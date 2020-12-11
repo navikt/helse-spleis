@@ -9,6 +9,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -151,13 +152,13 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000, 100, ORGNUMMER),
+            1.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
@@ -189,7 +190,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000, 100, ORGNUMMER),
+            1.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 
@@ -204,7 +205,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000, 100, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 

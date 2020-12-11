@@ -1,12 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.Ferie
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.Ferie
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -109,9 +111,9 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `sykedag på fredag og feriedag på fredag`() {
         historie(
-            RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000.daglig,  100.prosent,  AG1),
             Ferie(15.januar, 19.januar),
-            RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000.daglig,  100.prosent,  AG1),
         )
 
         assertEquals(null, skjæringstidspunkt(1.januar))
@@ -124,9 +126,9 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `skjæringstidspunkt med flere arbeidsgivere`() {
         historie(
-            RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(2.januar, 12.januar, 1000.daglig,  100.prosent,  AG1),
             Ferie(15.januar, 19.januar),
-            RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000, 100, AG2),
+            RefusjonTilArbeidsgiver(22.januar, 31.januar, 1000.daglig,  100.prosent,  AG2),
         )
 
         assertEquals(null, skjæringstidspunkt(1.januar))
@@ -139,7 +141,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `skjæringstidspunkt med avviste, foreldet og feriedager`() {
         historie(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1000.daglig,  100.prosent,  AG1),
             Ferie(8.januar, 12.januar)
         )
         historie.add(AG1, foreldetdager(15. januar, 19.januar))
@@ -153,7 +155,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `skjæringstidspunkt brytes opp av arbeidsdag`() {
         historie(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1000, 100, AG1),
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1000.daglig,  100.prosent,  AG1),
             Ferie(8.januar, 12.januar)
         )
         historie.add(AG1, foreldetdager(15. januar, 19.januar))
@@ -168,7 +170,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     fun `innledende ferie som avsluttes på fredag`() {
         historie(
             Ferie(1.januar, 5.januar),
-            RefusjonTilArbeidsgiver(8.januar, 12.januar, 1000, 100, AG1)
+            RefusjonTilArbeidsgiver(8.januar, 12.januar, 1000.daglig,  100.prosent,  AG1)
         )
 
         assertEquals(8.januar, skjæringstidspunkt(12.januar))
@@ -177,8 +179,8 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `avgrenset periode for en arbeidsgiver`() {
         historie(
-            RefusjonTilArbeidsgiver(1.januar, 20.januar, 1000, 100, AG1),
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000, 100, AG2),
+            RefusjonTilArbeidsgiver(1.januar, 20.januar, 1000.daglig,  100.prosent,  AG1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000.daglig,  100.prosent,  AG2),
         )
         historie.add(AG1, sykedager(1.februar, 28.februar))
         assertEquals(1.februar til 28.februar, historie.avgrensetPeriode(AG1, 1.februar til 28.februar))
@@ -187,7 +189,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     @Test
     fun `avgrenset periode går ikke lengre tilbake enn skjæringstidspunkt for arbeidsgiveren`() {
         historie(
-            RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000, 100, AG1)
+            RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig,  100.prosent,  AG1)
         )
         historie.add(AG1, sykedager(1.januar, 16.januar))
         historie.add(AG1, sykedager(2.februar, 28.februar))

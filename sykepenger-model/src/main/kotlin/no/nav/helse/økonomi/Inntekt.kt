@@ -29,7 +29,7 @@ class Inntekt private constructor(private val årlig: Double, private val erDekn
 
         internal val Number.årlig get() = Inntekt(this.toDouble())
 
-        internal val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
+        val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
         internal fun List<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 

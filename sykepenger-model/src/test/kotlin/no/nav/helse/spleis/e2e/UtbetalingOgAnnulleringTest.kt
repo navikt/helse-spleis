@@ -8,6 +8,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -343,8 +344,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         }
-        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000, 100, ORGNUMMER))
-        håndterYtelser(3.vedtaksperiode, Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000, 100, ORGNUMMER))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000.daglig,   100.prosent,   ORGNUMMER))
+        håndterYtelser(3.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.juli, 31.juli, 1000.daglig,   100.prosent,   ORGNUMMER))
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode)

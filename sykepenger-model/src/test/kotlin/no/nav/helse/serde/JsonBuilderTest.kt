@@ -378,11 +378,11 @@ class JsonBuilderTest {
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     utbetalinger = listOf(
-                        Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
+                        Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),
                             tom = 31.januar.minusYears(1),
-                            dagsats = 31000,
-                            grad = 100,
+                            inntekt = 31000.månedlig,
+                            grad = 100.prosent,
                             orgnummer = orgnummer
                         )
                     ),

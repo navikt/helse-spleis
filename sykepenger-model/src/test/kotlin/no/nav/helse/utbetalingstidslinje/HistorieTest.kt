@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.*
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.person.Person
@@ -11,6 +11,8 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -38,11 +40,11 @@ internal abstract class HistorieTest {
         historie = Historie()
     }
 
-    protected fun refusjon(fom: LocalDate, tom: LocalDate, dagsats: Int = 1000, grad: Int = 100, orgnr: String = AG1) =
-        RefusjonTilArbeidsgiver(fom, tom, dagsats, grad, orgnr)
+    protected fun refusjon(fom: LocalDate, tom: LocalDate, intekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+        RefusjonTilArbeidsgiver(fom, tom, intekt, grad, orgnr)
 
-    protected fun bruker(fom: LocalDate, tom: LocalDate, dagsats: Int = 1000, grad: Int = 100, orgnr: String = AG1) =
-        Utbetaling(fom, tom, dagsats, grad, orgnr)
+    protected fun bruker(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+        Utbetaling(fom, tom, inntekt, grad, orgnr)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
         Ferie(fom, tom)
@@ -67,7 +69,7 @@ internal abstract class HistorieTest {
 
     protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
-    protected fun historie(vararg perioder: Periode) {
+    protected fun historie(vararg perioder: Infotrygdperiode) {
         historie = Historie(
             Person(AKTØRID, FNR),
             Utbetalingshistorikk(

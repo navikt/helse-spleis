@@ -5,13 +5,15 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class UtbetalingshistorikkPeriodeTest {
+class UtbetalingshistorikkInfotrygdperiodeTest {
     private companion object {
         private val EN_PERIODE = Periode(1.mars, 1.mars)
         private const val ORGNUMMER = "987654321"
@@ -27,14 +29,14 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `ugyldig periode`() {
         assertDoesNotThrow {
-            Utbetalingshistorikk.Periode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
+            Utbetalingshistorikk.Infotrygdperiode.Ugyldig(2.januar, 1.januar).valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         }
         assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(1.januar, 1.januar, 1234, 100, ORGNUMMER)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.januar, 1.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         periode.valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -48,7 +50,7 @@ class UtbetalingshistorikkPeriodeTest {
     @Test
     fun `ReduksjonArbeidsgiverRefusjon mappes til utbetalingstidslinje`() {
         val periode =
-            Utbetalingshistorikk.Periode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234, 100, ORGNUMMER)
+            Utbetalingshistorikk.Infotrygdperiode.ReduksjonArbeidsgiverRefusjon(1.januar, 1.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         periode.valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -61,7 +63,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Utbetaling mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Utbetaling(1.januar, 1.januar, 1234, 100, "81549300")
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.januar, 1.januar, 1234.daglig, 100.prosent, "81549300")
         periode.valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -74,7 +76,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `ReduksjonMedlem mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.ReduksjonMedlem(1.januar, 1.januar, 1234, 100, "81549300")
+        val periode = Utbetalingshistorikk.Infotrygdperiode.ReduksjonMedlem(1.januar, 1.januar, 1234.daglig, 100.prosent, "81549300")
         periode.valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -87,7 +89,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Ferie mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Ferie(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Ferie(1.januar, 1.januar)
         periode.valider(aktivitetslogg, EN_PERIODE, ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -100,7 +102,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Etterbetaling mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Etterbetaling(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Etterbetaling(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -113,7 +115,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `KontertRegnskap mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.KontertRegnskap(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.KontertRegnskap(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -126,7 +128,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Tilbakeført mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Tilbakeført(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Tilbakeført(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -139,7 +141,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Konvertert mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Konvertert(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Konvertert(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -152,7 +154,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Opphold mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Opphold(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Opphold(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -165,7 +167,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Sanksjon mappes til utbetalingstidslinje`() {
-        val periode = Utbetalingshistorikk.Periode.Sanksjon(1.januar, 1.januar)
+        val periode = Utbetalingshistorikk.Infotrygdperiode.Sanksjon(1.januar, 1.januar)
         periode.valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         val tidslinje = periode.tidslinje()
 
@@ -178,14 +180,14 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Ukjent lager warning`() {
-        Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar).valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
+        Utbetalingshistorikk.Infotrygdperiode.Ukjent(1.januar, 1.januar).valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
     fun `Ukjent mappes til tom utbetalingstidslinje`() {
-        val tidslinje = Utbetalingshistorikk.Periode.Ukjent(1.januar, 1.januar)
+        val tidslinje = Utbetalingshistorikk.Infotrygdperiode.Ukjent(1.januar, 1.januar)
             .tidslinje()
         val inspektør = Inspektør().apply { tidslinje.accept(this) }
         assertNull(inspektør.førsteDag)
@@ -194,7 +196,7 @@ class UtbetalingshistorikkPeriodeTest {
 
     @Test
     fun `Ugyldig lager error`() {
-        Utbetalingshistorikk.Periode.Ugyldig(1.januar, null).valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
+        Utbetalingshistorikk.Infotrygdperiode.Ugyldig(1.januar, null).valider(aktivitetslogg, Periode(1.januar, 1.januar), ORGNUMMER)
         assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 

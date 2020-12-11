@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -37,21 +38,17 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.desember(2017),
-                31.desember(2017),
-                15000,
-                100,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
+                1.desember(2017), 31.desember(2017), 15000.daglig,
+                100.prosent,
                 ORGNUMMER
             )
         )
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver(
-                1.desember(2017),
-                31.desember(2017),
-                15000,
-                100,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
+                1.desember(2017), 31.desember(2017), 15000.daglig,
+                100.prosent,
                 ORGNUMMER
             ),
             statslønn = true

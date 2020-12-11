@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -14,9 +14,6 @@ import java.time.LocalDateTime
 
 internal class ForkastingTest : AbstractEndToEndTest() {
 
-    //FIXME: Fjernes når alle Doubles byttes ut med Inntekt
-    private val INNTEKT_AS_INT = 31000
-
     private val a2 = "arbeidsgiver 2"
     private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
 
@@ -26,12 +23,12 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT_AS_INT, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER),
             inntektshistorikk = emptyList()
         )
         håndterYtelser(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT_AS_INT, 100, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER),
             inntektshistorikk = emptyList()
         )
         assertTrue(inspektør.utbetalinger.isEmpty())

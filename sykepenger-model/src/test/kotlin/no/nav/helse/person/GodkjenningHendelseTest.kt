@@ -95,7 +95,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
+        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {

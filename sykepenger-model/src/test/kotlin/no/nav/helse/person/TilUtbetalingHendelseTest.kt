@@ -217,7 +217,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
 
     private fun ytelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Utbetalingshistorikk.Periode> = emptyList(),
+        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {

@@ -3,8 +3,8 @@ package no.nav.helse.serde.api
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
-import no.nav.helse.hendelser.Utbetalingshistorikk.Periode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
@@ -1357,7 +1357,7 @@ class SpeilBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = listOf(
-                RefusjonTilArbeidsgiver(fom = fom, tom = tom, dagsats = 31000, grad = 100, orgnummer = orgnummer)
+                RefusjonTilArbeidsgiver(fom, tom, 31000.månedlig, 100.prosent, orgnummer)
             ),
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk
