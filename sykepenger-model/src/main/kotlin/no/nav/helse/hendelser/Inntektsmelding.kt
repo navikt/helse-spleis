@@ -157,7 +157,7 @@ class Inntektsmelding(
             ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.")
+            warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
 
         inntektshistorikk.add(
@@ -174,7 +174,7 @@ class Inntektsmelding(
             ?: return
 
         if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag oppgitt i inntektsmeldingen er ulik den systemet har beregnet. Vurder hvilken inntektsmelding som skal legges til grunn, og utbetal kun hvis dagsatsen er korrekt i forhold til denne.")
+            warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
 
         inntektshistorikk {
