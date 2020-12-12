@@ -330,7 +330,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(26.januar, utbetalingslinje.tom)
-        assertEquals(8586, utbetalingslinje.beløp)
+        assertEquals(0, utbetalingslinje.beløp)
         assertEquals(100.0, utbetalingslinje.grad)
     }
 
@@ -363,7 +363,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertEquals("tbd@nav.no", annullering.saksbehandlerEpost)
         assertEquals(19.januar, utbetalingslinje.fom)
         assertEquals(20.februar, utbetalingslinje.tom)
-        assertEquals(32913, utbetalingslinje.beløp)
+        assertEquals(0, utbetalingslinje.beløp)
         assertEquals(100.0, utbetalingslinje.grad)
     }
 

@@ -50,14 +50,13 @@ internal class Utbetalingslinje internal constructor(
     }
 
     internal fun datoStatusFom() = datoStatusFom
-    internal fun totalbeløp() = beløp?.let { it * antallDager() } ?: 0
+    internal fun totalbeløp() = beløp?.let { it * stønadsdager() } ?: 0
+    internal fun stønadsdager() = if (!erOpphør()) filterNot(LocalDate::erHelg).size else 0
 
     internal fun dager() = fom
         .datesUntil(tom.plusDays(1))
         .filter { !it.erHelg() }
         .toList()
-
-    private fun antallDager() = dager().size
 
     override fun equals(other: Any?) = other is Utbetalingslinje && this.equals(other)
 

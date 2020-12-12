@@ -30,11 +30,15 @@ enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
 }
 
 internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
+    private val arbeidsgiverOppdrag: Oppdrag = utbetaling["arbeidsgiverOppdrag"]
+    private val personOppdrag: Oppdrag = utbetaling["personOppdrag"]
+
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "id" to utbetaling["id"],
         "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
-        "arbeidsgiverOppdrag" to OppdragReflect(utbetaling["arbeidsgiverOppdrag"]).toMap(),
-        "personOppdrag" to OppdragReflect(utbetaling["personOppdrag"]).toMap(),
+        "arbeidsgiverOppdrag" to OppdragReflect(arbeidsgiverOppdrag).toMap(),
+        "personOppdrag" to OppdragReflect(personOppdrag).toMap(),
+        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()),
         "tidsstempel" to utbetaling["tidsstempel"],
         "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")),
         "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
@@ -76,7 +80,8 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
         "endringskode" to oppdrag.get<Endringskode>("endringskode").toString(),
         "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
         "tidsstempel" to oppdrag["tidsstempel"],
-        "nettoBeløp" to oppdrag["nettoBeløp"]
+        "nettoBeløp" to oppdrag["nettoBeløp"],
+        "stønadsdager" to oppdrag.stønadsdager()
     )
 }
 
@@ -89,12 +94,14 @@ internal class UtbetalingslinjeReflect(private val utbetalingslinje: Utbetalings
         "lønn" to utbetalingslinje["aktuellDagsinntekt"], // TODO: change "lønn" to "aktuellDagsinntekt",
                                                           //    but needs JSON migration and change in Need apps
         "grad" to utbetalingslinje["grad"],
-        "refFagsystemId" to utbetalingslinje["refFagsystemId"],
-        "delytelseId" to utbetalingslinje["delytelseId"],
-        "datoStatusFom" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.toString(),
-        "statuskode" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.let { "OPPH" },
-        "refDelytelseId" to utbetalingslinje["refDelytelseId"],
+        "stønadsdager" to utbetalingslinje.stønadsdager(),
+        "totalbeløp" to utbetalingslinje.totalbeløp(),
         "endringskode" to utbetalingslinje.get<Endringskode>("endringskode").toString(),
+        "delytelseId" to utbetalingslinje["delytelseId"],
+        "refDelytelseId" to utbetalingslinje["refDelytelseId"],
+        "refFagsystemId" to utbetalingslinje["refFagsystemId"],
+        "statuskode" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.let { "OPPH" },
+        "datoStatusFom" to utbetalingslinje.get<LocalDate?>("datoStatusFom")?.toString(),
         "klassekode" to utbetalingslinje.get<Klassekode>("klassekode").verdi
     )
 }

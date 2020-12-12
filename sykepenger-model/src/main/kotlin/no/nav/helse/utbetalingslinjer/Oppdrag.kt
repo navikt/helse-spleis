@@ -84,6 +84,7 @@ internal class Oppdrag private constructor(
     }
 
     internal fun totalbeløp() = linjerUtenOpphør().sumBy { it.totalbeløp() }
+    internal fun stønadsdager() = sumBy { it.stønadsdager() }
 
     internal fun nettoBeløp() = nettoBeløp
 

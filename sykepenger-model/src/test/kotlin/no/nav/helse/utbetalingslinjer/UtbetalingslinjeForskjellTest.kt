@@ -29,11 +29,32 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun stønadsdager() {
+        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().also {
+            assertEquals(5, it.stønadsdager())
+            assertEquals(2500, it.totalbeløp())
+        }
+        (1.januar to 7.januar dagsats 500).asUtbetalingslinje().also {
+            assertEquals(5, it.stønadsdager())
+            assertEquals(2500, it.totalbeløp())
+        }
+        (1.januar to 8.januar dagsats 500).asUtbetalingslinje().also {
+            assertEquals(6, it.stønadsdager())
+            assertEquals(3000, it.totalbeløp())
+        }
+        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().deletion(1.januar).also {
+            assertEquals(0, it.stønadsdager())
+            assertEquals(0, it.totalbeløp())
+        }
+    }
+
+    @Test
     fun `helt separate utbetalingslinjer`() {
         val original = linjer(1.januar to 5.januar)
         val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
+        assertEquals(5, actual.stønadsdager())
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -57,6 +78,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(30, actual.stønadsdager())
         assertEquals(ENDR, actual.endringskode)
         assertNyLinje(actual[0], original.last())
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
@@ -69,6 +91,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 13.januar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
+        assertEquals(10, actual.stønadsdager())
         assertEquals(ENDR, actual.endringskode)
         assertEndretLinje(actual[0], original[0])
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
@@ -91,6 +114,7 @@ internal class UtbetalingslinjeForskjellTest {
         val recalculated = linjer(1.januar to 5.januar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 5.januar), actual)
+        assertEquals(5, actual.stønadsdager())
         assertUendretLinje(actual[0])
     }
 
@@ -725,6 +749,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
         assertOpphør(actual[0], 1.januar, original.last())
+        assertEquals(0, actual.stønadsdager())
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 

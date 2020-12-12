@@ -81,9 +81,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "ANNULLERT")
-        val annulleringsmelding = (0 until testRapid.inspektør.antall()).map {
-            testRapid.inspektør.melding(it)
-        }.first { it.path("@event_name").asText() == "utbetaling_annullert" }
+        val annulleringsmelding = testRapid.inspektør.siste("utbetaling_annullert")
 
         assertEquals(UNG_PERSON_FNR_2018, annulleringsmelding.path("fødselsnummer").asText())
         assertEquals(AKTØRID, annulleringsmelding.path("aktørId").asText())
@@ -200,9 +198,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             utbetalingOK = true
         )
 
-        val meldinger = 0.until(testRapid.inspektør.antall()).map(testRapid.inspektør::melding)
-        val utbetalingAnnullert =
-            requireNotNull(meldinger.firstOrNull { it["@event_name"]?.asText() == "utbetaling_annullert" })
+        val utbetalingAnnullert = testRapid.inspektør.siste("utbetaling_annullert")
 
         assertEquals(fagsystemId, utbetalingAnnullert["fagsystemId"].asText())
         assertEquals("siri.saksbehandler@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
@@ -210,7 +206,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(19.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["fom"].asText())
         assertEquals(26.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["tom"].asText())
-        assertEquals(8586, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
+        assertEquals(0, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
         assertEquals(100, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
     }
 
@@ -230,9 +226,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendUtbetaling(utbetalingOK = true)
 
-        val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
-
-        assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
+        val utbetaltEvent = testRapid.inspektør.siste("utbetalt")
         assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
         assertEquals("SYSTEM", utbetaltEvent["godkjentAv"].textValue())
     }
@@ -253,9 +247,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendUtbetaling(utbetalingOK = true)
 
-        val utbetaltEvent = testRapid.inspektør.let { it.melding(it.antall() - 1) }
-
-        assertEquals("utbetalt", utbetaltEvent["@event_name"].textValue())
+        val utbetaltEvent = testRapid.inspektør.siste("utbetalt")
         assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
         assertEquals("O123456", utbetaltEvent["godkjentAv"].textValue())
     }

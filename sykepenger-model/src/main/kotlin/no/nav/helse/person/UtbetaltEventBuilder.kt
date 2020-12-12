@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver.UtbetaltEvent
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -162,7 +161,7 @@ private class UtbetaltEventBuilder(
                 dagsats = dagsats,
                 beløp = beløp!!,
                 grad = grad,
-                sykedager = linje.filterNot { it.erHelg() }.count()
+                sykedager = linje.stønadsdager()
             )
         )
     }
