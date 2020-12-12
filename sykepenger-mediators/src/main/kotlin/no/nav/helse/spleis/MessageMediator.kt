@@ -8,6 +8,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.*
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
+import java.sql.SQLException
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
@@ -67,6 +68,8 @@ internal class MessageMediator(
         } catch (err: JsonMigrationException) {
             severeErrorHandler(err, message)
         } catch (err: DeserializationException) {
+            severeErrorHandler(err, message)
+        } catch (err: SQLException) {
             severeErrorHandler(err, message)
         } catch (err: Exception) {
             errorHandler(err, message)
