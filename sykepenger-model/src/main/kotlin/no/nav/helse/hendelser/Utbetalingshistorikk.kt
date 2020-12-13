@@ -257,6 +257,10 @@ class Utbetalingshistorikk(
                 oldtid.add(tidslinje = tidslinje())
                 oldtid.add(tidslinje = sykdomstidslinje())
             }
+
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
+                if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
+            }
         }
 
         class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
@@ -264,6 +268,10 @@ class Utbetalingshistorikk(
             override fun append(oldtid: Historie.Historikkbøtte) {
                 oldtid.add(tidslinje = tidslinje())
                 oldtid.add(tidslinje = sykdomstidslinje())
+            }
+
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
+                if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
             }
         }
 
