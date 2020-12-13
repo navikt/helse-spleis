@@ -45,8 +45,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
             is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
             is InntektsmeldingMessage -> INNTEKTSMELDING
-            is PåminnelseMessage -> PÅMINNELSE
-            is PersonPåminnelseMessage -> PERSONPÅMINNELSE
+            is PåminnelseMessage -> return // ignore
+            is PersonPåminnelseMessage -> return // ignore
             is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
             is YtelserMessage -> YTELSER
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
