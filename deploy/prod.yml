@@ -21,11 +21,11 @@ spec:
       cpu: 2000m
       memory: 4Gi
     requests:
-      cpu: 50m
+      cpu: 500m
       memory: 2Gi
   replicas:
     min: 1
-    max: 3
+    max: 6
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
