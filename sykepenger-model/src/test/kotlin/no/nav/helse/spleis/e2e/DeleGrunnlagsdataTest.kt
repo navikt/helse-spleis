@@ -1,12 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.TilstandType.*
@@ -91,7 +88,17 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER)
         )
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER))
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    1.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
@@ -120,7 +127,17 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
         håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER))
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    17.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)

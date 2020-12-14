@@ -1,7 +1,13 @@
 package no.nav.helse
 
-sealed class Toggles(var enabled: Boolean = false) {
+sealed class Toggles(enabled: Boolean = false, private val force: Boolean = false) {
+    var enabled = enabled
+        set(value) {
+            if (!force) field = value
+        }
+
     private fun runWith(enable: Boolean, block: () -> Unit) {
+        if (force) return block()
         val prev = this.enabled
         this.enabled = enable
         try {

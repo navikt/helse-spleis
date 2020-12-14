@@ -74,9 +74,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100.daglig,  100.prosent,  ORGNUMMER),
             RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(18.mars(2019), INNTEKT, ORGNUMMER,true),
-                Utbetalingshistorikk.Inntektsopplysning(2.mars(2018), INNTEKT, ORGNUMMER,true),
-                Utbetalingshistorikk.Inntektsopplysning(28.oktober(2017), INNTEKT, ORGNUMMER,true)
+                Utbetalingshistorikk.Inntektsopplysning(3.april(2019), INNTEKT, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(18.mars(2018), INNTEKT, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(13.november(2017), INNTEKT, ORGNUMMER, true)
             )
         )
         håndterSimulering(1.vedtaksperiode)
@@ -335,25 +335,21 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.desember(2019), 5.januar(2020), 80.prosent))
         håndterSøknad(
             Egenmelding(18.september(2019), 20.september(2019)),
-            Sykdom(21.desember(2019), 5.januar(2020), 80.prosent)
+            Sykdom(21.desember(2019), 8.januar(2020), 80.prosent)
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(
-                Periode(18.september(2019), 20.september(2019)),
-                Periode(21.september(2019), 22.september(2019)),
-                Periode(23.september(2019), 30.september(2019)),
-                Periode(1.oktober(2019), 2.oktober(2019)),
-                Periode(8.oktober(2019), 8.oktober(2019)) // grad for 8. oktober is NaN
+                24.desember(2019) til 26.desember(2019),
+                28.desember(2019) til 29.desember(2019),
+                31.desember(2019) til 8.januar(2020)
             ),
             ferieperioder = listOf(
-                Periode(3.oktober(2019), 7.oktober(2019)),
                 Periode(9.desember(2019), 23.desember(2019)),
                 Periode(27.desember(2019), 27.desember(2019)),
                 Periode(30.desember(2019), 30.desember(2019))
             ),
             førsteFraværsdag = 24.desember(2019)
         )
-        // Sykedag beats IM Feriedag; 21 Desember to 5 Januar is another employer period!
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode) // No history
 
@@ -367,7 +363,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
     }
 
@@ -1069,16 +1065,28 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.august(2020), 13.september(2020), 100.prosent)) // Denne blir ignorert
         håndterSøknad(Sykdom(20.august(2020), 13.september(2020), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(14.september(2020), 20.september(2020), 100.prosent)) // Dette fører til ukjent-dager i sykdomshistorikken mellom 6.9. og 14.9.
+        håndterSykmelding(
+            Sykmeldingsperiode(
+                14.september(2020),
+                20.september(2020),
+                100.prosent
+            )
+        ) // Dette fører til ukjent-dager i sykdomshistorikken mellom 6.9. og 14.9.
         håndterSøknad(Sykdom(14.september(2020), 20.september(2020), 100.prosent))
 
-        person = SerialisertPerson(person.serialize().json).deserialize() // Må gjøre serde for å få gjenskapt at ukjent-dager blir *instansiert* i sykdomshistorikken
+        person =
+            SerialisertPerson(person.serialize().json).deserialize() // Må gjøre serde for å få gjenskapt at ukjent-dager blir *instansiert* i sykdomshistorikken
 
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GAP, LocalDateTime.now().minusDays(200)) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
+        håndterPåminnelse(
+            1.vedtaksperiode,
+            AVVENTER_GAP,
+            LocalDateTime.now().minusDays(200)
+        ) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
 
         val historikk = RefusjonTilArbeidsgiver(27.juli(2020), 13.september(2020), 1000.daglig,  100.prosent,  ORGNUMMER)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        val inntekt = listOf(Utbetalingshistorikk.Inntektsopplysning(27.juli(2020), INNTEKT, ORGNUMMER, true))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
 
         assertEquals(40, 248 - inspektør.gjenståendeSykedager(2.vedtaksperiode))
     }
@@ -1112,7 +1120,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`(){
+    fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))

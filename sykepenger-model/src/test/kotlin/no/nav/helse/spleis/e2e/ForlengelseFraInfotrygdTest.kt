@@ -74,13 +74,12 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `forlenger vedtaksperiode som har gått til infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER)
-        val inntektshistorikk = listOf(Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(3.januar, INNTEKT, ORGNUMMER, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
-        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
@@ -109,7 +108,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             førsteFraværsdag = 29.januar
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterYtelser(
+            2.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    3.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
@@ -166,7 +175,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    1.januar,
+                    3.januar,
                     INNTEKT,
                     ORGNUMMER,
                     true
@@ -178,7 +187,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    1.januar,
+                    3.januar,
                     INNTEKT,
                     ORGNUMMER,
                     true
@@ -401,15 +410,34 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterYtelser(
+            2.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    3.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100.prosent))
-        håndterYtelser(3.vedtaksperiode, historikk)
+        håndterYtelser(
+            3.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    3.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
@@ -450,7 +478,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             førsteFraværsdag = 29.januar
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterYtelser(
+            2.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    3.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -460,7 +498,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         }
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100.prosent))
-        håndterYtelser(3.vedtaksperiode, historikk)
+        håndterYtelser(
+            3.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    3.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
@@ -501,12 +549,12 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-            inntektshistorikk = listOf(Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
+            inntektshistorikk = listOf(Inntektsopplysning(11.juni(2020), INNTEKT, ORGNUMMER, true))
         )
         håndterYtelser(
             2.vedtaksperiode,
             RefusjonTilArbeidsgiver(11.juni(2020), 21.juni(2020), 1000.daglig,  100.prosent,  ORGNUMMER),
-            inntektshistorikk = listOf(Inntektsopplysning(26.mai(2020), INNTEKT, ORGNUMMER, true))
+            inntektshistorikk = listOf(Inntektsopplysning(11.juni(2020), INNTEKT, ORGNUMMER, true))
         )
         inspektør.apply {
             assertTrue(etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
@@ -581,7 +629,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig,  100.prosent,  ORGNUMMER))
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(
+                    17.januar(2018),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

@@ -101,8 +101,17 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
-        håndterYtelser(1.vedtaksperiode, historikk)
-        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    3.januar(2018),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
@@ -127,8 +136,17 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
-        håndterYtelser(1.vedtaksperiode, historikk)
-        håndterYtelser(1.vedtaksperiode, historikk)
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    3.januar(2018),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(
@@ -142,7 +160,17 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterYtelser(
+            2.vedtaksperiode, utbetalinger = arrayOf(historikk),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    3.januar(2018),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(2.vedtaksperiode)
 
         assertEquals(

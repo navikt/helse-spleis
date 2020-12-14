@@ -141,7 +141,6 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private fun implisittDag(dagen: LocalDate) = if (dagen.erHelg()) fridag(dagen) else arbeidsdag(dagen)
 
     private fun sykedag(dagen: LocalDate, økonomi: Økonomi) {
-        if (forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode += 16
         if (arbeidsgiverperiodeGjennomført(dagen))
             tilstand.sykedagerEtterArbeidsgiverperioden(this, dagen, økonomi)
         else

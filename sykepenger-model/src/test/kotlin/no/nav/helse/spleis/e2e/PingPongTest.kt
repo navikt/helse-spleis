@@ -24,7 +24,17 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk1)
-        håndterYtelser(1.vedtaksperiode, historikk1)
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(historikk1),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    20.november(2019),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -36,7 +46,17 @@ internal class PingPongTest : AbstractEndToEndTest() {
             Sykdom(22.juni(2020), 9.juli(2020), 100.prosent)
         )
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk1)
-        håndterYtelser(2.vedtaksperiode, historikk1)
+        håndterYtelser(
+            2.vedtaksperiode, utbetalinger = arrayOf(historikk1),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    20.november(2019),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusWeeks(2))
 
@@ -45,7 +65,23 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk2)
-        håndterYtelser(3.vedtaksperiode, historikk2, historikk1)
+        håndterYtelser(
+            3.vedtaksperiode, utbetalinger = arrayOf(historikk1, historikk2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    20.november(2019),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                ),
+                Utbetalingshistorikk.Inntektsopplysning(
+                    22.juni(2020),
+                    1000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

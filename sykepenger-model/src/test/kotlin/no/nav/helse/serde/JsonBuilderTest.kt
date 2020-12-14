@@ -389,7 +389,7 @@ class JsonBuilderTest {
                         )
                     ),
                     inntektshistorikk = listOf(
-                        Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 25000.månedlig, orgnummer, true)
+                        Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 25000.månedlig, orgnummer, true)
                     ),
                     aktivitetslogg = it
                 ),

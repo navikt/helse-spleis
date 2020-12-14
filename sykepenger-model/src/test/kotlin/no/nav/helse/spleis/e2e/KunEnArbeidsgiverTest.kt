@@ -40,7 +40,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -75,7 +75,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -106,7 +106,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -153,7 +153,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(14, it.dagtelling[Sykedag::class])
@@ -203,7 +203,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 8.januar, it)
             assertEquals(7, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[SykHelgedag::class])
             assertEquals(13, it.dagtelling[Sykedag::class])
@@ -243,7 +243,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(4, it.dagtelling[Sykedag::class])
             assertEquals(2, it.dagtelling[SykHelgedag::class])
@@ -271,7 +271,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -303,7 +303,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -340,7 +340,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
-            assertInntektForDato(INNTEKT, 2.januar, it)
+            assertInntektForDato(INNTEKT, 3.januar, it)
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.dagtelling[Sykedag::class])
             assertEquals(6, it.dagtelling[SykHelgedag::class])
@@ -830,8 +830,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER)
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    1.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
         )
         håndterSimulering(1.vedtaksperiode)
 
@@ -965,8 +972,15 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT,  100.prosent,  ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT,  100.prosent,  ORGNUMMER)
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    1.januar(2018),
+                    INNTEKT,
+                    ORGNUMMER,
+                    true
+                )
+            )
         )
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
@@ -996,7 +1010,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterYtelser(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT,  100.prosent,  ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
         )
 
         inspektør.also {
@@ -1824,7 +1839,17 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Ferie(28.juni, 30.juni))
         håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig,  100.prosent,  ORGNUMMER))
-        håndterYtelser(1.vedtaksperiode, RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig,  100.prosent,  ORGNUMMER))
+        håndterYtelser(
+            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig, 100.prosent, ORGNUMMER)),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(
+                    3.juni(2018),
+                    15000.daglig,
+                    ORGNUMMER,
+                    true
+                )
+            )
+        )
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
@@ -2204,10 +2229,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Når inntektsmeldingens første fraværsdag er midt i en vedtaksperiode lagres inntekten på vedtaksperiodens skjæringstidspunkt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 12.januar, 100.prosent))
+
         håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent))
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
+            2.vedtaksperiode,
             RefusjonTilArbeidsgiver(1.november(2017), 20.november(2017), 200.daglig,  100.prosent,  ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(1.november(2017), 20000.månedlig, ORGNUMMER, true)
@@ -2216,14 +2244,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 3.februar)
 
         assertTilstander(
-            1.vedtaksperiode,
+            2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_GAP,
             AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP
         )
-        assertInntektForDato(INNTEKT, 1.januar, inspektør)
+        assertInntektForDato(INNTEKT, 1.februar, inspektør)
     }
 
     @Test
