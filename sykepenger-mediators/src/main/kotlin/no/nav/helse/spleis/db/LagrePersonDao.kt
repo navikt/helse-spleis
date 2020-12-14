@@ -28,7 +28,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
 
     private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
         using(sessionOf(dataSource)) { session ->
-            fjernEldreVersjoner(session, fødselsnummer)
+            // fjernEldreVersjoner(session, fødselsnummer)
             opprettNyPerson(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson)
         }.also {
             PostgresProbe.personSkrevetTilDb()
