@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -76,6 +77,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(oppdrag.path("fagområde").asText().isNotEmpty())
         assertTrue(oppdrag.path("endringskode").asText().isNotEmpty())
         assertTrue(oppdrag.path("stønadsdager").isInt)
+        assertDato(oppdrag.path("fom").asText())
+        assertDato(oppdrag.path("tom").asText())
         if (erAnnullering) {
             assertEquals(0, oppdrag.path("stønadsdager").asInt())
         }

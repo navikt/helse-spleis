@@ -44,6 +44,8 @@ internal class UtbetalingReflectTest {
             )
         ).toMap()
         assertEquals(4, map["stønadsdager"])
+        assertEquals(1.januar, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["fom"])
+        assertEquals(4.januar, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["tom"])
         assertEquals(4, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["stønadsdager"])
         assertEquals(0, map.getValue("personOppdrag").castAsMap<String, Any>()["stønadsdager"])
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")

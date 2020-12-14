@@ -81,7 +81,9 @@ internal class OppdragReflect(private val oppdrag: Oppdrag) {
         "sisteArbeidsgiverdag" to oppdrag["sisteArbeidsgiverdag"],
         "tidsstempel" to oppdrag["tidsstempel"],
         "nettoBeløp" to oppdrag["nettoBeløp"],
-        "stønadsdager" to oppdrag.stønadsdager()
+        "stønadsdager" to oppdrag.stønadsdager(),
+        "fom" to oppdrag.førstedato,
+        "tom" to oppdrag.sistedato
     )
 }
 
