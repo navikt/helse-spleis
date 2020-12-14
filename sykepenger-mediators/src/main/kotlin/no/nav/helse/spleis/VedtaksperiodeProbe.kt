@@ -21,8 +21,17 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
+    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         log.info(
+            "utbetaling endret {}, {}, {}",
+            keyValue("utbetalingId", "${event.utbetalingId}"),
+            keyValue("status", event.gjeldendeStatus),
+            keyValue("forrigeStatus", event.forrigeStatus)
+        )
+    }
+
+    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
+        log.debug(
             "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
             keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
             keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
