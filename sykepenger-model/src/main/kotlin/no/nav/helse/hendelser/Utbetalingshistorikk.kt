@@ -249,31 +249,13 @@ class Utbetalingshistorikk(
             inntekt: Inntekt,
             grad: Prosentdel,
             orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {}
+        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer)
 
-        class Utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
-            Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
-            override fun append(oldtid: Historie.Historikkbøtte) {
-                oldtid.add(tidslinje = tidslinje())
-                oldtid.add(tidslinje = sykdomstidslinje())
-            }
+        class Utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, orgnummer: String) :
+            Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer)
 
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
-                if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
-            }
-        }
-
-        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, fødselsnummer: String) :
-            Utbetalingsperiode(fom, tom, inntekt, grad, fødselsnummer) {
-            override fun append(oldtid: Historie.Historikkbøtte) {
-                oldtid.add(tidslinje = tidslinje())
-                oldtid.add(tidslinje = sykdomstidslinje())
-            }
-
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
-                if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
-            }
-        }
+        class ReduksjonMedlem(fom: LocalDate, tom: LocalDate, inntekt: Inntekt, grad: Prosentdel, orgnummer: String) :
+            Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer)
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje()
@@ -288,7 +270,7 @@ class Utbetalingshistorikk(
             }
         }
 
-        abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {}
+        abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom)
 
         class KontertRegnskap(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Etterbetaling(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)

@@ -43,8 +43,8 @@ internal abstract class HistorieTest {
     protected fun refusjon(fom: LocalDate, tom: LocalDate, intekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
         RefusjonTilArbeidsgiver(fom, tom, intekt, grad, orgnr)
 
-    protected fun bruker(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, fødselsnummer: String = FNR) =
-        Utbetaling(fom, tom, inntekt, grad, fødselsnummer)
+    protected fun bruker(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+        Utbetaling(fom, tom, inntekt, grad, orgnr)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
         Ferie(fom, tom)

@@ -29,8 +29,8 @@ internal class UtbetalingshistorikkMessage(packet: MessageDelegate) : BehovMessa
         val orgnummer = utbetaling["orgnummer"].asText()
         if (fom == null || tom == null || fom > tom) Infotrygdperiode.Ugyldig(fom, tom)
         else when (utbetaling["typeKode"].asText()) {
-            "0" -> Infotrygdperiode.Utbetaling(fom, tom, inntekt, grad, fødselsnummer)
-            "1" -> Infotrygdperiode.ReduksjonMedlem(fom, tom, inntekt, grad, fødselsnummer)
+            "0" -> Infotrygdperiode.Utbetaling(fom, tom, inntekt, grad, orgnummer)
+            "1" -> Infotrygdperiode.ReduksjonMedlem(fom, tom, inntekt, grad, orgnummer)
             "2", "3" -> Infotrygdperiode.Etterbetaling(fom, tom)
             "4" -> Infotrygdperiode.KontertRegnskap(fom, tom)
             "5" -> Infotrygdperiode.RefusjonTilArbeidsgiver(fom, tom, inntekt, grad, orgnummer)
