@@ -67,9 +67,9 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
 
     private fun fjernEldreVersjoner(session: Session, fødselsnummer: String, beholdAntall: Int = 3) {
         val now = LocalTime.now()
-        val kl5 = LocalTime.of(5, 0, 0)
+        val midnatt = LocalTime.MIDNIGHT
         val kl18 = LocalTime.of(18, 0, 0)
-        if (now in kl5..kl18) return
+        if (now in midnatt..kl18) return
         @Language("PostreSQL")
         val statement = """
             DELETE FROM person WHERE fnr=:fnr AND id NOT IN(
