@@ -21,11 +21,11 @@ import java.time.YearMonth
 import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
-    fun preVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
+    fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
-    fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {}
+    fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {}
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {

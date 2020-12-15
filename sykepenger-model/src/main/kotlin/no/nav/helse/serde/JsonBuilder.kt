@@ -52,6 +52,7 @@ internal class JsonBuilder(person: Person)  {
 
         override fun preVisitPerson(
             person: Person,
+            opprettet: LocalDateTime,
             aktørId: String,
             fødselsnummer: String
         ) {
@@ -88,6 +89,7 @@ internal class JsonBuilder(person: Person)  {
 
         override fun postVisitPerson(
             person: Person,
+            opprettet: LocalDateTime,
             aktørId: String,
             fødselsnummer: String
         ) {

@@ -36,7 +36,8 @@ internal data class PersonData(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsgivere: List<ArbeidsgiverData>,
-    private val aktivitetslogg: AktivitetsloggData?
+    private val aktivitetslogg: AktivitetsloggData?,
+    private val opprettet: LocalDateTime
 ) {
 
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
@@ -44,7 +45,7 @@ internal data class PersonData(
 
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
-        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg)
+        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet)
 
     internal fun createPerson(): Person {
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {

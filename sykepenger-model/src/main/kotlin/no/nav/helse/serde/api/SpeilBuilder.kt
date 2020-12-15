@@ -70,6 +70,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
 
         override fun preVisitPerson(
             person: Person,
+            opprettet: LocalDateTime,
             aktørId: String,
             fødselsnummer: String
         ) {
@@ -110,6 +111,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
 
         override fun postVisitPerson(
             person: Person,
+            opprettet: LocalDateTime,
             aktørId: String,
             fødselsnummer: String
         ) {

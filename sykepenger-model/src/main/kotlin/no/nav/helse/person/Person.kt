@@ -12,19 +12,21 @@ import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    internal val aktivitetslogg: Aktivitetslogg
+    internal val aktivitetslogg: Aktivitetslogg,
+    private val opprettet: LocalDateTime
 ) : Aktivitetskontekst {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now())
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -202,13 +204,13 @@ class Person private constructor(
     }
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, aktørId, fødselsnummer)
+        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
-        visitor.postVisitPerson(this, aktørId, fødselsnummer)
+        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

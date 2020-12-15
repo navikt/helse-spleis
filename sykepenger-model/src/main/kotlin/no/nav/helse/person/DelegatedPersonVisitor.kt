@@ -57,8 +57,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitAktivitetslogg(aktivitetslogg)
     }
 
-    override fun preVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {
-        delegatee.preVisitPerson(person, aktørId, fødselsnummer)
+    override fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {
+        delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer)
     }
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
@@ -73,8 +73,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitArbeidsgivere()
     }
 
-    override fun postVisitPerson(person: Person, aktørId: String, fødselsnummer: String) {
-        delegatee.postVisitPerson(person, aktørId, fødselsnummer)
+    override fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {
+        delegatee.postVisitPerson(person, opprettet, aktørId, fødselsnummer)
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {

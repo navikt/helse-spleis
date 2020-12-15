@@ -37,6 +37,16 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
 
     private fun opprettNyPerson(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
         @Language("PostreSQL")
+        val statement = "INSERT INTO unike_person (fnr, aktor_id) VALUES (:fnr, :aktor) ON CONFLICT DO NOTHING"
+        session.run(queryOf(statement, mapOf(
+            "fnr" to fødselsnummer.toLong(),
+            "aktor" to aktørId.toLong()
+        )).asExecute)
+        opprettNyPersonversjon(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson)
+    }
+
+    private fun opprettNyPersonversjon(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
+        @Language("PostreSQL")
         val statement = """
             INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data)
             VALUES (?, ?, ?, ?, (to_json(?::json)))
