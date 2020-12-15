@@ -270,11 +270,6 @@ internal class ØkonomiTest {
         assertUtbetaling(b, 233, 0)
     }
 
-    @Test fun `Beregner ikke dekningsgrad av allerede dekningsgradberegnet inntekt`() {
-        val dekningsgradberegnetInntekt = 1000.månedlig.dekningsgrunnlag(ArbeidsgiverRegler.Companion.NormalArbeidstaker)
-        assertSame(dekningsgradberegnetInntekt, dekningsgradberegnetInntekt.dekningsgrunnlag(ArbeidsgiverRegler.Companion.NormalArbeidstaker))
-    }
-
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Int, expectedPerson: Int) {
         økonomi.reflection { _, _, _, _, _, arbeidsgiverbeløp, personbeløp, _ ->
             assertEquals(expectedArbeidsgiver, arbeidsgiverbeløp, "arbeidsgiverbeløp problem")

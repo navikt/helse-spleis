@@ -4,7 +4,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
-class Inntekt private constructor(private val årlig: Double, private val erDekningsgrunnlag: Boolean = false) : Comparable<Inntekt> {
+class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
 
     init {
         require(
@@ -58,8 +58,7 @@ class Inntekt private constructor(private val årlig: Double, private val erDekn
 
     internal fun rundTilDaglig() = Inntekt((årlig / ARBEIDSDAGER_PER_ÅR).roundToInt() * ARBEIDSDAGER_PER_ÅR.toDouble())
 
-    internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler) = if (erDekningsgrunnlag) this
-    else Inntekt(this.årlig * regler.dekningsgrad(), true)
+    internal fun dekningsgrunnlag(regler: ArbeidsgiverRegler) = Inntekt(this.årlig * regler.dekningsgrad())
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 
