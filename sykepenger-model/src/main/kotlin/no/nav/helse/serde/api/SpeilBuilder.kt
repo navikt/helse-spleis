@@ -32,8 +32,7 @@ import kotlin.math.roundToInt
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
-    val jsonBuilder = SpeilBuilder(hendelser)
-    person.accept(jsonBuilder)
+    val jsonBuilder = SpeilBuilder(person, hendelser)
     return jsonBuilder.toJson().also {
         it.arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>().forEach { vedtaksperiode ->
@@ -46,401 +45,27 @@ fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = empty
     }
 }
 
-internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVisitor {
+internal class SpeilBuilder(person: Person, private val hendelser: List<HendelseDTO>) {
 
-    private val stack: Stack<JsonState> = Stack()
     private val rootState = Root()
-    private val currentState: JsonState get() = stack.peek()
+    private val stack = mutableListOf<PersonVisitor>(rootState)
     private val hendelsePerioder = mutableMapOf<UUID, Periode>()
 
     init {
-        stack.push(rootState)
+        person.accept(DelegatedPersonVisitor(stack::first))
     }
 
     internal fun toJson() = rootState.toJson()
 
-    private fun pushState(state: JsonState) {
-        stack.push(state)
+    private fun pushState(state: PersonVisitor) {
+        stack.add(0, state)
     }
 
     private fun popState() {
-        stack.pop()
+        stack.removeAt(0)
     }
 
-    override fun preVisitPerson(
-        person: Person,
-        aktørId: String,
-        fødselsnummer: String
-    ) = currentState.preVisitPerson(person, aktørId, fødselsnummer)
-
-    override fun visitWarn(
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Warn,
-        melding: String,
-        tidsstempel: String
-    ) = currentState.visitWarn(kontekster, aktivitet, melding, tidsstempel)
-
-    override fun postVisitPerson(
-        person: Person,
-        aktørId: String,
-        fødselsnummer: String
-    ) = currentState.postVisitPerson(person, aktørId, fødselsnummer)
-
-    override fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) = currentState.preVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
-
-    override fun postVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) = currentState.postVisitArbeidsgiver(arbeidsgiver, id, organisasjonsnummer)
-
-    override fun preVisitArbeidsgivere() = currentState.preVisitArbeidsgivere()
-
-    override fun postVisitArbeidsgivere() = currentState.postVisitArbeidsgivere()
-
-    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) =
-        currentState.preVisitInntekthistorikk(inntektshistorikk)
-
-    override fun preVisitHendelseSykdomstidslinje(
-        tidslinje: Sykdomstidslinje,
-        hendelseId: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-        currentState.preVisitHendelseSykdomstidslinje(tidslinje, hendelseId, tidsstempel)
-    }
-
-    override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-        currentState.postVisitInntekthistorikk(inntektshistorikk)
-    }
-
-    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
-        currentState.visitInntekt(inntektsendring, id)
-    }
-
-    override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
-        currentState.preVisitInntekthistorikkVol2(inntektshistorikk)
-    }
-
-    override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) =
-        currentState.preVisitTidslinjer(tidslinjer)
-
-    override fun preVisit(tidslinje: Utbetalingstidslinje) =
-        currentState.preVisit(tidslinje)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(
-            dag,
-            dato,
-            økonomi
-        )
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(
-            dag,
-            dato,
-            økonomi
-        )
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun visit(
-        dag: Utbetalingstidslinje.Utbetalingsdag.ForeldetDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) =
-        currentState.visit(dag, dato, økonomi)
-
-    override fun postVisit(tidslinje: Utbetalingstidslinje) =
-        currentState.postVisit(tidslinje)
-
-    override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
-        currentState.preVisitPerioder(vedtaksperioder)
-
-    override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) =
-        currentState.postVisitPerioder(vedtaksperioder)
-
-    override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
-        currentState.preVisitForkastedePerioder(vedtaksperioder)
-
-    override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) =
-        currentState.postVisitForkastedePerioder(vedtaksperioder)
-
-    override fun preVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>
-    ) {
-        currentState.preVisitVedtaksperiode(
-            vedtaksperiode,
-            id,
-            tilstand,
-            opprettet,
-            oppdatert,
-            periode,
-            opprinneligPeriode,
-            hendelseIder
-        )
-    }
-
-    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-        currentState.preVisitSykdomstidslinje(tidslinje, låstePerioder)
-    }
-
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-        currentState.postVisitSykdomstidslinje(tidslinje)
-    }
-
-    override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        currentState.postVisitUtbetalinger(utbetalinger)
-    }
-
-    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
-        currentState.preVisitSykdomshistorikk(sykdomshistorikk)
-
-    override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        currentState.postVisitSykdomshistorikk(sykdomshistorikk)
-    }
-
-    override fun preVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-        currentState.preVisitSykdomshistorikkElement(element, id, tidsstempel)
-    }
-
-    override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.preVisitBeregnetSykdomstidslinje(tidslinje)
-
-    override fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) =
-        currentState.postVisitBeregnetSykdomstidslinje(tidslinje)
-
-    override fun postVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID?,
-        tidsstempel: LocalDateTime
-    ) =
-        currentState.postVisitSykdomshistorikkElement(element, id, tidsstempel)
-
-    override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
-        currentState.visitDataForSimulering(dataForSimuleringResultat)
-    }
-
-    override fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        tilstand: Utbetaling.Tilstand,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
-    ) {
-        currentState.preVisitUtbetaling(
-            utbetaling,
-            id,
-            tilstand,
-            tidsstempel,
-            oppdatert,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager
-        )
-    }
-
-    override fun postVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
-        currentState.postVisitTidslinjer(tidslinjer)
-    }
-
-    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        currentState.preVisitArbeidsgiverOppdrag(oppdrag)
-    }
-
-    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        currentState.postVisitArbeidsgiverOppdrag(oppdrag)
-    }
-
-    override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
-        currentState.preVisitPersonOppdrag(oppdrag)
-    }
-
-    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
-        currentState.postVisitPersonOppdrag(oppdrag)
-    }
-
-    override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
-        currentState.visitVurdering(vurdering, ident, epost, tidspunkt, automatiskBehandling)
-    }
-
-    override fun postVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        tilstand: Utbetaling.Tilstand,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?
-    ) {
-        currentState.postVisitUtbetaling(
-            utbetaling,
-            id,
-            tilstand,
-            tidsstempel,
-            oppdatert,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager
-        )
-    }
-
-    override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-        currentState.visitSkjæringstidspunkt(skjæringstidspunkt)
-    }
-
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
-        currentState.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
-    }
-
-    override fun postVisitVedtaksperiode(
-        vedtaksperiode: Vedtaksperiode,
-        id: UUID,
-        tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-        opprettet: LocalDateTime,
-        oppdatert: LocalDateTime,
-        periode: Periode,
-        opprinneligPeriode: Periode
-    ) =
-        currentState.postVisitVedtaksperiode(
-            vedtaksperiode,
-            id,
-            tilstand,
-            opprettet,
-            oppdatert,
-            periode,
-            opprinneligPeriode
-        )
-
-    override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(
-        dag: Arbeidsgiverdag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) = currentState.visitDag(dag, dato, økonomi, kilde)
-
-    override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(
-        dag: ArbeidsgiverHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) = currentState.visitDag(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: Sykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) = currentState.visitDag(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: ForeldetSykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) = currentState.visitDag(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: SykHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) = currentState.visitDag(dag, dato, økonomi, kilde)
-
-    override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        currentState.visitDag(dag, dato, kilde)
-
-    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
-        currentState.visitDag(dag, dato, kilde, melding)
-
-    private interface JsonState : PersonVisitor {}
-
-    private inner class Root : JsonState {
+    private inner class Root : PersonVisitor {
         private val personMap = mutableMapOf<String, Any?>()
 
         override fun preVisitPerson(
@@ -460,7 +85,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         person: Person,
         private val personMap: MutableMap<String, Any?>,
         private val fødselsnummer: String
-    ) : JsonState {
+    ) : PersonVisitor {
         init {
             personMap.putAll(PersonReflect(person).toSpeilMap())
         }
@@ -508,7 +133,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val arbeidsgivere: MutableList<ArbeidsgiverDTO>,
         private val inntektshistorikk: MutableMap<String, InntektshistorikkVol2>,
         private val nøkkeldataOmInntekter: MutableList<NøkkeldataOmInntekt>
-    ) : JsonState {
+    ) : PersonVisitor {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toSpeilMap())
         }
@@ -627,7 +252,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         private val utbetalinger: List<Utbetaling>,
         private val hendelseIder: List<UUID>,
         private val nøkkeldataOmInntekter: MutableList<NøkkeldataOmInntekt>
-    ) : JsonState {
+    ) : PersonVisitor {
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
@@ -848,7 +473,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     private inner class UtbetalingstidslinjeState(
         private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>,
         private var utbetalinger: MutableList<Int>
-    ) : JsonState {
+    ) : PersonVisitor {
 
         override fun visit(
             dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag,
@@ -981,7 +606,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         }
     }
 
-    private inner class SykdomshistorikkState : JsonState {
+    private inner class SykdomshistorikkState : PersonVisitor {
 
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
             popState()
@@ -989,7 +614,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
     }
 
     private open inner class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO>) :
-        JsonState {
+        PersonVisitor {
 
         override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dag, kilde)

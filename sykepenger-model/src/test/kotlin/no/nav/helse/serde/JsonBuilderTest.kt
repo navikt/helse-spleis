@@ -50,8 +50,7 @@ class JsonBuilderTest {
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
         assertEquals(TilstandType.AVSLUTTET, tilstand)
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
+        val jsonBuilder = JsonBuilder(person)
         val personPost = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
 
@@ -98,13 +97,11 @@ class JsonBuilderTest {
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
+        val jsonBuilder = JsonBuilder(person)
         val json = jsonBuilder.toString()
 
         val result = SerialisertPerson(json).deserialize()
-        val jsonBuilder2 = JsonBuilder()
-        result.accept(jsonBuilder2)
+        val jsonBuilder2 = JsonBuilder(result)
         val json2 = jsonBuilder2.toString()
 
         objectMapper.readTree(json).also {

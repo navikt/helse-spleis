@@ -44,8 +44,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     fun `perioder fra søknaden skal serialiseres og deserialiseres riktig - jackson`() {
         val person = person
         val personPre = objectMapper.writeValueAsString(person)
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
+        val jsonBuilder = JsonBuilder(person)
         val personDeserialisert = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
         val personPost = objectMapper.writeValueAsString(personDeserialisert)
@@ -55,13 +54,11 @@ internal class SerialiseringAvDagerFraSøknadTest {
 
     @Test
     fun `perioder fra søknaden skal serialiseres og deserialiseres riktig`() {
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
+        val jsonBuilder = JsonBuilder(person)
         val json = jsonBuilder.toString()
 
         val result = SerialisertPerson(json).deserialize()
-        val jsonBuilder2 = JsonBuilder()
-        result.accept(jsonBuilder2)
+        val jsonBuilder2 = JsonBuilder(result)
         val json2 = jsonBuilder2.toString()
 
         assertEquals(json, json2)
