@@ -17,11 +17,16 @@ internal class TestObservatør : PersonObserver {
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
     val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
+    lateinit var avstemming: Map<String, Any>
 
     fun sisteVedtaksperiode() = sisteVedtaksperiode
     fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
+
+    override fun avstemt(result: Map<String, Any>) {
+        avstemming = result
+    }
 
     override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId

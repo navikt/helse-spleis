@@ -1,16 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
-import java.time.LocalDate
-import java.util.*
 
 internal abstract class AbstractPersonTest {
 
@@ -25,6 +17,7 @@ internal abstract class AbstractPersonTest {
     protected val inspektør get() = inspektør(ORGNUMMER)
 
     protected val Int.vedtaksperiode get() = this.vedtaksperiode(ORGNUMMER)
+    protected val Int.utbetaling get() = this.utbetaling(ORGNUMMER)
 
     @BeforeEach
     internal fun createTestPerson() {
@@ -33,6 +26,8 @@ internal abstract class AbstractPersonTest {
     }
 
     protected fun Int.vedtaksperiode(orgnummer: String) = vedtaksperiodeId(this - 1, orgnummer)
+    protected fun Int.utbetaling(orgnummer: String) = utbetalingId(this - 1, orgnummer)
     protected fun inspektør(orgnummer: String) = TestArbeidsgiverInspektør(person, orgnummer)
     protected fun vedtaksperiodeId(indeks: Int, orgnummer: String = ORGNUMMER) = observatør.vedtaksperiode(orgnummer, indeks)
+    protected fun utbetalingId(indeks: Int, orgnummer: String = ORGNUMMER) = inspektør(orgnummer).utbetalingId(indeks)
 }

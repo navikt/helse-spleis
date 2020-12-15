@@ -108,6 +108,13 @@ class Person private constructor(
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
     }
 
+    fun håndter(avstemming: Avstemming) {
+        avstemming.kontekst(this)
+        avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
+        val result = Avstemmer(this).toMap()
+        observers.forEach { it.avstemt(result) }
+    }
+
     fun håndter(hendelse: Rollback) {
         hendelse.kontekst(this)
         arbeidsgivere.forEach {

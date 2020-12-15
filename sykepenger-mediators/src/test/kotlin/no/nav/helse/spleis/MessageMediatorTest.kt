@@ -115,6 +115,12 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestUtbetaling)
     }
 
+    @Test
+    fun avstemming() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvstemming())
+        assertTrue(hendelseMediator.lestAvstemming)
+    }
+
     @BeforeEach
     internal fun reset() {
         testRapid.reset()

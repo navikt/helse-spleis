@@ -37,6 +37,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestAnnullerUtbetaling = false
         private set
+    internal var lestAvstemming = false
+        private set
     internal var lestRollback = false
         private set
     internal var lestRollbackDelete = false
@@ -64,6 +66,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestUtbetalingOverført = false
         lestUtbetaling = false
         lestAnnullerUtbetaling = false
+        lestAvstemming = false
         lestRollback = false
         lestRollbackDelete = false
         lestOverstyrTidslinje = false
@@ -136,6 +139,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling) {
         lestAnnullerUtbetaling = true
+    }
+
+    override fun behandle(message: AvstemmingMessage, avstemming: Avstemming) {
+        lestAvstemming = true
     }
 
     override fun behandle(message: RollbackMessage, rollback: Rollback) {

@@ -4,6 +4,7 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.serde.serialize
@@ -24,6 +25,16 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
             meldingId = message.id,
             personJson = serialisering.json
         )
+    }
+
+    fun personAvstemt(hendelse: Avstemming) {
+        @Language("PostreSQL")
+        val statement = "UPDATE unike_person SET sist_avstemt = now() WHERE fnr = :fnr"
+        using(sessionOf(dataSource)) { session ->
+            session.run(queryOf(statement, mapOf(
+                "fnr" to hendelse.fødselsnummer().toLong()
+            )).asExecute)
+        }
     }
 
     private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {

@@ -154,6 +154,13 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: AvstemmingMessage, avstemming: Avstemming) {
+        håndter(message, avstemming) { person ->
+            person.håndter(avstemming)
+            lagrePersonDao.personAvstemt(avstemming)
+        }
+    }
+
     override fun behandle(message: RollbackMessage, rollback: Rollback) {
         val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
         val vedtaksperiodeIderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
@@ -445,6 +452,10 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun avstemt(result: Map<String, Any>) {
+                queueMessage("person_avstemt", JsonMessage.newMessage(result))
+            }
+
             override fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
                 queueMessage(
                     "vedtaksperiode_ikke_funnet", JsonMessage.newMessage(
@@ -520,6 +531,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse)
     fun behandle(message: SimuleringMessage, simulering: Simulering)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling)
+    fun behandle(message: AvstemmingMessage, avstemming: Avstemming)
     fun behandle(message: RollbackMessage, rollback: Rollback)
     fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)

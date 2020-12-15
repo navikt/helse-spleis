@@ -290,6 +290,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendAvstemming() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvstemming())
+    }
+
     protected fun sendRollback(personVersjon: Long) {
         testRapid.sendTestMessage(meldingsfabrikk.lagRollback(personVersjon))
     }

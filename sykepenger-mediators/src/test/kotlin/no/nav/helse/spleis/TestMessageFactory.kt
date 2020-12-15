@@ -539,6 +539,11 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagAvstemming() = nyHendelse("avstemming", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId
+    ))
+
     fun lagRollback(personVersjon: Long): String {
         return nyHendelse(
             "rollback_person", mutableMapOf<String, Any>(
