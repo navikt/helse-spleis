@@ -262,6 +262,8 @@ class JsonBuilderTest {
                     vedtaksperiode: Vedtaksperiode,
                     id: UUID,
                     tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+                    opprettet: LocalDateTime,
+                    oppdatert: LocalDateTime,
                     periode: Periode,
                     opprinneligPeriode: Periode,
                     hendelseIder: List<UUID>

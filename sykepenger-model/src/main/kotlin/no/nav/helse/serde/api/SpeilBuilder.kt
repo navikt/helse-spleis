@@ -214,6 +214,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
@@ -222,6 +224,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiode,
             id,
             tilstand,
+            opprettet,
+            oppdatert,
             periode,
             opprinneligPeriode,
             hendelseIder
@@ -277,6 +281,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
@@ -288,6 +293,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id,
             tilstand,
             tidsstempel,
+            oppdatert,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             maksdato,
@@ -325,6 +331,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
@@ -336,6 +343,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id,
             tilstand,
             tidsstempel,
+            oppdatert,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             maksdato,
@@ -356,6 +364,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode
     ) =
@@ -363,6 +373,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiode,
             id,
             tilstand,
+            opprettet,
+            oppdatert,
             periode,
             opprinneligPeriode
         )
@@ -517,6 +529,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -570,6 +583,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
@@ -690,6 +705,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -723,6 +739,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -748,6 +765,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : PersonVi
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode
         ) {

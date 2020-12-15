@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class VilkårsgrunnlagTest {
@@ -145,6 +146,8 @@ internal class VilkårsgrunnlagTest {
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
                 tilstand: Vedtaksperiodetilstand,
+                opprettet: LocalDateTime,
+                oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>
@@ -162,6 +165,8 @@ internal class VilkårsgrunnlagTest {
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
                 tilstand: Vedtaksperiodetilstand,
+                opprettet: LocalDateTime,
+                oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>

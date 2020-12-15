@@ -99,6 +99,7 @@ private class UtbetaltEventBuilder(
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,

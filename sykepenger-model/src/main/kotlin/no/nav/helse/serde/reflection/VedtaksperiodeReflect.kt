@@ -11,6 +11,7 @@ import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
@@ -23,6 +24,8 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val utbetalingstidslinje = UtbetalingstidslinjeReflect(vedtaksperiode.get<Utbetalingstidslinje>("utbetalingstidslinje")).toMap()
     private val tilstand = vedtaksperiode.get<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand").type.name
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
+    private val opprettet = vedtaksperiode.get<LocalDateTime>("opprettet")
+    private val oppdatert = vedtaksperiode.get<LocalDateTime>("oppdatert")
     private val dataForSimulering: Map<String, Any>? = vedtaksperiode.get<Simulering.SimuleringResultat?>("dataForSimulering")?.let {
         mapOf(
             "totalbeløp" to it.totalbeløp,
@@ -92,7 +95,9 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "utbetalingId" to utbetalingId,
         "utbetaling" to utbetaling, // keep a copy of the json for debug purposes
         "utbetalingstidslinje" to utbetalingstidslinje,
-        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd
+        "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
+        "opprettet" to opprettet,
+        "oppdatert" to oppdatert
     )
 
     internal fun toSpeilMap(arbeidsgiver: Arbeidsgiver, periode: Periode) = mutableMapOf<String, Any?>(

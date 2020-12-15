@@ -106,6 +106,8 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
@@ -132,6 +134,8 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode
     ) {
@@ -168,6 +172,7 @@ internal class TestArbeidsgiverInspektør(
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
@@ -191,6 +196,7 @@ internal class TestArbeidsgiverInspektør(
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,

@@ -887,6 +887,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode
         ) {

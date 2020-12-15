@@ -523,7 +523,9 @@ internal data class PersonData(
             private val tilstand: TilstandType,
             private val utbetalingId: String?,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
-            private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd
+            private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            private val opprettet: LocalDateTime,
+            private val oppdatert: LocalDateTime
         ) {
 
             internal fun createVedtaksperiode(
@@ -557,7 +559,9 @@ internal data class PersonData(
                         Periode(sykmeldingFom, sykmeldingTom),
                         utbetaling,
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                        forlengelseFraInfotrygd
+                        forlengelseFraInfotrygd,
+                        opprettet,
+                        oppdatert
                     )
             }
 
@@ -748,7 +752,8 @@ internal data class PersonData(
         private val vurdering: VurderingData?,
         private val overføringstidspunkt: LocalDateTime?,
         private val avstemmingsnøkkel: Long?,
-        private val avsluttet: LocalDateTime?
+        private val avsluttet: LocalDateTime?,
+        private val oppdatert: LocalDateTime?
     ) {
 
         internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
@@ -767,7 +772,8 @@ internal data class PersonData(
                 vurdering?.konverterTilVurdering(),
                 overføringstidspunkt,
                 avstemmingsnøkkel,
-                avsluttet
+                avsluttet,
+                oppdatert
             )
 
         data class VurderingData(

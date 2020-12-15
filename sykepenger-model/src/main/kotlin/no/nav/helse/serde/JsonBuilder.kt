@@ -266,11 +266,13 @@ internal class JsonBuilder : PersonVisitor {
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
         hendelseIder: List<UUID>
     ) =
-        currentState.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, periode, opprinneligPeriode, hendelseIder)
+        currentState.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder)
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) =
         currentState.preVisitSykdomshistorikk(sykdomshistorikk)
@@ -346,6 +348,7 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
@@ -357,6 +360,7 @@ internal class JsonBuilder : PersonVisitor {
             id,
             tilstand,
             tidsstempel,
+            oppdatert,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             maksdato,
@@ -369,6 +373,8 @@ internal class JsonBuilder : PersonVisitor {
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
         tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        opprettet: LocalDateTime,
+        oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode
     ) =
@@ -376,6 +382,8 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiode,
             id,
             tilstand,
+            opprettet,
+            oppdatert,
             periode,
             opprinneligPeriode
         )
@@ -446,6 +454,7 @@ internal class JsonBuilder : PersonVisitor {
         id: UUID,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
         arbeidsgiverNettoBeløp: Int,
         personNettoBeløp: Int,
         maksdato: LocalDate,
@@ -457,6 +466,7 @@ internal class JsonBuilder : PersonVisitor {
             id,
             tilstand,
             tidsstempel,
+            oppdatert,
             arbeidsgiverNettoBeløp,
             personNettoBeløp,
             maksdato,
@@ -595,6 +605,8 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
@@ -625,6 +637,7 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -848,6 +861,7 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -862,6 +876,7 @@ internal class JsonBuilder : PersonVisitor {
             id: UUID,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
             arbeidsgiverNettoBeløp: Int,
             personNettoBeløp: Int,
             maksdato: LocalDate,
@@ -875,6 +890,8 @@ internal class JsonBuilder : PersonVisitor {
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode
         ) {

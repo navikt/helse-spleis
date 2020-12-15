@@ -52,7 +52,9 @@ internal class Vedtaksperiode private constructor(
     private var sykmeldingsperiode: Periode,
     private var utbetaling: Utbetaling?,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
+    private val opprettet: LocalDateTime,
+    private var oppdatert: LocalDateTime = opprettet
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val skjæringstidspunkt
@@ -86,11 +88,12 @@ internal class Vedtaksperiode private constructor(
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetaling = null,
-        utbetalingstidslinje = Utbetalingstidslinje()
+        utbetalingstidslinje = Utbetalingstidslinje(),
+        opprettet = LocalDateTime.now()
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, tilstand, periode, sykmeldingsperiode, hendelseIder)
+        visitor.preVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder)
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
@@ -98,7 +101,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitSkjæringstidspunkt(skjæringstidspunkt)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, tilstand, periode, sykmeldingsperiode)
+        visitor.postVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -293,6 +296,7 @@ internal class Vedtaksperiode private constructor(
         val previousState = tilstand
 
         tilstand = nyTilstand
+        oppdatert = LocalDateTime.now()
         block()
 
         event.kontekst(tilstand)

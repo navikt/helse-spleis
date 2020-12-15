@@ -31,7 +31,8 @@ internal class Utbetaling private constructor(
     private var vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
-    private var avsluttet: LocalDateTime?
+    private var avsluttet: LocalDateTime?,
+    private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
     private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
@@ -202,6 +203,7 @@ internal class Utbetaling private constructor(
         val forrigeTilstand = tilstand
         tilstand.leaving(this, hendelse)
         tilstand = neste
+        oppdatert = LocalDateTime.now()
         observers.forEach {
             it.utbetalingEndret(id, type, arbeidsgiverOppdrag, personOppdrag, forrigeTilstand, neste)
         }
@@ -310,7 +312,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, id, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.preVisitUtbetaling(this, id, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -319,7 +321,7 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
-        visitor.postVisitUtbetaling(this, id, tilstand, tidsstempel, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.postVisitUtbetaling(this, id, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
