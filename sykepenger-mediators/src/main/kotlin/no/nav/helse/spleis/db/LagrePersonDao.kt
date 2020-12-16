@@ -11,7 +11,6 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
-import java.time.LocalTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -39,7 +38,6 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
 
     private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
         using(sessionOf(dataSource)) { session ->
-            fjernEldreVersjoner(session, fødselsnummer)
             opprettNyPerson(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson)
         }.also {
             PostgresProbe.personSkrevetTilDb()
@@ -63,21 +61,5 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
             VALUES (?, ?, ?, ?, (to_json(?::json)))
         """
         session.run(queryOf(statement, aktørId, fødselsnummer, skjemaVersjon, meldingId, personJson).asExecute)
-    }
-
-    private fun fjernEldreVersjoner(session: Session, fødselsnummer: String, beholdAntall: Int = 3) {
-        val now = LocalTime.now()
-        val midnatt = LocalTime.MIDNIGHT
-        val kl18 = LocalTime.of(18, 0, 0)
-        if (now in midnatt..kl18) return
-        @Language("PostreSQL")
-        val statement = """
-            DELETE FROM person WHERE fnr=:fnr AND id NOT IN(
-                SELECT id FROM person WHERE fnr=:fnr ORDER BY id DESC LIMIT $beholdAntall
-            )
-        """
-        session.run(queryOf(statement, mapOf(
-            "fnr" to fødselsnummer
-        )).asExecute)
     }
 }
