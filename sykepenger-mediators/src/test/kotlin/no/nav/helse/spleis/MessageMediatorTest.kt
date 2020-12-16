@@ -128,7 +128,7 @@ internal class MessageMediatorTest {
     }
 
     private companion object {
-        private val meldingsfabrikk = TestMessageFactory("fnr", "aktør", "orgnr", 31000.0)
+        private val meldingsfabrikk = TestMessageFactory("12345678911", "1234567891234", "orgnr", 31000.0)
         private val testRapid = TestRapid()
         private val hendelseMediator = TestHendelseMediator()
 

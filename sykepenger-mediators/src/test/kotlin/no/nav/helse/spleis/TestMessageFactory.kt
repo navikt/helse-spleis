@@ -539,7 +539,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAvstemming() = nyHendelse("avstemming", mapOf(
+    fun lagAvstemming() = nyHendelse("person_avstemming", mapOf(
         "fødselsnummer" to fødselsnummer,
         "aktørId" to aktørId
     ))
