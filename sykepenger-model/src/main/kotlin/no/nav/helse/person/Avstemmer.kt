@@ -65,6 +65,7 @@ internal class Avstemmer(person: Person) {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
@@ -76,6 +77,7 @@ internal class Avstemmer(person: Person) {
         ) {
             utbetalinger.add(mapOf(
                 "id" to id,
+                "type" to type.name,
                 "status" to Utbetalingstatus.fraTilstand(tilstand),
                 "tidsstempel" to oppdatert
             ))

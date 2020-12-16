@@ -58,12 +58,15 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
 
         assertEquals(1.utbetaling, utbetalinger[0]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[0]["status"])
+        assertEquals("UTBETALING", utbetalinger[0]["type"])
         assertTrue(utbetalinger[0]["tidsstempel"] is LocalDateTime)
         assertEquals(2.utbetaling, utbetalinger[1]["id"])
         assertEquals(Utbetalingstatus.UTBETALT, utbetalinger[1]["status"])
+        assertEquals("UTBETALING", utbetalinger[1]["type"])
         assertTrue(utbetalinger[1]["tidsstempel"] is LocalDateTime)
         assertEquals(3.utbetaling, utbetalinger[2]["id"])
         assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger[2]["status"])
+        assertEquals("UTBETALING", utbetalinger[2]["type"])
         assertTrue(utbetalinger[2]["tidsstempel"] is LocalDateTime)
     }
 }

@@ -58,9 +58,11 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, utbetalinger.size())
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(0).path("id").asText()) }
         assertEquals("UTBETALT", utbetalinger.path(0).path("status").asText())
+        assertEquals("UTBETALING", utbetalinger.path(0).path("type").asText())
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(0).path("tidsstempel").asText()) }
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(1).path("id").asText()) }
         assertEquals("IKKE_UTBETALT", utbetalinger.path(1).path("status").asText())
+        assertEquals("UTBETALING", utbetalinger.path(1).path("type").asText())
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(1).path("tidsstempel").asText()) }
     }
 }

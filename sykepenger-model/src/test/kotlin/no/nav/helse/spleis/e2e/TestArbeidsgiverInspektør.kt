@@ -170,6 +170,7 @@ internal class TestArbeidsgiverInspektør(
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -194,6 +195,7 @@ internal class TestArbeidsgiverInspektør(
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

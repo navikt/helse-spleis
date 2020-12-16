@@ -314,6 +314,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -335,6 +336,7 @@ internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {
     fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,

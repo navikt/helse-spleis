@@ -385,6 +385,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -397,6 +398,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitUtbetaling(
             utbetaling,
             id,
+            type,
             tilstand,
             tidsstempel,
             oppdatert,
@@ -439,6 +441,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
+        type: Utbetaling.Utbetalingtype,
         tilstand: Utbetaling.Tilstand,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
@@ -451,6 +454,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitUtbetaling(
             utbetaling,
             id,
+            type,
             tilstand,
             tidsstempel,
             oppdatert,
