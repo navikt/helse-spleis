@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -40,18 +41,43 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(29.oktober(2020), 8.november(2020), 1000.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(5.desember(2020), 23.desember(2020), 1000.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar(2021), 3.januar(2021), 1000.daglig, 100.prosent, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.Ferie(24.desember(2020), 31.desember(2020)),
+            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(29.oktober(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(29.oktober(2020), 1000.daglig, ORGNUMMER, true)
             )
         )
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget i AVVENTER_HISTORIKK`() {
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+
         håndterYtelser(1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(5.desember(2020), 23.desember(2020), 1000.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.januar(2021), 3.januar(2021), 1000.daglig, 100.prosent, ORGNUMMER),
-            Utbetalingshistorikk.Infotrygdperiode.Ferie(24.desember(2020), 31.desember(2020)),
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(29.oktober(2020), 4.desember(2020), 1000.daglig, 100.prosent, UNG_PERSON_FNR_2018),
+            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.desember(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(29.oktober(2020), 1000.daglig, ORGNUMMER, true)
+                Utbetalingshistorikk.Inntektsopplysning(1.desember(2020), 1000.daglig, "456789123", true)
+            )
+        )
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget ved påminnelse`() {
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterUtbetalingshistorikk(1.vedtaksperiode,
+            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.desember(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.desember(2020), 1000.daglig, "456789123", true)
             )
         )
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

@@ -192,12 +192,7 @@ class Utbetalingshistorikk(
                 oldtid.add(orgnr, sykdomstidslinje())
             }
 
-            override fun valider(
-                aktivitetslogg: Aktivitetslogg,
-                other: Periode,
-                organisasjonsnummer: String
-            ) {
-                if (organisasjonsnummer != orgnr) return
+            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
                 if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
             }
 
@@ -241,7 +236,7 @@ class Utbetalingshistorikk(
             inntekt: Inntekt,
             grad: Prosentdel,
             orgnummer: String
-        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer) {}
+        ) : Utbetalingsperiode(fom, tom, inntekt, grad, orgnummer)
 
         class ReduksjonArbeidsgiverRefusjon(
             fom: LocalDate,
