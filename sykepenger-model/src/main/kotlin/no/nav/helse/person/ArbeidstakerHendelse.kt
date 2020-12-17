@@ -13,16 +13,7 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     abstract fun organisasjonsnummer(): String
 
-    override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return this.javaClass.canonicalName.split('.').last().let {
-            SpesifikkKontekst(
-                it, mapOf(
-                    "aktørId" to aktørId(),
-                    "fødselsnummer" to fødselsnummer(),
-                    "organisasjonsnummer" to organisasjonsnummer(),
-                    "id" to meldingsreferanseId().toString()
-                )
-            )
-        }
-    }
+    override fun kontekst() = mapOf(
+        "organisasjonsnummer" to organisasjonsnummer()
+    )
 }

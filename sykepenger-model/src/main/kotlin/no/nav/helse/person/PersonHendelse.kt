@@ -4,7 +4,7 @@ import java.util.*
 
 abstract class PersonHendelse protected constructor(
     private val meldingsreferanseId: UUID,
-    internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    internal val aktivitetslogg: Aktivitetslogg
 ) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
     init {
@@ -14,18 +14,17 @@ abstract class PersonHendelse protected constructor(
     abstract fun aktørId(): String
     abstract fun fødselsnummer(): String
 
-    fun meldingsreferanseId() = meldingsreferanseId
+    internal fun meldingsreferanseId() = meldingsreferanseId
 
-    override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
-        SpesifikkKontekst(
-            it, mapOf(
-                "aktørId" to aktørId(),
-                "fødselsnummer" to fødselsnummer(),
-                "id" to "$meldingsreferanseId"
-            )
-        )
+    final override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
+        SpesifikkKontekst(it, mapOf(
+            "meldingsreferanseId" to meldingsreferanseId().toString(),
+            "aktørId" to aktørId(),
+            "fødselsnummer" to fødselsnummer()
+        ) + kontekst())
     }
 
+    protected open fun kontekst(): Map<String, String> = emptyMap()
     internal open fun melding(klassName: String) = klassName
 
     fun toLogString() = aktivitetslogg.toString()

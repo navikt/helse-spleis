@@ -200,7 +200,6 @@ class BehovMediatorTest {
 
         override fun organisasjonsnummer() = "not_relevant"
 
-        override fun toSpesifikkKontekst() = SpesifikkKontekst("TestHendelse")
         override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)
         }

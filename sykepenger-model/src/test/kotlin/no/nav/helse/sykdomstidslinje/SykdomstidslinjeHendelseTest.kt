@@ -19,10 +19,10 @@ internal class SykdomstidslinjeHendelseTest {
     @Test
     fun kontekst() {
         assertEquals(mapOf(
+            "meldingsreferanseId" to MELDING.toString(),
             "aktørId" to AKTØR,
             "fødselsnummer" to FØDSELSNUMMER,
-            "organisasjonsnummer" to ORGNR,
-            "id" to MELDING.toString()
+            "organisasjonsnummer" to ORGNR
         ), Testhendelse().toSpesifikkKontekst().kontekstMap)
     }
 

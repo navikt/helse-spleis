@@ -16,10 +16,10 @@ internal class ArbeidstakerHendelseTest {
     @Test
     fun kontekst() {
         assertEquals(mapOf(
+            "meldingsreferanseId" to MELDINGSREFERANSE.toString(),
             "aktørId" to AKTØR,
             "fødselsnummer" to FØDSELSNUMMER,
-            "organisasjonsnummer" to ORGNR,
-            "id" to MELDINGSREFERANSE.toString()
+            "organisasjonsnummer" to ORGNR
         ), Testhendelse().toSpesifikkKontekst().kontekstMap)
     }
 

@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.SpesifikkKontekst
 import java.time.LocalDate
 import java.util.*
 
@@ -27,15 +26,9 @@ class Grunnbeløpsregulering(
 
     internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
 
-    override fun toSpesifikkKontekst(): SpesifikkKontekst =
-        super.toSpesifikkKontekst().let {
-            SpesifikkKontekst(
-                it.kontekstType,
-                it.kontekstMap + mapOf(
-                    "fagsystemId" to fagsystemId,
-                    "gyldighetsdato" to gyldighetsdato.toString()
-                )
-            )
-        }
-
+    override fun kontekst() =
+        super.kontekst() + mapOf(
+            "fagsystemId" to fagsystemId,
+            "gyldighetsdato" to gyldighetsdato.toString()
+        )
 }
