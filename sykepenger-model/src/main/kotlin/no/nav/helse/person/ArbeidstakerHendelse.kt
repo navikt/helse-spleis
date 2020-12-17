@@ -7,10 +7,6 @@ abstract class ArbeidstakerHendelse protected constructor(
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
 
-    init {
-        aktivitetslogg.kontekst(this)
-    }
-
     abstract fun organisasjonsnummer(): String
 
     override fun kontekst() = mapOf(
