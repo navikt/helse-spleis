@@ -662,7 +662,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             val historie = Historie(person, utbetalingshistorikk)
             val skjæringstidspunkt = historie.skjæringstidspunkt(vedtaksperiode.periode)
-            if (utbetalingshistorikk.valider(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), skjæringstidspunkt).hasErrorsOrWorse())
+            if (utbetalingshistorikk
+                    .valider(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), skjæringstidspunkt)
+                    .hasErrorsOrWorse()
+            )
                 return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
             utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
         }
@@ -803,7 +806,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndter(inntektsmelding) { AvventerSøknadFerdigGap }
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
+                    AvventerSøknadFerdigGap
+                } else {
+                    AvventerArbeidsgiversøknadFerdigGap
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -841,7 +850,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             inntektsmelding: Inntektsmelding
         ) {
-            vedtaksperiode.håndter(inntektsmelding) { AvventerSøknadUferdigGap }
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)
+                ) {
+                    AvventerSøknadUferdigGap
+                } else {
+                    AvventerArbeidsgiversøknadUferdigGap
+                }
+            }
         }
     }
 
@@ -859,6 +875,41 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
+        }
+    }
+
+    internal object AvventerArbeidsgiversøknadFerdigGap : Vedtaksperiodetilstand {
+        override val type = AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetalingMedInntektsmelding)
+            søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetalingMedInntektsmelding)
+            søknad.info("Fullført behandling av søknad til arbeidsgiver")
+        }
+    }
+
+    internal object AvventerArbeidsgiversøknadUferdigGap : Vedtaksperiodetilstand {
+        override val type = AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            gjenopptaBehandling: GjenopptaBehandling
+        ) {
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerArbeidsgiversøknadFerdigGap)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetalingMedInntektsmelding)
+            søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetalingMedInntektsmelding)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
@@ -883,7 +934,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding) { AvventerVilkårsprøvingGap }
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
+                    AvventerVilkårsprøvingGap
+                } else {
+                    AvsluttetUtenUtbetalingMedInntektsmelding
+                }
+            }
         }
 
         override fun håndter(
@@ -938,7 +995,14 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding) { AvventerUferdigGap }
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)
+                ) {
+                    AvventerUferdigGap
+                } else {
+                    UtenUtbetalingMedInntektsmeldingUferdigGap
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
@@ -959,6 +1023,14 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerVilkårsprøvingGap)
+        }
+    }
+
+    internal object UtenUtbetalingMedInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
+        override val type = UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetalingMedInntektsmelding)
         }
     }
 
@@ -1048,7 +1120,13 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_GAP
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding) { AvventerVilkårsprøvingGap }
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
+                    AvventerVilkårsprøvingGap
+                } else {
+                    AvsluttetUtenUtbetalingMedInntektsmelding
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1056,7 +1134,7 @@ internal class Vedtaksperiode private constructor(
                 sikkerLogg.info(
                     "${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode. Fant forkastet periode foran med vedtaksperiode ${it.id} og tilstand ${it.tilstand.type.name}"
                 )
-                if(it.tilstand == TilInfotrygd) {
+                if (it.tilstand == TilInfotrygd) {
                     vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer))
                 }
             }
@@ -1242,11 +1320,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
-                vedtaksperiode.utbetaling().erAvvist() -> TilInfotrygd
-                vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
-                else -> Avsluttet
-            })
+            vedtaksperiode.tilstand(
+                utbetalingsgodkjenning,
+                when {
+                    vedtaksperiode.utbetaling().erAvvist() -> TilInfotrygd
+                    vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
+                    else -> Avsluttet
+                }
+            )
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1361,16 +1442,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(
-                inntektsmelding
-            ) {
-                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.periode) && vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(
-                        vedtaksperiode
-                    ) == null
+            vedtaksperiode.håndter(inntektsmelding) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)
+                    && vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) == null
                 ) {
                     AvventerVilkårsprøvingArbeidsgiversøknad
-                } else
+                } else {
                     AvsluttetUtenUtbetalingMedInntektsmelding
+                }
             }
         }
 
@@ -1486,8 +1565,12 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun finnForrigeAvsluttaPeriode(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate, historie: Historie) =
-            perioder
+        internal fun finnForrigeAvsluttaPeriode(
+            perioder: List<Vedtaksperiode>,
+            vedtaksperiode: Vedtaksperiode,
+            skjæringstidspunkt: LocalDate,
+            historie: Historie
+        ) = perioder
                 .filter { it < vedtaksperiode }
                 .filter { it.erAvsluttet() }
                 .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }

@@ -1653,7 +1653,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
         inspektør.also {
             assertNoErrors(it)
             assertNoWarnings(it)
@@ -1669,7 +1669,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(
             2.vedtaksperiode,
-            listOf(Periode(16.januar, 16.februar))
+            listOf(3.januar til 18.januar),
+            førsteFraværsdag = 1.februar
         ) // Touches prior periode
         assertNoErrors(inspektør)
 

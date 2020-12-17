@@ -26,6 +26,8 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
     TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
     TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
     TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
+    TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_FERDIG_GAP,
+    TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP,
     TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
     TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
     TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
@@ -54,9 +56,9 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
         kunFerie -> TilstandstypeDTO.KunFerie
         else -> TilstandstypeDTO.IngenUtbetaling
     }
-    TilstandType.AVSLUTTET_UTEN_UTBETALING ->
-        if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
-    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING ->
+    TilstandType.AVSLUTTET_UTEN_UTBETALING,
+    TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING,
+    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP ->
         if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
 }
 
