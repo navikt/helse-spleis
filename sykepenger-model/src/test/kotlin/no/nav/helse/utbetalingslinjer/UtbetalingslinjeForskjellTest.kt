@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.testhelpers.*
@@ -26,6 +27,27 @@ internal class UtbetalingslinjeForskjellTest {
     @BeforeEach
     fun setup(){
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun periode() {
+        val oppdrag1 = linjer(1.januar to 5.januar)
+        val oppdrag2 = linjer(1.februar to 28.februar)
+        assertEquals(1.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `periode med tomt oppdrag`() {
+        val oppdrag1 = linjer(1.januar to 5.januar)
+        val oppdrag2 = linjer()
+        assertEquals(1.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag2))
+    }
+
+    @Test
+    fun `periode med bare tomme oppdrag`() {
+        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode())
+        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode(linjer()))
+        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode(linjer(), linjer()))
     }
 
     @Test

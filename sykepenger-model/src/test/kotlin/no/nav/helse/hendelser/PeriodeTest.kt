@@ -135,6 +135,13 @@ internal class PeriodeTest {
     }
 
     @Test
+    fun `oppdatere tom`() {
+        val periode = Periode(2.januar, 3.januar)
+        assertEquals(3.januar, periode.oppdaterTom(Periode(1.januar, 2.januar)).endInclusive)
+        assertEquals(5.januar, periode.oppdaterTom(Periode(3.januar, 5.januar)).endInclusive)
+    }
+
+    @Test
     fun likhet() {
         val periode = Periode(2.januar, 3.januar)
         assertTrue(periode == periode)

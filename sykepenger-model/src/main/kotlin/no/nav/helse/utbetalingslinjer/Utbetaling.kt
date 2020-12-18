@@ -81,8 +81,8 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager
     )
 
-    internal val periode get() =
-        arbeidsgiverOppdrag.førstedato til utbetalingstidslinje.sisteDato()
+    private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
+    internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.sisteDato())
 
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetaling
@@ -22,6 +23,16 @@ internal class Oppdrag private constructor(
     private var nettoBeløp: Int = linjer.sumBy { it.totalbeløp() },
     private val tidsstempel: LocalDateTime
 ) : MutableList<Utbetalingslinje> by linjer {
+    internal companion object {
+        internal fun periode(vararg oppdrag: Oppdrag): Periode {
+            return oppdrag
+                .filter(Oppdrag::isNotEmpty)
+                .takeIf(List<*>::isNotEmpty)
+                ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
+                ?: Periode(LocalDate.MIN, LocalDate.MAX)
+        }
+    }
+
     internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
     internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 

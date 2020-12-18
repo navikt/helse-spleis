@@ -55,6 +55,8 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
     internal fun oppdaterFom(other: LocalDate) = Periode(minOf(this.start, other), endInclusive)
     internal fun oppdaterFom(other: Periode) = oppdaterFom(other.start)
+    internal fun oppdaterTom(other: LocalDate) = Periode(this.start, maxOf(other, this.endInclusive))
+    internal fun oppdaterTom(other: Periode) = oppdaterTom(other.endInclusive)
 
     override fun equals(other: Any?) =
         other is Periode && this.equals(other)
