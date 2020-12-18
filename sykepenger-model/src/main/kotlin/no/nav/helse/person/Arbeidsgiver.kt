@@ -331,22 +331,26 @@ internal class Arbeidsgiver private constructor(
 
     override fun utbetalingAnnullert(
         id: UUID,
-        oppdrag: Oppdrag,
+        periode: Periode,
+        fagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
-                fagsystemId = oppdrag.fagsystemId(),
+                fagsystemId = fagsystemId,
                 utbetalingId = id,
-                utbetalingslinjer = oppdrag.map {
+                fom = periode.start,
+                tom = periode.endInclusive,
+                // TODO: gå bort fra å sende linje ettersom det er bare perioden som er interessant for konsumenter
+                utbetalingslinjer = listOf(
                     PersonObserver.UtbetalingAnnullertEvent.Utbetalingslinje(
-                        fom = requireNotNull(it.datoStatusFom()),
-                        tom = it.tom,
-                        beløp = it.totalbeløp(),
-                        grad = it.grad
+                        fom = periode.start,
+                        tom = periode.endInclusive,
+                        beløp = 0,
+                        grad = 0.0
                     )
-                },
+                ),
                 annullertAvSaksbehandler = godkjenttidspunkt,
                 saksbehandlerEpost = saksbehandlerEpost
             )

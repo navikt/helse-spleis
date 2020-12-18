@@ -33,7 +33,7 @@ internal class Oppdrag private constructor(
         }
     }
 
-    internal val førstedato get() = linjer.firstOrNull()?.fom ?: LocalDate.MIN
+    internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN
     internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
 
     internal constructor(

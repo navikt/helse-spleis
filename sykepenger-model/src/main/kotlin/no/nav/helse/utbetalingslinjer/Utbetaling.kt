@@ -249,9 +249,8 @@ internal class Utbetaling private constructor(
             val sisteUtbetalte = utbetalinger.aktive().lastOrNull { hendelse.erRelevant(it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null.also {
                 hendelse.info("Fant ingen utbetalte utbetalinger. Dette betyr trolig at fagsystemiden er annullert.")
             }
-            val periode = sisteUtbetalte.arbeidsgiverOppdrag.førstedato til sisteUtbetalte.utbetalingstidslinje.sisteDato()
             if (!sisteUtbetalte.utbetalingstidslinje.er6GBegrenset()) {
-                hendelse.info("Utbetalingen for perioden $periode er ikke begrenset av 6G")
+                hendelse.info("Utbetalingen for perioden ${sisteUtbetalte.periode} er ikke begrenset av 6G")
                 return null
             }
             return sisteUtbetalte
@@ -597,7 +596,7 @@ internal class Utbetaling private constructor(
 
         internal fun annullert(utbetaling: Utbetaling, oppdrag: Oppdrag) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(utbetaling.id, oppdrag, tidspunkt, epost)
+                it.utbetalingAnnullert(utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost)
             }
         }
 

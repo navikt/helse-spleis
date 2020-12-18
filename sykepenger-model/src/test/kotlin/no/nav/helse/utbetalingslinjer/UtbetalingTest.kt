@@ -60,6 +60,19 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `periode for annullering`() {
+        val tidslinje = tidslinjeOf(16.AP, 3.NAV, 2.HELG, 1.FRI, 4.NAV, 2.HELG, 1.FRI, 4.NAV)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
+        val andre = opprettUtbetaling(tidslinje, første, 28.januar)
+        val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
+        val annullering = tredje.annuller(AnnullerUtbetaling(UUID.randomUUID(), "", "", "", tredje.arbeidsgiverOppdrag().fagsystemId(), "", "", LocalDateTime.now())) ?: fail {
+            "Klarte ikke lage annullering"
+        }
+        assertEquals(17.januar til 2.februar, annullering.periode)
+    }
+
+    @Test
     fun `sorterer etter når fagsystemIDen ble oppretta`() {
         val tidslinje = tidslinjeOf(
             16.AP, 1.NAV, 2.HELG, 5.NAV(1200, 50.0), 7.FRI, 16.AP, 1.NAV,

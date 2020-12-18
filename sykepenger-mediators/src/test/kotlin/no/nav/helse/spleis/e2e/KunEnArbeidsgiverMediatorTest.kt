@@ -204,10 +204,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("siri.saksbehandler@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
         assertNotNull(utbetalingAnnullert["annullertAvSaksbehandler"].asText())
 
+        assertEquals(19.januar.toString(), utbetalingAnnullert["fom"].asText())
+        assertEquals(26.januar.toString(), utbetalingAnnullert["tom"].asText())
         assertEquals(19.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["fom"].asText())
         assertEquals(26.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["tom"].asText())
         assertEquals(0, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
-        assertEquals(100, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
+        assertEquals(0, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.hendelser.Periode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -7,7 +8,8 @@ import java.util.*
 internal interface UtbetalingObserver {
     fun utbetalingAnnullert(
         id: UUID,
-        oppdrag: Oppdrag,
+        periode: Periode,
+        fagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String
     )
