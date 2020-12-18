@@ -70,6 +70,7 @@ internal class UtbetalingTest {
             "Klarte ikke lage annullering"
         }
         assertEquals(17.januar til 2.februar, annullering.periode)
+        assertEquals(17.januar, annullering.arbeidsgiverOppdrag().førstedato)
     }
 
     @Test
