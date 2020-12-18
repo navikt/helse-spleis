@@ -44,6 +44,8 @@ internal class UtbetalingReflectTest {
             )
         ).toMap()
         assertEquals(4, map["stønadsdager"])
+        assertEquals(1.januar, map["fom"])
+        assertEquals(4.januar, map["tom"])
         assertEquals(1.januar, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["fom"])
         assertEquals(4.januar, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["tom"])
         assertEquals(4, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["stønadsdager"])
@@ -134,6 +136,8 @@ internal class UtbetalingReflectTest {
         ).toMap()
 
         assertEquals(4, map["stønadsdager"])
+        assertEquals(1.januar, map["fom"])
+        assertEquals(5.januar, map["tom"])
         assertEquals(4, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["stønadsdager"])
         assertEquals(0, map.getValue("personOppdrag").castAsMap<String, Any>()["stønadsdager"])
         assertUtbetalingslinjer(ORGNUMMER, "mottaker")
@@ -234,6 +238,8 @@ internal class UtbetalingReflectTest {
         )?.annuller(hendelse)) { "Forventet utbetaling" }
         map = UtbetalingReflect(utbetaling).toMap()
 
+        assertEquals(1.januar, map["fom"])
+        assertEquals(4.januar, map["tom"])
         assertEquals(0, map["stønadsdager"])
         assertEquals(0, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["stønadsdager"])
         assertEquals(0, map.getValue("personOppdrag").castAsMap<String, Any>()["stønadsdager"])

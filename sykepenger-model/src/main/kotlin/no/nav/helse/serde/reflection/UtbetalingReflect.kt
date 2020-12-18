@@ -38,6 +38,8 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
         "arbeidsgiverOppdrag" to OppdragReflect(arbeidsgiverOppdrag).toMap(),
         "personOppdrag" to OppdragReflect(personOppdrag).toMap(),
+        "fom" to utbetaling.periode.start,
+        "tom" to utbetaling.periode.endInclusive,
         "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()),
         "tidsstempel" to utbetaling["tidsstempel"],
         "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")),

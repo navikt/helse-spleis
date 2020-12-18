@@ -17,6 +17,7 @@ internal interface UtbetalingObserver {
     fun utbetalingUtbetalt(
         id: UUID,
         type: Utbetaling.Utbetalingtype,
+        periode: Periode,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,

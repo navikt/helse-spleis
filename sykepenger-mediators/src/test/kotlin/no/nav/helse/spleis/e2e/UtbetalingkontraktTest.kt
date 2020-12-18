@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -47,6 +46,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertUtbetalt(melding: JsonNode) {
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("type").asText().isNotEmpty())
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
         assertDato(melding.path("maksdato").asText())
         assertTrue(melding.path("forbrukteSykedager").isInt)
         assertTrue(melding.path("gjenståendeSykedager").isInt)
@@ -61,6 +62,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertAnnullert(melding: JsonNode) {
         assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
         assertTrue(melding.path("fagsystemId").asText().isNotEmpty())
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
         assertDatotid(melding.path("annullertAvSaksbehandler").asText())
         assertTrue(melding.path("saksbehandlerEpost").asText().isNotEmpty())
         assertTrue(melding.path("utbetalingslinjer").isArray)

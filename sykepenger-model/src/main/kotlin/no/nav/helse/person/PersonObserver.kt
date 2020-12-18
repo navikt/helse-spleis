@@ -149,6 +149,8 @@ interface PersonObserver {
     data class UtbetalingUtbetaltEvent(
         val utbetalingId: UUID,
         val type: String,
+        val fom: LocalDate,
+        val tom: LocalDate,
         val maksdato: LocalDate,
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,

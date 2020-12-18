@@ -282,6 +282,7 @@ internal class Arbeidsgiver private constructor(
     override fun utbetalingUtbetalt(
         id: UUID,
         type: Utbetaling.Utbetalingtype,
+        periode: Periode,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
@@ -296,6 +297,8 @@ internal class Arbeidsgiver private constructor(
             PersonObserver.UtbetalingUtbetaltEvent(
                 utbetalingId = id,
                 type = type.name,
+                fom = periode.start,
+                tom = periode.endInclusive,
                 maksdato = maksdato,
                 forbrukteSykedager = forbrukteSykedager,
                 gjenståendeSykedager = gjenståendeSykedager,

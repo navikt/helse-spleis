@@ -605,6 +605,7 @@ internal class Utbetaling private constructor(
                 it.utbetalingUtbetalt(
                     utbetaling.id,
                     utbetaling.type,
+                    utbetaling.periode,
                     utbetaling.maksdato,
                     utbetaling.forbrukteSykedager!!,
                     utbetaling.gjenståendeSykedager!!,
