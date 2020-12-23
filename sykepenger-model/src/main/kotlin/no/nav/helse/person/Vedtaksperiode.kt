@@ -1032,6 +1032,11 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetalingMedInntektsmelding)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode))
+                vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetalingMedInntektsmelding)
+        }
     }
 
     internal object AvventerInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
