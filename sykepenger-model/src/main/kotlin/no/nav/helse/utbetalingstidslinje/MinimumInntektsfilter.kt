@@ -15,11 +15,13 @@ internal class MinimumInntektsfilter(
     private val aktivitetslogg: Aktivitetslogg
 ) : UtbetalingsdagVisitor {
 
-    private var økonomier = mutableMapOf<LocalDate, MutableList<Økonomi>>()
+    private var økonomier = mutableMapOf<LocalDate, MutableMap<Utbetalingstidslinje.Utbetalingsdag, Økonomi>>()
 
     internal fun filter() {
         tidslinjer.forEach { it.accept(this) }
         val datoerUnderInntektsgrense = økonomier
+            .filterValues { it.keys.any { dag -> dag is NavDag } }
+            .mapValues { (_, value) -> value.values.toList() }
             .filter { (dato, økonomier) -> økonomier.erUnderInntekstgrensen(alder, dato) }
             .keys
             .toList()
@@ -37,7 +39,7 @@ internal class MinimumInntektsfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        addInntekt(dato, økonomi)
+        addInntekt(dato, dag, økonomi)
     }
 
     override fun visit(
@@ -45,7 +47,7 @@ internal class MinimumInntektsfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        addInntekt(dato, økonomi)
+        addInntekt(dato, dag, økonomi)
     }
 
     override fun visit(
@@ -53,11 +55,11 @@ internal class MinimumInntektsfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        addInntekt(dato, økonomi)
+        addInntekt(dato, dag, økonomi)
     }
 
-    private fun addInntekt(dato: LocalDate, økonomi: Økonomi) {
-        økonomier.putIfAbsent(dato, mutableListOf(økonomi))?.add(økonomi)
+    private fun addInntekt(dato: LocalDate, dag: Utbetalingstidslinje.Utbetalingsdag, økonomi: Økonomi) {
+        økonomier.putIfAbsent(dato, mutableMapOf(dag to økonomi))?.put(dag, økonomi)
     }
 
 }
