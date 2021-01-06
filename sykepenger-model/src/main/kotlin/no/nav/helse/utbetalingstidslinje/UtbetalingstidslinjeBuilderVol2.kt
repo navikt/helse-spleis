@@ -41,7 +41,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             }
 
     private fun inntektForDato(dato: LocalDate) =
-        requireNotNull(inntektForDatoOrNull(dato)) { "Fant ikke inntekt for $dato" }
+        requireNotNull(inntektForDatoOrNull(dato)) { "Fant ikke inntekt for $dato med skjæringstidspunkter $skjæringstidspunkter" }
 
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
         inntektForDatoOrNull(dato)
