@@ -23,23 +23,24 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `alle dager fom første dag med total sykdomsgrad under 20% skal avvises`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0)))
-        val periode = Periode(1.januar, 21.januar)
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 10.NAV))
+        val periode = Periode(1.januar, 31.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, inspektør.avvistDagTeller)
+        assertEquals(10, inspektør.navDagTeller)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
-    fun `kun dager i perioden blir avvist ved for lav sykdomsgrad`() {
-        val tidslinjer = listOf(tidslinjeOf(16.AP, 10.NAV(1200, 19.0)))
-        val periode = Periode(1.januar, 21.januar)
+    fun `ikke warning når de avviste dagene er utenfor perioden`() {
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 10.NAV))
+        val periode = Periode(22.januar, 31.januar)
         undersøke(tidslinjer, periode)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, inspektør.avvistDagTeller)
-        assertEquals(5, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertEquals(10, inspektør.navDagTeller)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
