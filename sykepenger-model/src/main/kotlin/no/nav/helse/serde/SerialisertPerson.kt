@@ -87,7 +87,8 @@ class SerialisertPerson(val json: String) {
             V68FikseØdelagteUtbetalinger(),
             V69SetteOpprettetOgOppdatertTidspunkt(),
             V70SetteOppdatertTidspunkt(),
-            V71SetteOpprettetTidspunkt()
+            V71SetteOpprettetTidspunkt(),
+            V72RetteUtbetalingPåEnkeltperson(),
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
