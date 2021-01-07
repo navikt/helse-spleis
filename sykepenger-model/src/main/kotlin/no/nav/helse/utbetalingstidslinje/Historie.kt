@@ -182,18 +182,19 @@ internal class Historie() {
 
         internal companion object {
             internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
-                Sykdomstidslinje(utbetalingstidslinje.map {
-                    it.dato to when {
-                        !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
-                        !it.dato.erHelg() && it is Fridag -> Dag.Feriedag(it.dato, INGEN)
-                        it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
-                        it is Arbeidsdag -> Dag.Arbeidsdag(it.dato, INGEN)
-                        it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
-                        else -> UkjentDag(it.dato, INGEN)
+                utbetalingstidslinje
+                    .mapNotNull {
+                        when {
+                            !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                            !it.dato.erHelg() && it is Fridag -> Dag.Feriedag(it.dato, INGEN)
+                            it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
+                            it is Arbeidsdag -> Dag.Arbeidsdag(it.dato, INGEN)
+                            it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                            else -> null
+                        }?.let { sykedag -> it.dato to sykedag }
                     }
-                }
-                    .filter { (_, dag) -> dag !is UkjentDag }
-                    .toMap ())
+                    .toMap()
+                    .let(::Sykdomstidslinje)
 
             private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _ -> grad }.prosent)
         }
