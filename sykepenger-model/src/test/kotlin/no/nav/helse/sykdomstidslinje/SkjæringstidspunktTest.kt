@@ -291,12 +291,32 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `arbeidsgivertidslinjer med ferie og arbeidsdag på samme dager, forblir sammenhengende - motsatt rekkefølge på tidslinjer`() {
+        val arbeidsgiver1tidslinje = 7.S + 2.A + 7.S
+        resetSeed(1.januar)
+        val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
+        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
     fun `arbeidsgivertidslinjer med ferie og ukjentdag på samme dager, forblir sammenhengende`() {
         val arbeidsgiver1tidslinje = 7.S + 2.F + 7.S
         resetSeed(1.januar)
         val arbeidsgiver2tidslinje = 7.S + 2.UK + 7.S
         assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje)
         assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver2tidslinje)
+        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
+    }
+
+    @Test
+    fun `arbeidsgivertidslinjer med ferie og ukjentdag på samme dager, forblir sammenhengende - motsatt rekkefølge på tidslinjer`() {
+        val arbeidsgiver1tidslinje = 7.S + 2.UK + 7.S
+        resetSeed(1.januar)
+        val arbeidsgiver2tidslinje = 7.S + 2.F + 7.S
+        assertSkjæringstidspunkt(10.januar, 31.januar, arbeidsgiver1tidslinje)
+        assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver2tidslinje)
         assertSkjæringstidspunkt(1.januar, 31.januar, arbeidsgiver1tidslinje, arbeidsgiver2tidslinje)
     }
 
