@@ -191,7 +191,9 @@ internal class Historie() {
                         it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
                         else -> UkjentDag(it.dato, INGEN)
                     }
-                }.associate { it })
+                }
+                    .filter { (_, dag) -> dag !is UkjentDag }
+                    .toMap ())
 
             private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _ -> grad }.prosent)
         }

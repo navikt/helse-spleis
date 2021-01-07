@@ -91,6 +91,12 @@ internal val Int.R
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { FriskHelgedag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.UK
+    get() = Sykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, TestHendelse.kilde) }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID()) {
     private const val UNG_PERSON_FNR_2018 = "12020052345"
     private const val AKTØRID = "42"

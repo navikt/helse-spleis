@@ -1,7 +1,6 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek.*
 import java.time.LocalDate
@@ -34,6 +33,7 @@ internal sealed class Dag(
                 is Sykedag,
                 is SykHelgedag,
                 is Arbeidsgiverdag,
+                is Feriedag,
                 is ArbeidsgiverHelgedag -> venstre
                 else -> høyre
             }
