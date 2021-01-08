@@ -20,8 +20,8 @@ sealed class Toggles(enabled: Boolean = false, private val force: Boolean = fals
     fun enable(block: () -> Unit) = runWith(true, block)
     fun disable(block: () -> Unit) = runWith(false, block)
 
-    object SpeilInntekterVol2Enabled : Toggles()
-    object NyInntekt : Toggles()
+    object SpeilInntekterVol2Enabled : Toggles(true)
+    object NyInntekt : Toggles(true)
     object ReplayEnabled : Toggles()
     object FlereArbeidsgivereEnabled : Toggles()
 }
