@@ -576,6 +576,7 @@ internal data class PersonData(
                 TilstandType.AVSLUTTET_UTEN_UTBETALING -> Vedtaksperiode.AvsluttetUtenUtbetaling
                 TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING -> Vedtaksperiode.AvsluttetUtenUtbetalingMedInntektsmelding
                 TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigGap
+                TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.UtenUtbetalingMedInntektsmeldingUferdigForlengelse
                 TilstandType.UTBETALING_FEILET -> Vedtaksperiode.UtbetalingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
                 TilstandType.START -> Vedtaksperiode.Start

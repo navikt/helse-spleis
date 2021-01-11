@@ -204,7 +204,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_GAP,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP
         )

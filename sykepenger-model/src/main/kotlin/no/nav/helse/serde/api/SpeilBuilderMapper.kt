@@ -58,7 +58,8 @@ internal fun mapTilstander(tilstand: TilstandType, utbetalt: Boolean, kunFerie: 
     }
     TilstandType.AVSLUTTET_UTEN_UTBETALING,
     TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING,
-    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP ->
+    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
+    TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE ->
         if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
 }
 

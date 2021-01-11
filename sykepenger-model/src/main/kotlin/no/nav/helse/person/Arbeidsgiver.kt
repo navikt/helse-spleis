@@ -145,6 +145,7 @@ internal class Arbeidsgiver private constructor(
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             vedtaksperioder.sort()
         }
+        finalize(sykmelding)
     }
 
     internal fun håndter(søknad: Søknad) {
@@ -152,6 +153,7 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad. Har nok ikke mottatt sykmelding")
         }
+        finalize(søknad)
     }
 
     internal fun håndter(søknad: SøknadArbeidsgiver) {
@@ -159,6 +161,7 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.toList().map { it.håndter(søknad) }.none { it }) {
             søknad.error("Forventet ikke søknad til arbeidsgiver. Har nok ikke mottatt sykmelding")
         }
+        finalize(søknad)
     }
 
     internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {
@@ -175,59 +178,72 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
+        finalize(inntektsmelding)
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
         inntektsmelding.wrapped.kontekst(this)
         inntektsmelding.wrapped.cacheRefusjon(this)
         vedtaksperioder.toList().forEach { it.håndter(inntektsmelding.wrapped) }
+        finalize(inntektsmelding)
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk) }
+        finalize(utbetalingshistorikk)
     }
 
     internal fun håndter(ytelser: Ytelser) {
         ytelser.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(ytelser) }
+        finalize(ytelser)
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         utbetalingsgodkjenning.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingsgodkjenning) }
         vedtaksperioder.toList().forEach { it.håndter(utbetalingsgodkjenning) }
+        finalize(utbetalingsgodkjenning)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(vilkårsgrunnlag) }
+        finalize(vilkårsgrunnlag)
     }
 
     internal fun håndter(simulering: Simulering) {
         simulering.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(simulering) }
+        finalize(simulering)
     }
 
     internal fun håndter(utbetaling: UtbetalingOverført) {
         utbetaling.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetaling) }
+        finalize(utbetaling)
     }
 
     internal fun håndter(utbetaling: UtbetalingHendelse) {
         utbetaling.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetaling) }
         vedtaksperioder.forEach { it.håndter(utbetaling) }
+        finalize(utbetaling)
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
         påminnelse.kontekst(this)
         utbetalinger.forEach { it.håndter(påminnelse) }
+        finalize(påminnelse)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return vedtaksperioder.toList().any { it.håndter(påminnelse) }
+        return vedtaksperioder
+            .toList()
+            .any { it.håndter(påminnelse) }
+            .apply { finalize(påminnelse) }
     }
 
     internal fun håndter(hendelse: AnnullerUtbetaling) {
@@ -239,6 +255,7 @@ internal class Arbeidsgiver private constructor(
         nyUtbetaling(annullering)
         annullering.håndter(hendelse)
         søppelbøtte(hendelse, ALLE, ForkastetÅrsak.ANNULLERING)
+        finalize(hendelse)
     }
 
     internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering) {
@@ -253,7 +270,7 @@ internal class Arbeidsgiver private constructor(
         val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
         if (!hendelse.harHistorikk) return utbetalingshistorikk(hendelse, periode)
 
-        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere,  Historie(person, hendelse.utbetalingshistorikk()), periode)
+        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, Historie(person, hendelse.utbetalingshistorikk()), periode)
 
         val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, reberegnetTidslinje)
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
@@ -263,7 +280,12 @@ internal class Arbeidsgiver private constructor(
         etterutbetaling.håndter(hendelse)
     }
 
-    private fun reberegnUtbetalte(aktivitetslogg: IAktivitetslogg, arbeidsgivere: List<Arbeidsgiver>, historie: Historie, periode: Periode): Utbetalingstidslinje {
+    private fun reberegnUtbetalte(
+        aktivitetslogg: IAktivitetslogg,
+        arbeidsgivere: List<Arbeidsgiver>,
+        historie: Historie,
+        periode: Periode
+    ): Utbetalingstidslinje {
         val arbeidsgivertidslinjer = arbeidsgivere
             .map { it to it.utbetalinger.utbetaltTidslinje() }
             .filter { it.second.isNotEmpty() }
@@ -425,7 +447,7 @@ internal class Arbeidsgiver private constructor(
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
                 else sykdomshistorikk.fjernDagerFør(vedtaksperioder.first().periode().start)
-                gjenopptaBehandling(hendelse)
+                gjenopptaBehandling()
             }
             ?: listOf()
     }
@@ -470,7 +492,7 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
-    internal fun finnForkastedeTilstøtende(vedtaksperiode: Vedtaksperiode) = forkastede.keys.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode)}
+    internal fun finnForkastedeTilstøtende(vedtaksperiode: Vedtaksperiode) = forkastede.keys.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
@@ -481,9 +503,17 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
-    internal fun gjenopptaBehandling(hendelse: ArbeidstakerHendelse) {
-        vedtaksperioder.any { it.håndter(GjenopptaBehandling(hendelse)) }
-        person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
+    private var skalGjenopptaBehandling = false
+    internal fun gjenopptaBehandling() {
+        skalGjenopptaBehandling = true
+    }
+
+    private fun finalize(hendelse: ArbeidstakerHendelse) {
+        while (skalGjenopptaBehandling) {
+            skalGjenopptaBehandling = false
+            vedtaksperioder.any { it.håndter(GjenopptaBehandling(hendelse)) }
+            person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
+        }
     }
 
     internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
@@ -588,8 +618,8 @@ internal class Arbeidsgiver private constructor(
     internal fun forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode: Vedtaksperiode, historie: Historie): Vedtaksperiode? {
         val referanse = historie.skjæringstidspunkt(vedtaksperiode.periode()) ?: return null
         return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
-            // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
-            Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
+        // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
+        Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
     }
 
     internal class JsonRestorer private constructor() {

@@ -386,6 +386,7 @@ internal class Sykdomstidslinje private constructor(
             .filterValues { erEnSykedag(it) }
             .map { it.key }
 
+    internal fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
     internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
 }

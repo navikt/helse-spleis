@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.SøknadArbeidsgiver
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -30,8 +31,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(31.januar, 28.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(31.januar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 1.januar, refusjon = Triple(6.februar, INNTEKT, emptyList()))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 1.januar, refusjon = Triple(6.februar, INNTEKT, emptyList())
+        )
 
         inspektør.also {
             assertEquals(Periode(1.januar, 30.januar), it.vedtaksperioder(1.vedtaksperiode).periode())
@@ -176,7 +179,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_INFOTRYGD
         )
     }
-
 
 
     @Test
@@ -330,6 +332,136 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `En periode som opprinnelig var en forlengelse oppdager at den er en gap periode uten utbetaling ved inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 14.desember(2020), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(8.desember(2020), 14.desember(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(15.desember(2020), 3.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.desember(2020), 3.januar(2021), 100.prosent))
+
+        håndterInntektsmelding(
+            listOf(
+                Periode(25.november(2020), 27.november(2020)),
+                Periode(1.desember(2020), 7.desember(2020)),
+                Periode(10.desember(2020), 10.desember(2020)),
+                Periode(15.desember(2020), 19.desember(2020))
+            ),
+            førsteFraværsdag = 15.desember(2020),
+            beregnetInntekt = 30000.månedlig,
+            refusjon = Triple(null, 30000.månedlig, emptyList())
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        assertTilstander(
+            4.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+    }
+
+    @Test
+    fun `En periode som opprinnelig var en forlengelse oppdager at den er fortsatt en en forlengelse uten utbetaling ved inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 14.desember(2020), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(8.desember(2020), 14.desember(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(15.desember(2020), 3.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.desember(2020), 3.januar(2021), 100.prosent))
+
+        håndterInntektsmelding(
+            listOf(
+                Periode(25.november(2020), 27.november(2020)),
+                Periode(1.desember(2020), 7.desember(2020)),
+                Periode(8.desember(2020), 10.desember(2020)),
+                Periode(15.desember(2020), 17.desember(2020))
+            ),
+            førsteFraværsdag = 15.desember(2020),
+            beregnetInntekt = 30000.månedlig,
+            refusjon = Triple(null, 30000.månedlig, emptyList())
+        )
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+        )
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        assertTilstander(
+            4.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+    }
+
+    @Test
+    fun `En periode som opprinnelig var en forlengelse oppdager at den er en gap periode med utbetaling ved inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(25.november(2020), 30.november(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(25.november(2020), 30.november(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.desember(2020), 7.desember(2020), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(8.desember(2020), 3.januar(2021), 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(8.desember(2020), 3.januar(2021), 100.prosent))
+
+        håndterInntektsmelding(
+            listOf(
+                Periode(25.november(2020), 27.november(2020)),
+                Periode(1.desember(2020), 7.desember(2020)),
+                Periode(10.desember(2020), 10.desember(2020)),
+                Periode(15.desember(2020), 19.desember(2020))
+            ),
+            førsteFraværsdag = 15.desember(2020),
+            beregnetInntekt = 30000.månedlig,
+            refusjon = Triple(null, 30000.månedlig, emptyList())
+        )
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
         )
     }
 }
