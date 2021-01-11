@@ -282,6 +282,8 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             dagen: LocalDate,
             økonomi: Økonomi
         ) {
+            splitter.ikkeSykedager = 0
+            splitter.fridager = 0
             splitter.håndterArbeidsgiverdag(dagen)
             splitter.state(ArbeidsgiverperiodeSykedager)
         }
@@ -300,6 +302,8 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             dagen: LocalDate,
             økonomi: Økonomi
         ) {
+            splitter.ikkeSykedager = 0
+            splitter.fridager = 0
             splitter.håndterArbeidsgiverdag(dagen)
             splitter.state(ArbeidsgiverperiodeSykedager)
         }

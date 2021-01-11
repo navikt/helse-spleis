@@ -628,6 +628,39 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         inspektør.navdager.assertDekningsgrunnlag(8.januar til 23.januar, 1431.daglig)
     }
 
+    @Test
+    fun `Sykedag etter langt opphold nullstiller tellere`() {
+        (4.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 2.S + 3.A + 2.R + 18.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(12.februar, hendelseId, 30000.månedlig)
+                    addInfotrygd(1.januar, UUID.randomUUID(), 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 5.februar, 12.februar)
+        )
+
+        assertEquals(20, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(36, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(4, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `Syk helgedag etter langt opphold nullstiller tellere`() {
+        (3.S + 2.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 1.R + 1.H + 1.S + 4.A + 2.R + 18.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(12.februar, hendelseId, 30000.månedlig)
+                    addInfotrygd(1.januar, UUID.randomUUID(), 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 5.februar, 12.februar)
+        )
+
+        assertEquals(19, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(37, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(4, inspektør.dagtelling[NavDag::class])
+    }
 
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
         invoke {
@@ -657,12 +690,14 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
 
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektshistorikk: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderVol2Test.inntektshistorikkVol2,
-        skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars)
+        skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars),
+        forlengelseStrategy: (LocalDate) -> Boolean = { false }
     ) {
         tidslinje = UtbetalingstidslinjeBuilderVol2(
             sammenhengendePeriode = this.periode()!!,
             skjæringstidspunkter = skjæringstidspunkter,
-            inntektshistorikk = inntektshistorikk
+            inntektshistorikk = inntektshistorikk,
+            forlengelseStrategy = forlengelseStrategy
         ).result(this)
     }
 
