@@ -879,4 +879,26 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         }
     }
+
+    @Test
+    fun `Sender perioden til Infotrygd hvis inntekt mangler ved bygging av utbetalingstidslinje`(){
+        håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 26.juli(2020), 60.prosent))
+        håndterSøknad(Sykdom(26.juni(2020), 26.juli(2020), 60.prosent))
+        val historikk = arrayOf(
+            RefusjonTilArbeidsgiver(10.januar(2020), 25.januar(2020), 1200.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(10.juni(2020), 25.juni(2020), 1200.daglig, 100.prosent, ORGNUMMER)
+        )
+        val inntektshistorikk = listOf(Inntektsopplysning(10.juni(2020), INNTEKT, ORGNUMMER, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
 }

@@ -1269,8 +1269,13 @@ internal class Vedtaksperiode private constructor(
                 harNødvendigInntekt(person, skjæringstidspunkt)
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
+                    val utbetalingstidslinjer = try {
+                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser)
+                    } catch (e: IllegalArgumentException) {
+                        return@valider false
+                    }
                     engineForTimeline = ArbeidsgiverUtbetalinger(
-                        tidslinjer = person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser),
+                        tidslinjer = utbetalingstidslinjer,
                         personTidslinje = historie.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
                         skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode),
@@ -1595,10 +1600,10 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt: LocalDate,
             historie: Historie
         ) = perioder
-                .filter { it < vedtaksperiode }
-                .filter { it.erAvsluttet() }
-                .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
-                .lastOrNull { it.dataForVilkårsvurdering != null }
+            .filter { it < vedtaksperiode }
+            .filter { it.erAvsluttet() }
+            .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
+            .lastOrNull { it.dataForVilkårsvurdering != null }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {
