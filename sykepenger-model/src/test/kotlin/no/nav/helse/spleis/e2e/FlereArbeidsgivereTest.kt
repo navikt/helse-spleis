@@ -33,13 +33,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @BeforeEach
     fun setup() {
         Toggles.FlereArbeidsgivereEnabled.enabled = true
-        Toggles.NyInntekt.enabled = true
     }
 
     @AfterEach
     fun tearDown() {
         Toggles.FlereArbeidsgivereEnabled.enabled = false
-        Toggles.NyInntekt.enabled = false
     }
 
     @Test

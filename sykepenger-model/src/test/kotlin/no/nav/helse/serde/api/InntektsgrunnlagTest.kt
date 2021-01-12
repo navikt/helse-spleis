@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntektshistorikkVol2
@@ -11,9 +10,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -35,16 +32,6 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
             this.inntektshistorikk[orgnummer] = inntektshistorikk
         }
-    }
-
-    @BeforeEach
-    fun setup() {
-        Toggles.NyInntekt.enabled = true
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggles.NyInntekt.enabled = false
     }
 
     private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.NøkkeldataOmInntekt(sisteDato).also { it.skjæringstidspunkt = this }
