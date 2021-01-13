@@ -1272,6 +1272,7 @@ internal class Vedtaksperiode private constructor(
                     val utbetalingstidslinjer = try {
                         person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser)
                     } catch (e: IllegalArgumentException) {
+                        sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
                         return@valider false
                     }
                     engineForTimeline = ArbeidsgiverUtbetalinger(
