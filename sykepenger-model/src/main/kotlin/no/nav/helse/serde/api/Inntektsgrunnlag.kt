@@ -42,12 +42,12 @@ private fun arbeidsgiverinntekt(
     orgnummer: String,
     inntektshistorikk: InntektshistorikkVol2
 ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-    val (inntektsopplysning, inntekt) = requireNotNull(inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)) {
-        "Fant ikke inntekt for skjæringstidspunkt $skjæringstidspunkt"
-    }
-    val omregnetÅrsinntektDTO = OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
-    val sammenligningsgrunnlagDTO =
-        inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
+    val omregnetÅrsinntektDTO = inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)
+        ?.let { (inntektsopplysning, inntekt) ->
+            OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
+        }
+    val sammenligningsgrunnlagDTO = inntektshistorikk.grunnlagForSammenligningsgrunnlagMedMetadata(skjæringstidspunkt)
+        ?.let { (sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag) ->
             SammenligningsgrunnlagVisitor(sammenligningsgrunnlagsopplysning, sammenligningsgrunnlag).sammenligningsgrunnlagDTO
         }
     return InntektsgrunnlagDTO.ArbeidsgiverinntektDTO(

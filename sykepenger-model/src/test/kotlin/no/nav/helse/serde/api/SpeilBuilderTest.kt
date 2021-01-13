@@ -618,10 +618,10 @@ class SpeilBuilderTest {
             inntektsgrunnlag?.inntekter?.forEach { arbeidsgiverinntekt ->
                 assertEquals(orgnummer, arbeidsgiverinntekt.arbeidsgiver)
 
-                assertEquals(InntektkildeDTO.Inntektsmelding, arbeidsgiverinntekt.omregnetÅrsinntekt.kilde)
-                assertEquals(31000.0 * 12, arbeidsgiverinntekt.omregnetÅrsinntekt.beløp)
-                assertEquals(31000.0, arbeidsgiverinntekt.omregnetÅrsinntekt.månedsbeløp)
-                assertNull(arbeidsgiverinntekt.omregnetÅrsinntekt.inntekterFraAOrdningen)
+                assertEquals(InntektkildeDTO.Inntektsmelding, arbeidsgiverinntekt.omregnetÅrsinntekt?.kilde)
+                assertEquals(31000.0 * 12, arbeidsgiverinntekt.omregnetÅrsinntekt?.beløp)
+                assertEquals(31000.0, arbeidsgiverinntekt.omregnetÅrsinntekt?.månedsbeløp)
+                assertNull(arbeidsgiverinntekt.omregnetÅrsinntekt?.inntekterFraAOrdningen)
 
                 assertEquals(31000.0 * 12, arbeidsgiverinntekt.sammenligningsgrunnlag?.beløp)
                 assertEquals(12, arbeidsgiverinntekt.sammenligningsgrunnlag?.inntekterFraAOrdningen?.size)

@@ -71,7 +71,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(0.0, inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
@@ -114,7 +114,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
@@ -161,7 +161,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
@@ -207,7 +207,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt.also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
@@ -219,6 +219,33 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    fun `omregnet årsinntekt kan være null`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk.also {
+            inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
+                1.april til 1.juni inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }.forEach { inntekt -> inntekt.lagreInntekter(it.getValue(ORGNUMMER), 1.juni, UUID.randomUUID()) }
+        }
+
+        val dataForSkjæringstidspunkt = listOf(1.oktober og 31.desember)
+
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+
+        assertTrue(inntektsgrunnlag.isNotEmpty())
+        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober }.also { inntektsgrunnlaget ->
+            assertEquals(Inntekt.INGEN.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(Inntekt.INGEN.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.avviksprosent)
+            assertEquals(0.0, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt)
         }
     }
 }
