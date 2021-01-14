@@ -854,7 +854,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         utbetalingGodkjent = utbetalingGodkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
-        saksbehandlerEpost = "ola.nordmann@nav.no"
+        saksbehandlerEpost = "ola.nordmann@nav.no",
+        makstidOppnådd = false,
     ).apply {
         hendelselogg = this
     }

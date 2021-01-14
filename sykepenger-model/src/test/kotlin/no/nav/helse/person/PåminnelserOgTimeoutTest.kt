@@ -384,7 +384,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         utbetalingGodkjent = true,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = false,
-        saksbehandlerEpost = "ola@normann.ss"
+        saksbehandlerEpost = "ola@normann.ss",
+        makstidOppnådd = false,
     ).apply {
         hendelse = this
     }

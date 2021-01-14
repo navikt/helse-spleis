@@ -18,6 +18,7 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
     private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
     private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
     private val automatiskBehandling = packet["@løsning.${Godkjenning.name}.automatiskBehandling"].asBoolean()
+    private val makstidOppnådd = packet["@løsning.${Godkjenning.name}.makstidOppnådd"].asBoolean()
 
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(
@@ -31,7 +32,8 @@ internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMes
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
             utbetalingGodkjent = utbetalingGodkjent,
-            automatiskBehandling = automatiskBehandling
+            automatiskBehandling = automatiskBehandling,
+            makstidOppnådd = makstidOppnådd
         )
 
     override fun behandle(mediator: IHendelseMediator) {

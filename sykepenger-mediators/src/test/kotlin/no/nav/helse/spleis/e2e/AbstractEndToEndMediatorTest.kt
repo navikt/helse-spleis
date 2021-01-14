@@ -150,7 +150,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         godkjent: Boolean = true,
         saksbehandlerIdent: String = "O123456",
         saksbehandlerEpost: String = "jan@banan.no",
-        automatiskBehandling: Boolean = false
+        automatiskBehandling: Boolean = false,
+        makstidOppnådd: Boolean = false
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
         testRapid.sendTestMessage(
@@ -161,7 +162,8 @@ internal abstract class AbstractEndToEndMediatorTest {
                 utbetalingGodkjent = godkjent,
                 saksbehandlerIdent = saksbehandlerIdent,
                 saksbehandlerEpost = saksbehandlerEpost,
-                automatiskBehandling = automatiskBehandling
+                automatiskBehandling = automatiskBehandling,
+                makstidOppnådd = makstidOppnådd
             )
         )
     }

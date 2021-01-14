@@ -88,7 +88,8 @@ internal class UtbetalingReflectTest {
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
                 utbetalingGodkjent = true,
                 godkjenttidspunkt = LocalDateTime.now(),
-                automatiskBehandling = false
+                automatiskBehandling = false,
+                makstidOppnådd = false,
             ).also {
                 utbetaling.håndter(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")
@@ -190,7 +191,8 @@ internal class UtbetalingReflectTest {
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
                 utbetalingGodkjent = true,
                 godkjenttidspunkt = LocalDateTime.now(),
-                automatiskBehandling = false
+                automatiskBehandling = false,
+                makstidOppnådd = false,
             ).also {
                 utbetaling.håndter(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")

@@ -435,7 +435,8 @@ class JsonBuilderTest {
             saksbehandler = "en_saksbehandler_ident",
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
-            saksbehandlerEpost = "mille.mellomleder@nav.no"
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            makstidOppnådd = false,
         )
 
         fun simulering(vedtaksperiodeId: String) = Simulering(

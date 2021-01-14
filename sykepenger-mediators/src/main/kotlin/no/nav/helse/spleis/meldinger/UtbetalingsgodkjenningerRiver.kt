@@ -23,6 +23,7 @@ internal class UtbetalingsgodkjenningerRiver(
         packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")
         packet.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
         packet.requireKey("@løsning.${Godkjenning.name}.automatiskBehandling")
+        packet.requireKey("@løsning.${Godkjenning.name}.makstidOppnådd")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(JsonMessageDelegate(packet))

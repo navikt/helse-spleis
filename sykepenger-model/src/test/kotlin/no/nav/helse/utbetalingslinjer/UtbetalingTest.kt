@@ -250,7 +250,8 @@ internal class UtbetalingTest {
             saksbehandlerEpost = "mille.mellomleder@nav.no",
             utbetalingGodkjent = true,
             godkjenttidspunkt = LocalDateTime.now(),
-            automatiskBehandling = false
+            automatiskBehandling = false,
+            makstidOppnådd = false,
         ).also {
             utbetaling.håndter(it)
         }

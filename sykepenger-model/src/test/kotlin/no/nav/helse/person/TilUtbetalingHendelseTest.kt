@@ -210,7 +210,8 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
-        saksbehandlerEpost = "mille.mellomleder@nav.no"
+        saksbehandlerEpost = "mille.mellomleder@nav.no",
+        makstidOppnådd = false,
     ).apply {
         hendelse = this
     }

@@ -117,7 +117,8 @@ internal class MessageMediatorTest {
             utbetalingGodkjent = true,
             saksbehandlerIdent = "en_saksbehandler",
             saksbehandlerEpost = "en_saksbehandler@ikke.no",
-            automatiskBehandling = false
+            automatiskBehandling = false,
+            makstidOppnådd = false
         ))
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
