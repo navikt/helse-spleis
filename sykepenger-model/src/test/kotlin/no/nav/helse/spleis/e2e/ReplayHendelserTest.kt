@@ -20,12 +20,12 @@ import org.junit.jupiter.api.Test
 internal class ReplayHendelserTest : AbstractEndToEndTest() {
     @BeforeEach
     fun prepare() {
-        Toggles.ReplayEnabled.enabled = true
+        Toggles.ReplayEnabled.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.ReplayEnabled.enabled = false
+        Toggles.ReplayEnabled.pop()
     }
 
     @Test

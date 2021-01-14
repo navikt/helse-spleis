@@ -32,12 +32,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        Toggles.FlereArbeidsgivereEnabled.enabled = true
+        Toggles.FlereArbeidsgivereEnabled.enable()
     }
 
     @AfterEach
     fun tearDown() {
-        Toggles.FlereArbeidsgivereEnabled.enabled = false
+        Toggles.FlereArbeidsgivereEnabled.pop()
     }
 
     @Test
