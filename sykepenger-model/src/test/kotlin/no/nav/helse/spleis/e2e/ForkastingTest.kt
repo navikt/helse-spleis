@@ -205,7 +205,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Håndterer ny sykmelding som ligger tidligere i tid *med forlengelse*`() {
+    fun `Håndterer ny sykmelding som ligger tidligere i tid med forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(10.april(2020), 20.april(2020), 100.prosent))
@@ -236,7 +236,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Håndterer ny sykmelding som ligger tidligere i tid *uten forlengelse*`() {
+    fun `Håndterer ny sykmelding som ligger tidligere i tid uten forlengelse`() {
         Toggles.ReplayEnabled.enable {
             håndterSykmelding(Sykmeldingsperiode(24.mars(2020), 29.mars(2020), 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100.prosent))
