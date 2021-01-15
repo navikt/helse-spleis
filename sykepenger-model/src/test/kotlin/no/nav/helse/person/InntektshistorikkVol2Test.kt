@@ -301,6 +301,7 @@ internal class InntektshistorikkVol2Test {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
             }
+            Thread.sleep(10) // Nødvendig for konsistent resultat på windows
         }.forEach { it.lagreInntekter(historikk, 1.januar(2018), UUID.randomUUID()) }
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(9, inspektør.inntektTeller.first())
@@ -319,6 +320,7 @@ internal class InntektshistorikkVol2Test {
                 1.desember(2016) til 1.august(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
+                Thread.sleep(10) // Nødvendig for konsistent resultat på windows
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
 
