@@ -48,7 +48,7 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereEnabled.enabled) return invaliderAllePerioder(hendelse)
+        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -229,7 +229,7 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    private fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse) {
+    internal fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse) {
         hendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, Arbeidsgiver.ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
@@ -305,8 +305,7 @@ class Person private constructor(
     }
 
     internal fun utbetalingstidslinjer(periode: Periode, historie: Historie, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        return arbeidsgivere
-            .filter(Arbeidsgiver::harHistorikk)
+        return arbeidsgivereMedSykdom()
             .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, ytelser, historie) }
             .toMap()
     }
@@ -319,4 +318,8 @@ class Person private constructor(
     }
 
     internal fun harNødvendigInntekt(skjæringstidspunkt: LocalDate) = arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
+
+    internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
+
+    private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harHistorikk)
 }

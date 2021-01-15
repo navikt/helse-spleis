@@ -180,13 +180,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vararg perioder: Søknad.Søknadsperiode,
         harAndreInntektskilder: Boolean = false,
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        orgnummer: String = ORGNUMMER
     ): UUID {
         søknad(
             id = id,
             perioder = perioder,
             harAndreInntektskilder = harAndreInntektskilder,
-            sendtTilNav = sendtTilNav
+            sendtTilNav = sendtTilNav,
+            orgnummer = orgnummer
         ).also(person::håndter)
         søknader[id] = Triple(sendtTilNav, harAndreInntektskilder, perioder)
         return id
@@ -267,9 +269,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
-    protected fun håndterSimulering(vedtaksperiodeId: UUID = 1.vedtaksperiode) {
+    protected fun håndterSimulering(
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        simuleringOK: Boolean = true,
+        orgnummer: String = ORGNUMMER
+    ) {
         assertEtterspurt(vedtaksperiodeId, Behovtype.Simulering, Simulering::class)
-        person.håndter(simulering(vedtaksperiodeId))
+        person.håndter(simulering(vedtaksperiodeId, simuleringOK, orgnummer))
     }
 
     protected fun håndterUtbetalingshistorikk(
@@ -280,9 +286,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     ) {
         person.håndter(
             utbetalingshistorikk(
-                vedtaksperiodeId,
-                utbetalinger.toList(),
-                inntektshistorikk(inntektshistorikk, orgnummer)
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalinger = utbetalinger.toList(),
+                inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+                orgnummer = orgnummer
             )
         )
     }
@@ -323,6 +330,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 omsorgspenger = omsorgspenger,
                 opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
+                orgnummer = orgnummer,
                 dødsdato = dødsdato,
                 statslønn = statslønn,
                 arbeidsavklaringspenger = arbeidsavklaringspenger,
@@ -362,8 +370,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
         saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
         annullert: Boolean = false,
-        fagsystemId: String = inspektør.fagsystemId(vedtaksperiodeId),
-        sendOverførtKvittering: Boolean = true
+        sendOverførtKvittering: Boolean = true,
+        orgnummer: String = ORGNUMMER,
+        fagsystemId: String = inspektør(orgnummer).fagsystemId(vedtaksperiodeId)
     ) {
         if (sendOverførtKvittering) {
             person.håndter(
@@ -371,7 +380,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                     meldingsreferanseId = UUID.randomUUID(),
                     aktørId = AKTØRID,
                     fødselsnummer = UNG_PERSON_FNR_2018,
-                    orgnummer = ORGNUMMER,
+                    orgnummer = orgnummer,
                     fagsystemId = fagsystemId,
                     utbetalingId = inspektør.sisteBehov(Utbetaling).kontekst()["utbetalingId"]
                         ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Utbetaling).kontekst()}"),
@@ -384,7 +393,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             utbetaling(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fagsystemId = fagsystemId,
-                status = status
+                status = status,
+                orgnummer = orgnummer
             )
         )
     }
@@ -929,10 +939,10 @@ const val sant = true
 
 const val usant = false
 
-infix fun <T>T?.er(expected: T?) =
+infix fun <T> T?.er(expected: T?) =
     assertEquals(expected, this)
 
-infix fun <T>T?.skalVære(expected: T?) =
+infix fun <T> T?.skalVære(expected: T?) =
     if (expected == null) {
         this == null
     } else {

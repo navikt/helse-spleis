@@ -482,8 +482,9 @@ internal class Vedtaksperiode private constructor(
         val vedtaksperioder = person.nåværendeVedtaksperioder()
         val første = vedtaksperioder.first()
         if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+
+        this.tilstand(hendelse, AvventerArbeidsgivere)
         if (første.tilstand == AvventerArbeidsgivere) {
-            this.tilstand(hendelse, AvventerArbeidsgivere)
             første.tilstand(hendelse, AvventerHistorikk)
         }
     }
@@ -960,18 +961,23 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.periode
                     ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
                 )
-                lateinit var nesteTilstand: Vedtaksperiodetilstand
+                onError {
+                    person.invaliderAllePerioder(utbetalingshistorikk)
+                }
+                valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
+                    if(!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return@valider true
+                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
+                }
                 onSuccess {
-                    nesteTilstand =
+                    vedtaksperiode.tilstand(
+                        utbetalingshistorikk,
                         if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                             utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
                             AvventerHistorikk
                         } else {
                             AvventerInntektsmeldingFerdigGap
                         }
-                }
-                onSuccess {
-                    vedtaksperiode.tilstand(utbetalingshistorikk, nesteTilstand)
+                    )
                 }
             }
         }

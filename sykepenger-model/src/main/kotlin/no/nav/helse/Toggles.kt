@@ -41,5 +41,5 @@ sealed class Toggles(enabled: Boolean = false, private val force: Boolean = fals
     object SpeilInntekterVol2Enabled : Toggles(true)
     object NyInntekt : Toggles(true)
     object ReplayEnabled : Toggles()
-    object FlereArbeidsgivereEnabled : Toggles()
+    object FlereArbeidsgivereOvergangITEnabled : Toggles()
 }

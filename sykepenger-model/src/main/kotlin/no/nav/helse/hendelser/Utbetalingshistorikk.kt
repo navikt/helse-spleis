@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -72,7 +73,9 @@ class Utbetalingshistorikk(
                 periode: Periode
             ) {
                 liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
-                liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
+                if(!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
+                    liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
+                }
             }
 
             private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
@@ -134,6 +137,7 @@ class Utbetalingshistorikk(
                 Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
             )
         }
+
         internal fun addInntekter(
             hendelseId: UUID,
             organisasjonsnummer: String,
@@ -172,7 +176,8 @@ class Utbetalingshistorikk(
             aktivitetslogg: Aktivitetslogg,
             other: Periode,
             organisasjonsnummer: String
-        ) {}
+        ) {
+        }
 
         abstract class Utbetalingsperiode(
             fom: LocalDate,
@@ -211,9 +216,11 @@ class Utbetalingshistorikk(
                     periode: Periode,
                     organisasjonsnummer: String
                 ): Aktivitetslogg {
-                    if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
-                        aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
-                        return aktivitetslogg
+                    if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
+                        if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
+                            aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
+                            return aktivitetslogg
+                        }
                     }
                     liste.onEach { it.valider(aktivitetslogg, periode, organisasjonsnummer) }
                     return aktivitetslogg
