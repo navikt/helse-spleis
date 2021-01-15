@@ -2586,4 +2586,25 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING
         )
     }
+
+    @Test
+    fun `oppretter ikke ny vedtaksperiode ved sykmelding som overlapper med forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent), Utdanning(8.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertEquals(1, inspektør.vedtaksperiodeTeller)
+    }
+
+    @Test
+    fun `man kan ikke opprette en vedtaksperiode før en forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), Utdanning(21.februar, 28.februar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+    }
 }

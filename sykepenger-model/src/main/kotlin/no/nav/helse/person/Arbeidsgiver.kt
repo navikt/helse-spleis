@@ -140,7 +140,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it }) {
+        if (!Toggles.ReplayEnabled.enabled) Vedtaksperiode.overlapperMedForkastet(forkastede.keys, sykmelding)
+
+        if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it } && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
             vedtaksperioder.sort()
@@ -499,6 +501,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
+            || forkastede.keys.any { other -> other.starterEtter(vedtaksperiode) }
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)

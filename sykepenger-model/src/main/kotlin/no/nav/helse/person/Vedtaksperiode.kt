@@ -1631,6 +1631,12 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.harInntekt() =
             this.takeIf { it.isNotEmpty() }
                 ?.any { it.arbeidsgiver.grunnlagForSykepengegrunnlag(it.skjæringstidspunkt, it.periode.start) != null } ?: true
+
+        internal fun overlapperMedForkastet(forkastede: Set<Vedtaksperiode>, sykmelding: Sykmelding) {
+            forkastede
+                .filter { it.sykmeldingsperiode.overlapperMed(sykmelding.periode()) }
+                .forEach { sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}") }
+        }
     }
 }
 

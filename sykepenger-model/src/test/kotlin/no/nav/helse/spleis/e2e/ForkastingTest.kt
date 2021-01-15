@@ -304,30 +304,13 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
-        håndterSykmelding(Sykmeldingsperiode(29.august(2020), 25.september(2020), 100.prosent))
-        håndterSøknadMedValidering(
-            1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(29.august(2020), 25.september(2020), 100.prosent)
-        )
-        håndterInntektsmelding(listOf(29.august(2020) til 13.september(2020)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        nyttVedtak(29.august, 25.september)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, annullert = true)
 
-        håndterSykmelding(Sykmeldingsperiode(29.september(2020), 30.september(2020), 100.prosent))
-        håndterSøknadMedValidering(
-            2.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(29.september(2020), 30.september(2020), 100.prosent)
-        )
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_FERDIG_GAP, LocalDateTime.now().minusYears(1))
+        håndterSykmelding(Sykmeldingsperiode(26.september, 23.oktober, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(26.september(2020), 23.oktober(2020), 100.prosent))
-
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertFalse(inspektør.periodeErForkastet(3.vedtaksperiode))
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
     }
 
     @Test
