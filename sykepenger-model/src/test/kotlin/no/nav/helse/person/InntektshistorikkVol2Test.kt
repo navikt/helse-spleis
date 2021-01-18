@@ -77,7 +77,7 @@ internal class InntektshistorikkVol2Test {
     }
 
     @Test
-    fun `Bruker inntekt fra inntektsmelding fremfor inntekt fra infotrygd for å beregne sykepengegrunnlaget`() {
+    fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar)
         utbetalingshistorikk(
             inntektshistorikk = listOf(
@@ -87,7 +87,7 @@ internal class InntektshistorikkVol2Test {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(20000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
+        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
     }
 
     @Test

@@ -126,6 +126,24 @@ internal class InntektshistorikkVol2 {
             other is Saksbehandler && this.dato == other.dato
     }
 
+    internal class Infotrygd(
+        override val dato: LocalDate,
+        private val hendelseId: UUID,
+        private val beløp: Inntekt,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : Inntektsopplysning {
+        override val prioritet = 80
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }?.let { it to it.beløp }
+
+        override fun skalErstattesAv(other: Inntektsopplysning) =
+            other is Infotrygd && this.dato == other.dato
+    }
 
     internal class Inntektsmelding(
         override val dato: LocalDate,
@@ -133,7 +151,7 @@ internal class InntektshistorikkVol2 {
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
-        override val prioritet = 80
+        override val prioritet = 60
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, dato, hendelseId, beløp, tidsstempel)
@@ -146,25 +164,6 @@ internal class InntektshistorikkVol2 {
 
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
-    }
-
-    internal class Infotrygd(
-        override val dato: LocalDate,
-        private val hendelseId: UUID,
-        private val beløp: Inntekt,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-        override val prioritet = 60
-
-        override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInfotrygd(this, dato, hendelseId, beløp, tidsstempel)
-        }
-
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
-        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }?.let { it to it.beløp }
-
-        override fun skalErstattesAv(other: Inntektsopplysning) =
-            other is Infotrygd && this.dato == other.dato
     }
 
     internal class SkattComposite(
