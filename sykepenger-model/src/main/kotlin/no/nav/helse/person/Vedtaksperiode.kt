@@ -634,8 +634,15 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
-            søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            if (!Toggles.KorrigertSøknadToggle.enabled) {
+                søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
+                if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            }
+            else {
+                if (!vedtaksperiode.skalForkastesVedOverlapp()) return søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
+                if (!søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return
+                søknad.error("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+            }
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 

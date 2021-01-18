@@ -76,16 +76,6 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `andre søknad ugyldig`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent)))
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
-        person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent)))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertTrue(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
-    }
-
-    @Test
     fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
