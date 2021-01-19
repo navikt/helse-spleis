@@ -307,7 +307,6 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         arbeidsgiver.addInntektVol2(hendelse, skjæringstidspunkt)
-        hendelse.padLeft(periode.start)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         inntektsmeldingId = hendelse.meldingsreferanseId()
