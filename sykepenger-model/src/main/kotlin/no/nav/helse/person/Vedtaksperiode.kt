@@ -341,18 +341,15 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand())
     }
 
-    private fun håndter(hendelse: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
-        periode = periode.oppdaterFom(hendelse.periode())
-        oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
-        tilstand(hendelse, nesteTilstand)
+    private fun håndter(søknad: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
+        håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
     }
 
-    private fun håndter(hendelse: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, onSuccess: () -> Unit = {}) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
-        tilstand(hendelse, nesteTilstand)
+        onSuccess()
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -632,18 +629,20 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            søknad.trimLeft(vedtaksperiode.periode.endInclusive)
             if (!Toggles.KorrigertSøknadToggle.enabled) {
+                søknad.trimLeft(vedtaksperiode.periode.endInclusive)
                 søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
                 if (!vedtaksperiode.skalForkastesVedOverlapp()) return
             }
             else {
                 if (!vedtaksperiode.skalForkastesVedOverlapp()) return søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-                if (!søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return
+                if (!søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return vedtaksperiode.håndterSøknad(søknad) {håndterOverlappendeSøknad(vedtaksperiode, søknad)}
                 søknad.error("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
             }
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
+
+        fun håndterOverlappendeSøknad(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
@@ -1331,6 +1330,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             trengerSimulering(vedtaksperiode, påminnelse)
+        }
+
+        override fun håndterOverlappendeSøknad(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.tilstand(søknad, AvventerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
