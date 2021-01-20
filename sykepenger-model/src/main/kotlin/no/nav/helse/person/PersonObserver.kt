@@ -162,11 +162,14 @@ interface PersonObserver {
         val personOppdrag: Map<String, Any>
     )
 
+    data class VedtaksperiodeReberegnetEvent(val vedtaksperiodeId: UUID)
+
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
     fun inntektsmeldingReplay(event: InntektsmeldingReplayEvent) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, vedtaksperiodeId: UUID, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {}
+    fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeAvbrutt(event: VedtaksperiodeAvbruttEvent) {}
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
     fun personEndret(personEndretEvent: PersonEndretEvent) {}

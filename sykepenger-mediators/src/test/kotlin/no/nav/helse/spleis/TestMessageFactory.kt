@@ -82,6 +82,7 @@ internal class TestMessageFactory(
 
     fun lagSøknadNav(
         perioder: List<SoknadsperiodeDTO>,
+        ferie: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ): String {
         val sendtSøknad = SykepengesoknadDTO(
@@ -97,7 +98,7 @@ internal class TestMessageFactory(
             sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
-            fravar = emptyList(),
+            fravar = ferie,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()
         )

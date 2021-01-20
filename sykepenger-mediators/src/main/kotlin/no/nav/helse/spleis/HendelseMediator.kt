@@ -379,6 +379,16 @@ internal class HendelseMediator(
                 )
             }
 
+            override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
+                queueMessage(
+                    "vedtaksperiode_reberegnet", JsonMessage.newMessage(
+                        mapOf(
+                            "vedtaksperiodeId" to vedtaksperiodeId
+                        )
+                    )
+                )
+            }
+
             override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
                 queueMessage(
                     "vedtaksperiode_endret", JsonMessage.newMessage(

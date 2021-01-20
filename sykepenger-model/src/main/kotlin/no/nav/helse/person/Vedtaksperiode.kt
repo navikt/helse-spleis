@@ -453,6 +453,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun emitVedtaksperiodeReberegnet() {
+        person.vedtaksperiodeReberegnet(id)
+    }
+
     private fun emitVedtaksperiodeEndret(
         currentState: Vedtaksperiodetilstand,
         hendelseaktivitetslogg: Aktivitetslogg,
@@ -1395,6 +1399,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad) {
+                vedtaksperiode.emitVedtaksperiodeReberegnet()
                 vedtaksperiode.tilstand(søknad, AvventerHistorikk)
             }
         }

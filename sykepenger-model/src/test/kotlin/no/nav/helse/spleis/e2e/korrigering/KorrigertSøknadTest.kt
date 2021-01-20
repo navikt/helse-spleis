@@ -260,6 +260,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
                 AVVENTER_HISTORIKK
             )
             assertEquals(1, inspektør.personLogg.warn().size)
+            assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode))
         }
     }
 }

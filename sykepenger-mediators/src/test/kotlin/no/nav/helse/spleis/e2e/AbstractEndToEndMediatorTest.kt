@@ -19,6 +19,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.flywaydb.core.Flyway
@@ -104,11 +105,20 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendSøknad(
         vedtaksperiodeIndeks: Int,
         perioder: List<SoknadsperiodeDTO>,
+        ferie: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, egenmeldinger))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, ferie, egenmeldinger))
+    }
+
+    protected fun sendKorrigerendeSøknad(
+        perioder: List<SoknadsperiodeDTO>,
+        ferie: List<FravarDTO> = emptyList(),
+        egenmeldinger: List<PeriodeDTO> = emptyList()
+    ) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, ferie, egenmeldinger))
     }
 
     protected fun sendSøknadArbeidsgiver(

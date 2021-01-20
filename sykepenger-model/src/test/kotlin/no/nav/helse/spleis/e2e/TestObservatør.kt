@@ -7,6 +7,7 @@ import java.util.*
 internal class TestObservatør : PersonObserver {
     internal val tilstander = mutableMapOf<UUID, MutableList<TilstandType>>()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
+    val reberegnedeVedtaksperioder = mutableListOf<UUID>()
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
     val hendelserTilReplay = mutableMapOf<UUID, List<UUID>>()
@@ -33,6 +34,10 @@ internal class TestObservatør : PersonObserver {
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
+    }
+
+    override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
+        reberegnedeVedtaksperioder.add(vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
