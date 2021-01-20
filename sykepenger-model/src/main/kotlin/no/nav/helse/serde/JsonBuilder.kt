@@ -18,8 +18,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.set
 
 fun Person.serialize(): SerialisertPerson {
@@ -27,7 +25,7 @@ fun Person.serialize(): SerialisertPerson {
     return SerialisertPerson(jsonBuilder.toJson())
 }
 
-internal class JsonBuilder(person: Person)  {
+internal class JsonBuilder(person: Person) {
 
     private val root = Root()
     private val stack = mutableListOf<PersonVisitor>(root)
@@ -142,28 +140,33 @@ internal class JsonBuilder(person: Person)  {
             }
         }
 
-        private val vedtaksperioderMap = mutableMapOf<Vedtaksperiode, MutableMap<String, Any?>>()
+        private val vedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            vedtaksperioderMap.clear()
+            vedtaksperiodeListe.clear()
         }
 
         override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            arbeidsgiverMap["vedtaksperioder"] = vedtaksperioderMap.values.toList()
+            arbeidsgiverMap["vedtaksperioder"] = vedtaksperiodeListe.toList()
         }
 
-        override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
-            vedtaksperioderMap.clear()
+        override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
+            vedtaksperiodeListe.clear()
         }
 
-        override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
-            arbeidsgiverMap["forkastede"] =
-                vedtaksperioder.map { (periode, årsak) ->
-                    mapOf(
-                        "vedtaksperiode" to vedtaksperioderMap[periode],
-                        "årsak" to årsak
-                    )
-                }
+        override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+            val vedtaksperiodeMap = mutableMapOf<String, Any?>()
+            vedtaksperiodeListe.add(
+                mutableMapOf(
+                    "vedtaksperiode" to vedtaksperiodeMap,
+                    "årsak" to forkastetÅrsak
+                )
+            )
+            pushState(ForkastetVedtaksperiodeState(vedtaksperiodeMap))
+        }
+
+        override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
+            arbeidsgiverMap["forkastede"] = vedtaksperiodeListe.toList()
         }
 
         override fun preVisitVedtaksperiode(
@@ -177,12 +180,8 @@ internal class JsonBuilder(person: Person)  {
             hendelseIder: List<UUID>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
-            vedtaksperiodeMap["fom"] = periode.start
-            vedtaksperiodeMap["tom"] = periode.endInclusive
-            vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
-            vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
-            vedtaksperiodeMap["hendelseIder"] = hendelseIder
-            vedtaksperioderMap[vedtaksperiode] = vedtaksperiodeMap
+            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder)
+            vedtaksperiodeListe.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
         }
 
@@ -193,6 +192,40 @@ internal class JsonBuilder(person: Person)  {
         ) {
             popState()
         }
+    }
+
+    private inner class ForkastetVedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : PersonVisitor {
+
+        override fun preVisitVedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            id: UUID,
+            tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>
+        ) {
+            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder)
+            pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
+        }
+
+        override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+            popState()
+        }
+    }
+
+    private fun initVedtaksperiodeMap(
+        vedtaksperiodeMap: MutableMap<String, Any?>,
+        periode: Periode,
+        opprinneligPeriode: Periode,
+        hendelseIder: List<UUID>
+    ) {
+        vedtaksperiodeMap["fom"] = periode.start
+        vedtaksperiodeMap["tom"] = periode.endInclusive
+        vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
+        vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
+        vedtaksperiodeMap["hendelseIder"] = hendelseIder
     }
 
     private inner class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : PersonVisitor {

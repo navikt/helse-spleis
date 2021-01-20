@@ -42,7 +42,7 @@ internal class Avstemmer(person: Person) {
             push(HarUtbetalinger(this.utbetalinger))
         }
 
-        override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+        override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
             push(HarPerioder(forkastedeVedtaksperioder))
         }
 
@@ -110,7 +110,7 @@ internal class Avstemmer(person: Person) {
             pop()
         }
 
-        override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+        override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
             pop()
         }
     }

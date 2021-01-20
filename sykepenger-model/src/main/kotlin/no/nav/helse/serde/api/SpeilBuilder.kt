@@ -176,11 +176,6 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
         }
 
         override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            vedtaksperioder.forEach { periode ->
-                gruppeIder[periode] = arbeidsgiver.finnSykeperiodeRettFør(periode)
-                    ?.let { foregående -> gruppeIder.getValue(foregående) }
-                    ?: UUID.randomUUID()
-            }
             this.vedtaksperioder.clear()
         }
 
@@ -188,16 +183,11 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             arbeidsgiverMap["vedtaksperioder"] = this.vedtaksperioder.toList()
         }
 
-        override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
-            vedtaksperioder.forEach { (periode, _) ->
-                gruppeIder[periode] = arbeidsgiver.finnSykeperiodeRettFør(periode)
-                    ?.let { foregående -> gruppeIder.getValue(foregående) }
-                    ?: UUID.randomUUID()
-            }
+        override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
             this.vedtaksperioder.clear()
         }
 
-        override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+        override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
             arbeidsgiverMap["vedtaksperioder"] =
                 (arbeidsgiverMap["vedtaksperioder"] as List<Any?>) + this.vedtaksperioder.toList()
                     .filter { it.tilstand.visesNårForkastet() }
@@ -217,6 +207,9 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             opprinneligPeriode: Periode,
             hendelseIder: List<UUID>
         ) {
+            gruppeIder[vedtaksperiode] = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+                ?.let(gruppeIder::getValue)
+                ?: UUID.randomUUID()
             pushState(
                 VedtaksperiodeState(
                     vedtaksperiode = vedtaksperiode,

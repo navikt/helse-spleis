@@ -33,7 +33,7 @@ internal class Arbeidsgiver private constructor(
     private val inntektshistorikkVol2: InntektshistorikkVol2,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
-    private val forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
+    private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
     private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
     private val refusjonOpphører: MutableList<LocalDate?>
@@ -46,7 +46,7 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikkVol2 = InntektshistorikkVol2(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
-        forkastede = sortedMapOf(),
+        forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
         beregnetUtbetalingstidslinjer = mutableListOf(),
         refusjonOpphører = mutableListOf()
@@ -91,7 +91,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.forEach { it.accept(visitor) }
         visitor.postVisitPerioder(vedtaksperioder)
         visitor.preVisitForkastedePerioder(forkastede)
-        forkastede.forEach { it.key.accept(visitor) }
+        forkastede.forEach { it.accept(visitor) }
         visitor.postVisitForkastedePerioder(forkastede)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
@@ -140,7 +140,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if (!Toggles.ReplayEnabled.enabled) Vedtaksperiode.overlapperMedForkastet(forkastede.keys, sykmelding)
+        if (!Toggles.ReplayEnabled.enabled) ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
 
         if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it } && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
@@ -458,7 +458,7 @@ internal class Arbeidsgiver private constructor(
         .filter(filter)
         .also { perioder ->
             vedtaksperioder.removeAll(perioder)
-            forkastede.putAll(perioder.map { it to årsak })
+            forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
         }
 
     private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
@@ -494,14 +494,14 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
-    internal fun finnForkastedeTilstøtende(vedtaksperiode: Vedtaksperiode) = forkastede.keys.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
+    internal fun finnForkastedeTilstøtende(vedtaksperiode: Vedtaksperiode) = ForkastetVedtaksperiode.finnForkastedeTilstøtende(forkastede, vedtaksperiode)
 
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
     internal fun harPeriodeEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { other -> other.starterEtter(vedtaksperiode) }
-            || forkastede.keys.any { other -> other.starterEtter(vedtaksperiode) }
+            || ForkastetVedtaksperiode.harPeriodeEtter(forkastede, vedtaksperiode)
 
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
@@ -622,7 +622,7 @@ internal class Arbeidsgiver private constructor(
         val referanse = historie.skjæringstidspunkt(vedtaksperiode.periode()) ?: return null
         return Vedtaksperiode.finnForrigeAvsluttaPeriode(vedtaksperioder, vedtaksperiode, referanse, historie) ?:
         // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
-        Vedtaksperiode.finnForrigeAvsluttaPeriode(forkastede.map { it.key }, vedtaksperiode, referanse, historie)
+        ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode, referanse, historie)
     }
 
     internal class JsonRestorer private constructor() {
@@ -635,7 +635,7 @@ internal class Arbeidsgiver private constructor(
                 inntektshistorikkVol2: InntektshistorikkVol2,
                 sykdomshistorikk: Sykdomshistorikk,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
-                forkastede: SortedMap<Vedtaksperiode, ForkastetÅrsak>,
+                forkastede: MutableList<ForkastetVedtaksperiode>,
                 utbetalinger: List<Utbetaling>,
                 beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
                 refusjonOpphører: List<LocalDate?>

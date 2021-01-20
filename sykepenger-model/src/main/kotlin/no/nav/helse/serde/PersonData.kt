@@ -155,7 +155,7 @@ internal data class PersonData(
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
-        private val forkastedeliste = sortedMapOf<Vedtaksperiode, ForkastetÅrsak>()
+        private val forkastedeliste = mutableListOf<ForkastetVedtaksperiode>()
         private val modelUtbetalinger = utbetalinger.map { it.konverterTilUtbetaling() }
         private val utbetalingMap = utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
 
@@ -189,15 +189,17 @@ internal data class PersonData(
                 )
             })
 
-            forkastedeliste.putAll(this.forkastede.map { (periode, årsak) ->
-                periode.createVedtaksperiode(
-                    person,
-                    arbeidsgiver,
-                    aktørId,
-                    fødselsnummer,
-                    this.organisasjonsnummer,
-                    utbetalingMap
-                ) to årsak
+            forkastedeliste.addAll(this.forkastede.map { (periode, årsak) ->
+                ForkastetVedtaksperiode(
+                    periode.createVedtaksperiode(
+                        person,
+                        arbeidsgiver,
+                        aktørId,
+                        fødselsnummer,
+                        this.organisasjonsnummer,
+                        utbetalingMap
+                    ), årsak
+                )
             })
             vedtaksperiodeliste.sort()
 

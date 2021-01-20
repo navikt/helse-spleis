@@ -94,11 +94,11 @@ internal class TestArbeidsgiverInspektør(
         this.arbeidsgiver = arbeidsgiver
     }
 
-    override fun preVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+    override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
         forkastetPeriode = true
     }
 
-    override fun postVisitForkastedePerioder(vedtaksperioder: Map<Vedtaksperiode, ForkastetÅrsak>) {
+    override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
         forkastetPeriode = false
     }
 

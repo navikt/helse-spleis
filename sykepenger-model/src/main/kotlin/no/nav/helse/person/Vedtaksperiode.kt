@@ -1610,6 +1610,12 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
+        private val periodeFomComparator = compareBy<Vedtaksperiode>{ it.periode.start }
+        private val periodeTomComparator = compareBy<Vedtaksperiode>{ it.periode.endInclusive }
+        private val periodeComparator = periodeFomComparator.thenComparing(periodeTomComparator)
+        private val opprettetComparator = compareBy<Vedtaksperiode> { it.opprettet }
+        internal val forkastetComparator = periodeComparator.thenComparing(opprettetComparator)
+
         internal fun finnForrigeAvsluttaPeriode(
             perioder: List<Vedtaksperiode>,
             vedtaksperiode: Vedtaksperiode,
@@ -1641,7 +1647,7 @@ internal class Vedtaksperiode private constructor(
             this.takeIf { it.isNotEmpty() }
                 ?.any { it.arbeidsgiver.grunnlagForSykepengegrunnlag(it.skjæringstidspunkt, it.periode.start) != null } ?: true
 
-        internal fun overlapperMedForkastet(forkastede: Set<Vedtaksperiode>, sykmelding: Sykmelding) {
+        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
             forkastede
                 .filter { it.sykmeldingsperiode.overlapperMed(sykmelding.periode()) }
                 .forEach { sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}") }
