@@ -12,8 +12,9 @@ internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
     meldingsreferanseId: UUID,
-    melding: Melding? = null
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+    melding: Melding? = null,
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     private var forrigeTom: LocalDate? = null
 
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId())

@@ -19,6 +19,7 @@ internal class TestObservatør : PersonObserver {
     val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
+    val inntektsmeldingReplayEventer = mutableListOf<UUID>()
 
     fun sisteVedtaksperiode() = sisteVedtaksperiode
     fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
@@ -50,6 +51,10 @@ internal class TestObservatør : PersonObserver {
 
     override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         trengerIkkeInntektsmeldingVedtaksperioder.add(event.vedtaksperiodeId)
+    }
+
+    override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
+        inntektsmeldingReplayEventer.add(event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {

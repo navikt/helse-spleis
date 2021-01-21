@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
+import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -186,7 +187,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
         inntektsmelding.wrapped.kontekst(this)
         inntektsmelding.wrapped.cacheRefusjon(this)
-        vedtaksperioder.toList().forEach { it.håndter(inntektsmelding.wrapped) }
+        vedtaksperioder.toList().håndter(inntektsmelding)
         finalize(inntektsmelding)
     }
 

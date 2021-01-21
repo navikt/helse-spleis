@@ -238,6 +238,17 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return id
     }
 
+    protected fun håndterInntektsmeldingReplay(
+        inntektsmelding: Inntektsmelding,
+        vedtaksperiodeId: UUID
+    ) {
+        assertTrue(vedtaksperiodeId in observatør.inntektsmeldingReplayEventer)
+        inntektsmeldingReplay(
+            inntektsmelding,
+            vedtaksperiodeId
+        ).also(person::håndter)
+    }
+
     protected fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
@@ -530,6 +541,19 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             perioder = listOf(*perioder)
+        ).apply {
+            hendelselogg = this
+        }
+    }
+
+    private fun inntektsmeldingReplay(
+        inntektsmelding: Inntektsmelding,
+        vedtaksperiodeId: UUID
+    ): InntektsmeldingReplay {
+        return InntektsmeldingReplay(
+            meldingsreferanseId = UUID.randomUUID(),
+            wrapped = inntektsmelding,
+            vedtaksperiodeId = vedtaksperiodeId
         ).apply {
             hendelselogg = this
         }

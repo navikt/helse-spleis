@@ -142,6 +142,23 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    internal fun håndter(inntektsmelding: InntektsmeldingReplay): Boolean {
+        return overlapperMedInntektsmelding(inntektsmelding.wrapped).also {
+            if (!it) {
+                inntektsmelding.trimLeft(periode.endInclusive)
+                return it
+            }
+            if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
+                inntektsmelding.wrapped.error("Refusjon opphører i perioden")
+                tilstand(inntektsmelding.wrapped, TilInfotrygd)
+            }
+            kontekst(inntektsmelding.wrapped)
+            tilstand.håndter(this, inntektsmelding.wrapped)
+        }
+
+        return false
+    }
+
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         if (!utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
@@ -1195,18 +1212,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.arbeidsgiver.finnForkastedeTilstøtende(vedtaksperiode)?.also {
-                sikkerLogg.info(
-                    "${vedtaksperiode.aktørId} med vedtaksperiodeId ${vedtaksperiode.id} er en kandidat for stuck periode. Fant forkastet periode foran med vedtaksperiode ${it.id} og tilstand ${it.tilstand.type.name}"
-                )
-                if (it.tilstand == TilInfotrygd) {
-                    vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer))
-                }
-            }
+            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
             vedtaksperiode.trengerKortHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
             vedtaksperiode.trengerInntektsmelding()
         }
 
@@ -1696,6 +1707,11 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.sykmeldingsperiode.overlapperMed(sykmelding.periode()) }
                 .forEach { sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}") }
+        }
+
+        internal fun List<Vedtaksperiode>.håndter(inntektsmelding: InntektsmeldingReplay) {
+            this.dropWhile { it.id != inntektsmelding.vedtaksperiodeId }
+                .forEach { it.håndter(inntektsmelding) }
         }
     }
 }

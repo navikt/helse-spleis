@@ -21,7 +21,8 @@ interface PersonObserver {
     )
 
     data class InntektsmeldingReplayEvent(
-        val fnr: String
+        val fnr: String,
+        val vedtaksperiodeId: UUID
     )
 
     data class VedtaksperiodeIkkeFunnetEvent(

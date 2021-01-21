@@ -35,8 +35,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun gjennopprettInntektsmelding(fnr: String): List<HendelseMessage> = finnMeldinger(fnr).map { data ->
-            InntektsmeldingReplayMessage(JsonNodeDelegate(data))
+    fun gjennopprettInntektsmelding(fnr: String, vedtaksperiodeId: UUID): List<HendelseMessage> = finnMeldinger(fnr).map { data ->
+            InntektsmeldingReplayMessage(JsonNodeDelegate(data), vedtaksperiodeId)
         }
 
     fun lagreMelding(melding: HendelseMessage) {
