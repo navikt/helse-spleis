@@ -42,5 +42,5 @@ sealed class Toggles(enabled: Boolean = false, private val force: Boolean = fals
     object NyInntekt : Toggles(true)
     object ReplayEnabled : Toggles()
     object FlereArbeidsgivereOvergangITEnabled : Toggles()
-    object KorrigertSøknadToggle : Toggles()
+    object KorrigertSøknadToggle : Toggles(System.getenv().getOrDefault("KORRIGERT_SOKNAD_TOGGLE", "false").toBoolean())
 }

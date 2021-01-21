@@ -55,3 +55,5 @@ spec:
     value: spleis
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
+  - name: KORRIGERT_SOKNAD_TOGGLE
+    value: "true"
