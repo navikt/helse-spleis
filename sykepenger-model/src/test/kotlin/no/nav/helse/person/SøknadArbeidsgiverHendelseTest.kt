@@ -137,7 +137,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Søknad.Søknadsperiode.Sykdom(1.januar, 5.januar, 100.prosent, 0.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(10, inspektør.sykdomstidslinje.count())
     }

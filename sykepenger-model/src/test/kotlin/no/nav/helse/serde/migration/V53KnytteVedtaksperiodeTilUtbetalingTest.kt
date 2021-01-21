@@ -127,7 +127,7 @@ private fun originalJson() =
       {
         "kontekstType": "Tilstand",
         "kontekstMap": {
-          "tilstand": "AVVENTER_GAP"
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
         }
       },
       {
@@ -317,7 +317,7 @@ private fun expectedJson() =
       {
         "kontekstType": "Tilstand",
         "kontekstMap": {
-          "tilstand": "AVVENTER_GAP"
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
         }
       },
       {

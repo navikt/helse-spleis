@@ -401,10 +401,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerYtelser(hendelse: ArbeidstakerHendelse) {
-        utbetalingshistorikk(
-            hendelse,
-            Periode(arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4), periode.endInclusive)
-        )
+        trengerGapHistorikkFraInfotrygd(hendelse)
         foreldrepenger(hendelse)
         pleiepenger(hendelse, periode)
         omsorgspenger(hendelse, periode)
@@ -423,7 +420,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGapHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse) {
-        utbetalingshistorikk(hendelse, periode.start.minusYears(4) til periode.endInclusive)
+        utbetalingshistorikk(hendelse, arbeidsgiver.sykdomstidslinje().førsteDag().minusYears(4) til periode.endInclusive)
     }
 
     private fun trengerVilkårsgrunnlag(hendelse: ArbeidstakerHendelse) {
@@ -689,13 +686,21 @@ internal class Vedtaksperiode private constructor(
             utbetalingshistorikk: Utbetalingshistorikk
         ) {
             val historie = Historie(person, utbetalingshistorikk)
-            val skjæringstidspunkt = historie.skjæringstidspunkt(vedtaksperiode.periode)
-            if (utbetalingshistorikk
-                    .valider(historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode), skjæringstidspunkt)
-                    .hasErrorsOrWorse()
-            )
-                return vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
-            utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
+            validation(utbetalingshistorikk) {
+                onError {
+                    vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
+                }
+                validerUtbetalingshistorikk(
+                    historie.avgrensetPeriode(
+                        vedtaksperiode.organisasjonsnummer,
+                        vedtaksperiode.periode
+                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
+                )
+
+                onSuccess {
+                    utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
+                }
+            }
         }
 
         fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
@@ -844,7 +849,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndter(søknad, AvventerGap)
+            vedtaksperiode.håndter(søknad, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -942,78 +947,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_GAP
-
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusHours(24)
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerGapHistorikkFraInfotrygd(hendelse)
-            hendelse.info("Forespør sykdoms- og inntektshistorikk")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerGapHistorikkFraInfotrygd(påminnelse)
-            påminnelse.info("Forespør sykdoms- og inntektshistorikk (Påminnet)")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding) {
-                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
-                    AvventerVilkårsprøvingGap
-                } else {
-                    AvsluttetUtenUtbetalingMedInntektsmelding
-                }
-            }
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
-        ) {
-            val historie = Historie(person, utbetalingshistorikk)
-            validation(utbetalingshistorikk) {
-                onError {
-                    vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
-                }
-                validerUtbetalingshistorikk(
-                    historie.avgrensetPeriode(
-                        vedtaksperiode.organisasjonsnummer,
-                        vedtaksperiode.periode
-                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
-                )
-                onError {
-                    person.invaliderAllePerioder(utbetalingshistorikk)
-                }
-                valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
-                    if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return@valider true
-                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
-                }
-                onSuccess {
-                    vedtaksperiode.tilstand(
-                        utbetalingshistorikk,
-                        if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
-                            utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
-                            AvventerHistorikk
-                        } else {
-                            AvventerInntektsmeldingFerdigGap
-                        }
-                    )
-                }
-            }
-        }
-    }
-
     internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
         override val type = AVVENTER_ARBEIDSGIVERE
 
@@ -1047,7 +980,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerGap)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -1105,7 +1038,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, AvventerHistorikk, AvventerInntektsmeldingFerdigGap)
+            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, AvventerHistorikk, AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1193,8 +1126,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerInntektsmeldingFerdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+    internal object AvventerInntektsmeldingEllerHistorikkFerdigGap : Vedtaksperiodetilstand {
+        override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
@@ -1210,13 +1143,47 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk
+        ) {
+            val historie = Historie(person, utbetalingshistorikk)
+            validation(utbetalingshistorikk) {
+                onError {
+                    vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
+                }
+                validerUtbetalingshistorikk(
+                    historie.avgrensetPeriode(
+                        vedtaksperiode.organisasjonsnummer,
+                        vedtaksperiode.periode
+                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
+                )
+                onError {
+                    person.invaliderAllePerioder(utbetalingshistorikk)
+                }
+                valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
+                    if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return@valider true
+                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
+                }
+                onSuccess {
+                    if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
+                        utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
+                        vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
+                    }
+                }
+            }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerKortHistorikkFraInfotrygd(påminnelse)
+            vedtaksperiode.trengerGapHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
             vedtaksperiode.trengerInntektsmelding()
+            vedtaksperiode.trengerGapHistorikkFraInfotrygd(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

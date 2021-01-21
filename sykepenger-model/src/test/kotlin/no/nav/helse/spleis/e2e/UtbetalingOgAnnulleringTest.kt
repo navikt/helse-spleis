@@ -80,7 +80,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD

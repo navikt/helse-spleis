@@ -34,7 +34,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -57,7 +57,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -89,7 +89,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertForkastedeTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -118,7 +118,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100)))
             sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 2.februar)
             sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-            assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
+            assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
             assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
             assertIkkeForkastedeTilstander(
                 2,
@@ -143,7 +143,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -169,7 +169,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
@@ -274,7 +274,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertForkastedeTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "TIL_INFOTRYGD"
         )
     }
@@ -288,7 +288,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.TEKNISK_FEIL)
         assertTilstander(
-            0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP",
+            0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
             "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING"
         )
     }
@@ -335,9 +335,9 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 16.januar, tom = 25.januar, sykmeldingsgrad = 100))
         sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 16.januar, tom = 25.januar, sykmeldingsgrad = 100)))
         sendUtbetalingshistorikk(1)
-        sendNyPåminnelse(1, TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_GAP)
+        sendNyPåminnelse(1, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING", "TIL_INFOTRYGD")
-        assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_GAP", "AVVENTER_INNTEKTSMELDING_FERDIG_GAP", "TIL_INFOTRYGD")
+        assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
     }
 }

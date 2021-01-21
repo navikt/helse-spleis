@@ -36,7 +36,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
@@ -58,7 +58,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -87,7 +87,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -282,7 +282,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
@@ -292,7 +292,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
@@ -326,7 +326,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP,
             TIL_INFOTRYGD
         )

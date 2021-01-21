@@ -72,7 +72,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
@@ -118,7 +118,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -199,7 +199,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_GODKJENNING,

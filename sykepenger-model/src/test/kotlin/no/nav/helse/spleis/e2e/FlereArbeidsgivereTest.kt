@@ -345,7 +345,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GAP)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
@@ -368,7 +368,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_GAP)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
@@ -415,7 +415,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertTilstand(a2, AVVENTER_GAP)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
             Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
@@ -436,7 +436,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GAP)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -479,7 +479,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GAP)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
@@ -506,7 +506,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GAP)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
 
         val inntektshistorikk = listOf(
@@ -529,7 +529,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_GAP)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, TIL_INFOTRYGD)

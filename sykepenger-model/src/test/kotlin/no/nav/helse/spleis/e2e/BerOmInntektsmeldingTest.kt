@@ -25,8 +25,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_INNTEKTSMELDING_FERDIG_GAP
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
         )
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
@@ -84,8 +83,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_GAP,
-            AVVENTER_INNTEKTSMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_VILKÅRSPRØVING_GAP
         )
 
@@ -131,6 +129,6 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
 
-        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
 }

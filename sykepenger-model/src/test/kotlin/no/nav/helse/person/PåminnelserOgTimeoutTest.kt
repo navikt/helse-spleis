@@ -40,10 +40,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     fun `påminnelse i mottatt søknad`() {
         person.håndter(sykmelding())
         person.håndter(søknad())
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
-        person.håndter(påminnelse(AVVENTER_GAP, 1.vedtaksperiode))
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
     }
@@ -157,10 +157,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
 
         person.håndter(søknad())
         person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(AVVENTER_GAP, 1.vedtaksperiode))
+        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
         assertEquals(AVVENTER_VILKÅRSPRØVING_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(vilkårsgrunnlag())

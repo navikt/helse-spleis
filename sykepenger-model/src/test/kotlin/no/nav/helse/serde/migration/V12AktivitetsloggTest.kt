@@ -167,7 +167,7 @@ private const val json = """{
                     {
                         "kontekstType": "Tilstand",
                         "kontekstMap": {
-                            "tilstand": "AVVENTER_GAP"
+                            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
                         }
                     }
                 ],

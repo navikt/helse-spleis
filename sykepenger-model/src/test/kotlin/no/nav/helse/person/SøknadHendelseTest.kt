@@ -25,7 +25,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
@@ -35,7 +35,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 50.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent), Egenmelding(9.januar, 10.januar)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count())
     }
 
@@ -61,7 +61,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Egenmelding(28.desember(2017), 29.desember(2017)), Sykdom(1.januar,  5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(5, inspektør.sykdomstidslinje.count()) { inspektør.sykdomstidslinje.toString() }
     }
 
@@ -83,7 +83,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Sykdom(1.januar,  5.januar, 100.prosent)))
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(10, inspektør.sykdomstidslinje.length())
     }
