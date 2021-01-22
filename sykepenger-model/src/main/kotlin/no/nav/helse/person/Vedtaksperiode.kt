@@ -377,7 +377,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, onSuccess: () -> Unit = {}) {
-        if (!Toggles.KorrigertSøknadToggle.enabled) return overlappendeSøknadIkkeStøttet(søknad)
         if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
         søknad.warn("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden")
         håndterSøknad(søknad, onSuccess)

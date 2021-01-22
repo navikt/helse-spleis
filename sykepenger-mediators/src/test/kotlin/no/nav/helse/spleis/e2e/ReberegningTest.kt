@@ -14,7 +14,6 @@ internal class ReberegningTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtaksperiode_reberegnet event`() {
-        Toggles.KorrigertSøknadToggle.enable {
             sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
             sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
             sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
@@ -30,5 +29,4 @@ internal class ReberegningTest : AbstractEndToEndMediatorTest() {
             assertEquals(AKTØRID, event["aktørId"].asText())
             assertEquals(ORGNUMMER, event["organisasjonsnummer"].asText())
         }
-    }
 }
