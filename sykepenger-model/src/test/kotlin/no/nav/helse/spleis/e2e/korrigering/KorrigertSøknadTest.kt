@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.korrigering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -10,10 +11,13 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.SykdomstidslinjeInspektør
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
@@ -54,6 +58,37 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_GAP)
         assertEquals(1, inspektør.personLogg.warn().size)
+    }
+
+    @Test
+    fun `Korrigerer grad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        object : OppdragVisitor {
+            var grad: Double = 0.0
+            override fun visitUtbetalingslinje(
+                linje: Utbetalingslinje,
+                fom: LocalDate,
+                tom: LocalDate,
+                beløp: Int?,
+                aktuellDagsinntekt: Int,
+                grad: Double,
+                delytelseId: Int,
+                refDelytelseId: Int?,
+                refFagsystemId: String?,
+                endringskode: Endringskode,
+                datoStatusFom: LocalDate?
+            ) {
+                this.grad = grad
+            }
+        }.also{
+            inspektør.arbeidsgiverOppdrag.first().accept(it)
+            assertEquals(50.0, it.grad)
+        }
     }
 
     @Test
