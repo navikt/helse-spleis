@@ -146,8 +146,7 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
             TestTidslinjeInspektør(it.utbetalingstidslinjer(3.vedtaksperiode)).also { tidslinjeInspektør ->
                 assertEquals(null, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
                 assertEquals(23, tidslinjeInspektør.dagtelling[NavDag::class])
-                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
-                assertEquals(1, tidslinjeInspektør.dagtelling[Fridag::class])
+                assertEquals(9, tidslinjeInspektør.dagtelling[NavHelgDag::class])
                 assertEquals(null, tidslinjeInspektør.dagtelling[Arbeidsdag::class])
             }
         }

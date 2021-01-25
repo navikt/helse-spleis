@@ -15,6 +15,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
@@ -660,6 +661,78 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         assertEquals(19, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
         assertEquals(37, inspektør.dagtelling[Arbeidsdag::class])
         assertEquals(4, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `Sykmelding som starter i helg etter oppholdsdager gir NavHelgDag i helgen`() {
+        (16.U + 2.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.H + 1.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                    addInntektsmelding(3.februar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 3.februar)
+        )
+
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(3, inspektør.dagtelling[NavDag::class])
+        assertEquals(15, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
+    @Disabled
+    fun `Bruker inntekt fra forrige skjæringstidspunkt ved gap mindre enn 16 dager3`() {
+        (16.U + 1.S + 2.A + 2.R + 5.A + 2.R + 4.A + 1.S + 2.H + 1.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 2.februar)
+        )
+
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(3, inspektør.dagtelling[NavDag::class])
+        assertEquals(15, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
+    @Disabled
+    fun `Feiler ved manglende inntekt når gap er 16 dager`() {
+        (16.U + 3.S + 2.H + 5.A + 2.R + 5.A + 2.R + 2.A + 3.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 7.februar)
+        )
+
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(3, inspektør.dagtelling[NavDag::class])
+        assertEquals(15, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
+    }
+
+    @Test
+    @Disabled
+    fun `Bruker inntekt fra forrige skjæringstidspunkt ved gap mindre enn 16 dager`() {
+        (16.U + 15.A + 1.S).utbetalingslinjer (
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 1.februar)
+        )
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(15, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(1, inspektør.dagtelling[NavDag::class])
+
     }
 
     private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {

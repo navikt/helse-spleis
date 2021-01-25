@@ -656,8 +656,8 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
             dagen: LocalDate,
             økonomi: Økonomi
         ) {
-            splitter.håndterFridag(dagen)
-            splitter.inkrementerIkkeSykedager()
+            splitter.håndterNAVHelgedag(dagen, økonomi)
+            splitter.state(UtbetalingSykedager)
         }
     }
 
