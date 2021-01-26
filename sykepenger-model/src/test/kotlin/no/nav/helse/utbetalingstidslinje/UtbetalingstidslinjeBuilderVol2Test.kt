@@ -743,6 +743,59 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         }
     }
 
+    @Test
+    fun `Etter sykdom som slutter på fredag starter gap-telling i helgen - helg som friskHelgdag`() { // Fordi vi vet når hen gjenopptok arbeidet, og det var i helgen
+        (16.U + 3.S + 2.R + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                    addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 5.februar)
+        )
+
+        assertEquals(32, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(16, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(5, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som ukjent-dag`() { // Fordi vi ikke vet når hen gjenopptok arbeidet, men antar mandag
+        (16.U + 3.S + 2.UK + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                    addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 5.februar)
+        )
+
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(14, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(2, inspektør.dagtelling[Fridag::class])
+        assertEquals(17, inspektør.dagtelling[NavDag::class])
+    }
+
+    @Test
+    fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som sykhelgdag`() {
+        (16.U + 3.S + 2.H + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
+            inntektshistorikk = InntektshistorikkVol2().apply {
+                this {
+                    addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
+                    addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
+                }
+            },
+            skjæringstidspunkter = listOf(1.januar, 5.februar)
+        )
+
+        assertEquals(16, inspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+        assertEquals(14, inspektør.dagtelling[Arbeidsdag::class])
+        assertEquals(17, inspektør.dagtelling[NavDag::class])
+        assertEquals(6, inspektør.dagtelling[NavHelgDag::class])
+    }
+
     private fun assertInntekter(dekningsgrunnlaget: Int? = null, aktuelleDagsinntekten: Int? = null) {
         inspektør.navdager.forEach { navDag ->
             navDag.økonomi.reflectionRounded { _, _, dekningsgrunnlag, aktuellDagsinntekt, _, _, _ ->
