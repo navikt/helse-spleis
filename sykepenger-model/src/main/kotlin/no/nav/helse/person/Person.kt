@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
@@ -268,6 +269,12 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder() = arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.sorted()
+
+    /**
+     * Brukes i MVP for flere arbeidsgivere. Alle infotrygdforlengelser hos alle arbeidsgivere må gjelde samme periode
+     * */
+    internal fun forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.forlengerSammePeriode(vedtaksperiode)
 
     internal fun lagreInntekter(
         arbeidsgiverId: String,

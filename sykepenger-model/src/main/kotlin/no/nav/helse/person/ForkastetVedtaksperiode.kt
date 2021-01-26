@@ -21,11 +21,11 @@ internal class ForkastetVedtaksperiode(
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
         }
 
-        internal fun finnForkastedeTilstøtende(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            forkastede.perioder().firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
+        internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
+            forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erSykeperiodeRettFør(other) }
 
-        internal fun harPeriodeEtter(forkastede: Iterable<ForkastetVedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            forkastede.perioder().any { other -> other.starterEtter(vedtaksperiode) }
+        internal fun harPeriodeEtter(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
+            forkastede.perioder().any { vedtaksperiode -> vedtaksperiode.starterEtter(other) }
 
         internal fun finnForrigeAvsluttaPeriode(
             forkastede: Iterable<ForkastetVedtaksperiode>,

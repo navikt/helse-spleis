@@ -794,6 +794,7 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.tilstand(søknad, TilInfotrygd)
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
