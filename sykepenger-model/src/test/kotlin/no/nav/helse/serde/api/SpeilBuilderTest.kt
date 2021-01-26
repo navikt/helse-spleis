@@ -41,6 +41,9 @@ class SpeilBuilderTest {
             TilstandstypeDTO.IngenUtbetaling,
             (personDTO.arbeidsgivere.first().vedtaksperioder.first()).tilstand
         )
+
+        val vedtaksperiode: UfullstendigVedtaksperiodeDTO = personDTO.arbeidsgivere.first().vedtaksperioder.first() as UfullstendigVedtaksperiodeDTO
+        assertEquals(9, vedtaksperiode.utbetalingstidslinje.size)
     }
 
     @Test
@@ -516,7 +519,7 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `Yes hello does this work?!`() {
+    fun `Yes hello this is dog`() {
         val fom = 1.januar(2018)
         val tom = 31.januar(2018)
 

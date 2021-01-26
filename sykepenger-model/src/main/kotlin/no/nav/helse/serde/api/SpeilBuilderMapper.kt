@@ -183,7 +183,8 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
         fom = sykdomstidslinje.first().dagen,
         tom = sykdomstidslinje.last().dagen,
         tilstand = this["tilstand"] as TilstandstypeDTO,
-        fullstendig = false
+        fullstendig = false,
+        utbetalingstidslinje = this["utbetalingstidslinje"].cast()
     )
 }
 
