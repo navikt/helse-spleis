@@ -142,7 +142,7 @@ internal class Arbeidsgiver private constructor(
         utbetaling.register(this)
     }
 
-    internal fun utbetalteUtbetalinger() = utbetalinger.aktive()
+    private fun utbetalteUtbetalinger() = utbetalinger.aktive()
 
     internal fun nåværendeTidslinje() =
         beregnetUtbetalingstidslinjer.lastOrNull()?.second ?: throw IllegalStateException("mangler utbetalinger")

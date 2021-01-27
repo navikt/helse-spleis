@@ -19,8 +19,6 @@ import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForlengelseFraInfotrygd.*
-import no.nav.helse.person.Kildesystem.INFOTRYGD
-import no.nav.helse.person.Kildesystem.SPLEIS
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -155,8 +153,6 @@ internal class Vedtaksperiode private constructor(
             kontekst(inntektsmelding.wrapped)
             tilstand.håndter(this, inntektsmelding.wrapped)
         }
-
-        return false
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
@@ -493,10 +489,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        person.nåværendeVedtaksperioder()
-            .first()
-            .takeIf { it.tilstand == AvventerArbeidsgivere }
-            ?.also { it.tilstand(påminnelse, AvventerHistorikk) }
+        person.nåværendeVedtaksperioder().first().gjentaHistorikk(påminnelse)
+    }
+
+    internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
+        if (tilstand == AvventerArbeidsgivere) tilstand(hendelse, AvventerHistorikk)
     }
 
     /**
@@ -597,10 +594,6 @@ internal class Vedtaksperiode private constructor(
             "Forventet inntekt ved opprettelse av utbetalt-event"
         }
         utbetaling().ferdigstill(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
-    }
-
-    internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
-        if (tilstand == AvventerArbeidsgivere) tilstand(hendelse, AvventerHistorikk)
     }
 
     private fun håndterMuligForlengelse(
@@ -794,7 +787,7 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.tilstand(søknad, TilInfotrygd)
+            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
@@ -809,6 +802,7 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
         }
@@ -850,7 +844,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.tilstand(søknad, TilInfotrygd)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -1633,12 +1627,6 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-        private val periodeFomComparator = compareBy<Vedtaksperiode>{ it.periode.start }
-        private val periodeTomComparator = compareBy<Vedtaksperiode>{ it.periode.endInclusive }
-        private val periodeComparator = periodeFomComparator.thenComparing(periodeTomComparator)
-        private val opprettetComparator = compareBy<Vedtaksperiode> { it.opprettet }
-        internal val forkastetComparator = periodeComparator.thenComparing(opprettetComparator)
-
         internal fun finnForrigeAvsluttaPeriode(
             perioder: List<Vedtaksperiode>,
             vedtaksperiode: Vedtaksperiode,
@@ -1689,19 +1677,16 @@ enum class ForlengelseFraInfotrygd {
     NEI
 }
 
-enum class Kildesystem { SPLEIS, INFOTRYGD }
-enum class Periodetype(private val kildesystem: Kildesystem) {
+enum class Periodetype {
     /** Perioden er første periode i et sykdomstilfelle */
-    FØRSTEGANGSBEHANDLING(SPLEIS),
+    FØRSTEGANGSBEHANDLING,
 
     /** Perioden en en forlengelse av en Spleis-periode */
-    FORLENGELSE(SPLEIS),
+    FORLENGELSE,
 
     /** Perioden en en umiddelbar forlengelse av en periode som er utbetalt i Infotrygd */
-    OVERGANG_FRA_IT(INFOTRYGD),
+    OVERGANG_FRA_IT,
 
     /** Perioden er en direkte eller indirekte forlengelse av en OVERGANG_FRA_IT-periode */
-    INFOTRYGDFORLENGELSE(INFOTRYGD);
-
-    fun opphav() = kildesystem
+    INFOTRYGDFORLENGELSE;
 }
