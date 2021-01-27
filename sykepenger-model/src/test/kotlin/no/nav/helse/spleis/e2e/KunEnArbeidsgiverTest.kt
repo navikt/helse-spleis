@@ -2609,4 +2609,37 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
     }
+
+    @Test
+    fun `legger ved inntektsmeldingId på vedtaksperiode_endret-event for forlengende vedtaksperioder`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        observatør.hendelseider(1.vedtaksperiode).contains(inntektsmeldingId)
+        observatør.hendelseider(2.vedtaksperiode).contains(inntektsmeldingId)
+    }
+
+    @Test
+    fun `legger ved inntektsmeldingId på vedtaksperiode_endret-event for første etterfølgende av en kort periode`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 10.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+
+        observatør.hendelseider(1.vedtaksperiode).contains(inntektsmeldingId)
+        observatør.hendelseider(2.vedtaksperiode).contains(inntektsmeldingId)
+    }
 }

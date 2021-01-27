@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretTilstandEvent
 import no.nav.helse.person.TilstandType
+import org.junit.jupiter.api.fail
 import java.util.*
 
 internal class TestObservatør : PersonObserver {
@@ -14,6 +16,7 @@ internal class TestObservatør : PersonObserver {
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
+    private val tilstandsendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretTilstandEvent>>()
 
     val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
     val avbruttEventer = mutableListOf<PersonObserver.VedtaksperiodeAvbruttEvent>()
@@ -21,6 +24,8 @@ internal class TestObservatør : PersonObserver {
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
 
+    fun hendelseider(vedtaksperiodeId: UUID) =
+        tilstandsendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
     fun sisteVedtaksperiode() = sisteVedtaksperiode
     fun sisteVedtaksperiode(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
@@ -30,8 +35,9 @@ internal class TestObservatør : PersonObserver {
         avstemming = result
     }
 
-    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretTilstandEvent) {
+    override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretTilstandEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
+        tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event) }.add(event)
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstander.getOrPut(event.vedtaksperiodeId) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
