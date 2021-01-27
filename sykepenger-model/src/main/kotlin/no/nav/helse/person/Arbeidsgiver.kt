@@ -82,9 +82,14 @@ internal class Arbeidsgiver private constructor(
         /**
          * Brukes i MVP for flere arbeidsgivere. Alle infotrygdforlengelser hos alle arbeidsgivere må gjelde samme periode
          * */
-        internal fun Iterable<Arbeidsgiver>.forlengerSammePeriode(other: Vedtaksperiode) =
-            this.filter { it.finnSykeperiodeRettFør(other) != null || it.finnForkastetSykeperiodeRettFør(other) != null }
-                .all { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.periode() == other.periode() } }
+        internal fun Iterable<Arbeidsgiver>.forlengerSammePeriode(other: Vedtaksperiode): Boolean {
+            val arbeidsgivere = filter { it.finnSykeperiodeRettFør(other) != null || it.finnForkastetSykeperiodeRettFør(other) != null }
+            if (arbeidsgivere.size == 1) return true
+            return arbeidsgivere.all { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.periode() == other.periode() }
+                    && arbeidsgiver.finnSykeperiodeRettFør(other) != null
+            }
+        }
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -502,7 +507,8 @@ internal class Arbeidsgiver private constructor(
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> other.erSykeperiodeRettFør(vedtaksperiode) }
 
-    internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) = ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
+    internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
+        ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
     internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other -> vedtaksperiode.erSykeperiodeRettFør(other) }
