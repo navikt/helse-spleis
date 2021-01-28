@@ -118,7 +118,7 @@ internal class VedtaksperiodeTest {
             aktørId = aktør,
             orgnummer = organisasjonsnummer,
             perioder = perioder,
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )

@@ -20,6 +20,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.InntektskildeDTO
 import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.flywaydb.core.Flyway
@@ -98,19 +99,27 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.reset()
     }
 
-    protected fun sendNySøknad(vararg perioder: SoknadsperiodeDTO) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder))
+    protected fun sendNySøknad(vararg perioder: SoknadsperiodeDTO, orgnummer: String = ORGNUMMER) {
+        testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(*perioder, orgnummer = orgnummer))
     }
 
     protected fun sendSøknad(
         vedtaksperiodeIndeks: Int,
         perioder: List<SoknadsperiodeDTO>,
+        orgnummer: String = ORGNUMMER,
         ferie: List<FravarDTO> = emptyList(),
-        egenmeldinger: List<PeriodeDTO> = emptyList()
+        egenmeldinger: List<PeriodeDTO> = emptyList(),
+        andreInntektskilder: List<InntektskildeDTO>? = null
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, ferie, egenmeldinger))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(
+            perioder = perioder,
+            orgnummer = orgnummer,
+            ferie = ferie,
+            egenmeldinger = egenmeldinger,
+            andreInntektskilder = andreInntektskilder
+        ))
     }
 
     protected fun sendKorrigerendeSøknad(
@@ -118,7 +127,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         ferie: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder, ferie, egenmeldinger))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder = perioder, ferie = ferie, egenmeldinger = egenmeldinger))
     }
 
     protected fun sendSøknadArbeidsgiver(
@@ -141,7 +150,15 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opptjening))
-        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagInnteksmelding(
+                arbeidsgiverperiode,
+                førsteFraværsdag,
+                opphørAvNaturalytelser,
+                beregnetInntekt,
+                opphørsdatoForRefusjon
+            )
+        )
     }
 
     protected fun sendNyUtbetalingpåminnelse(utbetalingIndeks: Int, status: Utbetalingstatus = Utbetalingstatus.IKKE_UTBETALT) {
@@ -211,12 +228,14 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendUtbetalingshistorikk(
         vedtaksperiodeIndeks: Int
-    ){
+    ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingshistorikk(
-            testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
-        ))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagUtbetalingshistorikk(
+                testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+            )
+        )
     }
 
     protected fun sendVilkårsgrunnlag(

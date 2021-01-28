@@ -113,13 +113,13 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med andre inntektskilder`() {
-        søknad(Sykdom(5.januar, 12.januar, 100.prosent), harAndreInntektskilder = true)
+        søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
         assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }
 
     @Test
     fun `søknad uten andre inntektskilder`() {
-        søknad(Sykdom(5.januar, 12.januar, 100.prosent), harAndreInntektskilder = false)
+        søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = emptyList())
         assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }
 
@@ -195,14 +195,14 @@ internal class SøknadTest {
         assertFalse(søknad.aktivitetslogg.hasErrorsOrWorse())
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, harAndreInntektskilder: Boolean = false, permittert: Boolean = false) {
+    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
             aktørId = "12345",
             orgnummer = "987654321",
             perioder = listOf(*perioder),
-            harAndreInntektskilder = harAndreInntektskilder,
+            andreInntektskilder = andreInntektskilder,
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
             permittert = permittert
         )

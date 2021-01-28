@@ -166,7 +166,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
             permittert = false
         ).apply {

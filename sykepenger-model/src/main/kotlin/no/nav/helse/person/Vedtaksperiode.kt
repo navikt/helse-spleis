@@ -355,14 +355,21 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand())
     }
 
-    private fun håndter(søknad: SykdomstidslinjeHendelse, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun håndter(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
+        if (!person.harFlereArbeidsgivereMedSykdom() && søknad.harAndreInntektskilder()) return tilstand(søknad, TilInfotrygd)
+        håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
+    }
+
+    private fun håndter(søknad: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
         håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
     }
 
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, onSuccess: () -> Unit = {}) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
+        if (hendelse.valider(periode).hasErrorsOrWorse()) {
+            return if (Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) person.invaliderAllePerioder(hendelse) else tilstand(hendelse, TilInfotrygd)
+        }
         onSuccess()
     }
 
@@ -374,7 +381,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, onSuccess: () -> Unit = {}) {
-        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) {
+            return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+        }
         søknad.warn("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden")
         håndterSøknad(søknad, onSuccess)
     }
@@ -794,7 +803,7 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
@@ -809,7 +818,7 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if(!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
         }
@@ -887,8 +896,7 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding: Inntektsmelding
         ) {
             vedtaksperiode.håndter(inntektsmelding) {
-                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)
-                ) {
+                if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
                     AvventerSøknadUferdigGap
                 } else {
                     AvventerArbeidsgiversøknadUferdigGap
@@ -1346,7 +1354,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad) {vedtaksperiode.tilstand(søknad, AvventerHistorikk)}
+            vedtaksperiode.håndterOverlappendeSøknad(søknad) { vedtaksperiode.tilstand(søknad, AvventerHistorikk) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

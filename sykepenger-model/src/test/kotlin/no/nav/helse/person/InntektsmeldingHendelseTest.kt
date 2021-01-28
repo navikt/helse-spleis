@@ -144,7 +144,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )

@@ -192,7 +192,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         orgnummer = ORGNUMMER,
         perioder = perioder,
-        harAndreInntektskilder = false,
+        andreInntektskilder = emptyList(),
         sendtTilNAV = 31.januar.atStartOfDay(),
         permittert = false
     ).apply {

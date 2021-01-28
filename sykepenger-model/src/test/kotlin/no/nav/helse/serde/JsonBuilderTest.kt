@@ -317,7 +317,7 @@ class JsonBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = perioder,
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
             permittert = false
         )

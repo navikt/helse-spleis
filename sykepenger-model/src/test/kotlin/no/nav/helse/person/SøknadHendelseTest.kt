@@ -106,7 +106,7 @@ internal class SøknadHendelseTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
             permittert = false
         )

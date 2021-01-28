@@ -105,7 +105,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Søknad.Søknadsperiode.Permisjon(5.januar, 5.januar),
             Søknad.Søknadsperiode.Utdanning(5.januar, 5.januar)
         ),
-        harAndreInntektskilder = false,
+        andreInntektskilder = emptyList(),
         sendtTilNAV = 5.januar.atStartOfDay(),
         permittert = false
     )

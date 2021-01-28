@@ -1027,10 +1027,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         betale(orgnummer)
     }
 
-    private fun forlengelsePeriode(periode: Periode, orgnummer: String) {
-        nyPeriode(periode, orgnummer)
-    }
-
     private fun gapPeriode(periode: Periode, orgnummer: String) {
         nyPeriode(periode, orgnummer)
         person.håndter(

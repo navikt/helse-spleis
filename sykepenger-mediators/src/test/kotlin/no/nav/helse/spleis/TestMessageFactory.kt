@@ -35,7 +35,7 @@ internal class TestMessageFactory(
         private fun Inntektsmelding.toMap(): Map<String, Any> = objectMapper.convertValue(this)
     }
 
-    fun lagNySøknad(vararg perioder: SoknadsperiodeDTO): String {
+    fun lagNySøknad(vararg perioder: SoknadsperiodeDTO, orgnummer: String = organisasjonsnummer): String {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
@@ -43,7 +43,7 @@ internal class TestMessageFactory(
             sykmeldingId = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+            arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -82,15 +82,17 @@ internal class TestMessageFactory(
 
     fun lagSøknadNav(
         perioder: List<SoknadsperiodeDTO>,
+        orgnummer: String = organisasjonsnummer,
         ferie: List<FravarDTO> = emptyList(),
-        egenmeldinger: List<PeriodeDTO> = emptyList()
+        egenmeldinger: List<PeriodeDTO> = emptyList(),
+        andreInntektskilder: List<InntektskildeDTO>? = null
     ): String {
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+            arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
             fom = perioder.minOfOrNull { it.fom!! },
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSTAKERE,
@@ -99,6 +101,7 @@ internal class TestMessageFactory(
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
             fravar = ferie,
+            andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()
         )

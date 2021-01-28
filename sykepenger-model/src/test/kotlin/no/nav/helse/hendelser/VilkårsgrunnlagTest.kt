@@ -215,7 +215,7 @@ internal class VilkårsgrunnlagTest {
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100.prosent)),
-        harAndreInntektskilder = false,
+        andreInntektskilder = emptyList(),
         sendtTilNAV = 30.januar.atStartOfDay(),
         permittert = false
     )

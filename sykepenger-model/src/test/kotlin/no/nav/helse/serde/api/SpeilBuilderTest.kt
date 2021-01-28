@@ -1182,7 +1182,7 @@ class SpeilBuilderTest {
             aktørId = aktørId,
             orgnummer = orgnummer,
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent)) + andrePerioder,
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
             permittert = false
         ) to SøknadNavDTO(

@@ -75,7 +75,7 @@ internal class ForeldetSykedagTest {
             aktørId = AKTØRID,
             orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = sendtTilNAV.atStartOfDay(),
             permittert = false
         )

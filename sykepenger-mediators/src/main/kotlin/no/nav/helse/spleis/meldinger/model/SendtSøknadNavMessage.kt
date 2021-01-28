@@ -16,7 +16,12 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
     private val aktørId = packet["aktorId"].asText()
     private val orgnummer = packet["arbeidsgiver.orgnummer"].asText()
     private val sendtNav = packet["sendtNav"].asLocalDateTime()
-    private val harAndreInntektskilder = packet["andreInntektskilder"].isArray && !packet["andreInntektskilder"].isEmpty
+    private val andreInntektskilder = packet["andreInntektskilder"].map {
+        Søknad.Inntektskilde(
+            sykmeldt = it["sykmeldt"].asBoolean(),
+            type = it["type"].asText()
+        )
+    }
     private val permittert = packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false
     private val papirsykmeldinger = packet["papirsykmeldinger"].map {
         Søknadsperiode.Papirsykmelding(
@@ -63,7 +68,7 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = perioder,
-        harAndreInntektskilder = harAndreInntektskilder,
+        andreInntektskilder = andreInntektskilder,
         sendtTilNAV = sendtNav,
         permittert = permittert
     )

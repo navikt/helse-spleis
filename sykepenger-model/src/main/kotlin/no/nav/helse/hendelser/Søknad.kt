@@ -1,7 +1,9 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -18,7 +20,7 @@ class Søknad constructor(
     private val aktørId: String,
     private val orgnummer: String,
     private val perioder: List<Søknadsperiode>,
-    private val harAndreInntektskilder: Boolean,
+    private val andreInntektskilder: List<Inntektskilde>,
     private val sendtTilNAV: LocalDateTime,
     private val permittert: Boolean
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
@@ -50,7 +52,12 @@ class Søknad constructor(
 
     override fun valider(periode: Periode): Aktivitetslogg {
         perioder.forEach { it.valider(this) }
-        if (harAndreInntektskilder) error("Søknaden inneholder andre inntektskilder")
+        if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled && andreInntektskilder.isNotEmpty()) {
+            error("Søknaden inneholder andre inntektskilder")
+        }
+        if(Toggles.FlereArbeidsgivereOvergangITEnabled.enabled){
+            andreInntektskilder.forEach { it.valider(this) }
+        }
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende brev")
         return aktivitetslogg
@@ -61,6 +68,8 @@ class Søknad constructor(
     }
 
     override fun melding(klassName: String) = "Søknad"
+
+    internal fun harAndreInntektskilder() = andreInntektskilder.isNotEmpty()
 
     private fun avskjæringsdato(): LocalDate = sendtTilNAV.toLocalDate().minusMonths(3).withDayOfMonth(1)
 
@@ -173,6 +182,19 @@ class Søknad constructor(
 
             override fun valider(søknad: Søknad) {
                 søknad.error("Søknaden inneholder utenlandsopphold")
+            }
+        }
+    }
+
+    class Inntektskilde(
+        private val sykmeldt: Boolean,
+        private val type: String
+    ) {
+        fun valider(aktivitetslogg: IAktivitetslogg) {
+            if (type != "ANDRE_ARBEIDSFORHOLD") {
+                aktivitetslogg.error("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
+            } else if (!sykmeldt) {
+                aktivitetslogg.error("Søknaden inneholder andre arbeidsforhold, men bruker er ikke sykmeldt")
             }
         }
     }

@@ -43,7 +43,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected lateinit var hendelselogg: ArbeidstakerHendelse
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
-    private val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknad.Søknadsperiode>>>()
+    private val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknad.Søknadsperiode>>>()
     private val inntektsmeldinger = mutableMapOf<UUID, InntektsmeldingData>()
 
     private data class InntektsmeldingData(
@@ -135,7 +135,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun replaySøknad(hendelseId: UUID) = håndterSøknad(
         id = hendelseId,
         sendtTilNav = requireNotNull(søknader[hendelseId]).first,
-        harAndreInntektskilder = requireNotNull(søknader[hendelseId]).second,
+        andreInntektskilder = requireNotNull(søknader[hendelseId]).second,
         perioder = requireNotNull(søknader[hendelseId]).third
     )
 
@@ -170,15 +170,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterSøknadMedValidering(
         vedtaksperiodeId: UUID,
         vararg perioder: Søknad.Søknadsperiode,
-        harAndreInntektskilder: Boolean = false
+        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList()
     ) {
         assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Søknad::class)
-        håndterSøknad(*perioder, harAndreInntektskilder = harAndreInntektskilder)
+        håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder)
     }
 
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
-        harAndreInntektskilder: Boolean = false,
+        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         id: UUID = UUID.randomUUID(),
         orgnummer: String = ORGNUMMER
@@ -186,11 +186,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         søknad(
             id = id,
             perioder = perioder,
-            harAndreInntektskilder = harAndreInntektskilder,
+            andreInntektskilder = andreInntektskilder,
             sendtTilNav = sendtTilNav,
             orgnummer = orgnummer
         ).also(person::håndter)
-        søknader[id] = Triple(sendtTilNav, harAndreInntektskilder, perioder)
+        søknader[id] = Triple(sendtTilNav, andreInntektskilder, perioder)
         return id
     }
 
@@ -513,7 +513,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun søknad(
         id: UUID,
         vararg perioder: Søknad.Søknadsperiode,
-        harAndreInntektskilder: Boolean = false,
+        andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNav: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         orgnummer: String = ORGNUMMER
     ): Søknad {
@@ -523,7 +523,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             orgnummer = orgnummer,
             perioder = listOf(*perioder),
-            harAndreInntektskilder = harAndreInntektskilder,
+            andreInntektskilder = andreInntektskilder,
             sendtTilNAV = sendtTilNav.atStartOfDay(),
             permittert = false
         ).apply {

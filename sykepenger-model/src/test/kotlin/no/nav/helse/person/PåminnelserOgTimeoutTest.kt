@@ -198,7 +198,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "12345",
             orgnummer = ORGNUMMER,
             perioder = perioder.toList(),
-            harAndreInntektskilder = false,
+            andreInntektskilder = emptyList(),
             sendtTilNAV = 20.januar.atStartOfDay(),
             permittert = false
         ).apply {
