@@ -146,6 +146,14 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
+    internal fun forrigeSykedagFør(dato: LocalDate) =
+        periode?.lastOrNull { it < dato && erEnSykedag(this[it]) }
+
+    internal fun har16EllerFlereDagerGap() = periode
+        ?.dropWhile { this[it] is Feriedag || (this[it] is UkjentDag && it.erHelg()) }
+        ?.count()
+        ?.let { it >= 16 } ?: true
+
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
@@ -164,7 +172,7 @@ internal class Sykdomstidslinje private constructor(
         return (erEnSykedag(fredag) || fredag is Feriedag) && (erEnSykedag(mandag) || mandag is Feriedag)
     }
 
-    private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
+    internal fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
     private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
         ?.findLast { erEnSykedag(this[it]) }

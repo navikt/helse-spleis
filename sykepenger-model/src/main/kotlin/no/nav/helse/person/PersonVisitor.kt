@@ -274,6 +274,15 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
+    fun visitInntektsopplysningKopi(
+        inntektsmelding: InntektshistorikkVol2.InntektsopplysningKopi,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
     fun visitInfotrygd(
         infotrygd: InntektshistorikkVol2.Infotrygd,
         dato: LocalDate,

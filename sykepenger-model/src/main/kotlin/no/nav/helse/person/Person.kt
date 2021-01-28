@@ -292,9 +292,9 @@ class Person private constructor(
     internal fun lagreInntekter(
         arbeidsgiverId: String,
         inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>,
-        ytelser: Ytelser
+        hendelse: PersonHendelse
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, ytelser).addInntektVol2(inntektsopplysninger, ytelser)
+        finnArbeidsgiverForInntekter(arbeidsgiverId, hendelse).addInntektVol2(inntektsopplysninger, hendelse)
     }
 
     internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate): Inntekt {
@@ -323,7 +323,7 @@ class Person private constructor(
             .toMap()
     }
 
-    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: ArbeidstakerHendelse): Arbeidsgiver {
+    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: PersonHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
             Arbeidsgiver(this, arbeidsgiver)

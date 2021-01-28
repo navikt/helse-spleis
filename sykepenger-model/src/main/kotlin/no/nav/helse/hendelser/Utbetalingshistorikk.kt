@@ -51,8 +51,8 @@ class Utbetalingshistorikk(
         addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
     }
 
-    fun addInntekter(person: Person, ytelser: Ytelser) {
-        Inntektsopplysning.addInntekter(person, ytelser, inntektshistorikk)
+    internal fun addInntekter(person: Person, hendelse: PersonHendelse = this) {
+        Inntektsopplysning.addInntekter(person, hendelse, inntektshistorikk)
     }
 
     class Inntektsopplysning(
@@ -101,12 +101,12 @@ class Utbetalingshistorikk(
 
             internal fun addInntekter(
                 person: Person,
-                ytelser: Ytelser,
+                hendelse: PersonHendelse,
                 inntektsopplysninger: List<Inntektsopplysning>
             ) {
                 inntektsopplysninger.groupBy { it.orgnummer }
                     .forEach { (orgnummer, opplysninger) ->
-                        person.lagreInntekter(orgnummer, opplysninger, ytelser)
+                        person.lagreInntekter(orgnummer, opplysninger, hendelse)
                     }
             }
 

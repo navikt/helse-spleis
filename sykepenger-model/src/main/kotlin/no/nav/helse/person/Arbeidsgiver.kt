@@ -426,8 +426,8 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikkVol2, skjæringstidspunkt)
     }
 
-    internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, ytelser: Ytelser) {
-        inntektsopplysninger.lagreInntekter(inntektshistorikkVol2, ytelser.meldingsreferanseId())
+    internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelse: PersonHendelse) {
+        inntektsopplysninger.lagreInntekter(inntektshistorikkVol2, hendelse.meldingsreferanseId())
     }
 
     internal fun lagreInntekter(
@@ -614,6 +614,8 @@ internal class Arbeidsgiver private constructor(
         // TODO: leiter frem fra forkasta perioder — vilkårsgrunnlag ol. felles data bør lagres på Arbeidsgivernivå
         ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode, referanse, historie)
     }
+
+    internal fun kopierInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikkVol2.kopier(fra, til)
 
     internal class JsonRestorer private constructor() {
         internal companion object {

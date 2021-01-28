@@ -1134,6 +1134,12 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerInntektsmeldingEllerHistorikkFerdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
+            vedtaksperiode.trengerInntektsmelding()
+            vedtaksperiode.trengerGapHistorikkFraInfotrygd(hendelse)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
@@ -1176,6 +1182,18 @@ internal class Vedtaksperiode private constructor(
                     if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
                         vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
+                    } else {
+                        if (Toggles.PraksisendringEnabled.enabled) {
+                            val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag()
+                            val forrigeSkjæringstidspunkt =
+                                førsteSykedag?.let { historie.skjæringstidspunktFørGapMindreEnn16Dager(vedtaksperiode.organisasjonsnummer, it) }
+                            if (forrigeSkjæringstidspunkt != null) {
+                                utbetalingshistorikk.addInntekter(person)
+                                if (arbeidsgiver.kopierInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
+                                    vedtaksperiode.tilstand(utbetalingshistorikk, AvventerVilkårsprøvingGap)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1183,12 +1201,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerGapHistorikkFraInfotrygd(påminnelse)
-        }
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.person.inntektsmeldingReplay(PersonObserver.InntektsmeldingReplayEvent(vedtaksperiode.fødselsnummer, vedtaksperiode.id))
-            vedtaksperiode.trengerInntektsmelding()
-            vedtaksperiode.trengerGapHistorikkFraInfotrygd(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

@@ -120,9 +120,19 @@ internal class Historie() {
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
+    private fun er16DagerEllerMerMellom(forrigeSykedag: LocalDate, førsteSykedag: LocalDate, sykdomstidslinje: Sykdomstidslinje) =
+        sykdomstidslinje.subset(Periode(forrigeSykedag.plusDays(1), førsteSykedag.minusDays(1))).har16EllerFlereDagerGap()
+
+    internal fun skjæringstidspunktFørGapMindreEnn16Dager(orgnummer: String, nyFørsteSykedag: LocalDate) : LocalDate? {
+        val sykdomstidslinje = sykdomstidslinje(orgnummer)
+        val forrigeSykedag = sykdomstidslinje.forrigeSykedagFør(nyFørsteSykedag) ?: return null
+        if(er16DagerEllerMerMellom(forrigeSykedag, nyFørsteSykedag, sykdomstidslinje)) return null
+        return sykdomstidslinje.skjæringstidspunkt(forrigeSykedag)
+    }
+
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
         if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, dagen)) return true
-        val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen) ?: return false
+        val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen)
         if (skjæringstidspunkt == dagen) return false
         if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)) return true
         return spleisbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)

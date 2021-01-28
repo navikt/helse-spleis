@@ -54,6 +54,18 @@ internal class InntektshistorikkVol2 {
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
+    internal fun kopier(fra: LocalDate, til: LocalDate): Boolean {
+        if (fra > til) return false
+        if (fra == til) return true
+        historikk.firstOrNull()?.clone()?.also { innslag ->
+            if (innslag.kopier(fra, til)) {
+                historikk.add(0, innslag)
+                return true
+            }
+        }
+        return false
+    }
+
     internal class Innslag {
 
         private val inntekter = mutableListOf<Inntektsopplysning>()
@@ -93,6 +105,18 @@ internal class InntektshistorikkVol2 {
                 .sorted()
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
                 .firstOrNull()
+
+        internal fun kopier(fra: LocalDate, til: LocalDate): Boolean {
+            inntekter
+                .sorted()
+                .mapNotNull { it.kopier(fra, til) }
+                .firstOrNull()
+                ?.also {
+                    add(it)
+                    return true
+                }
+            return false
+        }
     }
 
     internal interface Inntektsopplysning : Comparable<Inntektsopplysning> {
@@ -106,6 +130,7 @@ internal class InntektshistorikkVol2 {
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
         fun kanLagres(other: Inntektsopplysning) = true
+        fun kopier(dato: LocalDate, nyDato: LocalDate): Inntektsopplysning? = null
     }
 
     internal class Saksbehandler(
@@ -124,6 +149,9 @@ internal class InntektshistorikkVol2 {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
+
+        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
     }
 
     internal class Infotrygd(
@@ -143,6 +171,9 @@ internal class InntektshistorikkVol2 {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
+
+        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
     }
 
     internal class Inntektsmelding(
@@ -164,6 +195,30 @@ internal class InntektshistorikkVol2 {
 
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
+
+        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
+    }
+
+    internal class InntektsopplysningKopi(
+        override val dato: LocalDate,
+        private val hendelseId: UUID,
+        private val beløp: Inntekt,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    ) : Inntektsopplysning {
+        override val prioritet = 50
+
+        override fun accept(visitor: InntekthistorikkVisitor) {
+            visitor.visitInntektsopplysningKopi(this, dato, hendelseId, beløp, tidsstempel)
+        }
+
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+
+        override fun skalErstattesAv(other: Inntektsopplysning) =
+            other is InntektsopplysningKopi && this.dato == other.dato
+
+        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
     }
 
     internal class SkattComposite(
