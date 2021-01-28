@@ -26,6 +26,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -486,6 +487,12 @@ internal class Vedtaksperiode private constructor(
         )
 
         person.vedtaksperiodeEndret(event)
+    }
+
+    private fun vedtakFattet() {
+        val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt, periode.start)
+        val inntekt = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
+        Utbetaling.vedtakFattet(utbetaling, person, id, periode, hendelseIder, sykepengegrunnlag, inntekt)
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
@@ -1541,6 +1548,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            vedtaksperiode.vedtakFattet()
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }
 
@@ -1572,7 +1580,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
-            vedtaksperiode.sendUtbetaltEvent(hendelse)
+            vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
+            vedtaksperiode.vedtakFattet()
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }
 

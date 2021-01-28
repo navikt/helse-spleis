@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -181,4 +182,5 @@ interface PersonObserver {
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
+    fun vedtakFattet(vedtaksperiodeId: UUID, periode: Periode, hendelseIder: List<UUID>, sykepengegrunnlag: Double, inntekt: Double, utbetalingId: UUID?) {}
 }

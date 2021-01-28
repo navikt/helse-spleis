@@ -13,6 +13,8 @@ import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -42,6 +44,31 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "TIL_UTBETALING",
             "AVSLUTTET"
         )
+        testRapid.inspektør.siste("vedtak_fattet").also { melding ->
+            assertTrue(melding.hasNonNull("vedtaksperiodeId"))
+            assertTrue(melding.hasNonNull("utbetalingId"))
+        }
+    }
+
+    @Test
+    fun `bare ferie`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING"
+        )
+        testRapid.inspektør.siste("vedtak_fattet").also { melding ->
+            assertTrue(melding.hasNonNull("vedtaksperiodeId"))
+            assertFalse(melding.hasNonNull("utbetalingId"))
+        }
     }
 
     @Test
@@ -76,7 +103,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
+        val fagsystemId = testRapid.inspektør.let { it.siste("utbetalt")["utbetalt"][0]["fagsystemId"] }.asText()
         sendAnnullering(fagsystemId)
         sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
@@ -192,7 +219,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0, true)
         sendUtbetaling(utbetalingOK = true)
 
-        val fagsystemId = testRapid.inspektør.let { it.melding(it.antall() - 1)["utbetalt"][0]["fagsystemId"] }.asText()
+        val fagsystemId = testRapid.inspektør.let { it.siste("utbetalt")["utbetalt"][0]["fagsystemId"] }.asText()
         sendAnnullering(fagsystemId)
         sendUtbetaling(
             utbetalingOK = true

@@ -201,6 +201,19 @@ class Person private constructor(
         observers.forEach { it.utbetalingEndret(event) }
     }
 
+    internal fun vedtakFattet(
+        vedtaksperiodeId: UUID, periode: Periode, hendelseIder: List<UUID>, sykepengegrunnlag: Inntekt, inntekt: Inntekt, utbetalingId: UUID?
+    ) {
+        observers.forEach { it.vedtakFattet(
+            vedtaksperiodeId,
+            periode,
+            hendelseIder,
+            sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig  },
+            inntekt.reflection { _, månedlig, _, _ -> månedlig },
+            utbetalingId
+        ) }
+    }
+
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)

@@ -43,7 +43,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         internal val INGEN = 0.daglig
     }
 
-    internal fun <R> reflection(block: (Double, Double, Double, Int) -> R) = block(
+    internal fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
         årlig,
         tilMånedligDouble(),
         tilDagligDouble(),

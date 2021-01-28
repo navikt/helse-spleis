@@ -308,6 +308,10 @@ internal class Utbetaling private constructor(
             aktive()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+        internal fun vedtakFattet(utbetaling: Utbetaling?, person: Person, vedtaksperiodeId: UUID, periode: Periode, hendelseIder: List<UUID>, sykepengegrunnlag: Inntekt, inntekt: Inntekt) {
+            person.vedtakFattet(vedtaksperiodeId, periode, hendelseIder, sykepengegrunnlag, inntekt, utbetaling?.takeIf { it.harUtbetalinger() }?.id)
+        }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
@@ -340,6 +344,7 @@ internal class Utbetaling private constructor(
         vurdering?.overfør(hendelse, arbeidsgiverOppdrag, maksdato.takeUnless { type == Utbetalingtype.ANNULLERING })
     }
 
+    // TODO: Fjerne når vi slutter å sende utbetalt-event fra vedtaksperiode d(-_-)b
     private fun avslutt(
         hendelse: ArbeidstakerHendelse,
         person: Person,
@@ -350,7 +355,6 @@ internal class Utbetaling private constructor(
     ) {
         val vurdering = checkNotNull(vurdering) { "Mangler vurdering" }
         vurdering.ferdigstill(hendelse, this, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
-        avsluttet = LocalDateTime.now()
     }
 
     private fun håndterKvittering(hendelse: UtbetalingHendelse) {
@@ -449,6 +453,11 @@ internal class Utbetaling private constructor(
     }
 
     internal object GodkjentUtenUtbetaling : Tilstand {
+
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.avsluttet = LocalDateTime.now()
+        }
+
         override fun avslutt(
             utbetaling: Utbetaling,
             hendelse: ArbeidstakerHendelse,
@@ -458,8 +467,6 @@ internal class Utbetaling private constructor(
             inntekt: Inntekt,
             hendelseIder: List<UUID>
         ) {
-            // TODO: korte perioder uten utbetaling blir ikke utbetalt, men blir Avsluttet automatisk.
-            // skal vi fortsatt drive å sende Utbetalt-event da?
             utbetaling.avslutt(hendelse, person, periode, sykepengegrunnlag, inntekt, hendelseIder)
         }
     }
@@ -517,12 +524,14 @@ internal class Utbetaling private constructor(
     internal object Annullert : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.annullert(utbetaling, utbetaling.arbeidsgiverOppdrag)
+            utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal object Utbetalt : Tilstand {
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(utbetaling)
+            utbetaling.avsluttet = LocalDateTime.now()
         }
 
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =

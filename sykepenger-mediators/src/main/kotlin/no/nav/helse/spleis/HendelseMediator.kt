@@ -14,6 +14,7 @@ import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
 import no.nav.helse.spleis.db.VedtaksperiodeIdTilstand
 import no.nav.helse.spleis.meldinger.model.*
+import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -415,6 +416,28 @@ internal class HendelseMediator(
                         )
                     )
                 )
+            }
+
+            override fun vedtakFattet(
+                vedtaksperiodeId: UUID,
+                periode: Periode,
+                hendelseIder: List<UUID>,
+                sykepengegrunnlag: Double,
+                inntekt: Double,
+                utbetalingId: UUID?
+            ) {
+                queueMessage("vedtak_fattet", JsonMessage.newMessage(
+                    mutableMapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "fom" to periode.start,
+                        "tom" to periode.endInclusive,
+                        "hendelser" to hendelseIder,
+                        "sykepengegrunnlag" to sykepengegrunnlag,
+                        "inntekt" to inntekt
+                    ).apply {
+                        if (utbetalingId != null) this["utbetalingId"] = utbetalingId
+                    }
+                ))
             }
 
             override fun vedtaksperiodeUtbetalt(event: PersonObserver.UtbetaltEvent) {
