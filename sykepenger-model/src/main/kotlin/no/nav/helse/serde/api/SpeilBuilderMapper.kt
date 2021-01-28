@@ -3,6 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -15,6 +16,7 @@ import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -184,9 +186,28 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
         tom = sykdomstidslinje.last().dagen,
         tilstand = this["tilstand"] as TilstandstypeDTO,
         fullstendig = false,
-        utbetalingstidslinje = this["utbetalingstidslinje"].cast()
+        utbetalingstidslinje = this["utbetalingstidslinje"]?.cast() ?: emptyList()
     )
 }
+
+internal fun List<Utbetaling>.tilUfullstendigVedtaksperiodetidslinje(periode: Periode) =
+    map { it.utbetalingstidslinje() }
+        .takeIf { it.isNotEmpty() }
+        ?.reduce { acc, it -> acc + it }
+        ?.subset(periode)
+        ?.map {
+            val type = when (it) {
+                is ArbeidsgiverperiodeDag -> TypeDataDTO.ArbeidsgiverperiodeDag
+                is Arbeidsdag -> TypeDataDTO.Arbeidsdag
+                is AvvistDag -> TypeDataDTO.AvvistDag
+                is Fridag -> TypeDataDTO.Feriedag
+                is ForeldetDag -> TypeDataDTO.ForeldetDag
+                is UkjentDag -> TypeDataDTO.UkjentDag
+                is NavDag -> TypeDataDTO.NavDag
+                is NavHelgDag -> TypeDataDTO.ArbeidsgiverperiodeDag
+            }
+            UfullstendigVedtaksperiodedagDTO(type = type, dato = it.dato)
+        }
 
 internal fun mapDataForVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) = GrunnlagsdataDTO(
     beregnetÅrsinntektFraInntektskomponenten =

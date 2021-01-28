@@ -140,6 +140,11 @@ data class UtbetalingsdagMedGradDTO(
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 
+data class UfullstendigVedtaksperiodedagDTO(
+    val type: TypeDataDTO,
+    val dato: LocalDate
+)
+
 enum class TypeDataDTO {
     ArbeidsgiverperiodeDag,
     NavDag,

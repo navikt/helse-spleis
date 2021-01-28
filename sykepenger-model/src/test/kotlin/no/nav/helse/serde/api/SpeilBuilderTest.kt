@@ -398,6 +398,14 @@ class SpeilBuilderTest {
 //        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
     }
 
+    @Test
+    fun `perioder uten utbetaling får utbetalingstidslinje`() {
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size);
+    }
+
     /**
      * Test for å verifisere at kontrakten mellom Spleis og Speil opprettholdes.
      * Hvis du trenger å gjøre endringer i denne testen må du sannsynligvis også gjøre endringer i Speil.

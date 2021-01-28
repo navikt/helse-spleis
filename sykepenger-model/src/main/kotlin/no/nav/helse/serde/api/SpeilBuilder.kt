@@ -427,6 +427,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
                     )
                 )
             } else {
+                vedtaksperiodeMap["utbetalingstidslinje"] = utbetalinger.tilUfullstendigVedtaksperiodetidslinje(periode)
                 vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto(gruppeId))
             }
             popState()
