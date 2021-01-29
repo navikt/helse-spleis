@@ -36,10 +36,14 @@ class Utbetalingsgodkjenning(
         when {
             !utbetalingGodkjent && automatiskBehandling && makstidOppnådd ->
                 error("Gir opp fordi saksbehandleroppgaven har nådd makstid")
-            !utbetalingGodkjent && !automatiskBehandling ->
-                error("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
-            !utbetalingGodkjent && automatiskBehandling ->
-                error("Utbetaling markert som ikke godkjent automatisk $godkjenttidspunkt")
+            !utbetalingGodkjent && !automatiskBehandling -> {
+                error("Utbetaling markert som ikke godkjent av saksbehandler")
+                info("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
+            }
+            !utbetalingGodkjent && automatiskBehandling -> {
+                error("Utbetaling markert som ikke godkjent automatisk")
+                info("Utbetaling markert som ikke godkjent automatisk $godkjenttidspunkt")
+            }
             utbetalingGodkjent && !automatiskBehandling ->
                 info("Utbetaling markert som godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
             else ->
