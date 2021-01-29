@@ -15,14 +15,15 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class LagrePersonDao(private val dataSource: DataSource) {
-    fun lagrePerson(message: HendelseMessage, person: Person, hendelse: PersonHendelse) {
+    fun lagrePerson(message: HendelseMessage, person: Person, hendelse: PersonHendelse, vedtak: Boolean) {
         val serialisering = person.serialize()
         lagrePerson(
             aktørId = hendelse.aktørId(),
             fødselsnummer = hendelse.fødselsnummer(),
             skjemaVersjon = serialisering.skjemaVersjon,
             meldingId = message.id,
-            personJson = serialisering.json
+            personJson = serialisering.json,
+            vedtak = vedtak
         )
     }
 
@@ -36,30 +37,30 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
+    private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
         using(sessionOf(dataSource)) { session ->
-            opprettNyPerson(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson)
+            opprettNyPerson(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
         }.also {
             PostgresProbe.personSkrevetTilDb()
         }
     }
 
-    private fun opprettNyPerson(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
+    private fun opprettNyPerson(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
         @Language("PostreSQL")
         val statement = "INSERT INTO unike_person (fnr, aktor_id) VALUES (:fnr, :aktor) ON CONFLICT DO NOTHING"
         session.run(queryOf(statement, mapOf(
             "fnr" to fødselsnummer.toLong(),
             "aktor" to aktørId.toLong()
         )).asExecute)
-        opprettNyPersonversjon(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson)
+        opprettNyPersonversjon(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
     }
 
-    private fun opprettNyPersonversjon(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String) {
+    private fun opprettNyPersonversjon(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
         @Language("PostreSQL")
         val statement = """
-            INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data)
-            VALUES (?, ?, ?, ?, (to_json(?::json)))
+            INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data, vedtak)
+            VALUES (?, ?, ?, ?, (to_json(?::json)), ?)
         """
-        session.run(queryOf(statement, aktørId, fødselsnummer, skjemaVersjon, meldingId, personJson).asExecute)
+        session.run(queryOf(statement, aktørId, fødselsnummer, skjemaVersjon, meldingId, personJson, vedtak).asExecute)
     }
 }

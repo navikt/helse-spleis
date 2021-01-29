@@ -18,13 +18,14 @@ import java.util.*
 internal class PersonMediator(private val person: Person, private val message: HendelseMessage, private val hendelse: PersonHendelse) {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val meldinger = mutableListOf<Pair<String, String>>()
+    private var vedtak = false
 
     init {
         person.addObserver(Observatør())
     }
 
     fun finalize(rapidsConnection: RapidsConnection, lagrePersonDao: LagrePersonDao) {
-        lagrePersonDao.lagrePerson(message, person, hendelse)
+        lagrePersonDao.lagrePerson(message, person, hendelse, vedtak)
         if (meldinger.isEmpty()) return
         sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} meldinger på rapid for fnr=${hendelse.fødselsnummer()}")
         meldinger.forEach { (fødselsnummer, melding) ->
@@ -147,6 +148,7 @@ internal class PersonMediator(private val person: Person, private val message: H
             inntekt: Double,
             utbetalingId: UUID?
         ) {
+            vedtak = true
             queueMessage("vedtak_fattet", JsonMessage.newMessage(
                 mutableMapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId,

@@ -1,0 +1,2 @@
+ALTER TABLE person
+ADD COLUMN vedtak boolean DEFAULT FALSE;
