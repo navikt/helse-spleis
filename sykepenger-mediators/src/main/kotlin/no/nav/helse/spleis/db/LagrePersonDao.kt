@@ -1,9 +1,6 @@
 package no.nav.helse.spleis.db
 
-import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
+import kotliquery.*
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -11,6 +8,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
+import java.time.LocalTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -39,19 +37,22 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
 
     private fun lagrePerson(aktørId: String, fødselsnummer: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
         using(sessionOf(dataSource)) { session ->
-            opprettNyPerson(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
+            session.transaction {
+                opprettNyPerson(it, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
+            }
         }.also {
             PostgresProbe.personSkrevetTilDb()
         }
     }
 
-    private fun opprettNyPerson(session: Session, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
+    private fun opprettNyPerson(session: TransactionalSession, fødselsnummer: String, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
         @Language("PostreSQL")
         val statement = "INSERT INTO unike_person (fnr, aktor_id) VALUES (:fnr, :aktor) ON CONFLICT DO NOTHING"
         session.run(queryOf(statement, mapOf(
             "fnr" to fødselsnummer.toLong(),
             "aktor" to aktørId.toLong()
         )).asExecute)
+        slettEldrePersonversjon(session, fødselsnummer)
         opprettNyPersonversjon(session, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
     }
 
@@ -62,5 +63,20 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
             VALUES (?, ?, ?, ?, (to_json(?::json)), ?)
         """
         session.run(queryOf(statement, aktørId, fødselsnummer, skjemaVersjon, meldingId, personJson, vedtak).asExecute)
+    }
+
+    private fun slettEldrePersonversjon(session: Session, fødselsnummer: String) {
+        val now = LocalTime.now()
+        val midnight = LocalTime.MIDNIGHT
+        val kl18 = LocalTime.of(18, 0,0)
+
+        if (now in midnight..kl18) return // utfører kun sletting mellom 18:00 og 23:59:59
+
+        @Language("PostreSQL")
+        val statement = """
+            DELETE FROM person
+            WHERE vedtak = false AND fnr = ?
+        """
+        session.run(queryOf(statement, fødselsnummer).asExecute)
     }
 }
