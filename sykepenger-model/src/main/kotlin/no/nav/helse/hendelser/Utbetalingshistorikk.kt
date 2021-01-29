@@ -33,10 +33,10 @@ class Utbetalingshistorikk(
     internal fun erRelevant(vedtaksperiodeId: UUID) =
         vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?): Aktivitetslogg {
-        Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, aktivitetslogg, periode, organisasjonsnummer)
-        Inntektsopplysning.valider(inntektshistorikk, aktivitetslogg, skjæringstidspunkt, periode)
-        return aktivitetslogg
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?): IAktivitetslogg {
+        Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, this, periode, organisasjonsnummer)
+        Inntektsopplysning.valider(inntektshistorikk, this, skjæringstidspunkt, periode)
+        return this
     }
 
     internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
@@ -68,7 +68,7 @@ class Utbetalingshistorikk(
 
             fun valider(
                 liste: List<Inntektsopplysning>,
-                aktivitetslogg: Aktivitetslogg,
+                aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate?,
                 periode: Periode
             ) {
@@ -80,7 +80,7 @@ class Utbetalingshistorikk(
 
             private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
                 periode: Periode,
-                aktivitetslogg: Aktivitetslogg
+                aktivitetslogg: IAktivitetslogg
             ) {
                 filter { it.sykepengerFom >= periode.start.minusMonths(12) }
                     .distinctBy { it.orgnummer }
@@ -91,7 +91,7 @@ class Utbetalingshistorikk(
 
             private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
                 skjæringstidspunkt: LocalDate?,
-                aktivitetslogg: Aktivitetslogg,
+                aktivitetslogg: IAktivitetslogg,
                 periode: Periode
             ) {
                 filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
@@ -122,7 +122,7 @@ class Utbetalingshistorikk(
             }
         }
 
-        internal fun valider(aktivitetslogg: Aktivitetslogg, periode: Periode) {
+        internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             if (refusjonTom != null && periode.slutterEtter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
@@ -173,7 +173,7 @@ class Utbetalingshistorikk(
         internal open fun append(oldtid: Historie.Historikkbøtte) {}
 
         internal open fun valider(
-            aktivitetslogg: Aktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             other: Periode,
             organisasjonsnummer: String
         ) {
@@ -197,7 +197,7 @@ class Utbetalingshistorikk(
                 oldtid.add(orgnr, sykdomstidslinje())
             }
 
-            override fun valider(aktivitetslogg: Aktivitetslogg, other: Periode, organisasjonsnummer: String) {
+            override fun valider(aktivitetslogg: IAktivitetslogg, other: Periode, organisasjonsnummer: String) {
                 if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
             }
 
@@ -212,10 +212,10 @@ class Utbetalingshistorikk(
             internal companion object {
                 fun valider(
                     liste: List<Infotrygdperiode>,
-                    aktivitetslogg: Aktivitetslogg,
+                    aktivitetslogg: IAktivitetslogg,
                     periode: Periode,
                     organisasjonsnummer: String
-                ): Aktivitetslogg {
+                ): IAktivitetslogg {
                     if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
                         if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
                             aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
@@ -282,7 +282,7 @@ class Utbetalingshistorikk(
         class Opphold(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom)
         class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
             override fun valider(
-                aktivitetslogg: Aktivitetslogg,
+                aktivitetslogg: IAktivitetslogg,
                 other: Periode,
                 organisasjonsnummer: String
             ) {
@@ -297,7 +297,7 @@ class Utbetalingshistorikk(
         class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) :
             IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
             override fun valider(
-                aktivitetslogg: Aktivitetslogg,
+                aktivitetslogg: IAktivitetslogg,
                 other: Periode,
                 organisasjonsnummer: String
             ) {

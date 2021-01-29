@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import java.lang.Integer.max
 import java.time.LocalDate
 
@@ -17,7 +17,7 @@ class Opptjeningvurdering(
     internal fun harOpptjening(orgnummer: String) =
         opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: Aktivitetslogg, orgnummer: String, skjæringstidspunkt: LocalDate): Aktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, orgnummer: String, skjæringstidspunkt: LocalDate): IAktivitetslogg {
         Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, skjæringstidspunkt)
         if (harOpptjening(orgnummer)) aktivitetslogg.info(
             "Har minst %d dager opptjening",

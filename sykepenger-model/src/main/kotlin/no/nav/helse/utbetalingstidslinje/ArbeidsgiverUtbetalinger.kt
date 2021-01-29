@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
@@ -12,7 +12,7 @@ internal class ArbeidsgiverUtbetalinger(
     private val skjæringstidspunkter: List<LocalDate>,
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
-    private val aktivitetslogg: Aktivitetslogg,
+    private val aktivitetslogg: IAktivitetslogg,
     private val organisasjonsnummer: String,
     private val fødselsnummer: String,
     private val virkningsdato: LocalDate = periode.endInclusive,

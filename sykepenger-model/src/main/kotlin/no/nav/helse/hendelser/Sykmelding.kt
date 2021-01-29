@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -32,9 +32,9 @@ class Sykmelding(
 
     override fun periode() = periode
 
-    override fun valider(periode: Periode): Aktivitetslogg {
+    override fun valider(periode: Periode): IAktivitetslogg {
         forGammel()
-        return aktivitetslogg
+        return this
     }
 
     internal fun forGammel() = (periode.start < mottatt.toLocalDate().minusMonths(6)).also {

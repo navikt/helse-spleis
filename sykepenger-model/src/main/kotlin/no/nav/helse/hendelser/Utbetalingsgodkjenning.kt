@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
 import java.util.*
@@ -32,7 +32,7 @@ class Utbetalingsgodkjenning(
         automatiskBehandling
     )
 
-    internal fun valider(): Aktivitetslogg {
+    internal fun valider(): IAktivitetslogg {
         when {
             !utbetalingGodkjent && automatiskBehandling && makstidOppnådd ->
                 error("Gir opp fordi saksbehandleroppgaven har nådd makstid")
@@ -45,7 +45,7 @@ class Utbetalingsgodkjenning(
             else ->
                 info("Utbetaling markert som godkjent automatisk $godkjenttidspunkt")
         }
-        return aktivitetslogg
+        return this
     }
 
     override fun aktørId() = aktørId

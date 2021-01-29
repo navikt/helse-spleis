@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -38,9 +38,9 @@ class SøknadArbeidsgiver constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(periode: Periode): Aktivitetslogg {
+    override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
-        return aktivitetslogg
+        return this
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {

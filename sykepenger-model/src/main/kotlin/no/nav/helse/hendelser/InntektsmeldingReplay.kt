@@ -6,9 +6,9 @@ import java.util.*
 
 class InntektsmeldingReplay(
     meldingsreferanseId: UUID,
-    val wrapped: Inntektsmelding,
-    val vedtaksperiodeId: UUID
-) : SykdomstidslinjeHendelse(meldingsreferanseId, aktivitetslogg = wrapped.aktivitetslogg) {
+    internal val wrapped: Inntektsmelding,
+    internal val vedtaksperiodeId: UUID
+) : SykdomstidslinjeHendelse(meldingsreferanseId, wrapped) {
     override fun organisasjonsnummer() = wrapped.organisasjonsnummer()
     override fun aktørId() = wrapped.aktørId()
     override fun fødselsnummer() = wrapped.fødselsnummer()

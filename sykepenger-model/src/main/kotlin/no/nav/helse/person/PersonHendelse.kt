@@ -4,7 +4,7 @@ import java.util.*
 
 abstract class PersonHendelse protected constructor(
     private val meldingsreferanseId: UUID,
-    internal val aktivitetslogg: Aktivitetslogg
+    private val aktivitetslogg: IAktivitetslogg
 ) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
     init {

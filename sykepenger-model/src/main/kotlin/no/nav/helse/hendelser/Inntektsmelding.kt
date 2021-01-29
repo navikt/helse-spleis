@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.sykdomstidslinje.*
@@ -129,18 +129,18 @@ class Inntektsmelding(
     private fun førsteFraværsdagErFørEllerIPerioden(periode: Periode) =
         requireNotNull(førsteFraværsdag) <= periode.endInclusive
 
-    override fun valider(periode: Periode): Aktivitetslogg {
-        refusjon.valider(aktivitetslogg, periode, beregnetInntekt)
-        if (arbeidsgiverperioder.isEmpty()) aktivitetslogg.warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig")
-        if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) aktivitetslogg.warn("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.")
+    override fun valider(periode: Periode): IAktivitetslogg {
+        refusjon.valider(this, periode, beregnetInntekt)
+        if (arbeidsgiverperioder.isEmpty()) warn("Inntektsmelding inneholder ikke arbeidsgiverperiode. Vurder om  arbeidsgiverperioden beregnes riktig")
+        if (arbeidsforholdId != null && arbeidsforholdId.isNotBlank()) warn("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
-            aktivitetslogg.warn(
+            warn(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s. Vurder om dette har betydning for rett til sykepenger og beregning av arbeidsgiverperiode",
                 it
             )
         }
-        if (harOpphørAvNaturalytelser) aktivitetslogg.error("Brukeren har opphold i naturalytelser")
-        return aktivitetslogg
+        if (harOpphørAvNaturalytelser) error("Brukeren har opphold i naturalytelser")
+        return this
     }
 
     override fun aktørId() = aktørId
@@ -199,10 +199,10 @@ class Inntektsmelding(
     ) {
 
         internal fun valider(
-            aktivitetslogg: Aktivitetslogg,
+            aktivitetslogg: IAktivitetslogg,
             periode: Periode,
             beregnetInntekt: Inntekt
-        ): Aktivitetslogg {
+        ): IAktivitetslogg {
             when {
                 inntekt == null -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 inntekt != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")

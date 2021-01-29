@@ -1,14 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val tidslinjer: List<Utbetalingstidslinje>,
     private val periode: Periode,
     private val dødsdato: LocalDate?,
-    private val aktivitetslogg: Aktivitetslogg
+    private val aktivitetslogg: IAktivitetslogg
 ) {
 
     internal fun filter() {

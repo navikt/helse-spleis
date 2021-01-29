@@ -529,17 +529,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
-        ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
+        ArbeidstakerHendelse(hendelse) {
         override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
-        override fun aktørId() = hendelse.aktørId()
-        override fun fødselsnummer() = hendelse.fødselsnummer()
-    }
-
-    internal class TilbakestillBehandling(
-        private val organisasjonsnummer: String,
-        private val hendelse: PersonHendelse
-    ) : ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
-        override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()
     }

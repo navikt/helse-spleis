@@ -19,7 +19,7 @@ internal class PåminnelseTest {
         private const val orgnummer = "orgnummer"
     }
 
-    private lateinit var aktivitetslogg: Aktivitetslogg
+    private lateinit var aktivitetslogg: IAktivitetslogg
 
     @Test
     fun `info ved påminnelse for annen tilstand`() {
@@ -36,7 +36,7 @@ internal class PåminnelseTest {
         val vedtaksperiode = vedtaksperiode()
         påminnelse(tilstand.type, UUID.randomUUID()).also {
             assertFalse(vedtaksperiode.håndter(it))
-            assertFalse(it.aktivitetslogg.hasWarningsOrWorse(), it.aktivitetslogg.toString())
+            assertFalse(it.hasWarningsOrWorse(), it.toString())
         }
     }
 
@@ -76,5 +76,5 @@ internal class PåminnelseTest {
             tilstandsendringstidspunkt = LocalDateTime.now(),
             påminnelsestidspunkt = LocalDateTime.now(),
             nestePåminnelsestidspunkt = LocalDateTime.now()
-        ).also { aktivitetslogg = it.aktivitetslogg }
+        ).also { aktivitetslogg = it }
 }

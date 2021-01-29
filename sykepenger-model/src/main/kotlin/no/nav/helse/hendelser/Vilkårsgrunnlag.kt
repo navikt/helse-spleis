@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
@@ -29,10 +29,10 @@ class Vilkårsgrunnlag(
         beregnetInntekt: Inntekt,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype
-    ): Aktivitetslogg {
-        inntektsvurdering.valider(aktivitetslogg, beregnetInntekt, periodetype)
-        opptjeningvurdering.valider(aktivitetslogg, orgnummer, skjæringstidspunkt)
-        medlemskapsvurdering.valider(aktivitetslogg, periodetype)
+    ): IAktivitetslogg {
+        inntektsvurdering.valider(this, beregnetInntekt, periodetype)
+        opptjeningvurdering.valider(this, orgnummer, skjæringstidspunkt)
+        medlemskapsvurdering.valider(this, periodetype)
         grunnlagsdata = Grunnlagsdata(
             beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
             avviksprosent = inntektsvurdering.avviksprosent(),
@@ -40,7 +40,7 @@ class Vilkårsgrunnlag(
             harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus
         )
-        return aktivitetslogg
+        return this
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {

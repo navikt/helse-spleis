@@ -1,6 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
@@ -8,7 +8,7 @@ import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 class Medlemskapsvurdering(
     internal val medlemskapstatus: Medlemskapstatus
 ) {
-    internal fun valider(aktivitetslogg: Aktivitetslogg, periodetype: Periodetype): Aktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype): IAktivitetslogg {
         when (medlemskapstatus) {
             Medlemskapstatus.Ja -> aktivitetslogg.info("Bruker er medlem av Folketrygden")
             Medlemskapstatus.VetIkke -> {

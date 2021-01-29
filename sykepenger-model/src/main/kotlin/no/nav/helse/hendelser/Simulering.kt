@@ -19,7 +19,7 @@ class Simulering(
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = orgnummer
 
-    internal fun valider(oppdrag: Oppdrag) = aktivitetslogg.apply {
+    internal fun valider(oppdrag: Oppdrag) = this.apply {
         if (!simuleringOK) error("Feil under simulering: %s", melding)
         when {
             simuleringResultat == null -> {

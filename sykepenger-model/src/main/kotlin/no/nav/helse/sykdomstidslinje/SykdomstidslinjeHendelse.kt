@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
 import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
@@ -13,8 +14,11 @@ internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 abstract class SykdomstidslinjeHendelse(
     meldingsreferanseId: UUID,
     melding: Melding? = null,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+
+    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, null, other.aktivitetslogg)
+
     private var forrigeTom: LocalDate? = null
 
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId())
@@ -57,7 +61,7 @@ abstract class SykdomstidslinjeHendelse(
     internal open fun periode() =
         Periode(forrigeTom?.plusDays(1) ?: sykdomstidslinje().førsteDag(), sykdomstidslinje().sisteDag())
 
-    internal abstract fun valider(periode: Periode): Aktivitetslogg
+    internal abstract fun valider(periode: Periode): IAktivitetslogg
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 

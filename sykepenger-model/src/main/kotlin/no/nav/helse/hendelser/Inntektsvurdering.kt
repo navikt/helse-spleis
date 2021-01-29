@@ -1,12 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.InntektshistorikkVol2
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
-import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årligGjennomsnitt
@@ -29,10 +26,10 @@ class Inntektsvurdering(
     internal fun avviksprosent() = avviksprosent
 
     internal fun valider(
-        aktivitetslogg: Aktivitetslogg,
+        aktivitetslogg: IAktivitetslogg,
         beregnetInntekt: Inntekt,
         periodetype: Periodetype
-    ): Aktivitetslogg {
+    ): IAktivitetslogg {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > 1) {
             val melding =

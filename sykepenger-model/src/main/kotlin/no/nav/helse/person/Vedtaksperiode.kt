@@ -16,7 +16,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opptjening
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Arbeidsgiver.GjenopptaBehandling
-import no.nav.helse.person.Arbeidsgiver.TilbakestillBehandling
 import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForlengelseFraInfotrygd.*
 import no.nav.helse.person.Periodetype.*
@@ -314,7 +313,7 @@ internal class Vedtaksperiode private constructor(
         block()
 
         event.kontekst(tilstand)
-        emitVedtaksperiodeEndret(tilstand, event.aktivitetslogg, person.aktivitetslogg.logg(this), previousState)
+        emitVedtaksperiodeEndret(tilstand, event, person.aktivitetslogg.logg(this), previousState)
         tilstand.entering(this, event)
     }
 
@@ -478,7 +477,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun emitVedtaksperiodeEndret(
         currentState: Vedtaksperiodetilstand,
-        hendelseaktivitetslogg: Aktivitetslogg,
+        hendelse: ArbeidstakerHendelse,
         vedtaksperiodeaktivitetslogg: Aktivitetslogg,
         previousState: Vedtaksperiodetilstand
     ) {
@@ -489,8 +488,8 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = organisasjonsnummer,
             gjeldendeTilstand = currentState.type,
             forrigeTilstand = previousState.type,
-            aktivitetslogg = hendelseaktivitetslogg,
-            vedtaksperiodeaktivitetslogg = vedtaksperiodeaktivitetslogg,
+            aktivitetslogg = hendelse.aktivitetsloggMap(),
+            vedtaksperiodeaktivitetslogg = vedtaksperiodeaktivitetslogg.toMap(),
             hendelser = hendelseIder,
             makstid = currentState.makstid(this, LocalDateTime.now())
         )
@@ -636,11 +635,6 @@ internal class Vedtaksperiode private constructor(
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.warn("Avslutter perioden på grunn av tilbakestilling")
-            vedtaksperiode.tilstand(hendelse, TilInfotrygd)
-        }
 
         fun makstid(
             vedtaksperiode: Vedtaksperiode,
@@ -1318,7 +1312,7 @@ internal class Vedtaksperiode private constructor(
                         skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
-                        aktivitetslogg = ytelser.aktivitetslogg,
+                        aktivitetslogg = ytelser,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                         fødselsnummer = vedtaksperiode.fødselsnummer,
                         dødsdato = ytelser.dødsinfo().dødsdato
@@ -1424,10 +1418,6 @@ internal class Vedtaksperiode private constructor(
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til utbetaling")
-        }
-
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
@@ -1463,10 +1453,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilAnnullering : Vedtaksperiodetilstand {
         override val type = TIL_ANNULLERING
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til annullering")
-        }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1548,10 +1534,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Tilbakestiller ikke en vedtaksperiode som er avsluttet med inntektsmelding")
-        }
-
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
@@ -1578,10 +1560,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: TilbakestillBehandling) {
-            hendelse.info("Tilbakestiller ikke en vedtaksperiode som har gått til utbetalinger")
-        }
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX

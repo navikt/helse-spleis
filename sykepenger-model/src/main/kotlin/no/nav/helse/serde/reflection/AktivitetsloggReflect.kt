@@ -10,18 +10,20 @@ import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.*
 internal class AktivitetsloggReflect(aktivitetslogg: Aktivitetslogg) {
     private val inspektør = Aktivitetslogginspektør(aktivitetslogg)
 
-    internal fun toMap() = mutableMapOf(
-        "aktiviteter" to inspektør.aktiviteter,
-        "kontekster" to inspektør.kontekster
-    )
+    internal fun toMap() = inspektør.toMap()
 
     private inner class Aktivitetslogginspektør(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
-        internal val aktiviteter = mutableListOf<Map<String, Any>>()
-        internal val kontekster = mutableListOf<Map<String, Any>>()
+        private val aktiviteter = mutableListOf<Map<String, Any>>()
+        private val kontekster = mutableListOf<Map<String, Any>>()
 
         init {
             aktivitetslogg.accept(this)
         }
+
+        fun toMap() = mapOf(
+            "aktiviteter" to inspektør.aktiviteter.toList(),
+            "kontekster" to inspektør.kontekster.toList()
+        )
 
         override fun visitInfo(
             kontekster: List<SpesifikkKontekst>,

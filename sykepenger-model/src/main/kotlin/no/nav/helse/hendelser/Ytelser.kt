@@ -1,10 +1,7 @@
 package no.nav.helse.hendelser
 
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
+import no.nav.helse.person.*
 import java.time.LocalDate
 import java.util.*
 
@@ -42,11 +39,11 @@ class Ytelser(
 
     internal fun statslønn() = statslønn
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Aktivitetslogg {
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): IAktivitetslogg {
         utbetalingshistorikk.valider(periode, skjæringstidspunkt)
-        arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt)
-        dagpenger.valider(aktivitetslogg, skjæringstidspunkt)
-        return aktivitetslogg
+        arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
+        dagpenger.valider(this, skjæringstidspunkt)
+        return this
     }
 
     internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {

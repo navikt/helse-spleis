@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Toggles
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -34,7 +33,6 @@ class Søknad constructor(
 
     init {
         if (perioder.isEmpty()) severe("Søknad må inneholde perioder")
-        perioder.onEach { it.sjekkUgyldig(aktivitetslogg) }
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: severe("Søknad inneholder ikke sykdomsperioder")
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(avskjæringsdato(), kilde) }
@@ -50,7 +48,7 @@ class Søknad constructor(
 
     override fun aktørId() = aktørId
 
-    override fun valider(periode: Periode): Aktivitetslogg {
+    override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
         if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled && andreInntektskilder.isNotEmpty()) {
             error("Søknaden inneholder andre inntektskilder")
@@ -60,7 +58,7 @@ class Søknad constructor(
         }
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende brev")
-        return aktivitetslogg
+        return this
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
@@ -96,7 +94,6 @@ class Søknad constructor(
         internal open fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde): Sykdomstidslinje =
             Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Dagtype støttes ikke av systemet")
 
-        internal open fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {}
         internal open fun valider(søknad: Søknad) {}
 
         internal fun valider(søknad: Søknad, beskjed: String) {
@@ -119,8 +116,6 @@ class Søknad constructor(
         ) : Søknadsperiode(fom, tom) {
             private val søknadsgrad = arbeidshelse?.not()
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
-
-            override fun sjekkUgyldig(aktivitetslogg: Aktivitetslogg) {}
 
             override fun valider(søknad: Søknad) {
                 if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
