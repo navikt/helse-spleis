@@ -57,7 +57,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is AnnulleringMessage -> KANSELLER_UTBETALING
             is UtbetalingshistorikkMessage -> return // ignore UtbetalingshistorikkMessage
             is AvstemmingMessage -> return // ignore
-            is RollbackMessage -> ROLLBACK
             is EtterbetalingMessage -> GRUNNBELØPSREGULERING
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
         }
@@ -126,7 +125,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         UTBETALING,
         SIMULERING,
         KANSELLER_UTBETALING,
-        ROLLBACK,
         GRUNNBELØPSREGULERING,
     }
 }

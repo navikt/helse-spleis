@@ -1,17 +1,15 @@
 package no.nav.helse.spleis
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
-import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.db.VedtaksperiodeIdTilstand
 import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
-import java.util.*
 
 // Understands how to communicate messages to other objects
 // Acts like a GoF Mediator to forward messages to observers
@@ -153,57 +151,6 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: RollbackMessage, rollback: Rollback) {
-        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
-        val vedtaksperiodeIderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
-        val vedtaksperiodeIderEtterRollback =
-            personRepository.hentVedtaksperiodeIderMedTilstand(rollback.personVersjon())
-
-        val vedtaksperioderEndretTilstand = vedtaksperiodeIderFørRollback - vedtaksperiodeIderEtterRollback
-        val vedtaksperioderSlettet =
-            vedtaksperiodeIderFørRollback.map(VedtaksperiodeIdTilstand::id) - vedtaksperiodeIderEtterRollback.map(
-                VedtaksperiodeIdTilstand::id
-            )
-
-        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand)
-
-        val rollbackPerson = personForId(rollback.personVersjon())
-        val personMediator = PersonMediator(rollbackPerson, message, rollback)
-        rollbackPerson.håndter(rollback)
-        val tilbakerulledePerioder =
-            personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), rollback.personVersjon())
-        sikkerLogg.info(
-            "Rullet tilbake {} person for {}, gikk fra {} til {}",
-            keyValue("antallPersonIder", tilbakerulledePerioder),
-            keyValue("fødselsnummer", rollback.fødselsnummer()),
-            keyValue("forigePersonId", nyestePersonId),
-            keyValue("rullesTilbakeTilPersonId", rollback.personVersjon())
-        )
-        finalize(personMediator, message, rollback)
-
-
-        publiserPersonRulletTilbake(rollback, message, vedtaksperioderSlettet)
-    }
-
-    override fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete) {
-        val nyestePersonId = requireNotNull(personRepository.hentNyestePersonId(rollback.fødselsnummer()))
-        val vedtaksperioderFørRollback = personRepository.hentVedtaksperiodeIderMedTilstand(nyestePersonId)
-
-        sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderFørRollback)
-        val person = Person(rollback.aktørId(), rollback.fødselsnummer())
-        val personMediator = PersonMediator(person, message, rollback)
-        person.håndter(rollback)
-        val tilbakerulledePerioder = personRepository.markerSomTilbakerullet(rollback.fødselsnummer(), 0)
-        sikkerLogg.info(
-            "Resetter person {} perioder for {}, original {}",
-            keyValue("antallPersonIder", tilbakerulledePerioder),
-            keyValue("fødselsnummer", rollback.fødselsnummer()),
-            keyValue("forigePersonId", nyestePersonId)
-        )
-        finalize(personMediator, message, rollback)
-        publiserPersonRulletTilbake(rollback, message, vedtaksperioderFørRollback.map { it.id })
-    }
-
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje) {
         håndter(message, overstyrTidslinje) { person ->
             HendelseProbe.onOverstyrTidslinje()
@@ -217,55 +164,23 @@ internal class HendelseMediator(
         }
     }
 
-    private fun publiserPersonRulletTilbake(
-        rollback: PersonHendelse,
-        message: HendelseMessage,
-        vedtaksperioderSlettet: List<UUID>
-    ) {
-        rapidsConnection.publish(
-            rollback.fødselsnummer(), JsonMessage.newMessage(
-                mapOf(
-                    "@event_name" to "person_rullet_tilbake",
-                    "hendelseId" to message.id,
-                    "fødselsnummer" to rollback.fødselsnummer(),
-                    "vedtaksperioderSlettet" to vedtaksperioderSlettet
-                )
-            ).toJson()
-        )
-    }
-
-    private fun sjekkForVedtaksperioderTilUtbetaling(vedtaksperioderEndretTilstand: List<VedtaksperiodeIdTilstand>) {
-        require(vedtaksperioderEndretTilstand.none { it.tilstand in listOf("AVSLUTTET", "TIL_UTBETALING") }) {
-            "Prøvde å rulle tilbake en person med en utbetalt periode"
-        }
-    }
-
     private fun <Hendelse : PersonHendelse> håndter(
         message: HendelseMessage,
         hendelse: Hendelse,
         handler: (Person) -> Unit
     ) {
-        person(message, hendelse).also {
+        person(hendelse).also {
             val personMediator = PersonMediator(it, message, hendelse)
             handler(it)
             finalize(personMediator, message, hendelse)
         }
     }
 
-    private fun person(message: HendelseMessage, hendelse: PersonHendelse): Person {
-        return initPerson(
-            personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
-                aktørId = hendelse.aktørId(),
-                fødselsnummer = hendelse.fødselsnummer()
-            )
+    private fun person(hendelse: PersonHendelse): Person {
+        val person = personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
+            aktørId = hendelse.aktørId(),
+            fødselsnummer = hendelse.fødselsnummer()
         )
-    }
-
-    private fun personForId(id: Long): Person {
-        return initPerson(personRepository.hentPerson(id))
-    }
-
-    private fun initPerson(person: Person): Person {
         person.addObserver(replayMediator)
         person.addObserver(VedtaksperiodeProbe)
         return person
@@ -301,8 +216,6 @@ internal interface IHendelseMediator {
     fun behandle(message: SimuleringMessage, simulering: Simulering)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling)
     fun behandle(message: AvstemmingMessage, avstemming: Avstemming)
-    fun behandle(message: RollbackMessage, rollback: Rollback)
-    fun behandle(message: RollbackDeleteMessage, rollback: RollbackDelete)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje)
     fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering)
 }

@@ -397,11 +397,6 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun håndter(hendelse: Rollback) {
-        hendelse.kontekst(this)
-        søppelbøtte(RollbackArbeidsgiver(organisasjonsnummer, hendelse), ALLE, ForkastetÅrsak.IKKE_STØTTET)
-    }
-
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         vedtaksperioder.toList().forEach { it.håndter(hendelse) }
@@ -536,16 +531,6 @@ internal class Arbeidsgiver private constructor(
     internal class GjenopptaBehandling(private val hendelse: ArbeidstakerHendelse) :
         ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
         override fun organisasjonsnummer() = hendelse.organisasjonsnummer()
-        override fun aktørId() = hendelse.aktørId()
-        override fun fødselsnummer() = hendelse.fødselsnummer()
-    }
-
-    internal class RollbackArbeidsgiver(
-        private val organisasjonsnummer: String,
-        private val hendelse: PersonHendelse
-    ) :
-        ArbeidstakerHendelse(hendelse.meldingsreferanseId(), hendelse.aktivitetslogg) {
-        override fun organisasjonsnummer() = organisasjonsnummer
         override fun aktørId() = hendelse.aktørId()
         override fun fødselsnummer() = hendelse.fødselsnummer()
     }

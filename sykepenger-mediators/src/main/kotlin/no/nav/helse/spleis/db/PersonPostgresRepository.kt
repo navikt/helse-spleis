@@ -14,48 +14,6 @@ internal class PersonPostgresRepository(private val dataSource: DataSource) : Pe
     override fun hentPerson(fødselsnummer: String) =
         hentPerson(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fødselsnummer))
 
-    override fun hentVedtaksperiodeIderMedTilstand(personId: Long): List<VedtaksperiodeIdTilstand> =
-        using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    """
-                    SELECT DISTINCT vedtaksperiode ->> 'id' AS vedtaksperiode_id, vedtaksperiode ->> 'tilstand' as tilstand
-                    FROM person,
-                         json_array_elements(data -> 'arbeidsgivere') arbeidsgiver,
-                         json_array_elements(arbeidsgiver -> 'vedtaksperioder') vedtaksperiode
-                    WHERE id=?; """, personId
-                )
-                    .map {
-                        VedtaksperiodeIdTilstand(
-                            id = UUID.fromString(it.string("vedtaksperiode_id")),
-                            tilstand = it.string("tilstand")
-                        )
-                    }
-                    .asList
-            )
-        }
-
-    override fun hentNyestePersonId(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf("""SELECT max(id) AS id FROM person WHERE fnr=?;""", fødselsnummer)
-                .map { it.long("id") }.asSingle
-        )
-    }
-
-    override fun hentPerson(id: Long) =
-        requireNotNull(hentPerson(queryOf("SELECT data FROM person WHERE id = ?;", id)))
-
-    override fun markerSomTilbakerullet(fødselsnummer: String, tilbakeTilId: Long) =
-        using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "UPDATE person SET rullet_tilbake=now() WHERE fnr=? AND id > ?;",
-                    fødselsnummer,
-                    tilbakeTilId
-                ).asUpdate
-            )
-        }
-
     private fun hentPerson(query: Query) =
         using(sessionOf(dataSource)) { session ->
             session.run(query.map {

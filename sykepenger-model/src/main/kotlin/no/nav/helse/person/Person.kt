@@ -116,19 +116,6 @@ class Person private constructor(
         observers.forEach { it.avstemt(result) }
     }
 
-    fun håndter(hendelse: Rollback) {
-        hendelse.kontekst(this)
-        arbeidsgivere.forEach {
-            it.håndter(hendelse)
-        }
-        hendelse.warn("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.")
-    }
-
-    fun håndter(hendelse: RollbackDelete) {
-        hendelse.kontekst(this)
-        hendelse.warn("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.")
-    }
-
     fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)

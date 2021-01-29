@@ -550,25 +550,6 @@ internal class TestMessageFactory(
         "aktørId" to aktørId
     ))
 
-    fun lagRollback(personVersjon: Long): String {
-        return nyHendelse(
-            "rollback_person", mutableMapOf<String, Any>(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "personVersjon" to personVersjon
-            )
-        )
-    }
-
-    fun lagRollbackDelete(): String {
-        return nyHendelse(
-            "rollback_person_delete", mutableMapOf<String, Any>(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer
-            )
-        )
-    }
-
     fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): String {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
