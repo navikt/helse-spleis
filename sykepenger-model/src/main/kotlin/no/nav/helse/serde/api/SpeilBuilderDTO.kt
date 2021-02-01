@@ -335,7 +335,7 @@ data class InntektsgrunnlagDTO(
             val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>? = null //kun gyldig for A-ordningen
         ) {
             enum class InntektkildeDTO {
-                Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
+                Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, KopiertFraForrigePeriode
             }
 
             data class InntekterFraAOrdningenDTO(
