@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import no.nav.helse.sykdomstidslinje.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import java.math.BigDecimal
@@ -25,11 +26,18 @@ private class ModelDeepEquals {
         if (one is Collection<*> && other is Collection<*>) {
             assertCollectionEquals(one, other, path)
         } else if (one is Map<*, *> && other is Map<*, *>) {
-            assertMapEquals(one, other, path)
+            // NotLikeThis
+            if (path.last() == "dager") {
+                assertMapEquals(one.filtrerUkjenteDager(), other.filtrerUkjenteDager(), path)
+            } else {
+                assertMapEquals(one, other, path)
+            }
         } else {
             assertObjectEquals(one, other, path)
         }
     }
+
+    private fun Map<*, *>.filtrerUkjenteDager() = filterValues { it !is Dag.UkjentDag }
 
     private fun assertObjectEquals(one: Any, other: Any,path: List<String> ) {
         assertEqualWithMessage(one::class, other::class, path)
@@ -65,14 +73,14 @@ private class ModelDeepEquals {
     private fun assertHelseObjectEquals(one: Any, other: Any, path: List<String>) {
         one::class.memberProperties.map { it.apply { isAccessible = true } }.forEach { prop ->
             if (!prop.name.toLowerCase().endsWith("observers") && prop.name.toLowerCase() != "forrigehendelse") {
-                if (one::class.objectInstance != null)
+                if (one::class.objectInstance == null)
                     assertDeepEquals(prop.call(one), prop.call(other), path + prop.name)
             }
         }
     }
 
     private fun assertMapEquals(one: Map<*, *>, other: Map<*, *>, path: List<String>) {
-        assertEquals(one.size, other.size)
+        assertEquals(one.size, other.size, "$path")
         one.keys.forEach {
             assertDeepEquals(one[it], other[it], path + "[${it}]")
         }
