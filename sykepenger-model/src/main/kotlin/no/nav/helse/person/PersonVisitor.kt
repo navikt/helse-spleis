@@ -275,7 +275,7 @@ internal interface InntekthistorikkVisitor {
     }
 
     fun visitInntektsopplysningKopi(
-        inntektsmelding: InntektshistorikkVol2.InntektsopplysningKopi,
+        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,

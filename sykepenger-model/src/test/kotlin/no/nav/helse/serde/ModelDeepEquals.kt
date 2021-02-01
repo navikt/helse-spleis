@@ -26,9 +26,9 @@ private class ModelDeepEquals {
         if (one is Collection<*> && other is Collection<*>) {
             assertCollectionEquals(one, other, path)
         } else if (one is Map<*, *> && other is Map<*, *>) {
-            // NotLikeThis
+            // Sykdomstidslinje lagrer ikke UkjentDager, så vi ignorerer de for beregnetSykdomstidslinje. NotLikeThis
             if (path.last() == "dager") {
-                assertMapEquals(one.filtrerUkjenteDager(), other.filtrerUkjenteDager(), path)
+                assertMapEquals(one.filtrerUkjentDager(), other.filtrerUkjentDager(), path)
             } else {
                 assertMapEquals(one, other, path)
             }
@@ -37,7 +37,7 @@ private class ModelDeepEquals {
         }
     }
 
-    private fun Map<*, *>.filtrerUkjenteDager() = filterValues { it !is Dag.UkjentDag }
+    private fun Map<*, *>.filtrerUkjentDager() = filterValues { it !is Dag.UkjentDag }
 
     private fun assertObjectEquals(one: Any, other: Any,path: List<String> ) {
         assertEqualWithMessage(one::class, other::class, path)

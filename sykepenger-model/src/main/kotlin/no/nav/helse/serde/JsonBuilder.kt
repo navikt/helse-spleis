@@ -305,6 +305,16 @@ internal class JsonBuilder(person: Person) {
             inntektsopplysninger.add(InntektsmeldingVol2Reflect(inntektsmelding).toMap())
         }
 
+        override fun visitInntektsopplysningKopi(
+            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            tidsstempel: LocalDateTime
+        ) {
+            inntektsopplysninger.add(InntektsopplysningKopiVol2Reflect(inntektsopplysning).toMap())
+        }
+
         override fun visitInfotrygd(
             infotrygd: InntektshistorikkVol2.Infotrygd,
             dato: LocalDate,

@@ -350,6 +350,16 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInntektsmelding(inntektsmelding, dato, hendelseId, beløp, tidsstempel)
     }
 
+    override fun visitInntektsopplysningKopi(
+        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        delegatee.visitInntektsopplysningKopi(inntektsopplysning, dato, hendelseId, beløp, tidsstempel)
+    }
+
     override fun visitInfotrygd(infotrygd: InntektshistorikkVol2.Infotrygd, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {
         delegatee.visitInfotrygd(infotrygd, dato, hendelseId, beløp, tidsstempel)
     }

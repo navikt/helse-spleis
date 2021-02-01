@@ -603,7 +603,7 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektsopplysningKopi(
-            inntektsmelding: InntektshistorikkVol2.InntektsopplysningKopi,
+            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,

@@ -277,9 +277,7 @@ internal data class PersonData(
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
                         when (inntektData.kilde?.let {
-                            if (it == "SKATT_SAMMENLIGNINSGRUNNLAG") Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG else enumValueOf(
-                                it
-                            )
+                            if (it == "SKATT_SAMMENLIGNINSGRUNNLAG") Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG else enumValueOf(it)
                         }) {
                             Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
                                 innslag.skatt {
@@ -338,6 +336,15 @@ internal data class PersonData(
                             Kilde.SAKSBEHANDLER ->
                                 innslag.add(
                                     InntektshistorikkVol2.Saksbehandler(
+                                        dato = requireNotNull(inntektData.dato),
+                                        hendelseId = requireNotNull(inntektData.hendelseId),
+                                        beløp = requireNotNull(inntektData.beløp).månedlig,
+                                        tidsstempel = requireNotNull(inntektData.tidsstempel)
+                                    )
+                                )
+                            Kilde.INNTEKTSOPPLYSNING_KOPI ->
+                                innslag.add(
+                                    InntektshistorikkVol2.InntektsopplysningKopi(
                                         dato = requireNotNull(inntektData.dato),
                                         hendelseId = requireNotNull(inntektData.hendelseId),
                                         beløp = requireNotNull(inntektData.beløp).månedlig,

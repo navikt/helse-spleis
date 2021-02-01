@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -96,6 +97,13 @@ class JsonBuilderTest {
         testSerialiseringAvPerson(friskeHelgedagerPerson())
     }
 
+    @Test
+    fun `gjenoppbygd person er lik opprinnelig person med kopiert inntekt`() {
+        Toggles.PraksisendringEnabled.enable {
+            testSerialiseringAvPerson(personMedLiteGap())
+        }
+    }
+
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder(person)
         val json = jsonBuilder.toString()
@@ -150,6 +158,13 @@ class JsonBuilderTest {
                 håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
                 fangeVedtaksperiode()
             }
+
+        fun personMedLiteGap() = person(fom = 1.januar, tom = 20.januar).apply {
+            håndter(sykmelding(fom = 1.februar, tom = 10.februar))
+            fangeVedtaksperiode()
+            håndter(søknad(fom = 1.februar, tom = 10.februar))
+            håndter(utbetalingshistorikk())
+        }
 
         fun ingenBetalingsperson(
             sendtSøknad: LocalDate = 1.april,
@@ -361,6 +376,19 @@ class JsonBuilderTest {
                 )
             ),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        )
+
+        fun utbetalingshistorikk(
+            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
+            inntektsopplysning: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()
+        ) = Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalinger = utbetalinger,
+            inntektshistorikk = inntektsopplysning
         )
 
         fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
