@@ -277,7 +277,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
             requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
-                assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.KopiertFraForrigePeriode, omregnetÅrsinntekt.kilde)
+                assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
             }

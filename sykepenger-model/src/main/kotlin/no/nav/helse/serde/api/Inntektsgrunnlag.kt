@@ -96,20 +96,6 @@ private class OmregnetÅrsinntektVisitor(
         )
     }
 
-    override fun visitInntektsopplysningKopi(
-        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
-        dato: LocalDate,
-        hendelseId: UUID,
-        beløp: Inntekt,
-        tidsstempel: LocalDateTime
-    ) {
-        omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
-            kilde = InntektkildeDTO.KopiertFraForrigePeriode,
-            beløp = beløp.reflection { årlig, _, _, _ -> årlig },
-            månedsbeløp = beløp.reflection { _, mnd, _, _ -> mnd }
-        )
-    }
-
     override fun visitInfotrygd(
         infotrygd: InntektshistorikkVol2.Infotrygd,
         dato: LocalDate,
@@ -124,7 +110,7 @@ private class OmregnetÅrsinntektVisitor(
         )
     }
 
-    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
         skattegreier.clear()
     }
 
@@ -146,7 +132,7 @@ private class OmregnetÅrsinntektVisitor(
             ))
     }
 
-    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
         omregnetÅrsinntektDTO = OmregnetÅrsinntektDTO(
             kilde = InntektkildeDTO.AOrdningen,
             beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
@@ -174,7 +160,7 @@ private class SammenligningsgrunnlagVisitor(
         inntektsopplysning.accept(this)
     }
 
-    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+    override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
         skattegreier.clear()
     }
 
@@ -196,7 +182,7 @@ private class SammenligningsgrunnlagVisitor(
             ))
     }
 
-    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
         sammenligningsgrunnlagDTO = SammenligningsgrunnlagDTO(
             beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
             inntekterFraAOrdningen = skattegreier

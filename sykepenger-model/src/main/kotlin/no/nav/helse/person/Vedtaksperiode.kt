@@ -1191,7 +1191,7 @@ internal class Vedtaksperiode private constructor(
                                 førsteSykedag?.let { historie.skjæringstidspunktFørGapMindreEnn16Dager(vedtaksperiode.organisasjonsnummer, it) }
                             if (forrigeSkjæringstidspunkt != null) {
                                 utbetalingshistorikk.addInntekter(person)
-                                if (arbeidsgiver.kopierInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
+                                if (arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
                                     vedtaksperiode.tilstand(utbetalingshistorikk, AvventerVilkårsprøvingGap)
                                 }
                             }

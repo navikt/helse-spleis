@@ -238,7 +238,7 @@ internal interface InntekthistorikkVisitor {
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
-    fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
+    fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {}
     fun visitInntektVol2(
         inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
         id: UUID,
@@ -256,7 +256,7 @@ internal interface InntekthistorikkVisitor {
     }
 
     fun visitInntektSaksbehandlerVol2(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {}
-    fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {}
+    fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {}
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun visitSaksbehandler(
         saksbehandler: InntektshistorikkVol2.Saksbehandler,
@@ -276,11 +276,18 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun visitInntektsopplysningKopi(
-        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
+    fun preVisitInntektsopplysningKopi(
+        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
         dato: LocalDate,
         hendelseId: UUID,
-        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
+    fun postVisitInntektsopplysningKopi(
+        inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
+        dato: LocalDate,
+        hendelseId: UUID,
         tidsstempel: LocalDateTime
     ) {
     }
@@ -294,7 +301,7 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
+    fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {}
     fun visitSkattSykepengegrunnlag(
         sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
         dato: LocalDate,
@@ -321,7 +328,7 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {}
+    fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {}
 }
 
 internal interface UtbetalingVisitor : UtbetalingsdagVisitor, OppdragVisitor {

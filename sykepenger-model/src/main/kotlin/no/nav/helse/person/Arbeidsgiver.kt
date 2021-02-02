@@ -614,7 +614,7 @@ internal class Arbeidsgiver private constructor(
         ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode, referanse, historie)
     }
 
-    internal fun kopierInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikkVol2.kopier(fra, til)
+    internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikkVol2.opprettReferanse(fra, til, UUID.randomUUID())
 
     internal class JsonRestorer private constructor() {
         internal companion object {

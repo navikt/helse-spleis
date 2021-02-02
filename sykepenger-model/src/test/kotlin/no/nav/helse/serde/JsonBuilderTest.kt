@@ -104,6 +104,24 @@ class JsonBuilderTest {
         }
     }
 
+    @Test
+    fun `Kopi av inntekt lagrer kun peker til opprinnelig inntektsopplysning`() {
+        Toggles.PraksisendringEnabled.enable {
+            objectMapper.readTree(JsonBuilder(personMedLiteGap()).toString())
+                .get("arbeidsgivere")
+                .first()
+                .get("inntektshistorikk")
+                .flatMap { inntektshistorikk ->
+                    inntektshistorikk["inntektsopplysninger"]
+                        .groupBy { it["id"].asText() }
+                        .values
+                }
+                .forEach {
+                    assertEquals(1, it.size)
+                }
+        }
+    }
+
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder(person)
         val json = jsonBuilder.toString()

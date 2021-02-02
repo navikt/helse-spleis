@@ -41,11 +41,11 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         this.inntektshistorikk = inntektshistorikk
     }
 
-    override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {
+    override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
         inntektsopplysninger.clear()
     }
 
-    override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {
+    override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
         this.innslag.add(inntektsopplysninger.toList())
     }
 
@@ -113,7 +113,7 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         skattedato = dato
     }
 
-    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,

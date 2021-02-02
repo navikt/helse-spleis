@@ -53,7 +53,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `bare ferie`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ferie = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE)))
+        sendSøknad(
+            0,
+            listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ferie = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
+        )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -366,5 +370,51 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVSLUTTET_UTEN_UTBETALING", "TIL_INFOTRYGD")
         assertTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "TIL_INFOTRYGD")
+    }
+
+    @Test
+    fun `Venter ikke på inntektsmelding hvis gap mellom forrige periode og nå er mindre enn 16 dager`() {
+        Toggles.PraksisendringEnabled.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 21.januar, sykmeldingsgrad = 100))
+            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 21.januar, sykmeldingsgrad = 100)))
+            sendUtbetalingshistorikk(0)
+            sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+            sendVilkårsgrunnlag(0)
+            sendYtelser(0)
+            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+            sendUtbetalingsgodkjenning(0, true)
+            sendUtbetaling()
+            assertTilstander(
+                0,
+                "MOTTATT_SYKMELDING_FERDIG_GAP",
+                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+                "AVVENTER_VILKÅRSPRØVING_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_SIMULERING",
+                "AVVENTER_GODKJENNING",
+                "TIL_UTBETALING",
+                "AVSLUTTET"
+            )
+
+            sendNySøknad(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100))
+            sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+            sendUtbetalingshistorikk(1)
+            sendVilkårsgrunnlag(1)
+            sendYtelser(1)
+            sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+            sendUtbetalingsgodkjenning(1, true)
+            sendUtbetaling()
+            assertTilstander(
+                1,
+                "MOTTATT_SYKMELDING_FERDIG_GAP",
+                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+                "AVVENTER_VILKÅRSPRØVING_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_SIMULERING",
+                "AVVENTER_GODKJENNING",
+                "TIL_UTBETALING",
+                "AVSLUTTET"
+            )
+        }
     }
 }

@@ -18,7 +18,7 @@ internal class InntektshistorikkVol2 {
     private val historikk = mutableListOf<Innslag>()
 
     private val innslag
-        get() = (historikk.firstOrNull()?.clone() ?: Innslag())
+        get() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID()))
             .also { historikk.add(0, it) }
 
     internal operator fun invoke(block: AppendMode.() -> Unit) {
@@ -54,11 +54,12 @@ internal class InntektshistorikkVol2 {
     internal fun grunnlagForSammenligningsgrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
 
-    internal fun kopier(fra: LocalDate, til: LocalDate): Boolean {
+    internal fun opprettReferanse(fra: LocalDate, til: LocalDate, hendelseId: UUID): Boolean {
         if (fra > til) return false
         if (fra == til) return true
-        historikk.firstOrNull()?.clone()?.also { innslag ->
-            if (innslag.kopier(fra, til)) {
+        val forrigeInnslag = historikk.firstOrNull()
+        forrigeInnslag?.clone()?.also { innslag ->
+            if (innslag.opprettReferanse(fra, til, forrigeInnslag, hendelseId)) {
                 historikk.add(0, innslag)
                 return true
             }
@@ -66,17 +67,16 @@ internal class InntektshistorikkVol2 {
         return false
     }
 
-    internal class Innslag {
-
+    internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
 
         internal fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitInnslag(this)
+            visitor.preVisitInnslag(this, id)
             inntekter.forEach { it.accept(visitor) }
-            visitor.postVisitInnslag(this)
+            visitor.postVisitInnslag(this, id)
         }
 
-        internal fun clone() = Innslag().also {
+        internal fun clone() = Innslag(UUID.randomUUID()).also {
             it.inntekter.addAll(this.inntekter)
         }
 
@@ -106,10 +106,10 @@ internal class InntektshistorikkVol2 {
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
                 .firstOrNull()
 
-        internal fun kopier(fra: LocalDate, til: LocalDate): Boolean {
+        internal fun opprettReferanse(fra: LocalDate, til: LocalDate, forrigeInnslag: Innslag, hendelseId: UUID): Boolean {
             inntekter
                 .sorted()
-                .mapNotNull { it.kopier(fra, til) }
+                .mapNotNull { it.opprettReferanse(fra, til, forrigeInnslag.id, hendelseId) }
                 .firstOrNull()
                 ?.also {
                     add(it)
@@ -130,10 +130,11 @@ internal class InntektshistorikkVol2 {
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
         fun kanLagres(other: Inntektsopplysning) = true
-        fun kopier(dato: LocalDate, nyDato: LocalDate): Inntektsopplysning? = null
+        fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID): Inntektsopplysning? = null
     }
 
     internal class Saksbehandler(
+        private val id: UUID,
         override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
@@ -150,11 +151,12 @@ internal class InntektshistorikkVol2 {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
 
-        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
+        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class Infotrygd(
+        private val id: UUID,
         override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
@@ -172,11 +174,12 @@ internal class InntektshistorikkVol2 {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
 
-        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
+        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class Inntektsmelding(
+        private val id: UUID,
         override val dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
@@ -196,32 +199,40 @@ internal class InntektshistorikkVol2 {
         override fun kanLagres(other: Inntektsopplysning) =
             other !is Inntektsmelding || this.dato != other.dato
 
-        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
+        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
-    internal class InntektsopplysningKopi(
+    internal class InntektsopplysningReferanse(
+        private val id: UUID,
+        private val innslagId: UUID,
+        private val orginalOpplysningId: UUID,
+        private val orginalOpplysning: Inntektsopplysning,
         override val dato: LocalDate,
         private val hendelseId: UUID,
-        private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
         override val prioritet = 50
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitInntektsopplysningKopi(this, dato, hendelseId, beløp, tidsstempel)
+            visitor.preVisitInntektsopplysningKopi(this, dato, hendelseId, tidsstempel)
+            orginalOpplysning.accept(visitor)
+            visitor.postVisitInntektsopplysningKopi(this, dato, hendelseId, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }?.let { it to it.beløp }
+        override fun grunnlagForSykepengegrunnlag(dato: LocalDate) = takeIf { it.dato == dato }
+            ?.let { orginalOpplysning.grunnlagForSykepengegrunnlag(orginalOpplysning.dato) }
+            ?.let { (_, inntekt) -> this to inntekt }
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
-            other is InntektsopplysningKopi && this.dato == other.dato
+            other is InntektsopplysningReferanse && this.dato == other.dato
 
-        override fun kopier(dato: LocalDate, nyDato: LocalDate) =
-            takeIf { it.dato == dato }?.let { InntektsopplysningKopi(nyDato, hendelseId, beløp) }
+        override fun opprettReferanse(dato: LocalDate, nyDato: LocalDate, innslagId: UUID, hendelseId: UUID) =
+            takeIf { it.dato == dato }?.let { InntektsopplysningReferanse(UUID.randomUUID(), innslagId, id, this, nyDato, hendelseId) }
     }
 
     internal class SkattComposite(
+        private val id: UUID,
         private val inntektsopplysninger: List<Skatt>
     ) : Inntektsopplysning {
 
@@ -229,9 +240,9 @@ internal class InntektshistorikkVol2 {
         override val prioritet = inntektsopplysninger.first().prioritet
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.preVisitSkatt(this)
+            visitor.preVisitSkatt(this, id)
             inntektsopplysninger.forEach { it.accept(visitor) }
-            visitor.postVisitSkatt(this)
+            visitor.postVisitSkatt(this, id)
         }
 
         override fun grunnlagForSykepengegrunnlag(dato: LocalDate) =
@@ -355,7 +366,7 @@ internal class InntektshistorikkVol2 {
         companion object : AppenderFeature<InntektshistorikkVol2, AppendMode> {
             override fun append(a: InntektshistorikkVol2, appender: AppendMode.() -> Unit) {
                 AppendMode(a.innslag).apply(appender).apply {
-                    skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(it)) }
+                    skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
                 }
             }
         }
@@ -364,13 +375,13 @@ internal class InntektshistorikkVol2 {
         private val skatt = mutableListOf<Skatt>()
 
         internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Saksbehandler(dato, hendelseId, beløp, tidsstempel))
+            add(Saksbehandler(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
 
         internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Inntektsmelding(dato, hendelseId, beløp, tidsstempel))
+            add(Inntektsmelding(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
 
         internal fun addInfotrygd(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Infotrygd(dato, hendelseId, beløp, tidsstempel))
+            add(Infotrygd(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
 
         internal fun addSkattSykepengegrunnlag(
             dato: LocalDate,
@@ -429,24 +440,12 @@ internal class InntektshistorikkVol2 {
             }
         }
 
-        internal fun innslag(block: InnslagAppender.() -> Unit) {
-            Innslag().also { InnslagAppender(it).apply(block) }.also { inntektshistorikkVol2.historikk.add(it) }
+        internal fun innslag(innslagId: UUID, block: InnslagAppender.() -> Unit) {
+            Innslag(innslagId).also { InnslagAppender(it).apply(block) }.also { inntektshistorikkVol2.historikk.add(0, it) }
         }
 
         internal class InnslagAppender(private val innslag: Innslag) {
             internal fun add(opplysning: Inntektsopplysning) = innslag.add(opplysning)
-
-            internal fun skatt(block: SkattAppender.() -> Unit) {
-                SkattAppender(this).apply(block).finalize()
-            }
-
-            internal class SkattAppender(private val innslagAppender: InnslagAppender) {
-                private val skatt = mutableListOf<Skatt>()
-                internal fun finalize() =
-                    skatt.takeIf { it.isNotEmpty() }?.apply { innslagAppender.innslag.add(SkattComposite(this)) }
-
-                internal fun add(skatt: Skatt) = this.skatt.add(skatt)
-            }
         }
     }
 }

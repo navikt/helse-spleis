@@ -10,7 +10,7 @@ import java.time.YearMonth
 import java.util.*
 
 internal enum class Kilde {
-    SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, INNTEKTSOPPLYSNING_KOPI, SAKSBEHANDLER
+    SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, INNTEKTSOPPLYSNING_REFERANSE, SAKSBEHANDLER
 }
 
 internal class InntektsendringReflect(inntektsendring: Inntektshistorikk.Inntektsendring) {
@@ -33,13 +33,14 @@ internal abstract class InntektsopplysningReflect(
     inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
     private val kilde: Kilde
 ) {
-
+    private val id: UUID = inntektsopplysning["id"]
     private val dato: LocalDate = inntektsopplysning["dato"]
     private val hendelseId: UUID = inntektsopplysning["hendelseId"]
     private val beløp: Inntekt = inntektsopplysning["beløp"]
     private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
 
     internal open fun toMap(): Map<String, Any?> = mapOf(
+        "id" to id,
         "dato" to dato,
         "hendelseId" to hendelseId,
         "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
@@ -50,15 +51,26 @@ internal abstract class InntektsopplysningReflect(
 
 internal abstract class SkattSykepengegrunnlagVol2Reflect(
     inntektsopplysning: InntektshistorikkVol2.Skatt,
-    kilde: Kilde
-) : InntektsopplysningReflect(inntektsopplysning, kilde) {
+    private val kilde: Kilde
+) {
+    private val dato: LocalDate = inntektsopplysning["dato"]
+    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
+    private val beløp: Inntekt = inntektsopplysning["beløp"]
+    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
+
     private val måned: YearMonth = inntektsopplysning["måned"]
     private val type: InntektshistorikkVol2.Skatt.Inntekttype = inntektsopplysning["type"]
     private val fordel: String = inntektsopplysning["fordel"]
     private val beskrivelse: String = inntektsopplysning["beskrivelse"]
 
-    override fun toMap(): Map<String, Any?> {
-        return super.toMap() + mapOf(
+    internal fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "dato" to dato,
+            "hendelseId" to hendelseId,
+            "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+            "kilde" to kilde,
+            "tidsstempel" to tidsstempel,
+
             "måned" to måned,
             "type" to type,
             "fordel" to fordel,
@@ -76,8 +88,25 @@ internal class InntektsmeldingVol2Reflect(
 ) : InntektsopplysningReflect(inntektsopplysning, Kilde.INNTEKTSMELDING)
 
 internal class InntektsopplysningKopiVol2Reflect(
-    inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi
-) : InntektsopplysningReflect(inntektsopplysning, Kilde.INNTEKTSOPPLYSNING_KOPI)
+    inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse
+){
+    private val id: UUID = inntektsopplysning["id"]
+    private val innslagId: UUID = inntektsopplysning["innslagId"]
+    private val orginalOpplysningId: UUID = inntektsopplysning["orginalOpplysningId"]
+    private val dato: LocalDate = inntektsopplysning["dato"]
+    private val hendelseId: UUID = inntektsopplysning["hendelseId"]
+    private val tidsstempel: LocalDateTime = inntektsopplysning["tidsstempel"]
+
+    internal fun toMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "innslagId" to innslagId,
+        "orginalOpplysningId" to orginalOpplysningId,
+        "dato" to dato,
+        "hendelseId" to hendelseId,
+        "kilde" to Kilde.INNTEKTSOPPLYSNING_REFERANSE,
+        "tidsstempel" to tidsstempel
+    )
+}
 
 internal class InfotrygdVol2Reflect(
     inntektsopplysning: InntektshistorikkVol2.Infotrygd

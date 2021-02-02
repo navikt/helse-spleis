@@ -268,11 +268,13 @@ internal class JsonBuilder(person: Person) {
     private inner class InntektshistorikkVol2State(private val inntekter: MutableList<Map<String, Any?>>) :
         PersonVisitor {
         override fun preVisitInnslag(
-            innslag: InntektshistorikkVol2.Innslag
+            innslag: InntektshistorikkVol2.Innslag,
+            id: UUID
         ) {
             val inntektsopplysninger = mutableListOf<Map<String, Any?>>()
             this.inntekter.add(
                 mutableMapOf(
+                    "id" to id,
                     "inntektsopplysninger" to inntektsopplysninger
                 )
             )
@@ -306,14 +308,14 @@ internal class JsonBuilder(person: Person) {
             inntektsopplysninger.add(InntektsmeldingVol2Reflect(inntektsmelding).toMap())
         }
 
-        override fun visitInntektsopplysningKopi(
-            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
+        override fun preVisitInntektsopplysningKopi(
+            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
             dato: LocalDate,
             hendelseId: UUID,
-            beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
             inntektsopplysninger.add(InntektsopplysningKopiVol2Reflect(inntektsopplysning).toMap())
+            pushState(InntektsopplysningKopiState())
         }
 
         override fun visitInfotrygd(
@@ -326,9 +328,14 @@ internal class JsonBuilder(person: Person) {
             inntektsopplysninger.add(InfotrygdVol2Reflect(infotrygd).toMap())
         }
 
-        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) {
+        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
-            this.inntektsopplysninger.add(mutableMapOf("skatteopplysninger" to skatteopplysninger))
+            this.inntektsopplysninger.add(
+                mutableMapOf(
+                    "id" to id,
+                    "skatteopplysninger" to skatteopplysninger
+                )
+            )
             pushState(InntektsendringVol2State(skatteopplysninger))
         }
 
@@ -361,8 +368,17 @@ internal class JsonBuilder(person: Person) {
             inntektsopplysninger.add(SammenligningsgrunnlagVol2Reflect(sammenligningsgrunnlag).toMap())
         }
 
-        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite) = popState()
-        override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag) = popState()
+        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) = popState()
+        override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) = popState()
+    }
+
+    private inner class InntektsopplysningKopiState : PersonVisitor {
+        override fun postVisitInntektsopplysningKopi(
+            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
+            dato: LocalDate,
+            hendelseId: UUID,
+            tidsstempel: LocalDateTime
+        ) = popState()
     }
 
     private inner class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :

@@ -387,7 +387,7 @@ internal class InntektshistorikkVol2Test {
     fun `Kopier inntektsopplysning fra inntektsmelding`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
 
-        assertTrue(historikk.kopier(1.januar, 10.januar))
+        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -401,7 +401,7 @@ internal class InntektshistorikkVol2Test {
     fun `Kopierer ikke inntektsmeldinginntekt med annen dato`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar)
 
-        assertFalse(historikk.kopier(5.januar, 10.januar))
+        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -412,7 +412,7 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Oppretter ikke nytt innslag hvis ingen inntekter kopieres`() {
-        assertFalse(historikk.kopier(1.januar, 10.januar))
+        assertFalse(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
         assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -428,7 +428,7 @@ internal class InntektshistorikkVol2Test {
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
 
-        assertTrue(historikk.kopier(1.januar, 10.januar))
+        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -446,7 +446,7 @@ internal class InntektshistorikkVol2Test {
             )
         ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
 
-        assertFalse(historikk.kopier(5.januar, 10.januar))
+        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -461,7 +461,7 @@ internal class InntektshistorikkVol2Test {
             addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
         }
 
-        assertTrue(historikk.kopier(1.januar, 10.januar))
+        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -477,7 +477,7 @@ internal class InntektshistorikkVol2Test {
             addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
         }
 
-        assertFalse(historikk.kopier(5.januar, 10.januar))
+        assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -492,8 +492,8 @@ internal class InntektshistorikkVol2Test {
             addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
         }
 
-        assertTrue(historikk.kopier(1.januar, 10.januar))
-        assertTrue(historikk.kopier(10.januar, 20.januar))
+        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
+        assertTrue(historikk.opprettReferanse(10.januar, 20.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -511,8 +511,8 @@ internal class InntektshistorikkVol2Test {
             addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
         }
 
-        assertTrue(historikk.kopier(1.januar, 10.januar))
-        assertFalse(historikk.kopier(15.januar, 20.januar))
+        assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
+        assertFalse(historikk.opprettReferanse(15.januar, 20.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -532,7 +532,7 @@ internal class InntektshistorikkVol2Test {
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
 
-        assertFalse(historikk.kopier(1.januar, 10.januar))
+        assertFalse(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(10.januar))
@@ -552,7 +552,7 @@ internal class InntektshistorikkVol2Test {
             inntektTeller.clear()
         }
 
-        override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag) {
+        override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
             inntektTeller.add(0)
         }
 
@@ -594,16 +594,6 @@ internal class InntektshistorikkVol2Test {
 
         override fun visitInntektsmelding(
             inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            tidsstempel: LocalDateTime
-        ) {
-            inntektTeller.add(inntektTeller.removeLast() + 1)
-        }
-
-        override fun visitInntektsopplysningKopi(
-            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningKopi,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
