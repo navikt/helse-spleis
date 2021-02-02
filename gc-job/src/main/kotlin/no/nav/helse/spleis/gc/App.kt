@@ -18,7 +18,7 @@ fun main() {
 
     log.info("Commencing VACUUM FULL")
     val duration = measureTime { using(sessionOf(ds)) { it.run(queryOf(("VACUUM FULL person")).asExecute) } }
-    log.info("VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)}", duration.inHours.toInt(), duration.inMinutes.toInt() % 60, duration.inSeconds.toInt() % 60)
+    log.info("VACUUM FULL completed after {} hour(s), {} minute(s) and {} second(s)", duration.inHours.toInt(), duration.inMinutes.toInt() % 60, duration.inSeconds.toInt() % 60)
 }
 
 private val hikariConfig get() = HikariConfig().apply {
