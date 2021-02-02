@@ -5,7 +5,7 @@ metadata:
     namespace: tbd
 spec:
     ttlSecondsAfterFinished: 43200
-    backoffLimit: 1
+    backoffLimit: 0
     template:
         spec:
             containers:
@@ -72,7 +72,7 @@ spec:
                       - name: VAULT_AUTH_METHOD
                         value: kubernetes
                       - name: VAULT_SIDEKICK_ROLE
-                        value: spleis
+                        value: spleis-gc
                       - name: VAULT_K8S_LOGIN_PATH
                         value: auth/kubernetes/preprod/fss/login
             serviceAccount: podcreator
