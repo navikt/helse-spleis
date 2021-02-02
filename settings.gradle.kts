@@ -1,2 +1,2 @@
 rootProject.name = "sykepenger-spleis"
-include("sykepenger-api", "sykepenger-model", "sykepenger-mediators")
+include("gc-job", "sykepenger-api", "sykepenger-model", "sykepenger-mediators")
