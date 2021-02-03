@@ -4,8 +4,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import java.math.BigDecimal
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 internal fun assertDeepEquals(one: Any?, other: Any?) {
     ModelDeepEquals().assertDeepEquals(one, other, listOf("ROOT"))
@@ -39,7 +37,7 @@ private class ModelDeepEquals {
 
     private fun Map<*, *>.filtrerUkjentDager() = filterValues { it !is Dag.UkjentDag }
 
-    private fun assertObjectEquals(one: Any, other: Any,path: List<String> ) {
+    private fun assertObjectEquals(one: Any, other: Any, path: List<String>) {
         assertEqualWithMessage(one::class, other::class, path)
         if (one is Enum<*> && other is Enum<*>) {
             assertEqualWithMessage(one, other, path)
@@ -71,10 +69,9 @@ private class ModelDeepEquals {
     }
 
     private fun assertHelseObjectEquals(one: Any, other: Any, path: List<String>) {
-        one::class.memberProperties.map { it.apply { isAccessible = true } }.forEach { prop ->
+        one::class.java.declaredFields.map { it.apply { isAccessible = true } }.forEach { prop ->
             if (!prop.name.toLowerCase().endsWith("observers") && prop.name.toLowerCase() != "forrigehendelse") {
-                if (one::class.objectInstance == null)
-                    assertDeepEquals(prop.call(one), prop.call(other), path + prop.name)
+                assertDeepEquals(prop[one], prop[other], path + prop.name)
             }
         }
     }
@@ -96,10 +93,4 @@ private class ModelDeepEquals {
             )
         }
     }
-
-    private fun Pair<Array<*>, Array<*>>.forEach(block: (Any?, Any?) -> Unit) {
-        first.forEachIndexed { i, any -> block(any, second[i]) }
-    }
-
-
 }

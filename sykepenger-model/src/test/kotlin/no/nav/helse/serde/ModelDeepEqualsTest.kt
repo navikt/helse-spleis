@@ -14,10 +14,28 @@ class ModelDeepEqualsTest {
     fun `checks subclasses in no nav helse`() {
         assertThrows<AssertionError> {
             assertDeepEquals(
-                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP")),
-                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("NOPE"))
+                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP", "JA")),
+                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("NOPE", "JA"))
             )
         }
+    }
+
+    @Test
+    fun `checks private field in subclasses in no nav helse`() {
+        assertThrows<AssertionError> {
+            assertDeepEquals(
+                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP", "JA")),
+                TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP", "NEI"))
+            )
+        }
+    }
+
+    @Test
+    fun `do not check lazy getters in subclasses in no nav helse`() {
+        assertDeepEquals(
+            TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP", "JA")),
+            TestDataWithInnerClass(TestDataWithInnerClass.InnerClass("YEP", "JA"))
+        )
     }
 
     class TestDataWithObject {
@@ -31,8 +49,17 @@ class ModelDeepEqualsTest {
     }
 
     class TestDataWithInnerClass(
+        @JvmField
         val innerValue: InnerClass
     ) {
-        class InnerClass(val value: String)
+        class InnerClass(
+            @JvmField
+            val value: String,
+            @JvmField
+            private val myValue: String
+        )
+
+        val getValue get() = System.nanoTime().toString()
+        private val myGetValue get() = System.nanoTime().toString()
     }
 }
