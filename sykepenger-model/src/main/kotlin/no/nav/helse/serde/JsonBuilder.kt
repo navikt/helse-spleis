@@ -252,7 +252,7 @@ internal class JsonBuilder(person: Person) {
     }
 
     private inner class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : PersonVisitor {
-        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
 
@@ -515,13 +515,14 @@ internal class JsonBuilder(person: Person) {
     ) : PersonVisitor {
         override fun preVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID?,
+            id: UUID,
+            hendelseId: UUID?,
             tidsstempel: LocalDateTime
         ) {
             val elementMap = mutableMapOf<String, Any?>()
             sykdomshistorikkElementer.add(elementMap)
 
-            pushState(SykdomshistorikkElementState(id, tidsstempel, elementMap))
+            pushState(SykdomshistorikkElementState(id, hendelseId, tidsstempel, elementMap))
         }
 
         override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -530,12 +531,14 @@ internal class JsonBuilder(person: Person) {
     }
 
     private inner class SykdomshistorikkElementState(
-        id: UUID?,
+        id: UUID,
+        hendelseId: UUID?,
         tidsstempel: LocalDateTime,
         private val elementMap: MutableMap<String, Any?>
     ) : PersonVisitor {
         init {
-            elementMap["hendelseId"] = id
+            elementMap["id"] = id
+            elementMap["hendelseId"] = hendelseId
             elementMap["tidsstempel"] = tidsstempel
         }
 
@@ -557,7 +560,8 @@ internal class JsonBuilder(person: Person) {
 
         override fun postVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
-            id: UUID?,
+            id: UUID,
+            hendelseId: UUID?,
             tidsstempel: LocalDateTime
         ) {
             popState()

@@ -402,7 +402,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.toList().forEach { it.håndter(hendelse) }
     }
 
-    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.nyHåndter(hendelse)
+    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 

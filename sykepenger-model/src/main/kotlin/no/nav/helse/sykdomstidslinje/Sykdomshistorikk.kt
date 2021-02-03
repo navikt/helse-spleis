@@ -19,17 +19,6 @@ internal class Sykdomshistorikk private constructor(
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
-        elementer.add(
-            0, Element.opprett(
-                this,
-                hendelse,
-                if (elementer.isEmpty()) LocalDate.MAX else sykdomstidslinje().sisteDag()
-            )
-        )
-        return sykdomstidslinje()
-    }
-
-    internal fun nyHåndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
         if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
             elementer.add(0, Element.opprett(this, hendelse))
         }
@@ -37,7 +26,7 @@ internal class Sykdomshistorikk private constructor(
     }
 
     internal fun tøm() {
-        elementer.add(0, Element.opprettTom())
+        elementer.add(0, Element.empty)
     }
 
     internal fun fjernDager(periode: Periode) {
@@ -70,14 +59,15 @@ internal class Sykdomshistorikk private constructor(
 
 
     internal class Element private constructor(
-        private val hendelseId: UUID?,
-        private val tidsstempel: LocalDateTime,
-        private val hendelseSykdomstidslinje: Sykdomstidslinje,
-        private val beregnetSykdomstidslinje: Sykdomstidslinje
+        private val id: UUID = UUID.randomUUID(),
+        private val hendelseId: UUID? = null,
+        private val tidsstempel: LocalDateTime = LocalDateTime.now(),
+        private val hendelseSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
+        private val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()
     ) : Comparable<Element> {
 
         fun accept(visitor: SykdomshistorikkVisitor) {
-            visitor.preVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
+            visitor.preVisitSykdomshistorikkElement(this, id, hendelseId, tidsstempel)
             visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje, hendelseId, tidsstempel)
             hendelseSykdomstidslinje.accept(visitor)
             visitor.postVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
@@ -85,7 +75,7 @@ internal class Sykdomshistorikk private constructor(
             beregnetSykdomstidslinje.accept(visitor)
             visitor.postVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
 
-            visitor.postVisitSykdomshistorikkElement(this, hendelseId, tidsstempel)
+            visitor.postVisitSykdomshistorikkElement(this, id, hendelseId, tidsstempel)
         }
 
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
@@ -96,7 +86,7 @@ internal class Sykdomshistorikk private constructor(
 
         companion object {
 
-            internal val empty = Element(null, LocalDateTime.now(), Sykdomstidslinje(), Sykdomstidslinje())
+            internal val empty get() = Element()
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 
@@ -107,39 +97,11 @@ internal class Sykdomshistorikk private constructor(
                 val hendelseSykdomstidslinje = hendelse.sykdomstidslinje()
                 return Element(
                     hendelseId = hendelse.meldingsreferanseId(),
-                    tidsstempel = LocalDateTime.now(),
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                     beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
                         hendelse,
                         hendelseSykdomstidslinje
                     )
-                )
-            }
-
-            internal fun opprett(
-                historikk: Sykdomshistorikk,
-                hendelse: SykdomstidslinjeHendelse,
-                tom: LocalDate
-            ): Element {
-                if (!historikk.isEmpty()) hendelse.padLeft(historikk.sykdomstidslinje().førsteDag())
-                val hendelseSykdomstidslinje = hendelse.sykdomstidslinje(tom)
-                return Element(
-                    hendelseId = hendelse.meldingsreferanseId(),
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = historikk.sammenslåttTidslinje(
-                        hendelse,
-                        hendelseSykdomstidslinje
-                    )
-                )
-            }
-
-            internal fun opprettTom() : Element {
-                return Element(
-                    hendelseId = null,
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = Sykdomstidslinje()
                 )
             }
 
@@ -147,24 +109,14 @@ internal class Sykdomshistorikk private constructor(
                 historikk: Sykdomshistorikk,
                 periode: Periode
             ) : Element {
-                return Element(
-                    hendelseId = null,
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode)
-                )
+                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
             }
 
             internal fun opprettUtenDagerFør(
                 fraOgMed: LocalDate,
                 historikk: Sykdomshistorikk
             ) : Element {
-                return Element(
-                    hendelseId = null,
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().fraOgMed(fraOgMed)
-                )
+                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().fraOgMed(fraOgMed))
             }
         }
     }

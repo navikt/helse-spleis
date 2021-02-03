@@ -727,6 +727,7 @@ internal data class PersonData(
 
     data class SykdomshistorikkData(
         private val tidsstempel: LocalDateTime,
+        private val id: UUID,
         private val hendelseId: UUID?,
         private val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
         private val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
@@ -743,6 +744,7 @@ internal data class PersonData(
             return Sykdomshistorikk.Element::class.primaryConstructor!!
                 .apply { isAccessible = true }
                 .call(
+                    id,
                     hendelseId,
                     tidsstempel,
                     hendelseSykdomstidslinje.createSykdomstidslinje(),

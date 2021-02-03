@@ -202,8 +202,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitSykdomshistorikk(sykdomshistorikk)
     }
 
-    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID?, tidsstempel: LocalDateTime) {
-        delegatee.preVisitSykdomshistorikkElement(element, id, tidsstempel)
+    override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
+        delegatee.preVisitSykdomshistorikkElement(element, id, hendelseId, tidsstempel)
     }
 
     override fun preVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje, hendelseId: UUID?, tidsstempel: LocalDateTime) {
@@ -222,8 +222,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitBeregnetSykdomstidslinje(tidslinje)
     }
 
-    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID?, tidsstempel: LocalDateTime) {
-        delegatee.postVisitSykdomshistorikkElement(element, id, tidsstempel)
+    override fun postVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
+        delegatee.postVisitSykdomshistorikkElement(element, id, hendelseId, tidsstempel)
     }
 
     override fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -294,8 +294,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitInntekthistorikk(inntektshistorikk)
     }
 
-    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
-        delegatee.visitInntekt(inntektsendring, id)
+    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
+        delegatee.visitInntekt(inntektsendring, hendelseId)
     }
 
     override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {

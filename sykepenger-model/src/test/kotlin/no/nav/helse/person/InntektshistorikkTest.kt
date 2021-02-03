@@ -201,7 +201,7 @@ internal class InntektshistorikkTest {
             inntektTeller = 0
         }
 
-        override fun visitInntekt(inntektsendring: Inntektsendring, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektsendring, hendelseId: UUID) {
             inntektTeller += 1
         }
 

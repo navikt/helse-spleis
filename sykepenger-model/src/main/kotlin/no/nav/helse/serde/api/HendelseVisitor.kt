@@ -18,14 +18,15 @@ internal class HendelseVisitor : PersonVisitor {
 
     override fun preVisitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
-        id: UUID?,
+        id: UUID,
+        hendelseId: UUID?,
         tidsstempel: LocalDateTime
     ) {
-        if (id == null) return
-        hendelsereferanser.add(id)
+        if (hendelseId == null) return
+        hendelsereferanser.add(hendelseId)
     }
 
-    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
-        hendelsereferanser.add(id)
+    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
+        hendelsereferanser.add(hendelseId)
     }
 }

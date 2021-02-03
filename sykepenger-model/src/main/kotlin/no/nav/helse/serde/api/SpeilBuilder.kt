@@ -193,7 +193,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
                     .filter { it.tilstand.visesNårForkastet() }
         }
 
-        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, id: UUID) {
+        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
             inntekter.add(inntektsendring)
         }
 

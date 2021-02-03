@@ -2497,7 +2497,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
 
         // Må legge arbeidsgiverperioden fra inntektsperioden inn igjen fordi gammel bug gjorde at det fantes tilfeller av dette i databasen.
-        inspektør.sykdomshistorikk.nyHåndter(
+        inspektør.sykdomshistorikk.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
                 listOf(26.oktober(2020) til 11.november(2020)),
