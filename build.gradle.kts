@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.0"
+    kotlin("jvm") version "1.4.21"
 }
 
 val flywayVersion = "6.5.0"
 val hikariVersion = "3.4.5"
-val jacksonVersion = "2.10.4"
+val jacksonVersion = "2.12.0"
 val junitJupiterVersion = "5.6.2"
 val kotliqueryVersion = "1.3.1"
 val vaultJdbcVersion = "1.3.1"
@@ -20,7 +20,7 @@ allprojects {
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.0")
         implementation("ch.qos.logback:logback-classic:1.2.3")
-        implementation("net.logstash.logback:logstash-logback-encoder:6.4") {
+        implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
             exclude("com.fasterxml.jackson.core")
             exclude("com.fasterxml.jackson.dataformat")
         }

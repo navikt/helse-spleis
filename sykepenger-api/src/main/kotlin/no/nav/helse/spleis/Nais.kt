@@ -17,6 +17,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.delay
+import java.io.CharArrayWriter
 import java.util.concurrent.atomic.AtomicInteger
 
 internal fun Application.nais(teller: AtomicInteger) {
@@ -53,14 +54,14 @@ internal fun Application.nais(teller: AtomicInteger) {
         }
         get("/metrics") {
             val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: emptySet()
-            call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-                TextFormat.write004(
-                    this,
-                    CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(
-                        names
-                    )
-                )
-            }
+            val formatted = CharArrayWriter(1024)
+                .also { TextFormat.write004(it, CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(names)) }
+                .use { it.toString() }
+
+            call.respondText(
+                contentType = ContentType.parse(TextFormat.CONTENT_TYPE_004),
+                text = formatted
+            )
         }
     }
 }
