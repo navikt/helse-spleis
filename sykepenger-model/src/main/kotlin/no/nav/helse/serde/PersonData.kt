@@ -534,7 +534,7 @@ internal data class PersonData(
             private val sykmeldingFom: LocalDate,
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
-            private val utbetalingId: String?,
+            private val utbetalinger: List<UUID>,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             private val opprettet: LocalDateTime,
@@ -549,9 +549,6 @@ internal data class PersonData(
                 organisasjonsnummer: String,
                 utbetalinger: Map<UUID, Utbetaling>
             ): Vedtaksperiode {
-                val utbetaling = utbetalingId
-                    ?.let { UUID.fromString(it) }
-                    ?.let { utbetalinger.getValue(it) }
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(
@@ -570,7 +567,7 @@ internal data class PersonData(
                         inntektsmeldingId,
                         Periode(fom, tom),
                         Periode(sykmeldingFom, sykmeldingTom),
-                        utbetaling,
+                        this.utbetalinger.map { utbetalinger.getValue(it) }.toMutableList(),
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         forlengelseFraInfotrygd,
                         opprettet,

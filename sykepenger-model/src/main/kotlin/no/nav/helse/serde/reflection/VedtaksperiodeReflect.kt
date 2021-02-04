@@ -7,7 +7,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
@@ -19,8 +18,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
     private val inntektsmeldingId:UUID? = vedtaksperiode["inntektsmeldingId"]
     private val skjæringstidspunktFraInfotrygd:LocalDate? = vedtaksperiode["skjæringstidspunktFraInfotrygd"]
     private val skjæringstidspunkt:LocalDate= vedtaksperiode["skjæringstidspunkt"]
-    private val utbetalingId: UUID? = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap().getValue("id") as UUID }
-    private val utbetaling = vedtaksperiode.maybe<Utbetaling>("utbetaling")?.let { UtbetalingReflect(it).toMap() }
+    private val utbetalinger: List<UUID> = vedtaksperiode.get<List<Utbetaling>>("utbetalinger").map { UtbetalingReflect(it).toMap().getValue("id") as UUID }
     private val utbetalingstidslinje = UtbetalingstidslinjeReflect(vedtaksperiode.get<Utbetalingstidslinje>("utbetalingstidslinje")).toMap()
     private val tilstand = vedtaksperiode.get<Vedtaksperiode.Vedtaksperiodetilstand>("tilstand").type.name
     private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd = vedtaksperiode["forlengelseFraInfotrygd"]
@@ -92,8 +90,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         "skjæringstidspunkt" to skjæringstidspunkt,
         "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
-        "utbetalingId" to utbetalingId,
-        "utbetaling" to utbetaling, // keep a copy of the json for debug purposes
+        "utbetalinger" to utbetalinger,
         "utbetalingstidslinje" to utbetalingstidslinje,
         "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
         "opprettet" to opprettet,

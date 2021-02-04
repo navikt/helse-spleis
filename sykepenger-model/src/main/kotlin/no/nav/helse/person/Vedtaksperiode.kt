@@ -48,7 +48,7 @@ internal class Vedtaksperiode private constructor(
     private var inntektsmeldingId: UUID?,
     private var periode: Periode,
     private var sykmeldingsperiode: Periode,
-    private var utbetaling: Utbetaling?,
+    private val utbetalinger: MutableList<Utbetaling>,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
     private val opprettet: LocalDateTime,
@@ -60,6 +60,8 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd
                 ?: Historie(person).skjæringstidspunkt(periode)
                 ?: periode.start
+
+    private val utbetaling get() = utbetalinger.lastOrNull()
 
     internal constructor(
         person: Person,
@@ -85,7 +87,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingId = null,
         periode = Periode(LocalDate.MIN, LocalDate.MAX),
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
-        utbetaling = null,
+        utbetalinger = mutableListOf(),
         utbetalingstidslinje = Utbetalingstidslinje(),
         opprettet = LocalDateTime.now()
     )
@@ -555,7 +557,7 @@ internal class Vedtaksperiode private constructor(
             periode = periode,
             forrige = utbetaling
         ).also {
-            utbetaling = it
+            utbetalinger.add(it)
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
 
