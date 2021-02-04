@@ -19,6 +19,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -174,7 +175,7 @@ internal data class PersonData(
                 vedtaksperiodeliste,
                 forkastedeliste,
                 modelUtbetalinger,
-                beregnetUtbetalingstidslinjer.map { it.konverterTilTriple() },
+                beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 refusjonOpphører
             )
 
@@ -207,12 +208,14 @@ internal data class PersonData(
         }
 
         data class BeregnetUtbetalingstidslinjeData(
-            private val organisasjonsnummer: String,
+            private val id: UUID,
             private val tidsstempel: LocalDateTime,
+            private val sykdomshistorikkElementId: UUID,
+            private val organisasjonsnummer: String,
             private val utbetalingstidslinje: UtbetalingstidslinjeData
         ) {
-            internal fun konverterTilTriple() =
-                Triple(organisasjonsnummer, utbetalingstidslinje.konverterTilUtbetalingstidslinje(), tidsstempel)
+            internal fun tilBeregnetUtbetalingstidslinje() =
+                Utbetalingstidslinjeberegning.restore(id, tidsstempel, sykdomshistorikkElementId, organisasjonsnummer, utbetalingstidslinje.konverterTilUtbetalingstidslinje())
         }
 
         data class InntektData(

@@ -3,6 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.tournament.dagturnering
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -57,13 +59,16 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprettUtenDagerFør(nyFørsteDag, this))
     }
 
+    internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
+        Element.lagUtbetalingstidslinjeberegning(elementer, organisasjonsnummer, utbetalingstidslinje)
+
 
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
         private val hendelseId: UUID? = null,
         private val tidsstempel: LocalDateTime = LocalDateTime.now(),
         private val hendelseSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
-        private val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()
+        private val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
     ) : Comparable<Element> {
 
         fun accept(visitor: SykdomshistorikkVisitor) {
@@ -84,11 +89,21 @@ internal class Sykdomshistorikk private constructor(
 
         internal fun harHåndtert(hendelse: SykdomstidslinjeHendelse) = hendelseId == hendelse.meldingsreferanseId()
 
+        internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
+            Utbetalingstidslinjeberegning(id, organisasjonsnummer, utbetalingstidslinje)
+
+
         companion object {
 
             internal val empty get() = Element()
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
+
+            internal fun lagUtbetalingstidslinjeberegning(
+                elementer: List<Element>,
+                organisasjonsnummer: String,
+                utbetalingstidslinje: Utbetalingstidslinje
+            ) = elementer.first().lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje)
 
             internal fun opprett(
                 historikk: Sykdomshistorikk,
@@ -111,7 +126,6 @@ internal class Sykdomshistorikk private constructor(
             ) : Element {
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
             }
-
             internal fun opprettUtenDagerFør(
                 fraOgMed: LocalDate,
                 historikk: Sykdomshistorikk

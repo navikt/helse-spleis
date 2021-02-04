@@ -1,14 +1,19 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class ArbeidsgiverUtbetalingerTest {
 
@@ -332,6 +337,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         historiskTidslinje: Utbetalingstidslinje
     ) {
         val arbeidsgiver = Arbeidsgiver(Person("aktørid", fnr), "88888888")
+        // seed arbeidsgiver med sykdomshistorikk
+        arbeidsgiver.håndter(Sykmelding(UUID.randomUUID(), UNG_PERSON_FNR_2018, "", "", listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)), LocalDateTime.now()))
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
             mapOf(arbeidsgiver to arbeidsgiverTidslinje),

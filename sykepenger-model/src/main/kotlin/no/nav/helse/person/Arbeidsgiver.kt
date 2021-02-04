@@ -20,6 +20,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -36,7 +37,7 @@ internal class Arbeidsgiver private constructor(
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
-    private val beregnetUtbetalingstidslinjer: MutableList<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
+    private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val refusjonOpphører: MutableList<LocalDate?>
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String) : this(
@@ -122,13 +123,11 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         forrige: Utbetaling?
     ): Utbetaling {
-        val (organisasjonsnummer, utbetalingstidslinje, _) = beregnetUtbetalingstidslinjer.last()
-        return Utbetaling.lagUtbetaling(
+        return Utbetalingstidslinjeberegning.lagUtbetaling(
+            beregnetUtbetalingstidslinjer,
             utbetalinger,
             fødselsnummer,
-            organisasjonsnummer,
-            utbetalingstidslinje,
-            periode.endInclusive,
+            periode,
             aktivitetslogg,
             maksdato,
             forbrukteSykedager,
@@ -145,10 +144,10 @@ internal class Arbeidsgiver private constructor(
     private fun utbetalteUtbetalinger() = utbetalinger.aktive()
 
     internal fun nåværendeTidslinje() =
-        beregnetUtbetalingstidslinjer.lastOrNull()?.second ?: throw IllegalStateException("mangler utbetalinger")
+        beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje() ?: throw IllegalStateException("mangler utbetalinger")
 
     internal fun lagreUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) {
-        beregnetUtbetalingstidslinjer.add(Triple(organisasjonsnummer, utbetalingstidslinje, LocalDateTime.now()))
+        beregnetUtbetalingstidslinjer.add(sykdomshistorikk.lagUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje))
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
@@ -629,7 +628,7 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: MutableList<ForkastetVedtaksperiode>,
                 utbetalinger: List<Utbetaling>,
-                beregnetUtbetalingstidslinjer: List<Triple<String, Utbetalingstidslinje, LocalDateTime>>,
+                beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 refusjonOpphører: List<LocalDate?>
             ) = Arbeidsgiver(
                 person,
