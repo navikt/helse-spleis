@@ -65,6 +65,7 @@ internal class Avstemmer(person: Person) {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,

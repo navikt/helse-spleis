@@ -233,6 +233,7 @@ internal class JsonBuilder(person: Person) {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -468,6 +469,7 @@ internal class JsonBuilder(person: Person) {
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -484,6 +486,7 @@ internal class JsonBuilder(person: Person) {
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,

@@ -40,6 +40,7 @@ internal class UtbetalingTest {
         val utbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
+            UUID.randomUUID(),
             ORGNUMMER,
             tidslinje,
             sisteDato,
@@ -200,6 +201,7 @@ internal class UtbetalingTest {
     ) = Utbetaling.lagUtbetaling(
         tidligere?.let { listOf(tidligere) } ?: emptyList(),
         fødselsnummer,
+        UUID.randomUUID(),
         orgnummer,
         tidslinje,
         sisteDato,

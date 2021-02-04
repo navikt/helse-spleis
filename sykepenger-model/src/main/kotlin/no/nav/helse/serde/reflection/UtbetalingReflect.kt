@@ -35,6 +35,7 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
 
     internal fun toMap(): MutableMap<String, Any?> = mutableMapOf(
         "id" to utbetaling["id"],
+        "beregningId" to utbetaling["beregningId"],
         "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
         "arbeidsgiverOppdrag" to OppdragReflect(arbeidsgiverOppdrag).toMap(),
         "personOppdrag" to OppdragReflect(personOppdrag).toMap(),

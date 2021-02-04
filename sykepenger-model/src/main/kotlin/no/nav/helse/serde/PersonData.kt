@@ -758,6 +758,7 @@ internal data class PersonData(
 
     data class UtbetalingData(
         val id: UUID,
+        private val beregningId: UUID,
         private val utbetalingstidslinje: UtbetalingstidslinjeData,
         private val arbeidsgiverOppdrag: OppdragData,
         private val personOppdrag: OppdragData,
@@ -778,6 +779,7 @@ internal data class PersonData(
             .apply { isAccessible = true }
             .call(
                 id,
+                beregningId,
                 utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                 arbeidsgiverOppdrag.konverterTilOppdrag(),
                 personOppdrag.konverterTilOppdrag(),

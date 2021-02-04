@@ -30,10 +30,12 @@ internal class UtbetalingReflectTest {
 
     @Test
     fun `Reflect mapper riktige verdier`() {
+        val beregningId = UUID.randomUUID()
         map = UtbetalingReflect(
             Utbetaling.lagUtbetaling(
                 emptyList(),
                 UNG_PERSON_FNR_2018,
+                beregningId,
                 ORGNUMMER,
                 tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
                 4.januar,
@@ -44,6 +46,7 @@ internal class UtbetalingReflectTest {
             )
         ).toMap()
         assertEquals(4, map["stønadsdager"])
+        assertEquals(beregningId, map["beregningId"])
         assertEquals(1.januar, map["fom"])
         assertEquals(4.januar, map["tom"])
         assertEquals(1.januar, map.getValue("arbeidsgiverOppdrag").castAsMap<String, Any>()["fom"])
@@ -68,6 +71,7 @@ internal class UtbetalingReflectTest {
         val tidligereUtbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
+            UUID.randomUUID(),
             ORGNUMMER,
             tidslinjeMedDagsats(tidslinjeOf(5.NAV)),
             5.januar,
@@ -126,6 +130,7 @@ internal class UtbetalingReflectTest {
             Utbetaling.lagUtbetaling(
                 listOf(tidligereUtbetaling),
                 UNG_PERSON_FNR_2018,
+                UUID.randomUUID(),
                 ORGNUMMER,
                 tidslinjeMedDagsats(tidslinjeOf(1.FRI, 4.NAV)),
                 5.januar,
@@ -171,6 +176,7 @@ internal class UtbetalingReflectTest {
         val tidligereUtbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
+            UUID.randomUUID(),
             ORGNUMMER,
             tidslinjeMedDagsats(tidslinjeOf(4.NAV)),
             4.januar,

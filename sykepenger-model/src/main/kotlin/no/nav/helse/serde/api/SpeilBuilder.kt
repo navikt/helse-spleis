@@ -154,6 +154,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -324,6 +325,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,
@@ -359,6 +361,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
         override fun postVisitUtbetaling(
             utbetaling: Utbetaling,
             id: UUID,
+            beregningId: UUID,
             type: Utbetaling.Utbetalingtype,
             tilstand: Utbetaling.Tilstand,
             tidsstempel: LocalDateTime,

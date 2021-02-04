@@ -19,6 +19,7 @@ import java.util.*
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
     private val id: UUID,
+    private val beregningId: UUID,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
@@ -35,6 +36,7 @@ internal class Utbetaling private constructor(
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
     private constructor(
+        beregningId: UUID,
         utbetalingstidslinje: Utbetalingstidslinje,
         arbeidsgiverOppdrag: Oppdrag,
         personOppdrag: Oppdrag,
@@ -44,6 +46,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int?
     ) : this(
         UUID.randomUUID(),
+        beregningId,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
         personOppdrag,
@@ -62,6 +65,7 @@ internal class Utbetaling private constructor(
     private constructor(
         sisteAktive: Utbetaling?,
         fødselsnummer: String,
+        beregningId: UUID,
         organisasjonsnummer: String,
         utbetalingstidslinje: Utbetalingstidslinje,
         type: Utbetalingtype,
@@ -72,6 +76,7 @@ internal class Utbetaling private constructor(
         gjenståendeSykedager: Int,
         forrige: Utbetaling?
     ) : this(
+        beregningId,
         utbetalingstidslinje.kutt(sisteDato),
         buildArb(sisteAktive?.arbeidsgiverOppdrag, organisasjonsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, forrige?.arbeidsgiverOppdrag),
         buildPerson(fødselsnummer, utbetalingstidslinje, sisteDato, aktivitetslogg, emptyList()),
@@ -218,6 +223,7 @@ internal class Utbetaling private constructor(
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
+            beregningId: UUID,
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
             sisteDato: LocalDate,
@@ -230,6 +236,7 @@ internal class Utbetaling private constructor(
             return Utbetaling(
                 utbetalinger.aktive().lastOrNull(),
                 fødselsnummer,
+                beregningId,
                 organisasjonsnummer,
                 utbetalingstidslinje,
                 Utbetalingtype.UTBETALING,
@@ -315,7 +322,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(this, id, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.preVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
         utbetalingstidslinje.accept(visitor)
         visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
         arbeidsgiverOppdrag.accept(visitor)
@@ -324,7 +331,7 @@ internal class Utbetaling private constructor(
         personOppdrag.accept(visitor)
         vurdering?.accept(visitor)
         visitor.postVisitPersonOppdrag(personOppdrag)
-        visitor.postVisitUtbetaling(this, id, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
+        visitor.postVisitUtbetaling(this, id, beregningId, type, tilstand, tidsstempel, oppdatert, arbeidsgiverOppdrag.nettoBeløp(), personOppdrag.nettoBeløp(), maksdato, forbrukteSykedager, gjenståendeSykedager)
     }
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
@@ -536,6 +543,7 @@ internal class Utbetaling private constructor(
 
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
+                utbetaling.beregningId,
                 utbetaling.utbetalingstidslinje,
                 utbetaling.arbeidsgiverOppdrag.annuller(hendelse),
                 utbetaling.personOppdrag.annuller(hendelse),
@@ -549,6 +557,7 @@ internal class Utbetaling private constructor(
             Utbetaling(
                 sisteAktive = null,
                 fødselsnummer = hendelse.fødselsnummer(),
+                beregningId = utbetaling.beregningId,
                 organisasjonsnummer = hendelse.organisasjonsnummer(),
                 utbetalingstidslinje = utbetalingstidslinje.kutt(utbetaling.periode.endInclusive),
                 type = Utbetalingtype.ETTERUTBETALING,

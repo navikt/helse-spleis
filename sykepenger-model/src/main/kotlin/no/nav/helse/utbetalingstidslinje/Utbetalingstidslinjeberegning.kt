@@ -26,8 +26,8 @@ internal class Utbetalingstidslinjeberegning private constructor(
 
     internal companion object {
         internal fun lagUtbetaling(
-            beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
-            utbetalinger: MutableList<Utbetaling>,
+            beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
+            utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
             periode: Periode,
             aktivitetslogg: IAktivitetslogg,
@@ -40,6 +40,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
             return Utbetaling.lagUtbetaling(
                 utbetalinger,
                 fødselsnummer,
+                beregning.id,
                 beregning.organisasjonsnummer,
                 beregning.utbetalingstidslinje,
                 periode.endInclusive,
