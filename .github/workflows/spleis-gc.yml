@@ -39,3 +39,29 @@ jobs:
         run: |
           docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://docker.pkg.github.com
           docker push ${{ needs.set_version.outputs.image }}
+
+  deployDev:
+      name: deploy to dev
+      needs: [set_version, build]
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@v1
+          - uses: nais/deploy/actions/deploy@v1
+            env:
+                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                CLUSTER: dev-fss
+                RESOURCE: deploy/dev-gc-job.yml
+                IMAGE: ${{ needs.set_version.outputs.image }}
+
+  deployProd:
+      name: deploy to prod
+      needs: [set_version, deployDev]
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@v1
+          - uses: nais/deploy/actions/deploy@v1
+            env:
+                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                CLUSTER: prod-fss
+                RESOURCE: deploy/prod-gc-job.yml
+                IMAGE: ${{ needs.set_version.outputs.image }}
