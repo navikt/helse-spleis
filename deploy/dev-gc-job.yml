@@ -3,6 +3,8 @@ kind: CronJob
 metadata:
     name: spleis-gc
     namespace: tbd
+    labels:
+        team: tbd
 spec:
     schedule: "0 1 * * SAT"
     jobTemplate:
