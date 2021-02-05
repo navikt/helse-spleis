@@ -8,6 +8,8 @@ on:
     - 'gc-job/**'
     - 'build.gradle.kts'
     - '.github/workflows/**'
+    - 'deploy/dev-gc-job.yml'
+    - 'deploy/prod-gc-job.yml'
 
 jobs:
   set_version:
