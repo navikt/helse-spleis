@@ -39,8 +39,6 @@ internal class RestApiTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØRID = "42"
-        private const val ORGNUMMER = "987654321"
-        private const val UTBETALINGSREF = "qwerty"
     }
 
     private lateinit var embeddedPostgres: EmbeddedPostgres
@@ -122,7 +120,6 @@ internal class RestApiTest {
         flyway.migrate()
 
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR_2018, Person(AKTØRID, UNG_PERSON_FNR_2018))
-        dataSource.lagreUtbetaling(AKTØRID, ORGNUMMER, UTBETALINGSREF, UUID.randomUUID())
 
         teller.set(0)
     }
@@ -131,25 +128,13 @@ internal class RestApiTest {
         val serialisertPerson = person.serialize()
         using(sessionOf(this)) {
             it.run(queryOf("INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                aktørId, fødselsnummer, serialisertPerson.skjemaVersjon, serialisertPerson.json).asExecute)
-        }
-    }
-
-    private fun DataSource.lagreUtbetaling(aktørId: String, organisasjonsnummer: String, utbetalingsreferanse: String, vedtaksperiodeId: UUID) {
-        using(sessionOf(this)) {
-            it.run(queryOf("INSERT INTO utbetalingsreferanse (id, aktor_id, orgnr, vedtaksperiode_id) VALUES (?, ?, ?, ?)",
-                utbetalingsreferanse, aktørId, organisasjonsnummer, vedtaksperiodeId.toString()).asExecute)
+                aktørId.toLong(), fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asExecute)
         }
     }
 
     @Test
     fun `hent person`() {
         await().atMost(5, SECONDS).untilAsserted { "/api/person/$AKTØRID".httpGet(HttpStatusCode.OK) }
-    }
-
-    @Test
-    fun `hent utbetaling`() {
-        await().atMost(5, SECONDS).untilAsserted { "/api/utbetaling/$UTBETALINGSREF".httpGet(HttpStatusCode.OK) }
     }
 
     @Disabled("Tester bruk av preStopHook")

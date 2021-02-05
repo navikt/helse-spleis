@@ -15,7 +15,6 @@ import no.nav.helse.spleis.HendelseDTO.*
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.HendelseDao.Meldingstype.*
 import no.nav.helse.spleis.dao.PersonDao
-import no.nav.helse.spleis.dao.UtbetalingDao
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
@@ -26,18 +25,10 @@ import no.nav.helse.serde.api.SøknadNavDTO as SerdeSøknadNavDTO
 
 internal fun Application.spleisApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)
-    val utbetalingDao = UtbetalingDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
         authenticate(authProviderName) {
-            get("/api/utbetaling/{utbetalingsreferanse}") {
-                utbetalingDao.hentUtbetaling(call.parameters["utbetalingsreferanse"]!!)
-                    ?.let { personDao.hentPersonAktørId(it.aktørId) }
-                    ?.let { call.respond(serializePersonForSpeil(it)) }
-                    ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-            }
-
             get("/api/person/{aktørId}") {
                 personDao.hentPersonAktørId(call.parameters["aktørId"]!!)
                     ?.let { håndterPerson(it, hendelseDao) }

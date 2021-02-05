@@ -62,7 +62,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
             INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data, vedtak)
             VALUES (?, ?, ?, ?, (to_json(?::json)), ?)
         """
-        session.run(queryOf(statement, aktørId, fødselsnummer, skjemaVersjon, meldingId, personJson, vedtak).asExecute)
+        session.run(queryOf(statement, aktørId.toLong(), fødselsnummer.toLong(), skjemaVersjon, meldingId, personJson, vedtak).asExecute)
     }
 
     private fun slettEldrePersonversjon(session: Session, fødselsnummer: String) {
@@ -77,6 +77,6 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
             DELETE FROM person
             WHERE vedtak = false AND fnr = ?
         """
-        session.run(queryOf(statement, fødselsnummer).asExecute)
+        session.run(queryOf(statement, fødselsnummer.toLong()).asExecute)
     }
 }

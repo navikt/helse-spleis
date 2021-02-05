@@ -87,7 +87,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
-                    fnr
+                    fnr.toLong()
                 )
                     .map { objectMapper.readTree(it.string("data")) }
                     .asList
@@ -99,7 +99,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    melding.fødselsnummer,
+                    melding.fødselsnummer.toLong(),
                     melding.id.toString(),
                     meldingstype.name,
                     melding.toJson()
