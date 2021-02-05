@@ -13,7 +13,7 @@ spec:
                 spec:
                     containers:
                         - name: spleis-gc
-                          image: "docker.pkg.github.com/navikt/helse-spleis/spleis-gc:{{version}}"
+                          image: {{image}}
                           resources:
                               requests:
                                   memory: 256Mi
