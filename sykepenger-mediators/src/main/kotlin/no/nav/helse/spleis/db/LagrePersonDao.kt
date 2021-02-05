@@ -8,7 +8,6 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -66,12 +65,6 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     }
 
     private fun slettEldrePersonversjon(session: Session, fødselsnummer: String) {
-        val now = LocalDateTime.now()
-        val midnightFebruar7 = LocalDateTime.of(2021, 2, 7, 23, 59,59)
-        val kl18Februar4 = LocalDateTime.of(2021, 2, 4, 17, 55,0)
-
-        if (kl18Februar4 > now || now > midnightFebruar7) return // utfører kun sletting mellom 4. februar kl 17:55 og 7. februar kl 23:59:59
-
         @Language("PostreSQL")
         val statement = """
             DELETE FROM person
