@@ -318,6 +318,10 @@
                     "role": "CONSUMER"
                 },
                 {
+                    "member": "srvspare",
+                    "role": "CONSUMER"
+                },
+                {
                     "member": "S151890",
                     "role": "MANAGER"
                 },
