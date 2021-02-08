@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -510,7 +508,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Replay av inntektsmelding skal håndteres av periode som trigget replay og etterfølgende perioder`(){
+    fun `Replay av inntektsmelding skal håndteres av periode som trigget replay og etterfølgende perioder`() {
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)), førsteFraværsdag = 21.januar)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
@@ -520,7 +518,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 100.prosent))
 
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)), førsteFraværsdag = 21.januar), 1.vedtaksperiode)
+        håndterInntektsmeldingReplay(
+            inntektsmelding(
+                inntektsmeldingId,
+                listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)),
+                førsteFraværsdag = 21.januar
+            ), 1.vedtaksperiode
+        )
 
         assertTilstander(
             1.vedtaksperiode,
@@ -538,5 +542,108 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG_FORLENGELSE,
             AVVENTER_VILKÅRSPRØVING_GAP
         )
+    }
+
+    @Test
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TIL_INFOTRYGD
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt(3.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(3.vedtaksperiode).periode().start)
+        }
+    }
+
+    @Test
+    @Disabled("Under arbeid")
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IT-historikk kommer først`() {
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        )
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
+    }
+
+    @Test
+    @Disabled("Under arbeid")
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer først - kort periode`() {
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode) // Skal vi fikse perioden her??
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
+    }
+
+    @Test
+    @Disabled("Under arbeid")
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer først`() {
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode) // Skal vi fikse perioden her??
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
     }
 }

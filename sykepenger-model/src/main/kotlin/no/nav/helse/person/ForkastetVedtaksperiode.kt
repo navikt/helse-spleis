@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.utbetalingstidslinje.Historie
 import java.time.LocalDate
@@ -19,6 +20,10 @@ internal class ForkastetVedtaksperiode(
 
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
+        }
+
+        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) {
+            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), inntektsmelding)
         }
 
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =

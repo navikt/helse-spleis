@@ -141,10 +141,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun replayInntektsmelding(hendelseId: UUID): UUID {
         return håndterInntektsmelding(
-            requireNotNull(inntektsmeldinger[hendelseId]).arbeidsgiverperioder,
-            requireNotNull(inntektsmeldinger[hendelseId]).førsteFraværsdag,
-            requireNotNull(inntektsmeldinger[hendelseId]).ferieperioder,
-            requireNotNull(inntektsmeldinger[hendelseId]).refusjon
+            arbeidsgiverperioder = requireNotNull(inntektsmeldinger[hendelseId]).arbeidsgiverperioder,
+            førsteFraværsdag = requireNotNull(inntektsmeldinger[hendelseId]).førsteFraværsdag,
+            ferieperioder = requireNotNull(inntektsmeldinger[hendelseId]).ferieperioder,
+            refusjon = requireNotNull(inntektsmeldinger[hendelseId]).refusjon,
+            id = hendelseId
         )
     }
 

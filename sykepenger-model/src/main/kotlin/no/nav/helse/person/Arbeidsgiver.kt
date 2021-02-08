@@ -616,6 +616,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikkVol2.opprettReferanse(fra, til, UUID.randomUUID())
 
+    internal fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
+        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+    }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(
