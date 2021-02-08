@@ -41,18 +41,23 @@ internal class UtbetalingReflect(private val utbetaling: Utbetaling) {
         "personOppdrag" to OppdragReflect(personOppdrag).toMap(),
         "fom" to utbetaling.periode.start,
         "tom" to utbetaling.periode.endInclusive,
-        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()),
+        "stønadsdager" to (arbeidsgiverOppdrag.stønadsdager() + personOppdrag.stønadsdager()), //TA MED
         "tidsstempel" to utbetaling["tidsstempel"],
-        "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")),
-        "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"),
-        "maksdato" to utbetaling.maybe<LocalDate>("maksdato"),
-        "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"),
-        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"),
-        "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() },
+        "status" to Utbetalingstatus.fraTilstand(utbetaling.get<Utbetaling.Tilstand>("tilstand")), //TA MED
+        "type" to utbetaling.get<Utbetaling.Utbetalingtype>("type"), //TA MED
+        "maksdato" to utbetaling.maybe<LocalDate>("maksdato"), //TA MED
+        "forbrukteSykedager" to utbetaling.maybe<Int>("forbrukteSykedager"), //TA MED
+        "gjenståendeSykedager" to utbetaling.maybe<Int>("gjenståendeSykedager"), //TA MED
+        "vurdering" to utbetaling.maybe<Utbetaling.Vurdering>("vurdering")?.let { VurderingReflect(it).toMap() }, //TA MED
         "overføringstidspunkt" to utbetaling.maybe<LocalDateTime>("overføringstidspunkt"),
         "avstemmingsnøkkel" to utbetaling.maybe<Long>("avstemmingsnøkkel"),
         "avsluttet" to utbetaling.maybe<LocalDateTime>("avsluttet"),
         "oppdatert" to utbetaling.maybe<LocalDateTime>("oppdatert")
+    )
+
+    fun toSpeilMap() = mapOf(
+        "utbetalingstidslinje" to UtbetalingstidslinjeReflect(utbetaling["utbetalingstidslinje"]).toMap(),
+        "arbeidsgiverOppdrag" to OppdragReflect(arbeidsgiverOppdrag).toMap(),
     )
 }
 

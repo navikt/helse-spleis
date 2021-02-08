@@ -107,6 +107,9 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitForkastedePerioder(forkastede)
         forkastede.forEach { it.accept(visitor) }
         visitor.postVisitForkastedePerioder(forkastede)
+        visitor.preVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
+        beregnetUtbetalingstidslinjer.forEach { it.accept(visitor) }
+        visitor.postVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 

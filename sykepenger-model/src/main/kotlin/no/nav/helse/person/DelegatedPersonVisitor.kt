@@ -12,6 +12,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -32,6 +33,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
         delegatee.visitWarn(kontekster, aktivitet, melding, tidsstempel)
+    }
+
+    override fun preVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {
+        delegatee.preVisitUtbetalingstidslinjeberegninger(bereninger)
+    }
+
+    override fun postVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {
+        delegatee.postVisitUtbetalingstidslinjeberegninger(bereninger)
+    }
+
+    override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
+        delegatee.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId)
     }
 
     override fun visitBehov(

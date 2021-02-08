@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.UtbetalingstidslinjeberegningVisitor
 import no.nav.helse.serde.reflection.UtbetalingstidslinjeberegningReflect
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDate
@@ -23,6 +24,10 @@ internal class Utbetalingstidslinjeberegning private constructor(
     ) : this(UUID.randomUUID(), LocalDateTime.now(), sykdomshistorikkElementId, organisasjonsnummer, utbetalingstidslinje)
 
     internal fun utbetalingstidslinje() = utbetalingstidslinje
+
+    internal fun accept(visitor: UtbetalingstidslinjeberegningVisitor) {
+        visitor.visitUtbetalingstidslinjeberegning(id, tidsstempel, sykdomshistorikkElementId)
+    }
 
     internal companion object {
         internal fun lagUtbetaling(

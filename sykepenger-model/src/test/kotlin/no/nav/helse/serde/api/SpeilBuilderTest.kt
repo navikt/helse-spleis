@@ -24,6 +24,56 @@ import java.util.*
 
 
 class SpeilBuilderTest {
+
+    @Test
+    fun `happy case`(){
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertEquals("12020052345", personDTO.fødselsnummer)
+        assertEquals(1, personDTO.arbeidsgivere.size)
+    }
+
+    @Test
+    fun `mapping av utbetalingshistorikk`() {
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertEquals(1, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
+        val tidslinje = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
+        assertEquals(31, tidslinje.beregnettidslinje.size)
+        assertEquals(16, tidslinje.hendelsetidslinje.size)
+        assertEquals(1, tidslinje.utbetalinger.size)
+        assertEquals(31, tidslinje.utbetalinger.first().utbetalingstidslinje.size)
+    }
+
+    @Test
+    fun `mapping av utbetalingshistorikk med flere perioder`() {
+        val (person, hendelser) = person()
+
+        person.run {
+            håndter(sykmelding(fom = 1.februar, tom = 14.februar).first)
+            håndter(søknad(fom = 1.februar, tom = 14.februar).first)
+            fangeVedtaksperiodeId()
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
+            håndter(simulering(vedtaksperiodeIder.last()))
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val nyesteHistorikkElement = personDTO.arbeidsgivere.first().utbetalingshistorikk.first()
+        val eldsteHistorikkElement = personDTO.arbeidsgivere.first().utbetalingshistorikk.last()
+        assertEquals(2, personDTO.arbeidsgivere.first().utbetalingshistorikk.size)
+        assertEquals(1.februar, nyesteHistorikkElement.hendelsetidslinje.first().dagen)
+        assertEquals(14.februar, nyesteHistorikkElement.hendelsetidslinje.last().dagen)
+        assertEquals(1.januar, nyesteHistorikkElement.beregnettidslinje.first().dagen)
+        assertEquals(14.februar, nyesteHistorikkElement.beregnettidslinje.last().dagen)
+
+        assertEquals(1.januar, eldsteHistorikkElement.hendelsetidslinje.first().dagen)
+        assertEquals(16.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
+        assertEquals(1.januar, eldsteHistorikkElement.hendelsetidslinje.first().dagen)
+        assertEquals(16.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
+    }
+
     @Test
     fun `dager før skjæringstidspunkt og etter sisteSykedag skal kuttes vekk fra utbetalingstidslinje`() {
         val (person, hendelser) = person()
@@ -795,6 +845,7 @@ class SpeilBuilderTest {
         private const val orgnummer = "987654321"
         private const val orgnummer2 = "1234"
         private lateinit var vedtaksperiodeId: String
+        private val vedtaksperiodeIder: MutableList<String> = mutableListOf()
         private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
 
         private fun person(
@@ -1216,7 +1267,9 @@ class SpeilBuilderTest {
                     opprinneligPeriode: Periode,
                     hendelseIder: List<UUID>
                 ) {
+                    vedtaksperiodeIder.add(id.toString())
                     if (iPeriode) vedtaksperiodeId = id.toString()
+
                 }
             })
         }

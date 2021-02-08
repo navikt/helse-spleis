@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -28,7 +29,8 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
     fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
+    UtbetalingstidslinjeberegningVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -36,13 +38,15 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     ) {
     }
 
+    fun preVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {}
+    fun postVisitUtbetalingstidslinjeberegninger(bereninger: List<Utbetalingstidslinjeberegning>) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
     fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
     fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
-    fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak){}
-    fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak){}
+    fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
+    fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
     fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
     fun postVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
@@ -51,6 +55,10 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     ) {
     }
 
+}
+
+internal interface UtbetalingstidslinjeberegningVisitor {
+    fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {}
 }
 
 internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor {
