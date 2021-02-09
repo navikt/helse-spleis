@@ -2644,7 +2644,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overstyring`() {
+    fun `Overstyring treffer periode som har fått FOM flyttet bakover`() {
         val inntektsmeldingId = UUID.randomUUID()
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
@@ -2655,16 +2655,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(29.januar(2021), 29.januar(2021), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2021), 10.januar(2021), 100.prosent), Sykdom(11.januar(2021), 31.januar(2021), 20.prosent))
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, arbeidsgiverperioder = listOf(15.oktober(2020) til 16.oktober(2020), 29.oktober(2020) til 11.november(2020))), 2.vedtaksperiode)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(20.januar(2021), 25.januar(2021), 100.prosent)) // Irrelevant, men tas med for completeness
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 29.januar(2021), 20.prosent)) // Irrelevant, men tas med for completeness
 
-        håndterSøknad(Sykdom(29.januar(2021), 29.januar(2021), 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(29.januar(2021), 29.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 29.januar(2021), 20.prosent)) // Her strekkes vedtaksperioden tilbake til 1. januar, pga historikken.
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
 
         assertEquals(null, inspektør.dagtelling[Dag.Feriedag::class])
 
