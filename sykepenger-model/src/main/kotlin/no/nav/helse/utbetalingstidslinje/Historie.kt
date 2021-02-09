@@ -206,7 +206,7 @@ internal class Historie() {
                     .toMap()
                     .let(::Sykdomstidslinje)
 
-            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _ -> grad }.prosent)
+            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
         }
     }
 }

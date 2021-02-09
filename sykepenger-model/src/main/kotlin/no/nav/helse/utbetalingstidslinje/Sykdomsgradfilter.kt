@@ -12,7 +12,7 @@ internal class Sykdomsgradfilter(
 
     internal fun filter() {
         val avvisteDager = Utbetalingstidslinje.periode(tidslinjer).filter { dato ->
-            Økonomi.sykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen()
+            Økonomi.totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen()
         }
         when {
             tidslinjer.none { it.avvis(avvisteDager, Begrunnelse.MinimumSykdomsgrad) } -> aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel")

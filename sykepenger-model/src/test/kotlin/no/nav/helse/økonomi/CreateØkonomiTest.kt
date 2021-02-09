@@ -22,7 +22,7 @@ internal class CreateØkonomiTest {
     fun `opprette bare prosenter`() {
         val data = sykdomstidslinjedag(79.5, 66.67)
         createØkonomi(data).also { økonomi ->
-            økonomi.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, aktuellDagsinntekt, _, _, _ ->
+            økonomi.reflection { grad, arbeidsgiverBetalingProsent, dekningsgrunnlag, _, _, aktuellDagsinntekt, _, _, _ ->
                 assertEquals(79.5, grad)
                 assertEquals(66.67, arbeidsgiverBetalingProsent)
                 assertNull(dekningsgrunnlag)
@@ -43,6 +43,7 @@ internal class CreateØkonomiTest {
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
                     skjæringstidspunkt,
+                    totalGrad,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -63,13 +64,14 @@ internal class CreateØkonomiTest {
 
     @Test
     fun `har betalinger`() {
-        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640, 320, true)
+        val data = utbetalingsdag(79.5, 66.67, 1500.0, 1199.6, 640, 320, null, true)
         createØkonomi(data).also { økonomi ->
             økonomi.reflection {
                     grad,
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
                     skjæringstidspunkt,
+                    totalGrad,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -95,6 +97,7 @@ internal class CreateØkonomiTest {
         dekningsgrunnlag: Double,
         arbeidsgiverbeløp: Int? = null,
         personbeløp: Int? = null,
+        totalGrad: Prosentdel? = null,
         er6GBegrenset: Boolean = false
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
@@ -102,6 +105,7 @@ internal class CreateØkonomiTest {
         aktuellDagsinntekt,
         dekningsgrunnlag,
         1.januar,
+        totalGrad?.toDouble(),
         null,
         grad,
         arbeidsgiverBetalingProsent,
@@ -117,7 +121,8 @@ internal class CreateØkonomiTest {
         dekningsgrunnlag: Double? = null,
         arbeidsgiverbeløp: Int? = null,
         personbeløp: Int? = null,
-        er6GBegrenset: Boolean = false
+        er6GBegrenset: Boolean = false,
+        totalGrad: Double? = null
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         1.januar,
         JsonDagType.SYKEDAG,
@@ -127,6 +132,7 @@ internal class CreateØkonomiTest {
         aktuellDagsinntekt,
         dekningsgrunnlag,
         null,
+        totalGrad,
         arbeidsgiverbeløp,
         personbeløp,
         er6GBegrenset,

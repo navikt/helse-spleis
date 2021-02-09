@@ -21,10 +21,11 @@ internal class Økonomi private constructor(
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
     private var skjæringstidspunkt: LocalDate? = null,
+    private var totalGrad: Prosentdel? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
     private var er6GBegrenset: Boolean? = null,
-    private var tilstand: Tilstand = Tilstand.KunGrad
+    private var tilstand: Tilstand = Tilstand.KunGrad,
 ) {
 
     companion object {
@@ -39,7 +40,7 @@ internal class Økonomi private constructor(
 
         internal fun ikkeBetalt() = sykdomsgrad(0.prosent)
 
-        internal fun sykdomsgrad(økonomiList: List<Økonomi>) =
+        internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
 
         internal fun betal(økonomiList: List<Økonomi>, skjæringstidspunkt: LocalDate, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
@@ -47,11 +48,12 @@ internal class Økonomi private constructor(
             økonomiList
                 .filter { it.skjæringstidspunkt == null }
                 .forEach { it.skjæringstidspunkt = skjæringstidspunkt }
-            justereForGrense(it, maksbeløp(it, virkningsdato))
+            økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
+            justereForGrense(it, maksbeløp(it.first(), virkningsdato))
         }
 
-        private fun maksbeløp(økonomiList: List<Økonomi>, virkningsdato: LocalDate) =
-            (Grunnbeløp.`6G`.dagsats(økonomiList.first().skjæringstidspunkt!!, virkningsdato) * sykdomsgrad(økonomiList).roundToTwoDecimalPlaces()).rundTilDaglig()
+        private fun maksbeløp(økonomi: Økonomi, virkningsdato: LocalDate) =
+            (Grunnbeløp.`6G`.dagsats(økonomi.skjæringstidspunkt!!, virkningsdato) * økonomi.totalGrad!!.roundToTwoDecimalPlaces()).rundTilDaglig()
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
@@ -162,6 +164,7 @@ internal class Økonomi private constructor(
         arbeidsgiverBetalingProsent: Double,
         dekningsgrunnlag: Double?,
         skjæringstidspunkt: LocalDate?,
+        totalGrad: Double?,
         aktuellDagsinntekt: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?,
@@ -182,6 +185,7 @@ internal class Økonomi private constructor(
                      arbeidsgiverBetalingProsent: Double,
                      dekningsgrunnlag: Double?,
                      _: LocalDate?,
+                     totalGrad: Double?,
                      aktuellDagsinntekt: Double?,
                      arbeidsgiverbeløp: Int?,
                      personbeløp: Int?,
@@ -202,6 +206,7 @@ internal class Økonomi private constructor(
                      _: Double,
                      _: Double?,
                      _: LocalDate?,
+                     _: Double?,
                      aktuellDagsinntekt: Double?,
                      _: Int?,
                      _: Int?,
@@ -227,6 +232,7 @@ internal class Økonomi private constructor(
         arbeidsgiverBetalingProsent: Double,
         dekningsgrunnlag: Double?,
         skjæringstidspunkt: LocalDate?,
+        totalGrad: Double?,
         aktuellDagsinntekt: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?,
@@ -237,6 +243,7 @@ internal class Økonomi private constructor(
             arbeidsgiverBetalingProsent.toDouble(),
             dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
             skjæringstidspunkt,
+            totalGrad?.toDouble(),
             aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
             arbeidsgiverbeløp!!.reflection { _, _, _, daglig -> daglig },
             personbeløp!!.reflection { _, _, _, daglig -> daglig },
@@ -248,6 +255,7 @@ internal class Økonomi private constructor(
         arbeidsgiverBetalingProsent: Double,
         dekningsgrunnlag: Double?,
         skjæringstidspunkt: LocalDate?,
+        totalGrad: Double?,
         aktuellDagsinntekt: Double?,
         arbeidsgiverbeløp: Int?,
         personbeløp: Int?,
@@ -258,6 +266,7 @@ internal class Økonomi private constructor(
             arbeidsgiverBetalingProsent.toDouble(),
             dekningsgrunnlag!!.reflection { _, _, daglig, _ -> daglig },
             skjæringstidspunkt,
+            totalGrad?.toDouble(),
             aktuellDagsinntekt!!.reflection { _, _, daglig, _ -> daglig },
             null, null, null
         )
@@ -369,6 +378,7 @@ internal class Økonomi private constructor(
                 arbeidsgiverBetalingProsent: Double,
                 dekningsgrunnlag: Double?,
                 skjæringstidspunkt: LocalDate?,
+                totalGrad: Double?,
                 aktuellDagsinntekt: Double?,
                 arbeidsgiverbeløp: Int?,
                 personbeløp: Int?,
@@ -421,6 +431,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverBetalingProsent: Double,
                     dekningsgrunnlag: Double?,
                     skjæringstidspunkt: LocalDate?,
+                    totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
                     arbeidsgiverbeløp: Int?,
                     personbeløp: Int?,
@@ -430,7 +441,7 @@ internal class Økonomi private constructor(
                 block(
                     økonomi.grad.toDouble(),
                     økonomi.arbeidsgiverBetalingProsent.toDouble(),
-                    null, null, null, null, null, null
+                    null, null, null, null, null, null, null
                 )
         }
 
@@ -447,6 +458,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverBetalingProsent: Double,
                     dekningsgrunnlag: Double?,
                     skjæringstidspunkt: LocalDate?,
+                    totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
                     arbeidsgiverbeløp: Int?,
                     personbeløp: Int?,
@@ -475,6 +487,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverBetalingProsent: Double,
                     dekningsgrunnlag: Double?,
                     skjæringstidspunkt: LocalDate?,
+                    totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
                     arbeidsgiverbeløp: Int?,
                     personbeløp: Int?,
@@ -500,6 +513,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverBetalingProsent: Double,
                     dekningsgrunnlag: Double?,
                     skjæringstidspunkt: LocalDate?,
+                    totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
                     arbeidsgiverbeløp: Int?,
                     personbeløp: Int?,
@@ -535,6 +549,7 @@ internal class Økonomi private constructor(
                     arbeidsgiverBetalingProsent: Double,
                     dekningsgrunnlag: Double?,
                     skjæringstidspunkt: LocalDate?,
+                    totalGrad: Double?,
                     aktuellDagsinntekt: Double?,
                     arbeidsgiverbeløp: Int?,
                     personbeløp: Int?,
@@ -545,7 +560,7 @@ internal class Økonomi private constructor(
     }
 }
 
-internal fun List<Økonomi>.sykdomsgrad(): Prosentdel = Økonomi.sykdomsgrad(this)
+internal fun List<Økonomi>.totalSykdomsgrad(): Prosentdel = Økonomi.totalSykdomsgrad(this)
 
 internal fun List<Økonomi>.betal(skjæringstidspunkt: LocalDate, virkningsdato: LocalDate = skjæringstidspunkt) = Økonomi.betal(this, skjæringstidspunkt, virkningsdato)
 

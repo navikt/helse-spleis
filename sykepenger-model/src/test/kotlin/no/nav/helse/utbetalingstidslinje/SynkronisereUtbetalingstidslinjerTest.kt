@@ -217,6 +217,6 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         inntektsmelding(arbeidsgiver, beløp, dato.plusDays(1))
 
     private fun assertInntekt(expected: Number, dag: Utbetalingsdag) {
-        assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, _, daglig, _, _, _ -> daglig })
+        assertEquals(expected.toDouble(), dag.økonomi.reflection { _, _, _, _, _, daglig, _, _, _ -> daglig })
     }
 }

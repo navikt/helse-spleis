@@ -12,6 +12,7 @@ import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -334,8 +335,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = skjæringstidspunktFraInfotrygd,
-                        tom = 4.januar
+                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, 4.januar, 31000.månedlig, 100.prosent, orgnummer))
                     )
                 )
 
@@ -353,8 +353,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = skjæringstidspunktFraInfotrygd,
-                        tom = tom1Periode,
+                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, tom1Periode, 31000.månedlig, 100.prosent, orgnummer)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -362,8 +361,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        fom = skjæringstidspunktFraInfotrygd,
-                        tom = tom1Periode,
+                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, tom1Periode, 31000.månedlig, 100.prosent, orgnummer)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -684,13 +682,97 @@ class SpeilBuilderTest {
         assertFalse(forlengelse.automatiskBehandlet)
     }
 
+    @Test
+    fun `Total sykdomsgrad ved en arbeidsgiver`() {
+        val (person, hendelser) = person()
+
+        val vedtaksperiodeDTO = serializePersonForSpeil(person, hendelser)
+            .arbeidsgivere.first()
+            .vedtaksperioder.first() as VedtaksperiodeDTO
+
+        assertEquals(100.0, vedtaksperiodeDTO.utbetalingstidslinje.filterIsInstance<NavDagDTO>().first().totalGrad)
+    }
+
+    @Test
+    fun `Total sykdomsgrad ved flere arbeidsgivere`() = Toggles.FlereArbeidsgivereOvergangITEnabled.enable {
+
+        val periode = 27.januar(2021) til 31.januar(2021)
+        val inntekt = 30000.månedlig
+        val orgnr1 = "123456879"
+        val orgnr2 = "987654321"
+
+        val person = Person(aktørId, fnr)
+
+        person.håndter(sykmelding(orgnummer = orgnr1, fom = periode.start, tom = periode.endInclusive, grad = 50.prosent).first)
+        person.håndter(sykmelding(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
+        person.håndter(søknad(orgnummer = orgnr1, fom = periode.start, tom = periode.endInclusive, grad = 50.prosent).first)
+
+
+        val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnr1).last()
+        val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnr2).last()
+
+        val inntektshistorikk = listOf(
+            Inntektsopplysning(20.januar(2021), inntekt, orgnr1, true),
+            Inntektsopplysning(20.januar(2021), inntekt, orgnr2, true)
+        )
+
+        val utbetalinger = listOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr2)
+        )
+
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr1
+            )
+        )
+        person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2))
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId2,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr2
+            )
+        )
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr1
+            )
+        )
+        person.håndter(simulering(vedtaksperiodeId1, orgnummer = orgnr1))
+
+        val navdagDTO = serializePersonForSpeil(person)
+            .arbeidsgivere.first()
+            .vedtaksperioder.last()
+            .utbetalingstidslinje.filterIsInstance<NavDagDTO>().last()
+
+        assertEquals(75.0, navdagDTO.totalGrad)
+    }
+
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
     }
 
-    private fun Person.collectVedtaksperiodeIder() = mutableListOf<String>().apply {
+    private fun Person.collectVedtaksperiodeIder(orgnummer: String = SpeilBuilderTest.orgnummer) = mutableMapOf<String, List<String>>().apply {
         accept(object : PersonVisitor {
+            var currentArbeidsgiver = mutableListOf<String>()
+
+            override fun postVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+                put(organisasjonsnummer, currentArbeidsgiver)
+                currentArbeidsgiver = mutableListOf()
+            }
+
             override fun preVisitVedtaksperiode(
                 vedtaksperiode: Vedtaksperiode,
                 id: UUID,
@@ -701,10 +783,11 @@ class SpeilBuilderTest {
                 opprinneligPeriode: Periode,
                 hendelseIder: List<UUID>
             ) {
-                add(id.toString())
+                currentArbeidsgiver.add(id.toString())
             }
         })
-    }
+    }.get(orgnummer)!!
+
 
     companion object {
         private const val aktørId = "12345"
@@ -1155,13 +1238,15 @@ class SpeilBuilderTest {
         private fun sykmelding(
             hendelseId: UUID = UUID.randomUUID(),
             fom: LocalDate = 1.januar,
-            tom: LocalDate = 31.januar
+            tom: LocalDate = 31.januar,
+            orgnummer: String = SpeilBuilderTest.orgnummer,
+            grad: Prosentdel = 100.prosent
         ) = Sykmelding(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
+            sykeperioder = listOf(Sykmeldingsperiode(fom, tom, grad)),
             mottatt = fom.plusMonths(3).atStartOfDay()
         ) to SykmeldingDTO(
             id = hendelseId.toString(),
@@ -1175,13 +1260,15 @@ class SpeilBuilderTest {
             fom: LocalDate = 1.januar,
             tom: LocalDate = 31.januar,
             sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
-            andrePerioder: List<Søknad.Søknadsperiode> = emptyList()
+            andrePerioder: List<Søknad.Søknadsperiode> = emptyList(),
+            orgnummer: String = SpeilBuilderTest.orgnummer,
+            grad: Prosentdel = 100.prosent
         ) = Søknad(
             meldingsreferanseId = hendelseId,
             fnr = fnr,
             aktørId = aktørId,
             orgnummer = orgnummer,
-            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent)) + andrePerioder,
+            perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, grad)) + andrePerioder,
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
             permittert = false
@@ -1291,16 +1378,9 @@ class SpeilBuilderTest {
         private fun ytelser(
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
-            fom: LocalDate = 1.januar.minusYears(1),
-            tom: LocalDate = 31.januar.minusYears(1),
-            inntektshistorikk: List<Inntektsopplysning> = listOf(
-                Inntektsopplysning(
-                    fom,
-                    31000.månedlig,
-                    orgnummer,
-                    true
-                )
-            ),
+            orgnummer: String = SpeilBuilderTest.orgnummer,
+            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+            inntektshistorikk: List<Inntektsopplysning> = listOf(),
             arbeidsavklaringspenger: List<Periode> = emptyList()
         ) = Aktivitetslogg().let {
             Ytelser(
@@ -1310,8 +1390,7 @@ class SpeilBuilderTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingshistorikk = utbetalingshistorikk(
-                    fom = fom,
-                    tom = tom,
+                    utbetalinger = utbetalinger,
                     meldingsreferanseId = hendelseId,
                     vedtaksperiodeId = vedtaksperiodeId,
                     inntektshistorikk = inntektshistorikk,
@@ -1354,26 +1433,17 @@ class SpeilBuilderTest {
         private fun utbetalingshistorikk(
             meldingsreferanseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
-            fom: LocalDate = 1.januar.minusYears(1),
-            tom: LocalDate = 31.januar.minusYears(1),
-            inntektshistorikk: List<Inntektsopplysning> = listOf(
-                Inntektsopplysning(
-                    fom,
-                    31000.månedlig,
-                    orgnummer,
-                    true
-                )
-            ),
-            aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+            inntektshistorikk: List<Inntektsopplysning> = listOf(),
+            aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+            orgnummer: String = SpeilBuilderTest.orgnummer
         ) = Utbetalingshistorikk(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = aktørId,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalinger = listOf(
-                RefusjonTilArbeidsgiver(fom, tom, 31000.månedlig, 100.prosent, orgnummer)
-            ),
+            utbetalinger = utbetalinger,
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk
         )
@@ -1399,7 +1469,7 @@ class SpeilBuilderTest {
                 makstidOppnådd = false,
             )
 
-        private fun simulering(vedtaksperiodeId: String) = Simulering(
+        private fun simulering(vedtaksperiodeId: String, orgnummer: String = SpeilBuilderTest.orgnummer) = Simulering(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,

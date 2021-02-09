@@ -378,7 +378,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 .navdager
                 .first()
                 .økonomi
-                .reflection { _, _, dekningsgrunnlag, _, _, _, _, _ -> dekningsgrunnlag }
+                .reflection { _, _, dekningsgrunnlag, _, _, _, _, _, _ -> dekningsgrunnlag }
         )
         assertEquals(18.januar, inspektør.navdager.first().dato)
     }

@@ -514,14 +514,15 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             dato: LocalDate,
             økonomi: Økonomi
         ) {
-            økonomi.reflection { grad, _, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
+            økonomi.reflection { grad, _, _, _, totalGrad, aktuellDagsinntekt, arbeidsgiverbeløp, _, _ ->
                 utbetalingstidslinjeMap.add(
                     NavDagDTO(
                         type = TypeDataDTO.NavDag,
                         inntekt = aktuellDagsinntekt!!.roundToInt(),
                         dato = dato,
                         utbetaling = arbeidsgiverbeløp!!,
-                        grad = grad
+                        grad = grad,
+                        totalGrad = totalGrad
                     )
                 )
                 utbetalinger.add(arbeidsgiverbeløp)

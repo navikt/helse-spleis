@@ -116,7 +116,8 @@ data class NavDagDTO(
     override val inntekt: Int,
     override val dato: LocalDate,
     val utbetaling: Int,
-    val grad: Double
+    val grad: Double,
+    val totalGrad: Double?
 ) : UtbetalingstidslinjedagDTO
 
 data class AvvistDagDTO(

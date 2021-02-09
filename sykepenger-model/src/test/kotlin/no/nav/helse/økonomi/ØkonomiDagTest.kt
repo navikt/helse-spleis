@@ -129,6 +129,7 @@ internal class ØkonomiDagTest {
                     _,
                     _,
                     _,
+                    _,
                     actualArbeidsgiverbeløp,
                     actualPersonbeløp,
                     _ ->

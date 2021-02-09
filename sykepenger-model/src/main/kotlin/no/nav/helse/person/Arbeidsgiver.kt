@@ -582,8 +582,8 @@ internal class Arbeidsgiver private constructor(
             sikkerLogg.info("Forskjellig toString() på utbetalingstidslinjer.\nVol1 = $vol1Linje\nVol2 = $vol2Linje")
 
         vol1Linje.zip(vol2Linje).mapNotNull { (vol1Dag, vol2Dag: Utbetalingstidslinje.Utbetalingsdag) ->
-            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
-            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, _, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
+            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, _, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
 
             if (vol1Dekning != vol2Dekning || vol1Dagsinntekt != vol2Dagsinntekt)
                 "Vol1: ${vol1Dag.dato} [$vol1Dekning, $vol1Dagsinntekt] != Vol2: ${vol2Dag.dato} [$vol2Dekning, $vol2Dagsinntekt]"

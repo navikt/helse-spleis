@@ -8,6 +8,7 @@ internal fun serialiserØkonomi(økonomi: Økonomi) =
                              arbeidsgiverBetalingProsent,
                              dekningsgrunnlag,
                              skjæringstidspunkt,
+                             totalGrad,
                              aktuellDagsinntekt,
                              arbeidsgiverbeløp,
                              personbeløp,
@@ -15,6 +16,7 @@ internal fun serialiserØkonomi(økonomi: Økonomi) =
             map["grad"] = grad
             map["arbeidsgiverBetalingProsent"] = arbeidsgiverBetalingProsent
             map.compute("skjæringstidspunkt") { _, _ -> skjæringstidspunkt }
+            map.compute("totalGrad") { _, _ -> totalGrad }
             map.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             map.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
             map.compute("arbeidsgiverbeløp") { _, _ -> arbeidsgiverbeløp }
