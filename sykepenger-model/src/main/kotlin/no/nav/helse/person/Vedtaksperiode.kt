@@ -209,7 +209,7 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(hendelse: OverstyrTidslinje) = overlapperMed(hendelse).also {
+    internal fun håndter(hendelse: OverstyrTidslinje) = hendelse.erRelevant(periode).also {
         if (!it) return it
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)

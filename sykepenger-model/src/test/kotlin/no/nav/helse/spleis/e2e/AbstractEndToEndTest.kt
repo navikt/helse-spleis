@@ -565,7 +565,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
         beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = 1.januar,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, beregnetInntekt, emptyList()),
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false

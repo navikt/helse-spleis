@@ -2642,4 +2642,34 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         observatør.hendelseider(1.vedtaksperiode).contains(inntektsmeldingId)
         observatør.hendelseider(2.vedtaksperiode).contains(inntektsmeldingId)
     }
+
+    @Test
+    fun `Overstyring`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
+        håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), id = inntektsmeldingId)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar(2021), 29.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 10.januar(2021), 100.prosent), Sykdom(11.januar(2021), 31.januar(2021), 20.prosent))
+        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, listOf(15.oktober(2020) til 16.oktober(2020), 29.oktober(2020) til 11.november(2020))), 2.vedtaksperiode)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterSøknad(Sykdom(29.januar(2021), 29.januar(2021), 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        assertEquals(null, inspektør.dagtelling[Dag.Feriedag::class])
+
+        håndterOverstyring(listOf(ManuellOverskrivingDag(14.januar(2021), Dagtype.Feriedag)))
+
+        assertEquals(1, inspektør.dagtelling[Dag.Feriedag::class])
+    }
 }

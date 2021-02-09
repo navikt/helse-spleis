@@ -143,7 +143,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Inntektsmelding med første fraværsdag 1 januar skal ikke gjøre at sykmelding nr 2 ikke blir behandlet`() {
+    fun `Kan håndtere replay når vi har mottatt inntektsmelding med skjæringstidspunkt utenfor AGP`() {
         Toggles.ReplayEnabled.enable {
             sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
             sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100)))
@@ -151,12 +151,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
             assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
             assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
-            assertIkkeForkastedeTilstander(
-                2,
-                "MOTTATT_SYKMELDING_UFERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP",
-                "AVVENTER_UFERDIG_GAP"
-            )
+            assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP", "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP", "AVVENTER_UFERDIG_GAP")
         }
     }
 
