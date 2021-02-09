@@ -132,7 +132,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList()),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,

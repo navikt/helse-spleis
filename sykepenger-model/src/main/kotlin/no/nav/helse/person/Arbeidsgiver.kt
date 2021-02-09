@@ -191,7 +191,7 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.cacheRefusjon(this)
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.info("Inntektsmelding traff ingen vedtaksperioder, lagt på kjøl.")
-            inntektsmeldingLagtPåKjøl(inntektsmeldingId = inntektsmelding.inntektsmeldingId)
+            inntektsmeldingLagtPåKjøl(hendelseId = inntektsmelding.meldingsreferanseId())
         }
         finalize(inntektsmelding)
     }
@@ -398,12 +398,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun inntektsmeldingLagtPåKjøl(
-        inntektsmeldingId: UUID,
+        hendelseId: UUID,
     ) {
         person.inntektsmeldingLagtPåKjøl(
-            PersonObserver.InntektsmeldingLagtPåKjølEvent(
-               inntektsmeldingId = inntektsmeldingId
-            )
+            PersonObserver.InntektsmeldingLagtPåKjølEvent(hendelseId)
         )
     }
 

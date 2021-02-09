@@ -13,7 +13,6 @@ import java.util.*
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
-    internal val inntektsmeldingId: UUID,
     private val refusjon: Refusjon,
     private val orgnummer: String,
     private val fødselsnummer: String,

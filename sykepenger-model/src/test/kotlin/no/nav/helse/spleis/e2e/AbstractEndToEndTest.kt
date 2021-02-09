@@ -218,18 +218,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         id: UUID = UUID.randomUUID(),
-        inntektsmeldingId: UUID = UUID.randomUUID(),
         beregnetInntekt: Inntekt = refusjon.second,
         harOpphørAvNaturalytelser: Boolean = false
     ): UUID {
         inntektsmelding(
             id,
-            inntektsmeldingId,
             arbeidsgiverperioder,
             ferieperioder = ferieperioder,
+            beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
-            beregnetInntekt = beregnetInntekt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         ).also(person::håndter)
         inntektsmeldinger[id] = InntektsmeldingData(
@@ -564,7 +562,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun inntektsmelding(
         id: UUID,
-        inntektsmeldingId: UUID = UUID.randomUUID(),
         arbeidsgiverperioder: List<Periode>,
         ferieperioder: List<Periode> = emptyList(),
         beregnetInntekt: Inntekt = INNTEKT,
@@ -575,7 +572,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     ): Inntektsmelding {
         return Inntektsmelding(
             meldingsreferanseId = id,
-            inntektsmeldingId = inntektsmeldingId,
             refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
             orgnummer = orgnummer,
             fødselsnummer = UNG_PERSON_FNR_2018,

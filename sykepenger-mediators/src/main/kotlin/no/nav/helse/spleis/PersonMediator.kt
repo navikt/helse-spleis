@@ -228,7 +228,7 @@ internal class PersonMediator(private val person: Person, private val message: H
             queueMessage(
                 "inntektsmelding_lagt_på_kjøl", JsonMessage.newMessage(
                     mapOf(
-                        "inntektsmeldingId" to event.inntektsmeldingId,
+                        "hendelseId" to event.hendelseId,
                     )
                 )
             )

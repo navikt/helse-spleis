@@ -8,7 +8,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import java.util.*
 
 // Understands a JSON message representing an Inntektsmelding
 internal open class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
@@ -28,11 +27,9 @@ internal open class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMe
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
-    private val inntektsmeldingId = UUID.fromString(packet["inntektsmeldingId"].asText())
 
     protected val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = this.id,
-        inntektsmeldingId = inntektsmeldingId,
         refusjon = refusjon,
         orgnummer = orgnummer,
         fødselsnummer = fødselsnummer,

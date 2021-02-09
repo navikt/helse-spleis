@@ -165,7 +165,7 @@ interface PersonObserver {
     )
 
     data class InntektsmeldingLagtPåKjølEvent(
-        val inntektsmeldingId: UUID
+        val hendelseId: UUID,
     )
 
     data class VedtaksperiodeReberegnetEvent(val vedtaksperiodeId: UUID)

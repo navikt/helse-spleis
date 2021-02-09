@@ -356,8 +356,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(15.desember(2020), 19.desember(2020))
             ),
             førsteFraværsdag = 15.desember(2020),
-            beregnetInntekt = 30000.månedlig,
-            refusjon = Triple(null, 30000.månedlig, emptyList())
+            refusjon = Triple(null, 30000.månedlig, emptyList()),
+            beregnetInntekt = 30000.månedlig
         )
         assertTilstander(
             3.vedtaksperiode,
@@ -403,8 +403,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(15.desember(2020), 17.desember(2020))
             ),
             førsteFraværsdag = 15.desember(2020),
-            beregnetInntekt = 30000.månedlig,
-            refusjon = Triple(null, 30000.månedlig, emptyList())
+            refusjon = Triple(null, 30000.månedlig, emptyList()),
+            beregnetInntekt = 30000.månedlig
         )
         assertTilstander(
             3.vedtaksperiode,
@@ -447,8 +447,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 Periode(15.desember(2020), 19.desember(2020))
             ),
             førsteFraværsdag = 15.desember(2020),
-            beregnetInntekt = 30000.månedlig,
-            refusjon = Triple(null, 30000.månedlig, emptyList())
+            refusjon = Triple(null, 30000.månedlig, emptyList()),
+            beregnetInntekt = 30000.månedlig
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -696,7 +696,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - ferie i IM etter historikk beholdes`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), ferieperioder = listOf(28.januar til 2.februar), førsteFraværsdag = 3.februar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, ferieperioder = listOf(28.januar til 2.februar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
         val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
@@ -718,7 +718,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - ferie i IM før historikk fjernes`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), ferieperioder = listOf(18.januar til 22.januar), førsteFraværsdag = 3.februar)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, ferieperioder = listOf(18.januar til 22.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(24.januar, 28.januar, 1000.daglig, 100.prosent, ORGNUMMER)
         val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(24.januar, INNTEKT, ORGNUMMER, true))

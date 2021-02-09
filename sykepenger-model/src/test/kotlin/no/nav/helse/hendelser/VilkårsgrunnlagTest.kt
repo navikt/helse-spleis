@@ -223,7 +223,6 @@ internal class VilkårsgrunnlagTest {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = orgnummer,
             fødselsnummer = fødselsnummer,

@@ -61,7 +61,7 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun inntektsmeldingLagtPåKjøl(event: PersonObserver.InntektsmeldingLagtPåKjølEvent) {
-        inntektsmeldingerLagtPåKjøl.add(event.inntektsmeldingId)
+        inntektsmeldingerLagtPåKjøl.add(event.hendelseId)
     }
 
     override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {

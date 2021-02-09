@@ -647,7 +647,6 @@ internal class InntektshistorikkVol2Test {
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
     ) = Inntektsmelding(
         meldingsreferanseId = UUID.randomUUID(),
-        inntektsmeldingId = UUID.randomUUID(),
         refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
         orgnummer = ORGNUMMER,
         fødselsnummer = UNG_PERSON_FNR_2018,
