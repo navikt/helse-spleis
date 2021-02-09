@@ -42,7 +42,7 @@ internal fun Validation.validerUtbetalingshistorikk(
     utbetalingshistorikk: Utbetalingshistorikk,
     skjæringstidspunkt: LocalDate?
 ) = valider {
-    !utbetalingshistorikk.valider(periode, skjæringstidspunkt).hasErrorsOrWorse()
+    !utbetalingshistorikk.validerOverlappende(periode, skjæringstidspunkt).hasErrorsOrWorse()
 }
 
 internal fun Validation.overlappende(

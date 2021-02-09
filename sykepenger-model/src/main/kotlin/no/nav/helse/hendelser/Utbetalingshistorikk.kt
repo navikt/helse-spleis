@@ -33,8 +33,14 @@ class Utbetalingshistorikk(
     internal fun erRelevant(vedtaksperiodeId: UUID) =
         vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?): IAktivitetslogg {
-        Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, this, periode, organisasjonsnummer)
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?) =
+        valider(false, periode, skjæringstidspunkt)
+
+    internal fun validerOverlappende(periode: Periode, skjæringstidspunkt: LocalDate?) =
+        valider(true, periode, skjæringstidspunkt)
+
+    private fun valider(bareOverlappende: Boolean, periode: Periode, skjæringstidspunkt: LocalDate?): IAktivitetslogg {
+        Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, this, bareOverlappende, periode, organisasjonsnummer)
         Inntektsopplysning.valider(inntektshistorikk, this, skjæringstidspunkt, periode)
         return this
     }
@@ -174,6 +180,7 @@ class Utbetalingshistorikk(
 
         internal open fun valider(
             aktivitetslogg: IAktivitetslogg,
+            bareOverlappende: Boolean,
             other: Periode,
             organisasjonsnummer: String
         ) {
@@ -197,7 +204,7 @@ class Utbetalingshistorikk(
                 oldtid.add(orgnr, sykdomstidslinje())
             }
 
-            override fun valider(aktivitetslogg: IAktivitetslogg, other: Periode, organisasjonsnummer: String) {
+            override fun valider(aktivitetslogg: IAktivitetslogg, bareOverlappende: Boolean, other: Periode, organisasjonsnummer: String) {
                 if (periode.overlapperMed(other)) aktivitetslogg.error("Hele eller deler av perioden er utbetalt i Infotrygd")
             }
 
@@ -213,6 +220,7 @@ class Utbetalingshistorikk(
                 fun valider(
                     liste: List<Infotrygdperiode>,
                     aktivitetslogg: IAktivitetslogg,
+                    bareOverlappende: Boolean,
                     periode: Periode,
                     organisasjonsnummer: String
                 ): IAktivitetslogg {
@@ -222,7 +230,7 @@ class Utbetalingshistorikk(
                             return aktivitetslogg
                         }
                     }
-                    liste.onEach { it.valider(aktivitetslogg, periode, organisasjonsnummer) }
+                    liste.onEach { it.valider(aktivitetslogg, bareOverlappende, periode, organisasjonsnummer) }
                     return aktivitetslogg
                 }
 
@@ -283,9 +291,11 @@ class Utbetalingshistorikk(
         class Ukjent(fom: LocalDate, tom: LocalDate) : IgnorertPeriode(fom, tom) {
             override fun valider(
                 aktivitetslogg: IAktivitetslogg,
+                bareOverlappende: Boolean,
                 other: Periode,
                 organisasjonsnummer: String
             ) {
+                if (bareOverlappende) return
                 if (periode.endInclusive < other.start.minusDays(18)) return
                 aktivitetslogg.warn(
                     "Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.",
@@ -298,9 +308,11 @@ class Utbetalingshistorikk(
             IgnorertPeriode(LocalDate.MIN, LocalDate.MAX) {
             override fun valider(
                 aktivitetslogg: IAktivitetslogg,
+                bareOverlappende: Boolean,
                 other: Periode,
                 organisasjonsnummer: String
             ) {
+                if (bareOverlappende) return
                 val tekst = when {
                     fom == null || tom == null -> "mangler fom- eller tomdato"
                     fom > tom -> "fom er nyere enn tom"

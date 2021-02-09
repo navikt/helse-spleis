@@ -568,6 +568,11 @@ internal class Vedtaksperiode private constructor(
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
             }
+            !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
+                tilstand(hendelse, AvventerGodkjenning) {
+                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav, men inneholder andre warnings""")
+                }
+            }
             !utbetaling().harUtbetalinger() && !utbetalingstidslinje.harUtbetalinger() -> {
                 loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerGodkjenning) {
@@ -1411,6 +1416,7 @@ internal class Vedtaksperiode private constructor(
                 when {
                     vedtaksperiode.utbetaling().erAvvist() -> TilInfotrygd
                     vedtaksperiode.utbetaling().harUtbetalinger() -> TilUtbetaling
+                    vedtaksperiode.utbetalingstidslinje.kunArbeidsgiverdager() -> AvsluttetUtenUtbetalingMedInntektsmelding
                     else -> Avsluttet
                 }
             )
