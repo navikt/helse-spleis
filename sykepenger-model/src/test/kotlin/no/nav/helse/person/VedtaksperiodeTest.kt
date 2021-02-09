@@ -78,6 +78,7 @@ internal class VedtaksperiodeTest {
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
                 inntekt = 1000.månedlig

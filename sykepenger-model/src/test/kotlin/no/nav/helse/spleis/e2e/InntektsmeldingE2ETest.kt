@@ -495,8 +495,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId1, listOf(Periode(1.januar, 16.januar))), 2.vedtaksperiode)
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId2, listOf(Periode(1.mars, 16.mars)), førsteFraværsdag = 1.mars), 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId1, arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar))), 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId2, arbeidsgiverperioder = listOf(Periode(1.mars, 16.mars)), førsteFraværsdag = 1.mars), 2.vedtaksperiode)
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -521,7 +521,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(
             inntektsmelding(
                 inntektsmeldingId,
-                listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)),
+                arbeidsgiverperioder = listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)),
                 førsteFraværsdag = 21.januar
             ), 1.vedtaksperiode
         )
@@ -671,7 +671,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(
             inntektsmelding(
                 inntektsmeldingId,
-                listOf(Periode(1.januar, 16.januar)),
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 3.februar
             ), 1.vedtaksperiode
         )

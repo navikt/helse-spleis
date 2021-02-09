@@ -599,6 +599,7 @@ internal class InntektsmeldingTest {
     ) {
         inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = "88888888",
             fødselsnummer = "12020052345",

@@ -205,6 +205,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, beregnetInntekt, emptyList()),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,

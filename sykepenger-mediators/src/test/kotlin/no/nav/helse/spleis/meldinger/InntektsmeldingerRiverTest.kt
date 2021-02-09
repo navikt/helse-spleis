@@ -21,7 +21,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidInntektsmelding = Inntektsmeldingkontrakt(
-        inntektsmeldingId = "",
+        inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = "fødselsnummer",
         arbeidstakerAktorId = "aktørId",
         virksomhetsnummer = "virksomhetsnummer",
@@ -42,7 +42,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         mottattDato = LocalDateTime.now()
     ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
-        inntektsmeldingId = "",
+        inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = "fødselsnummer",
         arbeidstakerAktorId = "aktørId",
         virksomhetsnummer = "virksomhetsnummer",

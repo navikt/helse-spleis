@@ -361,6 +361,7 @@ class JsonBuilderTest {
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(null, 31000.månedlig, emptyList())
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = refusjon,
             orgnummer = orgnummer,
             fødselsnummer = fnr,

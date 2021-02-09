@@ -1304,6 +1304,7 @@ class SpeilBuilderTest {
             fom: LocalDate
         ) = Inntektsmelding(
             meldingsreferanseId = hendelseId,
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
                 inntekt = 31000.månedlig,

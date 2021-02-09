@@ -195,7 +195,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periode.start, periode.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
                 førsteFraværsdag = periode.start,
                 orgnummer = orgnummer,
                 beregnetInntekt = inntekt

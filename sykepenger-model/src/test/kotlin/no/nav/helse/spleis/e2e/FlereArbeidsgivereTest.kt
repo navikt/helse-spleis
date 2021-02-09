@@ -47,7 +47,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periodeA1.start, periodeA1.start.plusDays(15))),
                 beregnetInntekt = 30000.månedlig,
                 refusjon = Triple(null, 30000.månedlig, emptyList()),
                 førsteFraværsdag = periodeA1.start,
@@ -73,7 +73,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
                 beregnetInntekt = 10000.månedlig,
                 refusjon = Triple(null, 10000.månedlig, emptyList()),
                 førsteFraværsdag = periodeA2.start,
@@ -90,7 +90,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(15.januar til 28.januar, 2.februar til 3.februar),
+                arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
                 beregnetInntekt = 30000.månedlig,
                 refusjon = Triple(null, 30000.månedlig, emptyList()),
                 førsteFraværsdag = 2.februar,
@@ -116,7 +116,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
                 beregnetInntekt = 10000.månedlig,
                 refusjon = Triple(null, 10000.månedlig, emptyList()),
                 førsteFraværsdag = periodeA2.start,
@@ -133,7 +133,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(15.januar til 28.januar, 2.februar til 3.februar),
+                arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
                 beregnetInntekt = 30000.månedlig,
                 refusjon = Triple(null, 30000.månedlig, emptyList()),
                 førsteFraværsdag = 2.februar,
@@ -160,7 +160,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periodeA2.start, periodeA2.start.plusDays(15))),
                 beregnetInntekt = 10000.månedlig,
                 refusjon = Triple(null, 10000.månedlig, emptyList()),
                 førsteFraværsdag = periodeA2.start,
@@ -1032,7 +1032,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(Periode(periode.start, periode.start.plusDays(15))),
+                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
                 førsteFraværsdag = periode.start,
                 orgnummer = orgnummer
             )

@@ -18,6 +18,7 @@ internal class ArbeidsgiverTest {
     fun `ny inntektsmelding legger på inntekt på inntektHistorie`() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(
                 opphørsdato = null,
                 inntekt = 12000.månedlig

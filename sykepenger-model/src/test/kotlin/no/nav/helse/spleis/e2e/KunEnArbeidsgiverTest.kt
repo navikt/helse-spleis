@@ -2500,7 +2500,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.sykdomshistorikk.håndter(
             inntektsmelding(
                 UUID.randomUUID(),
-                listOf(26.oktober(2020) til 11.november(2020)),
+                arbeidsgiverperioder = listOf(26.oktober(2020) til 11.november(2020)),
                 førsteFraværsdag = 26.oktober(2020)
             )
         )
@@ -2657,7 +2657,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(29.januar(2021), 29.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2021), 10.januar(2021), 100.prosent), Sykdom(11.januar(2021), 31.januar(2021), 20.prosent))
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, listOf(15.oktober(2020) til 16.oktober(2020), 29.oktober(2020) til 11.november(2020))), 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, arbeidsgiverperioder = listOf(15.oktober(2020) til 16.oktober(2020), 29.oktober(2020) til 11.november(2020))), 2.vedtaksperiode)
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

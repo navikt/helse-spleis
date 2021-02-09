@@ -239,6 +239,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
     ) =
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = refusjon,
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,

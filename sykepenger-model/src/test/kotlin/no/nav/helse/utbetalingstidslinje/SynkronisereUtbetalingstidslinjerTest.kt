@@ -198,6 +198,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         arbeidsgiver.addInntekt(
             Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
+                inntektsmeldingId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(null, null),
                 orgnummer = arbeidsgiver.organisasjonsnummer(),
                 fødselsnummer = UNG_PERSON_FNR_2018,

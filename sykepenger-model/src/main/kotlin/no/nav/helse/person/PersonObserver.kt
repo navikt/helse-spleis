@@ -164,6 +164,10 @@ interface PersonObserver {
         val personOppdrag: Map<String, Any>
     )
 
+    data class InntektsmeldingLagtPåKjølEvent(
+        val inntektsmeldingId: UUID
+    )
+
     data class VedtaksperiodeReberegnetEvent(val vedtaksperiodeId: UUID)
 
     fun vedtaksperiodeReplay(event: VedtaksperiodeReplayEvent) {}
@@ -176,6 +180,7 @@ interface PersonObserver {
     fun vedtaksperiodeUtbetalt(event: UtbetaltEvent) {}
     fun personEndret(personEndretEvent: PersonEndretEvent) {}
     fun vedtaksperiodeIkkeFunnet(vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
+    fun inntektsmeldingLagtPåKjøl(event: InntektsmeldingLagtPåKjølEvent) {}
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}

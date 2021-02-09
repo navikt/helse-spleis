@@ -386,6 +386,7 @@ internal class SkjæringstidspunktTest {
     ): Inntektsmelding {
         return Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(refusjonOpphørsdato, refusjonBeløp, endringerIRefusjon),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,

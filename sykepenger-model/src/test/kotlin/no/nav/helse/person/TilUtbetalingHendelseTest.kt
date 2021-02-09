@@ -298,6 +298,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private fun inntektsmelding() =
         Inntektsmelding(
             meldingsreferanseId = inntektsmeldingHendelseId,
+            inntektsmeldingId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018,

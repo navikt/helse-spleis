@@ -224,6 +224,16 @@ internal class PersonMediator(private val person: Person, private val message: H
             )
         }
 
+        override fun inntektsmeldingLagtPåKjøl(event: PersonObserver.InntektsmeldingLagtPåKjølEvent) {
+            queueMessage(
+                "inntektsmelding_lagt_på_kjøl", JsonMessage.newMessage(
+                    mapOf(
+                        "inntektsmeldingId" to event.inntektsmeldingId,
+                    )
+                )
+            )
+        }
+
         override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
             queueMessage(
                 "trenger_inntektsmelding", JsonMessage.newMessage(
