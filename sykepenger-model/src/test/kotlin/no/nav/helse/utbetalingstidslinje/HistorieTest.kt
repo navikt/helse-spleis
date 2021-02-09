@@ -84,6 +84,21 @@ internal abstract class HistorieTest {
         )
     }
 
+    protected fun historieUtenSpleisbøtte(vararg perioder: Infotrygdperiode) {
+        historie = Historie(
+            Utbetalingshistorikk(
+                UUID.randomUUID(),
+                AKTØRID,
+                FNR,
+                "ET ORGNR",
+                UUID.randomUUID().toString(),
+                perioder.toList(),
+                emptyList()
+            )
+        )
+    }
+
+
     protected fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val inntektshistorikk = Inntektshistorikk(inntektsdatoer.map {
             Inntektshistorikk.Inntektsendring(it, UUID.randomUUID(), 25000.månedlig, INNTEKTSMELDING)

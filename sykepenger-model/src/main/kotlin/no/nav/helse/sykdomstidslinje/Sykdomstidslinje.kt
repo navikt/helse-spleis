@@ -6,7 +6,6 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.sykdomstidslinje.Dag.Companion.override
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -397,10 +396,9 @@ internal class Sykdomstidslinje private constructor(
     internal fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
     internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
+    internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =
     if (this.isEmpty()) Sykdomstidslinje()
     else reduce { result, tidslinje -> result.merge(tidslinje, beste) }
-
-internal fun List<Sykdomstidslinje>.join() = merge(override)

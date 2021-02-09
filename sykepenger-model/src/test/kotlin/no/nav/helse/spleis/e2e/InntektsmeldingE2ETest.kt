@@ -592,18 +592,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Under arbeid")
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IT-historikk kommer først`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
         )
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
@@ -614,13 +619,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Under arbeid")
-    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer først - kort periode`() {
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode) // Skal vi fikse perioden her??
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
@@ -631,13 +641,48 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("Under arbeid")
-    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer først`() {
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer etter søknad, men før historikk`() {
+        //Inntektsmelding kan komme før historikk fra IT hvis replikering er nede eller sirup
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode) // Skal vi fikse perioden her??
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IM kommer før sykmelding`() {
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
+        håndterInntektsmeldingReplay(
+            inntektsmelding(
+                inntektsmeldingId,
+                listOf(Periode(1.januar, 16.januar)),
+                førsteFraværsdag = 3.februar
+            ), 1.vedtaksperiode
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)

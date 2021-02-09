@@ -137,4 +137,12 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             assertEquals(30.juni, it.sisteDato())
         }
     }
+
+    @Test
+    fun `beregner historikkperiode`() {
+        historieUtenSpleisbøtte(
+            refusjon(1.januar, 31.januar, orgnr = AG1)
+        )
+        assertEquals(31.januar, historie.periodeTom(AG1))
+    }
 }

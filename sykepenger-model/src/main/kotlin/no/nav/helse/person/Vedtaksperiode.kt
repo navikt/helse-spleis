@@ -627,6 +627,19 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, arbeidsgiver.finnSykeperiodeRettFør(this)?.let { tilstandHvisForlengelse } ?: tilstandHvisGap)
     }
 
+    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser: Ytelser) {
+        val opprinneligPeriodeFom = periode.start
+        val ytelseTom = Historie(ytelser.utbetalingshistorikk()).periodeTom(organisasjonsnummer) ?: return
+
+        if (ytelseTom < opprinneligPeriodeFom) return
+        if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return
+
+        val nyPeriodeFom = sykdomstidslinje.førsteSykedagEtter(ytelseTom.plusDays(1)) ?: sykmeldingsperiode.start
+
+        periode = nyPeriodeFom til periode.endInclusive
+        sykdomstidslinje = arbeidsgiver.fjernDager(opprinneligPeriodeFom til nyPeriodeFom.minusDays(1)).subset(periode)
+    }
+
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive}"
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1276,6 +1289,7 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser
         ) {
             val historie = Historie(person, ytelser.utbetalingshistorikk())
+            vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser)
             lateinit var skjæringstidspunkt: LocalDate
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }

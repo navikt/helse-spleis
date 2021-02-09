@@ -405,6 +405,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
 
+    internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
+
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         if (Toggles.NyInntekt.enabled) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
         else inntektshistorikk.inntekt(skjæringstidspunkt)
@@ -452,7 +454,7 @@ internal class Arbeidsgiver private constructor(
                 perioder
                     .forEach {
                         it.ferdig(hendelse, årsak)
-                        sykdomshistorikk.fjernDager(it.periode())
+                        fjernDager(it.periode())
                     }
                 if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
                 else sykdomshistorikk.fjernDagerFør(vedtaksperioder.first().periode().start)

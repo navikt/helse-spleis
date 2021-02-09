@@ -30,6 +30,10 @@ internal class Historie() {
         utbetalingshistorikk.append(infotrygdbøtte)
     }
 
+    internal constructor(utbetalingshistorikk: Utbetalingshistorikk) : this() {
+        utbetalingshistorikk.append(infotrygdbøtte)
+    }
+
     private val infotrygdbøtte = Historikkbøtte()
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
@@ -119,6 +123,8 @@ internal class Historie() {
     internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
     }
+
+    internal fun periodeTom(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).periode()?.endInclusive
 
     private fun er16DagerEllerMerMellom(forrigeSykedag: LocalDate, førsteSykedag: LocalDate, sykdomstidslinje: Sykdomstidslinje) =
         sykdomstidslinje.subset(Periode(forrigeSykedag.plusDays(1), førsteSykedag.minusDays(1))).har16EllerFlereDagerGap()

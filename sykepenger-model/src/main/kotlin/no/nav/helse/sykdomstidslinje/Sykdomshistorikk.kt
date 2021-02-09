@@ -31,11 +31,12 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.empty)
     }
 
-    internal fun fjernDager(periode: Periode) {
+    internal fun fjernDager(periode: Periode): Sykdomstidslinje {
         // TODO: Remove size == 0 whenever migration is done
-        if (size == 0 || sykdomstidslinje().length() == 0) return
-        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return
+        if (size == 0 || sykdomstidslinje().length() == 0) return sykdomstidslinje()
+        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return sykdomstidslinje()
         elementer.add(0, Element.opprettReset(this, periode))
+        return sykdomstidslinje()
     }
 
     internal fun accept(visitor: SykdomshistorikkVisitor) {
