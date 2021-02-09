@@ -634,7 +634,7 @@ internal class Vedtaksperiode private constructor(
         if (ytelseTom < opprinneligPeriodeFom) return
         if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return
 
-        val nyPeriodeFom = sykdomstidslinje.førsteSykedagEtter(ytelseTom.plusDays(1)) ?: sykmeldingsperiode.start
+        val nyPeriodeFom = sykdomstidslinje.førsteIkkeUkjentDagEtter(ytelseTom.plusDays(1)) ?: sykmeldingsperiode.start
 
         periode = nyPeriodeFom til periode.endInclusive
         sykdomstidslinje = arbeidsgiver.fjernDager(opprinneligPeriodeFom til nyPeriodeFom.minusDays(1)).subset(periode)

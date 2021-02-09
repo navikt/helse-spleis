@@ -691,4 +691,48 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
         }
     }
+
+    @Test
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - ferie i IM etter historikk beholdes`() {
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), ferieperioder = listOf(28.januar til 2.februar), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(28.januar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - ferie i IM før historikk fjernes`() {
+        håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), ferieperioder = listOf(18.januar til 22.januar), førsteFraværsdag = 3.februar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(24.januar, 28.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(24.januar, INNTEKT, ORGNUMMER, true))
+        håndterYtelser(
+            1.vedtaksperiode,
+            utbetalinger,
+            inntektshistorikk = inntektshistorikk
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        inspektør.also {
+            assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
+        }
+    }
 }
