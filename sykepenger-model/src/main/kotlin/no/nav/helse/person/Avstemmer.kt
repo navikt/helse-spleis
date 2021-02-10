@@ -98,7 +98,8 @@ internal class Avstemmer(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            hendelseIder: List<UUID>
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             perioder.add(mapOf(
                 "id" to id,

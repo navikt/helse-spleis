@@ -51,6 +51,7 @@ internal class Vedtaksperiode private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
+    private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
@@ -89,11 +90,12 @@ internal class Vedtaksperiode private constructor(
         sykmeldingsperiode = Periode(LocalDate.MIN, LocalDate.MAX),
         utbetalinger = mutableListOf(),
         utbetalingstidslinje = Utbetalingstidslinje(),
+        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         opprettet = LocalDateTime.now()
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder)
+        visitor.preVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder, inntektskilde)
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
@@ -101,7 +103,7 @@ internal class Vedtaksperiode private constructor(
         visitor.visitSkjæringstidspunkt(skjæringstidspunkt)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode)
+        visitor.postVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder, inntektskilde)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -229,6 +231,8 @@ internal class Vedtaksperiode private constructor(
         harForegåendeSomErBehandletOgUtbetalt(this) -> FORLENGELSE
         else -> FØRSTEGANGSBEHANDLING
     }
+
+    internal fun inntektskilde() = inntektskilde
 
     internal fun ferdig(hendelse: ArbeidstakerHendelse, årsak: ForkastetÅrsak) {
         kontekst(hendelse)
@@ -530,6 +534,10 @@ internal class Vedtaksperiode private constructor(
         val vedtaksperioder = person.nåværendeVedtaksperioder()
         val første = vedtaksperioder.first()
         if (første == this) return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), engineForTimeline, hendelse)
+
+        vedtaksperioder
+            .filter { this.periode.overlapperMed(it.periode) }
+            .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
         if (første.tilstand == AvventerArbeidsgivere) {
@@ -1735,4 +1743,9 @@ enum class Periodetype {
 
     /** Perioden er en direkte eller indirekte forlengelse av en OVERGANG_FRA_IT-periode */
     INFOTRYGDFORLENGELSE;
+}
+
+enum class Inntektskilde{
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE
 }

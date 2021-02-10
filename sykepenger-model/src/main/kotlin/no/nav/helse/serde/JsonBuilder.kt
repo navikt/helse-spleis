@@ -177,10 +177,11 @@ internal class JsonBuilder(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            hendelseIder: List<UUID>
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
-            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder)
+            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder, inntektskilde)
             vedtaksperiodeListe.add(vedtaksperiodeMap)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
         }
@@ -204,9 +205,10 @@ internal class JsonBuilder(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            hendelseIder: List<UUID>
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
-            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder)
+            initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder, inntektskilde)
             pushState(VedtaksperiodeState(vedtaksperiode, vedtaksperiodeMap))
         }
 
@@ -219,13 +221,15 @@ internal class JsonBuilder(person: Person) {
         vedtaksperiodeMap: MutableMap<String, Any?>,
         periode: Periode,
         opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
         vedtaksperiodeMap["fom"] = periode.start
         vedtaksperiodeMap["tom"] = periode.endInclusive
         vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
         vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
         vedtaksperiodeMap["hendelseIder"] = hendelseIder
+        vedtaksperiodeMap["inntektskilde"] = inntektskilde
     }
 
     private inner class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : PersonVisitor {
@@ -523,7 +527,9 @@ internal class JsonBuilder(person: Person) {
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
-            opprinneligPeriode: Periode
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             popState()
         }

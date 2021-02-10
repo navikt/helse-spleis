@@ -5,6 +5,9 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
@@ -374,16 +377,25 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
         assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertInntektskilde(a1, EN_ARBEIDSGIVER)
+        assertInntektskilde(a2, EN_ARBEIDSGIVER)
 
         håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         assertTilstand(a1, AVVENTER_SIMULERING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
@@ -431,10 +443,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertInntektskilde(a1, EN_ARBEIDSGIVER)
+        assertInntektskilde(a2, EN_ARBEIDSGIVER)
 
         håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
@@ -449,6 +465,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
@@ -462,6 +483,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_SIMULERING)
 
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, TIL_UTBETALING)
@@ -586,16 +612,25 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+        assertInntektskilde(a1, EN_ARBEIDSGIVER,2)
+        assertInntektskilde(a2, EN_ARBEIDSGIVER,2)
 
         håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, AVVENTER_HISTORIKK, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
 
         håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         assertTilstand(a1, AVVENTER_SIMULERING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
 
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_GODKJENNING,2)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE,2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
@@ -609,6 +644,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_SIMULERING, 2)
 
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET,2)
+        assertTilstand(a2, AVVENTER_GODKJENNING,2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, TIL_UTBETALING, 2)
@@ -756,14 +796,20 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 3)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a1
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a2
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
     }
@@ -832,11 +878,17 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a1
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a2
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
     }
@@ -907,17 +959,26 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
         assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a1
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
         assertTilstand(a3, TIL_INFOTRYGD, 2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a2
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
         assertTilstand(a3, TIL_INFOTRYGD, 2)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+            orgnummer = a3
+        )
         assertTilstand(a1, TIL_INFOTRYGD, 3)
         assertTilstand(a2, TIL_INFOTRYGD, 3)
         assertTilstand(a3, TIL_INFOTRYGD, 2)
@@ -1020,6 +1081,14 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         vedtaksperiodeIndeks: Int = 1
     ) {
         assertEquals(tilstand, inspektør(orgnummer).sisteTilstand(vedtaksperiodeIndeks.vedtaksperiode(orgnummer)))
+    }
+
+    private fun assertInntektskilde(
+        orgnummer: String,
+        inntektskilde: Inntektskilde,
+        vedtaksperiodeIndeks: Int = 1
+    ) {
+        assertEquals(inntektskilde, orgnummer.inspektør.inntektskilde(vedtaksperiodeIndeks.vedtaksperiode(orgnummer)))
     }
 
     private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {

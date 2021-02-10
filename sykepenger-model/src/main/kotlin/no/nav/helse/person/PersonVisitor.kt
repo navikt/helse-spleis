@@ -70,7 +70,8 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
     }
 
@@ -85,7 +86,9 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
         periode: Periode,
-        opprinneligPeriode: Periode
+        opprinneligPeriode: Periode,
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
     }
 }

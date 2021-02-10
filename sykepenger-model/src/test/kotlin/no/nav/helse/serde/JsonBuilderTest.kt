@@ -295,7 +295,8 @@ class JsonBuilderTest {
                     oppdatert: LocalDateTime,
                     periode: Periode,
                     opprinneligPeriode: Periode,
-                    hendelseIder: List<UUID>
+                    hendelseIder: List<UUID>,
+                    inntektskilde: Inntektskilde
                 ) {
                     vedtaksperiodeId = id.toString()
                     JsonBuilderTest.tilstand = tilstand.type

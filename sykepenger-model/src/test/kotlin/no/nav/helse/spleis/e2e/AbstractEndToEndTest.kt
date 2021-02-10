@@ -925,7 +925,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
-            opprinneligPeriode: Periode
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             vedtaksperioderIder[orgnummer to indeks] = id
             indeks++

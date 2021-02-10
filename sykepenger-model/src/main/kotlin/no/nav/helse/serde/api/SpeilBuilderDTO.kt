@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api
 
 import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
@@ -40,6 +41,7 @@ data class VedtaksperiodeDTO(
     override val tilstand: TilstandstypeDTO,
     override val fullstendig: Boolean = true,
     override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    override val inntektskilde: Inntektskilde,
     val utbetalingsreferanse: String?,
     val utbetalinger: UtbetalingerDTO,
     val utbetalteUtbetalinger: UtbetalingerDTO,
@@ -83,7 +85,8 @@ data class UfullstendigVedtaksperiodeDTO(
     override val tom: LocalDate,
     override val tilstand: TilstandstypeDTO,
     override val fullstendig: Boolean = false,
-    override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>
+    override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    override val inntektskilde: Inntektskilde
 ) : VedtaksperiodeDTOBase
 
 interface VedtaksperiodeDTOBase {
@@ -94,6 +97,7 @@ interface VedtaksperiodeDTOBase {
     val tilstand: TilstandstypeDTO
     val fullstendig: Boolean
     val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>
+    val inntektskilde: Inntektskilde
 }
 
 data class SykdomstidslinjedagDTO(

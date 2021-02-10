@@ -59,6 +59,7 @@ internal class TestArbeidsgiverInspektør(
     private var inUtbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, List<UUID>>()
+    private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
 
     init {
         HentAktivitetslogg(person, orgnummer).also { results ->
@@ -110,7 +111,8 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
@@ -119,6 +121,7 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
         this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
         tilstander[vedtaksperiodeindeks] = tilstand.type
+        inntektskilder[vedtaksperiodeindeks] = inntektskilde
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
@@ -137,7 +140,9 @@ internal class TestArbeidsgiverInspektør(
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
         periode: Periode,
-        opprinneligPeriode: Periode
+        opprinneligPeriode: Periode,
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
         vedtaksperiodeindeks += 1
         inVedtaksperiode = false
@@ -343,5 +348,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun hendelseIder(id: UUID) = id.finn(hendelseIder)
 
     internal fun fagsystemId(id: UUID) = id.finn(fagsystemIder)
+
+    internal fun inntektskilde(id: UUID) = id.finn(inntektskilder)
 }
 

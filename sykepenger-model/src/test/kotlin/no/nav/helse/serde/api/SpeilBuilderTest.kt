@@ -808,6 +808,70 @@ class SpeilBuilderTest {
         assertEquals(75.0, navdagDTO.totalGrad)
     }
 
+    @Test
+    fun `Inntektskilde ved flere arbeidsgivere`() = Toggles.FlereArbeidsgivereOvergangITEnabled.enable {
+
+        val periode = 27.januar(2021) til 31.januar(2021)
+        val inntekt = 30000.månedlig
+        val orgnr1 = "123456879"
+        val orgnr2 = "987654321"
+
+        val person = Person(aktørId, fnr)
+
+        person.håndter(sykmelding(orgnummer = orgnr1, fom = periode.start, tom = periode.endInclusive, grad = 50.prosent).first)
+        person.håndter(sykmelding(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
+        person.håndter(søknad(orgnummer = orgnr1, fom = periode.start, tom = periode.endInclusive, grad = 50.prosent).first)
+
+
+        val vedtaksperiodeId1 = person.collectVedtaksperiodeIder(orgnr1).last()
+        val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnr2).last()
+
+        val inntektshistorikk = listOf(
+            Inntektsopplysning(20.januar(2021), inntekt, orgnr1, true),
+            Inntektsopplysning(20.januar(2021), inntekt, orgnr2, true)
+        )
+
+        val utbetalinger = listOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr2)
+        )
+
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr1
+            )
+        )
+        person.håndter(søknad(orgnummer = orgnr2, fom = periode.start, tom = periode.endInclusive, grad = 100.prosent).first)
+        person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId2, utbetalinger = utbetalinger, orgnummer = orgnr2))
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId2,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr2
+            )
+        )
+        person.håndter(
+            ytelser(
+                vedtaksperiodeId = vedtaksperiodeId1,
+                utbetalinger = utbetalinger,
+                inntektshistorikk = inntektshistorikk,
+                orgnummer = orgnr1
+            )
+        )
+        person.håndter(simulering(vedtaksperiodeId1, orgnummer = orgnr1))
+
+        val vedtaksperiode = serializePersonForSpeil(person)
+            .arbeidsgivere.first()
+            .vedtaksperioder.single()
+
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, vedtaksperiode.inntektskilde)
+    }
+
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
@@ -831,7 +895,8 @@ class SpeilBuilderTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                hendelseIder: List<UUID>
+                hendelseIder: List<UUID>,
+                inntektskilde: Inntektskilde
             ) {
                 currentArbeidsgiver.add(id.toString())
             }
@@ -1265,7 +1330,8 @@ class SpeilBuilderTest {
                     oppdatert: LocalDateTime,
                     periode: Periode,
                     opprinneligPeriode: Periode,
-                    hendelseIder: List<UUID>
+                    hendelseIder: List<UUID>,
+                    inntektskilde: Inntektskilde
                 ) {
                     vedtaksperiodeIder.add(id.toString())
                     if (iPeriode) vedtaksperiodeId = id.toString()

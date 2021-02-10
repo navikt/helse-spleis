@@ -1,10 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Grunnlagsdata
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.april
 import no.nav.helse.testhelpers.desember
@@ -150,7 +147,8 @@ internal class VilkårsgrunnlagTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                hendelseIder: List<UUID>
+                hendelseIder: List<UUID>,
+                inntektskilde: Inntektskilde
             ) {
                 _tilstand = tilstand
             }
@@ -169,7 +167,8 @@ internal class VilkårsgrunnlagTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                hendelseIder: List<UUID>
+                hendelseIder: List<UUID>,
+                inntektskilde: Inntektskilde
             ) {
                 _id = id
             }

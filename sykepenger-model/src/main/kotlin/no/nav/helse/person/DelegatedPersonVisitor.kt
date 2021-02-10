@@ -138,9 +138,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
-        delegatee.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder)
+        delegatee.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder, inntektskilde)
     }
 
     override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
@@ -166,9 +167,11 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         opprettet: LocalDateTime,
         oppdatert: LocalDateTime,
         periode: Periode,
-        opprinneligPeriode: Periode
+        opprinneligPeriode: Periode,
+        hendelseIder: List<UUID>,
+        inntektskilde: Inntektskilde
     ) {
-        delegatee.postVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode)
+        delegatee.postVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder, inntektskilde)
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {

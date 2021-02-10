@@ -214,7 +214,8 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            hendelseIder: List<UUID>
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             gruppeIder[vedtaksperiode] = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                 ?.let(gruppeIder::getValue)
@@ -319,6 +320,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
             vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
             vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
+            vedtaksperiodeMap["inntektskilde"] = vedtaksperiode.inntektskilde()
             vedtaksperiodeMap["maksdato"] = LocalDate.MAX
         }
 
@@ -441,7 +443,9 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
-            opprinneligPeriode: Periode
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
             vedtaksperiodeMap["utbetalteUtbetalinger"] = byggUtbetalteUtbetalingerForPeriode()

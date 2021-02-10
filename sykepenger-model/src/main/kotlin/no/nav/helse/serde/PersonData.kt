@@ -512,6 +512,7 @@ internal data class PersonData(
             private val utbetalinger: List<UUID>,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            private val inntektskilde: Inntektskilde,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -545,6 +546,7 @@ internal data class PersonData(
                         this.utbetalinger.map { utbetalinger.getValue(it) }.toMutableList(),
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         forlengelseFraInfotrygd,
+                        inntektskilde,
                         opprettet,
                         oppdatert
                     )

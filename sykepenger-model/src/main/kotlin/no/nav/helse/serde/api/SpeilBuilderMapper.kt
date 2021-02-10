@@ -6,12 +6,10 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.*
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.inntekt
 import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.sykepengegrunnlag
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -138,7 +136,8 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         utbetalinger = this["utbetalteUtbetalinger"] as UtbetalingerDTO,
         utbetalteUtbetalinger = this["utbetalteUtbetalinger"] as UtbetalingerDTO,
         forlengelseFraInfotrygd = this["forlengelseFraInfotrygd"] as ForlengelseFraInfotrygd,
-        periodetype = this["periodetype"] as Periodetype
+        periodetype = this["periodetype"] as Periodetype,
+        inntektskilde = this["inntektskilde"] as Inntektskilde
     )
 }
 
@@ -188,7 +187,8 @@ internal fun MutableMap<String, Any?>.mapTilUfullstendigVedtaksperiodeDto(gruppe
         tom = sykdomstidslinje.last().dagen,
         tilstand = this["tilstand"] as TilstandstypeDTO,
         fullstendig = false,
-        utbetalingstidslinje = this["utbetalingstidslinje"]?.cast() ?: emptyList()
+        utbetalingstidslinje = this["utbetalingstidslinje"]?.cast() ?: emptyList(),
+        inntektskilde = this["inntektskilde"] as Inntektskilde
     )
 }
 
