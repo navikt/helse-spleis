@@ -325,7 +325,9 @@ data class InntektsgrunnlagDTO(
     val sammenligningsgrunnlag: Double?,
     val avviksprosent: Double?,
     val maksUtbetalingPerDag: Double,
-    val inntekter: List<ArbeidsgiverinntektDTO>
+    val inntekter: List<ArbeidsgiverinntektDTO>,
+    val oppfyllerKravOmMinstelønn: Boolean,
+    val grunnbeløp: Int
 ) {
     data class ArbeidsgiverinntektDTO(
         val arbeidsgiver: String,

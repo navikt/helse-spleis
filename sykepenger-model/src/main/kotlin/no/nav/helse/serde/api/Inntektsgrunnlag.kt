@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Person
@@ -33,7 +34,12 @@ internal fun inntektsgrunnlag(
         sammenligningsgrunnlag = sammenligningsgrunnlag?.reflection { årlig, _, _, _ -> årlig },
         avviksprosent = nøkkeldata.avviksprosent,
         maksUtbetalingPerDag = sykepengegrunnlag.reflection { _, _, daglig, _ -> daglig },
-        inntekter = arbeidsgiverinntekt
+        inntekter = arbeidsgiverinntekt,
+        oppfyllerKravOmMinstelønn = sykepengegrunnlag > person.minimumInntekt(nøkkeldata.skjæringstidspunkt),
+        grunnbeløp = (Grunnbeløp.`1G`
+            .beløp(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)
+            .reflection { årlig, _, _, _ -> årlig })
+            .toInt(),
     )
 }
 
