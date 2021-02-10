@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Endringskode.*
@@ -22,8 +23,10 @@ internal class Utbetalingslinje internal constructor(
     private var datoStatusFom: LocalDate? = null
 ) : Iterable<LocalDate> {
 
+    internal val periode get() = fom til tom
+
     override operator fun iterator() = object : Iterator<LocalDate> {
-        private val periodeIterator = Periode(fom, tom).iterator()
+        private val periodeIterator = periode.iterator()
         override fun hasNext() = periodeIterator.hasNext()
         override fun next() = periodeIterator.next()
     }

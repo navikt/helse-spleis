@@ -43,4 +43,5 @@ sealed class Toggles(enabled: Boolean = false, private val force: Boolean = fals
     object ReplayEnabled : Toggles()
     object FlereArbeidsgivereOvergangITEnabled : Toggles(true)
     object PraksisendringEnabled : Toggles()
+    object RevurderUtbetaltPeriode : Toggles()
 }

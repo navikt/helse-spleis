@@ -109,6 +109,14 @@ internal class Utbetaling private constructor(
     internal fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     internal fun erEtterutbetaling() = type == Utbetalingtype.ETTERUTBETALING
 
+    // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
+    // og at this er lik den siste aktive utbetalingen for fagsystemIden
+    internal fun hørerSammen(other: Utbetaling) =
+        arbeidsgiverOppdrag.fagsystemId() == other.arbeidsgiverOppdrag.fagsystemId()
+
+    internal fun kanRevurdere(other: Utbetaling, utbetalinger: List<Utbetaling>) =
+        hørerSammen(other) && utbetalinger.aktive().any { it == this }
+
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
