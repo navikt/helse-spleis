@@ -9,6 +9,7 @@ import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
 internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
@@ -130,5 +131,33 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         )
 
         assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+    }
+
+
+    @Test
+    fun `Sender ikke ut ManglendeInntektsmeldingEvent hvis vi har en tilstøtende forkastet sykeperiode - AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 25.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 25.februar, 100.prosent))
+
+        assertFalse(3.vedtaksperiode in observatør.manglendeInntektsmeldingVedtaksperioder)
+
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+        )
     }
 }

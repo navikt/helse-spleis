@@ -495,8 +495,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun tidligereOgEttergølgende2(segSelv: Vedtaksperiode): VedtaksperioderFilter {
-        val medSammeArbeidsgiverperiode = tidligereOgEttergølgende(segSelv)
-        return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in medSammeArbeidsgiverperiode
+        val tidligereOgEttergølgende1 = tidligereOgEttergølgende(segSelv)
+        return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode in tidligereOgEttergølgende1
     }
 
     private fun nyVedtaksperiode(sykmelding: Sykmelding): Vedtaksperiode {
