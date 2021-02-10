@@ -78,7 +78,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     private fun addUkjentDag(dato: LocalDate) =
-        Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN).let { økonomi ->
+        Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato).let { økonomi ->
             if (dato.erHelg()) addFridag(dato, økonomi) else addUkjentDag(dato, økonomi)
         }
 
@@ -114,7 +114,7 @@ internal class Utbetalingstidslinje private constructor(
         if (other.utbetalingsdager.isEmpty()) return this
         if (!this.overlapper(other)) return this
         return this.plus(other) { venstre, høyre ->
-            if ((høyre !is UkjentDag && !høyre.dato.erHelg()) || (høyre !is Fridag && høyre.dato.erHelg())) UkjentDag(høyre.dato, høyre.økonomi)
+            if ((høyre !is UkjentDag && !høyre.dato.erHelg()) || (høyre !is Fridag && høyre.dato.erHelg())) UkjentDag(venstre.dato, venstre.økonomi)
             else venstre
         }.trim()
     }
@@ -202,7 +202,7 @@ internal class Utbetalingstidslinje private constructor(
     internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in førsteDato()..sisteDato()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN))
+        if (isEmpty() || dato !in førsteDato()..sisteDato()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
         else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {

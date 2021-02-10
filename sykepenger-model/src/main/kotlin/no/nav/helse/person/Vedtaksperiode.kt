@@ -1345,12 +1345,10 @@ internal class Vedtaksperiode private constructor(
                         tidslinjer = utbetalingstidslinjer,
                         personTidslinje = historie.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
-                        skjæringstidspunkter = historie.skjæringstidspunkter(vedtaksperiode.periode),
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
                         aktivitetslogg = ytelser,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                        fødselsnummer = vedtaksperiode.fødselsnummer,
                         dødsdato = ytelser.dødsinfo().dødsdato
                     ).also { engine ->
                         engine.beregn()

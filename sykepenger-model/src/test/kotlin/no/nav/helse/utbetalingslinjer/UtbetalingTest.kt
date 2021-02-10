@@ -187,7 +187,6 @@ internal class UtbetalingTest {
         MaksimumUtbetaling(
             listOf(*tidslinjer),
             aktivitetslogg,
-            listOf(1.januar),
             1.januar
         ).betal()
 

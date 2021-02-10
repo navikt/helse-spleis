@@ -20,7 +20,7 @@ internal class Økonomi private constructor(
     private val arbeidsgiverBetalingProsent: Prosentdel,
     private val aktuellDagsinntekt: Inntekt? = null,
     private val dekningsgrunnlag: Inntekt? = null,
-    private var skjæringstidspunkt: LocalDate? = null,
+    private val skjæringstidspunkt: LocalDate? = null,
     private var totalGrad: Prosentdel? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
@@ -43,13 +43,10 @@ internal class Økonomi private constructor(
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
             Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag!! })
 
-        internal fun betal(økonomiList: List<Økonomi>, skjæringstidspunkt: LocalDate, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
+        internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
-            økonomiList
-                .filter { it.skjæringstidspunkt == null }
-                .forEach { it.skjæringstidspunkt = skjæringstidspunkt }
             økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
-            justereForGrense(it, maksbeløp(it.first(), virkningsdato))
+            justereForGrense(it, maksbeløp(requireNotNull(it.firstOrNull { it.skjæringstidspunkt != null }) { "Fant ingen økonomiobjekter med skjæringstidspunkt" }, virkningsdato))
         }
 
         private fun maksbeløp(økonomi: Økonomi, virkningsdato: LocalDate) =
@@ -562,7 +559,7 @@ internal class Økonomi private constructor(
 
 internal fun List<Økonomi>.totalSykdomsgrad(): Prosentdel = Økonomi.totalSykdomsgrad(this)
 
-internal fun List<Økonomi>.betal(skjæringstidspunkt: LocalDate, virkningsdato: LocalDate = skjæringstidspunkt) = Økonomi.betal(this, skjæringstidspunkt, virkningsdato)
+internal fun List<Økonomi>.betal(virkningsdato: LocalDate) = Økonomi.betal(this, virkningsdato)
 
 internal fun List<Økonomi>.erUnderInntekstgrensen(
     alder: Alder,

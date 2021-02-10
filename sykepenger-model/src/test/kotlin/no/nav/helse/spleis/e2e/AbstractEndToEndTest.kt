@@ -424,8 +424,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 organisasjonsnummer = orgnummer,
                 gyldighetsdato = gyldighetsdato,
                 fagsystemId = fagsystemId,
-                aktivitetslogg = Aktivitetslogg(),
-                utbetalingshistorikk = utbetalingshistorikk(UUID.randomUUID())
+                aktivitetslogg = Aktivitetslogg()
             )
         )
     }

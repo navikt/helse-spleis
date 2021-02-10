@@ -46,7 +46,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private fun Økonomi.inntektIfNotNull(dato: LocalDate) =
         inntektForDatoOrNull(dato)
             ?.let { (skjæringstidspunkt, inntekt) -> inntekt(inntekt, inntekt.dekningsgrunnlag(arbeidsgiverRegler), skjæringstidspunkt) }
-            ?: inntekt(INGEN)
+            ?: inntekt(INGEN, skjæringstidspunkt = dato)
 
     internal fun result(sykdomstidslinje: Sykdomstidslinje): Utbetalingstidslinje {
         Sykdomstidslinje(sykdomstidslinje, sammenhengendePeriode)

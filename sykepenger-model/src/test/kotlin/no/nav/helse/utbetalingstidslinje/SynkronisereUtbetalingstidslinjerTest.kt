@@ -82,12 +82,10 @@ internal class SynkronisereUtbetalingstidslinjerTest {
             ),
             tidslinjeOf(),
             1.januar til 31.januar,
-            listOf(1.januar),
             Alder(UNG_PERSON_FNR_2018),
             NormalArbeidstaker,
             Aktivitetslogg(),
             arb1.organisasjonsnummer(),
-            UNG_PERSON_FNR_2018,
         )
         // TODO gjøre ferdig eller slette testen
     }

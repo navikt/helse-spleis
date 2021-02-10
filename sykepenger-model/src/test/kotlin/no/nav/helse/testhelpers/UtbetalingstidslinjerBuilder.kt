@@ -14,15 +14,17 @@ import java.time.LocalDate
  * */
 internal fun tidslinjeOf(
     vararg utbetalingsdager: Utbetalingsdager,
-    startDato: LocalDate = LocalDate.of(2018, 1, 1)
+    startDato: LocalDate = LocalDate.of(2018, 1, 1),
+    skjæringstidspunkter: List<LocalDate> = listOf(startDato)
 ) = Utbetalingstidslinje().apply {
+    val skjæringstidspunkt = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
     utbetalingsdager.fold(startDato) { startDato, (antallDager, utbetalingsdag, helgedag, dekningsgrunnlag, grad) ->
         var dato = startDato
         repeat(antallDager) {
             if (helgedag != null && dato.erHelg()) {
-                this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
+                this.helgedag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
             } else {
-                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig))
+                this.utbetalingsdag(dato, Økonomi.sykdomsgrad(grad.prosent).inntekt(dekningsgrunnlag.daglig, skjæringstidspunkt = skjæringstidspunkt(dato)))
             }
             dato = dato.plusDays(1)
         }

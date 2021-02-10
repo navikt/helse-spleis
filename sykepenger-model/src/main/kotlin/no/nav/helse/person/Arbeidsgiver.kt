@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -286,9 +285,8 @@ internal class Arbeidsgiver private constructor(
         ) ?: return hendelse.info("Fant ingen utbetalinger å etterutbetale")
 
         val periode = LocalDate.of(2020, 5, 1).minusMonths(18) til LocalDate.now()
-        if (!hendelse.harHistorikk) return utbetalingshistorikk(hendelse, periode)
 
-        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, Historie(person, hendelse.utbetalingshistorikk()), periode)
+        val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode)
 
         val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, reberegnetTidslinje)
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
@@ -301,7 +299,6 @@ internal class Arbeidsgiver private constructor(
     private fun reberegnUtbetalte(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,
-        historie: Historie,
         periode: Periode
     ): Utbetalingstidslinje {
         val arbeidsgivertidslinjer = arbeidsgivere
@@ -309,7 +306,7 @@ internal class Arbeidsgiver private constructor(
             .filter { it.second.isNotEmpty() }
             .toMap()
 
-        MaksimumUtbetaling(arbeidsgivertidslinjer.values.toList(), aktivitetslogg, historie.skjæringstidspunkter(periode), periode.endInclusive)
+        MaksimumUtbetaling(arbeidsgivertidslinjer.values.toList(), aktivitetslogg, periode.endInclusive)
             .betal()
 
         arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->

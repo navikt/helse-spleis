@@ -29,7 +29,6 @@ internal class EtterbetalingMessage(val packet: MessageDelegate) : HendelseMessa
                 organisasjonsnummer,
                 gyldighetsdato,
                 fagsystemId,
-                utbetalingshistorikkMessage?.utbetalingshistorikk(aktivitetslogg),
                 aktivitetslogg
             )
         )

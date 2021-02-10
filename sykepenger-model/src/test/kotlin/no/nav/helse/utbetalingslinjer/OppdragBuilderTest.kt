@@ -195,7 +195,6 @@ internal class OppdragBuilderTest {
         MaksimumUtbetaling(
             listOf(tidslinje),
             Aktivitetslogg(),
-            listOf(1.januar),
             1.januar
         ).betal()
         oppdrag = OppdragBuilder(

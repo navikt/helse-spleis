@@ -344,12 +344,10 @@ internal class ArbeidsgiverUtbetalingerTest {
             mapOf(arbeidsgiver to arbeidsgiverTidslinje),
             historiskTidslinje,
             Periode(1.januar, 31.desember(2019)),
-            listOf(1.januar),
             Alder(fnr),
             NormalArbeidstaker,
             aktivitetslogg,
             "88888888",
-            fnr,
         ).also {
             it.beregn()
             it.tidslinjeEngine.beregnGrenser(31.desember(2019))
