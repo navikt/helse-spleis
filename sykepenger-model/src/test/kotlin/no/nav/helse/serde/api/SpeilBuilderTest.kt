@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
@@ -516,13 +515,6 @@ class SpeilBuilderTest {
         assertEquals("en_saksbehandler_ident", vedtaksperiode.godkjentAv)
 
         val vilkår = vedtaksperiode.vilkår
-        val sykepengegrunnlag = vilkår.sykepengegrunnlag
-        assertEquals(
-            Grunnbeløp.`1G`.beløp(fom).reflection { årlig, _, _, _ -> årlig }.toInt(),
-            sykepengegrunnlag!!.grunnbeløp
-        )
-        assertTrue(sykepengegrunnlag.oppfylt!!)
-        assertEquals(31000.0 * 12, sykepengegrunnlag.sykepengegrunnlag)
 
         val sykepengedager = vilkår.sykepengedager
         assertEquals(11, sykepengedager.forbrukteSykedager)

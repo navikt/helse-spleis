@@ -1,22 +1,20 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.person.*
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.inntekt
-import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Companion.sykepengegrunnlag
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.SimuleringsdataDTO.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -91,7 +89,6 @@ internal fun MutableMap<String, Any?>.mapTilArbeidsgiverDto(utbetalingshistorikk
 
 internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
     fødselsnummer: String,
-    inntekter: List<Inntektshistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?,
     gruppeId: UUID
@@ -108,7 +105,6 @@ internal fun MutableMap<String, Any?>.mapTilVedtaksperiodeDto(
         fødselsnummer,
         dataForVilkårsvurdering,
         søknad,
-        inntekter,
         førsteSykepengedag,
         sisteSykepengedag
     )
@@ -240,13 +236,10 @@ internal fun mapVilkår(
     fødselsnummer: String,
     dataForVilkårsvurdering: GrunnlagsdataDTO?,
     søknadNav: SøknadNavDTO?,
-    inntekter: List<Inntektshistorikk.Inntektsendring>,
     førsteSykepengedag: LocalDate?,
     sisteSykepengedag: LocalDate?
 ): VilkårDTO {
     val skjæringstidspunkt = vedtaksperiodeMap["skjæringstidspunkt"] as LocalDate
-    val sykepengegrunnlag = sykepengegrunnlag(inntekter, skjæringstidspunkt, tom)
-    val beregnetMånedsinntekt = inntekt(inntekter, skjæringstidspunkt)
     val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: sykdomstidslinje.last().dagen
     val personalder = Alder(fødselsnummer)
     val forbrukteSykedager = (vedtaksperiodeMap["forbrukteSykedager"] as Int?) ?: 0
@@ -277,27 +270,10 @@ internal fun mapVilkår(
             oppfylt = søknadsfristOppfylt(it)
         )
     }
-    val sykepengegrunnlagDTO = SykepengegrunnlagDTO(
-        sykepengegrunnlag = sykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig },
-        grunnbeløp = (Grunnbeløp.`1G`
-            .beløp(skjæringstidspunkt, tom)
-            .reflection { årlig, _, _, _ -> årlig })
-            .toInt(),
-        oppfylt = sykepengegrunnlagOppfylt(
-            personalder = personalder,
-            beregnetMånedsinntekt = beregnetMånedsinntekt,
-            skjæringstidspunkt = skjæringstidspunkt
-        )
-    )
-    val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus
-    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, sykepengegrunnlagDTO, medlemskapstatusDTO)
-}
 
-private fun sykepengegrunnlagOppfylt(
-    personalder: Alder,
-    beregnetMånedsinntekt: Inntekt?,
-    skjæringstidspunkt: LocalDate
-) = beregnetMånedsinntekt?.let { it > personalder.minimumInntekt(skjæringstidspunkt) }
+    val medlemskapstatusDTO = dataForVilkårsvurdering?.medlemskapstatus
+    return VilkårDTO(sykepengedager, alder, opptjening, søknadsfrist, medlemskapstatusDTO)
+}
 
 private fun søknadsfristOppfylt(søknadNav: SøknadNavDTO): Boolean {
     val søknadSendtMåned = søknadNav.sendtNav.toLocalDate().withDayOfMonth(1)

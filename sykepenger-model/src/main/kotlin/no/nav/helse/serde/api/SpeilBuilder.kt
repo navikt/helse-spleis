@@ -12,7 +12,6 @@ import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.VedtaksperiodeReflect
-import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -35,16 +34,7 @@ private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
     val jsonBuilder = SpeilBuilder(person, hendelser)
-    return jsonBuilder.toJson().also {
-        it.arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>().forEach { vedtaksperiode ->
-                vedtaksperiode.vilkår.sykepengegrunnlag ?: sikkerLogg.info(
-                    "Sykepengegrunnlag er null, SpeilPerson-json: {}",
-                    serdeObjectMapper.writeValueAsString(it)
-                )
-            }
-        }
-    }
+    return jsonBuilder.toJson()
 }
 
 internal class SpeilBuilder(person: Person, private val hendelser: List<HendelseDTO>) {
@@ -474,7 +464,6 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
                         fødselsnummer,
-                        inntekter,
                         førsteSykepengedag,
                         sisteSykepengedag,
                         gruppeId
