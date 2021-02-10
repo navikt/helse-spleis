@@ -320,13 +320,13 @@ data class SykepengegrunnlagDTO(
 
 data class InntektsgrunnlagDTO(
     val skjæringstidspunkt: LocalDate,
-    val sykepengegrunnlag: Double,
-    val omregnetÅrsinntekt: Double,
+    val sykepengegrunnlag: Double?,
+    val omregnetÅrsinntekt: Double?,
     val sammenligningsgrunnlag: Double?,
     val avviksprosent: Double?,
-    val maksUtbetalingPerDag: Double,
+    val maksUtbetalingPerDag: Double?,
     val inntekter: List<ArbeidsgiverinntektDTO>,
-    val oppfyllerKravOmMinstelønn: Boolean,
+    val oppfyllerKravOmMinstelønn: Boolean?,
     val grunnbeløp: Int
 ) {
     data class ArbeidsgiverinntektDTO(
@@ -341,7 +341,7 @@ data class InntektsgrunnlagDTO(
             val inntekterFraAOrdningen: List<InntekterFraAOrdningenDTO>? = null //kun gyldig for A-ordningen
         ) {
             enum class InntektkildeDTO {
-                Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, KopiertFraForrigePeriode
+                Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen
             }
 
             data class InntekterFraAOrdningenDTO(

@@ -311,11 +311,11 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober }.also { inntektsgrunnlaget ->
-            assertEquals(Inntekt.INGEN.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
-            assertEquals(Inntekt.INGEN.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertNull(inntektsgrunnlaget.sykepengegrunnlag)
+            assertNull(inntektsgrunnlaget.omregnetÅrsinntekt)
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(0.0, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertNull(inntektsgrunnlaget.maksUtbetalingPerDag)
             assertNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt)
         }
     }

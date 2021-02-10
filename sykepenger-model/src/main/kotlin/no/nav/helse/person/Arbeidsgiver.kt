@@ -66,7 +66,9 @@ internal class Arbeidsgiver private constructor(
         internal val ALLE: VedtaksperioderFilter = { true }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }.summer()
+            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
+                .takeIf { it.isNotEmpty() }
+                ?.summer()
 
         internal fun List<Arbeidsgiver>.inntekt(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.inntekt(skjæringstidspunkt) }.summer()

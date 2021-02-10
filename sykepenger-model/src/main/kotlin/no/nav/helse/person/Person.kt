@@ -50,7 +50,8 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return invaliderAllePerioder(hendelse)
+        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereOvergangITEnabled.enabled)
+            return invaliderAllePerioder(hendelse)
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -302,10 +303,11 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(arbeidsgiverId, hendelse).addInntektVol2(inntektsopplysninger, hendelse)
     }
 
-    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate): Inntekt {
-        val grunnlagForSykepengegrunnlag: Inntekt = grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
-        return minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
-    }
+    internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
+        grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
+            ?.let { grunnlagForSykepengegrunnlag ->
+                minOf(grunnlagForSykepengegrunnlag, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden))
+            }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
         if (Toggles.NyInntekt.enabled) {

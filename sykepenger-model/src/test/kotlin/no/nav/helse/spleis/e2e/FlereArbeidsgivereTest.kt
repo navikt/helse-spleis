@@ -128,6 +128,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled("Trenger inntekt fra Inntektskomponenten før disse virker (§8-28)")
     fun `Sammenligningsgrunnlag for flere arbeidsgivere som overlapper hverandres sykeperioder`() {
         nyPeriode(15.januar til 5.februar, a1)
         person.håndter(
