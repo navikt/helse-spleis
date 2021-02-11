@@ -316,8 +316,17 @@ internal class Utbetaling private constructor(
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
 
-        internal fun vedtakFattet(utbetaling: Utbetaling?, person: Person, vedtaksperiodeId: UUID, periode: Periode, hendelseIder: List<UUID>, sykepengegrunnlag: Inntekt, inntekt: Inntekt) {
-            person.vedtakFattet(vedtaksperiodeId, periode, hendelseIder, sykepengegrunnlag, inntekt, utbetaling?.takeIf { it.harUtbetalinger() }?.id)
+        internal fun vedtakFattet(
+            utbetaling: Utbetaling?,
+            person: Person,
+            vedtaksperiodeId: UUID,
+            periode: Periode,
+            hendelseIder: List<UUID>,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: Inntekt,
+            inntekt: Inntekt
+        ) {
+            person.vedtakFattet(vedtaksperiodeId, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt, utbetaling?.takeIf { it.harUtbetalinger() }?.id)
         }
     }
 

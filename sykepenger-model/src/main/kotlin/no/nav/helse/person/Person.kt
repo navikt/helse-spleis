@@ -195,12 +195,19 @@ class Person private constructor(
     }
 
     internal fun vedtakFattet(
-        vedtaksperiodeId: UUID, periode: Periode, hendelseIder: List<UUID>, sykepengegrunnlag: Inntekt, inntekt: Inntekt, utbetalingId: UUID?
+        vedtaksperiodeId: UUID,
+        periode: Periode,
+        hendelseIder: List<UUID>,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Inntekt,
+        inntekt: Inntekt,
+        utbetalingId: UUID?
     ) {
         observers.forEach { it.vedtakFattet(
             vedtaksperiodeId,
             periode,
             hendelseIder,
+            skjæringstidspunkt,
             sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig  },
             inntekt.reflection { _, månedlig, _, _ -> månedlig },
             utbetalingId

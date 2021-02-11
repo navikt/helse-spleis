@@ -12,6 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -144,6 +145,7 @@ internal class PersonMediator(private val person: Person, private val message: H
             vedtaksperiodeId: UUID,
             periode: Periode,
             hendelseIder: List<UUID>,
+            skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Double,
             inntekt: Double,
             utbetalingId: UUID?
@@ -155,6 +157,7 @@ internal class PersonMediator(private val person: Person, private val message: H
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
                     "hendelser" to hendelseIder,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
                     "sykepengegrunnlag" to sykepengegrunnlag,
                     "inntekt" to inntekt
                 ).apply {
