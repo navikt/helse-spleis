@@ -575,7 +575,35 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `Yes hello this is dog`() {
+    fun `Yes hello does this work‽`() {
+        val fom = 1.januar(2018)
+        val tom = 31.januar(2018)
+
+        val (person, hendelser) = person(
+            fom = fom, tom = tom,
+            påfølgendePerioder = listOf(
+                1.februar(2018).rangeTo(28.februar(2018)),
+                1.mars(2018).rangeTo(31.mars(2018)),
+                1.april(2018).rangeTo(30.april(2018)),
+                1.mai(2018).rangeTo(31.mai(2018)),
+                1.juni(2018).rangeTo(30.juni(2018)),
+                1.juli(2018).rangeTo(31.juli(2018)),
+                1.august(2018).rangeTo(31.august(2018)),
+                1.september(2018).rangeTo(30.september(2018)),
+                1.oktober(2018).rangeTo(31.oktober(2018)),
+                1.november(2018).rangeTo(30.november(2018)),
+                1.desember(2018).rangeTo(31.desember(2018)),
+                1.januar(2019).rangeTo(31.januar(2019))
+            )
+        )
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
+        assertEquals(0, vedtaksperiode.vilkår.sykepengedager.gjenståendeDager)
+    }
+
+    @Test
+    fun `Sí, hola, ⸘funciona‽`() {
         val fom = 1.januar(2018)
         val tom = 31.januar(2018)
 
