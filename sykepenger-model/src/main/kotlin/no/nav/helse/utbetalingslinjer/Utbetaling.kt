@@ -603,8 +603,8 @@ internal class Utbetaling private constructor(
         }
     }
 
-    internal object IkkeGodkjent : Tilstand {}
-    internal object Forkastet : Tilstand {}
+    internal object IkkeGodkjent : Tilstand
+    internal object Forkastet : Tilstand
 
     internal class Vurdering(
         private val godkjent: Boolean,

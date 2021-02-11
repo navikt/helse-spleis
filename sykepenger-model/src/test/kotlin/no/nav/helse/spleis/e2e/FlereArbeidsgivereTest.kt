@@ -1168,7 +1168,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         person.håndter(
             utbetaling(
-                orgnummer.id(0),
                 orgnummer.inspektør.fagsystemId(orgnummer.id(0)),
                 status = AKSEPTERT,
                 orgnummer = orgnummer

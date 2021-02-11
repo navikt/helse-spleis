@@ -182,7 +182,7 @@ internal class Økonomi private constructor(
                      arbeidsgiverBetalingProsent: Double,
                      dekningsgrunnlag: Double?,
                      _: LocalDate?,
-                     totalGrad: Double?,
+                     _: Double?,
                      aktuellDagsinntekt: Double?,
                      arbeidsgiverbeløp: Int?,
                      personbeløp: Int?,

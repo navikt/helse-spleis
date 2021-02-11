@@ -825,7 +825,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -967,7 +967,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT,  100.prosent,  ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode, *arrayOf(RefusjonTilArbeidsgiver(1.januar, 2.januar, INNTEKT, 100.prosent, ORGNUMMER)),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -1257,7 +1257,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         håndterSøknad(
-            perioder = arrayOf(Sykdom(1.januar, 21.januar, 100.prosent), Permisjon(21.januar, 21.januar)),
+            Sykdom(1.januar, 21.januar, 100.prosent), Permisjon(21.januar, 21.januar),
             id = 1.vedtaksperiode
         )
         assertTilstander(
@@ -1834,7 +1834,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Ferie(28.juni, 30.juni))
         håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig,  100.prosent,  ORGNUMMER))
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode, *arrayOf(RefusjonTilArbeidsgiver(3.juni, 8.juni, 15000.daglig, 100.prosent, ORGNUMMER)),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     3.juni(2018),
@@ -1946,7 +1946,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.februar, 10.februar, 100.prosent))
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
-        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT, annullert = true)
+        håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].arbeidsgiverOppdrag().fagsystemId())
 
         assertTrue(inspektør.utbetalinger[0].erUtbetalt())
@@ -2473,7 +2473,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val inntektsopplysning = listOf(
             Utbetalingshistorikk.Inntektsopplysning(3.september(2020), INNTEKT, ORGNUMMER, true)
         )
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = historikk, inntektshistorikk = inntektsopplysning)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk, inntektshistorikk = inntektsopplysning)
 
         assertTilstander(
             1.vedtaksperiode,

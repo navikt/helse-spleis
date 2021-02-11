@@ -149,9 +149,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     }
 
-    protected fun replaySøknadArbeidsgiver(søknadArbeidsgiver: SøknadArbeidsgiver): Unit =
-        person.håndter(søknadArbeidsgiver)
-
     protected fun håndterSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
         mottatt: LocalDateTime? = null,
@@ -185,8 +182,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER
     ): UUID {
         søknad(
-            id = id,
-            perioder = perioder,
+            id,
+            *perioder,
             andreInntektskilder = andreInntektskilder,
             sendtTilNav = sendtTilNav,
             orgnummer = orgnummer
@@ -198,7 +195,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterSøknadArbeidsgiver(
         vararg perioder: SøknadArbeidsgiver.Søknadsperiode,
         orgnummer: String = ORGNUMMER
-    ) = søknadArbeidsgiver(perioder = perioder, orgnummer = orgnummer).also(person::håndter)
+    ) = søknadArbeidsgiver(*perioder, orgnummer = orgnummer).also(person::håndter)
 
     protected fun håndterInntektsmeldingMedValidering(
         vedtaksperiodeId: UUID,
@@ -380,8 +377,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterUtbetalt(
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
         status: UtbetalingHendelse.Oppdragstatus = UtbetalingHendelse.Oppdragstatus.AKSEPTERT,
-        saksbehandlerEpost: String = "siri.saksbehanlder@nav.no",
-        annullert: Boolean = false,
         sendOverførtKvittering: Boolean = true,
         orgnummer: String = ORGNUMMER,
         fagsystemId: String = inspektør(orgnummer).fagsystemId(vedtaksperiodeId)
@@ -403,7 +398,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         }
         person.håndter(
             utbetaling(
-                vedtaksperiodeId = vedtaksperiodeId,
                 fagsystemId = fagsystemId,
                 status = status,
                 orgnummer = orgnummer
@@ -461,7 +455,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun utbetaling(
-        vedtaksperiodeId: UUID,
         fagsystemId: String,
         status: UtbetalingHendelse.Oppdragstatus,
         orgnummer: String = ORGNUMMER

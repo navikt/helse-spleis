@@ -14,13 +14,13 @@ import java.util.*
 internal class SykmeldingTest {
 
     private companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
+        const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
     private lateinit var sykmelding: Sykmelding
 
     @Test
-    fun `sykdomsgrad som er 100% støttes`() {
+    fun `sykdomsgrad som er 100 prosent støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
         assertEquals(8 + 3, sykmelding.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(4, sykmelding.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
@@ -28,7 +28,7 @@ internal class SykmeldingTest {
     }
 
     @Test
-    fun `sykdomsgrad under 100% støttes`() {
+    fun `sykdomsgrad under 100 prosent støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
         assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
     }

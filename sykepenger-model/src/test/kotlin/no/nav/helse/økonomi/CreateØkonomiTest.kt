@@ -42,8 +42,8 @@ internal class CreateØkonomiTest {
                     grad,
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
-                    skjæringstidspunkt,
-                    totalGrad,
+                    _,
+                    _,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -70,8 +70,8 @@ internal class CreateØkonomiTest {
                     grad,
                     arbeidsgiverBetalingProsent,
                     dekningsgrunnlag,
-                    skjæringstidspunkt,
-                    totalGrad,
+                    _,
+                    _,
                     aktuellDagsinntekt,
                     arbeidsgiverbeløp,
                     personbeløp,
@@ -140,21 +140,21 @@ internal class CreateØkonomiTest {
     )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
-        lateinit var _økonomi: Økonomi
+        lateinit var fangetØkonomi: Økonomi
         dagData.parseDag().accept(object : UtbetalingsdagVisitor {
             override fun visit(
                 dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
                 dato: LocalDate,
                 økonomi: Økonomi
             ) {
-                _økonomi = økonomi
+                fangetØkonomi = økonomi
             }
         })
-        return _økonomi
+        return fangetØkonomi
     }
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
-        lateinit var _økonomi: Økonomi
+        lateinit var fangetØkonomi: Økonomi
         dagData.parseDag().accept(object : SykdomstidslinjeVisitor {
             override fun visitDag(
                 dag: Dag.Sykedag,
@@ -162,9 +162,9 @@ internal class CreateØkonomiTest {
                 økonomi: Økonomi,
                 kilde: SykdomstidslinjeHendelse.Hendelseskilde
             ) {
-                _økonomi = økonomi
+                fangetØkonomi = økonomi
             }
         })
-        return _økonomi
+        return fangetØkonomi
     }
 }

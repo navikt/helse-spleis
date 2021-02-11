@@ -89,7 +89,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER)
         )
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -128,7 +128,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
         håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig,  100.prosent,  ORGNUMMER))
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     17.januar(2018),

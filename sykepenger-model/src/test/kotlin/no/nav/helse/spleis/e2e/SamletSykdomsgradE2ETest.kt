@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
     @Test
-    fun `avviser dager under 20 %`() {
+    fun `avviser dager under 20 prosent`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
@@ -45,7 +45,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser dager under 20 % på forlengelser`() {
+    fun `avviser dager under 20 prosent på forlengelser`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))

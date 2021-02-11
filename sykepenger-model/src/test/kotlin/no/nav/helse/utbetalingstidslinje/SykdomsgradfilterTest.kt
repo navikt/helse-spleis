@@ -12,7 +12,7 @@ internal class SykdomsgradfilterTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @Test
-    fun `sykdomsgrad over 20%`() {
+    fun `sykdomsgrad over 20 prosent`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 50.0)))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
@@ -22,7 +22,7 @@ internal class SykdomsgradfilterTest {
     }
 
     @Test
-    fun `alle dager fom første dag med total sykdomsgrad under 20% skal avvises`() {
+    fun `alle dager fom første dag med total sykdomsgrad under 20 prosent skal avvises`() {
         val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 10.NAV))
         val periode = Periode(1.januar, 31.januar)
         undersøke(tidslinjer, periode)

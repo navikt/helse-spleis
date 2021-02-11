@@ -306,7 +306,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
         nyttVedtak(29.august, 25.september)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode, annullert = true)
+        håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(26.september, 23.oktober, 100.prosent))
 

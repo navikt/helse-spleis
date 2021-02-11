@@ -25,7 +25,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk1)
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = arrayOf(historikk1),
+            1.vedtaksperiode, historikk1,
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     20.november(2019),
@@ -47,7 +47,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk1)
         håndterYtelser(
-            2.vedtaksperiode, utbetalinger = arrayOf(historikk1),
+            2.vedtaksperiode, historikk1,
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     20.november(2019),
@@ -66,7 +66,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk2)
         håndterYtelser(
-            3.vedtaksperiode, utbetalinger = arrayOf(historikk1, historikk2),
+            3.vedtaksperiode, historikk1, historikk2,
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     20.november(2019),

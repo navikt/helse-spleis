@@ -125,7 +125,6 @@ internal class UtbetalingReflectTest {
             )
         }
 
-        val tidligereMap = UtbetalingReflect(tidligereUtbetaling).toMap()
         map = UtbetalingReflect(
             Utbetaling.lagUtbetaling(
                 listOf(tidligereUtbetaling),

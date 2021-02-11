@@ -121,11 +121,11 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `ikke egen ansatt og mer enn 25 % avvik i inntekt`() {
+    fun `ikke egen ansatt og mer enn 25 prosent avvik i inntekt`() {
         val månedslønn = 1000.0.månedlig
-        val `25 % mer` = månedslønn * 1.26
+        val `mer enn 25 prosent` = månedslønn * 1.26
         håndterVilkårsgrunnlag(
-            beregnetInntekt = `25 % mer`,
+            beregnetInntekt = `mer enn 25 prosent`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
         )
@@ -136,11 +136,11 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `ikke egen ansatt og mindre enn 25 % avvik i inntekt`() {
+    fun `ikke egen ansatt og mindre enn 25 prosent avvik i inntekt`() {
         val månedslønn = 1000.0.månedlig
-        val `25 % mindre` = månedslønn * 0.74
+        val `mindre enn 25 prosent` = månedslønn * 0.74
         håndterVilkårsgrunnlag(
-            beregnetInntekt = `25 % mindre`,
+            beregnetInntekt = `mindre enn 25 prosent`,
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017()
         )

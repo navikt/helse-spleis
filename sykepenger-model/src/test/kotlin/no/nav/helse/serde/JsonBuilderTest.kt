@@ -171,8 +171,8 @@ class JsonBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
-                håndter(overføring(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(overføring())
+                håndter(utbetalt())
                 fangeVedtaksperiode()
             }
 
@@ -251,8 +251,8 @@ class JsonBuilderTest {
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
-                håndter(overføring(vedtaksperiodeId = vedtaksperiodeId))
-                håndter(utbetalt(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(overføring())
+                håndter(utbetalt())
             }
 
         fun refusjonOpphørerPerson(
@@ -507,7 +507,7 @@ class JsonBuilderTest {
             fagsystemId = fagsystemId
         )
 
-        fun Person.overføring(vedtaksperiodeId: String) = UtbetalingOverført(
+        fun Person.overføring() = UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,
@@ -518,7 +518,7 @@ class JsonBuilderTest {
             overføringstidspunkt = LocalDateTime.now()
         )
 
-        fun Person.utbetalt(vedtaksperiodeId: String) = UtbetalingHendelse(
+        fun Person.utbetalt() = UtbetalingHendelse(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = fnr,

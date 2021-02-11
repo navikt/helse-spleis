@@ -30,7 +30,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = historie1.toTypedArray(),
+            1.vedtaksperiode, *historie1.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     19.mai(2018),
@@ -52,7 +52,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
-            2.vedtaksperiode, utbetalinger = historie2.toTypedArray(),
+            2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     24.juni(2018),
@@ -97,7 +97,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = historie1.toTypedArray(),
+            1.vedtaksperiode, *historie1.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     19.mai(2018),
@@ -120,7 +120,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
-            2.vedtaksperiode, utbetalinger = historie2.toTypedArray(),
+            2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     24.juni(2018),
@@ -144,7 +144,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
-            3.vedtaksperiode, utbetalinger = historie2.toTypedArray(),
+            3.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     24.juni(2018),
@@ -192,7 +192,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = historie1.toTypedArray(),
+            1.vedtaksperiode, *historie1.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -213,7 +213,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
-            2.vedtaksperiode, utbetalinger = historie2.toTypedArray(),
+            2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -264,7 +264,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(
-            1.vedtaksperiode, utbetalinger = historie1.toTypedArray(),
+            1.vedtaksperiode, *historie1.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     1.januar(2018),
@@ -289,7 +289,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.april, 30.april, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
-            2.vedtaksperiode, utbetalinger = historie2.toTypedArray(),
+            2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
                 Utbetalingshistorikk.Inntektsopplysning(
                     5.april(2018),
