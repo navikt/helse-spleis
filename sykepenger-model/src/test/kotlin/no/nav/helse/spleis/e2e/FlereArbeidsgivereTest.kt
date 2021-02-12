@@ -395,6 +395,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
         assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
         assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+        assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode(a1)).detaljer()["inntektskilde"])
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING)
@@ -409,6 +410,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_SIMULERING)
 
         håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+        assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode(a2)).detaljer()["inntektskilde"])
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, TIL_UTBETALING)

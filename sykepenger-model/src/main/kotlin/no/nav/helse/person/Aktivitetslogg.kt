@@ -315,13 +315,15 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     periodeFom: LocalDate,
                     periodeTom: LocalDate,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
-                    periodetype: Periodetype
+                    periodetype: Periodetype,
+                    inntektskilde: Inntektskilde
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
                             "periodeFom" to periodeFom.toString(),
                             "periodeTom" to periodeTom.toString(),
                             "periodetype" to periodetype.name,
+                            "inntektskilde" to inntektskilde.name,
                             "warnings" to Aktivitetslogg().apply {
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
                             }.toMap()

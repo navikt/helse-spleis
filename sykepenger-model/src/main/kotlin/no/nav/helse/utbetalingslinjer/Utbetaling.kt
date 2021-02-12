@@ -463,7 +463,8 @@ internal class Utbetaling private constructor(
                 periodeFom = vedtaksperiode.periode().start,
                 periodeTom = vedtaksperiode.periode().endInclusive,
                 vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
-                periodetype = vedtaksperiode.periodetype()
+                periodetype = vedtaksperiode.periodetype(),
+                inntektskilde = vedtaksperiode.inntektskilde()
             )
         }
     }

@@ -2670,4 +2670,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertEquals(1, inspektør.dagtelling[Dag.Feriedag::class])
     }
+
+    @Test
+    fun `Inntektskilde i godkjenningsbehov for en arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
+        håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        assertEquals("EN_ARBEIDSGIVER", inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
+    }
 }
