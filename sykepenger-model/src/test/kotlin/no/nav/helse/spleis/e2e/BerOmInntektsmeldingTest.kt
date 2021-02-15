@@ -49,7 +49,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ber om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
+    fun `Ber ikke om inntektsmelding når vi ankommer AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
@@ -62,7 +62,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
         )
-        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
+    fun `Sender ikke ut event om at vi ikke trenger inntektsmelding når vi forlater`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -130,7 +130,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
 
-        assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
 
 

@@ -1090,14 +1090,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerInntektsmelding()
-        }
-
-        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding()
-        }
     }
 
     internal object AvventerUferdigForlengelse : Vedtaksperiodetilstand {
