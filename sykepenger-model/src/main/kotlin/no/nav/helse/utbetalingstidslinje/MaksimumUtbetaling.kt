@@ -16,8 +16,12 @@ internal class MaksimumUtbetaling(
     internal fun betal() {
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
-                økonomiList.betal(virkningsdato)
-                harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()
+                try {
+                    økonomiList.betal(virkningsdato)
+                    harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()
+                } catch (err: Exception) {
+                    throw IllegalArgumentException("Klarte ikke å utbetale for dag=$dato, fordi: ${err.message}", err)
+                }
             }
         }
         if (harRedusertUtbetaling)
