@@ -105,14 +105,14 @@ internal class HistorieUtbetalingstidslinjeTest : HistorieTest() {
     }
 
     @Test
-    fun `samlet utbetalingstidslinje`() {
+    fun `utbetalingstidslinje fra infotrygd ser bort ifra utbetalingstidslinjer i spleis`() {
         historie(refusjon(1.januar, 31.januar))
         historie.add(AG1, navdager(1.februar, 28.februar))
-        historie.utbetalingstidslinje(1.februar til 28.februar).also {
+        historie.utbetalingstidslinjeFraInfotrygd(1.februar til 28.februar).also {
             assertEquals(1.januar, it.førsteDato())
-            assertEquals(28.februar, it.sisteDato())
+            assertEquals(31.januar, it.sisteDato())
         }
-        historie.utbetalingstidslinje(1.januar til 21.januar).also {
+        historie.utbetalingstidslinjeFraInfotrygd(1.januar til 21.januar).also {
             assertEquals(1.januar, it.førsteDato())
             assertEquals(21.januar, it.sisteDato())
         }
