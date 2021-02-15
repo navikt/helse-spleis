@@ -37,12 +37,12 @@ internal class InntektshistorikkVol2 {
     internal fun grunnlagForSykepengegrunnlag(dato: LocalDate): Inntekt? =
         grunnlagForSykepengegrunnlagMedMetadata(dato)?.second
 
-    private fun grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt: LocalDate, dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
+    internal fun grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt: LocalDate, dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt) ?: skjæringstidspunkt
             .takeIf { it <= dato }
             ?.let { grunnlagForSykepengegrunnlagFraInfotrygdMedMetadata(it til dato) }
 
-    internal fun grunnlagForSykepengegrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
+    private fun grunnlagForSykepengegrunnlagMedMetadata(dato: LocalDate): Pair<Inntektsopplysning, Inntekt>? =
         historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(dato)
 
     private fun grunnlagForSykepengegrunnlagFraInfotrygdMedMetadata(periode: Periode): Pair<Inntektsopplysning, Inntekt>? =

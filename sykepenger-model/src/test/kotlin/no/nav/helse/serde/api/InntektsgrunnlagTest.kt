@@ -139,13 +139,14 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
@@ -171,13 +172,51 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Infotrygd på senere dato enn skjærinstidspunkt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 16.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent))
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(
+            2.vedtaksperiode,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 24.januar, 1000.daglig, 100.prosent, ORGNUMMER),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        )
+
+        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar)
+
+        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
+        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+
+        assertTrue(inntektsgrunnlag.isNotEmpty())
+        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
+            assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
+            assertNull(inntektsgrunnlaget.avviksprosent)
+            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
+                assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
+                assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
+                assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
+            }
+        }
+        assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag)
+    }
+
+    @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Skatt`() {
         // Hacker til både infotrygd- og skatteinntekter fordi vi ikke har fler arbeidsgivere eller henter sykepengegrunnlag fra inntektskompontenten enda
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
+            1.vedtaksperiode,
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 
@@ -192,7 +231,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig,  100.prosent,  ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 

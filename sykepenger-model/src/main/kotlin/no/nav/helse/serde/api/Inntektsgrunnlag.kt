@@ -25,7 +25,7 @@ internal fun inntektsgrunnlag(
     val sammenligningsgrunnlag = person.sammenligningsgrunnlag(nøkkeldata.skjæringstidspunkt)
 
     val arbeidsgiverinntekt: List<InntektsgrunnlagDTO.ArbeidsgiverinntektDTO> =
-        inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, orgnummer, inntekthist) }
+        inntektshistorikk.map { (orgnummer, inntekthist) -> arbeidsgiverinntekt(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode, orgnummer, inntekthist) }
 
     InntektsgrunnlagDTO(
         skjæringstidspunkt = nøkkeldata.skjæringstidspunkt,
@@ -45,10 +45,11 @@ internal fun inntektsgrunnlag(
 
 private fun arbeidsgiverinntekt(
     skjæringstidspunkt: LocalDate,
+    sisteDagISammenhengendePeriode: LocalDate,
     orgnummer: String,
     inntektshistorikk: InntektshistorikkVol2
 ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
-    val omregnetÅrsinntektDTO = inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt)
+    val omregnetÅrsinntektDTO = inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, sisteDagISammenhengendePeriode)
         ?.let { (inntektsopplysning, inntekt) ->
             OmregnetÅrsinntektVisitor(inntektsopplysning, inntekt).omregnetÅrsinntektDTO
         }
