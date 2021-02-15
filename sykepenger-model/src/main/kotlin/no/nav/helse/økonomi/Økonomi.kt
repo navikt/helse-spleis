@@ -146,7 +146,7 @@ internal class Økonomi private constructor(
             økonomiList.any { it.er6GBegrenset() }
     }
 
-    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate? = null): Økonomi =
+    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate): Økonomi =
         dekningsgrunnlag.let {
             require(it >= INGEN) { "dekningsgrunnlag kan ikke være negativ" }
             tilstand.inntekt(this, aktuellDagsinntekt, it, skjæringstidspunkt)

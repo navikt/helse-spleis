@@ -212,8 +212,8 @@ class Utbetalingshistorikk(
                 Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
 
             private fun dag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate, grad: Prosentdel) {
-                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad).inntekt(Inntekt.INGEN))
-                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad).inntekt(inntekt))
+                if (dato.erHelg()) utbetalingstidslinje.addHelg(dato, Økonomi.sykdomsgrad(grad).inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+                else utbetalingstidslinje.addNAVdag(dato, Økonomi.sykdomsgrad(grad).inntekt(inntekt, skjæringstidspunkt = dato))
             }
 
             internal companion object {
@@ -269,7 +269,7 @@ class Utbetalingshistorikk(
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
             override fun tidslinje() = Utbetalingstidslinje()
-                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN)) } }
+                .apply { periode.forEach { addFridag(it, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = it)) } }
 
             override fun sykdomstidslinje() =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
