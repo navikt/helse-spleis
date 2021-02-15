@@ -23,12 +23,12 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
         håndterYtelser(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT,  100.prosent,  ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
         assertTrue(inspektør.utbetalinger.isEmpty())
@@ -263,44 +263,45 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `invaliderer perioder når det kommer sykmelding på en arbeidsgiver som hadde tom sykdomshistorikk`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+    fun `invaliderer perioder når det kommer sykmelding på en arbeidsgiver som hadde tom sykdomshistorikk`() =
+        Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                    1.januar(2017) til 1.januar(2017) inntekter {
+                        a2 inntekt 1
+                    }
                 }
-                1.januar(2017) til 1.januar(2017) inntekter {
-                    a2 inntekt 1
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode) // No history
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
-        )
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            TIL_INFOTRYGD
-        )
-        assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-        assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
-    }
+            ))
+            håndterYtelser(1.vedtaksperiode) // No history
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_VILKÅRSPRØVING_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING
+            )
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                MOTTATT_SYKMELDING_FERDIG_GAP,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                AVVENTER_VILKÅRSPRØVING_GAP,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                TIL_INFOTRYGD
+            )
+            assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
+            assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
+        }
 
     @Test
     fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {

@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
@@ -49,7 +50,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `direkteutbetaling til bruker støttes ikke ennå`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -64,9 +65,9 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `flere inntektsopplysninger på ulike orgnr gir feil`() {
+    fun `flere inntektsopplysninger på ulike orgnr gir feil`() = Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -84,8 +85,8 @@ class UtbetalingshistorikkTest {
     @Test
     fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig,  100.prosent,  "1234"),
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig, 100.prosent, "1234"),
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
@@ -95,23 +96,24 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `forlengelser fra infotrygd med to tilstøtende perioder hvor den ene har forskjellig orgnr gir feil`() {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  "1234"),
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
+    fun `forlengelser fra infotrygd med to tilstøtende perioder hvor den ene har forskjellig orgnr gir feil`() =
+        Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
+            val utbetalinger = listOf(
+                RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, "1234"),
+                RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
+            )
+            val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
-        assertTrue(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
-    }
+            assertTrue(
+                utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
+            )
+        }
 
     @Test
-    fun `forlengelser fra infotrygd med én tilstøtende periode med forskjellig orgnr gir feil`() {
+    fun `forlengelser fra infotrygd med én tilstøtende periode med forskjellig orgnr gir feil`() = Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  "1234"),
-            RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, "1234"),
+            RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
@@ -123,7 +125,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `flere inntektsopplysninger på samme orgnr er ok`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -141,7 +143,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `flere inntektsopplysninger gir ikke feil dersom de er gamle`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -159,8 +161,8 @@ class UtbetalingshistorikkTest {
     @Test
     fun `lager ikke warning når dagsats endrer seg i en sammenhengende periode som følge av Grunnbeløpjustering`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.april, 30.april, 2161.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.mai, 31.mai, 2236.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.april, 30.april, 2161.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.mai, 31.mai, 2236.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -181,7 +183,7 @@ class UtbetalingshistorikkTest {
                 (100 * gradering).roundToInt().prosent,
                 ORGNUMMER
             ),
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, dagsats.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.februar, 28.februar, dagsats.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -195,8 +197,8 @@ class UtbetalingshistorikkTest {
     @Test
     fun `lager ikke warning når dagsats ikke endrer seg i en sammenhengende periode`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1234.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.februar, 28.februar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -210,8 +212,8 @@ class UtbetalingshistorikkTest {
     @Test
     fun `RefusjonTilArbeidsgiver mappes til utbetalingstidslinje`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
 
         val tidslinje = utbetalinger.map { it.tidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -227,7 +229,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `RefusjonTilArbeidsgiver regnes som utbetalingsdag selv om den overlapper med ferie`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER),
             Utbetalingshistorikk.Infotrygdperiode.Ferie(5.januar, 20.januar),
             Utbetalingshistorikk.Infotrygdperiode.Utbetaling(15.januar, 25.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
@@ -245,7 +247,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Slår sammen reduksjonTilArbeidsgiver og reduksjonMedlem og ignorerer tilbakeført og sanksjon`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER),
             Utbetalingshistorikk.Infotrygdperiode.Tilbakeført(5.januar, 20.januar),
             Utbetalingshistorikk.Infotrygdperiode.Sanksjon(15.januar, 25.januar),
             Utbetalingshistorikk.Infotrygdperiode.ReduksjonMedlem(20.januar, 31.januar, 623.daglig, 100.prosent, ORGNUMMER)
@@ -303,7 +305,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Utbetalinger i Infotrygd som overlapper med tidslinjen`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -317,7 +319,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Utbetalinger i Infotrygd som er nærmere enn 18 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -331,7 +333,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Utbetalinger i Infotrygd som er eldre enn 18 dager fra tidslinjen`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -345,7 +347,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER),
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER),
             Utbetalingshistorikk.Infotrygdperiode.Ukjent(1.januar, 10.januar)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
@@ -360,7 +362,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `Validering ignorerer maksdato hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 10.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,
@@ -374,7 +376,7 @@ class UtbetalingshistorikkTest {
     @Test
     fun `validering av inntektsopplysninger feiler ikke for skjæringstidspunkt null`() {
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig,  100.prosent,  ORGNUMMER)
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(
             utbetalinger = utbetalinger,

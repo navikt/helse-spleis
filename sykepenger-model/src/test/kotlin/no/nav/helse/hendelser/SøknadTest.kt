@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.person.Aktivitetslogg
@@ -112,7 +113,7 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `søknad med andre inntektskilder`() {
+    fun `søknad med andre inntektskilder`() = Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
         assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
     }

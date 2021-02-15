@@ -44,14 +44,6 @@ internal class ReplayHendelserTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Støtter ikke replay for flere arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent), orgnummer = "ANNET ORGNUMMER")
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-    }
-
-    @Test
     fun `Denne og etterfølgende perioder settes i tilstand TilInfotrygd ved mer enn 16 dagers gap (ny arbeidsgiverperiode) da det ikke støttes ennå`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
