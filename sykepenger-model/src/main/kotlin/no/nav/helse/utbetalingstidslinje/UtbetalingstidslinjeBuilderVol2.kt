@@ -185,7 +185,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     }
 
     private fun håndterNAVHelgedag(dato: LocalDate, økonomi: Økonomi) {
-        tidslinje.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = inntektForDatoOrNull(dato)?.let { (skjæringstidspunkt) -> skjæringstidspunkt }))
+        tidslinje.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = inntektForDatoOrNull(dato)?.let { (skjæringstidspunkt) -> skjæringstidspunkt } ?: dato))
     }
 
     private fun håndterArbeidsdag(dato: LocalDate) {
