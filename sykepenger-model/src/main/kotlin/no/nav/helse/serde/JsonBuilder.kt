@@ -177,7 +177,11 @@ internal class JsonBuilder(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
@@ -205,7 +209,11 @@ internal class JsonBuilder(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             initVedtaksperiodeMap(vedtaksperiodeMap, periode, opprinneligPeriode, hendelseIder, inntektskilde)
@@ -528,7 +536,11 @@ internal class JsonBuilder(person: Person) {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             popState()

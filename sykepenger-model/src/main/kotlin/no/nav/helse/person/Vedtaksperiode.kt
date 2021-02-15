@@ -95,15 +95,13 @@ internal class Vedtaksperiode private constructor(
     )
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
-        visitor.preVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder, inntektskilde)
+        visitor.preVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, skjæringstidspunkt, periodetype(), forlengelseFraInfotrygd, hendelseIder, inntektsmeldingId, inntektskilde)
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
-        visitor.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
         utbetaling?.accept(visitor)
-        visitor.visitSkjæringstidspunkt(skjæringstidspunkt)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
-        visitor.postVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, hendelseIder, inntektskilde)
+        visitor.postVisitVedtaksperiode(this, id, tilstand, opprettet, oppdatert, periode, sykmeldingsperiode, skjæringstidspunkt, periodetype(), forlengelseFraInfotrygd, hendelseIder, inntektsmeldingId, inntektskilde)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

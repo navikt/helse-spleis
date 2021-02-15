@@ -11,7 +11,6 @@ import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.reflection.ArbeidsgiverReflect
 import no.nav.helse.serde.reflection.PersonReflect
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.serde.reflection.VedtaksperiodeReflect
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -22,6 +21,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kronologisk
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -46,6 +46,8 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
     init {
         person.accept(DelegatedPersonVisitor(stack::first))
     }
+
+    private fun finnHendelser(ider: List<UUID>) = hendelser.filter { UUID.fromString(it.id) in ider }
 
     internal fun toJson() = rootState.toJson()
 
@@ -204,23 +206,37 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             gruppeIder[vedtaksperiode] = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                 ?.let(gruppeIder::getValue)
                 ?: UUID.randomUUID()
+
+            val sykepengegrunnlag = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+
             pushState(
                 VedtaksperiodeState(
                     vedtaksperiode = vedtaksperiode,
-                    arbeidsgiver = arbeidsgiver,
                     vedtaksperioder = vedtaksperioder,
+                    id = id,
+                    periode = periode,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    periodetype = periodetype,
+                    forlengelseFraInfotrygd = forlengelseFraInfotrygd,
+                    tilstand = tilstand,
+                    inntektskilde = inntektskilde,
+                    sykepengegrunnlag = sykepengegrunnlag,
                     gruppeId = gruppeIder.getValue(vedtaksperiode),
                     fødselsnummer = fødselsnummer,
                     inntekter = inntekter,
                     utbetalinger = utbetalinger.flatMap { it.value },
                     hendelseIder = hendelseIder,
-                    periode = periode,
+                    inntektsmeldingId = inntektsmeldingId,
                     nøkkeldataOmInntekter = nøkkeldataOmInntekter
                 )
             )
@@ -278,41 +294,59 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
 
     private inner class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
-        arbeidsgiver: Arbeidsgiver,
-        private val periode: Periode,
         private val vedtaksperioder: MutableList<VedtaksperiodeDTOBase>,
+        private val id: UUID,
+        private val periode: Periode,
+        private val skjæringstidspunkt: LocalDate,
+        private val periodetype: Periodetype,
+        private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+        private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        private val inntektskilde: Inntektskilde,
+        private val sykepengegrunnlag: Inntekt?,
         private val gruppeId: UUID,
         private val fødselsnummer: String,
         private val inntekter: List<Inntektshistorikk.Inntektsendring>,
         private val utbetalinger: List<Utbetaling>,
         private val hendelseIder: List<UUID>,
+        private val inntektsmeldingId: UUID?,
         private val nøkkeldataOmInntekter: MutableList<NøkkeldataOmInntekt>
     ) : PersonVisitor {
+
+        private val fullstendig = tilstand.type in listOf(
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.UTBETALING_FEILET,
+            TilstandType.TIL_UTBETALING
+        )
         private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
         private val totalbeløpakkumulator = mutableListOf<Int>()
         private val dataForVilkårsvurdering = vedtaksperiode
             .get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")
             ?.let { mapDataForVilkårsvurdering(it) }
-
-
-        private val vedtaksperiodeMap = mutableMapOf<String, Any?>()
         private var arbeidsgiverFagsystemId: String? = null
         private var personFagsystemId: String? = null
         private var inUtbetaling = false
         private var utbetalingGodkjent = false
-        private val nøkkeldataOmInntekt = NøkkeldataOmInntekt(sisteDagISammenhengendePeriode = periode.endInclusive)
-
-        init {
-            val vedtaksperiodeReflect = VedtaksperiodeReflect(vedtaksperiode)
-            vedtaksperiodeMap.putAll(vedtaksperiodeReflect.toSpeilMap(arbeidsgiver, periode))
-            vedtaksperiodeMap["sykdomstidslinje"] = beregnetSykdomstidslinje
-            vedtaksperiodeMap["hendelser"] = vedtaksperiodehendelser()
-            vedtaksperiodeMap["dataForVilkårsvurdering"] = dataForVilkårsvurdering
-            vedtaksperiodeMap["aktivitetslogg"] = hentWarnings(vedtaksperiode)
-            vedtaksperiodeMap["periodetype"] = vedtaksperiode.periodetype()
-            vedtaksperiodeMap["inntektskilde"] = vedtaksperiode.inntektskilde()
-            vedtaksperiodeMap["maksdato"] = LocalDate.MAX
+        private val nøkkeldataOmInntekt = NøkkeldataOmInntekt(sisteDagISammenhengendePeriode = periode.endInclusive).also {
+            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
+                it.skjæringstidspunkt = skjæringstidspunkt
+            }
         }
+
+        private val vedtaksperiodeMap = mutableMapOf<String, Any?>(
+            "id" to id,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "inntektsmeldingId" to inntektsmeldingId,
+            "inntektFraInntektsmelding" to sykepengegrunnlag?.reflection{ _, månedlig, _, _ -> månedlig },
+            "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
+            "sykdomstidslinje" to beregnetSykdomstidslinje,
+            "hendelser" to finnHendelser(hendelseIder),
+            "dataForVilkårsvurdering" to dataForVilkårsvurdering,
+            "aktivitetslogg" to hentWarnings(vedtaksperiode),
+            "periodetype" to periodetype,
+            "inntektskilde" to inntektskilde,
+            "maksdato" to LocalDate.MAX
+        )
 
         private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
             val aktiviteter = mutableListOf<AktivitetDTO>()
@@ -414,12 +448,6 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             inUtbetaling = false
         }
 
-        override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-            if (Toggles.SpeilInntekterVol2Enabled.enabled) {
-                nøkkeldataOmInntekt.skjæringstidspunkt = skjæringstidspunkt
-            }
-        }
-
         override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
             if (Toggles.SpeilInntekterVol2Enabled.enabled) {
                 nøkkeldataOmInntekt.avviksprosent = dataForVilkårsvurdering?.avviksprosent?.prosent()
@@ -434,7 +462,11 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             vedtaksperiodeMap["totalbeløpArbeidstaker"] = totalbeløpakkumulator.sum()
@@ -453,13 +485,7 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
                     kunFerie = beregnetSykdomstidslinje.all { it.type == SpeilDagtype.FERIEDAG },
                     utbetaling = utbetaling
                 )
-            if (tilstand.type in listOf(
-                    TilstandType.AVSLUTTET,
-                    TilstandType.AVVENTER_GODKJENNING,
-                    TilstandType.UTBETALING_FEILET,
-                    TilstandType.TIL_UTBETALING
-                )
-            ) {
+            if (fullstendig) {
                 nøkkeldataOmInntekter.add(nøkkeldataOmInntekt)
                 vedtaksperioder.add(
                     vedtaksperiodeMap.mapTilVedtaksperiodeDto(
@@ -474,12 +500,6 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
                 vedtaksperioder.add(vedtaksperiodeMap.mapTilUfullstendigVedtaksperiodeDto(gruppeId))
             }
             popState()
-        }
-
-        private fun vedtaksperiodehendelser(): MutableList<HendelseDTO> {
-            return hendelseIder.map { it.toString() }.let { ids ->
-                hendelser.filter { it.id in ids }.toMutableList()
-            }
         }
 
         private fun byggUtbetalteUtbetalingerForPeriode(): UtbetalingerDTO =

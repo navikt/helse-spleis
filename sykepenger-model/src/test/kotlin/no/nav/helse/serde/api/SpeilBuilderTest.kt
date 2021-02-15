@@ -915,7 +915,11 @@ class SpeilBuilderTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
+                skjæringstidspunkt: LocalDate,
+                periodetype: Periodetype,
+                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: List<UUID>,
+                inntektsmeldingId: UUID?,
                 inntektskilde: Inntektskilde
             ) {
                 currentArbeidsgiver.add(id.toString())
@@ -1350,7 +1354,11 @@ class SpeilBuilderTest {
                     oppdatert: LocalDateTime,
                     periode: Periode,
                     opprinneligPeriode: Periode,
+                    skjæringstidspunkt: LocalDate,
+                    periodetype: Periodetype,
+                    forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                     hendelseIder: List<UUID>,
+                    inntektsmeldingId: UUID?,
                     inntektskilde: Inntektskilde
                 ) {
                     vedtaksperiodeIder.add(id.toString())

@@ -919,7 +919,11 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
+            skjæringstidspunkt: LocalDate,
+            periodetype: Periodetype,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: List<UUID>,
+            inntektsmeldingId: UUID?,
             inntektskilde: Inntektskilde
         ) {
             vedtaksperioderIder[orgnummer to indeks] = id

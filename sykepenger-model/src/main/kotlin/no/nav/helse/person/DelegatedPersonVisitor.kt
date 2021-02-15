@@ -138,14 +138,28 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
-        delegatee.preVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder, inntektskilde)
-    }
-
-    override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-        delegatee.visitSkjæringstidspunkt(skjæringstidspunkt)
+        delegatee.preVisitVedtaksperiode(
+            vedtaksperiode,
+            id,
+            tilstand,
+            opprettet,
+            oppdatert,
+            periode,
+            opprinneligPeriode,
+            skjæringstidspunkt,
+            periodetype,
+            forlengelseFraInfotrygd,
+            hendelseIder,
+            inntektsmeldingId,
+            inntektskilde
+        )
     }
 
     override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
@@ -156,10 +170,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitDataForSimulering(dataForSimuleringResultat)
     }
 
-    override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
-        delegatee.visitForlengelseFraInfotrygd(forlengelseFraInfotrygd)
-    }
-
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -168,10 +178,28 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
-        delegatee.postVisitVedtaksperiode(vedtaksperiode, id, tilstand, opprettet, oppdatert, periode, opprinneligPeriode, hendelseIder, inntektskilde)
+        delegatee.postVisitVedtaksperiode(
+            vedtaksperiode,
+            id,
+            tilstand,
+            opprettet,
+            oppdatert,
+            periode,
+            opprinneligPeriode,
+            skjæringstidspunkt,
+            periodetype,
+            forlengelseFraInfotrygd,
+            hendelseIder,
+            inntektsmeldingId,
+            inntektskilde
+        )
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
 import no.nav.helse.testhelpers.juli
 import no.nav.helse.testhelpers.oktober
 import no.nav.helse.testhelpers.september
@@ -53,7 +54,7 @@ internal class VedtaksperiodeTest {
         val vedtaksperiode = periodeFor(sykmelding())
         vedtaksperiode.håndter(inntektsmelding(førsteFraværsdag = førsteFraværsdag))
 
-        assertEquals(10.september, skjæringstidspunkt(vedtaksperiode))
+        assertEquals(10.september, fangeSkjæringstidspunkt(vedtaksperiode))
     }
 
     @Test
@@ -62,17 +63,7 @@ internal class VedtaksperiodeTest {
             sykmelding(perioder = listOf(Sykmeldingsperiode(1.juli, 20.juli, 100.prosent)))
         )
 
-        assertEquals(1.juli, skjæringstidspunkt(vedtaksperiode))
-    }
-
-    private fun skjæringstidspunkt(vedtaksperiode: Vedtaksperiode): LocalDate? {
-        var dato: LocalDate? = null
-        vedtaksperiode.accept(object : VedtaksperiodeVisitor {
-            override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-                dato = skjæringstidspunkt
-            }
-        })
-        return dato
+        assertEquals(1.juli, fangeSkjæringstidspunkt(vedtaksperiode))
     }
 
     private fun inntektsmelding(førsteFraværsdag: LocalDate = LocalDate.now()) =

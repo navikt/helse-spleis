@@ -3,10 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Grunnlagsdata
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.desember
-import no.nav.helse.testhelpers.inntektperioder
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
@@ -74,7 +71,7 @@ internal class VilkårsgrunnlagTest {
     @Test
     fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, skjæringstidspunkt().plusDays(1)))
+            arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, fangeSkjæringstidspunkt(person).plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
@@ -115,16 +112,6 @@ internal class VilkårsgrunnlagTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
     }
 
-    private fun skjæringstidspunkt(): LocalDate {
-        var dato: LocalDate? = null
-        person.accept(object : PersonVisitor {
-            override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-                dato = skjæringstidspunkt
-            }
-        })
-        return requireNotNull(dato)
-    }
-
 
     private fun dataForVilkårsvurdering(): Grunnlagsdata? {
         var _dataForVilkårsvurdering: Grunnlagsdata? = null
@@ -147,7 +134,11 @@ internal class VilkårsgrunnlagTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
+                skjæringstidspunkt: LocalDate,
+                periodetype: Periodetype,
+                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: List<UUID>,
+                inntektsmeldingId: UUID?,
                 inntektskilde: Inntektskilde
             ) {
                 _tilstand = tilstand
@@ -167,7 +158,11 @@ internal class VilkårsgrunnlagTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
+                skjæringstidspunkt: LocalDate,
+                periodetype: Periodetype,
+                forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: List<UUID>,
+                inntektsmeldingId: UUID?,
                 inntektskilde: Inntektskilde
             ) {
                 _id = id

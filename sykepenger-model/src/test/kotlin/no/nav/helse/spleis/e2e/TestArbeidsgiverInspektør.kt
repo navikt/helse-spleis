@@ -111,7 +111,11 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
         inVedtaksperiode = true
@@ -122,15 +126,13 @@ internal class TestArbeidsgiverInspektør(
         this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
         tilstander[vedtaksperiodeindeks] = tilstand.type
         inntektskilder[vedtaksperiodeindeks] = inntektskilde
+        skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
+        forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
     }
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
         if (inVedtaksperiode && !inUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
         else if (!inVedtaksperiode && inUtbetaling) utbetalingutbetalingstidslinjer.add(tidslinje)
-    }
-
-    override fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {
-        forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
     }
 
     override fun postVisitVedtaksperiode(
@@ -141,7 +143,11 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
         vedtaksperiodeindeks += 1
@@ -166,10 +172,6 @@ internal class TestArbeidsgiverInspektør(
         if (oppdrag != arbeidsgiverOppdrag.last()) return
         this.totalBeløp.add(totalBeløp)
         this.nettoBeløp.add(nettoBeløp)
-    }
-
-    override fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {
-        skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
     }
 
     override fun preVisitUtbetaling(

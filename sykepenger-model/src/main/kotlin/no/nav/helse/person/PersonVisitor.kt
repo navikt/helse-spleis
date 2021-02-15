@@ -70,15 +70,17 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
     }
 
-    fun visitSkjæringstidspunkt(skjæringstidspunkt: LocalDate) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
-    fun visitForlengelseFraInfotrygd(forlengelseFraInfotrygd: ForlengelseFraInfotrygd) {}
     fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -87,7 +89,11 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodetype: Periodetype,
+        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: List<UUID>,
+        inntektsmeldingId: UUID?,
         inntektskilde: Inntektskilde
     ) {
     }
