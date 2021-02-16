@@ -23,7 +23,7 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
         )
     }
     private val permittert = packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false
-    private val tilbakedatert = packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.map { Søknad.Merknad(it.path("type").asText(), it.path("beskrivelse")?.asText()) } ?: emptyList()
+    private val merknaderFraSykmelding = packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.map { Søknad.Merknad(it.path("type").asText(), it.path("beskrivelse")?.asText()) } ?: emptyList()
     private val papirsykmeldinger = packet["papirsykmeldinger"].map {
         Søknadsperiode.Papirsykmelding(
             fom = it.path("fom").asLocalDate(),
@@ -72,7 +72,7 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
         andreInntektskilder = andreInntektskilder,
         sendtTilNAV = sendtNav,
         permittert = permittert,
-        tilbakedatert = tilbakedatert
+        merknaderFraSykmelding = merknaderFraSykmelding
     )
 
     override fun behandle(mediator: IHendelseMediator) {
