@@ -40,13 +40,19 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
 
     fun lagreMelding(melding: HendelseMessage) {
+        if (
+            melding is AvstemmingMessage ||
+            melding is OverstyrTidslinjeMessage ||
+            melding is PersonPåminnelseMessage ||
+            melding is PåminnelseMessage ||
+            melding is UtbetalingshistorikkMessage
+        ) return // Disse trenger vi ikke å lagre
+
         val type = when (melding) {
             is NySøknadMessage -> NY_SØKNAD
             is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
             is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
             is InntektsmeldingMessage -> INNTEKTSMELDING
-            is PåminnelseMessage -> return // ignore
-            is PersonPåminnelseMessage -> return // ignore
             is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
             is YtelserMessage -> YTELSER
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
@@ -55,8 +61,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
             is UtbetalingMessage -> UTBETALING
             is AnnulleringMessage -> KANSELLER_UTBETALING
-            is UtbetalingshistorikkMessage -> return // ignore UtbetalingshistorikkMessage
-            is AvstemmingMessage -> return // ignore
             is EtterbetalingMessage -> GRUNNBELØPSREGULERING
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
         }
