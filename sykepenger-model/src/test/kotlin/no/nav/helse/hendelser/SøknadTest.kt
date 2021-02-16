@@ -170,6 +170,20 @@ internal class SøknadTest {
     }
 
     @Test
+    fun `søknad uten tilbakedateringmerknad får ikke warning`() {
+        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
+        søknad.valider(EN_PERIODE)
+        assertFalse(søknad.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `søknad med tilbakedateringmerknad får warning`() {
+        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING", null)))
+        søknad.valider(EN_PERIODE)
+        assertTrue(søknad.hasWarningsOrWorse())
+    }
+
+    @Test
     fun `søknadsturnering for nye dagtyper`() {
         søknad(Arbeid(15.januar, 31.januar), Sykdom(1.januar, 31.januar, 100.prosent))
 
@@ -196,7 +210,7 @@ internal class SøknadTest {
         assertFalse(søknad.hasErrorsOrWorse())
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false) {
+    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()) {
         søknad = Søknad(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018,
@@ -205,7 +219,8 @@ internal class SøknadTest {
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             sendtTilNAV = Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
-            permittert = permittert
+            permittert = permittert,
+            merknaderFraSykmelding = merknaderFraSykmelding
         )
     }
 }

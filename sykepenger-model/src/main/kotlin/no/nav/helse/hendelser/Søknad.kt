@@ -21,7 +21,8 @@ class Søknad constructor(
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: List<Inntektskilde>,
     private val sendtTilNAV: LocalDateTime,
-    private val permittert: Boolean
+    private val permittert: Boolean,
+    private val merknaderFraSykmelding: List<Merknad>
 ) : SykdomstidslinjeHendelse(meldingsreferanseId) {
 
     private val sykdomsperiode: Periode
@@ -57,6 +58,9 @@ class Søknad constructor(
             andreInntektskilder.forEach { it.valider(this) }
         }
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
+        if (merknaderFraSykmelding.any { it.type ==  "UGYLDIG_TILBAKEDATERING" || it.type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER"}) {
+            warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
+        }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende brev")
         return this
     }
@@ -70,6 +74,8 @@ class Søknad constructor(
     internal fun harAndreInntektskilder() = andreInntektskilder.isNotEmpty()
 
     private fun avskjæringsdato(): LocalDate = sendtTilNAV.toLocalDate().minusMonths(3).withDayOfMonth(1)
+
+    data class Merknad(val type: String, val beskrivelse: String?)
 
     sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate) {
         protected val periode = Periode(fom, tom)

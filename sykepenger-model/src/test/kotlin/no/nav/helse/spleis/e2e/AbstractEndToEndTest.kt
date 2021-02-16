@@ -524,7 +524,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             sendtTilNAV = sendtTilNav.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         ).apply {
             hendelselogg = this
         }

@@ -1418,7 +1418,8 @@ class SpeilBuilderTest {
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(fom, tom, grad)) + andrePerioder,
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         ) to SøknadNavDTO(
             id = hendelseId.toString(),
             fom = fom,

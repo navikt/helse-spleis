@@ -111,7 +111,8 @@ internal class VedtaksperiodeTest {
             perioder = perioder,
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         )
 
     private fun påminnelse(vedtaksperiodeId: UUID, tilstandType: TilstandType) = Påminnelse(

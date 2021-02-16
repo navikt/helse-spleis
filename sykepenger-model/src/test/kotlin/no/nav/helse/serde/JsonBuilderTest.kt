@@ -356,7 +356,8 @@ class JsonBuilderTest {
             perioder = perioder,
             andreInntektskilder = emptyList(),
             sendtTilNAV = sendtSøknad,
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         )
 
         fun inntektsmelding(

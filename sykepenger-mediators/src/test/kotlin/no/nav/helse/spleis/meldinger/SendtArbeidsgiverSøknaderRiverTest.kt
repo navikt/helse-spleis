@@ -68,6 +68,7 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "sykmeldingSkrevet": "2020-01-01T00:00:00",
   "andreInntektskilder": [],
   "soktUtenlandsopphold": null,
-  "arbeidsgiverForskutterer": null
+  "arbeidsgiverForskutterer": null,
+  "merknaderFraSykmelding": null
 }""".trimIndent()
 }

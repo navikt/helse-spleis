@@ -194,7 +194,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         perioder = perioder,
         andreInntektskilder = emptyList(),
         sendtTilNAV = 31.januar.atStartOfDay(),
-        permittert = false
+        permittert = false,
+        merknaderFraSykmelding = emptyList()
     ).apply {
         hendelse = this
     }

@@ -124,7 +124,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         ).apply {
             hendelse = this
         }

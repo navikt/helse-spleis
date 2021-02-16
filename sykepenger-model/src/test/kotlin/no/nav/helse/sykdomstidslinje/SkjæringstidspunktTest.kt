@@ -371,7 +371,8 @@ internal class SkjæringstidspunktTest {
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
             sendtTilNAV = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         )
     }
 

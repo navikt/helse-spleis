@@ -107,7 +107,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         ),
         andreInntektskilder = emptyList(),
         sendtTilNAV = 5.januar.atStartOfDay(),
-        permittert = false
+        permittert = false,
+        merknaderFraSykmelding = emptyList()
     )
 }
 

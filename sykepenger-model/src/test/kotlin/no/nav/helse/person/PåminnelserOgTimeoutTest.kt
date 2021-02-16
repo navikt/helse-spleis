@@ -200,7 +200,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             perioder = perioder.toList(),
             andreInntektskilder = emptyList(),
             sendtTilNAV = 20.januar.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         ).apply {
             hendelse = this
         }

@@ -131,8 +131,16 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     fun `parser søknad med permitteringer`() {
         assertNoErrors(validSøknad().copy(permitteringer = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(permitteringer = null).toJson())
-        assertNoErrors(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, 31.januar))).toJson())
-        assertNoErrors(validSøknad().copy(permitteringer = listOf(PermitteringDTO(1.januar, null))).toJson())
+        assertNoErrors(validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, 31.januar))).toJson())
+        assertNoErrors(validSøknad().copy(permitteringer = listOf(PeriodeDTO(1.januar, null))).toJson())
+    }
+
+    @Test
+    fun `parser søknad med merknader (fra sykmelding)`() {
+        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = emptyList()).toJson())
+        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = null).toJson())
+        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
+        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
     }
 }
 

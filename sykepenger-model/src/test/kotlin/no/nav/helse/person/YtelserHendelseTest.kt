@@ -227,7 +227,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             perioder = listOf(Søknad.Søknadsperiode.Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAV = sisteSykedag.atStartOfDay(),
-            permittert = false
+            permittert = false,
+            merknaderFraSykmelding = emptyList()
         )
 
     private fun inntektsmelding(
