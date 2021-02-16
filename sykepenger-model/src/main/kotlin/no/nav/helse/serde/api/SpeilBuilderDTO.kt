@@ -149,9 +149,10 @@ data class UtbetalingsdagMedGradDTO(
 ) : UtbetalingstidslinjedagDTO
 
 data class UfullstendigVedtaksperiodedagDTO(
-    val type: TypeDataDTO,
-    val dato: LocalDate
-)
+    override val type: TypeDataDTO,
+    override val dato: LocalDate,
+    override val inntekt: Int = 0
+) : UtbetalingstidslinjedagDTO
 
 enum class TypeDataDTO {
     ArbeidsgiverperiodeDag,
