@@ -7,6 +7,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO
+import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,7 +17,7 @@ import java.util.*
 internal fun inntektsgrunnlag(
     person: Person,
     inntektshistorikk: Map<String, InntektshistorikkVol2>,
-    dataForSkjæringstidspunkt: List<SpeilBuilder.NøkkeldataOmInntekt>
+    dataForSkjæringstidspunkt: List<InntektshistorikkBuilder.NøkkeldataOmInntekt>
 ) = dataForSkjæringstidspunkt.map { nøkkeldata ->
     val sykepengegrunnlag =
         person.sykepengegrunnlag(nøkkeldata.skjæringstidspunkt, nøkkeldata.sisteDagISammenhengendePeriode)

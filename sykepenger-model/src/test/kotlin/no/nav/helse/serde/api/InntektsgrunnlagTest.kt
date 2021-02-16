@@ -6,6 +6,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -36,8 +37,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         }
     }
 
-    private infix fun LocalDate.og(sisteDato: LocalDate) = SpeilBuilder.NøkkeldataOmInntekt(sisteDato).also { it.skjæringstidspunkt = this }
-    private infix fun SpeilBuilder.NøkkeldataOmInntekt.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
+    private infix fun LocalDate.og(sisteDato: LocalDate) = InntektshistorikkBuilder.NøkkeldataOmInntekt(sisteDato, skjæringstidspunkt = this)
+    private infix fun InntektshistorikkBuilder.NøkkeldataOmInntekt.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
 
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
