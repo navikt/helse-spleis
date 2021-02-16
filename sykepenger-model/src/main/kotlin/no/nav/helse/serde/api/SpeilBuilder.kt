@@ -28,38 +28,11 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.MutableMap
-import kotlin.collections.all
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.distinctBy
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.find
 import kotlin.collections.first
-import kotlin.collections.firstOrNull
-import kotlin.collections.flatMap
-import kotlin.collections.fold
-import kotlin.collections.forEach
-import kotlin.collections.getOrPut
 import kotlin.collections.getValue
-import kotlin.collections.groupBy
-import kotlin.collections.isNotEmpty
-import kotlin.collections.last
-import kotlin.collections.lastOrNull
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mapNotNull
-import kotlin.collections.maxByOrNull
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.plus
-import kotlin.collections.reversed
 import kotlin.collections.set
-import kotlin.collections.sum
-import kotlin.collections.toList
 import kotlin.math.roundToInt
 
 
@@ -353,7 +326,8 @@ internal class SpeilBuilder(person: Person, private val hendelser: List<Hendelse
             TilstandType.AVSLUTTET,
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.UTBETALING_FEILET,
-            TilstandType.TIL_UTBETALING
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE
         )
         private val hendelser = finnHendelser(hendelseIder)
         private val warnings = hentWarnings(vedtaksperiode)
