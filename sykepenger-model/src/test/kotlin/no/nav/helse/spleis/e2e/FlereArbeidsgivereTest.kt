@@ -619,24 +619,24 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
         assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
-        assertInntektskilde(a1, EN_ARBEIDSGIVER,2)
-        assertInntektskilde(a2, EN_ARBEIDSGIVER,2)
+        assertInntektskilde(a1, EN_ARBEIDSGIVER, 2)
+        assertInntektskilde(a2, EN_ARBEIDSGIVER, 2)
 
         håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, AVVENTER_HISTORIKK, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
-        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
-        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
 
         håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         assertTilstand(a1, AVVENTER_SIMULERING, 2)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
 
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
-        assertTilstand(a1, AVVENTER_GODKJENNING,2)
-        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE,2)
-        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
-        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
+        assertTilstand(a1, AVVENTER_GODKJENNING, 2)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, TIL_UTBETALING, 2)
@@ -651,10 +651,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_SIMULERING, 2)
 
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
-        assertTilstand(a1, AVSLUTTET,2)
-        assertTilstand(a2, AVVENTER_GODKJENNING,2)
-        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE,2)
-        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE,2)
+        assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVVENTER_GODKJENNING, 2)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE, 2)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE, 2)
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 2)
@@ -1080,6 +1080,31 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVSLUTTET, 1)
         assertTilstand(a2, AVSLUTTET, 2)
+    }
+
+    @Test
+    @Disabled("WIP")
+    fun `⸘en kul test‽`() {
+        val periode = 1.januar til 31.januar
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterPåminnelse(1.vedtaksperiode(orgnummer = a1), AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.januar(2017).atStartOfDay(), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode(orgnummer = a2),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)),
+            orgnummer = a2
+        )
+        håndterYtelser(
+            1.vedtaksperiode(orgnummer = a2),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)),
+            orgnummer = a2
+        )
+
     }
 
     private fun assertTilstand(

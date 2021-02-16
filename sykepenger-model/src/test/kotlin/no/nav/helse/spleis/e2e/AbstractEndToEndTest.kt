@@ -359,9 +359,15 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun håndterPåminnelse(
         vedtaksperiodeId: UUID,
         påminnetTilstand: TilstandType,
-        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
+        orgnummer: String = ORGNUMMER
     ) {
-        person.håndter(påminnelse(vedtaksperiodeId, påminnetTilstand, tilstandsendringstidspunkt))
+        person.håndter(påminnelse(
+            vedtaksperiodeId = vedtaksperiodeId,
+            påminnetTilstand = påminnetTilstand,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            orgnummer = orgnummer
+        ))
     }
 
     protected fun håndterUtbetalingsgodkjenning(
