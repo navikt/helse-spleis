@@ -7,7 +7,7 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
-internal class UtbetalingstidslinjeState(
+internal class UtbetalingstidslinjeBuilder(
     private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>,
     private var utbetalinger: MutableList<Int>
 ) : BuilderState() {

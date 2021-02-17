@@ -8,13 +8,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class VedtaksperioderState(
+internal class VedtaksperioderBuilder(
     private val arbeidsgiver: Arbeidsgiver,
     private val fødselsnummer: String,
     private val inntektshistorikkBuilder: InntektshistorikkBuilder
 ) : BuilderState() {
     private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
-    private val perioder = mutableListOf<VedtaksperiodeState>()
+    private val perioder = mutableListOf<VedtaksperiodeBuilder>()
 
     fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>) =
         perioder.map { it.build(hendelser, utbetalinger) }
@@ -42,7 +42,7 @@ internal class VedtaksperioderState(
     ) {
         val sykepengegrunnlag = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
 
-        val vedtaksperiodeState = VedtaksperiodeState(
+        val vedtaksperiodeBuilder = VedtaksperiodeBuilder(
             vedtaksperiode = vedtaksperiode,
             id = id,
             periode = periode,
@@ -58,8 +58,8 @@ internal class VedtaksperioderState(
             inntektsmeldingId = inntektsmeldingId,
             inntektshistorikkBuilder = inntektshistorikkBuilder
         )
-        perioder.add(vedtaksperiodeState)
-        pushState(vedtaksperiodeState)
+        perioder.add(vedtaksperiodeBuilder)
+        pushState(vedtaksperiodeBuilder)
     }
 
     override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {

@@ -8,13 +8,13 @@ import no.nav.helse.serde.api.PersonDTO
 import java.time.LocalDateTime
 import java.util.*
 
-internal class PersonState(
+internal class PersonBuilder(
     builder: AbstractBuilder,
     private val person: Person,
     private val fødselsnummer: String,
     private val aktørId: String
 ) : BuilderState(builder) {
-    private val arbeidsgivere = mutableListOf<ArbeidsgiverState>()
+    private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
     private val inntektshistorikkBuilder = InntektshistorikkBuilder()
 
     fun build(hendelser: List<HendelseDTO>): PersonDTO {
@@ -32,9 +32,9 @@ internal class PersonState(
         organisasjonsnummer: String
     ) {
         if (!arbeidsgiver.harHistorikk()) return
-        val arbeidsgiverState = ArbeidsgiverState(arbeidsgiver, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
-        arbeidsgivere.add(arbeidsgiverState)
-        pushState(arbeidsgiverState)
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
+        arbeidsgivere.add(arbeidsgiverBuilder)
+        pushState(arbeidsgiverBuilder)
     }
 
     override fun postVisitPerson(

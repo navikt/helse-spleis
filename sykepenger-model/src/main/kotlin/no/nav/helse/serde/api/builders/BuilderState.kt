@@ -7,8 +7,11 @@ internal abstract class BuilderState(
     private var builder: AbstractBuilder? = null
 ) : PersonVisitor {
 
+    internal fun builder(builder: AbstractBuilder) {
+        this.builder = builder
+    }
+
     protected fun pushState(newState: BuilderState) {
-        newState.builder = builder
         builder?.pushState(newState)
     }
 

@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class VedtaksperiodeState(
+internal class VedtaksperiodeBuilder(
     vedtaksperiode: Vedtaksperiode,
     private val id: UUID,
     private val periode: Periode,
@@ -249,7 +249,7 @@ internal class VedtaksperiodeState(
     }
 
     override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-        pushState(SykdomstidslinjeState(beregnetSykdomstidslinje))
+        pushState(SykdomstidslinjeBuilder(beregnetSykdomstidslinje))
     }
 
     private var førsteSykepengedag: LocalDate? = null
@@ -259,7 +259,7 @@ internal class VedtaksperiodeState(
         if (inUtbetaling) return
         førsteSykepengedag = tidslinje.førsteSykepengedag()
         sisteSykepengedag = tidslinje.sisteSykepengedag()
-        pushState(UtbetalingstidslinjeState(utbetalingstidslinje, totalbeløpakkumulator))
+        pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje, totalbeløpakkumulator))
     }
 
     override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {

@@ -13,7 +13,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class SykdomstidslinjeState(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO> = mutableListOf()) :
+internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: MutableList<SykdomstidslinjedagDTO> = mutableListOf()) :
     BuilderState() {
 
     internal fun build() = sykdomstidslinjeListe.toList()

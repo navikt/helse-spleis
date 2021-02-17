@@ -10,18 +10,18 @@ import java.util.*
 
 internal class UtbetalingshistorikkBuilder() : BuilderState() {
     private val utbetalingberegning = mutableMapOf<UUID, Pair<UUID, LocalDateTime>>()
-    private val sykdomshistorikkElementStater = mutableListOf<SykdomshistorikkElementState>()
-    private val utbetalingstidslinjeStater = mutableListOf<Pair<UUID, UtbetalingstidslinjeState>>()
+    private val sykdomshistorikkElementBuilders = mutableListOf<SykdomshistorikkElementBuilder>()
+    private val utbetalingstidslinjeBuilders = mutableListOf<Pair<UUID, UtbetalingstidslinjeBuilder>>()
 
     fun build(): List<UtbetalingshistorikkElementDTO> {
         val beregningTilSykdomshistorikkElement = utbetalingberegning
             .mapValues { (_, beregningInfo) -> beregningInfo.first }
-        val utbetalinger = utbetalingstidslinjeStater
+        val utbetalinger = utbetalingstidslinjeBuilders
             .map { beregningTilSykdomshistorikkElement.getValue(it.first) to UtbetalingshistorikkElementDTO.UtbetalingDTO(it.second.build()) }
             .groupBy { it.first }
             .mapValues { it.value.map { it.second } }
 
-        return sykdomshistorikkElementStater.map { it.build(utbetalinger) }.filter { it.utbetalinger.isNotEmpty() }
+        return sykdomshistorikkElementBuilders.map { it.build(utbetalinger) }.filter { it.utbetalinger.isNotEmpty() }
     }
 
     override fun preVisitUtbetaling(
@@ -38,9 +38,9 @@ internal class UtbetalingshistorikkBuilder() : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        val utbetalingstidslinjeState = UtbetalingstidslinjeState(mutableListOf(), mutableListOf())
-        utbetalingstidslinjeStater.add(beregningId to utbetalingstidslinjeState)
-        pushState(utbetalingstidslinjeState)
+        val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf(), mutableListOf())
+        utbetalingstidslinjeBuilders.add(beregningId to utbetalingstidslinjeBuilder)
+        pushState(utbetalingstidslinjeBuilder)
     }
 
     override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
@@ -56,14 +56,14 @@ internal class UtbetalingshistorikkBuilder() : BuilderState() {
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
-        val sykdomshistorikkElementState = SykdomshistorikkElementState(id)
-        sykdomshistorikkElementStater.add(sykdomshistorikkElementState)
-        pushState(sykdomshistorikkElementState)
+        val elementBuilder = SykdomshistorikkElementBuilder(id)
+        sykdomshistorikkElementBuilders.add(elementBuilder)
+        pushState(elementBuilder)
     }
 
-    private class SykdomshistorikkElementState(private val id: UUID) : BuilderState() {
-        private lateinit var hendelsetidslinje: SykdomstidslinjeState
-        private lateinit var beregnettidslinje: SykdomstidslinjeState
+    private class SykdomshistorikkElementBuilder(private val id: UUID) : BuilderState() {
+        private lateinit var hendelsetidslinje: SykdomstidslinjeBuilder
+        private lateinit var beregnettidslinje: SykdomstidslinjeBuilder
 
         fun build(sykdomshistorikkbetalinger: Map<UUID, List<UtbetalingshistorikkElementDTO.UtbetalingDTO>>) =
             UtbetalingshistorikkElementDTO(
@@ -77,12 +77,12 @@ internal class UtbetalingshistorikkBuilder() : BuilderState() {
             hendelseId: UUID?,
             tidsstempel: LocalDateTime
         ) {
-            hendelsetidslinje = SykdomstidslinjeState()
+            hendelsetidslinje = SykdomstidslinjeBuilder()
             pushState(hendelsetidslinje)
         }
 
         override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-            beregnettidslinje = SykdomstidslinjeState()
+            beregnettidslinje = SykdomstidslinjeBuilder()
             pushState(beregnettidslinje)
         }
 

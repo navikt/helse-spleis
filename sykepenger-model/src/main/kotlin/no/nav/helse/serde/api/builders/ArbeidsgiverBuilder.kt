@@ -12,7 +12,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ArbeidsgiverState(
+internal class ArbeidsgiverBuilder(
     arbeidsgiver: Arbeidsgiver,
     private val id: UUID,
     private val organisasjonsnummer: String,
@@ -22,8 +22,8 @@ internal class ArbeidsgiverState(
     private val utbetalingshistorikkBuilder = UtbetalingshistorikkBuilder()
     private val utbetalinger = mutableListOf<Utbetaling>()
 
-    private val perioderBuilder = VedtaksperioderState(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
-    private val forkastetPerioderBuilder = VedtaksperioderState(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
+    private val perioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
+    private val forkastetPerioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
 
     internal fun build(hendelser: List<HendelseDTO>) = ArbeidsgiverDTO(
         organisasjonsnummer = organisasjonsnummer,

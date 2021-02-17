@@ -2,7 +2,7 @@ package no.nav.helse.serde.api
 
 import no.nav.helse.person.Person
 import no.nav.helse.serde.AbstractBuilder
-import no.nav.helse.serde.api.builders.PersonState
+import no.nav.helse.serde.api.builders.PersonBuilder
 import java.time.LocalDateTime
 
 fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
@@ -13,9 +13,9 @@ fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = empty
 
 internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : AbstractBuilder() {
 
-    private lateinit var personState: PersonState
+    private lateinit var personBuilder: PersonBuilder
 
-    fun build() = personState.build(hendelser)
+    fun build() = personBuilder.build(hendelser)
 
     override fun preVisitPerson(
         person: Person,
@@ -23,8 +23,8 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         aktørId: String,
         fødselsnummer: String
     ) {
-        personState = PersonState(this, person, fødselsnummer, aktørId)
-        pushState(personState)
+        personBuilder = PersonBuilder(this, person, fødselsnummer, aktørId)
+        pushState(personBuilder)
     }
 
 }
