@@ -18,6 +18,8 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun isEmpty() = elementer.isEmpty()
 
+    internal fun harSykdom() = !isEmpty() && !elementer.first().isEmpty()
+
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
@@ -92,6 +94,8 @@ internal class Sykdomshistorikk private constructor(
 
         internal fun lagUtbetalingstidslinjeberegning(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
             Utbetalingstidslinjeberegning(id, organisasjonsnummer, utbetalingstidslinje)
+
+        internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
 
         companion object {

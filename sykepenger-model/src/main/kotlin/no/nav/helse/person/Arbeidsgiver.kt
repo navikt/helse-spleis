@@ -567,6 +567,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
 
+    internal fun harSykdom() = sykdomshistorikk.harSykdom()
+
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
         if (Toggles.NyInntekt.enabled) return historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
         val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)

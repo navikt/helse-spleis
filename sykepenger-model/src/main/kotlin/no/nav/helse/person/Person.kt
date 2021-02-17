@@ -348,7 +348,7 @@ class Person private constructor(
 
     internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
 
-    private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harHistorikk)
+    private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
 

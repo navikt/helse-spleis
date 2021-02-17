@@ -1083,8 +1083,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("WIP")
-    fun `⸘en kul test‽`() {
+    fun `Bygger ikke utbetalingstidlinjer for arbeidsgivere med kun forkastede perioder`() {
         val periode = 1.januar til 31.januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1104,7 +1103,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)),
             orgnummer = a2
         )
-
     }
 
     private fun assertTilstand(
