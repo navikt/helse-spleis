@@ -519,7 +519,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
-        if (tilstand == AvventerArbeidsgivere) tilstand(hendelse, AvventerHistorikk)
+        if (tilstand == AvventerArbeidsgivere) {
+            kontekst(hendelse)
+            tilstand(hendelse, AvventerHistorikk)
+        }
     }
 
     /**
@@ -538,9 +541,7 @@ internal class Vedtaksperiode private constructor(
             .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
-        if (første.tilstand == AvventerArbeidsgivere) {
-            første.tilstand(hendelse, AvventerHistorikk)
-        }
+        første.gjentaHistorikk(hendelse)
     }
 
     private fun forsøkUtbetalingSteg2(
