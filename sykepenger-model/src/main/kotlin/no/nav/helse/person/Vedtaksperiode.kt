@@ -674,7 +674,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             tilstandsendringstidspunkt: LocalDateTime
         ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(35)
+            .plusDays(110)
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.tilstand(påminnelse, TilInfotrygd) {

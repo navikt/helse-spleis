@@ -294,7 +294,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             5.januar
         )
 
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, LocalDateTime.now().minusDays(36))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, LocalDateTime.now().minusDays(111))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -340,7 +340,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             5.januar
         )
 
-        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, LocalDateTime.now().minusDays(36))
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, LocalDateTime.now().minusDays(111))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

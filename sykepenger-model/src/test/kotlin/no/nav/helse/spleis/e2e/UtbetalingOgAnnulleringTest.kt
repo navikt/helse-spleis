@@ -338,7 +338,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(3)) // forkast
+        håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(4)) // forkast
 
         (1.august to 31.august).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
