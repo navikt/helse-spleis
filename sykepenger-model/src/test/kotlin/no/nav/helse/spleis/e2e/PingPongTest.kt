@@ -58,7 +58,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
             )
         )
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusWeeks(2))
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(35))
 
         val historikk2 = RefusjonTilArbeidsgiver(22.juni(2020), 17.august(2020), 1145.daglig,  100.prosent,  ORGNUMMER)
 
