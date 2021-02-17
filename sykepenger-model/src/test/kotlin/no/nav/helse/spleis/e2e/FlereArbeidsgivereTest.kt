@@ -1083,6 +1083,62 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `vedtaksperioder i AVVENTER_ARBEIDSGIVERE får også utbetalingstidslinje`() {
+        val periode = 1.februar til 28.februar
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, 25.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, 25.februar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode(orgnummer = a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a1
+        )
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode(orgnummer = a2),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a2
+        )
+        håndterYtelser(
+            1.vedtaksperiode(orgnummer = a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(
+            1.vedtaksperiode(orgnummer = a2),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a2
+        )
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 1)
+        assertTilstand(a2, AVVENTER_SIMULERING, 1)
+
+        //Utbetalingstidslinjen blir like lang som den som går til AvventerGodkjenning
+        assertEquals(25, a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode(a1)).size)
+
+        assertEquals(25, a2.inspektør.utbetalingstidslinjer(1.vedtaksperiode(a2)).size)
+    }
+
+    @Test
     fun `Bygger ikke utbetalingstidlinjer for arbeidsgivere med kun forkastede perioder`() {
         val periode = 1.januar til 31.januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)

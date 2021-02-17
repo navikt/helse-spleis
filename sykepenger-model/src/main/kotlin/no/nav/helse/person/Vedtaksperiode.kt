@@ -553,13 +553,14 @@ internal class Vedtaksperiode private constructor(
                 .filter { this.periode.overlapperMed(it.periode) }
                 .all { it.tilstand == AvventerArbeidsgivere }
         )
-            høstingsresultater(engineForTimeline, hendelse)
+            høstingsresultater(engineForTimeline, hendelse, andreVedtaksperioder)
         else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
     private fun høstingsresultater(
         engineForTimeline: MaksimumSykepengedagerfilter,
-        hendelse: ArbeidstakerHendelse
+        hendelse: ArbeidstakerHendelse,
+        andreVedtaksperioder: List<Vedtaksperiode>
     ) {
         engineForTimeline.beregnGrenser(periode.endInclusive)
         val utbetaling = arbeidsgiver.lagUtbetaling(
@@ -574,6 +575,7 @@ internal class Vedtaksperiode private constructor(
             utbetalinger.add(it)
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
+        andreVedtaksperioder.forEach { it.utbetalingstidslinje = it.arbeidsgiver.nåværendeTidslinje().subset(it.periode) }
 
         val ingenUtbetaling = !utbetaling().harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
