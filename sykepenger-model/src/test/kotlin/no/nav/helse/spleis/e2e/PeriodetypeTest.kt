@@ -159,7 +159,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(
             2.vedtaksperiode, historikk,
             inntektshistorikk = listOf(

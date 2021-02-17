@@ -45,7 +45,6 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(
             Sykdom(22.juni(2020), 9.juli(2020), 100.prosent)
         )
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk1)
         håndterYtelser(
             2.vedtaksperiode, historikk1,
             inntektshistorikk = listOf(

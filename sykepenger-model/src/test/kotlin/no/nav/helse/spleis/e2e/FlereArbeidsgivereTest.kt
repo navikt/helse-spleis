@@ -401,7 +401,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, TIL_UTBETALING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
-        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        val utbetaltRefId = håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
 
@@ -1080,6 +1080,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, AVSLUTTET, 2)
         assertTilstand(a2, AVSLUTTET, 1)
         assertTilstand(a2, AVSLUTTET, 2)
+
+        assertAlleBehovBesvart()
     }
 
     @Test

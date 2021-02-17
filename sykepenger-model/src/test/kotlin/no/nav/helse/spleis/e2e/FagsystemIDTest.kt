@@ -50,7 +50,6 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
-        håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
             2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
@@ -118,7 +117,6 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray())
-        håndterYtelser(2.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
             2.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
@@ -142,7 +140,6 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.august, 31.august, 100.prosent))
         håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, *historie2.toTypedArray())
         håndterYtelser(
             3.vedtaksperiode, *historie2.toTypedArray(),
             inntektshistorikk = listOf(
@@ -390,7 +387,6 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, *historie1.toTypedArray())
         håndterYtelser(3.vedtaksperiode, *historie1.toTypedArray())
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)

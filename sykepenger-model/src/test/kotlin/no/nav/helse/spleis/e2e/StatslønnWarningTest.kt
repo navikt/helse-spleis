@@ -36,14 +36,6 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
-                1.desember(2017), 31.desember(2017), 15000.daglig,
-                100.prosent,
-                ORGNUMMER
-            )
-        )
         håndterYtelser(
             1.vedtaksperiode,
             Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(

@@ -76,6 +76,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig, 100.prosent, ORGNUMMER)
         val inntektshistorikk = listOf(Inntektsopplysning(3.januar, INNTEKT, ORGNUMMER, true))
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
@@ -99,6 +100,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `forlenger ikke vedtaksperiode som har gått til infotrygd, der utbetaling ikke er gjort`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)  // <-- TIL_INFOTRYGD
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
@@ -222,6 +224,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode, RefusjonTilArbeidsgiver(
                 1.januar, 31.januar, 1000.daglig,
@@ -405,6 +408,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `setter forlengelse-flagget likt som forrige periode - forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
@@ -467,6 +471,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `setter forlengelse-flagget likt som forrige periode - ikke forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
@@ -479,7 +484,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            2.vedtaksperiode, *arrayOf(historikk),
+            2.vedtaksperiode, historikk,
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     3.januar(2018),
@@ -499,7 +504,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100.prosent))
         håndterYtelser(
-            3.vedtaksperiode, *arrayOf(historikk),
+            3.vedtaksperiode, historikk,
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     3.januar(2018),
@@ -720,7 +725,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.september(2020), 30.september(2020), 100.prosent))
         håndterSøknad(Sykdom(3.september(2020), 30.september(2020), 100.prosent))
         håndterYtelser(3.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
-        håndterYtelser(3.vedtaksperiode, *historikk2.toTypedArray(), inntektshistorikk = inntektsopplysning2)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -860,7 +864,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
             håndterSykmelding(Sykmeldingsperiode(9.november(2020), 6.desember(2020), 60.prosent))
             håndterSøknad(Sykdom(9.november(2020), 6.desember(2020), 60.prosent))
-            håndterUtbetalingshistorikk(3.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
             håndterYtelser(3.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
