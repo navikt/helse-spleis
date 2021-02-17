@@ -575,21 +575,23 @@ internal class Vedtaksperiode private constructor(
         }
         utbetalingstidslinje = utbetaling.utbetalingstidslinje(periode)
 
+        val ingenUtbetaling = !utbetaling().harUtbetalinger()
+        val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
+        val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
+
         when {
-            !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
+            ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
                 tilstand(hendelse, AvsluttetUtenUtbetalingMedInntektsmelding) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avluttes""")
                 }
             }
-            !utbetaling().harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
-                tilstand(hendelse, AvventerGodkjenning) {
-                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav, men inneholder andre warnings""")
-                }
-            }
-            !utbetaling().harUtbetalinger() && !utbetalingstidslinje.harUtbetalinger() -> {
+            ingenUtbetaling -> {
                 loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerGodkjenning) {
-                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                    if (kunArbeidsgiverdager)
+                        hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav, men inneholder andre warnings""")
+                    else
+                        hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
             dataForVilkårsvurdering == null && erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding() -> {
