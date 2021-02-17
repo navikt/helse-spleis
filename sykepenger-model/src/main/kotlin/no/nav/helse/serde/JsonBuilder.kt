@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
+import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -21,55 +22,43 @@ import java.util.*
 import kotlin.collections.set
 
 fun Person.serialize(): SerialisertPerson {
-    val jsonBuilder = JsonBuilder(this)
+    val jsonBuilder = JsonBuilder()
+    this.accept(jsonBuilder)
     return SerialisertPerson(jsonBuilder.toJson())
 }
 
-internal class JsonBuilder(person: Person) {
+internal class JsonBuilder : AbstractBuilder() {
 
-    private val root = Root()
-    private val stack = mutableListOf<PersonVisitor>(root)
+    private lateinit var personBuilder: PersonState
 
-    init {
-        person.accept(DelegatedPersonVisitor(stack::first))
-    }
-
-    internal fun toJson() = SerialisertPerson.medSkjemaversjon(root.toJson()).toString()
+    internal fun toJson() = personBuilder.build().toString()
     override fun toString() = toJson()
 
-    private fun pushState(state: PersonVisitor) {
-        stack.add(0, state)
+    override fun preVisitPerson(
+        person: Person,
+        opprettet: LocalDateTime,
+        aktørId: String,
+        fødselsnummer: String
+    ) {
+        personBuilder = PersonState(fødselsnummer, aktørId, opprettet)
+        pushState(personBuilder)
     }
 
-    private fun popState() {
-        stack.removeAt(0)
-    }
+    private class PersonState(fødselsnummer: String, aktørId: String, opprettet: LocalDateTime) : BuilderState() {
+        private val personMap = mutableMapOf<String, Any?>(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "opprettet" to opprettet
+        )
 
-    private inner class Root : PersonVisitor {
-        private val personMap = mutableMapOf<String, Any?>()
+        private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
-        override fun preVisitPerson(
-            person: Person,
-            opprettet: LocalDateTime,
-            aktørId: String,
-            fødselsnummer: String
-        ) {
-            pushState(PersonState(person, personMap))
-        }
-
-        fun toJson(): JsonNode = serdeObjectMapper.valueToTree<JsonNode>(personMap)
-    }
-
-    private inner class PersonState(person: Person, private val personMap: MutableMap<String, Any?>) : PersonVisitor {
-        init {
-            personMap.putAll(PersonReflect(person).toMap())
-        }
+        fun build() =
+            SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree<JsonNode>(personMap))
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             personMap["aktivitetslogg"] = AktivitetsloggReflect(aktivitetslogg).toMap()
         }
-
-        private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitArbeidsgivere() {
             personMap["arbeidsgivere"] = arbeidsgivere
@@ -95,11 +84,27 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class ArbeidsgiverState(
+    private companion object {
+        fun initVedtaksperiodeMap(
+            vedtaksperiodeMap: MutableMap<String, Any?>,
+            periode: Periode,
+            opprinneligPeriode: Periode,
+            hendelseIder: List<UUID>,
+            inntektskilde: Inntektskilde
+        ) {
+            vedtaksperiodeMap["fom"] = periode.start
+            vedtaksperiodeMap["tom"] = periode.endInclusive
+            vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
+            vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
+            vedtaksperiodeMap["hendelseIder"] = hendelseIder
+            vedtaksperiodeMap["inntektskilde"] = inntektskilde
+        }
+    }
+
+    private class ArbeidsgiverState(
         arbeidsgiver: Arbeidsgiver,
         private val arbeidsgiverMap: MutableMap<String, Any?>
-    ) :
-        PersonVisitor {
+    ) : BuilderState() {
         init {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
@@ -199,7 +204,7 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class ForkastetVedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : PersonVisitor {
+    private class ForkastetVedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
 
         override fun preVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
@@ -225,22 +230,7 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private fun initVedtaksperiodeMap(
-        vedtaksperiodeMap: MutableMap<String, Any?>,
-        periode: Periode,
-        opprinneligPeriode: Periode,
-        hendelseIder: List<UUID>,
-        inntektskilde: Inntektskilde
-    ) {
-        vedtaksperiodeMap["fom"] = periode.start
-        vedtaksperiodeMap["tom"] = periode.endInclusive
-        vedtaksperiodeMap["sykmeldingFom"] = opprinneligPeriode.start
-        vedtaksperiodeMap["sykmeldingTom"] = opprinneligPeriode.endInclusive
-        vedtaksperiodeMap["hendelseIder"] = hendelseIder
-        vedtaksperiodeMap["inntektskilde"] = inntektskilde
-    }
-
-    private inner class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : PersonVisitor {
+    private class UtbetalingerState(private val utbetalinger: MutableList<MutableMap<String, Any?>>) : BuilderState() {
 
         override fun preVisitUtbetaling(
             utbetaling: Utbetaling,
@@ -264,7 +254,7 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : PersonVisitor {
+    private class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : BuilderState() {
         override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
             val inntektMap = mutableMapOf<String, Any?>()
             inntekter.add(inntektMap)
@@ -277,8 +267,8 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class InntektshistorikkVol2State(private val inntekter: MutableList<Map<String, Any?>>) :
-        PersonVisitor {
+    private class InntektshistorikkVol2State(private val inntekter: MutableList<Map<String, Any?>>) :
+        BuilderState() {
         override fun preVisitInnslag(
             innslag: InntektshistorikkVol2.Innslag,
             id: UUID
@@ -298,8 +288,8 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class InntektsendringVol2State(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
-        PersonVisitor {
+    private class InntektsendringVol2State(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
+        BuilderState() {
         override fun visitSaksbehandler(
             saksbehandler: InntektshistorikkVol2.Saksbehandler,
             dato: LocalDate,
@@ -384,7 +374,7 @@ internal class JsonBuilder(person: Person) {
         override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) = popState()
     }
 
-    private inner class InntektsopplysningKopiState : PersonVisitor {
+    private class InntektsopplysningKopiState : BuilderState() {
         override fun postVisitInntektsopplysningKopi(
             inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
             dato: LocalDate,
@@ -393,8 +383,8 @@ internal class JsonBuilder(person: Person) {
         ) = popState()
     }
 
-    private inner class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
-        PersonVisitor {
+    private class UtbetalingstidslinjeState(utbetalingstidslinjeMap: MutableMap<String, Any?>) :
+        BuilderState() {
 
         private val dager = mutableListOf<MutableMap<String, Any?>>()
 
@@ -475,10 +465,10 @@ internal class JsonBuilder(person: Person) {
         override fun postVisit(tidslinje: Utbetalingstidslinje) = popState()
     }
 
-    private inner class VedtaksperiodeState(
+    private class VedtaksperiodeState(
         vedtaksperiode: Vedtaksperiode,
         private val vedtaksperiodeMap: MutableMap<String, Any?>
-    ) : PersonVisitor {
+    ) : BuilderState() {
         init {
             vedtaksperiodeMap.putAll(VedtaksperiodeReflect(vedtaksperiode).toMap())
         }
@@ -547,9 +537,9 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class SykdomshistorikkState(
+    private class SykdomshistorikkState(
         private val sykdomshistorikkElementer: MutableList<MutableMap<String, Any?>>
-    ) : PersonVisitor {
+    ) : BuilderState() {
         override fun preVisitSykdomshistorikkElement(
             element: Sykdomshistorikk.Element,
             id: UUID,
@@ -567,12 +557,12 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class SykdomshistorikkElementState(
+    private class SykdomshistorikkElementState(
         id: UUID,
         hendelseId: UUID?,
         tidsstempel: LocalDateTime,
         private val elementMap: MutableMap<String, Any?>
-    ) : PersonVisitor {
+    ) : BuilderState() {
         init {
             elementMap["id"] = id
             elementMap["hendelseId"] = hendelseId
@@ -605,7 +595,7 @@ internal class JsonBuilder(person: Person) {
         }
     }
 
-    private inner class SykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any>) : PersonVisitor {
+    private class SykdomstidslinjeState(private val sykdomstidslinje: MutableMap<String, Any>) : BuilderState() {
 
         private val dager: MutableList<MutableMap<String, Any>> = mutableListOf()
 

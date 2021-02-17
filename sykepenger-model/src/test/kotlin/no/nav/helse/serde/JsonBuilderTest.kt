@@ -51,7 +51,8 @@ class JsonBuilderTest {
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
         assertEquals(TilstandType.AVSLUTTET, tilstand)
-        val jsonBuilder = JsonBuilder(person)
+        val jsonBuilder = JsonBuilder()
+        person.accept(jsonBuilder)
         val personPost = SerialisertPerson(jsonBuilder.toString())
             .deserialize()
 
@@ -107,7 +108,9 @@ class JsonBuilderTest {
     @Test
     fun `Kopi av inntekt lagrer kun peker til opprinnelig inntektsopplysning`() {
         Toggles.PraksisendringEnabled.enable {
-            objectMapper.readTree(JsonBuilder(personMedLiteGap()).toString())
+            val builder = JsonBuilder()
+            personMedLiteGap().accept(builder)
+            objectMapper.readTree(builder.toString())
                 .get("arbeidsgivere")
                 .first()
                 .get("inntektshistorikk")
@@ -123,11 +126,13 @@ class JsonBuilderTest {
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
-        val jsonBuilder = JsonBuilder(person)
+        val jsonBuilder = JsonBuilder()
+        person.accept(jsonBuilder)
         val json = jsonBuilder.toString()
 
         val result = SerialisertPerson(json).deserialize()
-        val jsonBuilder2 = JsonBuilder(result)
+        val jsonBuilder2 = JsonBuilder()
+        result.accept(jsonBuilder2)
         val json2 = jsonBuilder2.toString()
 
         objectMapper.readTree(json).also {
