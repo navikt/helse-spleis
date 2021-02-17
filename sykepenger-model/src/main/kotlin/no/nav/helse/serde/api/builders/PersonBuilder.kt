@@ -15,14 +15,14 @@ internal class PersonBuilder(
     private val aktørId: String
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private val inntektshistorikkBuilder = InntektshistorikkBuilder()
+    private val inntektshistorikkBuilder = InntektshistorikkBuilder(person)
 
     fun build(hendelser: List<HendelseDTO>): PersonDTO {
         return PersonDTO(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser) },
-            inntektsgrunnlag = inntektshistorikkBuilder.build(person)
+            inntektsgrunnlag = inntektshistorikkBuilder.build()
         )
     }
 

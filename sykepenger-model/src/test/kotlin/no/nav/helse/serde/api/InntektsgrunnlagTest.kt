@@ -20,7 +20,7 @@ import java.util.*
 
 internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
-    private class FinnInntektshistorikk(person: Person) : PersonVisitor {
+    private class FinnInntektshistorikk(person: Person, private val builder: InntektshistorikkBuilder) : PersonVisitor {
         val inntektshistorikk = mutableMapOf<String, InntektshistorikkVol2>()
         private lateinit var orgnummer: String
 
@@ -34,6 +34,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
             this.inntektshistorikk[orgnummer] = inntektshistorikk
+            builder.inntektshistorikk(orgnummer, inntektshistorikk)
         }
     }
 
@@ -44,8 +45,9 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
 
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk.also {
-            (it.getValue(ORGNUMMER)){
+        val builder = InntektshistorikkBuilder(person)
+        FinnInntektshistorikk(person, builder).also {
+            (it.inntektshistorikk.getValue(ORGNUMMER)) {
                 addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
             }
         }
@@ -63,9 +65,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode)   // No history
-        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar avvik 0.0)
-
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        builder.nøkkeldataOmInntekt(1.januar og 31.januar avvik 0.0)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
@@ -105,10 +106,10 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)   // No history
 
-        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar avvik 7.7)
-
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        val builder = InntektshistorikkBuilder(person)
+        builder.nøkkeldataOmInntekt(1.januar og 31.januar avvik 7.7)
+        val inntektshistorikk = FinnInntektshistorikk(person, builder)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
@@ -151,10 +152,11 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
         )
 
-        val dataForSkjæringstidspunkt = listOf(1.oktober(2017) og 31.januar)
+        val builder = InntektshistorikkBuilder(person)
+        builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
 
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        FinnInntektshistorikk(person, builder)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
@@ -188,10 +190,11 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
         )
 
-        val dataForSkjæringstidspunkt = listOf(1.januar og 31.januar)
+        val builder = InntektshistorikkBuilder(person)
+        builder.nøkkeldataOmInntekt(1.januar og 31.januar)
 
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        FinnInntektshistorikk(person, builder)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
@@ -221,13 +224,16 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk.also {
+        val builder = InntektshistorikkBuilder(person)
+        FinnInntektshistorikk(person, builder).also {
             inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
                 1.juli(2017) til 1.september(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
-            }.forEach { inntekt -> inntekt.lagreInntekter(it.getValue(ORGNUMMER), 1.oktober(2017), UUID.randomUUID()) }
+            }.forEach { inntekt ->
+                inntekt.lagreInntekter(it.inntektshistorikk.getValue(ORGNUMMER), 1.oktober(2017), UUID.randomUUID())
+            }
         }
 
         håndterYtelser(
@@ -236,9 +242,9 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
         )
 
-        val dataForSkjæringstidspunkt = listOf(1.oktober(2017) og 31.januar)
+        builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
 
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
@@ -303,11 +309,11 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
                 })
         )
 
+        val builder = InntektshistorikkBuilder(person)
+        builder.nøkkeldataOmInntekt(10.februar og 28.februar avvik 7.7)
 
-        val dataForSkjæringstidspunkt = listOf(10.februar og 28.februar avvik 7.7)
-
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        val inntektshistorikk = FinnInntektshistorikk(person, builder)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 10.februar }.also { inntektsgrunnlaget ->
@@ -336,18 +342,21 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
     @Test
     fun `omregnet årsinntekt kan være null`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        val inntektshistorikk = FinnInntektshistorikk(person).inntektshistorikk.also {
+        val builder = InntektshistorikkBuilder(person)
+        FinnInntektshistorikk(person, builder).also {
             inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SYKEPENGEGRUNNLAG
                 1.april til 1.juni inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
-            }.forEach { inntekt -> inntekt.lagreInntekter(it.getValue(ORGNUMMER), 1.juni, UUID.randomUUID()) }
+            }.forEach { inntekt ->
+                inntekt.lagreInntekter(it.inntektshistorikk.getValue(ORGNUMMER), 1.juni, UUID.randomUUID())
+            }
         }
 
-        val dataForSkjæringstidspunkt = listOf(1.oktober og 31.desember)
+        builder.nøkkeldataOmInntekt(1.oktober og 31.desember)
 
-        val inntektsgrunnlag = inntektsgrunnlag(person, inntektshistorikk, dataForSkjæringstidspunkt)
+        val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober }.also { inntektsgrunnlaget ->
