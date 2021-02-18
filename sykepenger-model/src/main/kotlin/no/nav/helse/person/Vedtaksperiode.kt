@@ -1219,7 +1219,7 @@ internal class Vedtaksperiode private constructor(
                         if (Toggles.PraksisendringEnabled.enabled) {
                             val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag()
                             val forrigeSkjæringstidspunkt =
-                                førsteSykedag?.let { historie.skjæringstidspunktFørGapMindreEnn16Dager(vedtaksperiode.regler, vedtaksperiode.organisasjonsnummer, it) }
+                                førsteSykedag?.let { historie.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(vedtaksperiode.regler, vedtaksperiode.organisasjonsnummer, it) }
                             if (forrigeSkjæringstidspunkt != null) {
                                 utbetalingshistorikk.addInntekter(person)
                                 if (arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {

@@ -126,14 +126,10 @@ internal class Historie() {
 
     internal fun periodeTom(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).periode()?.endInclusive
 
-    private fun starteNyArbeidsgiverperiode(regler: ArbeidsgiverRegler, forrigeSykedag: LocalDate, førsteSykedag: LocalDate, sykdomstidslinje: Sykdomstidslinje) =
-        sykdomstidslinje.subset(Periode(forrigeSykedag.plusDays(1), førsteSykedag.minusDays(1))).starteNyArbeidsgiverperiode(regler)
-
-    internal fun skjæringstidspunktFørGapMindreEnn16Dager(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate) : LocalDate? {
+    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate) : LocalDate? {
         val sykdomstidslinje = sykdomstidslinje(orgnummer)
-        val forrigeSykedag = sykdomstidslinje.forrigeSykedagFør(nyFørsteSykedag) ?: return null
-        if(starteNyArbeidsgiverperiode(regler, forrigeSykedag, nyFørsteSykedag, sykdomstidslinje)) return null
-        return sykdomstidslinje.skjæringstidspunkt(forrigeSykedag)
+        if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
+        return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
     }
 
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {

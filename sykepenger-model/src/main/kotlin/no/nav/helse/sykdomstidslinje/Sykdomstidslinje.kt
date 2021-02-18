@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -152,27 +153,33 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteIkkeUkjentDagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && this[it] !is UkjentDag }
 
-    internal fun forrigeSykedagFør(dato: LocalDate) =
+    private fun forrigeSykedagFør(dato: LocalDate) =
         periode?.lastOrNull { it < dato && erEnSykedag(this[it]) }
 
-    internal fun starteNyArbeidsgiverperiode(regler: ArbeidsgiverRegler) = periode
-        ?.dropWhile { this[it] is Feriedag || (this[it] is UkjentDag && it.erHelg()) }
-        ?.count()
-        ?.let { regler.burdeStarteNyArbeidsgiverperiode(it) } ?: true
+    internal fun harNyArbeidsgiverperiodeFør(regler: ArbeidsgiverRegler, nesteSykedag: LocalDate): Boolean {
+        val forrigeSykedag = forrigeSykedagFør(nesteSykedag) ?: return false
+        return regler.burdeStarteNyArbeidsgiverperiode(avstandMellomSykedager(forrigeSykedag, nesteSykedag))
+    }
+
+    internal fun harNyArbeidsgiverperiodeEtter(regler: ArbeidsgiverRegler, fraOgMed: LocalDate) =
+        fraOgMed(fraOgMed)
+            .kunSykedager()
+            .zipWithNext()
+            .any { (forrigeSykedag, nesteSykedag) ->
+                regler.burdeStarteNyArbeidsgiverperiode(forrigeSykedag.plusDays(1).until(nesteSykedag, DAYS).toInt())
+            }
+
+    private fun avstandMellomSykedager(forrigeSykedag: LocalDate, nesteSykedag: LocalDate) =
+        subset(forrigeSykedag.plusDays(1) til nesteSykedag.minusDays(1))
+            .periode
+            ?.dropWhile { this[it] is Feriedag || (this[it] is UkjentDag && it.erHelg()) }
+            ?.count() ?: Int.MAX_VALUE
 
     fun starterFør(other: Sykdomstidslinje): Boolean {
         requireNotNull(periode)
         requireNotNull(other.periode)
         return periode.start < other.periode.start
     }
-
-    fun harNyArbeidsgiverperiodeEtter(regler: ArbeidsgiverRegler, etter: LocalDate) =
-        fraOgMed(etter)
-            .kunSykedager()
-            .zipWithNext()
-            .any {
-                regler.burdeStarteNyArbeidsgiverperiode(it.first.plusDays(1).until(it.second, DAYS).toInt())
-            }
 
     internal fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erArbeidsdag) ?: true
     internal fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
