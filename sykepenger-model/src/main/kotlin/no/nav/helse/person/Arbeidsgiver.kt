@@ -15,11 +15,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -610,9 +607,9 @@ internal class Arbeidsgiver private constructor(
             ?.also(sikkerLogg::info)
     }
 
-    internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode): Boolean {
+    internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null
-            && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(vedtaksperiode.periode().endInclusive)
+            && !sykdomstidslinje().harNyArbeidsgiverperiodeEtter(regler, vedtaksperiode.periode().endInclusive)
     }
 
     internal fun append(bøtte: Historie.Historikkbøtte) {

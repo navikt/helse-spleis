@@ -56,6 +56,7 @@ internal class Vedtaksperiode private constructor(
     private var oppdatert: LocalDateTime = opprettet
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
+    private val regler = NormalArbeidstaker
     private val skjæringstidspunkt
         get() =
             skjæringstidspunktFraInfotrygd
@@ -796,7 +797,7 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.håndter(sykmelding) returnPoint@{
                 if (Toggles.ReplayEnabled.enabled) {
-                    if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode)) {
+                    if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode, vedtaksperiode.regler)) {
                         return@returnPoint TilInfotrygd
                     }
                     replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
@@ -1218,7 +1219,7 @@ internal class Vedtaksperiode private constructor(
                         if (Toggles.PraksisendringEnabled.enabled) {
                             val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag()
                             val forrigeSkjæringstidspunkt =
-                                førsteSykedag?.let { historie.skjæringstidspunktFørGapMindreEnn16Dager(vedtaksperiode.organisasjonsnummer, it) }
+                                førsteSykedag?.let { historie.skjæringstidspunktFørGapMindreEnn16Dager(vedtaksperiode.regler, vedtaksperiode.organisasjonsnummer, it) }
                             if (forrigeSkjæringstidspunkt != null) {
                                 utbetalingshistorikk.addInntekter(person)
                                 if (arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
@@ -1355,7 +1356,7 @@ internal class Vedtaksperiode private constructor(
                         personTidslinje = historie.utbetalingstidslinjeFraInfotrygd(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
                         alder = Alder(vedtaksperiode.fødselsnummer),
-                        arbeidsgiverRegler = NormalArbeidstaker,
+                        arbeidsgiverRegler = vedtaksperiode.regler,
                         aktivitetslogg = ytelser,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                         dødsdato = ytelser.dødsinfo().dødsdato

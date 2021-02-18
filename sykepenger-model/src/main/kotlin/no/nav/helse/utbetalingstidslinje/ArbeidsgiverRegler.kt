@@ -6,13 +6,21 @@ internal interface ArbeidsgiverRegler {
     fun dekningsgrad(): Double
     fun maksSykepengedager(): Int
     fun maksSykepengedagerOver67(): Int
+    fun gjennomførArbeidsgiverperiode(): Int
 
     companion object {
         internal object NormalArbeidstaker: ArbeidsgiverRegler {
-            override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
+            private const val arbeidsgiverperiodelengde = 16
+            private const val oppholdsdagerFørNyArbeidsgiverperiode = 16
+
+            override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) =
+                oppholdsdagerBrukt >= oppholdsdagerFørNyArbeidsgiverperiode
 
             override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) =
-                arbeidsgiverperiodedagerBrukt >= 16
+                arbeidsgiverperiodedagerBrukt >= arbeidsgiverperiodelengde
+
+            override fun gjennomførArbeidsgiverperiode() =
+                arbeidsgiverperiodelengde
 
             override fun dekningsgrad() = 1.0
             override fun maksSykepengedager() = 248

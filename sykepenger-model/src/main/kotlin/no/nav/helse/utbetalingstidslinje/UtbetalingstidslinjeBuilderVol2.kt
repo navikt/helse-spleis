@@ -223,7 +223,7 @@ internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     }
 
     private fun arbeidsgiverperiodeGjennomført(dagen: LocalDate): Boolean {
-        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode += 16
+        if (sykedagerIArbeidsgiverperiode == 0 && forlengelseStrategy(dagen)) sykedagerIArbeidsgiverperiode = arbeidsgiverRegler.gjennomførArbeidsgiverperiode()
         return arbeidsgiverRegler.arbeidsgiverperiodenGjennomført(sykedagerIArbeidsgiverperiode)
     }
 
