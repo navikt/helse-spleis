@@ -765,7 +765,6 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         forlengelseStrategy: (LocalDate) -> Boolean = { false }
     ) {
         tidslinje = UtbetalingstidslinjeBuilderVol2(
-            sammenhengendePeriode = this.periode()!!,
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = forlengelseStrategy

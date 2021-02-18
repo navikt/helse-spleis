@@ -3,8 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.*
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Person
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -100,10 +99,13 @@ internal abstract class HistorieTest {
 
 
     protected fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
-        val inntektshistorikk = Inntektshistorikk(inntektsdatoer.map {
-            Inntektshistorikk.Inntektsendring(it, UUID.randomUUID(), 25000.månedlig, INNTEKTSMELDING)
-        }.toMutableList())
-        return historie.beregnUtbetalingstidslinje(orgnr, periode, inntektshistorikk, regler)
+        val inntektshistorikkVol2 = InntektshistorikkVol2()
+        inntektshistorikkVol2 {
+            inntektsdatoer.forEach {
+                addInntektsmelding(it, UUID.randomUUID(), 25000.månedlig)
+            }
+        }
+        return historie.beregnUtbetalingstidslinjeVol2(orgnr, periode, inntektshistorikkVol2, regler)
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))
