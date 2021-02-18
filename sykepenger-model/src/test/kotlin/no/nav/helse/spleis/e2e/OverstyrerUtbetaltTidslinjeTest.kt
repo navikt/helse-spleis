@@ -257,11 +257,50 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
-    fun `ferie utenfor arbeidsgiverperiode`() {}
+    fun `ferie i arbeidsgiverperiode`() {
+        nyttVedtak(3.januar, 26.januar)
+        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterOverstyring((6.januar til 9.januar).map { manuellFeriedag(it) })  // ferie på første navdag
+        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_SØKNAD_FERDIG_GAP,
+            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVSLUTTET
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_UFERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+        )
+        assertEquals(3, inspektør.utbetalinger.size)
+        assertFalse( inspektør.utbetaling(2).harUtbetalinger())
+
+    }
 
     @Test
-    fun `ledende uferdig periode overstyrer arbeidsgiverperiode`() {
+    fun `ledende uferdig periode`() {
         nyttVedtak(3.januar, 26.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(27.januar, 14.februar, 100.prosent))
