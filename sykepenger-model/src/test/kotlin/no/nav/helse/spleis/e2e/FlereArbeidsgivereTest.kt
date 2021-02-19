@@ -1163,6 +1163,31 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `flere arbeidsgivere med inntekter på forskjellige skjæringstidspunkt skal til infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        var infotrygdPerioder = arrayOf(
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1)
+        )
+        val inntektshistorikk = mutableListOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), utbetalinger = infotrygdPerioder, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), utbetalinger = infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        infotrygdPerioder += RefusjonTilArbeidsgiver(1.mars, 31.mars, INNTEKT, 100.prosent, a2)
+        inntektshistorikk += Utbetalingshistorikk.Inntektsopplysning(1.mars, INNTEKT, a2, true)
+
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 30.april, 100.prosent), orgnummer = a2)
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertForkastetPeriodeTilstander(a2, 1.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
     private fun assertTilstand(
         orgnummer: String,
         tilstand: TilstandType,

@@ -78,7 +78,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
-
     protected fun assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
         assertForkastetPeriodeTilstander(vedtaksperiodeId(indeks), *tilstander)
     }
@@ -86,6 +85,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
+        assertEquals(tilstander.asList(), observatør.tilstander[id])
+    }
+
+    protected fun assertForkastetPeriodeTilstander(orgnummer: String, id: UUID, vararg tilstander: TilstandType) {
+        assertTrue(inspektør(orgnummer).periodeErForkastet(id)) { "Perioden er ikke forkastet" }
+        assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 

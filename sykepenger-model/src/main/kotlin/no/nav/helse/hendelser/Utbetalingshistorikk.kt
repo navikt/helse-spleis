@@ -97,8 +97,13 @@ class Utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
                 periode: Periode
             ) {
-                filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
-                    .forEach { it.valider(aktivitetslogg, periode) }
+                val relevanteInntektsopplysninger = filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
+                relevanteInntektsopplysninger.forEach { it.valider(aktivitetslogg, periode) }
+                val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
+                val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
+                if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) {
+                    aktivitetslogg.error("Har inntekt på flere arbeidsgivere med forskjellig fom dato")
+                }
                 if (this.isNotEmpty() && skjæringstidspunkt == null) sikkerLogg.info("Har inntekt i Infotrygd og skjæringstidspunkt er null")
             }
 
