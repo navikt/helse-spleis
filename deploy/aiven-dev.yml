@@ -1,0 +1,141 @@
+---
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+    name: rapid.v1
+    namespace: tbd
+    labels:
+        team: tbd
+spec:
+    pool: nav-dev
+    config:  # optional; all fields are optional too; defaults shown
+        cleanupPolicy: delete  # delete, compact
+        minimumInSyncReplicas: 1
+        partitions: 6
+        replication: 3  # see min/max requirements
+        retentionBytes: -1  # -1 means unlimited
+        retentionHours: 2160  # -1 means unlimited
+    acl:
+        - team: tbd
+          application: behovsakkumulator
+          access: readwrite
+        - team: tbd
+          application: spaghet
+          access: readwrite
+        - team: tbd
+          application: spammer
+          access: readwrite
+        - team: tbd
+          application: spare
+          access: readwrite
+        - team: tbd
+          application: sparkel-aareg
+          access: readwrite
+        - team: tbd
+          application: sparkel-arena
+          access: readwrite
+        - team: tbd
+          application: sparkel-dkif
+          access: readwrite
+        - team: tbd
+          application: sparkel-gosys
+          access: readwrite
+        - team: tbd
+          application: sparkel-inntekt
+          access: readwrite
+        - team: tbd
+          application: sparkel-institusjonsopphold
+          access: readwrite
+        - team: tbd
+          application: sparkel-medlemskap
+          access: readwrite
+        - team: tbd
+          application: sparkel-norg
+          access: readwrite
+        - team: tbd
+          application: sparkel-personinfo
+          access: readwrite
+        - team: tbd
+          application: sparkel-pleiepenger
+          access: readwrite
+        - team: tbd
+          application: sparkel-sykepengeperioder
+          access: readwrite
+        - team: tbd
+          application: sparkel-vilkarsproving
+          access: readwrite
+        - team: tbd
+          application: spedisjon
+          access: readwrite
+        - team: tbd
+          application: speider
+          access: readwrite
+        - team: tbd
+          application: speil
+          access: readwrite
+        - team: tbd
+          application: speil-redis
+          access: readwrite
+        - team: tbd
+          application: spenn
+          access: readwrite
+        - team: tbd
+          application: spenn-avstemming
+          access: readwrite
+        - team: tbd
+          application: spesialist
+          access: readwrite
+        - team: tbd
+          application: spetakkel
+          access: readwrite
+        - team: tbd
+          application: spleis
+          access: readwrite
+        - team: tbd
+          application: spleis-api
+          access: readwrite
+        - team: tbd
+          application: spock
+          access: readwrite
+        - team: tbd
+          application: spokelse
+          access: readwrite
+        - team: tbd
+          application: sporbar
+          access: readwrite
+        - team: tbd
+          application: spre-arbeidsgiver
+          access: readwrite
+        - team: tbd
+          application: spre-gosys
+          access: readwrite
+        - team: tbd
+          application: spre-gosys-pdf
+          access: readwrite
+        - team: tbd
+          application: spre-oppgaver
+          access: readwrite
+        - team: tbd
+          application: spre-stonadsstatistikk
+          access: readwrite
+        - team: tbd
+          application: sputnik
+          access: readwrite
+        - team: tbd
+          application: vedtaksfeed
+          access: readwrite
+        - team: risk
+          application: sigmund
+          access: readwrite
+        - team: risk
+          application: helserisk-treskeverk
+          access: readwrite
+        - team: tbd
+          application: sparkel-sykepengeperioder-mock
+          access: readwrite
+        - team: tbd
+          application: risk-mock
+          access: readwrite
+        - team: teamsykmelding
+          application: sparenaproxy
+          access: read
