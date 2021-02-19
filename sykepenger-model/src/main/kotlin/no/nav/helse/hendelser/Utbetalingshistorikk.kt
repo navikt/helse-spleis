@@ -131,7 +131,7 @@ class Utbetalingshistorikk(
                 hendelseId: UUID
             ) {
                 inntektshistorikk {
-                    forEach {
+                    reversed().forEach {
                         addInfotrygd(it.sykepengerFom, hendelseId, it.inntektPerMåned)
                     }
                 }

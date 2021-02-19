@@ -2,7 +2,9 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -441,6 +443,17 @@ class UtbetalingshistorikkTest {
         )
 
         assertFalse(utbetalingshistorikk.valider(Periode(2.januar, 31.januar), 2.januar).hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `legger til siste inntekt først i inntektshistorikk`() {
+        val inntektshistorikk = InntektshistorikkVol2()
+            listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
+        ).lagreInntekter(inntektshistorikk, UUID.randomUUID())
+
+        assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
     private class Inspektør : UtbetalingsdagVisitor {
