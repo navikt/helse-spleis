@@ -125,7 +125,7 @@ internal class Historie() {
 
     internal fun periodeTom(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).periode()?.endInclusive
 
-    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate) : LocalDate? {
+    internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate): LocalDate? {
         val sykdomstidslinje = sykdomstidslinje(orgnummer)
         if (sykdomstidslinje.harNyArbeidsgiverperiodeFør(regler, nyFørsteSykedag)) return null
         return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
@@ -141,6 +141,11 @@ internal class Historie() {
 
     private fun sykdomstidslinje(orgnummer: String) =
         infotrygdbøtte.sykdomstidslinje(orgnummer).merge(spleisbøtte.sykdomstidslinje(orgnummer), replace)
+
+    internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
+        orgnummerForOverlappendeVedtaksperioder: List<String>,
+        skjæringstidspunkt: LocalDate
+    ) = infotrygdbøtte.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(orgnummerForOverlappendeVedtaksperioder, skjæringstidspunkt)
 
     internal companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
@@ -190,6 +195,15 @@ internal class Historie() {
 
         internal fun erUtbetaltDag(orgnr: String, dato: LocalDate) =
             utbetalingstidslinje(orgnr)[dato].erSykedag()
+
+        private fun orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt: LocalDate) =
+            sykdomstidslinjer.filter { (_, sykdomstidlinje) -> sykdomstidlinje.førsteSykedagEtter(skjæringstidspunkt) != null }.keys
+
+        internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
+            orgnummerForOverlappendeVedtaksperioder: List<String>,
+            skjæringstidspunkt: LocalDate
+        ) = orgnummerForOverlappendeVedtaksperioder.containsAll(orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt))
+
 
         internal companion object {
             internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =

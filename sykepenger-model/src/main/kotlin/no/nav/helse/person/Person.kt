@@ -352,4 +352,6 @@ class Person private constructor(
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
 
+    internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie: Historie, vedtaksperiode: Vedtaksperiode) =
+        Arbeidsgiver.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere, historie, vedtaksperiode)
 }

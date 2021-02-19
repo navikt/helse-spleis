@@ -401,7 +401,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a1, TIL_UTBETALING)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
-        val utbetaltRefId = håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVVENTER_HISTORIKK)
 
@@ -1186,6 +1186,41 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertForkastetPeriodeTilstander(a2, 1.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Kaster ut perioder hvis ikke alle forlengelser fra IT har fått sykmeldinger`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode(orgnummer = a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(
+            1.vedtaksperiode(orgnummer = a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a2),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a2, true)
+            ),
+            orgnummer = a1
+        )
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode(a1),
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
     }
 
     private fun assertTilstand(

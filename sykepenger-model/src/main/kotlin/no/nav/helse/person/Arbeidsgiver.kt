@@ -89,6 +89,12 @@ internal class Arbeidsgiver private constructor(
                     && arbeidsgiver.finnSykeperiodeRettFør(other) != null
             }
         }
+
+        internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
+            arbeidsgivere: Iterable<Arbeidsgiver>,
+            historie: Historie,
+            vedtaksperiode: Vedtaksperiode
+        ) = Vedtaksperiode.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere.flatMap { it.vedtaksperioder }, historie, vedtaksperiode)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
