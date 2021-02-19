@@ -390,6 +390,59 @@ class UtbetalingshistorikkTest {
         )
     }
 
+    @Test
+    fun `validering gir warning hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = emptyList(),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
+            )
+        )
+
+        assertTrue(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasWarningsOrWorse())
+        assertFalse(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på forskjellig dato`() {
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = emptyList(),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(2.januar, 1234.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
+            )
+        )
+
+        assertFalse(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er 12 måneder før perioden`() {
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = emptyList(),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar(2018), 1234.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar(2018), 4321.månedlig, ORGNUMMER, true),
+            )
+        )
+
+        assertFalse(utbetalingshistorikk.valider(Periode(1.februar(2019), 28.februar(2019)), null).hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er før skjæringstidspunkt`() {
+        val utbetalingshistorikk = utbetalingshistorikk(
+            utbetalinger = emptyList(),
+            inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true),
+                Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
+            )
+        )
+
+        assertFalse(utbetalingshistorikk.valider(Periode(2.januar, 31.januar), 2.januar).hasWarningsOrWorse())
+    }
+
     private class Inspektør : UtbetalingsdagVisitor {
         var førsteDag: LocalDate? = null
         var sisteDag: LocalDate? = null

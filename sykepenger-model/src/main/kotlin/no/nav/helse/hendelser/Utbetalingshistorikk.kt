@@ -75,9 +75,10 @@ class Utbetalingshistorikk(
                 periode: Periode
             ) {
                 liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
-                if(!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
+                if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
                     liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
                 }
+                liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
             }
 
             private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
@@ -99,6 +100,19 @@ class Utbetalingshistorikk(
                 filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
                     .forEach { it.valider(aktivitetslogg, periode) }
                 if (this.isNotEmpty() && skjæringstidspunkt == null) sikkerLogg.info("Har inntekt i Infotrygd og skjæringstidspunkt er null")
+            }
+
+            private fun List<Inntektsopplysning>.validerAntallInntekterPerArbeidsgiverPerDato(
+                skjæringstidspunkt: LocalDate?,
+                aktivitetslogg: IAktivitetslogg,
+                periode: Periode
+            ) {
+                val harFlereInntekterPåSammeAGogDato = filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
+                    .groupBy { it.orgnummer to it.sykepengerFom }
+                    .any { (_, inntekter) -> inntekter.size > 1 }
+                if (harFlereInntekterPåSammeAGogDato) {
+                    aktivitetslogg.warn("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato, den seneste er lagt til grunn. Kontroller sykepengegrunnlaget.")
+                }
             }
 
             internal fun addInntekter(
