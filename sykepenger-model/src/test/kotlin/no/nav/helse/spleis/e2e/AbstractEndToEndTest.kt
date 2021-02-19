@@ -78,6 +78,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
+
     protected fun assertForkastetPeriodeTilstander(indeks: Int, vararg tilstander: TilstandType) {
         assertForkastetPeriodeTilstander(vedtaksperiodeId(indeks), *tilstander)
     }
@@ -176,7 +177,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList()
     ) {
-        assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Søknad::class)
+        assertIkkeEtterspurt(Søknad::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
         håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder)
     }
 
@@ -211,7 +212,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
         beregnetInntekt: Inntekt = refusjon.second
     ): UUID {
-        assertIkkeEtterspurt(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, Inntektsmelding::class)
+        assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
         return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon, beregnetInntekt = beregnetInntekt)
     }
 
@@ -269,7 +270,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         )
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
-            assertEtterspurt(vedtaksperiodeId, behovtype, Vilkårsgrunnlag::class)
+            assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(InntekterForSammenligningsgrunnlag)
         assertEtterspurt(Medlemskap)
@@ -287,7 +288,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         simuleringOK: Boolean = true,
         orgnummer: String = ORGNUMMER
     ) {
-        assertEtterspurt(vedtaksperiodeId, Behovtype.Simulering, Simulering::class)
+        assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeId, orgnummer)
         simulering(vedtaksperiodeId, simuleringOK, orgnummer).håndter(Person::håndter)
     }
 
@@ -297,7 +298,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER
     ) {
-        assertEtterspurt(vedtaksperiodeId, Sykepengehistorikk, Utbetalingshistorikk::class)
+        assertEtterspurt(Utbetalingshistorikk::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
 
         utbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -323,7 +324,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         dagpenger: List<Periode> = emptyList()
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
-            assertEtterspurt(vedtaksperiodeId, behovtype, Ytelser::class)
+            assertEtterspurt(Ytelser::class, behovtype, vedtaksperiodeId, orgnummer)
 
         assertEtterspurt(Sykepengehistorikk)
         assertEtterspurt(Foreldrepenger)
@@ -379,7 +380,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false
     ) {
-        assertEtterspurt(vedtaksperiodeId, Godkjenning, Utbetalingsgodkjenning::class)
+        assertEtterspurt(Utbetalingsgodkjenning::class, Godkjenning, vedtaksperiodeId, orgnummer)
         utbetalingsgodkjenning(vedtaksperiodeId, utbetalingGodkjent, orgnummer, automatiskBehandling).håndter(Person::håndter)
     }
 
@@ -947,8 +948,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return this
     }
 
-    private fun <T : ArbeidstakerHendelse> assertEtterspurt(vedtaksperiodeId: UUID, type: Behovtype, løsning: KClass<T>) {
-        val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, vedtaksperiodeId, type)
+    private fun <T : ArbeidstakerHendelse> assertEtterspurt(løsning: KClass<T>, type: Behovtype, vedtaksperiodeId: UUID, orgnummer: String) {
+        val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer)
         assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
             "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
                 observatør.tilstander[vedtaksperiodeId]?.last()
@@ -956,8 +957,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         }
     }
 
-    private fun <T : ArbeidstakerHendelse> assertIkkeEtterspurt(vedtaksperiodeId: UUID, type: Behovtype, løsning: KClass<T>) {
-        val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, vedtaksperiodeId, type)
+    private fun <T : ArbeidstakerHendelse> assertIkkeEtterspurt(løsning: KClass<T>, type: Behovtype, vedtaksperiodeId: UUID, orgnummer: String) {
+        val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer)
         assertFalse(etterspurtBehov in ikkeBesvarteBehov) {
             "Forventer ikke at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
                 observatør.tilstander[vedtaksperiodeId]?.last()
@@ -976,23 +977,31 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     private class EtterspurtBehov(
         private val type: Behovtype,
         private val tilstand: TilstandType,
+        private val orgnummer: String,
         private val vedtaksperiodeId: UUID
     ) {
         companion object {
             internal fun finnEtterspurteBehov(behovsliste: List<Aktivitetslogg.Aktivitet.Behov>) =
                 behovsliste
                     .filter { "tilstand" in it.kontekst() }
+                    .filter { "organisasjonsnummer" in it.kontekst() }
                     .filter { "vedtaksperiodeId" in it.kontekst() }
                     .map {
                         EtterspurtBehov(
                             type = it.type,
                             tilstand = enumValueOf(it.kontekst()["tilstand"] as String),
+                            orgnummer = it.kontekst()["organisasjonsnummer"] as String,
                             vedtaksperiodeId = UUID.fromString(it.kontekst()["vedtaksperiodeId"] as String)
                         )
                     }
 
-            internal fun finnEtterspurtBehov(ikkeBesvarteBehov: MutableList<EtterspurtBehov>, vedtaksperiodeId: UUID, type: Behovtype) =
-                ikkeBesvarteBehov.firstOrNull { it.vedtaksperiodeId == vedtaksperiodeId && it.type == type }
+            internal fun finnEtterspurtBehov(
+                ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
+                type: Behovtype,
+                vedtaksperiodeId: UUID,
+                orgnummer: String
+            ) =
+                ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeId }
         }
 
         override fun toString() = "$type ($tilstand)"
