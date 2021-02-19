@@ -31,6 +31,8 @@ spec:
     enabled: true
     path: /metrics
   webproxy: true
+  kafka:
+    pool: nav-prod
   vault:
     enabled: true
     paths:

@@ -6,6 +6,7 @@ on:
     - master
     paths:
     - 'deploy/aiven-dev.yml'
+    - 'deploy/aiven-prod.yml'
 
 jobs:
   deployDev:
@@ -18,3 +19,14 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/aiven-dev.yml
+
+  deployProd:
+    name: apply prod-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/aiven-prod.yml
