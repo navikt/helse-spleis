@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
@@ -65,11 +66,8 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
+            .lagreInntekter(historikk, UUID.randomUUID())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
         assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar(2018)))
@@ -78,11 +76,8 @@ internal class InntektshistorikkVol2Test {
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar)
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true))
+            .lagreInntekter(historikk, UUID.randomUUID())
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
@@ -99,11 +94,8 @@ internal class InntektshistorikkVol2Test {
                 ORGNUMMER inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true))
+            .lagreInntekter(historikk, UUID.randomUUID())
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(23, inspektør.inntektTeller.last())
@@ -112,11 +104,8 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, 25000.månedlig, ORGNUMMER, true))
+            .lagreInntekter(historikk, UUID.randomUUID())
         inntektperioder {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
@@ -360,11 +349,8 @@ internal class InntektshistorikkVol2Test {
     @Test
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk, 1.januar)
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
+            .lagreInntekter(historikk, UUID.randomUUID())
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
@@ -372,12 +358,11 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Finner nærmeste inntekt fra Infotrygd, hvis det ikke finnes inntekt for skjæringstidspunkt`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(10.januar, 30000.månedlig, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(5.januar, 25000.månedlig, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(
+            Utbetalingshistorikk.Inntektsopplysning(10.januar, 30000.månedlig, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(5.januar, 25000.månedlig, ORGNUMMER, true)
+        )
+            .lagreInntekter(historikk, UUID.randomUUID())
         assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 11.januar))
         assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 9.januar))
         assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar))
@@ -422,11 +407,8 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Kopier inntektsopplysning fra infotrygd`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
+                .lagreInntekter(historikk, UUID.randomUUID())
 
         assertTrue(historikk.opprettReferanse(1.januar, 10.januar, UUID.randomUUID()))
 
@@ -440,11 +422,8 @@ internal class InntektshistorikkVol2Test {
 
     @Test
     fun `Kopierer ikke infotrygdinntekt med annen dato`() {
-        utbetalingshistorikk(
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true)
-            )
-        ).addInntekter(UUID.randomUUID(), ORGNUMMER, historikk)
+        listOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, ORGNUMMER, true))
+                .lagreInntekter(historikk, UUID.randomUUID())
 
         assertFalse(historikk.opprettReferanse(5.januar, 10.januar, UUID.randomUUID()))
 
@@ -658,15 +637,4 @@ internal class InntektshistorikkVol2Test {
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
     )
-
-    private fun utbetalingshistorikk(inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning>) =
-        Utbetalingshistorikk(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            utbetalinger = emptyList(),
-            inntektshistorikk = inntektshistorikk
-        )
 }

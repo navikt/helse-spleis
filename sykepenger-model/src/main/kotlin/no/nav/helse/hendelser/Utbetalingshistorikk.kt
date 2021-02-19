@@ -49,10 +49,6 @@ class Utbetalingshistorikk(
         this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
     }
 
-    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: InntektshistorikkVol2) {
-        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
-    }
-
     internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
         addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
     }
@@ -142,21 +138,6 @@ class Utbetalingshistorikk(
                 inntektPerMåned,
                 Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
             )
-        }
-
-        internal fun addInntekter(
-            hendelseId: UUID,
-            organisasjonsnummer: String,
-            inntektshistorikk: InntektshistorikkVol2
-        ) {
-            if (organisasjonsnummer != orgnummer) return
-            inntektshistorikk {
-                addInfotrygd(
-                    sykepengerFom,
-                    hendelseId,
-                    inntektPerMåned
-                )
-            }
         }
     }
 
