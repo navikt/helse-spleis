@@ -539,6 +539,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
         if (tilstand == AvventerArbeidsgivere) {
+            hendelse.kontekst(arbeidsgiver)
             kontekst(hendelse)
             tilstand(hendelse, AvventerHistorikk)
         }
