@@ -2683,4 +2683,87 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertEquals("EN_ARBEIDSGIVER", inspektør.sisteBehov(1.vedtaksperiode).detaljer()["inntektskilde"])
     }
+
+    @Test
+    fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold starter på helg`() {
+        håndterSykmelding(Sykmeldingsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(8.februar(2021), 12.februar(2021), 100.prosent))
+        håndterSøknad(Sykdom(8.februar(2021), 12.februar(2021), 100.prosent))
+
+        håndterInntektsmelding(listOf(
+            28.desember(2020) til 28.desember(2020),
+            13.januar(2021) til 15.januar(2021),
+            27.januar(2021) til 7.februar(2021)
+        ), førsteFraværsdag = 27.januar(2021))
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+            assertEquals(5, it.navDagTeller)
+            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
+        }
+    }
+
+    @Test
+    fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager`() {
+        håndterSykmelding(Sykmeldingsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.januar(2021), 2.februar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.februar(2021), 7.februar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(8.februar(2021), 12.februar(2021), 100.prosent))
+        håndterSøknad(Sykdom(8.februar(2021), 12.februar(2021), 100.prosent))
+
+        håndterInntektsmelding(listOf(
+            27.desember(2020) til 27.desember(2020),
+            12.januar(2021) til 14.januar(2021),
+            27.januar(2021) til 7.februar(2021)
+        ), førsteFraværsdag = 27.januar(2021))
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+            assertEquals(5, it.navDagTeller)
+            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
+        }
+    }
+
+    @Test
+    fun `Starter ikke ny arbeidsgiverperiode dersom flere opphold til sammen utgjør over 16 dager når hvert opphold er under 16 dager - opphold etter arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 10.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar(2021), 10.januar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(20.januar(2021), 25.januar(2021), 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(20.januar(2021), 25.januar(2021), 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(5.februar(2021), 12.februar(2021), 100.prosent))
+        håndterSøknad(Sykdom(5.februar(2021), 12.februar(2021), 100.prosent))
+
+        håndterInntektsmelding(listOf(
+            1.januar(2021) til 10.januar(2021),
+            20.januar(2021) til 25.februar(2021)
+        ), førsteFraværsdag = 5.februar(2021))
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        UtbetalingstidslinjeInspektør(inspektør.utbetalingUtbetalingstidslinje(0)).also {
+            assertEquals(6, it.navDagTeller)
+            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
+        }
+    }
 }
