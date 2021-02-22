@@ -139,3 +139,6 @@ spec:
         - team: teamsykmelding
           application: sparenaproxy
           access: read
+        - team: default
+          application: sparenaproxy
+          access: read
