@@ -197,8 +197,7 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
-            inntektsmelding.info("Inntektsmelding traff ingen vedtaksperioder, lagt på kjøl.")
-            inntektsmeldingLagtPåKjøl(hendelseId = inntektsmelding.meldingsreferanseId())
+            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
         finalize(inntektsmelding)
     }

@@ -73,7 +73,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
