@@ -441,7 +441,7 @@ class SpeilBuilderTest {
         assertNotNull(vedtaksperiodeDTO.dataForVilkårsvurdering)
         assertNotNull(vedtaksperiodeDTO.vilkår.opptjening)
         assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[1].fullstendig)
-//        This assertion will not pass until SpeilBuilder can map empoyers period correctly - https://trello.com/c/4FjMVwna")
+//        This assertion will not pass until SpeilBuilder can map employer's period correctly - https://trello.com/c/4FjMVwna")
 //        assertTrue(personDTO.arbeidsgivere[0].vedtaksperioder[0].fullstendig)
     }
 

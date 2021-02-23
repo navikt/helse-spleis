@@ -271,6 +271,7 @@ enum class TilstandstypeDTO(private val visForkastet: Boolean = false) {
     AnnulleringFeilet(true),
     Oppgaver,
     Venter,
+    VenterPåKiling,
     IngenUtbetaling,
     KunFerie,
     Feilet(true),

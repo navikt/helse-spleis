@@ -199,7 +199,6 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
             TilstandType.AVVENTER_UFERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_SIMULERING,
@@ -208,6 +207,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
+            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> TilstandstypeDTO.VenterPåKiling
             TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
             TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
             TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
