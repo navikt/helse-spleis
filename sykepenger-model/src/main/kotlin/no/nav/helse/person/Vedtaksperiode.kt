@@ -419,7 +419,10 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         if (hendelse.valider(periode).hasErrorsOrWorse()) {
-            return if (Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) person.invaliderAllePerioder(hendelse) else tilstand(hendelse, TilInfotrygd)
+            return if (Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) person.invaliderAllePerioder(
+                hendelse,
+                "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
+            ) else tilstand(hendelse, TilInfotrygd)
         }
         onSuccess()
     }
@@ -957,7 +960,10 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
+                søknad,
+                "Invaliderer alle perioder for flere arbeidsgivere fordi infotrygdforlengelser hos alle arbeidsgivere ikke gjelder samme periode"
+            )
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
@@ -977,7 +983,10 @@ internal class Vedtaksperiode private constructor(
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
+                søknad,
+                "Invaliderer alle perioder for flere arbeidsgivere fordi infotrygdforlengelser hos alle arbeidsgivere ikke gjelder samme periode"
+            )
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingUferdigForlengelse)
             søknad.info("Fullført behandling av søknad")
         }
@@ -1019,7 +1028,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(søknad)
+            if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
+                søknad,
+                "Invaliderer alle perioder for flere arbeidsgivere fordi infotrygdforlengelser hos alle arbeidsgivere ikke gjelder samme periode"
+            )
             vedtaksperiode.håndter(søknad, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             søknad.info("Fullført behandling av søknad")
         }
@@ -1395,7 +1407,7 @@ internal class Vedtaksperiode private constructor(
                     ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
                 )
                 onError {
-                    person.invaliderAllePerioder(utbetalingshistorikk)
+                    person.invaliderAllePerioder(utbetalingshistorikk, null)
                 }
                 valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
                     if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return@valider true

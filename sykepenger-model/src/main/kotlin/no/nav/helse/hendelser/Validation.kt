@@ -80,14 +80,6 @@ internal fun Validation.overlappende(
     !institusjonsopphold.overlapper(sykdomsperiode)
 }
 
-internal fun Validation.overlappende(
-    periode: Periode,
-    person: Person,
-    ytelser: Ytelser
-) = valider("Invaliderer alle perioder pga flere arbeidsgivere") {
-    !person.arbeidsgiverOverlapper(periode, ytelser)
-}
-
 internal fun Validation.harNødvendigInntekt(
     person: Person,
     skjæringstidspunkt: LocalDate

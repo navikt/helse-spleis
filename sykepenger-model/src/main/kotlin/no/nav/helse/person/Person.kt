@@ -51,7 +51,7 @@ class Person private constructor(
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereOvergangITEnabled.enabled)
-            return invaliderAllePerioder(hendelse)
+            return invaliderAllePerioder(hendelse, "Invaliderer alle perioder fordi bryter for FlereArbeidsgivereOvergangIT er skrudd av")
 
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
@@ -249,8 +249,8 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    internal fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse) {
-        hendelse.error("Invaliderer alle perioder pga flere arbeidsgivere")
+    internal fun invaliderAllePerioder(hendelse: ArbeidstakerHendelse, feilmelding: String?) {
+        feilmelding?.also(hendelse::error)
         arbeidsgivere.forEach { it.søppelbøtte(hendelse, Arbeidsgiver.ALLE, ForkastetÅrsak.IKKE_STØTTET) }
     }
 
@@ -274,11 +274,6 @@ class Person private constructor(
             val newValue = creator()
             add(newValue)
             newValue
-        }
-
-    internal fun arbeidsgiverOverlapper(periode: Periode, arbeidstakerHendelse: ArbeidstakerHendelse) =
-        (arbeidsgivere.filter { it.overlapper(periode) }.size > 1).also {
-            if (it) invaliderAllePerioder(arbeidstakerHendelse)
         }
 
     internal fun nåværendeVedtaksperioder() = arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.sorted()
