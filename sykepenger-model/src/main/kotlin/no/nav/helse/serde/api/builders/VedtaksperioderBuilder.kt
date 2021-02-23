@@ -11,9 +11,9 @@ import java.util.*
 internal class VedtaksperioderBuilder(
     private val arbeidsgiver: Arbeidsgiver,
     private val fødselsnummer: String,
-    private val inntektshistorikkBuilder: InntektshistorikkBuilder
+    private val inntektshistorikkBuilder: InntektshistorikkBuilder,
+    private val gruppeIder: MutableMap<Vedtaksperiode, UUID>
 ) : BuilderState() {
-    private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
     private val perioder = mutableListOf<VedtaksperiodeBuilder>()
 
     fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>) =

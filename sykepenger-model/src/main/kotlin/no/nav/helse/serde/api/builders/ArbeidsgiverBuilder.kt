@@ -22,8 +22,9 @@ internal class ArbeidsgiverBuilder(
     private val utbetalingshistorikkBuilder = UtbetalingshistorikkBuilder()
     private val utbetalinger = mutableListOf<Utbetaling>()
 
-    private val perioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
-    private val forkastetPerioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder)
+    private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
+    private val perioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder)
+    private val forkastetPerioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder)
 
     internal fun build(hendelser: List<HendelseDTO>) = ArbeidsgiverDTO(
         organisasjonsnummer = organisasjonsnummer,
