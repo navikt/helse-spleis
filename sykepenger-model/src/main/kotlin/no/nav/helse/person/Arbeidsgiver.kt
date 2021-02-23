@@ -642,7 +642,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun append(bøtte: Historie.Historikkbøtte) {
-        if (harHistorikk()) bøtte.add(organisasjonsnummer, sykdomstidslinje())
+        if (harSykdom()) bøtte.add(organisasjonsnummer, sykdomstidslinje())
         utbetalteUtbetalinger().forEach {
             it.append(organisasjonsnummer, bøtte)
         }

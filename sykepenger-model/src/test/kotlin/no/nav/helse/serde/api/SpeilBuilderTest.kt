@@ -25,7 +25,7 @@ import java.util.*
 class SpeilBuilderTest {
 
     @Test
-    fun `happy case`(){
+    fun `happy case`() {
         val (person, hendelser) = person()
         val personDTO = serializePersonForSpeil(person, hendelser)
 
@@ -892,6 +892,21 @@ class SpeilBuilderTest {
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, vedtaksperiode.inntektskilde)
     }
 
+    @Test
+    fun `arbeidsgivere uten vedtaksperioder som skal vises i speil, filtreres bort`() {
+        val person = Person(aktørId, fnr)
+        person.håndter(sykmelding(orgnummer = orgnummer, fom = 1.februar, tom = 28.februar, grad = 100.prosent).first)
+        person.håndter(
+            søknad(
+                orgnummer = orgnummer,
+                fom = 1.februar,
+                tom = 28.februar,
+                grad = 100.prosent,
+                andrePerioder = listOf(Søknad.Søknadsperiode.Permisjon(1.januar, 31.januar))
+            ).first
+        )
+        assertTrue(serializePersonForSpeil(person).arbeidsgivere.isEmpty())
+    }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())

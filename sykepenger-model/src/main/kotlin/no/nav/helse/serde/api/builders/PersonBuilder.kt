@@ -10,18 +10,18 @@ import java.util.*
 
 internal class PersonBuilder(
     builder: AbstractBuilder,
-    private val person: Person,
+    person: Person,
     private val fødselsnummer: String,
     private val aktørId: String
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
     private val inntektshistorikkBuilder = InntektshistorikkBuilder(person)
 
-    fun build(hendelser: List<HendelseDTO>): PersonDTO {
+    internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
         return PersonDTO(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser) },
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser) }.filter { it.vedtaksperioder.isNotEmpty() },
             inntektsgrunnlag = inntektshistorikkBuilder.build()
         )
     }
@@ -31,7 +31,6 @@ internal class PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        if (!arbeidsgiver.harHistorikk()) return
         val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
@@ -45,5 +44,4 @@ internal class PersonBuilder(
     ) {
         popState()
     }
-
 }
