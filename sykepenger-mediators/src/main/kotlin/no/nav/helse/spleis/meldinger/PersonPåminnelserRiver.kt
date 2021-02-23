@@ -13,8 +13,8 @@ internal class PersonPåminnelserRiver(
     override val eventName = "person_påminnelse"
     override val riverName = "Person påminnelse"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("fødselsnummer", "aktørId")
+    override fun validate(message: JsonMessage) {
+        message.requireKey("fødselsnummer", "aktørId")
     }
 
     override fun createMessage(packet: JsonMessage) = PersonPåminnelseMessage(JsonMessageDelegate(packet))

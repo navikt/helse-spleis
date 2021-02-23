@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.DeserializationException
@@ -52,7 +53,7 @@ internal class MessageMediator(
         riverErrors.clear()
     }
 
-    override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
+    override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             messageRecognized = true
             sikkerLogg.info(
@@ -75,7 +76,7 @@ internal class MessageMediator(
         }
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext) {
+    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext) {
         riverErrors.add(riverName to problems)
     }
 
@@ -126,6 +127,6 @@ internal class MessageMediator(
 }
 
 internal interface IMessageMediator {
-    fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext)
-    fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext)
+    fun onRecognizedMessage(message: HendelseMessage, context: MessageContext)
+    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext)
 }

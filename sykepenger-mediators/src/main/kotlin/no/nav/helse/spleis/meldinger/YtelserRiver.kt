@@ -26,18 +26,18 @@ internal class YtelserRiver(
     )
     override val riverName = "Ytelser"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("vedtaksperiodeId", "tilstand")
-        packet.requireKey("@løsning.${Foreldrepenger.name}")
-        packet.requireKey("@løsning.${Sykepengehistorikk.name}")
-        packet.requireKey("@løsning.${Pleiepenger.name}")
-        packet.requireKey("@løsning.${Omsorgspenger.name}")
-        packet.requireKey("@løsning.${Opplæringspenger.name}")
-        packet.requireKey("@løsning.${Institusjonsopphold.name}")
-        packet.requireKey("@løsning.${Dødsinfo.name}")
-        packet.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
-        packet.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
-        packet.requireArray("@løsning.${Sykepengehistorikk.name}") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.requireKey("@løsning.${Foreldrepenger.name}")
+        message.requireKey("@løsning.${Sykepengehistorikk.name}")
+        message.requireKey("@løsning.${Pleiepenger.name}")
+        message.requireKey("@løsning.${Omsorgspenger.name}")
+        message.requireKey("@løsning.${Opplæringspenger.name}")
+        message.requireKey("@løsning.${Institusjonsopphold.name}")
+        message.requireKey("@løsning.${Dødsinfo.name}")
+        message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
+        message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
+        message.requireArray("@løsning.${Sykepengehistorikk.name}") {
             requireArray("inntektsopplysninger") {
                 require("sykepengerFom", JsonNode::asLocalDate)
                 requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
@@ -48,30 +48,30 @@ internal class YtelserRiver(
                 requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
             }
         }
-        packet.requireArray("@løsning.${Pleiepenger.name}") {
+        message.requireArray("@løsning.${Pleiepenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }
             interestedIn("grad") { it.asInt() }
         }
-        packet.requireArray("@løsning.${Omsorgspenger.name}") {
+        message.requireArray("@løsning.${Omsorgspenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }
             interestedIn("grad") { it.asInt() }
         }
-        packet.requireArray("@løsning.${Opplæringspenger.name}") {
+        message.requireArray("@løsning.${Opplæringspenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }
             interestedIn("grad") { it.asInt() }
         }
-        packet.requireArray("@løsning.${Institusjonsopphold.name}") {
+        message.requireArray("@løsning.${Institusjonsopphold.name}") {
             interestedIn("startdato") { it.asLocalDate() }
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
-        packet.requireArray("@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder") {
+        message.requireArray("@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
+        message.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }

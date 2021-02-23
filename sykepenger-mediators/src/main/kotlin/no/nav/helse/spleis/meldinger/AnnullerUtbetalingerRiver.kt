@@ -13,8 +13,8 @@ internal class AnnullerUtbetalingerRiver(
     override val eventName = "annullering"
     override val riverName = "annullering"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey(
+    override fun validate(message: JsonMessage) {
+        message.requireKey(
             "@id",
             "aktørId",
             "fødselsnummer",

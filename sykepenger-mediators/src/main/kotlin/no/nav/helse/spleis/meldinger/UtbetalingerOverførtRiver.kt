@@ -17,11 +17,11 @@ internal class UtbetalingerOverførtRiver(
     override val behov = listOf(Utbetaling)
     override val riverName = "Utbetaling overført"
 
-    override fun validate(packet: JsonMessage) {
-        packet.demandValue("@løsning.${Utbetaling.name}.status", Oppdragstatus.OVERFØRT.name)
-        packet.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
-        packet.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
-        packet.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId")
+    override fun validate(message: JsonMessage) {
+        message.demandValue("@løsning.${Utbetaling.name}.status", Oppdragstatus.OVERFØRT.name)
+        message.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
+        message.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
+        message.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingOverførtMessage(JsonMessageDelegate(packet))

@@ -18,9 +18,9 @@ internal class VilkårsgrunnlagRiver(
 
     override val riverName = "Vilkårsgrunnlag"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("vedtaksperiodeId", "tilstand")
-        packet.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
                 requireKey("beløp")
@@ -28,10 +28,10 @@ internal class VilkårsgrunnlagRiver(
                 interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
             }
         }
-        packet.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
+        message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
             require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
         }
-        packet.requireArray("@løsning.${Opptjening.name}") {
+        message.requireArray("@løsning.${Opptjening.name}") {
             requireKey("orgnummer")
             require("ansattSiden", JsonNode::asLocalDate)
             interestedIn("ansattTil") { it.asLocalDate() }

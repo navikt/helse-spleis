@@ -15,10 +15,10 @@ internal class NyeSøknaderRiver(
     override val eventName = "ny_søknad"
     override val riverName = "Ny søknad"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("sykmeldingId")
-        packet.requireValue("status", "NY")
-        packet.require("opprettet", JsonNode::asLocalDateTime)
+    override fun validate(message: JsonMessage) {
+        message.requireKey("sykmeldingId")
+        message.requireValue("status", "NY")
+        message.require("opprettet", JsonNode::asLocalDateTime)
     }
 
     override fun createMessage(packet: JsonMessage) = NySøknadMessage(JsonMessageDelegate(packet))

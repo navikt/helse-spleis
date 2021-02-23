@@ -16,11 +16,11 @@ internal class UtbetalingpåminnelserRiver(
     override val eventName = "utbetalingpåminnelse"
     override val riverName = "Utbetalingpåminnelse"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("antallGangerPåminnet", "utbetalingId",
+    override fun validate(message: JsonMessage) {
+        message.requireKey("antallGangerPåminnet", "utbetalingId",
             "organisasjonsnummer", "fødselsnummer", "aktørId")
-        packet.require("endringstidspunkt", JsonNode::asLocalDateTime)
-        packet.requireAny("status", Utbetalingstatus.values().map(Enum<*>::name))
+        message.require("endringstidspunkt", JsonNode::asLocalDateTime)
+        message.requireAny("status", Utbetalingstatus.values().map(Enum<*>::name))
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingpåminnelseMessage(JsonMessageDelegate(packet))

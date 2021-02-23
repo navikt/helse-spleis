@@ -16,23 +16,23 @@ internal class SendtNavSøknaderRiver(
     override val eventName = "sendt_søknad_nav"
     override val riverName = "Sendt søknad Nav"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("id")
-        packet.requireArray("egenmeldinger") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("id")
+        message.requireArray("egenmeldinger") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("papirsykmeldinger") {
+        message.requireArray("papirsykmeldinger") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("fravar") {
+        message.requireArray("fravar") {
             requireAny("type", listOf("UTDANNING_FULLTID", "UTDANNING_DELTID", "PERMISJON", "FERIE", "UTLANDSOPPHOLD"))
             require("fom", JsonNode::asLocalDate)
             interestedIn("tom") { it.asLocalDate() }
         }
-        packet.require("sendtNav", JsonNode::asLocalDateTime)
-        packet.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding")
+        message.require("sendtNav", JsonNode::asLocalDateTime)
+        message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding")
     }
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(JsonMessageDelegate(packet))

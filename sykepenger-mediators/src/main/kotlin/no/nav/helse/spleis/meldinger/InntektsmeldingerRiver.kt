@@ -16,28 +16,28 @@ internal class InntektsmeldingerRiver(
     override val eventName = "inntektsmelding"
     override val riverName = "Inntektsmelding"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey(
+    override fun validate(message: JsonMessage) {
+        message.requireKey(
             "inntektsmeldingId", "arbeidstakerFnr",
             "arbeidstakerAktorId", "virksomhetsnummer",
             "arbeidsgivertype", "beregnetInntekt",
             "status", "arkivreferanse"
         )
-        packet.requireArray("arbeidsgiverperioder") {
+        message.requireArray("arbeidsgiverperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("ferieperioder") {
+        message.requireArray("ferieperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        packet.requireArray("endringIRefusjoner") {
+        message.requireArray("endringIRefusjoner") {
             require("endringsdato", JsonNode::asLocalDate)
         }
-        packet.require("mottattDato", JsonNode::asLocalDateTime)
-        packet.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
-        packet.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
-        packet.interestedIn(
+        message.require("mottattDato", JsonNode::asLocalDateTime)
+        message.interestedIn("foersteFravaersdag", JsonNode::asLocalDate)
+        message.interestedIn("refusjon.opphoersdato", JsonNode::asLocalDate)
+        message.interestedIn(
             "refusjon.beloepPrMnd",
             "arbeidsforholdId",
             "begrunnelseForReduksjonEllerIkkeUtbetalt",

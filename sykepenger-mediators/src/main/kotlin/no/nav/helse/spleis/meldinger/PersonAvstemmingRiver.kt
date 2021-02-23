@@ -14,10 +14,10 @@ internal class PersonAvstemmingRiver(
     override val eventName = "person_avstemming"
     override val riverName = "Person Avstemming"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("fødselsnummer", "aktørId")
-        packet.require("fødselsnummer", ::requireLong)
-        packet.require("aktørId", ::requireLong)
+    override fun validate(message: JsonMessage) {
+        message.requireKey("fødselsnummer", "aktørId")
+        message.require("fødselsnummer", ::requireLong)
+        message.require("aktørId", ::requireLong)
     }
 
     override fun createMessage(packet: JsonMessage) = AvstemmingMessage(JsonMessageDelegate(packet))

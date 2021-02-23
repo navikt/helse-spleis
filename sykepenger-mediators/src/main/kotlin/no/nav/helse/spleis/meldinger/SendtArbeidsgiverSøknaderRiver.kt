@@ -15,11 +15,11 @@ internal class SendtArbeidsgiverSøknaderRiver(
     override val eventName = "sendt_søknad_arbeidsgiver"
     override val riverName = "Sendt søknad arbeidsgiver"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("id", "egenmeldinger", "fravar")
-        packet.requireValue("status", "SENDT")
-        packet.require("sendtArbeidsgiver", JsonNode::asLocalDateTime)
-        packet.forbid("sendtNav")
+    override fun validate(message: JsonMessage) {
+        message.requireKey("id", "egenmeldinger", "fravar")
+        message.requireValue("status", "SENDT")
+        message.require("sendtArbeidsgiver", JsonNode::asLocalDateTime)
+        message.forbid("sendtNav")
     }
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(JsonMessageDelegate(packet))

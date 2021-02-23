@@ -14,19 +14,19 @@ internal class SimuleringerRiver(
     override val behov = listOf(Simulering)
     override val riverName = "Simulering"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("vedtaksperiodeId", "tilstand")
-        packet.requireKey("@løsning.${Simulering.name}.status")
-        packet.require("@løsning.${Simulering.name}") { løsning ->
-            packet.require("@løsning.${Simulering.name}.status") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.requireKey("@løsning.${Simulering.name}.status")
+        message.require("@løsning.${Simulering.name}") { løsning ->
+            message.require("@løsning.${Simulering.name}.status") {
                 SimuleringMessage.Simuleringstatus.valueOf(it.asText())
             }
             if (løsning["status"].asText() == "OK") {
-                packet.requireKey("@løsning.${Simulering.name}.simulering")
-                packet.forbid("@løsning.${Simulering.name}.feilmelding")
+                message.requireKey("@løsning.${Simulering.name}.simulering")
+                message.forbid("@løsning.${Simulering.name}.feilmelding")
             } else {
-                packet.forbid("@løsning.${Simulering.name}.simulering")
-                packet.requireKey("@løsning.${Simulering.name}.feilmelding")
+                message.forbid("@løsning.${Simulering.name}.simulering")
+                message.requireKey("@løsning.${Simulering.name}.feilmelding")
             }
         }
     }

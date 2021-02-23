@@ -16,13 +16,13 @@ internal class PåminnelserRiver(
     override val eventName = "påminnelse"
     override val riverName = "Påminnelse"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("antallGangerPåminnet", "vedtaksperiodeId",
+    override fun validate(message: JsonMessage) {
+        message.requireKey("antallGangerPåminnet", "vedtaksperiodeId",
             "organisasjonsnummer", "fødselsnummer", "aktørId")
-        packet.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
-        packet.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
-        packet.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
-        packet.requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
+        message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
+        message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
+        message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
+        message.requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 
     override fun createMessage(packet: JsonMessage) = PåminnelseMessage(JsonMessageDelegate(packet))

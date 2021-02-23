@@ -17,7 +17,6 @@ internal class TestRapid : RapidsConnection() {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private val context = TestContext()
     private val messages = mutableListOf<Pair<String?, String>>()
     internal val inspektør get() = RapidInspektør(messages.toList())
 
@@ -26,7 +25,7 @@ internal class TestRapid : RapidsConnection() {
     }
 
     fun sendTestMessage(message: String) {
-        listeners.forEach { it.onMessage(message, context) }
+        listeners.forEach { it.onMessage(message, this) }
     }
 
     override fun publish(message: String) {
@@ -38,18 +37,7 @@ internal class TestRapid : RapidsConnection() {
     }
 
     override fun start() {}
-
     override fun stop() {}
-
-    private inner class TestContext : MessageContext {
-        override fun send(message: String) {
-            publish(message)
-        }
-
-        override fun send(key: String, message: String) {
-            publish(key, message)
-        }
-    }
 
     class RapidInspektør(private val messages: List<Pair<String?, String>>) {
         private val jsonmeldinger = mutableMapOf<Int, JsonNode>()

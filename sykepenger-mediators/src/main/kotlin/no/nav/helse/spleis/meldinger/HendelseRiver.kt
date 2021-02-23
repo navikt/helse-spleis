@@ -7,7 +7,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import java.util.*
 
-internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) {
+internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : Validation {
     protected val river = River(rapidsConnection)
     protected abstract val eventName: String
     protected abstract val riverName: String
@@ -22,17 +22,16 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         packet.require("@id") { UUID.fromString(it.asText()) }
     }
 
-    protected abstract fun validate(packet: JsonMessage)
     protected abstract fun createMessage(packet: JsonMessage): HendelseMessage
 
     private inner class RiverImpl(river: River) : River.PacketListener {
         init {
             river.validate(::validateHendelse)
-            river.validate(::validate)
+            river.validate(this@HendelseRiver)
             river.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             withMDC(mapOf(
                 "river_name" to riverName,
                 "melding_type" to eventName,
@@ -42,7 +41,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             }
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             messageMediator.onRiverError(riverName, problems, context)
         }
     }

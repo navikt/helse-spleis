@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 
@@ -19,11 +19,11 @@ internal class TestMessageMediator : IMessageMediator {
         riverError = false
     }
 
-    override fun onRecognizedMessage(message: HendelseMessage, context: RapidsConnection.MessageContext) {
+    override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         recognizedMessage = true
     }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: RapidsConnection.MessageContext) {
+    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext) {
         riverError = true
     }
 }

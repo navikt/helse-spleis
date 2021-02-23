@@ -14,9 +14,9 @@ internal class EtterbetalingerRiver(
     override val eventName = "Etterbetalingskandidat_v1"
     override val riverName = "Kandidat for etterbetaling"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("aktørId", "fødselsnummer", "fagsystemId", "organisasjonsnummer", "gyldighetsdato")
-        packet.rejectKey("@løsning.${Sykepengehistorikk.name}")
+    override fun validate(message: JsonMessage) {
+        message.requireKey("aktørId", "fødselsnummer", "fagsystemId", "organisasjonsnummer", "gyldighetsdato")
+        message.rejectKey("@løsning.${Sykepengehistorikk.name}")
     }
 
     override fun createMessage(packet: JsonMessage) = EtterbetalingMessage(JsonMessageDelegate(packet))

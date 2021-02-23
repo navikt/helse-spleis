@@ -13,9 +13,9 @@ internal class OverstyrTidlinjeRiver(
     override val eventName = "overstyr_tidslinje"
     override val riverName = "Overstyr tidslinje"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
-        packet.requireArray("dager") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
+        message.requireArray("dager") {
             requireKey("dato")
             requireKey("type")
             interestedIn("grad")

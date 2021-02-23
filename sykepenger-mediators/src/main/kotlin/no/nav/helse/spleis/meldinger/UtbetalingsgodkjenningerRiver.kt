@@ -16,14 +16,14 @@ internal class UtbetalingsgodkjenningerRiver(
     override val behov = listOf(Godkjenning)
     override val riverName = "Utbetalingsgodkjenning"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("vedtaksperiodeId", "tilstand", "utbetalingId")
-        packet.requireKey("@løsning.${Godkjenning.name}.godkjent")
-        packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
-        packet.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")
-        packet.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
-        packet.requireKey("@løsning.${Godkjenning.name}.automatiskBehandling")
-        packet.requireKey("@løsning.${Godkjenning.name}.makstidOppnådd")
+    override fun validate(message: JsonMessage) {
+        message.requireKey("vedtaksperiodeId", "tilstand", "utbetalingId")
+        message.requireKey("@løsning.${Godkjenning.name}.godkjent")
+        message.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
+        message.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")
+        message.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
+        message.requireKey("@løsning.${Godkjenning.name}.automatiskBehandling")
+        message.requireKey("@løsning.${Godkjenning.name}.makstidOppnådd")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(JsonMessageDelegate(packet))

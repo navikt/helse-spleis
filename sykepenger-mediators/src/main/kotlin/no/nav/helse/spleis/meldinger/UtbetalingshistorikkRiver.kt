@@ -18,11 +18,11 @@ internal class UtbetalingshistorikkRiver(
     override val behov = listOf(Sykepengehistorikk)
     override val riverName = "Utbetalingshistorikk"
 
-    override fun validate(packet: JsonMessage) {
-        packet.requireKey("vedtaksperiodeId", "tilstand")
-        packet.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
-        packet.rejectKey("fagsystemId")
-        packet.requireArray("@løsning.${Sykepengehistorikk.name}") {
+    override fun validate(message: JsonMessage) {
+        message.requireKey("vedtaksperiodeId", "tilstand")
+        message.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
+        message.rejectKey("fagsystemId")
+        message.requireArray("@løsning.${Sykepengehistorikk.name}") {
             requireArray("inntektsopplysninger") {
                 require("sykepengerFom", JsonNode::asLocalDate)
                 requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
