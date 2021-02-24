@@ -14,7 +14,7 @@ import java.time.LocalDate
 /**
  *  Forstår opprettelsen av en Utbetalingstidslinje
  */
-
+//TODO: Rename
 internal class UtbetalingstidslinjeBuilderVol2 internal constructor(
     private val skjæringstidspunkter: List<LocalDate>,
     private val inntektshistorikk: InntektshistorikkVol2,

@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
@@ -53,21 +52,7 @@ internal class Historie() {
         }
     }
 
-    internal fun beregnUtbetalingstidslinje(
-        organisasjonsnummer: String,
-        periode: Periode,
-        inntektshistorikk: Inntektshistorikk,
-        arbeidsgiverRegler: ArbeidsgiverRegler
-    ): Utbetalingstidslinje {
-        val builder = UtbetalingstidslinjeBuilder(
-            inntektshistorikk = inntektshistorikk,
-            forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
-            skjæringstidspunkter = skjæringstidspunkter(periode),
-            arbeidsgiverRegler = arbeidsgiverRegler
-        )
-        return byggUtbetalingstidslinje(organisasjonsnummer, periode, builder::result)
-    }
-
+    //TODO: Rename
     internal fun beregnUtbetalingstidslinjeVol2(
         organisasjonsnummer: String,
         periode: Periode,
@@ -93,9 +78,6 @@ internal class Historie() {
 
     internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)
-
-    internal fun sammenhengendePeriode(periode: Periode) =
-        skjæringstidspunkt(periode)?.let { periode.oppdaterFom(it) } ?: periode
 
     internal fun avgrensetPeriode(orgnr: String, periode: Periode) =
         Periode(maxOf(periode.start, skjæringstidspunkt(orgnr, periode)), periode.endInclusive)

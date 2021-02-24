@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-
+//TODO: Rename
 internal class InntektshistorikkVol2 {
 
     private val historikk = mutableListOf<Innslag>()

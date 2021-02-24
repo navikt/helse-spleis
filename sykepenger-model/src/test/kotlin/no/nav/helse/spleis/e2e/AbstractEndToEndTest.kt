@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -894,12 +893,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
-        if (Toggles.NyInntekt.enabled) {
-            assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato))
-        } else {
-            forventetInntekt?.also { assertTrue(inspektør.inntekter.isNotEmpty()) }
-            assertEquals(forventetInntekt, inspektør.inntektshistorikk.inntekt(dato))
-        }
+        assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato))
     }
 
     private val vedtaksperioderIder = mutableMapOf<Pair<String, Int>, UUID>()

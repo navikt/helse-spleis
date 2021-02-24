@@ -18,7 +18,6 @@ import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -27,7 +26,9 @@ internal class Arbeidsgiver private constructor(
     private val person: Person,
     private val organisasjonsnummer: String,
     private val id: UUID,
+    //TODO: Remove
     private val inntektshistorikk: Inntektshistorikk,
+    //TODO: Rename
     private val inntektshistorikkVol2: InntektshistorikkVol2,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
@@ -55,8 +56,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
         internal val SENERE_EXCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperioderFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
@@ -66,9 +65,6 @@ internal class Arbeidsgiver private constructor(
             this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
-
-        internal fun List<Arbeidsgiver>.inntekt(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { it.inntektshistorikk.inntekt(skjæringstidspunkt) }.summer()
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }
@@ -421,8 +417,7 @@ internal class Arbeidsgiver private constructor(
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        if (Toggles.NyInntekt.enabled) inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
-        else inntektshistorikk.inntekt(skjæringstidspunkt)
+        inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
@@ -507,7 +502,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun List<Vedtaksperiode>.sisteSammenhengedeUtbetaling(vedtaksperiode: Vedtaksperiode) =
-        this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode)}.maxOrNull()
+        this.filter { it.sammeArbeidsgiverPeriodeOgUtbetalt(vedtaksperiode) }.maxOrNull()
 
     internal fun blokkeresRevurdering(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.any { it.blokkererRevurdering(vedtaksperiode) }
@@ -595,46 +590,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
-    internal fun oppdatertUtbetalingstidslinje(periode: Periode, ytelser: Ytelser, historie: Historie): Utbetalingstidslinje {
-        if (Toggles.NyInntekt.enabled) return historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
-        val utbetalingstidslinje = historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
-        try {
-            val sammenhengendePeriode = historie.sammenhengendePeriode(periode)
-            val vol2Linje = historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
-            sammenlignGammelOgNyUtbetalingstidslinje(utbetalingstidslinje, vol2Linje, sammenhengendePeriode)
-        } catch (e: Throwable) {
-            sikkerLogg.info("Feilet ved bygging av utbetalingstidslinje på ny måte for ${ytelser.vedtaksperiodeId}", e)
-        }
-
-        return utbetalingstidslinje
-    }
-
-    private fun sammenlignGammelOgNyUtbetalingstidslinje(
-        utbetalingstidslinje: Utbetalingstidslinje,
-        vol2Linje: Utbetalingstidslinje,
-        sammenhengendePeriode: Periode
-    ) {
-        val vol1Linje = utbetalingstidslinje.kutt(sammenhengendePeriode.endInclusive)
-
-        if (vol1Linje.size != vol2Linje.size)
-            sikkerLogg.info("Forskjellig lengde på utbetalingstidslinjer. Vol1 = ${vol1Linje.size}, Vol2 = ${vol2Linje.size}")
-
-        if (vol1Linje.toString() != vol2Linje.toString())
-            sikkerLogg.info("Forskjellig toString() på utbetalingstidslinjer.\nVol1 = $vol1Linje\nVol2 = $vol2Linje")
-
-        vol1Linje.zip(vol2Linje).mapNotNull { (vol1Dag, vol2Dag: Utbetalingstidslinje.Utbetalingsdag) ->
-            val (vol1Dekning, vol1Dagsinntekt) = vol1Dag.økonomi.reflection { _, _, dekning, _, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
-            val (vol2Dekning, vol2Dagsinntekt) = vol2Dag.økonomi.reflection { _, _, dekning, _, _, dagsinntekt, _, _, _ -> dekning to dagsinntekt }
-
-            if (vol1Dekning != vol2Dekning || vol1Dagsinntekt != vol2Dagsinntekt)
-                "Vol1: ${vol1Dag.dato} [$vol1Dekning, $vol1Dagsinntekt] != Vol2: ${vol2Dag.dato} [$vol2Dekning, $vol2Dagsinntekt]"
-            else
-                null
-        }
-            .takeIf { it.isNotEmpty() }
-            ?.joinToString(prefix = "\n", separator = "\n")
-            ?.also(sikkerLogg::info)
-    }
+    internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie) =
+        historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
 
     internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null

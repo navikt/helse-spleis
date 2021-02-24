@@ -7,11 +7,9 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
-import no.nav.helse.person.Arbeidsgiver.Companion.inntekt
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Historie
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -203,15 +201,17 @@ class Person private constructor(
         inntekt: Inntekt,
         utbetalingId: UUID?
     ) {
-        observers.forEach { it.vedtakFattet(
-            vedtaksperiodeId,
-            periode,
-            hendelseIder,
-            skjæringstidspunkt,
-            sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig  },
-            inntekt.reflection { _, månedlig, _, _ -> månedlig },
-            utbetalingId
-        ) }
+        observers.forEach {
+            it.vedtakFattet(
+                vedtaksperiodeId,
+                periode,
+                hendelseIder,
+                skjæringstidspunkt,
+                sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                inntekt.reflection { _, månedlig, _, _ -> månedlig },
+                utbetalingId
+            )
+        }
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {
@@ -312,25 +312,19 @@ class Person private constructor(
             }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
-        if (Toggles.NyInntekt.enabled) {
-            arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
-        } else {
-            arbeidsgivere.inntekt(skjæringstidspunkt)
-        }
+        arbeidsgivere.grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
 
-    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt? {
-        return arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
-    }
+    internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
 
     internal fun append(bøtte: Historie.Historikkbøtte) {
         arbeidsgivere.forEach { it.append(bøtte) }
     }
 
-    internal fun utbetalingstidslinjer(periode: Periode, historie: Historie, ytelser: Ytelser): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        return arbeidsgivereMedSykdom()
-            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, ytelser, historie) }
+    internal fun utbetalingstidslinjer(periode: Periode, historie: Historie) =
+        arbeidsgivereMedSykdom()
+            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, historie) }
             .toMap()
-    }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: PersonHendelse): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {

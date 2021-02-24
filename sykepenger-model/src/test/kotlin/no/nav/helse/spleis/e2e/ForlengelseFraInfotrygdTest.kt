@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -112,7 +111,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            2.vedtaksperiode, *arrayOf(historikk),
+            2.vedtaksperiode,
+            historikk,
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     3.januar(2018),
@@ -214,7 +214,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = emptyList()
         )
-        assertForkastetPeriodeTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test
@@ -415,7 +422,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(
-            2.vedtaksperiode, *arrayOf(historikk),
+            2.vedtaksperiode,
+            historikk,
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     3.januar(2018),
@@ -432,7 +440,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(24.februar, 28.februar, 100.prosent))
         håndterYtelser(
-            3.vedtaksperiode, *arrayOf(historikk),
+            3.vedtaksperiode,
+            historikk,
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     3.januar(2018),
@@ -634,7 +643,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(
-            1.vedtaksperiode, *arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER)),
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
                     17.januar(2018),
@@ -797,88 +807,94 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
     @Test
     fun `Ping-pong med ferie mellom Infotrygd-perioder skal ikke beregne nye skjæringstidspunkt etter ferien`() {
-        Toggles.NyInntekt.enable {
-            håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 26.juli(2020), 60.prosent))
-            håndterSøknad(Sykdom(26.juni(2020), 26.juli(2020), 60.prosent))
-            val historikk1 = arrayOf(
-                RefusjonTilArbeidsgiver(10.juni(2020), 25.juni(2020), 1200.daglig, 100.prosent, ORGNUMMER),
-            )
-            val inntektsopplysning1 = listOf(
-                Inntektsopplysning(10.juni(2020), INNTEKT, ORGNUMMER, true)
-            )
-            håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk1, inntektshistorikk = inntektsopplysning1)
-            håndterYtelser(1.vedtaksperiode, *historikk1, inntektshistorikk = inntektsopplysning1)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(26.juni(2020), 26.juli(2020), 60.prosent))
+        håndterSøknad(Sykdom(26.juni(2020), 26.juli(2020), 60.prosent))
+        val historikk1 = arrayOf(
+            RefusjonTilArbeidsgiver(10.juni(2020), 25.juni(2020), 1200.daglig, 100.prosent, ORGNUMMER),
+        )
+        val inntektsopplysning1 = listOf(
+            Inntektsopplysning(10.juni(2020), INNTEKT, ORGNUMMER, true)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk1, inntektshistorikk = inntektsopplysning1)
+        håndterYtelser(1.vedtaksperiode, *historikk1, inntektshistorikk = inntektsopplysning1)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
 
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
 
-            håndterSykmelding(Sykmeldingsperiode(12.oktober(2020), 8.november(2020), 50.prosent))
-            håndterSøknad(Sykdom(12.oktober(2020), 8.november(2020), 50.prosent))
+        håndterSykmelding(Sykmeldingsperiode(12.oktober(2020), 8.november(2020), 50.prosent))
+        håndterSøknad(Sykdom(12.oktober(2020), 8.november(2020), 50.prosent))
 
-            val historikk2 = arrayOf(
-                RefusjonTilArbeidsgiver(10.juni(2020), 25.juni(2020), 1200.daglig, 60.prosent, ORGNUMMER),
-                RefusjonTilArbeidsgiver(27.juli(2020), 6.september(2020), 1200.daglig, 60.prosent, ORGNUMMER),
-                Utbetalingshistorikk.Infotrygdperiode.Ferie(7.september(2020), 8.september(2020)),
-                RefusjonTilArbeidsgiver(9.september(2020), 13.september(2020), 1200.daglig, 60.prosent, ORGNUMMER),
-                Utbetalingshistorikk.Infotrygdperiode.Ferie(14.september(2020), 15.september(2020)),
-                RefusjonTilArbeidsgiver(16.september(2020), 11.oktober(2020), 1200.daglig, 60.prosent, ORGNUMMER)
-            )
-            val inntektsopplysning2 = listOf(
-                Inntektsopplysning(10.juni(2020), INNTEKT, ORGNUMMER, true),
-                Inntektsopplysning(27.juli(2020), INNTEKT, ORGNUMMER, true)
-            )
-            håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
-            håndterYtelser(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt(2.vedtaksperiode)
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
+        val historikk2 = arrayOf(
+            RefusjonTilArbeidsgiver(10.juni(2020), 25.juni(2020), 1200.daglig, 60.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(27.juli(2020), 6.september(2020), 1200.daglig, 60.prosent, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.Ferie(7.september(2020), 8.september(2020)),
+            RefusjonTilArbeidsgiver(9.september(2020), 13.september(2020), 1200.daglig, 60.prosent, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.Ferie(14.september(2020), 15.september(2020)),
+            RefusjonTilArbeidsgiver(16.september(2020), 11.oktober(2020), 1200.daglig, 60.prosent, ORGNUMMER)
+        )
+        val inntektsopplysning2 = listOf(
+            Inntektsopplysning(10.juni(2020), INNTEKT, ORGNUMMER, true),
+            Inntektsopplysning(27.juli(2020), INNTEKT, ORGNUMMER, true)
+        )
+        håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
+        håndterYtelser(2.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
 
-            håndterSykmelding(Sykmeldingsperiode(9.november(2020), 6.desember(2020), 60.prosent))
-            håndterSøknad(Sykdom(9.november(2020), 6.desember(2020), 60.prosent))
-            håndterYtelser(3.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
-            håndterSimulering(3.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-            håndterUtbetalt(3.vedtaksperiode)
-            assertTilstander(
-                3.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-        }
+        håndterSykmelding(Sykmeldingsperiode(9.november(2020), 6.desember(2020), 60.prosent))
+        håndterSøknad(Sykdom(9.november(2020), 6.desember(2020), 60.prosent))
+        håndterYtelser(3.vedtaksperiode, *historikk2, inntektshistorikk = inntektsopplysning2)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt(3.vedtaksperiode)
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
     }
 
     @Test

@@ -38,7 +38,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
         }
     }
 
-    object NyInntekt : Toggles(true)
     object ReplayEnabled : Toggles()
     object FlereArbeidsgivereOvergangITEnabled : Toggles(true)
     object PraksisendringEnabled : Toggles()

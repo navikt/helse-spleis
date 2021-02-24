@@ -92,7 +92,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Padding utbetalingstidslinjene til sammenhengendeperiode`() {
-        person.utbetalingstidslinjer(1.januar til 31.januar, Historie(), ytelser("A1")).also {
+        person.utbetalingstidslinjer(1.januar til 31.januar, Historie()).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)

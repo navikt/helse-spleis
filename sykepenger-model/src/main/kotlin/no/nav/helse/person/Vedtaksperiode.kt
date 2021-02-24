@@ -1161,7 +1161,7 @@ internal class Vedtaksperiode private constructor(
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser)
+                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie)
                     } catch (e: IllegalArgumentException) {
                         sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
                         return@valider false
@@ -1568,7 +1568,7 @@ internal class Vedtaksperiode private constructor(
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie, ytelser)
+                        person.utbetalingstidslinjer(vedtaksperiode.periode, historie)
                     } catch (e: IllegalArgumentException) {
                         sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
                         return@valider false
