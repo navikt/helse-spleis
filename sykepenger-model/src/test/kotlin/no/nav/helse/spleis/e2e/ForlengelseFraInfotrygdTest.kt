@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.Aktivitetslogg
@@ -16,6 +17,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
@@ -917,5 +919,30 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
+    }
+
+    @Test
+    @Disabled
+    fun `Forlengelse oppdager ferie fra infotrygd`() {
+        /* Vi ser at hvis vi oppdager ferie i infotrygd ender vi opp med ukjente dager i utbetalingstidslinja.
+           Dette fører til en annullering i oppdraget. */
+        val historikk = RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Inntektsopplysning(3.januar, INNTEKT, ORGNUMMER, true))
+
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent), Ferie(16.februar, 17. februar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+        assertTilstander(1. vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+
+        håndterSykmelding(Sykmeldingsperiode(24.februar, 15.mars, 100.prosent))
+        val id = observatør.sisteVedtaksperiode()
+        håndterSøknadMedValidering(id, Sykdom(24.februar, 15.mars, 100.prosent))
+        håndterYtelser(id, historikk, Utbetalingshistorikk.Infotrygdperiode.Ferie(16.februar, 17.februar), inntektshistorikk = inntektshistorikk)
+        håndterSimulering(id)
+        assertEquals(1, inspektør.arbeidsgiverOppdrag[1].size)
     }
 }
