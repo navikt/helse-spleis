@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -13,12 +13,11 @@ internal enum class Kilde {
     SKATT, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
 }
 
-//TODO: Rename
-internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
+internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
 
     private val innslag = mutableListOf<List<Opplysning>>()
     private val inntektsopplysninger = mutableListOf<Opplysning>()
-    private lateinit var inntektshistorikk: InntektshistorikkVol2
+    private lateinit var inntektshistorikk: Inntektshistorikk
 
     class Opplysning(
         val dato: LocalDate,
@@ -38,20 +37,20 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) = inntektshistorikk.grunnlagForSammenligningsgrunnlag(dato)
 
-    override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.inntektshistorikk = inntektshistorikk
     }
 
-    override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
+    override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
         inntektsopplysninger.clear()
     }
 
-    override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
+    override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
         this.innslag.add(inntektsopplysninger.toList())
     }
 
     override fun visitInntektsmelding(
-        inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+        inntektsmelding: Inntektshistorikk.Inntektsmelding,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -68,7 +67,7 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
     }
 
     override fun visitInfotrygd(
-        infotrygd: InntektshistorikkVol2.Infotrygd,
+        infotrygd: Inntektshistorikk.Infotrygd,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -87,12 +86,12 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
     private lateinit var skattedato: LocalDate
 
     override fun visitSkattSykepengegrunnlag(
-        sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+        sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        type: Inntektshistorikk.Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -101,12 +100,12 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
     }
 
     override fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         måned: YearMonth,
-        type: InntektshistorikkVol2.Skatt.Inntekttype,
+        type: Inntektshistorikk.Skatt.Inntekttype,
         fordel: String,
         beskrivelse: String,
         tidsstempel: LocalDateTime
@@ -114,7 +113,7 @@ internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : Arb
         skattedato = dato
     }
 
-    override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+    override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,

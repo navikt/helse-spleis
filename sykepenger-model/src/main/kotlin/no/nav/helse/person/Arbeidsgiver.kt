@@ -26,8 +26,7 @@ internal class Arbeidsgiver private constructor(
     private val person: Person,
     private val organisasjonsnummer: String,
     private val id: UUID,
-    //TODO: Rename
-    private val inntektshistorikkVol2: InntektshistorikkVol2,
+    private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
@@ -39,7 +38,7 @@ internal class Arbeidsgiver private constructor(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
-        inntektshistorikkVol2 = InntektshistorikkVol2(),
+        inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
@@ -59,12 +58,12 @@ internal class Arbeidsgiver private constructor(
         internal val ALLE: VedtaksperioderFilter = { true }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
+            this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-            this.mapNotNull { it.inntektshistorikkVol2.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }
+            this.mapNotNull { it.inntektshistorikk.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt) }
                 .takeIf { it.isNotEmpty() }
                 ?.summer()
 
@@ -92,7 +91,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
-        inntektshistorikkVol2.accept(visitor)
+        inntektshistorikk.accept(visitor)
         sykdomshistorikk.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
@@ -413,16 +412,14 @@ internal class Arbeidsgiver private constructor(
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
+        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
 
-    //TODO: Rename
-    internal fun addInntektVol2(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
-        inntektsmelding.addInntekt(inntektshistorikkVol2, skjæringstidspunkt)
+    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
+        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
-    //TODO: Rename
-    internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelse: PersonHendelse) {
-        inntektsopplysninger.lagreInntekter(inntektshistorikkVol2, hendelse.meldingsreferanseId())
+    internal fun addInntekt(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelse: PersonHendelse) {
+        inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelse.meldingsreferanseId())
     }
 
     internal fun lagreInntekter(
@@ -431,7 +428,7 @@ internal class Arbeidsgiver private constructor(
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
         arbeidsgiverInntekt.lagreInntekter(
-            inntektshistorikkVol2,
+            inntektshistorikk,
             skjæringstidspunkt,
             vilkårsgrunnlag.meldingsreferanseId()
         )
@@ -575,7 +572,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie) =
-        historie.beregnUtbetalingstidslinjeVol2(organisasjonsnummer, periode, inntektshistorikkVol2, NormalArbeidstaker)
+        historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
 
     internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null
@@ -596,7 +593,7 @@ internal class Arbeidsgiver private constructor(
         ForkastetVedtaksperiode.finnForrigeAvsluttaPeriode(forkastede, vedtaksperiode, referanse, historie)
     }
 
-    internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikkVol2.opprettReferanse(fra, til, UUID.randomUUID())
+    internal fun opprettReferanseTilInntekt(fra: LocalDate, til: LocalDate) = inntektshistorikk.opprettReferanse(fra, til, UUID.randomUUID())
 
     internal fun trimTidligereBehandletDager(hendelse: Inntektsmelding) {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
@@ -608,7 +605,7 @@ internal class Arbeidsgiver private constructor(
                 person: Person,
                 organisasjonsnummer: String,
                 id: UUID,
-                inntektshistorikk: InntektshistorikkVol2,
+                inntektshistorikk: Inntektshistorikk,
                 sykdomshistorikk: Sykdomshistorikk,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: MutableList<ForkastetVedtaksperiode>,

@@ -109,10 +109,10 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
-        override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             val inntektshistorikkListe = mutableListOf<Map<String, Any?>>()
             arbeidsgiverMap["inntektshistorikk"] = inntektshistorikkListe
-            pushState(InntektshistorikkVol2State(inntektshistorikkListe))
+            pushState(InntektshistorikkState(inntektshistorikkListe))
         }
 
         override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
@@ -248,10 +248,10 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class InntektshistorikkVol2State(private val inntekter: MutableList<Map<String, Any?>>) :
+    private class InntektshistorikkState(private val inntekter: MutableList<Map<String, Any?>>) :
         BuilderState() {
         override fun preVisitInnslag(
-            innslag: InntektshistorikkVol2.Innslag,
+            innslag: Inntektshistorikk.Innslag,
             id: UUID
         ) {
             val inntektsopplysninger = mutableListOf<Map<String, Any?>>()
@@ -261,18 +261,18 @@ internal class JsonBuilder : AbstractBuilder() {
                     "inntektsopplysninger" to inntektsopplysninger
                 )
             )
-            pushState(InntektsendringVol2State(inntektsopplysninger))
+            pushState(InntektsendringState(inntektsopplysninger))
         }
 
-        override fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+        override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             popState()
         }
     }
 
-    private class InntektsendringVol2State(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
+    private class InntektsendringState(private val inntektsopplysninger: MutableList<Map<String, Any?>>) :
         BuilderState() {
         override fun visitSaksbehandler(
-            saksbehandler: InntektshistorikkVol2.Saksbehandler,
+            saksbehandler: Inntektshistorikk.Saksbehandler,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -282,7 +282,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitInntektsmelding(
-            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+            inntektsmelding: Inntektshistorikk.Inntektsmelding,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -292,7 +292,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitInntektsopplysningKopi(
-            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
+            inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
             dato: LocalDate,
             hendelseId: UUID,
             tidsstempel: LocalDateTime
@@ -302,7 +302,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitInfotrygd(
-            infotrygd: InntektshistorikkVol2.Infotrygd,
+            infotrygd: Inntektshistorikk.Infotrygd,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -311,7 +311,7 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysninger.add(InfotrygdReflect(infotrygd).toMap())
         }
 
-        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
             this.inntektsopplysninger.add(
                 mutableMapOf(
@@ -319,17 +319,17 @@ internal class JsonBuilder : AbstractBuilder() {
                     "skatteopplysninger" to skatteopplysninger
                 )
             )
-            pushState(InntektsendringVol2State(skatteopplysninger))
+            pushState(InntektsendringState(skatteopplysninger))
         }
 
 
         override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+            sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -338,12 +338,12 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -351,13 +351,13 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsopplysninger.add(SammenligningsgrunnlagReflect(sammenligningsgrunnlag).toMap())
         }
 
-        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) = popState()
-        override fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) = popState()
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) = popState()
+        override fun postVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) = popState()
     }
 
     private class InntektsopplysningKopiState : BuilderState() {
         override fun postVisitInntektsopplysningKopi(
-            inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse,
+            inntektsopplysning: Inntektshistorikk.InntektsopplysningReferanse,
             dato: LocalDate,
             hendelseId: UUID,
             tidsstempel: LocalDateTime

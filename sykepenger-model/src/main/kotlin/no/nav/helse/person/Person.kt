@@ -298,7 +298,7 @@ class Person private constructor(
         inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>,
         hendelse: PersonHendelse
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, hendelse).addInntektVol2(inntektsopplysninger, hendelse)
+        finnArbeidsgiverForInntekter(arbeidsgiverId, hendelse).addInntekt(inntektsopplysninger, hendelse)
     }
 
     internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =

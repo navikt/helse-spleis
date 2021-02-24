@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
@@ -568,13 +568,13 @@ internal class InntektsmeldingTest {
     @Test
     fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
-        assertDoesNotThrow { inntektsmelding.addInntekt(InntektshistorikkVol2(), 1.januar) }
+        assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar) }
     }
 
     @Test
     fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, beregnetInntekt = 2000.månedlig, refusjonBeløp = 2000.månedlig)
-        val inntektshistorikk = InntektshistorikkVol2()
+        val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
         assertEquals(2000.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.februar))
         assertEquals(null, inntektshistorikk.grunnlagForSykepengegrunnlag(3.februar))

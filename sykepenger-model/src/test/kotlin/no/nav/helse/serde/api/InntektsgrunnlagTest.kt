@@ -3,7 +3,7 @@ package no.nav.helse.serde.api
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
@@ -21,7 +21,7 @@ import java.util.*
 internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
     private class FinnInntektshistorikk(person: Person, private val builder: InntektshistorikkBuilder) : PersonVisitor {
-        val inntektshistorikk = mutableMapOf<String, InntektshistorikkVol2>()
+        val inntektshistorikk = mutableMapOf<String, Inntektshistorikk>()
         private lateinit var orgnummer: String
 
         init {
@@ -32,7 +32,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             orgnummer = organisasjonsnummer
         }
 
-        override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             this.inntektshistorikk[orgnummer] = inntektshistorikk
             builder.inntektshistorikk(orgnummer, inntektshistorikk)
         }

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
-import no.nav.helse.person.InntektshistorikkVol2.Inntektsopplysning
+import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -15,9 +15,9 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class InntektshistorikkVol2Test {
+internal class InntektshistorikkTest {
 
-    private lateinit var historikk: InntektshistorikkVol2
+    private lateinit var historikk: Inntektshistorikk
     private val inspektør get() = Inntektsinspektør(historikk)
 
     private companion object {
@@ -29,7 +29,7 @@ internal class InntektshistorikkVol2Test {
 
     @BeforeEach
     fun setup() {
-        historikk = InntektshistorikkVol2()
+        historikk = Inntektshistorikk()
     }
 
     @Test
@@ -520,22 +520,22 @@ internal class InntektshistorikkVol2Test {
         assertEquals(3, inspektør.inntektTeller.first())
     }
 
-    private class Inntektsinspektør(historikk: InntektshistorikkVol2) : InntekthistorikkVisitor {
+    private class Inntektsinspektør(historikk: Inntektshistorikk) : InntekthistorikkVisitor {
         var inntektTeller = mutableListOf<Int>()
 
         init {
             historikk.accept(this)
         }
 
-        override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             inntektTeller.clear()
         }
 
-        override fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {
+        override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
             inntektTeller.add(0)
         }
 
-        override fun visitInntektVol2(
+        override fun visitInntekt(
             inntektsopplysning: Inntektsopplysning,
             id: UUID,
             fom: LocalDate,
@@ -544,7 +544,7 @@ internal class InntektshistorikkVol2Test {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitInntektSkattVol2(
+        override fun visitInntektSkatt(
             id: UUID,
             fom: LocalDate,
             måned: YearMonth,
@@ -553,7 +553,7 @@ internal class InntektshistorikkVol2Test {
             inntektTeller.add(inntektTeller.removeLast() + 1)
         }
 
-        override fun visitInntektSaksbehandlerVol2(
+        override fun visitInntektSaksbehandler(
             id: UUID,
             fom: LocalDate,
             tidsstempel: LocalDateTime
@@ -562,7 +562,7 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitSaksbehandler(
-            saksbehandler: InntektshistorikkVol2.Saksbehandler,
+            saksbehandler: Inntektshistorikk.Saksbehandler,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -572,7 +572,7 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInntektsmelding(
-            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+            inntektsmelding: Inntektshistorikk.Inntektsmelding,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -582,7 +582,7 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitInfotrygd(
-            infotrygd: InntektshistorikkVol2.Infotrygd,
+            infotrygd: Inntektshistorikk.Infotrygd,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -592,12 +592,12 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+            sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -606,12 +606,12 @@ internal class InntektshistorikkVol2Test {
         }
 
         override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime

@@ -109,7 +109,7 @@ class Utbetalingshistorikk(
             }
 
             internal fun List<Inntektsopplysning>.lagreInntekter(
-                inntektshistorikk: InntektshistorikkVol2,
+                inntektshistorikk: Inntektshistorikk,
                 hendelseId: UUID
             ) {
                 inntektshistorikk {

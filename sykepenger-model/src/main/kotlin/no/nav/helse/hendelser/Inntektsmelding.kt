@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.økonomi.Inntekt
@@ -150,7 +150,7 @@ class Inntektsmelding(
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
-    internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2, skjæringstidspunktVedtaksperiode: LocalDate) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate) {
         val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
             ?.let { if (førsteFraværsdagErEtterArbeidsgiverperioden() && it.isAfter(skjæringstidspunktVedtaksperiode)) skjæringstidspunktVedtaksperiode else it }
             ?: return

@@ -193,7 +193,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
     }
 
     private fun inntektsmelding(arbeidsgiver: Arbeidsgiver, beløp: Number, førsteFraværsdag: LocalDate, skjæringstisdpunkt: LocalDate = førsteFraværsdag) {
-        arbeidsgiver.addInntektVol2(
+        arbeidsgiver.addInntekt(
             Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(null, null),

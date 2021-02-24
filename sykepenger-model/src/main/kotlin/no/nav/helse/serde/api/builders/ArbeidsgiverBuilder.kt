@@ -2,7 +2,7 @@ package no.nav.helse.serde.api.builders
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.ArbeidsgiverDTO
 import no.nav.helse.serde.api.HendelseDTO
@@ -40,7 +40,7 @@ internal class ArbeidsgiverBuilder(
         pushState(forkastetPerioderBuilder)
     }
 
-    override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
+    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         inntektshistorikkBuilder.inntektshistorikk(organisasjonsnummer, inntektshistorikk)
     }
 

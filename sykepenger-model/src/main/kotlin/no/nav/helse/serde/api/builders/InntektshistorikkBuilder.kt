@@ -2,7 +2,7 @@ package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.økonomi.Inntekt
@@ -12,11 +12,11 @@ import java.time.YearMonth
 import java.util.*
 
 internal class InntektshistorikkBuilder(private val person: Person) {
-    private val inntektshistorikk = mutableMapOf<String, InntektshistorikkVol2>()
+    private val inntektshistorikk = mutableMapOf<String, Inntektshistorikk>()
     private val nøkkeldataOmInntekter = mutableListOf<NøkkeldataOmInntekt>()
 
-    internal fun inntektshistorikk(organisasjonsnummer: String, inntektshistorikkVol2: InntektshistorikkVol2) {
-        inntektshistorikk[organisasjonsnummer] = inntektshistorikkVol2
+    internal fun inntektshistorikk(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
+        this.inntektshistorikk[organisasjonsnummer] = inntektshistorikk
     }
 
     internal fun nøkkeldataOmInntekt(nøkkeldataOmInntekt: NøkkeldataOmInntekt) {
@@ -67,7 +67,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         skjæringstidspunkt: LocalDate,
         sisteDagISammenhengendePeriode: LocalDate,
         orgnummer: String,
-        inntektshistorikk: InntektshistorikkVol2
+        inntektshistorikk: Inntektshistorikk
     ): InntektsgrunnlagDTO.ArbeidsgiverinntektDTO {
         val omregnetÅrsinntektDTO = inntektshistorikk.grunnlagForSykepengegrunnlagMedMetadata(skjæringstidspunkt, sisteDagISammenhengendePeriode)
             ?.let { (inntektsopplysning, inntekt) ->
@@ -85,7 +85,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
     }
 
     private class OmregnetÅrsinntektVisitor(
-        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
+        inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
         private val inntekt: Inntekt
     ) : InntekthistorikkVisitor {
         lateinit var omregnetÅrsinntektDTO: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO
@@ -96,7 +96,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         }
 
         override fun visitSaksbehandler(
-            saksbehandler: InntektshistorikkVol2.Saksbehandler,
+            saksbehandler: Inntektshistorikk.Saksbehandler,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -110,7 +110,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         }
 
         override fun visitInntektsmelding(
-            inntektsmelding: InntektshistorikkVol2.Inntektsmelding,
+            inntektsmelding: Inntektshistorikk.Inntektsmelding,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -124,7 +124,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         }
 
         override fun visitInfotrygd(
-            infotrygd: InntektshistorikkVol2.Infotrygd,
+            infotrygd: Inntektshistorikk.Infotrygd,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -137,17 +137,17 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             )
         }
 
-        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             skattegreier.clear()
         }
 
         override fun visitSkattSykepengegrunnlag(
-            sykepengegrunnlag: InntektshistorikkVol2.Skatt.Sykepengegrunnlag,
+            sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -159,7 +159,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                 ))
         }
 
-        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
                 kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen,
                 beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
@@ -177,7 +177,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
     }
 
     private class SammenligningsgrunnlagVisitor(
-        inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
+        inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
         private val inntekt: Inntekt
     ) : InntekthistorikkVisitor {
         lateinit var sammenligningsgrunnlagDTO: InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO
@@ -187,17 +187,17 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             inntektsopplysning.accept(this)
         }
 
-        override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             skattegreier.clear()
         }
 
         override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag,
+            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
             måned: YearMonth,
-            type: InntektshistorikkVol2.Skatt.Inntekttype,
+            type: Inntektshistorikk.Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String,
             tidsstempel: LocalDateTime
@@ -209,7 +209,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
                 ))
         }
 
-        override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID) {
             sammenligningsgrunnlagDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.SammenligningsgrunnlagDTO(
                 beløp = inntekt.reflection { årlig, _, _, _ -> årlig },
                 inntekterFraAOrdningen = skattegreier

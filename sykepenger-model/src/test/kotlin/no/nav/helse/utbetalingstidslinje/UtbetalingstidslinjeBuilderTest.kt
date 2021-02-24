@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
@@ -21,7 +21,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class UtbetalingstidslinjeBuilderVol2Test {
+internal class UtbetalingstidslinjeBuilderTest {
     private val hendelseId = UUID.randomUUID()
     private lateinit var tidslinje: Utbetalingstidslinje
     private val inspektør get() = TestTidslinjeInspektør(tidslinje)
@@ -380,7 +380,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt basert på inntektsdatoer`() {
         resetSeed(1.januar(2020))
         (14.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 invoke {
                     addInntektsmelding(1.januar(2020), hendelseId, 31000.månedlig)
                 }
@@ -394,7 +394,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt basert på inntektsdato for siste del av arbeidsgiverperioden`() {
         resetSeed(1.januar(2020))
         (10.S + 10.A + 10.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 invoke {
                     addInntektsmelding(21.januar(2020), hendelseId, 30000.månedlig)
                 }
@@ -412,7 +412,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt basert på inntektsdatoer med gap`() {
         resetSeed(1.januar(2020))
         (20.S + 10.A + 10.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 invoke {
                     addInntektsmelding(1.januar(2020), hendelseId, 31000.månedlig)
                     addInntektsmelding(31.januar(2020), hendelseId, 30000.månedlig)
@@ -431,7 +431,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Arbeidsgiverdager før frisk helg har ikke inntekt`() {
         resetSeed(1.januar(2020))
         (3.S + 2.A + 5.S + 2.A + 20.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 invoke {
                     addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
                 }
@@ -454,7 +454,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Endrer ikke inntekt ved ferie`() {
         resetSeed(1.januar(2020))
         (5.S + 5.F + 15.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar(2020), hendelseId, 30000.månedlig)
                 }
@@ -472,7 +472,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt ved sykedag i helg etter opphold i arbeidsgiverperioden`() {
         resetSeed(1.januar(2020))
         (2.S + 1.A + 7.F + 17.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(11.januar(2020), hendelseId, 30000.månedlig)
                 }
@@ -497,7 +497,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt ved sykedag i helg etter opphold utenfor arbeidsgiverperioden`() {
         resetSeed(1.januar(2020))
         (20.S + 1.A + 3.F + 3.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar(2020), hendelseId, 30000.månedlig)
                     addInntektsmelding(25.januar(2020), hendelseId, 31000.månedlig)
@@ -518,7 +518,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     fun `Setter inntekt ved sykedag i helg etter opphold rett etter arbeidsgiverperioden`() {
         resetSeed(1.januar(2020))
         (16.S + 2.A + 3.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(19.januar(2020), hendelseId, 30000.månedlig)
                 }
@@ -536,7 +536,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         resetSeed(1.januar(2020))
         assertDoesNotThrow {
             (1.S + 11.A + 21.S).utbetalingslinjer(
-                inntektshistorikk = InntektshistorikkVol2().apply {
+                inntektshistorikk = Inntektshistorikk().apply {
                     this {
                         addInntektsmelding(13.januar(2020), hendelseId, 30000.månedlig)
                     }
@@ -561,7 +561,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         resetSeed(3.januar(2020))
         assertDoesNotThrow {
             (16.U + 1.R + 2.S).utbetalingslinjer(
-                inntektshistorikk = InntektshistorikkVol2().apply {
+                inntektshistorikk = Inntektshistorikk().apply {
                     this {
                         addInntektsmelding(20.januar(2020), hendelseId, 30000.månedlig)
                     }
@@ -583,7 +583,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         resetSeed(4.januar(2020))
         assertDoesNotThrow {
             (16.U + 2.A + 2.S).utbetalingslinjer(
-                inntektshistorikk = InntektshistorikkVol2().apply {
+                inntektshistorikk = Inntektshistorikk().apply {
                     this {
                         addInntektsmelding(22.januar(2020), hendelseId, 30000.månedlig)
                     }
@@ -614,7 +614,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `oppdaterer inntekt etter frisk helg`() {
         (4.U + 1.A + 2.R + 12.U + 4.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(8.januar, hendelseId, 31000.månedlig)
                 }
@@ -631,7 +631,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Sykedag etter langt opphold nullstiller tellere`() {
         (4.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 2.S + 3.A + 2.R + 18.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(12.februar, hendelseId, 30000.månedlig)
                     addInfotrygd(1.januar, UUID.randomUUID(), 30000.månedlig)
@@ -648,7 +648,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Syk helgedag etter langt opphold nullstiller tellere`() {
         (3.S + 2.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 2.R + 5.A + 1.R + 1.H + 1.S + 4.A + 2.R + 18.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(12.februar, hendelseId, 30000.månedlig)
                     addInfotrygd(1.januar, UUID.randomUUID(), 30000.månedlig)
@@ -665,7 +665,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Sykmelding som starter i helg etter oppholdsdager gir NavHelgDag i helgen`() {
         (16.U + 2.S + 1.A + 2.R + 5.A + 2.R + 5.A + 2.H + 1.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
                     addInntektsmelding(3.februar, hendelseId, 30000.månedlig)
@@ -680,7 +680,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
         assertEquals(2, inspektør.dagtelling[NavHelgDag::class])
     }
 
-    private val inntektshistorikkVol2 = InntektshistorikkVol2().apply {
+    private val inntektshistorikk = Inntektshistorikk().apply {
         invoke {
             addInntektsmelding(1.januar, hendelseId, 31000.månedlig)
             addInntektsmelding(1.februar, hendelseId, 25000.månedlig)
@@ -691,7 +691,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Etter sykdom som slutter på fredag starter gap-telling i helgen - helg som friskHelgdag`() { // Fordi vi vet når hen gjenopptok arbeidet, og det var i helgen
         (16.U + 3.S + 2.R + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
                     addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
@@ -708,7 +708,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som ukjent-dag`() { // Fordi vi ikke vet når hen gjenopptok arbeidet, men antar mandag
         (16.U + 3.S + 2.UK + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
                     addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
@@ -726,7 +726,7 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
     @Test
     fun `Etter sykdom som slutter på fredag starter gap-telling mandagen etter (ikke i helgen) - helg som sykhelgdag`() {
         (16.U + 3.S + 2.H + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
-            inntektshistorikk = InntektshistorikkVol2().apply {
+            inntektshistorikk = Inntektshistorikk().apply {
                 this {
                     addInntektsmelding(1.januar, hendelseId, 30000.månedlig)
                     addInntektsmelding(5.februar, hendelseId, 30000.månedlig)
@@ -760,11 +760,11 @@ internal class UtbetalingstidslinjeBuilderVol2Test {
             }
 
     private fun Sykdomstidslinje.utbetalingslinjer(
-        inntektshistorikk: InntektshistorikkVol2 = this@UtbetalingstidslinjeBuilderVol2Test.inntektshistorikkVol2,
+        inntektshistorikk: Inntektshistorikk = this@UtbetalingstidslinjeBuilderTest.inntektshistorikk,
         skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars),
         forlengelseStrategy: (LocalDate) -> Boolean = { false }
     ) {
-        tidslinje = UtbetalingstidslinjeBuilderVol2(
+        tidslinje = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = forlengelseStrategy

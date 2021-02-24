@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.InntektshistorikkVol2
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Person
@@ -52,14 +52,13 @@ internal class Historie() {
         }
     }
 
-    //TODO: Rename
-    internal fun beregnUtbetalingstidslinjeVol2(
+    internal fun beregnUtbetalingstidslinje(
         organisasjonsnummer: String,
         periode: Periode,
-        inntektshistorikk: InntektshistorikkVol2,
+        inntektshistorikk: Inntektshistorikk,
         arbeidsgiverRegler: ArbeidsgiverRegler
     ): Utbetalingstidslinje {
-        val builder = UtbetalingstidslinjeBuilderVol2(
+        val builder = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter(periode),
             inntektshistorikk = inntektshistorikk,
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },

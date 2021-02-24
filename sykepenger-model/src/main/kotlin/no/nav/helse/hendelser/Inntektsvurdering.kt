@@ -64,7 +64,7 @@ class Inntektsvurdering(
         private val inntekter: List<MånedligInntekt>
     ) {
         internal fun lagreInntekter(
-            inntektshistorikk: InntektshistorikkVol2,
+            inntektshistorikk: Inntektshistorikk,
             skjæringstidspunkt: LocalDate,
             meldingsreferanseId: UUID
         ) {
@@ -141,7 +141,7 @@ class Inntektsvurdering(
 
                 internal fun lagreInntekter(
                     inntekter: List<MånedligInntekt>,
-                    inntektshistorikk: InntektshistorikkVol2,
+                    inntektshistorikk: Inntektshistorikk,
                     skjæringstidspunkt: LocalDate,
                     meldingsreferanseId: UUID
                 ) {

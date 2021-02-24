@@ -147,7 +147,7 @@ internal data class PersonData(
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val refusjonOpphører: List<LocalDate?> = emptyList()
     ) {
-        private val modelInntekthistorikk = InntektshistorikkVol2().apply {
+        private val modelInntekthistorikk = Inntektshistorikk().apply {
             InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -226,10 +226,10 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntekter: List<InntektshistorikkInnslagData>,
-                    inntektshistorikk: InntektshistorikkVol2
+                    inntektshistorikk: Inntektshistorikk
                 ) {
-                    val alleOpplysninger = mutableMapOf<Pair<UUID, UUID>, InntektshistorikkVol2.Inntektsopplysning>()
-                    inntektshistorikk.appender(InntektshistorikkVol2.RestoreJsonMode) {
+                    val alleOpplysninger = mutableMapOf<Pair<UUID, UUID>, Inntektshistorikk.Inntektsopplysning>()
+                    inntektshistorikk.appender(Inntektshistorikk.RestoreJsonMode) {
                         inntekter.reversed().forEach {
                             innslag(it.id) {
                                 InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this, it.id, alleOpplysninger)
@@ -259,14 +259,14 @@ internal data class PersonData(
             internal companion object {
                 internal fun parseInntekter(
                     inntektsopplysninger: List<InntektsopplysningData>,
-                    innslag: InntektshistorikkVol2.RestoreJsonMode.InnslagAppender,
+                    innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender,
                     innslagId: UUID,
-                    alleOpplysninger: MutableMap<Pair<UUID, UUID>, InntektshistorikkVol2.Inntektsopplysning>
+                    alleOpplysninger: MutableMap<Pair<UUID, UUID>, Inntektshistorikk.Inntektsopplysning>
                 ) {
                     inntektsopplysninger.forEach { inntektData ->
                         when (inntektData.kilde?.let(Kilde::valueOf)) {
                             Kilde.INFOTRYGD ->
-                                InntektshistorikkVol2.Infotrygd(
+                                Inntektshistorikk.Infotrygd(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
                                     hendelseId = requireNotNull(inntektData.hendelseId),
@@ -274,7 +274,7 @@ internal data class PersonData(
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
                             Kilde.INNTEKTSMELDING ->
-                                InntektshistorikkVol2.Inntektsmelding(
+                                Inntektshistorikk.Inntektsmelding(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
                                     hendelseId = requireNotNull(inntektData.hendelseId),
@@ -282,7 +282,7 @@ internal data class PersonData(
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
                             Kilde.SAKSBEHANDLER ->
-                                InntektshistorikkVol2.Saksbehandler(
+                                Inntektshistorikk.Saksbehandler(
                                     id = requireNotNull(inntektData.id),
                                     dato = requireNotNull(inntektData.dato),
                                     hendelseId = requireNotNull(inntektData.hendelseId),
@@ -290,7 +290,7 @@ internal data class PersonData(
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
                             Kilde.INNTEKTSOPPLYSNING_REFERANSE ->
-                                InntektshistorikkVol2.InntektsopplysningReferanse(
+                                Inntektshistorikk.InntektsopplysningReferanse(
                                     id = requireNotNull(inntektData.id),
                                     innslagId = requireNotNull(inntektData.innslagId),
                                     orginalOpplysningId = requireNotNull(inntektData.orginalOpplysningId),
@@ -299,12 +299,12 @@ internal data class PersonData(
                                     hendelseId = requireNotNull(inntektData.hendelseId),
                                     tidsstempel = requireNotNull(inntektData.tidsstempel)
                                 )
-                            null -> InntektshistorikkVol2.SkattComposite(
+                            null -> Inntektshistorikk.SkattComposite(
                                 id = requireNotNull(inntektData.id),
                                 inntektsopplysninger = requireNotNull(inntektData.skatteopplysninger).map { skatteData ->
                                     when (skatteData.kilde?.let(Kilde::valueOf)) {
                                         Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                            InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag(
+                                            Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
                                                 dato = requireNotNull(skatteData.dato),
                                                 hendelseId = requireNotNull(skatteData.hendelseId),
                                                 beløp = requireNotNull(skatteData.beløp).månedlig,
@@ -315,7 +315,7 @@ internal data class PersonData(
                                                 tidsstempel = requireNotNull(skatteData.tidsstempel)
                                             )
                                         Kilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                            InntektshistorikkVol2.Skatt.Sykepengegrunnlag(
+                                            Inntektshistorikk.Skatt.Sykepengegrunnlag(
                                                 dato = requireNotNull(skatteData.dato),
                                                 hendelseId = requireNotNull(skatteData.hendelseId),
                                                 beløp = requireNotNull(skatteData.beløp).månedlig,

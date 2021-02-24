@@ -12,8 +12,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
-//TODO: Rename
-internal class InntektshistorikkVol2 {
+
+internal class Inntektshistorikk {
 
     private val historikk = mutableListOf<Innslag>()
 
@@ -26,9 +26,9 @@ internal class InntektshistorikkVol2 {
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
-        visitor.preVisitInntekthistorikkVol2(this)
+        visitor.preVisitInntekthistorikk(this)
         historikk.forEach { it.accept(visitor) }
-        visitor.postVisitInntekthistorikkVol2(this)
+        visitor.postVisitInntekthistorikk(this)
     }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate): Inntekt? =
@@ -363,8 +363,8 @@ internal class InntektshistorikkVol2 {
     }
 
     internal class AppendMode private constructor(private val innslag: Innslag) : Appender {
-        companion object : AppenderFeature<InntektshistorikkVol2, AppendMode> {
-            override fun append(a: InntektshistorikkVol2, appender: AppendMode.() -> Unit) {
+        companion object : AppenderFeature<Inntektshistorikk, AppendMode> {
+            override fun append(a: Inntektshistorikk, appender: AppendMode.() -> Unit) {
                 AppendMode(a.innslag).apply(appender).apply {
                     skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
                 }
@@ -432,16 +432,16 @@ internal class InntektshistorikkVol2 {
         }
     }
 
-    internal class RestoreJsonMode private constructor(private val inntektshistorikkVol2: InntektshistorikkVol2) :
+    internal class RestoreJsonMode private constructor(private val inntektshistorikk: Inntektshistorikk) :
         Appender {
-        companion object : AppenderFeature<InntektshistorikkVol2, RestoreJsonMode> {
-            override fun append(a: InntektshistorikkVol2, appender: RestoreJsonMode.() -> Unit) {
+        companion object : AppenderFeature<Inntektshistorikk, RestoreJsonMode> {
+            override fun append(a: Inntektshistorikk, appender: RestoreJsonMode.() -> Unit) {
                 RestoreJsonMode(a).apply(appender)
             }
         }
 
         internal fun innslag(innslagId: UUID, block: InnslagAppender.() -> Unit) {
-            Innslag(innslagId).also { InnslagAppender(it).apply(block) }.also { inntektshistorikkVol2.historikk.add(0, it) }
+            Innslag(innslagId).also { InnslagAppender(it).apply(block) }.also { inntektshistorikk.historikk.add(0, it) }
         }
 
         internal class InnslagAppender(private val innslag: Innslag) {

@@ -386,7 +386,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `fremtidig test av utbetalingstidslinjeBuilderVol2, historikk fra flere arbeidsgivere`() {
+    fun `fremtidig test av utbetalingstidslinjeBuilder, historikk fra flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(20.september(2020), 19.oktober(2020), 100.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
@@ -435,7 +435,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `setter riktig inntekt i utbetalingstidslinjebuilderVol2`() {
+    fun `setter riktig inntekt i utbetalingstidslinjebuilder`() {
         håndterSykmelding(Sykmeldingsperiode(21.september(2020), 10.oktober(2020), 100.prosent))
         håndterSøknad(Sykdom(21.september(2020), 10.oktober(2020), 100.prosent))
         håndterInntektsmelding(
