@@ -1760,6 +1760,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerArbeidsgivereRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_ARBEIDSGIVERE_REVURDERING
+        // Skal denne trigge polling i Speil? Se VenterPåKiling
     }
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {

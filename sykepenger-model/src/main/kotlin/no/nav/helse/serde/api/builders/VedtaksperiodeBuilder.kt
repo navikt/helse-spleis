@@ -203,11 +203,11 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_ARBEIDSGIVERE,
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> TilstandstypeDTO.VenterPåKiling
+            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
             TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
             TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
             TilstandType.TIL_UTBETALING -> TilstandstypeDTO.TilUtbetaling
