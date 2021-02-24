@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -316,7 +317,8 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                     periodeTom: LocalDate,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype,
-                    inntektskilde: Inntektskilde
+                    inntektskilde: Inntektskilde,
+                    aktiveVedtaksperioder: List<AktivVedtaksperiode>
                 ) {
                     aktivitetslogg.behov(
                         Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
@@ -326,7 +328,9 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
                             "inntektskilde" to inntektskilde.name,
                             "warnings" to Aktivitetslogg().apply {
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
-                            }.toMap()
+
+                            }.toMap(),
+                            "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap)
                         )
                     )
                 }
@@ -405,6 +409,18 @@ class Aktivitetslogg(private var forelder: Aktivitetslogg? = null) : IAktivitets
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitSevere(kontekster, this, melding, tidsstempel)
             }
+        }
+
+        internal data class AktivVedtaksperiode(
+            val orgnummer: String,
+            val vedtaksperiodeId: UUID,
+            val periodetype: Periodetype
+        ){
+            fun toMap() = mapOf<String, Any>(
+                "orgnummer" to orgnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId.toString(),
+                "periodetype" to periodetype.name
+            )
         }
     }
 }

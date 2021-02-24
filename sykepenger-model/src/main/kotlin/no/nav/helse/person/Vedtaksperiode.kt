@@ -1669,7 +1669,7 @@ internal class Vedtaksperiode private constructor(
                 .plusDays(35)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            trengerGodkjenning(hendelse, vedtaksperiode)
+            vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1709,12 +1709,19 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            trengerGodkjenning(påminnelse, vedtaksperiode)
+            vedtaksperiode.trengerGodkjenning(påminnelse)
         }
+    }
 
-        private fun trengerGodkjenning(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.utbetaling().godkjenning(hendelse, vedtaksperiode, vedtaksperiode.person.aktivitetslogg)
+    private fun trengerGodkjenning(hendelse: ArbeidstakerHendelse) {
+        val aktiveVedtaksperioder = person.nåværendeVedtaksperioder().map {
+            Aktivitetslogg.Aktivitet.AktivVedtaksperiode(
+                it.arbeidsgiver.organisasjonsnummer(),
+                it.id,
+                it.periodetype()
+            )
         }
+        utbetaling().godkjenning(hendelse, this, aktiveVedtaksperioder, person.aktivitetslogg)
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
@@ -1725,15 +1732,11 @@ internal class Vedtaksperiode private constructor(
                 .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            trengerGodkjenning(hendelse, vedtaksperiode)
+            vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            trengerGodkjenning(påminnelse, vedtaksperiode)
-        }
-
-        private fun trengerGodkjenning(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
-            vedtaksperiode.utbetaling().godkjenning(hendelse, vedtaksperiode, vedtaksperiode.person.aktivitetslogg)
+            vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
         override fun håndter(
