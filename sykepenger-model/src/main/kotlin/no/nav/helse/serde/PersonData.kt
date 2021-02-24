@@ -139,7 +139,6 @@ internal data class PersonData(
     data class ArbeidsgiverData(
         private val organisasjonsnummer: String,
         private val id: UUID,
-        private val inntekter: List<InntektData>,
         private val inntektshistorikk: List<InntektshistorikkInnslagData> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
@@ -148,10 +147,7 @@ internal data class PersonData(
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val refusjonOpphører: List<LocalDate?> = emptyList()
     ) {
-        private val modelInntekthistorikk = Inntektshistorikk().apply {
-            InntektData.parseInntekter(inntekter, this)
-        }
-        private val modelInntekthistorikkVol2 = InntektshistorikkVol2().apply {
+        private val modelInntekthistorikk = InntektshistorikkVol2().apply {
             InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
         }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
@@ -170,7 +166,6 @@ internal data class PersonData(
                 organisasjonsnummer,
                 id,
                 modelInntekthistorikk,
-                modelInntekthistorikkVol2,
                 modelSykdomshistorikk,
                 vedtaksperiodeliste,
                 forkastedeliste,
@@ -222,28 +217,6 @@ internal data class PersonData(
                     organisasjonsnummer,
                     utbetalingstidslinje.konverterTilUtbetalingstidslinje()
                 )
-        }
-
-        data class InntektData(
-            private val fom: LocalDate,
-            private val hendelseId: UUID,
-            private val beløp: Double,
-            private val kilde: String,
-            private val tidsstempel: LocalDateTime
-        ) {
-            internal companion object {
-                internal fun parseInntekter(inntekter: List<InntektData>, inntektshistorikk: Inntektshistorikk) {
-                    inntekter.forEach { inntektData ->
-                        inntektshistorikk.add(
-                            fom = inntektData.fom,
-                            hendelseId = inntektData.hendelseId,
-                            beløp = inntektData.beløp.månedlig,
-                            kilde = Inntektshistorikk.Inntektsendring.Kilde.valueOf(inntektData.kilde),
-                            tidsstempel = inntektData.tidsstempel
-                        )
-                    }
-                }
-            }
         }
 
         data class InntektshistorikkInnslagData(

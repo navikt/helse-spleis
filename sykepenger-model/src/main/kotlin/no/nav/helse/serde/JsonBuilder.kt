@@ -109,12 +109,6 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap.putAll(ArbeidsgiverReflect(arbeidsgiver).toMap())
         }
 
-        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-            val inntekter = mutableListOf<MutableMap<String, Any?>>()
-            arbeidsgiverMap["inntekter"] = inntekter
-            pushState(InntektHistorieState(inntekter))
-        }
-
         override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
             val inntektshistorikkListe = mutableListOf<Map<String, Any?>>()
             arbeidsgiverMap["inntektshistorikk"] = inntektshistorikkListe
@@ -254,19 +248,6 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class InntektHistorieState(private val inntekter: MutableList<MutableMap<String, Any?>>) : BuilderState() {
-        override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
-            val inntektMap = mutableMapOf<String, Any?>()
-            inntekter.add(inntektMap)
-
-            inntektMap.putAll(InntektsendringReflect(inntektsendring).toMap())
-        }
-
-        override fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-            popState()
-        }
-    }
-
     private class InntektshistorikkVol2State(private val inntekter: MutableList<Map<String, Any?>>) :
         BuilderState() {
         override fun preVisitInnslag(
@@ -297,7 +278,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SaksbehandlerVol2Reflect(saksbehandler).toMap())
+            inntektsopplysninger.add(SaksbehandlerReflect(saksbehandler).toMap())
         }
 
         override fun visitInntektsmelding(
@@ -307,7 +288,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(InntektsmeldingVol2Reflect(inntektsmelding).toMap())
+            inntektsopplysninger.add(InntektsmeldingReflect(inntektsmelding).toMap())
         }
 
         override fun preVisitInntektsopplysningKopi(
@@ -316,7 +297,7 @@ internal class JsonBuilder : AbstractBuilder() {
             hendelseId: UUID,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(InntektsopplysningKopiVol2Reflect(inntektsopplysning).toMap())
+            inntektsopplysninger.add(InntektsopplysningKopiReflect(inntektsopplysning).toMap())
             pushState(InntektsopplysningKopiState())
         }
 
@@ -327,7 +308,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(InfotrygdVol2Reflect(infotrygd).toMap())
+            inntektsopplysninger.add(InfotrygdReflect(infotrygd).toMap())
         }
 
         override fun preVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) {
@@ -353,7 +334,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SykepengegrunnlagVol2Reflect(sykepengegrunnlag).toMap())
+            inntektsopplysninger.add(SykepengegrunnlagReflect(sykepengegrunnlag).toMap())
         }
 
         override fun visitSkattSammenligningsgrunnlag(
@@ -367,7 +348,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.add(SammenligningsgrunnlagVol2Reflect(sammenligningsgrunnlag).toMap())
+            inntektsopplysninger.add(SammenligningsgrunnlagReflect(sammenligningsgrunnlag).toMap())
         }
 
         override fun postVisitSkatt(skattComposite: InntektshistorikkVol2.SkattComposite, id: UUID) = popState()

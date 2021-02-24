@@ -1,6 +1,5 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.økonomi.Inntekt
@@ -11,22 +10,6 @@ import java.util.*
 
 internal enum class Kilde {
     SKATT_SAMMENLIGNINGSGRUNNLAG, SKATT_SYKEPENGEGRUNNLAG, INFOTRYGD, INNTEKTSMELDING, INNTEKTSOPPLYSNING_REFERANSE, SAKSBEHANDLER
-}
-
-internal class InntektsendringReflect(inntektsendring: Inntektshistorikk.Inntektsendring) {
-    private val fom: LocalDate = inntektsendring["fom"]
-    private val hendelseId: UUID = inntektsendring["hendelseId"]
-    private val beløp: Inntekt = inntektsendring["beløp"]
-    private val kilde: Inntektshistorikk.Inntektsendring.Kilde = inntektsendring["kilde"]
-    private val tidsstempel: LocalDateTime = inntektsendring["tidsstempel"]
-
-    internal fun toMap(): Map<String, Any?> = mapOf(
-        "fom" to fom,
-        "hendelseId" to hendelseId,
-        "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
-        "kilde" to kilde.toString(),
-        "tidsstempel" to tidsstempel
-    )
 }
 
 internal abstract class InntektsopplysningReflect(
@@ -49,7 +32,7 @@ internal abstract class InntektsopplysningReflect(
     )
 }
 
-internal abstract class SkattSykepengegrunnlagVol2Reflect(
+internal abstract class SkattSykepengegrunnlagReflect(
     inntektsopplysning: InntektshistorikkVol2.Skatt,
     private val kilde: Kilde
 ) {
@@ -79,17 +62,17 @@ internal abstract class SkattSykepengegrunnlagVol2Reflect(
     }
 }
 
-internal class SaksbehandlerVol2Reflect(
+internal class SaksbehandlerReflect(
     inntektsopplysning: InntektshistorikkVol2.Saksbehandler
 ) : InntektsopplysningReflect(inntektsopplysning, Kilde.SAKSBEHANDLER)
 
-internal class InntektsmeldingVol2Reflect(
+internal class InntektsmeldingReflect(
     inntektsopplysning: InntektshistorikkVol2.Inntektsmelding
 ) : InntektsopplysningReflect(inntektsopplysning, Kilde.INNTEKTSMELDING)
 
-internal class InntektsopplysningKopiVol2Reflect(
+internal class InntektsopplysningKopiReflect(
     inntektsopplysning: InntektshistorikkVol2.InntektsopplysningReferanse
-){
+) {
     private val id: UUID = inntektsopplysning["id"]
     private val innslagId: UUID = inntektsopplysning["innslagId"]
     private val orginalOpplysningId: UUID = inntektsopplysning["orginalOpplysningId"]
@@ -108,14 +91,14 @@ internal class InntektsopplysningKopiVol2Reflect(
     )
 }
 
-internal class InfotrygdVol2Reflect(
+internal class InfotrygdReflect(
     inntektsopplysning: InntektshistorikkVol2.Infotrygd
 ) : InntektsopplysningReflect(inntektsopplysning, Kilde.INFOTRYGD)
 
-internal class SykepengegrunnlagVol2Reflect(
+internal class SykepengegrunnlagReflect(
     inntektsopplysning: InntektshistorikkVol2.Skatt.Sykepengegrunnlag
-) : SkattSykepengegrunnlagVol2Reflect(inntektsopplysning, Kilde.SKATT_SYKEPENGEGRUNNLAG)
+) : SkattSykepengegrunnlagReflect(inntektsopplysning, Kilde.SKATT_SYKEPENGEGRUNNLAG)
 
-internal class SammenligningsgrunnlagVol2Reflect(
+internal class SammenligningsgrunnlagReflect(
     inntektsopplysning: InntektshistorikkVol2.Skatt.Sammenligningsgrunnlag
-) : SkattSykepengegrunnlagVol2Reflect(inntektsopplysning, Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG)
+) : SkattSykepengegrunnlagReflect(inntektsopplysning, Kilde.SKATT_SAMMENLIGNINGSGRUNNLAG)

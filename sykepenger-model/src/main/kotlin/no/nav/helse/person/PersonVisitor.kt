@@ -250,12 +250,17 @@ internal interface SykdomstidslinjeVisitor {
 }
 
 internal interface InntekthistorikkVisitor {
+    //TODO: Remove
     fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
+    //TODO: Remove
     fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {}
+    //TODO: Remove
     fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
 
+    //TODO: Rename
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {}
+    //TODO: Rename
     fun visitInntektVol2(
         inntektsopplysning: InntektshistorikkVol2.Inntektsopplysning,
         id: UUID,
@@ -264,6 +269,7 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
+    //TODO: Rename
     fun visitInntektSkattVol2(
         id: UUID,
         fom: LocalDate,
@@ -272,8 +278,10 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
+    //TODO: Rename
     fun visitInntektSaksbehandlerVol2(id: UUID, fom: LocalDate, tidsstempel: LocalDateTime) {}
     fun postVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {}
+    //TODO: Rename
     fun postVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun visitSaksbehandler(
         saksbehandler: InntektshistorikkVol2.Saksbehandler,

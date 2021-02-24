@@ -44,14 +44,6 @@ class Utbetalingshistorikk(
         return this
     }
 
-    internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
-        this.inntektshistorikk.forEach { it.addInntekter(hendelseId, organisasjonsnummer, inntektshistorikk) }
-    }
-
-    internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
-        addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
-    }
-
     internal fun addInntekter(person: Person, hendelse: PersonHendelse = this) {
         Inntektsopplysning.addInntekter(person, hendelse, inntektshistorikk)
     }
@@ -132,16 +124,6 @@ class Utbetalingshistorikk(
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             if (refusjonTom != null && periode.slutterEtter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")
-        }
-
-        internal fun addInntekter(hendelseId: UUID, organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
-            if (organisasjonsnummer != orgnummer) return
-            inntektshistorikk.add(
-                sykepengerFom.minusDays(1), // Assuming salary is the day before the first sykedag
-                hendelseId,
-                inntektPerMåned,
-                Inntektshistorikk.Inntektsendring.Kilde.INFOTRYGD
-            )
         }
     }
 

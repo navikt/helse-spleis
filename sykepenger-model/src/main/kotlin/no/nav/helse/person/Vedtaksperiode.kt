@@ -369,7 +369,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndter(hendelse: Inntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
-        arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
         arbeidsgiver.addInntektVol2(hendelse, skjæringstidspunkt)
         arbeidsgiver.trimTidligereBehandletDager(hendelse)
         periode = periode.oppdaterFom(hendelse.periode())
@@ -1546,7 +1545,6 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = JA
 
                             if (periodetype == OVERGANG_FRA_IT) {
-                                arbeidsgiver.addInntekt(ytelser)
                                 ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
                                 if (ytelser.statslønn()) ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
                             }

@@ -26,8 +26,6 @@ internal class Arbeidsgiver private constructor(
     private val person: Person,
     private val organisasjonsnummer: String,
     private val id: UUID,
-    //TODO: Remove
-    private val inntektshistorikk: Inntektshistorikk,
     //TODO: Rename
     private val inntektshistorikkVol2: InntektshistorikkVol2,
     private val sykdomshistorikk: Sykdomshistorikk,
@@ -41,7 +39,6 @@ internal class Arbeidsgiver private constructor(
         person = person,
         organisasjonsnummer = organisasjonsnummer,
         id = UUID.randomUUID(),
-        inntektshistorikk = Inntektshistorikk(),
         inntektshistorikkVol2 = InntektshistorikkVol2(),
         sykdomshistorikk = Sykdomshistorikk(),
         vedtaksperioder = mutableListOf(),
@@ -95,7 +92,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
-        inntektshistorikk.accept(visitor)
         inntektshistorikkVol2.accept(visitor)
         sykdomshistorikk.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
@@ -419,22 +415,12 @@ internal class Arbeidsgiver private constructor(
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         inntektshistorikkVol2.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart)
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
-        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
-    }
-
-    internal fun addInntekt(ytelser: Ytelser) {
-        ytelser.addInntekt(organisasjonsnummer, inntektshistorikk)
-    }
-
-    internal fun addInntekt(utbetalingshistorikk: Utbetalingshistorikk) {
-        utbetalingshistorikk.addInntekt(organisasjonsnummer, inntektshistorikk)
-    }
-
+    //TODO: Rename
     internal fun addInntektVol2(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikkVol2, skjæringstidspunkt)
     }
 
+    //TODO: Rename
     internal fun addInntektVol2(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelse: PersonHendelse) {
         inntektsopplysninger.lagreInntekter(inntektshistorikkVol2, hendelse.meldingsreferanseId())
     }
@@ -622,8 +608,7 @@ internal class Arbeidsgiver private constructor(
                 person: Person,
                 organisasjonsnummer: String,
                 id: UUID,
-                inntektshistorikk: Inntektshistorikk,
-                inntektshistorikkVol2: InntektshistorikkVol2,
+                inntektshistorikk: InntektshistorikkVol2,
                 sykdomshistorikk: Sykdomshistorikk,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: MutableList<ForkastetVedtaksperiode>,
@@ -635,7 +620,6 @@ internal class Arbeidsgiver private constructor(
                 organisasjonsnummer,
                 id,
                 inntektshistorikk,
-                inntektshistorikkVol2,
                 sykdomshistorikk,
                 vedtaksperioder,
                 forkastede,

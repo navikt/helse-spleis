@@ -1,7 +1,10 @@
 package no.nav.helse.hendelser
 
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Person
 import java.time.LocalDate
 import java.util.*
 
@@ -44,10 +47,6 @@ class Ytelser(
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
         return this
-    }
-
-    internal fun addInntekt(organisasjonsnummer: String, inntektshistorikk: Inntektshistorikk) {
-        utbetalingshistorikk().addInntekter(meldingsreferanseId(), organisasjonsnummer, inntektshistorikk)
     }
 
     internal fun addInntekter(person: Person) {

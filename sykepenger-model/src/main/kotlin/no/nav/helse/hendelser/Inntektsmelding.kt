@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -150,23 +149,6 @@ class Inntektsmelding(
     override fun organisasjonsnummer() = orgnummer
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate) {
-        val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
-            ?.let { if (førsteFraværsdagErEtterArbeidsgiverperioden() && it.isAfter(skjæringstidspunktVedtaksperiode)) skjæringstidspunktVedtaksperiode else it }
-            ?: return
-
-        if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
-        }
-
-        inntektshistorikk.add(
-            skjæringstidspunkt.minusDays(1),  // Assuming salary is the day before the first sykedag
-            meldingsreferanseId(),
-            beregnetInntekt,
-            Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
-        )
-    }
 
     internal fun addInntekt(inntektshistorikk: InntektshistorikkVol2, skjæringstidspunktVedtaksperiode: LocalDate) {
         val skjæringstidspunkt = sykdomstidslinje.skjæringstidspunkt()
