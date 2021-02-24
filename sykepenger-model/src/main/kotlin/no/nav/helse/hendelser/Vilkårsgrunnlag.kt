@@ -26,15 +26,16 @@ class Vilkårsgrunnlag(
     override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(
-        beregnetInntekt: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype
     ): IAktivitetslogg {
-        inntektsvurdering.valider(this, beregnetInntekt, periodetype)
+        inntektsvurdering.valider(this, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, periodetype)
         opptjeningvurdering.valider(this, orgnummer, skjæringstidspunkt)
         medlemskapsvurdering.valider(this, periodetype)
         grunnlagsdata = Grunnlagsdata(
-            beregnetÅrsinntektFraInntektskomponenten = inntektsvurdering.sammenligningsgrunnlag(),
+            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
             antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
             harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),

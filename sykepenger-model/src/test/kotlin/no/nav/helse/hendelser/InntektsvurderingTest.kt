@@ -25,7 +25,7 @@ internal class InntektsvurderingTest {
 
     @Test
     fun `ugyldige verdier`() {
-        assertTrue(hasErrors(inntektsvurdering(emptyList()), INGEN))
+        assertTrue(hasErrors(inntektsvurdering(emptyList()), INGEN, INGEN))
         assertTrue(
             hasErrors(
                 inntektsvurdering(
@@ -35,7 +35,7 @@ internal class InntektsvurderingTest {
                             ORGNR inntekt INGEN
                         }
                     }
-                ), INGEN
+                ), INGEN, INGEN
             )
         )
     }
@@ -43,23 +43,23 @@ internal class InntektsvurderingTest {
     @Test
     fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
-        assertTrue(hasErrors(inntektsvurdering, 1250.01.månedlig))
-        assertTrue(hasErrors(inntektsvurdering, 749.99.månedlig))
-        assertFalse(hasErrors(inntektsvurdering, 1000.00.månedlig))
-        assertFalse(hasErrors(inntektsvurdering, 1250.00.månedlig))
-        assertFalse(hasErrors(inntektsvurdering, 750.00.månedlig))
+        assertTrue(hasErrors(inntektsvurdering, 1250.01.månedlig, INNTEKT))
+        assertTrue(hasErrors(inntektsvurdering, 749.99.månedlig, INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering, 1000.00.månedlig, INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering, 1250.00.månedlig, INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering, 750.00.månedlig, INNTEKT))
     }
 
     @Test
     fun `flere organisasjoner siste 3 måneder gir warning`() {
         val annenInntekt = "etAnnetOrgnr" to INNTEKT
-        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 12), annenInntekt)), INNTEKT, INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 11), annenInntekt)), INNTEKT, INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 10), annenInntekt)), INNTEKT, INNTEKT))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT))
+        assertFalse(hasErrors(inntektsvurdering(inntekter(YearMonth.of(2017, 9), annenInntekt)), INNTEKT, INNTEKT))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
@@ -73,11 +73,12 @@ internal class InntektsvurderingTest {
             }
         }
 
-    private fun hasErrors(inntektsvurdering: Inntektsvurdering, beregnetInntekt: Inntekt): Boolean {
+    private fun hasErrors(inntektsvurdering: Inntektsvurdering, grunnlagForSykepengegrunnlag: Inntekt, sammenligningsgrunnlag: Inntekt): Boolean {
         aktivitetslogg = Aktivitetslogg()
         return inntektsvurdering.valider(
             aktivitetslogg,
-            beregnetInntekt,
+            grunnlagForSykepengegrunnlag,
+            sammenligningsgrunnlag,
             Periodetype.FØRSTEGANGSBEHANDLING
         ).hasErrorsOrWorse()
     }

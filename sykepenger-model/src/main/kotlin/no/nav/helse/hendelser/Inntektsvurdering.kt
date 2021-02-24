@@ -17,19 +17,18 @@ import java.util.*
 class Inntektsvurdering(
     private val inntekter: List<ArbeidsgiverInntekt>
 ) {
-    private val sammenligningsgrunnlag = this.inntekter.årligGjennomsnitt()
 
     private var avviksprosent: Prosent? = null
-
-    internal fun sammenligningsgrunnlag() = sammenligningsgrunnlag
 
     internal fun avviksprosent() = avviksprosent
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-        beregnetInntekt: Inntekt,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        sammenligningsgrunnlag: Inntekt,
         periodetype: Periodetype
     ): IAktivitetslogg {
+
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > 1) {
             val melding =
@@ -38,7 +37,7 @@ class Inntektsvurdering(
             else aktivitetslogg.warn(melding)
         }
         if (sammenligningsgrunnlag <= Inntekt.INGEN) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
-        avviksprosent(beregnetInntekt).also { avvik ->
+        grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
             if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) aktivitetslogg.error(
                 "Har mer enn %.0f %% avvik",
@@ -52,9 +51,6 @@ class Inntektsvurdering(
         }
         return aktivitetslogg
     }
-
-    private fun avviksprosent(beregnetInntekt: Inntekt) =
-        beregnetInntekt.avviksprosent(sammenligningsgrunnlag)
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =
         ArbeidsgiverInntekt.lagreInntekter(inntekter, person, skjæringstidspunkt, vilkårsgrunnlag)

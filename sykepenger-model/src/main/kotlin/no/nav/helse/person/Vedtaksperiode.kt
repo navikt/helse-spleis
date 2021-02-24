@@ -440,14 +440,15 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
-        val beregnetInntekt = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+        val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
+        val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
-        if (beregnetInntekt == null) {
+        if (grunnlagForSykepengegrunnlag == null) {
             vilkårsgrunnlag.error("Har ikke inntekt på skjæringstidspunkt $skjæringstidspunkt ved vilkårsvurdering")
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
 
-        if (vilkårsgrunnlag.valider(beregnetInntekt, skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
+        if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN,  skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
