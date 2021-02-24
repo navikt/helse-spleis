@@ -108,7 +108,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         val builder = InntektshistorikkBuilder(person)
         builder.nøkkeldataOmInntekt(1.januar og 31.januar avvik 7.7)
-        val inntektshistorikk = FinnInntektshistorikk(person, builder)
+        FinnInntektshistorikk(person, builder)
         val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
@@ -312,7 +312,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         val builder = InntektshistorikkBuilder(person)
         builder.nøkkeldataOmInntekt(10.februar og 28.februar avvik 7.7)
 
-        val inntektshistorikk = FinnInntektshistorikk(person, builder)
+        FinnInntektshistorikk(person, builder)
         val inntektsgrunnlag = builder.build()
 
         assertTrue(inntektsgrunnlag.isNotEmpty())

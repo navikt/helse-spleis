@@ -450,7 +450,7 @@ class SpeilBuilderTest {
         val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
         val personDTO = serializePersonForSpeil(person, hendelser)
 
-        assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size);
+        assertEquals(9, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
     }
 
     /**
@@ -682,32 +682,30 @@ class SpeilBuilderTest {
 
     @Test
     fun `ny inntekt inkluderes`() {
-        Toggles.SpeilInntekterVol2Enabled.enable {
-            val (person, hendelser) = person()
-            val personDTO = serializePersonForSpeil(person, hendelser)
-            assertEquals(1, personDTO.arbeidsgivere.size)
-            assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
-            val inntektsgrunnlag = personDTO.inntektsgrunnlag.find { it.skjæringstidspunkt == 1.januar }
-            assertEquals(31000.0 * 12, inntektsgrunnlag?.sykepengegrunnlag)
-            assertEquals(31000.0 * 12, inntektsgrunnlag?.omregnetÅrsinntekt)
-            assertEquals(31000.0 * 12, inntektsgrunnlag?.sammenligningsgrunnlag)
-            assertEquals(0.0, inntektsgrunnlag?.avviksprosent)
-            assertEquals(31000.0 * 12 / 260, inntektsgrunnlag?.maksUtbetalingPerDag)
-            assertEquals(1, inntektsgrunnlag?.inntekter?.size)
-            inntektsgrunnlag?.inntekter?.forEach { arbeidsgiverinntekt ->
-                assertEquals(orgnummer, arbeidsgiverinntekt.arbeidsgiver)
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+        assertEquals(1, personDTO.arbeidsgivere.size)
+        assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
+        val inntektsgrunnlag = personDTO.inntektsgrunnlag.find { it.skjæringstidspunkt == 1.januar }
+        assertEquals(31000.0 * 12, inntektsgrunnlag?.sykepengegrunnlag)
+        assertEquals(31000.0 * 12, inntektsgrunnlag?.omregnetÅrsinntekt)
+        assertEquals(31000.0 * 12, inntektsgrunnlag?.sammenligningsgrunnlag)
+        assertEquals(0.0, inntektsgrunnlag?.avviksprosent)
+        assertEquals(31000.0 * 12 / 260, inntektsgrunnlag?.maksUtbetalingPerDag)
+        assertEquals(1, inntektsgrunnlag?.inntekter?.size)
+        inntektsgrunnlag?.inntekter?.forEach { arbeidsgiverinntekt ->
+            assertEquals(orgnummer, arbeidsgiverinntekt.arbeidsgiver)
 
-                assertEquals(InntektkildeDTO.Inntektsmelding, arbeidsgiverinntekt.omregnetÅrsinntekt?.kilde)
-                assertEquals(31000.0 * 12, arbeidsgiverinntekt.omregnetÅrsinntekt?.beløp)
-                assertEquals(31000.0, arbeidsgiverinntekt.omregnetÅrsinntekt?.månedsbeløp)
-                assertNull(arbeidsgiverinntekt.omregnetÅrsinntekt?.inntekterFraAOrdningen)
+            assertEquals(InntektkildeDTO.Inntektsmelding, arbeidsgiverinntekt.omregnetÅrsinntekt?.kilde)
+            assertEquals(31000.0 * 12, arbeidsgiverinntekt.omregnetÅrsinntekt?.beløp)
+            assertEquals(31000.0, arbeidsgiverinntekt.omregnetÅrsinntekt?.månedsbeløp)
+            assertNull(arbeidsgiverinntekt.omregnetÅrsinntekt?.inntekterFraAOrdningen)
 
-                assertEquals(31000.0 * 12, arbeidsgiverinntekt.sammenligningsgrunnlag?.beløp)
-                assertEquals(12, arbeidsgiverinntekt.sammenligningsgrunnlag?.inntekterFraAOrdningen?.size)
-                arbeidsgiverinntekt.sammenligningsgrunnlag?.inntekterFraAOrdningen?.forEachIndexed { index, inntekterFraAOrdningen ->
-                    assertEquals(YearMonth.of(2017, index + 1), inntekterFraAOrdningen.måned)
-                    assertEquals(31000.0, inntekterFraAOrdningen.sum)
-                }
+            assertEquals(31000.0 * 12, arbeidsgiverinntekt.sammenligningsgrunnlag?.beløp)
+            assertEquals(12, arbeidsgiverinntekt.sammenligningsgrunnlag?.inntekterFraAOrdningen?.size)
+            arbeidsgiverinntekt.sammenligningsgrunnlag?.inntekterFraAOrdningen?.forEachIndexed { index, inntekterFraAOrdningen ->
+                assertEquals(YearMonth.of(2017, index + 1), inntekterFraAOrdningen.måned)
+                assertEquals(31000.0, inntekterFraAOrdningen.sum)
             }
         }
     }
@@ -940,7 +938,7 @@ class SpeilBuilderTest {
                 currentArbeidsgiver.add(id.toString())
             }
         })
-    }.get(orgnummer)!!
+    }.getValue(orgnummer)
 
 
     companion object {

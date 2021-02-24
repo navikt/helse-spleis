@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.Toggles
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.InntektshistorikkVol2
@@ -42,7 +41,6 @@ internal class ArbeidsgiverBuilder(
     }
 
     override fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {
-        if (!Toggles.SpeilInntekterVol2Enabled.enabled) return
         inntektshistorikkBuilder.inntektshistorikk(organisasjonsnummer, inntektshistorikk)
     }
 

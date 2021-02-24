@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggles
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.InntektshistorikkVol2
 import no.nav.helse.person.Person
@@ -25,7 +24,6 @@ internal class InntektshistorikkBuilder(private val person: Person) {
     }
 
     fun build(): List<InntektsgrunnlagDTO> {
-        if (!Toggles.SpeilInntekterVol2Enabled.enabled) return emptyList()
         return inntektsgrunnlag()
     }
 
