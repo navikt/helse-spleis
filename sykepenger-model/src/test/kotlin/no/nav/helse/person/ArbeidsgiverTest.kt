@@ -36,7 +36,6 @@ internal class ArbeidsgiverTest {
         val arbeidsgiver = Arbeidsgiver(person, "12345678")
         arbeidsgiver.håndter(sykmelding(Sykmeldingsperiode(10.september, 26.september, 100.prosent)))
         arbeidsgiver.håndter(inntektsmelding)
-        arbeidsgiver.accept(ArbeidsgiverTestVisitor)
         assertEquals(
             12000.månedlig,
             arbeidsgiver.grunnlagForSykepengegrunnlag(10.september, 10.september)
@@ -53,12 +52,4 @@ internal class ArbeidsgiverTest {
             mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
         )
     }
-
-    private object ArbeidsgiverTestVisitor : ArbeidsgiverVisitor {
-        lateinit var inntektshistorikk: Inntektshistorikk
-        override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-            this.inntektshistorikk = inntektshistorikk
-        }
-    }
-
 }

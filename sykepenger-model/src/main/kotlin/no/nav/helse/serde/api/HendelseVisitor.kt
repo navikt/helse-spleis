@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -23,10 +22,6 @@ internal class HendelseVisitor : PersonVisitor {
         tidsstempel: LocalDateTime
     ) {
         if (hendelseId == null) return
-        hendelsereferanser.add(hendelseId)
-    }
-
-    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
         hendelsereferanser.add(hendelseId)
     }
 }

@@ -250,13 +250,6 @@ internal interface SykdomstidslinjeVisitor {
 }
 
 internal interface InntekthistorikkVisitor {
-    //TODO: Remove
-    fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-    //TODO: Remove
-    fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {}
-    //TODO: Remove
-    fun postVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {}
-
     //TODO: Rename
     fun preVisitInntekthistorikkVol2(inntektshistorikk: InntektshistorikkVol2) {}
     fun preVisitInnslag(innslag: InntektshistorikkVol2.Innslag, id: UUID) {}

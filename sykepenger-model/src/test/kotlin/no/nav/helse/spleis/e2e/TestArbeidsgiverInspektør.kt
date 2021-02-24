@@ -37,13 +37,11 @@ internal class TestArbeidsgiverInspektør(
     private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata?>()
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
-    internal lateinit var inntektshistorikk: Inntektshistorikk
     internal val inntektInspektør get() = InntektshistorikkVol2Inspektør(arbeidsgiver)
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
     internal lateinit var sykdomstidslinje: Sykdomstidslinje
     internal var låstePerioder = emptyList<Periode>()
     internal val dagtelling = mutableMapOf<KClass<out Dag>, Int>()
-    internal val inntekter = mutableListOf<Inntektshistorikk.Inntektsendring>()
     internal val utbetalinger = mutableListOf<Utbetaling>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, Int>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
@@ -217,14 +215,6 @@ internal class TestArbeidsgiverInspektør(
         inUtbetaling = false
     }
 
-    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
-        this.inntektshistorikk = inntektshistorikk
-    }
-
-    override fun visitInntekt(inntektsendring: Inntektshistorikk.Inntektsendring, hendelseId: UUID) {
-        inntekter.add(inntektsendring)
-    }
-
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
         if (inVedtaksperiode) return
         this.sykdomshistorikk = sykdomshistorikk
@@ -353,4 +343,3 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun inntektskilde(id: UUID) = id.finn(inntektskilder)
 }
-

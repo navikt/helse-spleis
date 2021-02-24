@@ -13,6 +13,7 @@ internal enum class Kilde {
     SKATT, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
 }
 
+//TODO: Rename
 internal class InntektshistorikkVol2Inspektør(arbeidsgiver: Arbeidsgiver) : ArbeidsgiverVisitor {
 
     private val innslag = mutableListOf<List<Opplysning>>()
