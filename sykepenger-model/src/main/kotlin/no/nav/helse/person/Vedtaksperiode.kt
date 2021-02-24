@@ -419,10 +419,7 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         if (hendelse.valider(periode).hasErrorsOrWorse()) {
-            return if (Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) person.invaliderAllePerioder(
-                hendelse,
-                "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
-            ) else tilstand(hendelse, TilInfotrygd)
+            return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
         }
         onSuccess()
     }
@@ -1410,7 +1407,6 @@ internal class Vedtaksperiode private constructor(
                     person.invaliderAllePerioder(utbetalingshistorikk, null)
                 }
                 valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
-                    if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) return@valider true
                     historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
                 }
                 onSuccess {

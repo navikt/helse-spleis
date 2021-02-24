@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -75,21 +74,7 @@ class Utbetalingshistorikk(
                 periode: Periode
             ) {
                 liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
-                if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
-                    liste.kontrollerAntallArbeidsgivere(periode, aktivitetslogg)
-                }
                 liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
-            }
-
-            private fun List<Inntektsopplysning>.kontrollerAntallArbeidsgivere(
-                periode: Periode,
-                aktivitetslogg: IAktivitetslogg
-            ) {
-                filter { it.sykepengerFom >= periode.start.minusMonths(12) }
-                    .distinctBy { it.orgnummer }
-                    .also {
-                        if (it.size > 1) aktivitetslogg.error("Har inntekt fra flere arbeidsgivere i Infotrygd innen 12 måneder fra perioden")
-                    }
             }
 
             private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
@@ -224,24 +209,9 @@ class Utbetalingshistorikk(
                     periode: Periode,
                     organisasjonsnummer: String
                 ): IAktivitetslogg {
-                    if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled) {
-                        if (liste.harForegåendeFraAnnenArbeidsgiver(periode, organisasjonsnummer)) {
-                            aktivitetslogg.error("Det finnes en tilstøtende utbetalt periode i Infotrygd med et annet organisasjonsnummer enn denne vedtaksperioden.")
-                            return aktivitetslogg
-                        }
-                    }
-                    liste.onEach { it.valider(aktivitetslogg, bareOverlappende, periode, organisasjonsnummer) }
+                    liste.forEach { it.valider(aktivitetslogg, bareOverlappende, periode, organisasjonsnummer) }
                     return aktivitetslogg
                 }
-
-                private fun List<Infotrygdperiode>.harForegåendeFraAnnenArbeidsgiver(
-                    periode: Periode,
-                    organisasjonsnummer: String
-                ) =
-                    this
-                        .filterIsInstance<Utbetalingsperiode>()
-                        .filter { it.periode.erRettFør(periode) }
-                        .any { it.orgnr != organisasjonsnummer }
             }
         }
 

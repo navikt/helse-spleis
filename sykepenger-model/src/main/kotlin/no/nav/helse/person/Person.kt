@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
@@ -48,9 +47,6 @@ class Person private constructor(
         registrer(hendelse, "Behandler $hendelsesmelding")
         if (avvisIf()) return
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
-        if (!arbeidsgiver.harHistorikk() && arbeidsgivere.size > 1 && !Toggles.FlereArbeidsgivereOvergangITEnabled.enabled)
-            return invaliderAllePerioder(hendelse, "Invaliderer alle perioder fordi bryter for FlereArbeidsgivereOvergangIT er skrudd av")
-
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
 

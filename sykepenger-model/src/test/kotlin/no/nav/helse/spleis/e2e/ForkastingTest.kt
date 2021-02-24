@@ -14,9 +14,6 @@ import org.junit.jupiter.api.Test
 
 internal class ForkastingTest : AbstractEndToEndTest() {
 
-    private val a2 = "arbeidsgiver 2"
-    private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)
-
     @Test
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
@@ -261,47 +258,6 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             assertReplayAv(1.vedtaksperiode, 2.vedtaksperiode, 3.vedtaksperiode)
         }
     }
-
-    @Test
-    fun `invaliderer perioder når det kommer sykmelding på en arbeidsgiver som hadde tom sykdomshistorikk`() =
-        Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        ORGNUMMER inntekt INNTEKT
-                    }
-                    1.januar(2017) til 1.januar(2017) inntekter {
-                        a2 inntekt 1
-                    }
-                }
-            ))
-            håndterYtelser(1.vedtaksperiode) // No history
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_VILKÅRSPRØVING_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
-            )
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_GAP,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                AVVENTER_VILKÅRSPRØVING_GAP,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                TIL_INFOTRYGD
-            )
-            assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-            assertEquals(0, a2Inspektør.vedtaksperiodeTeller)
-        }
 
     @Test
     fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {

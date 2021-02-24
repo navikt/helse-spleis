@@ -1,27 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.InntektskildeDTO
 import no.nav.syfo.kafka.felles.InntektskildetypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
-
-    @BeforeEach
-    fun tearup() {
-        Toggles.FlereArbeidsgivereOvergangITEnabled.enable()
-    }
-
-    @AfterEach
-    fun setdown() {
-        Toggles.FlereArbeidsgivereOvergangITEnabled.pop()
-    }
 
     @Test
     fun `tillater søknader med flere arbeidsforhold`() {

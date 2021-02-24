@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Aktivitetslogg
@@ -67,24 +66,6 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
-    fun `flere inntektsopplysninger på ulike orgnr gir feil`() = Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(
-            utbetalinger = utbetalinger,
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.desember(2017), 1234.månedlig, "123456789", true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true)
-            )
-        )
-
-        assertTrue(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
-    }
-
-    @Test
     fun `forlengelser fra infotrygd med tilstøtende periode med samme orgnr er ok`() {
         val utbetalinger = listOf(
             RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig, 100.prosent, "1234"),
@@ -93,33 +74,6 @@ class UtbetalingshistorikkTest {
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
         assertFalse(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
-    }
-
-    @Test
-    fun `forlengelser fra infotrygd med to tilstøtende perioder hvor den ene har forskjellig orgnr gir feil`() =
-        Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
-            val utbetalinger = listOf(
-                RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, "1234"),
-                RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
-            )
-            val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
-
-            assertTrue(
-                utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-            )
-        }
-
-    @Test
-    fun `forlengelser fra infotrygd med én tilstøtende periode med forskjellig orgnr gir feil`() = Toggles.FlereArbeidsgivereOvergangITEnabled.disable {
-        val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, "1234"),
-            RefusjonTilArbeidsgiver(1.januar, 3.januar, 1234.daglig, 100.prosent, ORGNUMMER)
-        )
-        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
-
-        assertTrue(
             utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
         )
     }
@@ -448,9 +402,9 @@ class UtbetalingshistorikkTest {
     @Test
     fun `legger til siste inntekt først i inntektshistorikk`() {
         val inntektshistorikk = InntektshistorikkVol2()
-            listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
+        listOf(
+            Utbetalingshistorikk.Inntektsopplysning(1.januar, 1234.månedlig, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(1.januar, 4321.månedlig, ORGNUMMER, true),
         ).lagreInntekter(inntektshistorikk, UUID.randomUUID())
 
         assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar))

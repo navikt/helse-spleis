@@ -39,7 +39,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     }
 
     object ReplayEnabled : Toggles()
-    object FlereArbeidsgivereOvergangITEnabled : Toggles(true)
     object PraksisendringEnabled : Toggles()
     object RevurderUtbetaltPeriode : Toggles()
 }

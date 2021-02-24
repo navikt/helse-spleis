@@ -586,8 +586,6 @@ internal class Arbeidsgiver private constructor(
         return vedtaksperioder.firstOrNull { it.måFerdigstilles() }
     }
 
-    internal fun harHistorikk() = !sykdomshistorikk.isEmpty()
-
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
     internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie) =

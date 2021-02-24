@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
@@ -15,9 +14,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -32,16 +29,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private val String.inspektør get() = inspektør(this)
-
-    @BeforeEach
-    fun setup() {
-        Toggles.FlereArbeidsgivereOvergangITEnabled.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggles.FlereArbeidsgivereOvergangITEnabled.pop()
-    }
 
     @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
@@ -1171,8 +1158,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, a1)
         )
         val inntektshistorikk = mutableListOf(Utbetalingshistorikk.Inntektsopplysning(1.januar, INNTEKT, a1, true))
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), utbetalinger = infotrygdPerioder, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode(a1), utbetalinger = infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *infotrygdPerioder, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), *infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
@@ -1183,9 +1170,17 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 30.april, 100.prosent), orgnummer = a2)
 
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode(a2), utbetalinger = infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        assertForkastetPeriodeTilstander(a2, 1.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *infotrygdPerioder, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), *infotrygdPerioder, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertForkastetPeriodeTilstander(
+            a2,
+            1.vedtaksperiode(a2),
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
     }
 
     @Test

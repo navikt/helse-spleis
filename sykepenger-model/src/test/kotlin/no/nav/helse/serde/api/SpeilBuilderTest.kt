@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
@@ -20,7 +19,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
 import java.util.*
-
 
 class SpeilBuilderTest {
 
@@ -762,8 +760,7 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `Total sykdomsgrad ved flere arbeidsgivere`() = Toggles.FlereArbeidsgivereOvergangITEnabled.enable {
-
+    fun `Total sykdomsgrad ved flere arbeidsgivere`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
         val orgnr1 = "123456879"
@@ -827,8 +824,7 @@ class SpeilBuilderTest {
     }
 
     @Test
-    fun `Inntektskilde ved flere arbeidsgivere`() = Toggles.FlereArbeidsgivereOvergangITEnabled.enable {
-
+    fun `Inntektskilde ved flere arbeidsgivere`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
         val orgnr1 = "123456879"

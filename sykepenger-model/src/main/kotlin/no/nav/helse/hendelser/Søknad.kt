@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggles
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -51,14 +50,9 @@ class Søknad constructor(
 
     override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
-        if (!Toggles.FlereArbeidsgivereOvergangITEnabled.enabled && andreInntektskilder.isNotEmpty()) {
-            error("Søknaden inneholder andre inntektskilder")
-        }
-        if(Toggles.FlereArbeidsgivereOvergangITEnabled.enabled){
-            andreInntektskilder.forEach { it.valider(this) }
-        }
+        andreInntektskilder.forEach { it.valider(this) }
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
-        if (merknaderFraSykmelding.any { it.type ==  "UGYLDIG_TILBAKEDATERING" || it.type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER"}) {
+        if (merknaderFraSykmelding.any { it.type == "UGYLDIG_TILBAKEDATERING" || it.type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" }) {
             warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
         }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende brev")
@@ -92,7 +86,8 @@ class Søknad constructor(
                         it.reduce { champion, challenger ->
                             Periode(
                                 fom = minOf(champion.start, challenger.start),
-                                tom = maxOf(champion.endInclusive, challenger.endInclusive))
+                                tom = maxOf(champion.endInclusive, challenger.endInclusive)
+                            )
                         }
                     }
         }
@@ -177,7 +172,7 @@ class Søknad constructor(
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
         }
 
-        class Utlandsopphold(fom: LocalDate, tom: LocalDate): Søknadsperiode(fom, tom) {
+        class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Utenlandsdager ikke støttet")
 
