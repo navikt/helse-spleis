@@ -1,6 +1,6 @@
 package no.nav.helse
 
-sealed class Toggles(enabled: Boolean = false, private val force: Boolean = false) {
+abstract class Toggles internal constructor(enabled: Boolean = false, private val force: Boolean = false) {
     private val states = mutableListOf(enabled)
 
     val enabled get() = states.last()

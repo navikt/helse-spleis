@@ -7,7 +7,6 @@ import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.jvm.javaField
 
 @Suppress("UNCHECKED_CAST")
 internal class ReflectClass private constructor(
@@ -19,14 +18,6 @@ internal class ReflectClass private constructor(
             .also {
                 it.isAccessible = true
             }.call(instance) as R
-
-    internal operator fun set(instance: Any, property: String, value: Any?) {
-        props()
-        .single { it.name == property }
-            .javaField
-            ?.also { it.isAccessible = true }
-            ?.set(instance, value)
-    }
 
     internal fun has(property: String): Boolean = props().filter { it.name == property }.size == 1
 
@@ -67,10 +58,6 @@ internal class ReflectInstance private constructor(
     internal operator fun <R> get(property: String): R =
         reflectClass[instance, property]
 
-    internal operator fun set(property: String, value: Any?) {
-        reflectClass[instance, property] = value
-    }
-
     internal fun has(property: String): Boolean =
         reflectClass.has(property)
 
@@ -85,10 +72,6 @@ internal class ReflectInstance private constructor(
 
         internal operator fun <R> Any.get(property: String): R =
             getReflectInstance(this)[property]
-
-        internal operator fun Any.set(property: String, value: Any?) {
-            getReflectInstance(this)[property] = value
-        }
 
         internal fun <R> Any.maybe(property: String): R? =
             if (getReflectInstance(this).has(property)) getReflectInstance(this)[property]

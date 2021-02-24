@@ -1,8 +1,5 @@
 package no.nav.helse
 
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.set
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -11,24 +8,18 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TogglesTest {
 
-    //Trenger bare å peke på en hvilken som helst toggle
-    private val toggle = Toggles.SpeilInntekterVol2Enabled
-
-    private val initialToggleValues = toggle.let {
-        it.get<MutableList<Boolean>>("states").first() to it.get<Boolean>("force")
-    }
+    private lateinit var toggle: Toggles
 
     private fun prepareToggle(enabled: Boolean, force: Boolean) {
-        toggle["force"] = force
-        toggle.get<MutableList<Boolean>>("states").apply {
-            clear()
-            add(enabled)
-        }
+        toggle = object : Toggles(enabled, force) {}
     }
 
-    @AfterAll
-    fun tearDown() {
-        prepareToggle(enabled = initialToggleValues.first, force = initialToggleValues.second)
+    @Test
+    fun `Initial toggle state cannot be removed`() {
+        prepareToggle(enabled = true, force = false)
+        assertTrue(toggle.enabled)
+        toggle.pop()
+        assertTrue(toggle.enabled)
     }
 
     @Test
