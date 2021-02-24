@@ -56,7 +56,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: --project-name=spleis-api --org=tbd-ty7 --fail-on=all
+          args: --project-name=spleis-api --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
           command: monitor
 
   deployDev:
