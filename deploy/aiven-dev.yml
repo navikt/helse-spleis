@@ -136,6 +136,9 @@ spec:
         - team: tbd
           application: risk-mock
           access: readwrite
+        - team: tbd
+          application: spleis-testdata
+          access: readwrite
         - team: teamsykmelding
           application: sparenaproxy
           access: read
