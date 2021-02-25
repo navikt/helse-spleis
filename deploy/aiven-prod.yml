@@ -122,6 +122,9 @@ spec:
           application: sputnik
           access: readwrite
         - team: tbd
+          application: sparkel-sputnik
+          access: readwrite
+        - team: tbd
           application: vedtaksfeed
           access: readwrite
         - team: risk
