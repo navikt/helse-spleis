@@ -141,8 +141,9 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     @Test
     fun `beregner historikkperiode`() {
         historieUtenSpleisbøtte(
-            refusjon(1.januar, 31.januar, orgnr = AG1)
+            refusjon(1.januar, 31.januar, orgnr = AG1),
+            ferie(1.februar, 28.februar)
         )
-        assertEquals(31.januar, historie.periodeTom(AG1))
+        assertEquals(31.januar, historie.sisteSykepengedagIInfotrygd(AG1))
     }
 }

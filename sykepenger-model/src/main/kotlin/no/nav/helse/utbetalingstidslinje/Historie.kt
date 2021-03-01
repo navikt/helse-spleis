@@ -104,7 +104,7 @@ internal class Historie() {
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
-    internal fun periodeTom(orgnummer: String) = infotrygdbøtte.sykdomstidslinje(orgnummer).periode()?.endInclusive
+    internal fun sisteSykepengedagIInfotrygd(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer).sisteSykepengedag()
 
     internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate): LocalDate? {
         val sykdomstidslinje = sykdomstidslinje(orgnummer)

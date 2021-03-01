@@ -767,7 +767,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser: Ytelser) {
         val opprinneligPeriodeFom = periode.start
-        val ytelseTom = Historie(ytelser.utbetalingshistorikk()).periodeTom(organisasjonsnummer) ?: return
+        val ytelseTom = Historie(ytelser.utbetalingshistorikk()).sisteSykepengedagIInfotrygd(organisasjonsnummer) ?: return
 
         if (ytelseTom < opprinneligPeriodeFom) return
         if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return

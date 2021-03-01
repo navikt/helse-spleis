@@ -1496,4 +1496,22 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
     }
+
+    @Test
+    fun `Kan ta inn ferie fra IT som overlapper med perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER),
+            Utbetalingshistorikk.Infotrygdperiode.Ferie(1.februar, 28.februar)
+        )
+
+        inspektør.also {
+            assertEquals(1.februar, it.sykdomstidslinje.førsteDag())
+            assertEquals(28.februar, it.sykdomstidslinje.sisteDag())
+            assertEquals(28, it.dagtelling[Feriedag::class])
+        }
+    }
 }
