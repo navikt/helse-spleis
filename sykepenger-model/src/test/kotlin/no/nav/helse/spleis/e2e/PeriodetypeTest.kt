@@ -4,9 +4,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +23,14 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(2.vedtaksperiode)   // No history
         håndterSimulering(2.vedtaksperiode)
 
@@ -63,7 +69,14 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -188,7 +201,14 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar(2020), 4.februar(2020))),
             førsteFraværsdag = 20.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterYtelser(2.vedtaksperiode)   // No history

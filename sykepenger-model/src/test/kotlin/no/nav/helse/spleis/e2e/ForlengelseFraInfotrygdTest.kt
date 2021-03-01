@@ -333,7 +333,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(Periode(18.februar(2020), 4.mars(2020))), 18.februar(2020))
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.februar(2019) til 1.januar(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(35)) // <-- TIL_INFOTRYGD
@@ -585,7 +592,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.mai(2020), 2.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(10.mai(2020), 2.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(10.mai(2020), 25.mai(2020))), førsteFraværsdag = 10.mai(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.mai(2019) til 1.april(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

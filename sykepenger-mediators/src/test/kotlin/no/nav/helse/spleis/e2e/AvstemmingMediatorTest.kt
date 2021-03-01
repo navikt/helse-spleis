@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
@@ -29,7 +30,9 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100))
         sendSøknad(2, listOf(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100)))
         sendInntektsmelding(2, listOf(Periode(fom = 1.april, tom = 18.april)), førsteFraværsdag = 1.april)
-        sendVilkårsgrunnlag(2)
+        sendVilkårsgrunnlag(2,
+            inntekter = (4.rangeTo(12).map { YearMonth.of(2017, it) to 31000.00 } + 1.rangeTo(3).map { YearMonth.of(2018, it) to 31000.00 })
+        )
         sendYtelser(2)
 
         sendAvstemming()

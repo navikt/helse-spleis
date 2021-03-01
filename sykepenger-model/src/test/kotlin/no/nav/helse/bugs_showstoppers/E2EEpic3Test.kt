@@ -66,7 +66,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(
             1.vedtaksperiode,
             RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100.daglig, 100.prosent, ORGNUMMER),
@@ -567,7 +574,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(29.februar(2020), 11.mars(2020), 80.prosent))
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode) // No history
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
@@ -614,7 +628,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(30.desember(2019), 30.desember(2019))
             )
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2018) til 1.november(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode) // No history
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
@@ -678,7 +699,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -725,7 +753,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(2.vedtaksperiode)   // No history
 
         assertTilstander(
@@ -757,7 +792,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
             førsteFraværsdag = 17.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -794,7 +836,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -880,7 +929,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020)))
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -920,7 +976,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020)))
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -958,7 +1021,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -994,7 +1064,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 31.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100.prosent))
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -1022,7 +1099,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.august(2020), 31.august(2020), 50.prosent))
         håndterSøknad(Sykdom(1.august(2020), 31.august(2020), 50.prosent))
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -1138,7 +1222,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Triple(null, INNTEKT, emptyList())
         )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.mars(2019) til 1.februar(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertFalse(inspektør.personLogg.hasWarningsOrWorse())
@@ -1251,7 +1342,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 1.juni)
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2017) til 1.mai(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

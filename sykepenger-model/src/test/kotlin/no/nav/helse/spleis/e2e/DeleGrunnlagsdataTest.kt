@@ -7,10 +7,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilA
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.testhelpers.april
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.mars
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -43,7 +40,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.april(2017) til 1.mars(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)

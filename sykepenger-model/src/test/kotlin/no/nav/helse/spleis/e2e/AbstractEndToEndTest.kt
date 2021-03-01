@@ -797,7 +797,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             førsteFraværsdag = førsteFraværsdag
         )
         håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(fom, tom, grad))
-        håndterVilkårsgrunnlag(id, INNTEKT)
+        håndterVilkårsgrunnlag(id, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                fom.minusYears(1) til fom.minusMonths(1) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(id)   // No history
         return id
     }

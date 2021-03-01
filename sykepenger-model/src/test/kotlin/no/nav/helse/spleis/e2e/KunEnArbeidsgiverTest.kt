@@ -444,7 +444,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ),
             førsteFraværsdag = 21.september(2020)
         ) // 20. september er en søndag
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.september(2019) til 1.august(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
@@ -1980,6 +1987,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
                 }
@@ -2078,7 +2086,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2020), 16.januar(2020))))
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.januar(2020))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2019) til 1.desember(2019) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2281,7 +2296,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(4.november(2020), 13.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(16.oktober(2020), 23.oktober(2020)), Periode(28.oktober(2020), 4.november(2020))), 28.oktober(2020))
 
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.oktober(2019) til 1.september(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
 
         håndterYtelser(
             5.vedtaksperiode,
@@ -2356,7 +2378,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.november(2020), 11.november(2020), 100.prosent))
         håndterSøknad(Sykdom(11.november(2020), 11.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(18.august(2020), 2.september(2020))), 11.november(2020))
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         assertDoesNotThrow {
             håndterYtelser(
                 3.vedtaksperiode,
@@ -2659,7 +2688,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), id = inntektsmeldingId)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2019) til 1.november(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2686,7 +2722,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2019) til 1.november(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -2712,7 +2755,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 27.januar(2021)
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -2742,7 +2792,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 27.januar(2021)
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -2771,7 +2828,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             ), førsteFraværsdag = 5.februar(2021)
         )
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

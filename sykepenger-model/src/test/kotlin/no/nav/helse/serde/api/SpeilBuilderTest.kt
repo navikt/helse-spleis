@@ -1514,7 +1514,8 @@ class SpeilBuilderTest {
             fødselsnummer = fnr,
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(inntektperioder {
-                1.januar(2018) til 1.desember(2018) inntekter {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
                     orgnummer inntekt 31000.månedlig
                 }
                 1.januar(2017) til 1.januar(2017) inntekter {

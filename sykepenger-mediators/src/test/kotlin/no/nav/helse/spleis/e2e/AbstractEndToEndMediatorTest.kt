@@ -240,7 +240,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendVilkårsgrunnlag(
         vedtaksperiodeIndeks: Int,
-        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2018, it) to INNTEKT },
+        inntekter: List<Pair<YearMonth, Double>> = 1.rangeTo(12).map { YearMonth.of(2017, it) to INNTEKT },
         opptjening: List<Triple<String, LocalDate, LocalDate?>> = listOf(
             Triple(
                 ORGNUMMER,

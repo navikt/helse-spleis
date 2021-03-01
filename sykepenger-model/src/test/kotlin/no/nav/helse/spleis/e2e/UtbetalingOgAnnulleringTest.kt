@@ -333,7 +333,14 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         }
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2017) til 1.mai(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode) // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

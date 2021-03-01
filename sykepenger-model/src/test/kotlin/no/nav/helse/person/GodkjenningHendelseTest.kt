@@ -200,7 +200,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(
                 inntektperioder {
-                    1.januar(2018) til 1.desember(2018) inntekter {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt 31000.månedlig
                     }
                 }),

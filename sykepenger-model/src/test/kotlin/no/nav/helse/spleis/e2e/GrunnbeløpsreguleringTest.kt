@@ -64,7 +64,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltVedtaksperiodeBegrensetAv6G(1, 10.juni(2020), 30.juni(2020), inntekter = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.desember(2017) inntekter {
+                1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt INNTEKT
                     ORGNUMMER_AG2 inntekt INNTEKT
                 }
@@ -119,7 +119,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.desember(2017) inntekter {
+                1.juni(2019) til 1.mai(2020) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
             }
@@ -286,7 +286,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         inntekter: Inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.desember(2017) inntekter {
+                fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
             }
@@ -318,7 +318,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         inntekter: Inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2017) til 1.desember(2017) inntekter {
+                fom.minusYears(1) til fom.minusMonths(1) inntekter {
                     ORGNUMMER inntekt HØY_INNTEKT
                 }
             }

@@ -45,7 +45,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -83,7 +90,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -122,7 +136,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -160,7 +181,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
@@ -185,7 +213,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -259,7 +294,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -299,7 +341,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.november(2020), 20.november(2020), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -367,7 +416,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2019) til 1.november(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(4.vedtaksperiode)
         assertTilstander(
             4.vedtaksperiode,
@@ -414,7 +470,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterVilkårsgrunnlag(4.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2019) til 1.november(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(4.vedtaksperiode)
         assertTilstander(
             4.vedtaksperiode,
@@ -450,7 +513,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             refusjon = Triple(null, 30000.månedlig, emptyList()),
             beregnetInntekt = 30000.månedlig
         )
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.desember(2019) til 1.november(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(3.vedtaksperiode)
         assertTilstander(
             3.vedtaksperiode,

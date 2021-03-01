@@ -1,12 +1,9 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
-import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +25,14 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2017) til 1.mai(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)
@@ -54,7 +58,14 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.juni(2017) til 1.mai(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)

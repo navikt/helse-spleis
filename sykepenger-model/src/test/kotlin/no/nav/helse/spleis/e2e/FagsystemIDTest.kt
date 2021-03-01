@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus
@@ -324,7 +325,14 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.april til 16.april))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.april(2017) til 1.mars(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -368,7 +376,14 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.april til 16.april))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.april(2017) til 1.mars(2018) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

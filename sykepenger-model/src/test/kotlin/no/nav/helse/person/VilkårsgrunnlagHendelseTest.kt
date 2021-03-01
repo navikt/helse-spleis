@@ -57,6 +57,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     fun `9 måneder med inntekt gir riktig sammenligningsgrunnlag`() {
         håndterVilkårsgrunnlag(
             inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2017) til 1.april(2017) inntekter {
                     ORGNUMMER inntekt 12000.månedlig
                 }
@@ -155,6 +156,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioder {
+        inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
         1.januar(2017) til 1.desember(2017) inntekter {
             ORGNUMMER inntekt beregnetInntekt
         }

@@ -1,10 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -61,7 +58,14 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.november(2019) til 1.oktober(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
 
         håndterYtelser(1.vedtaksperiode,
             Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.desember(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
