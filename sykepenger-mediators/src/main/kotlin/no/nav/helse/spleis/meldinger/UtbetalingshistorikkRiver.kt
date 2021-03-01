@@ -30,6 +30,7 @@ internal class UtbetalingshistorikkRiver(
             requireArray("utbetalteSykeperioder") {
                 interestedIn("fom", JsonNode::asLocalDate)
                 interestedIn("tom", JsonNode::asLocalDate)
+                requireKey("dagsats", "utbetalingsGrad", "orgnummer")
                 requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
             }
         }
