@@ -1258,6 +1258,82 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `forkast alle aktive vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`(){
+        val periode = 27.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), false, a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode(a2), TIL_INFOTRYGD)
+
+    }
+
+    @Test
+    fun `forkast ettergølgende vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`(){
+        val periode = 27.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), false, a2)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), AVSLUTTET)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode(a2), TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode(a1), TIL_INFOTRYGD)
+    }
+
     private fun assertTilstand(
         orgnummer: String,
         tilstand: TilstandType,

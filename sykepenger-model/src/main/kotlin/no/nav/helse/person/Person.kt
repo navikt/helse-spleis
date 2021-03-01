@@ -339,4 +339,8 @@ class Person private constructor(
 
     internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie: Historie, vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere, historie, vedtaksperiode)
+
+    internal fun søppelbøtte(hendelse: ArbeidstakerHendelse, periode: Periode) {
+        arbeidsgivere.forEach{ it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
+    }
 }

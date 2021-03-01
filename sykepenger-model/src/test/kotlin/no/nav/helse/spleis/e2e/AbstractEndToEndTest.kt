@@ -94,6 +94,13 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEquals(tilstander.asList(), observatør.tilstander[id])
     }
 
+    protected fun assertSisteForkastetPeriodeTilstand(orgnummer: String, id: UUID, tilstand: TilstandType){
+        assertTrue(inspektør(orgnummer).periodeErForkastet(id)) { "Perioden er ikke forkastet" }
+        assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
+        assertEquals(tilstand, observatør.tilstander[id]?.last())
+
+    }
+
     protected fun assertReplayAv(vararg ids: UUID) {
         assertEquals(
             ids.map(this::vedtaksperiodeIndeks).toSet(),

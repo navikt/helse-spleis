@@ -1953,10 +1953,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.arbeidsgiver.søppelbøtte(
+            vedtaksperiode.person.søppelbøtte(
                 hendelse,
-                vedtaksperiode.arbeidsgiver.tidligereOgEttergølgende2(vedtaksperiode),
-                ForkastetÅrsak.IKKE_STØTTET
+                vedtaksperiode.periode
             )
         }
 
