@@ -4,7 +4,6 @@ import no.nav.helse.appender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.mapping.JsonDagType
@@ -572,7 +571,7 @@ internal data class PersonData(
                 private val medlemskapstatus: JsonMedlemskapstatus
             ) {
                 internal fun parseDataForVilkårsvurdering(
-                ): Vilkårsgrunnlag.Grunnlagsdata = Vilkårsgrunnlag.Grunnlagsdata(
+                ): VilkårsgrunnlagHistorikk.Grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
                     beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
                     avviksprosent = avviksprosent.ratio,
                     harOpptjening = harOpptjening,

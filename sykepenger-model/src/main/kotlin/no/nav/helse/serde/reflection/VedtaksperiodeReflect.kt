@@ -2,10 +2,10 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -67,7 +67,7 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         )
     }
 
-    private val dataForVilkårsvurdering: Map<String, Any?>? = vedtaksperiode.get<Vilkårsgrunnlag.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
+    private val dataForVilkårsvurdering: Map<String, Any?>? = vedtaksperiode.get<VilkårsgrunnlagHistorikk.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
         mapOf(
             "beregnetÅrsinntektFraInntektskomponenten" to
                 it.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },

@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Grunnlagsdata
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.testhelpers.*
@@ -114,10 +113,10 @@ internal class VilkårsgrunnlagTest {
     }
 
 
-    private fun dataForVilkårsvurdering(): Grunnlagsdata? {
-        var _dataForVilkårsvurdering: Grunnlagsdata? = null
+    private fun dataForVilkårsvurdering(): VilkårsgrunnlagHistorikk.Grunnlagsdata? {
+        var _dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
         person.accept(object : PersonVisitor {
-            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Grunnlagsdata?) {
+            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
                 _dataForVilkårsvurdering = dataForVilkårsvurdering
             }
         })

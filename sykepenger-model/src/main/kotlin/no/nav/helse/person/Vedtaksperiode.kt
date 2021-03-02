@@ -42,7 +42,7 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
-    private var dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?,
+    private var dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
@@ -458,7 +458,7 @@ internal class Vedtaksperiode private constructor(
         tilstand(vilkårsgrunnlag, nesteTilstand)
     }
 
-    private fun mottaVilkårsvurdering(grunnlagsdata: Vilkårsgrunnlag.Grunnlagsdata) {
+    private fun mottaVilkårsvurdering(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
         dataForVilkårsvurdering = grunnlagsdata
         arbeidsgiver.finnSykeperiodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }

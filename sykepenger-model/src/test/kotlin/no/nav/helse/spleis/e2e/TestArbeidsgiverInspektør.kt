@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -34,7 +33,7 @@ internal class TestArbeidsgiverInspektør(
     private val vedtaksperiodeindekser = mutableMapOf<UUID, Int>()
     private val fagsystemIder = mutableMapOf<Int, String>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
-    private val vilkårsgrunnlag = mutableMapOf<Int, Vilkårsgrunnlag.Grunnlagsdata?>()
+    private val vilkårsgrunnlag = mutableMapOf<Int, VilkårsgrunnlagHistorikk.Grunnlagsdata?>()
     internal val personLogg: Aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver)
@@ -235,7 +234,7 @@ internal class TestArbeidsgiverInspektør(
         if (!sykdomshistorikk.isEmpty()) sykdomshistorikk.sykdomstidslinje().accept(LåsInspektør())
     }
 
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
         vilkårsgrunnlag[vedtaksperiodeindeks] = dataForVilkårsvurdering
     }
 

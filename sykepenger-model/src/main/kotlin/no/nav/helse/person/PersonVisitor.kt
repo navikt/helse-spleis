@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -79,7 +78,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
     ) {
     }
 
-    fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {}
+    fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,

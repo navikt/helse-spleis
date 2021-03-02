@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.builders
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
 import no.nav.helse.serde.mapping.SpeilDagtype
@@ -358,7 +357,7 @@ internal class VedtaksperiodeBuilder(
         inUtbetaling = false
     }
 
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
         if (dataForVilkårsvurdering == null) return
         val medlemskapstatusDTO = when (dataForVilkårsvurdering.medlemskapstatus) {
             Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA

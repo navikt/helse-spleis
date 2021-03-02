@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -162,7 +161,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         )
     }
 
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: Vilkårsgrunnlag.Grunnlagsdata?) {
+    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
         delegatee.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
     }
 

@@ -133,6 +133,8 @@ class Utbetalingshistorikk(
         }
     }
 
+    internal fun grunnlagsdata() = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
+
     sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun sorter(liste: List<Infotrygdperiode>) = liste.sortedBy { it.periode.start }
