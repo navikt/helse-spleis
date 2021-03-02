@@ -1,9 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Person
+import no.nav.helse.person.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -50,11 +47,20 @@ class Vilkårsgrunnlag(
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
-    internal class Grunnlagsdata(
+    internal class Grunnlagsdata (
         internal val beregnetÅrsinntektFraInntektskomponenten: Inntekt,
         internal val avviksprosent: Prosent?,
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean,
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
-    )
+    ) : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
+
+        override fun valider(aktivitetslogg: Aktivitetslogg) {
+        }
+
+        override fun isOk() = false
+
+        override fun accept(personVisitor: PersonVisitor) {
+        }
+    }
 }
