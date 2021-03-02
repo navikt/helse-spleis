@@ -11,26 +11,26 @@ import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 // Understands a JSON message representing a Søknad that is sent to NAV
-internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(packet) {
-    private val søknadTom = packet["tom"].asLocalDate()
-    private val aktørId = packet["aktorId"].asText()
-    private val orgnummer = packet["arbeidsgiver.orgnummer"].asText()
-    private val sendtNav = packet["sendtNav"].asLocalDateTime()
-    private val andreInntektskilder = packet["andreInntektskilder"].map {
+internal class SendtSøknadNavMessage(private val packet: MessageDelegate) : SøknadMessage(packet) {
+    private val søknadTom get() = packet["tom"].asLocalDate()
+    private val aktørId get() = packet["aktorId"].asText()
+    private val orgnummer get() = packet["arbeidsgiver.orgnummer"].asText()
+    private val sendtNav get() = packet["sendtNav"].asLocalDateTime()
+    private val andreInntektskilder get() = packet["andreInntektskilder"].map {
         Søknad.Inntektskilde(
             sykmeldt = it["sykmeldt"].asBoolean(),
             type = it["type"].asText()
         )
     }
-    private val permittert = packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false
-    private val merknaderFraSykmelding = packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.map { Søknad.Merknad(it.path("type").asText(), it.path("beskrivelse")?.asText()) } ?: emptyList()
-    private val papirsykmeldinger = packet["papirsykmeldinger"].map {
+    private val permittert get() = packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false
+    private val merknaderFraSykmelding get() = packet["merknaderFraSykmelding"].takeIf(JsonNode::isArray)?.map { Søknad.Merknad(it.path("type").asText(), it.path("beskrivelse")?.asText()) } ?: emptyList()
+    private val papirsykmeldinger get() = packet["papirsykmeldinger"].map {
         Søknadsperiode.Papirsykmelding(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate()
         )
     }
-    private val søknadsperioder = packet["soknadsperioder"].map { periode ->
+    private val søknadsperioder get() = packet["soknadsperioder"].map { periode ->
         val arbeidshelse = periode.path("faktiskGrad")
             .takeIf(JsonNode::isIntegralNumber)
             ?.asInt()
@@ -43,13 +43,13 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
             arbeidshelse = arbeidshelse
         )
     }
-    private val egenmeldinger = packet["egenmeldinger"].map {
+    private val egenmeldinger get() = packet["egenmeldinger"].map {
         Søknadsperiode.Egenmelding(
             fom = it.path("fom").asLocalDate(),
             tom = it.path("tom").asLocalDate()
         )
     }
-    private val fraværsperioder = packet["fravar"].mapNotNull {
+    private val fraværsperioder get() = packet["fravar"].mapNotNull {
         val fraværstype = it["type"].asText()
         val fom = it.path("fom").asLocalDate()
         when (fraværstype) {
@@ -60,8 +60,8 @@ internal class SendtSøknadNavMessage(packet: MessageDelegate) : SøknadMessage(
             else -> null // is filtered away in SendtNavSøknader river
         }
     }
-    private val arbeidGjenopptatt = packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Søknadsperiode.Arbeid(it, søknadTom)) } ?: emptyList()
-    private val perioder = søknadsperioder + papirsykmeldinger + egenmeldinger + fraværsperioder + arbeidGjenopptatt
+    private val arbeidGjenopptatt get() = packet["arbeidGjenopptatt"].asOptionalLocalDate()?.let { listOf(Søknadsperiode.Arbeid(it, søknadTom)) } ?: emptyList()
+    private val perioder get() = søknadsperioder + papirsykmeldinger + egenmeldinger + fraværsperioder + arbeidGjenopptatt
 
     private val søknad get() = Søknad(
         meldingsreferanseId = this.id,
