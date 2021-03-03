@@ -19,6 +19,7 @@ class Utbetalingshistorikk(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
+    private val arbeidskategorikoder: Map<String, LocalDate>,
     utbetalinger: List<Infotrygdperiode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
@@ -39,10 +40,17 @@ class Utbetalingshistorikk(
         valider(true, periode, skjæringstidspunkt)
 
     private fun valider(bareOverlappende: Boolean, periode: Periode, skjæringstidspunkt: LocalDate?): IAktivitetslogg {
+        if (!erNormalArbeidstaker(skjæringstidspunkt)) error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
         Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, this, bareOverlappende, periode, organisasjonsnummer)
         Inntektsopplysning.valider(inntektshistorikk, this, skjæringstidspunkt, periode)
         return this
     }
+
+    private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?) =
+        if(arbeidskategorikoder.isEmpty()) true
+        else arbeidskategorikoder
+            .filter { (_, dato) -> dato >= skjæringstidspunkt }
+            .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
 
     internal fun addInntekter(person: Person, hendelse: PersonHendelse = this) {
         Inntektsopplysning.addInntekter(person, hendelse, inntektshistorikk)

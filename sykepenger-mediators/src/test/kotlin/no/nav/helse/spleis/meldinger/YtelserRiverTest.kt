@@ -125,7 +125,8 @@ private val json = """
                 "orgnummer": "orgnummer",
                 "inntektPerMåned": 36000
               }
-            ]
+            ],
+            "arbeidsKategoriKode": "01"
           }
         ],
         "Pleiepenger": [
@@ -257,7 +258,8 @@ private val ukjentPeriode = """
                 "orgnummer": "orgnummer",
                 "inntektPerMåned": 36000
               }
-            ]
+            ],
+            "arbeidsKategoriKode": "01"
           }
         ],
         "Pleiepenger": [],
@@ -354,7 +356,8 @@ private val ugyldigPeriode = """
                 "orgnummer": "orgnummer",
                 "inntektPerMåned": 36000
               }
-            ]
+            ],
+            "arbeidsKategoriKode": "01"
           }
         ],
         "Pleiepenger": [],

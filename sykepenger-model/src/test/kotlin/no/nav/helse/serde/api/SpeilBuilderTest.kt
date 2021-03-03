@@ -1601,6 +1601,7 @@ class SpeilBuilderTest {
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk

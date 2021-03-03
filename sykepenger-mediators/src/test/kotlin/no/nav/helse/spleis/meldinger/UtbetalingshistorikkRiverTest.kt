@@ -76,7 +76,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
                     "orgnummer": "orgnummer",
                     "inntektPerMåned": 36000
                   }
-                ]
+                ],
+                "arbeidsKategoriKode": "01"
               }
             ]
           },
@@ -141,7 +142,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
                     "orgnummer": "orgnummer",
                     "inntektPerMåned": 36000
                   }
-                ]
+                ],
+                "arbeidsKategoriKode": "01"
               }
             ]
           },
@@ -206,7 +208,8 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
                     "orgnummer": "orgnummer",
                     "inntektPerMåned": 36000
                   }
-                ]
+                ],
+                "arbeidsKategoriKode": "01"
               }
             ]
           },

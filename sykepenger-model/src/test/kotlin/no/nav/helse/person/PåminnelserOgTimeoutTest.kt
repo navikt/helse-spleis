@@ -337,6 +337,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
+                arbeidskategorikoder = emptyMap(),
                 utbetalinger = listOf(RefusjonTilArbeidsgiver(17.januar(2017), 20.januar(2017), 1000.daglig,  100.prosent,  ORGNUMMER)),
                 inntektshistorikk = listOf(
                     Utbetalingshistorikk.Inntektsopplysning(17.januar(2017), 31000.månedlig, ORGNUMMER, true)

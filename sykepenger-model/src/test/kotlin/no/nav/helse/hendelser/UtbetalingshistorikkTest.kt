@@ -35,7 +35,8 @@ class UtbetalingshistorikkTest {
 
     private fun utbetalingshistorikk(
         utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode>,
-        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()
+        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
+        arbeidskategorikoder: Map<String, LocalDate> = emptyMap()
     ) =
         Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
@@ -43,10 +44,49 @@ class UtbetalingshistorikkTest {
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODEID,
+            arbeidskategorikoder = arbeidskategorikoder,
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
             aktivitetslogg = aktivitetslogg
         )
+
+    @Test
+    fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd`() {
+        val arbeidskategorikoder = mapOf("07" to 1.januar)
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
+        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `validering feiler ikke når det ikke er redusert utbetaling i Infotrygd, men skjæringstidspunkt i Infotrygd`() {
+        val arbeidskategorikoder = mapOf("01" to 1.januar)
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
+        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `validering skal ikke feile når bruker har redusert utbetaling i Infotrygd, men skjæringstidspunkt i Spleis`() {
+        val arbeidskategorikoder = mapOf("07" to 1.januar)
+        val utbetalinger = listOf(
+            RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
+        )
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = utbetalinger, arbeidskategorikoder = arbeidskategorikoder)
+        assertFalse(utbetalingshistorikk.valider(Periode(7.januar, 23.januar), 7.januar).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
+        val arbeidskategorikoder = mapOf("01" to 1.januar, "07" to 6.januar)
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
+        assertTrue(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `validering skal ikke feile når bruker ikke har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
+        val arbeidskategorikoder = mapOf("01" to 1.januar, "01" to 6.januar)
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
+        assertFalse(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+    }
 
     @Test
     fun `direkteutbetaling til bruker støttes ikke ennå`() {

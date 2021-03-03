@@ -176,6 +176,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "$vedtaksperiodeId",
+                arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 aktivitetslogg = it

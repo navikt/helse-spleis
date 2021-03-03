@@ -11,6 +11,7 @@ import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import java.time.LocalDate
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(packet: MessageDelegate) : BehovMessage(packet) {
@@ -45,6 +46,14 @@ internal class UtbetalingshistorikkMessage(packet: MessageDelegate) : BehovMessa
         }
     }
 
+    private val arbeidskategorikoder: Map<String, LocalDate> = packet["@løsning.${Sykepengehistorikk.name}"].flatMap { element ->
+        element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
+            utbetaling["fom"].asOptionalLocalDate()?.let {
+                element.path("arbeidsKategoriKode").asText() to it
+            }
+        }
+    }.toMap()
+
     private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
         it.path("inntektsopplysninger")
     }.map { opplysning ->
@@ -64,6 +73,7 @@ internal class UtbetalingshistorikkMessage(packet: MessageDelegate) : BehovMessa
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            arbeidskategorikoder = arbeidskategorikoder,
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
             aktivitetslogg = aktivitetslogg

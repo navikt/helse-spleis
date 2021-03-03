@@ -421,6 +421,7 @@ class JsonBuilderTest {
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektsopplysning
         )
@@ -438,6 +439,7 @@ class JsonBuilderTest {
                     fødselsnummer = fnr,
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
+                    arbeidskategorikoder = emptyMap(),
                     utbetalinger = listOf(
                         Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
                             fom = 1.januar.minusYears(1),

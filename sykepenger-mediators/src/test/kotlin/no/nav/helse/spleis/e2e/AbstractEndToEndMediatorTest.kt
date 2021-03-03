@@ -202,7 +202,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         opplæringspenger: List<TestMessageFactory.OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<TestMessageFactory.InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<TestMessageFactory.ArbeidsavklaringspengerTestdata> = emptyList(),
-        dagpenger: List<TestMessageFactory.DagpengerTestdata> = emptyList()
+        dagpenger: List<TestMessageFactory.DagpengerTestdata> = emptyList(),
+        sykepengehistorikk: List<TestMessageFactory.UtbetalingshistorikkTestdata> = emptyList()
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
@@ -221,7 +222,8 @@ internal abstract class AbstractEndToEndMediatorTest {
                 opplæringspenger = opplæringspenger,
                 institusjonsoppholdsperioder = institusjonsoppholdsperioder,
                 arbeidsavklaringspenger = arbeidsavklaringspenger,
-                dagpenger = dagpenger
+                dagpenger = dagpenger,
+                sykepengehistorikk = sykepengehistorikk
             )
         )
     }

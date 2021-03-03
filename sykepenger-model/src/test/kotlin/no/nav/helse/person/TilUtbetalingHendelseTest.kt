@@ -235,6 +235,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "$vedtaksperiodeId",
+                arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it

@@ -160,6 +160,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = "vedtaksperiode1",
+                arbeidskategorikoder = emptyMap(),
                 utbetalinger = emptyList(),
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = aktivitetslogg

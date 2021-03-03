@@ -326,6 +326,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
         statslønn: Boolean = false,
+        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
     ) {
@@ -353,6 +354,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             orgnummer = orgnummer,
             dødsdato = dødsdato,
             statslønn = statslønn,
+            arbeidskategorikoder = arbeidskategorikoder,
             arbeidsavklaringspenger = arbeidsavklaringspenger,
             dagpenger = dagpenger
         ).håndter(Person::håndter)
@@ -669,6 +671,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
+            arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
             inntektshistorikk =
             inntektshistorikk(inntektshistorikk, orgnummer)
@@ -690,6 +693,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         dødsdato: LocalDate? = null,
         statslønn: Boolean = false,
+        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
     ): Ytelser {
@@ -708,6 +712,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
+                arbeidskategorikoder = arbeidskategorikoder,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 aktivitetslogg = aktivitetslogg

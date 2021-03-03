@@ -150,6 +150,31 @@ internal class TestMessageFactory(
         )
     }
 
+    class UtbetalingshistorikkTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val arbeidskategorikode: String,
+        val utbetalteSykeperioder: List<UtbetaltSykeperiode> = emptyList(),
+        val inntektsopplysninger: List<Inntektsopplysninger> = emptyList(),
+    ) {
+        class UtbetaltSykeperiode(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val dagsats: Double,
+            val typekode: String,
+            val utbetalingsgrad: String,
+            val organisasjonsnummer: String
+        )
+
+        class Inntektsopplysninger(
+            val sykepengerFom: LocalDate,
+            val inntekt: Double,
+            val organisasjonsnummer: String,
+            val refusjonTilArbeidsgiver: Boolean,
+            val refusjonTom: LocalDate? = null
+        )
+    }
+
     class PleiepengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
@@ -193,7 +218,8 @@ internal class TestMessageFactory(
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
-        dagpenger: List<DagpengerTestdata> = emptyList()
+        dagpenger: List<DagpengerTestdata> = emptyList(),
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()
     ): String {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -210,7 +236,32 @@ internal class TestMessageFactory(
                 "Dagpenger"
             ),
             løsninger = mapOf(
-                "Sykepengehistorikk" to emptyList<Any>(),
+                "Sykepengehistorikk" to sykepengehistorikk.map { data ->
+                    mapOf(
+                        "fom" to data.fom,
+                        "tom" to data.tom,
+                        "inntektsopplysninger" to data.inntektsopplysninger.map {
+                            mapOf(
+                                "sykepengerFom" to it.sykepengerFom,
+                                "inntekt" to it.inntekt,
+                                "orgnummer" to it.organisasjonsnummer,
+                                "refusjonTilArbeidsgiver" to it.refusjonTilArbeidsgiver,
+                                "refusjonTom" to it.refusjonTom
+                            )
+                        },
+                        "utbetalteSykeperioder" to data.utbetalteSykeperioder.map {
+                            mapOf(
+                                "fom" to it.fom,
+                                "tom" to it.tom,
+                                "dagsats" to it.dagsats,
+                                "utbetalingsGrad" to it.utbetalingsgrad,
+                                "orgnummer" to it.organisasjonsnummer,
+                                "typeKode" to it.typekode
+                            )
+                        },
+                        "arbeidsKategoriKode" to data.arbeidskategorikode
+                    )
+                },
                 "Foreldrepenger" to emptyMap<String, String>(),
                 "Pleiepenger" to pleiepenger.map { data ->
                     mapOf(

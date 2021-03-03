@@ -113,6 +113,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 fødselsnummer = UNG_PERSON_FNR_2018,
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
+                arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
                 aktivitetslogg = it

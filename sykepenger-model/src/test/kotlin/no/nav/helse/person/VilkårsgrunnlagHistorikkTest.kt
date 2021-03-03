@@ -37,7 +37,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969",
             organisasjonsnummer = "ORGNUMMER",
             utbetalinger = emptyList(),
-            inntektshistorikk = emptyList()
+            inntektshistorikk = emptyList(),
+            arbeidskategorikoder = emptyMap()
         )
         vilkårsgrunnlagHistorikk.lagre(infotrygdVilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))

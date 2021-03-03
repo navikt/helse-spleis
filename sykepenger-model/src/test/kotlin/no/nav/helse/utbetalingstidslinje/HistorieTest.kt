@@ -77,6 +77,7 @@ internal abstract class HistorieTest {
                 FNR,
                 "ET ORGNR",
                 UUID.randomUUID().toString(),
+                arbeidskategorikoder = emptyMap(),
                 perioder.toList(),
                 emptyList()
             )
@@ -91,6 +92,7 @@ internal abstract class HistorieTest {
                 FNR,
                 "ET ORGNR",
                 UUID.randomUUID().toString(),
+                arbeidskategorikoder = emptyMap(),
                 perioder.toList(),
                 emptyList()
             )
