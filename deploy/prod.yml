@@ -41,16 +41,12 @@ spec:
   secureLogs:
     enabled: true
   env:
-  - name: KAFKA_PREFER_ON_PREM
-    value: "true"
-  - name: KAFKA_BOOTSTRAP_SERVERS
-    value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
   - name: KAFKA_RAPID_TOPIC
-    value: helse-rapid-v1
+    value: tbd.rapid.v1
   - name: KAFKA_CONSUMER_GROUP_ID
-    value: spleis-v4
-  - name: KAFKA_RESET_POLICY
-    value: none
+    value: tbd-spleis-v1
+  #- name: KAFKA_RESET_POLICY
+  #  value: none
   - name: DATABASE_HOST
     value: a01dbfl039.adeo.no
   - name: DATABASE_PORT
