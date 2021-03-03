@@ -109,22 +109,14 @@ internal class Utbetalingstidslinje private constructor(
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
     }
 
-    internal operator fun minus(other: Utbetalingstidslinje): Utbetalingstidslinje {
-        if (this.utbetalingsdager.isEmpty()) return this
-        if (other.utbetalingsdager.isEmpty()) return this
-        if (!this.overlapper(other)) return this
-        return this.plus(other) { venstre, høyre ->
-            if ((høyre !is UkjentDag && !høyre.dato.erHelg()) || (høyre !is Fridag && høyre.dato.erHelg())) UkjentDag(venstre.dato, venstre.økonomi)
-            else venstre
-        }.trim()
+    internal fun trim(førsteSpleisdag: LocalDate?): Utbetalingstidslinje {
+        if (erTom()) return Utbetalingstidslinje()
+        return subset(førsteDag(førsteSpleisdag), sisteDato()).takeUnless { it.erTom() } ?: Utbetalingstidslinje()
     }
 
-    private fun overlapper(other: Utbetalingstidslinje) = this.periode().overlapperMed(other.periode())
-
-    private fun trim() =
-        if (isEmpty() || all { erUkjentDag(it) }) Utbetalingstidslinje()
-        else subset(first { !erUkjentDag(it) }.dato, sisteDato())
-
+    private fun erTom() = isEmpty() || kunUkjenteDager()
+    private fun kunUkjenteDager() = all(::erUkjentDag)
+    private fun førsteDag(førsteSpleisdag: LocalDate?) = listOfNotNull(førsteSpleisdag, førsteSykepengedag()).minOrNull() ?: first { !erUkjentDag(it) }.dato
     private fun erUkjentDag(it: Utbetalingsdag) = it is UkjentDag || it is Fridag && it.dato.erHelg()
 
     private fun binde(

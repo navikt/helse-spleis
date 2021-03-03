@@ -64,13 +64,19 @@ internal class Historie() {
             forlengelseStrategy = { dagen -> erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer, dagen) },
             arbeidsgiverRegler = arbeidsgiverRegler
         )
-        return byggUtbetalingstidslinje(organisasjonsnummer, periode, builder::result)
+        val utbetalingstidlinje = builder.result(sykdomstidslinje(organisasjonsnummer).fremTilOgMed(periode.endInclusive))
+        return fjernInfotrygd(utbetalingstidlinje, organisasjonsnummer)
     }
 
-    private fun byggUtbetalingstidslinje(organisasjonsnummer: String, periode: Periode, builder: (Sykdomstidslinje) -> Utbetalingstidslinje) =
-        builder(sykdomstidslinje(organisasjonsnummer).fremTilOgMed(periode.endInclusive))
-            .minus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer))
-            .let { it.gjøreKortere(minOf(it.førsteSykepengedag() ?: LocalDate.MAX, spleisbøtte.tidligsteDato(organisasjonsnummer))) }
+    private fun fjernInfotrygd(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
+        return utbetalingstidlinje.plus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingsdag, infotrygdDag: Utbetalingsdag ->
+            when {
+                !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                else -> spleisDag
+            }
+        }.trim(spleisbøtte.tidligsteDato(organisasjonsnummer))
+    }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
         periodetype(orgnr, periode) != FØRSTEGANGSBEHANDLING
@@ -138,10 +144,10 @@ internal class Historie() {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
 
-        internal fun tidligsteDato(orgnummer: String): LocalDate {
+        internal fun tidligsteDato(orgnummer: String): LocalDate? {
             val førsteUtbetalingsdag = utbetalingstidslinje(orgnummer).førsteSykepengedag()
             val førsteSykdomstidslinjedag = sykdomstidslinje(orgnummer).periode()?.start
-            return listOfNotNull(førsteUtbetalingsdag, førsteSykdomstidslinjedag).minOrNull() ?: LocalDate.MIN
+            return listOfNotNull(førsteUtbetalingsdag, førsteSykdomstidslinjedag).minOrNull()
         }
 
         internal fun sykdomstidslinjer() = sykdomstidslinjer.values.toList()

@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class HistorieEnArbeidsgiverTest : HistorieTest() {
@@ -145,5 +146,167 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
             ferie(1.februar, 28.februar)
         )
         assertEquals(31.januar, historie.sisteSykepengedagIInfotrygd(AG1))
+    }
+
+    @Test
+    fun `infotrygd legger inn ferie i etterkant`() {
+        historie(
+            ferie(8.januar, 14.januar)
+        )
+        historie.add(AG1, 7.S + 7.F + 7.S)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
+        assertEquals(21, utbetalingstidslinje.size)
+        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
+        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+    }
+
+    @Test
+    fun `ferie midt i refusjon i infotrygd`() {
+        historie(
+            refusjon(1.januar, 3.januar),
+            ferie(4.januar, 6.januar),
+            refusjon(7.januar, 10.januar)
+        )
+        resetSeed(11.januar)
+        historie.add(AG1, 4.S + 5.S + 2.S)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
+        assertEquals(11, utbetalingstidslinje.size)
+        assertAlleDager(utbetalingstidslinje, 11.januar til 21.januar, NavDag::class, NavHelgDag::class)
+        assertEquals(11.januar, utbetalingstidslinje.førsteDato())
+        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+    }
+
+    @Test
+    fun `fjerne dager midt i`() {
+        historie(
+            refusjon(8.januar, 12.januar)
+        )
+        historie.add(AG1, tidslinjeOf(5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG))
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
+        assertEquals(21, utbetalingstidslinje.size)
+        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
+        assertTrue(utbetalingstidslinje[7.januar] is ArbeidsgiverperiodeDag)
+        assertTrue(utbetalingstidslinje[8.januar] is UkjentDag)
+        assertTrue(utbetalingstidslinje[12.januar] is UkjentDag)
+        assertTrue(utbetalingstidslinje[13.januar] is ArbeidsgiverperiodeDag)
+        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
+        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+    }
+
+    @Test
+    fun `ferie i spleis overlapper med utbetaling i infotrygd`() {
+        historie(
+            refusjon(8.januar, 12.januar)
+        )
+        historie.add(AG1, 12.F)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 8.januar)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, Fridag::class)
+        assertEquals(12, utbetalingstidslinje.size)
+        assertAlleDager(utbetalingstidslinje, 8.januar til 12.januar, UkjentDag::class)
+        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
+        assertEquals(12.januar, utbetalingstidslinje.sisteDato())
+    }
+
+    @Test
+    fun `overlapper helt med infotrygd`() {
+        historie(
+            ferie(1.januar, 7.januar),
+            refusjon(8.januar, 12.januar)
+        )
+        resetSeed(8.januar)
+        historie.add(AG1, 5.S)
+        val utbetalingstidslinje = beregn(AG1, 8.januar til 21.januar, 8.januar)
+        assertEquals(0, utbetalingstidslinje.size)
+    }
+
+    @Test
+    fun `fri etter infotrygdfri`() {
+        historie(
+            refusjon(1.januar, 7.januar),
+            ferie(8.januar, 14.januar)
+        )
+        resetSeed(15.januar)
+        historie.add(AG1, 5.F)
+        val utbetalingstidslinje = beregn(AG1, 8.januar til 19.januar, 1.januar)
+        assertEquals(5, utbetalingstidslinje.size)
+        assertAlleDager(utbetalingstidslinje, 15.januar til 19.januar, Fridag::class)
+    }
+
+    @Test
+    fun `navdag etter infotrygdfri`() {
+        historie(
+            refusjon(1.januar, 7.januar),
+            ferie(8.januar, 14.januar)
+        )
+        resetSeed(15.januar)
+        historie.add(AG1, 5.S)
+        val utbetalingstidslinje = beregn(AG1, 8.januar til 19.januar, 1.januar)
+        assertEquals(5, utbetalingstidslinje.size)
+        assertAlleDager(utbetalingstidslinje, 15.januar til 19.januar, NavDag::class)
+    }
+
+    @Test
+    fun `tidslinje med ekstra NAVdager etter en tidslinje som trekkes fra resulterer i en tidslinje med bare de siste NAVdagene`() {
+        historie(
+            ferie(1.januar, 7.januar),
+            refusjon(8.januar, 12.januar)
+        )
+        resetSeed(15.januar)
+        historie.add(AG1, 7.S)
+        val utbetalingstidslinje = beregn(AG1, 8.januar til 21.januar, 8.januar)
+        assertEquals(7, utbetalingstidslinje.size)
+        assertAlleDager(utbetalingstidslinje, 13.januar til 14.januar, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, 15.januar til 19.januar, NavDag::class)
+    }
+
+    @Test
+    fun `tidslinje med ekstra fridager etter en tidslinje som trekkes fra resulterer i en tidslinje med bare de siste fridagene (siste helg med fridager beholdes)`() {
+        resetSeed(15.januar)
+        historie(
+            refusjon(1.januar, 7.januar),
+            ferie(8.januar, 14.januar),
+        )
+        historie.add(AG1, 7.F)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 21.januar, Fridag::class)
+        assertEquals(7, utbetalingstidslinje.size)
+    }
+
+//    @Test
+//    fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {
+//        val tidslinje = tidslinjeOf(5.NAVv2).minus(tidslinjeOf(5.NAVv2))
+//        assertEquals(0, tidslinje.size)
+//    }
+
+    @Test
+    fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {
+        historie(
+            refusjon(1.januar, 7.januar)
+        )
+        historie.add(AG1, tidslinjeOf(7.NAVv2))
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 7.januar, 1.januar)
+        assertEquals(0, utbetalingstidslinje.size)
+    }
+
+    @Test
+    fun `ledende infotrygddager utfyller tidslinje`() {
+        historie(
+            ferie(8.januar, 9.januar)
+        )
+        historie.add(AG1, 14.S)
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
+        assertEquals(14, utbetalingstidslinje.size)
+    }
+
+    @Test
+    fun `overlappende fridager fra infotrygd`() {
+        historie(
+            ferie(8.januar, 9.januar)
+        )
+        historie.add(AG1, tidslinjeOf(7.NAVv2, 2.FRIv2, 7.NAVv2))
+        val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
+        assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, ArbeidsgiverperiodeDag::class)
+        assertAlleDager(utbetalingstidslinje, 8.januar til 9.januar, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 10.januar til 16.januar, ArbeidsgiverperiodeDag::class)
     }
 }

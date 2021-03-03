@@ -37,6 +37,7 @@ internal abstract class HistorieTest {
     @BeforeEach
     fun beforeEach() {
         historie = Historie()
+        resetSeed()
     }
 
     protected fun refusjon(fom: LocalDate, tom: LocalDate, intekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
