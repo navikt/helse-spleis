@@ -132,8 +132,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
 
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
         inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni(2020), utbetalingUtbetalingstidslinje.førsteDato())
-            assertEquals(30.juni(2020), utbetalingUtbetalingstidslinje.sisteDato())
+            assertEquals(10.juni(2020) til 30.juni(2020), utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(0).also { utbetaling ->
             assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)
@@ -141,8 +140,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
         }
         inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni(2020), utbetalingUtbetalingstidslinje.førsteDato())
-            assertEquals(30.juni(2020), utbetalingUtbetalingstidslinje.sisteDato())
+            assertEquals(10.juni(2020) til 30.juni(2020), utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(1).also { utbetaling ->
             assertEquals(26.juni(2020), utbetaling.arbeidsgiverOppdrag().førstedato)

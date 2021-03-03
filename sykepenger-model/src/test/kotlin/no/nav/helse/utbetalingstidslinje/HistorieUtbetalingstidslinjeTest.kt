@@ -81,22 +81,19 @@ internal class HistorieUtbetalingstidslinjeTest : HistorieTest() {
         bøtte.add(AG1, tidslinjeOf(5.NAV, 2.HELG, startDato = 8.januar))
         bøtte.add(AG2, tidslinjeOf(5.NAV, 2.HELG, startDato = 15.januar))
         bøtte.utbetalingstidslinje(AG1).also {
-            assertEquals(1.januar, it.førsteDato())
-            assertEquals(14.januar, it.sisteDato())
+            assertEquals(1.januar til 14.januar, it.periode())
             assertTrue(it[1.januar] is Fridag)
             assertTrue(it[8.januar] is NavDag)
         }
         bøtte.utbetalingstidslinje(AG2).also {
-            assertEquals(1.januar, it.førsteDato())
-            assertEquals(21.januar, it.sisteDato())
+            assertEquals(1.januar til 21.januar, it.periode())
             assertTrue(it[1.januar] is Fridag)
             assertTrue(it[8.januar] is UkjentDag)
             assertTrue(it[15.januar] is NavDag)
             assertTrue(it[21.januar] is NavHelgDag)
         }
         bøtte.utbetalingstidslinje().also {
-            assertEquals(1.januar, it.førsteDato())
-            assertEquals(21.januar, it.sisteDato())
+            assertEquals(1.januar til 21.januar, it.periode())
             assertTrue(it[1.januar] is Fridag)
             assertTrue(it[8.januar] is NavDag)
             assertTrue(it[15.januar] is NavDag)
@@ -109,12 +106,10 @@ internal class HistorieUtbetalingstidslinjeTest : HistorieTest() {
         historie(refusjon(1.januar, 31.januar))
         historie.add(AG1, navdager(1.februar, 28.februar))
         historie.utbetalingstidslinjeFraInfotrygd(1.februar til 28.februar).also {
-            assertEquals(1.januar, it.førsteDato())
-            assertEquals(31.januar, it.sisteDato())
+            assertEquals(1.januar til 31.januar, it.periode())
         }
         historie.utbetalingstidslinjeFraInfotrygd(1.januar til 21.januar).also {
-            assertEquals(1.januar, it.førsteDato())
-            assertEquals(21.januar, it.sisteDato())
+            assertEquals(1.januar til 21.januar, it.periode())
         }
     }
 }

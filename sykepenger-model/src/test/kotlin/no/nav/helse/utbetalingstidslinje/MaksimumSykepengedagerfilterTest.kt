@@ -39,7 +39,7 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test fun `stopper betaling etter 248 dager inkl persontidslinje`() {
         val persontidslinje = tidslinjeOf(247.NAV)
-        val tidslinje = tidslinjeOf(2.NAV, startDato = persontidslinje.sisteDato().plusDays(1))
+        val tidslinje = tidslinjeOf(2.NAV, startDato = persontidslinje.periode().endInclusive.plusDays(1))
         assertEquals(listOf(6.september), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = persontidslinje))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }

@@ -319,7 +319,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)   // No history
         val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
-        assertEquals(3.januar to 26.januar, utbetalingUtbetalingstidslinje.førsteDato() to utbetalingUtbetalingstidslinje.sisteDato())
+        assertEquals(3.januar til 26.januar, utbetalingUtbetalingstidslinje.periode())
     }
 
     @Test
@@ -358,8 +358,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt(3.vedtaksperiode)
 
         inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni, utbetalingUtbetalingstidslinje.førsteDato())
-            assertEquals(30.juni, utbetalingUtbetalingstidslinje.sisteDato())
+            assertEquals(10.juni til 30.juni, utbetalingUtbetalingstidslinje.periode())
         }
         inspektør.utbetaling(0).also { utbetaling ->
             assertEquals(26.juni, utbetaling.arbeidsgiverOppdrag().førstedato)
@@ -367,8 +366,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             assertEquals(1, utbetaling.arbeidsgiverOppdrag().size)
         }
         inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni, utbetalingUtbetalingstidslinje.førsteDato())
-            assertEquals(31.august, utbetalingUtbetalingstidslinje.sisteDato())
+            assertEquals(10.juni til 31.august, utbetalingUtbetalingstidslinje.periode())
             assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[1.juli]::class)
             assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[31.juli]::class)
         }

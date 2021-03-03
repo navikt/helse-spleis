@@ -139,31 +139,19 @@ internal class Utbetalingstidslinje private constructor(
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.førsteDato(), other.førsteDato())
 
-    internal fun førsteDato() =
-        utbetalingsdager.first().dato
-
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.sisteDato(), other.sisteDato())
 
     internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
-    internal fun sisteDato() = utbetalingsdager.last().dato
+    private fun førsteDato() = utbetalingsdager.first().dato
+    private fun sisteDato() = utbetalingsdager.last().dato
 
-    private fun periode() = Periode(førsteDato(), sisteDato())
+    internal fun periode() = Periode(førsteDato(), sisteDato())
 
     internal fun førsteSykepengedag() = utbetalingsdager.firstOrNull { it is NavDag }?.dato
 
     internal fun sisteSykepengedag() = utbetalingsdager.lastOrNull { it is NavDag }?.dato
-
-    internal fun sisteSykepengeperiode(): Periode? {
-        val sisteDag = sisteSykepengedag() ?: return null
-        var førsteDag = sisteDag
-        for (challenger in kutt(sisteDag.minusDays(1)).reverse().utbetalingsdager) {
-            if (challenger is NavDag || challenger is NavHelgDag || challenger is ArbeidsgiverperiodeDag) førsteDag =
-                challenger.dato else break
-        }
-        return Periode(førsteDag, sisteDag)
-    }
 
     private fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
         return Utbetalingstidslinje(

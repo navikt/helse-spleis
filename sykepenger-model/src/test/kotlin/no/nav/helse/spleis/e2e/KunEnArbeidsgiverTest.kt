@@ -2333,8 +2333,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
 
-        assertEquals(24.juni(2020), inspektør.utbetalinger.first().utbetalingstidslinje().førsteDato())
-
+        assertEquals(24.juni(2020), inspektør.utbetalinger.first().utbetalingstidslinje().periode().start)
     }
 
     @Test

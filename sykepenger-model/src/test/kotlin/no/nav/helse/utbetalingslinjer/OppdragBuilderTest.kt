@@ -201,7 +201,7 @@ internal class OppdragBuilderTest {
             tidslinje,
             ORGNUMMER,
             SykepengerRefusjon,
-            sisteDato ?: tidslinje.sisteDato()
+            sisteDato ?: tidslinje.periode().endInclusive
         ).result()
     }
 

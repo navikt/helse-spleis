@@ -73,7 +73,7 @@ internal class MaksimumSykepengedagerfilter(
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
         sisteUkedag = tidslinje.sisteUkedag()
-        sisteBetalteDag = tidslinje.sisteDato()
+        sisteBetalteDag = tidslinje.periode().endInclusive
     }
 
     override fun visit(

@@ -96,7 +96,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, navdager(1.desember(2017), 31.desember(2017)))
         historie.add(AG1, sykedager(1.mars, 31.mars))
         val utbetalingstidslinje = beregn(AG1, 1.mars til 31.mars, 1.desember(2017))
-        assertEquals(1.desember(2017), utbetalingstidslinje.førsteDato())
+        assertEquals(1.desember(2017) til 31.mars, utbetalingstidslinje.periode())
         assertAlleDager(utbetalingstidslinje, 1.desember(2017) til 16.desember(2017), ArbeidsgiverperiodeDag::class)
         assertAlleDager(utbetalingstidslinje, 17.desember(2017) til 31.desember(2017), NavDag::class, NavHelgDag::class)
         assertAlleDager(utbetalingstidslinje, 1.januar til 28.februar, UkjentDag::class, Fridag::class)
@@ -111,7 +111,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         historie.add(AG1, sykedager(1.mars, 31.mars))
         val utbetalingstidslinje = beregn(AG1, 1.mars til 31.mars, 1.januar)
-        assertEquals(1.mars, utbetalingstidslinje.førsteDato())
+        assertEquals(1.mars til 31.mars, utbetalingstidslinje.periode())
         assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, NavDag::class, NavHelgDag::class)
     }
 
@@ -120,8 +120,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie(bruker(1.januar, 31.januar))
         historie.add(AG1, tidslinjeOf(2.NAV, 2.HELG, 5.NAV, startDato = 1.mars))
         beregn(AG1, 1.mars til 9.mars, 1.januar, 1.mars).also {
-            assertEquals(1.mars, it.førsteDato())
-            assertEquals(9.mars, it.sisteDato())
+            assertEquals(1.mars til 9.mars, it.periode())
         }
     }
 
@@ -134,8 +133,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, sykedager(1.juni, 30.juni))
         beregn(AG1, 1.mars til 30.juni, 1.januar, 1.juni).also {
             assertAlleDager(it, 1.juni til 30.juni, NavDag::class, NavHelgDag::class)
-            assertEquals(1.juni, it.førsteDato())
-            assertEquals(30.juni, it.sisteDato())
+            assertEquals(1.juni til 30.juni, it.periode())
         }
     }
 
@@ -156,8 +154,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, 7.S + 7.F + 7.S)
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
         assertEquals(21, utbetalingstidslinje.size)
-        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
-        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+        assertEquals(1.januar til 21.januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -172,8 +169,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
         assertEquals(11, utbetalingstidslinje.size)
         assertAlleDager(utbetalingstidslinje, 11.januar til 21.januar, NavDag::class, NavHelgDag::class)
-        assertEquals(11.januar, utbetalingstidslinje.førsteDato())
-        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+        assertEquals(11.januar til 21.januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -184,13 +180,11 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie.add(AG1, tidslinjeOf(5.NAV, 2.HELG, 5.NAV, 2.HELG, 5.NAV, 2.HELG))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
         assertEquals(21, utbetalingstidslinje.size)
-        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
         assertTrue(utbetalingstidslinje[7.januar] is ArbeidsgiverperiodeDag)
         assertTrue(utbetalingstidslinje[8.januar] is UkjentDag)
         assertTrue(utbetalingstidslinje[12.januar] is UkjentDag)
         assertTrue(utbetalingstidslinje[13.januar] is ArbeidsgiverperiodeDag)
-        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
-        assertEquals(21.januar, utbetalingstidslinje.sisteDato())
+        assertEquals(1.januar til 21.januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -203,8 +197,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, Fridag::class)
         assertEquals(12, utbetalingstidslinje.size)
         assertAlleDager(utbetalingstidslinje, 8.januar til 12.januar, UkjentDag::class)
-        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
-        assertEquals(12.januar, utbetalingstidslinje.sisteDato())
+        assertEquals(1.januar til 12.januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -271,12 +264,6 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         assertAlleDager(utbetalingstidslinje, 1.januar til 21.januar, Fridag::class)
         assertEquals(7, utbetalingstidslinje.size)
     }
-
-//    @Test
-//    fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {
-//        val tidslinje = tidslinjeOf(5.NAVv2).minus(tidslinjeOf(5.NAVv2))
-//        assertEquals(0, tidslinje.size)
-//    }
 
     @Test
     fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {

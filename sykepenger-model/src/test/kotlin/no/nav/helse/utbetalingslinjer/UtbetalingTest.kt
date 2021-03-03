@@ -55,8 +55,7 @@ internal class UtbetalingTest {
                 utbetalingstidslinje = tidslinje
             }
         })
-        assertEquals(1.januar, utbetalingstidslinje.førsteDato())
-        assertEquals(sisteDato, utbetalingstidslinje.sisteDato())
+        assertEquals(1.januar til sisteDato, utbetalingstidslinje.periode())
         assertEquals(17.januar til sisteDato, utbetaling.periode)
     }
 
@@ -193,7 +192,7 @@ internal class UtbetalingTest {
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
-        sisteDato: LocalDate = tidslinje.sisteDato(),
+        sisteDato: LocalDate = tidslinje.periode().endInclusive,
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
