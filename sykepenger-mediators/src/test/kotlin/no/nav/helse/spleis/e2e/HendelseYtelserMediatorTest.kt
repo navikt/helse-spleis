@@ -186,6 +186,34 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING"
         )
     }
+
+
+    @Test
+    fun `Passerer validering når utbetalte sykeperioder er tom`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
+            sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
+                fom = 1.januar,
+                tom = 26.januar,
+                arbeidskategorikode = "07",
+                utbetalteSykeperioder = emptyList(),
+                inntektsopplysninger = emptyList()
+            ))
+        )
+
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING"
+        )
+    }
 }
 
 

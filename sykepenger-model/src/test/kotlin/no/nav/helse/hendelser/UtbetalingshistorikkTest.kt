@@ -89,6 +89,12 @@ class UtbetalingshistorikkTest {
     }
 
     @Test
+    fun `validering skal ikke feile når utbetalingshistorikken er tom`() {
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = emptyMap())
+        assertFalse(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+    }
+
+    @Test
     fun `direkteutbetaling til bruker støttes ikke ennå`() {
         val utbetalinger = listOf(
             RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
