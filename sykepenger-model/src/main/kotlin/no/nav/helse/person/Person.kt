@@ -19,13 +19,14 @@ class Person private constructor(
     private val fødselsnummer: String,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
-    private val opprettet: LocalDateTime
+    private val opprettet: LocalDateTime,
+    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) : Aktivitetskontekst {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), VilkårsgrunnlagHistorikk())
 
     private val observers = mutableListOf<PersonObserver>()
 

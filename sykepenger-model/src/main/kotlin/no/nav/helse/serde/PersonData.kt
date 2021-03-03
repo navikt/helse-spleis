@@ -45,7 +45,7 @@ internal data class PersonData(
 
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
-        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet)
+        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, VilkårsgrunnlagHistorikk())
 
     internal fun createPerson(): Person {
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {

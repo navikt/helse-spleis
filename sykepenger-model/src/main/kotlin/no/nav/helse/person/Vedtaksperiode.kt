@@ -450,6 +450,7 @@ internal class Vedtaksperiode private constructor(
 
         if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN,  skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
                 mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
+                person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
             }) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
