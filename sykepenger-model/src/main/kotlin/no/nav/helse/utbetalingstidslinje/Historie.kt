@@ -75,7 +75,7 @@ internal class Historie() {
                 infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 else -> spleisDag
             }
-        }.trim(spleisbøtte.tidligsteDato(organisasjonsnummer))
+        }.subset(spleisbøtte.tidligsteDato(organisasjonsnummer))
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
@@ -110,7 +110,7 @@ internal class Historie() {
         spleisbøtte.add(orgnummer, tidslinje)
     }
 
-    internal fun sisteSykepengedagIInfotrygd(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer).sisteSykepengedag()
+    internal fun sisteSykepengedagIInfotrygd(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer).sykepengeperiode()?.endInclusive
 
     internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate): LocalDate? {
         val sykdomstidslinje = sykdomstidslinje(orgnummer)
@@ -144,10 +144,11 @@ internal class Historie() {
         private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
         private val sykdomstidslinjer = mutableMapOf<String, Sykdomstidslinje>()
 
-        internal fun tidligsteDato(orgnummer: String): LocalDate? {
-            val førsteUtbetalingsdag = utbetalingstidslinje(orgnummer).førsteSykepengedag()
+        internal fun tidligsteDato(orgnummer: String): LocalDate {
+            val førsteUtbetalingsdag = utbetalingstidslinje(orgnummer).sykepengeperiode()?.start
             val førsteSykdomstidslinjedag = sykdomstidslinje(orgnummer).periode()?.start
             return listOfNotNull(førsteUtbetalingsdag, førsteSykdomstidslinjedag).minOrNull()
+                ?: throw IllegalArgumentException("Finner ingen første dag! Både sykdomstidslinjen og historiske utbetalinger er helt tom")
         }
 
         internal fun sykdomstidslinjer() = sykdomstidslinjer.values.toList()

@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
@@ -19,13 +20,15 @@ internal class Utbetalingstidslinje private constructor(
     private val utbetalingsdager: MutableList<Utbetalingsdag>
 ) : MutableList<Utbetalingsdag> by utbetalingsdager {
 
+    private val førsteDato get() = utbetalingsdager.first().dato
+    private val sisteDato get() = utbetalingsdager.last().dato
+
     internal constructor() : this(mutableListOf())
 
     internal companion object {
-        internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = Periode(
-            tidslinjer.minOfOrNull { it.førsteDato() }!!,
-            tidslinjer.maxOfOrNull { it.sisteDato() }!!
-        )
+        internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
+            .map { it.periode() }
+            .reduce(Periode::merge)
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -43,8 +46,6 @@ internal class Utbetalingstidslinje private constructor(
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisit(this)
     }
-
-    internal fun gjøreKortere(fom: LocalDate) = subset(fom, sisteDato())
 
     internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse): Boolean {
         var result = false
@@ -98,26 +99,33 @@ internal class Utbetalingstidslinje private constructor(
         return this.plus(other) { venstre, høyre -> maxOf(venstre, høyre) }
     }
 
+    internal fun reverse(): Utbetalingstidslinje {
+        return Utbetalingstidslinje(utbetalingsdager.asReversed())
+    }
+
+    internal fun kunArbeidsgiverdager() =
+        this.utbetalingsdager.all {
+            it is ArbeidsgiverperiodeDag ||
+                it is Arbeidsdag ||
+                it is NavHelgDag ||
+                it is Fridag
+        }
+
+    internal fun harUtbetalinger() = sykepengeperiode() != null
+    override fun isEmpty() = utbetalingsdager.isEmpty() || kunUkjenteDager()
+    private fun kunUkjenteDager() = utbetalingsdager.all(::erUkjentDag)
+    private fun erUkjentDag(it: Utbetalingsdag) = it is UkjentDag || it is Fridag && it.dato.erHelg()
+
     internal fun plus(
         other: Utbetalingstidslinje,
         plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ): Utbetalingstidslinje {
-        if (other.utbetalingsdager.isEmpty()) return this
-        if (this.utbetalingsdager.isEmpty()) return other
+        if (other.isEmpty()) return this
+        if (this.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
         return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
     }
-
-    internal fun trim(førsteSpleisdag: LocalDate?): Utbetalingstidslinje {
-        if (erTom()) return Utbetalingstidslinje()
-        return subset(førsteDag(førsteSpleisdag), sisteDato()).takeUnless { it.erTom() } ?: Utbetalingstidslinje()
-    }
-
-    private fun erTom() = isEmpty() || kunUkjenteDager()
-    private fun kunUkjenteDager() = all(::erUkjentDag)
-    private fun førsteDag(førsteSpleisdag: LocalDate?) = listOfNotNull(førsteSpleisdag, førsteSykepengedag()).minOrNull() ?: first { !erUkjentDag(it) }.dato
-    private fun erUkjentDag(it: Utbetalingsdag) = it is UkjentDag || it is Fridag && it.dato.erHelg()
 
     private fun binde(
         other: Utbetalingstidslinje,
@@ -129,60 +137,44 @@ internal class Utbetalingstidslinje private constructor(
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
             val original = this@Utbetalingstidslinje
-            tidligsteDato.datesUntil(original.førsteDato())
+            tidligsteDato.datesUntil(original.førsteDato)
                 .forEach { this.addUkjentDag(it) }
             this.utbetalingsdager.addAll(original.utbetalingsdager)
-            original.utbetalingsdager.last().dato.plusDays(1).datesUntil(sisteDato.plusDays(1))
+            original.sisteDato.plusDays(1).datesUntil(sisteDato.plusDays(1))
                 .forEach { this.addUkjentDag(it) }
         }
 
     private fun tidligsteDato(other: Utbetalingstidslinje) =
-        minOf(this.førsteDato(), other.førsteDato())
+        minOf(this.førsteDato, other.førsteDato)
 
     private fun sisteDato(other: Utbetalingstidslinje) =
-        maxOf(this.sisteDato(), other.sisteDato())
+        maxOf(this.sisteDato, other.sisteDato)
 
     internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
-    private fun førsteDato() = utbetalingsdager.first().dato
-    private fun sisteDato() = utbetalingsdager.last().dato
-
-    internal fun periode() = Periode(førsteDato(), sisteDato())
-
-    internal fun førsteSykepengedag() = utbetalingsdager.firstOrNull { it is NavDag }?.dato
-
-    internal fun sisteSykepengedag() = utbetalingsdager.lastOrNull { it is NavDag }?.dato
+    internal fun periode() = Periode(førsteDato, sisteDato)
+    internal fun sykepengeperiode(): Periode? {
+        val første = utbetalingsdager.firstOrNull { it is NavDag }?.dato ?: return null
+        val siste = utbetalingsdager.last { it is NavDag }.dato
+        return første til siste
+    }
 
     private fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
-        return Utbetalingstidslinje(
-            utbetalingsdager
-                .filterNot { it.dato.isBefore(fom) || it.dato.isAfter(tom) }
-                .toMutableList()
-        )
+        if (isEmpty() || fom > tom) return Utbetalingstidslinje()
+        val periode = fom til tom
+        val tidslinje = Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
+        if (tidslinje.isEmpty()) return Utbetalingstidslinje()
+        return tidslinje
     }
 
+    internal fun subset(fom: LocalDate) = subset(fom, sisteDato)
     internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
-
-    internal fun kunArbeidsgiverdager() =
-        this.utbetalingsdager.all {
-            it is ArbeidsgiverperiodeDag ||
-                it is Arbeidsdag ||
-                it is NavHelgDag ||
-                it is Fridag
-        }
-
-    internal fun reverse(): Utbetalingstidslinje {
-        return Utbetalingstidslinje(utbetalingsdager.asReversed())
-    }
-
     internal fun kutt(sisteDato: LocalDate) =
         if (utbetalingsdager.isEmpty()) this
-        else subset(førsteDato(), sisteDato)
-
-    internal fun harUtbetalinger() = utbetalingsdager.any { it is NavDag }
+        else subset(førsteDato, sisteDato)
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in førsteDato()..sisteDato()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
         else utbetalingsdager.first { it.dato == dato }
 
     override fun toString(): String {
@@ -286,8 +278,6 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 }
-
-internal typealias UtbetalingStrategy = (Økonomi) -> Int
 
 enum class Begrunnelse {
     SykepengedagerOppbrukt,

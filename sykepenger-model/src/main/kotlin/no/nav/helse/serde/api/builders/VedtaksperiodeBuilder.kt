@@ -146,12 +146,12 @@ internal class VedtaksperiodeBuilder(
             }
 
     private fun buildVilkår(hendelser: List<HendelseDTO>): VilkårDTO {
-        val sisteSykepengedagEllerSisteDagIPerioden = sisteSykepengedag ?: beregnetSykdomstidslinje.last().dagen
+        val sisteSykepengedagEllerSisteDagIPerioden = sykepengeperiode?.endInclusive ?: beregnetSykdomstidslinje.last().dagen
         val personalder = Alder(fødselsnummer)
         val sykepengedager = SykepengedagerDTO(
             forbrukteSykedager = forbrukteSykedager,
             skjæringstidspunkt = skjæringstidspunkt,
-            førsteSykepengedag = førsteSykepengedag,
+            førsteSykepengedag = sykepengeperiode?.start,
             maksdato = maksdato,
             gjenståendeDager = gjenståendeSykedager,
             oppfylt = maksdato > sisteSykepengedagEllerSisteDagIPerioden
@@ -256,13 +256,11 @@ internal class VedtaksperiodeBuilder(
         pushState(SykdomstidslinjeBuilder(beregnetSykdomstidslinje))
     }
 
-    private var førsteSykepengedag: LocalDate? = null
-    private var sisteSykepengedag: LocalDate? = null
+    private var sykepengeperiode: Periode? = null
 
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
         if (inUtbetaling) return
-        førsteSykepengedag = tidslinje.førsteSykepengedag()
-        sisteSykepengedag = tidslinje.sisteSykepengedag()
+        sykepengeperiode = tidslinje.sykepengeperiode()
         pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje, totalbeløpakkumulator))
     }
 

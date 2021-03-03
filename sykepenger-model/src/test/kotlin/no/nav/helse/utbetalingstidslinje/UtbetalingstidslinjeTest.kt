@@ -1,11 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
-import no.nav.helse.testhelpers.januar
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -15,6 +13,16 @@ internal class UtbetalingstidslinjeTest {
 
     companion object {
         private val UNG_PERSON_FNR_2018 = Alder("12020052345")
+    }
+
+    @Test
+    fun `samlet periode`() {
+        assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
+        assertEquals(1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(listOf(
+            tidslinjeOf(7.NAV),
+            tidslinjeOf(7.NAV, startDato = 1.mars),
+            tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
+        )))
     }
 
     @Test

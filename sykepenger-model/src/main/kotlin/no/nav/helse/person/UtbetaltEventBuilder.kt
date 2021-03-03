@@ -192,7 +192,7 @@ private class UtbetaltEventBuilder(
             }
 
             override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
-                if (!dato.isBefore(utbetalingstidslinje.førsteSykepengedag() ?: LocalDate.MIN)) {
+                if (!dato.isBefore(utbetalingstidslinje.sykepengeperiode()?.start ?: LocalDate.MIN)) {
                     ikkeUtbetalteDager.add(
                         UtbetaltEvent.IkkeUtbetaltDag(
                             dato,
