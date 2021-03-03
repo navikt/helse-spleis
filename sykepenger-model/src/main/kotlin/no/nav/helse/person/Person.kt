@@ -276,7 +276,7 @@ class Person private constructor(
     internal fun nåværendeVedtaksperioder() = arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.sorted()
 
     /**
-     * Brukes i MVP for flere arbeidsgivere. Alle infotrygdforlengelser hos alle arbeidsgivere må gjelde samme periode
+     * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
      * */
     internal fun forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode: Vedtaksperiode) =
         arbeidsgivere.forlengerSammePeriode(vedtaksperiode)

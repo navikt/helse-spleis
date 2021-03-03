@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
@@ -495,7 +496,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Tillater ikke flere arbeidsgivere hvis ingen er overgang fra Infotrygd`() {
+    fun `Tillater ikke flere arbeidsgivere hvis ingen er overgang fra Infotrygd`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -522,7 +523,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Tillater ikke flere arbeidsgivere hvis ikke alle er overgang fra Infotrygd`() {
+    fun `Tillater ikke flere arbeidsgivere hvis ikke alle er overgang fra Infotrygd`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -558,6 +559,98 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         assertTilstand(a1, TIL_INFOTRYGD)
         assertTilstand(a2, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Tillater flere arbeidsgivere selv om ikke alle har samme periodetype`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+        val periode = 27.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 25.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+        håndterInntektsmelding(listOf(4.januar(2021) til 19.januar(2021)), førsteFraværsdag = 27.januar(2021), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
+
+        if (!Toggles.ForTest_ManglerVilkårsvurderingPåPerson.enabled) {
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+        }
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_SIMULERING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, TIL_UTBETALING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_SIMULERING)
+
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, TIL_UTBETALING)
+
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
     }
 
     @Test
@@ -812,7 +905,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlenger forkastet periode med flere arbeidsgivere`() {
+    fun `forlenger forkastet periode med flere arbeidsgivere`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -891,95 +984,316 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlenger forkastet periode med flere arbeidsgivere hvor alle arbeidsgivernes perioder blir forlenget`() {
-        val periode = 27.januar(2021) til 31.januar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+    fun `Kaster ut en plutselig tredje arbeidsgiver og passer på at senere forlengelser også forkastes`() =
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 27.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
 
-        val inntektshistorikk = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
-            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
-        )
+            val inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+            )
 
-        val utbetalinger = arrayOf(
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
-        )
+            val utbetalinger = arrayOf(
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+            )
 
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
 
-        //Her starter forlengelsen
-        val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
+            //Her starter forlengelsen
+            val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
 
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
-        håndterUtbetalingshistorikk(1.vedtaksperiode(a3), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
-        assertTilstand(a3, TIL_INFOTRYGD)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a3), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
+            assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
-        //Her starter forlengelsen av forlengelsen
-        val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
-        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
-        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
-        assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 2)
+            håndterInntektsmelding(listOf(27.januar(2021) til 11.februar(2021)), førsteFraværsdag = 27.januar(2021), orgnummer = a3)
+            assertTilstand(a3, AVVENTER_VILKÅRSPRØVING_GAP)
 
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
-            orgnummer = a1
-        )
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
-        assertTilstand(a3, TIL_INFOTRYGD, 2)
+            if (!Toggles.ForTest_ManglerVilkårsvurderingPåPerson.enabled) {
+                håndterVilkårsgrunnlag(1.vedtaksperiode(a3), orgnummer = a3, inntektsvurdering = Inntektsvurdering(
+                    inntekter = inntektperioder {
+                        inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                        1.februar(2020) til 1.januar(2021) inntekter {
+                            a3 inntekt INNTEKT
+                        }
+                    }
+                ))
+            }
+            assertTilstand(a3, AVVENTER_HISTORIKK)
 
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
-            orgnummer = a2
-        )
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
-        assertTilstand(a3, TIL_INFOTRYGD, 2)
+            håndterYtelser(1.vedtaksperiode(a3), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
+            assertTilstand(a3, TIL_INFOTRYGD)
 
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
-            orgnummer = a3
-        )
-        assertTilstand(a1, TIL_INFOTRYGD, 3)
-        assertTilstand(a2, TIL_INFOTRYGD, 3)
-        assertTilstand(a3, TIL_INFOTRYGD, 2)
-    }
+            //Her starter forlengelsen av forlengelsen
+            val forlengelsesforlengelseperiode = 1.mars(2021) til 31.mars(2021)
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+        }
+
+    @Test
+    fun `forlenger forkastet periode med flere arbeidsgivere hvor alle arbeidsgivernes perioder blir forlenget`() =
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
+            val periode = 27.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+            val inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+            )
+
+            val utbetalinger = arrayOf(
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+            )
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            //Her starter forlengelsen
+            val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
+
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a3), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
+            assertTilstand(a3, TIL_INFOTRYGD)
+
+            //Her starter forlengelsen av forlengelsen
+            val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a3
+            )
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+            assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a3
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+        }
+
+    @Test
+    fun `forlenger forkastet periode med flere arbeidsgivere hvor alle arbeidsgivernes perioder blir forlenget 2`() =
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 27.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+            val inntektshistorikk = listOf(
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+                Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+            )
+
+            val utbetalinger = arrayOf(
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+                RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+            )
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            //Her starter forlengelsen
+            val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterYtelser(2.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+            håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+            håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
+
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
+            assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a3), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a3)
+            assertTilstand(a3, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterInntektsmelding(listOf(18.januar(2021) til 2.februar(2021)), førsteFraværsdag = 18.januar(2021), orgnummer = a3)
+            assertTilstand(a3, AVVENTER_VILKÅRSPRØVING_GAP)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a3), orgnummer = a3)
+            assertTilstand(a3, TIL_INFOTRYGD)
+
+            //Her starter forlengelsen av forlengelsen
+            val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            håndterSykmelding(
+                Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a3
+            )
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 3)
+            assertTilstand(a3, MOTTATT_SYKMELDING_FERDIG_GAP, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a1
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a2
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent),
+                orgnummer = a3
+            )
+            assertTilstand(a1, TIL_INFOTRYGD, 3)
+            assertTilstand(a2, TIL_INFOTRYGD, 3)
+            assertTilstand(a3, TIL_INFOTRYGD, 2)
+        }
 
     @Test
     fun `Håndterer søknader i ikke-kronologisk rekkefølge for flere arbeidsgivere`() {
@@ -1249,17 +1563,19 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
 
-        val aktiveVedtaksperioder = inspektør.sisteBehov(Behovtype.Godkjenning).detaljer().get("aktiveVedtaksperioder").castAsList<Map<Any, Any>>()
-        assertTrue(aktiveVedtaksperioder.containsAll(
-            listOf(
-                mapOf("orgnummer" to a1, "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name),
-                mapOf("orgnummer" to a2, "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name)
-            ))
+        val aktiveVedtaksperioder = inspektør.sisteBehov(Behovtype.Godkjenning).detaljer()["aktiveVedtaksperioder"].castAsList<Map<Any, Any>>()
+        assertTrue(
+            aktiveVedtaksperioder.containsAll(
+                listOf(
+                    mapOf("orgnummer" to a1, "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name),
+                    mapOf("orgnummer" to a2, "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "periodetype" to Periodetype.OVERGANG_FRA_IT.name)
+                )
+            )
         )
     }
 
     @Test
-    fun `forkast alle aktive vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`(){
+    fun `forkast alle aktive vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -1294,7 +1610,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkast ettergølgende vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`(){
+    fun `forkast ettergølgende vedtaksperioder for alle arbeidsgivere dersom en periode til godkjenning avises`() {
         val periode = 27.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -1332,6 +1648,354 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), AVSLUTTET)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode(a2), TIL_INFOTRYGD)
         assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode(a1), TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forkast periode som overlapper med annen arbeidsgiver i infotrygd`() {
+        val periode = 22.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Sykefravær rett etter periode i infotrygd på annen arbeidsgiver forkastes`() {
+        val periode = 1.februar(2021) til 28.februar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 31.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.februar(2020) til 1.januar(2021) inntekter {
+                    a1 inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode(a1), TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Tillater førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding er på samme dato`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 1.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_VILKÅRSPRØVING_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                }
+            ))
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+            assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+            assertTilstand(a1, AVVENTER_HISTORIKK)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_SIMULERING)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_GODKJENNING)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+            assertTilstand(a1, TIL_UTBETALING)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            assertTilstand(a1, AVSLUTTET)
+            assertTilstand(a2, AVVENTER_HISTORIKK)
+
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET)
+            assertTilstand(a2, AVVENTER_SIMULERING)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET)
+            assertTilstand(a2, AVVENTER_GODKJENNING)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
+            assertTilstand(a1, AVSLUTTET)
+            assertTilstand(a2, TIL_UTBETALING)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET)
+            assertTilstand(a2, AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `Tillater ikke førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding ikke er på samme dato`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 1.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
+                førsteFraværsdag = 1.januar(2021),
+                orgnummer = a1
+            )
+            assertTilstand(a1, AVVENTER_VILKÅRSPRØVING_GAP)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                }
+            ))
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
+                førsteFraværsdag = 6.januar(2021),
+                orgnummer = a2
+            )
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+            assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                }
+            ))
+            assertTilstand(a1, AVVENTER_HISTORIKK)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, TIL_INFOTRYGD)
+            assertTilstand(a2, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Tillater ikke forlengelse av flere arbeidsgivere hvis sykmelding og søknad for en arbeidsgiver kommer før sykmelding for den andre arbeidsgiveren`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 1.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
+                førsteFraværsdag = 1.januar(2021),
+                orgnummer = a1
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
+                førsteFraværsdag = 1.januar(2021),
+                orgnummer = a2
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            //Forlengelsen starter her
+            val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            assertTilstand(a1, TIL_INFOTRYGD, 2)
+        }
+    }
+
+    @Test
+    fun `Tillater forlengelse av flere arbeidsgivere`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
+            val periode = 1.januar(2021) til 31.januar(2021)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterUtbetalingshistorikk(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
+                førsteFraværsdag = 1.januar(2021),
+                orgnummer = a1
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
+                førsteFraværsdag = 1.januar(2021),
+                orgnummer = a2
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ))
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), true, a1)
+            håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), true, a2)
+            håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+
+            //Forlengelsen starter her
+            val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+
+            håndterYtelser(2.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
+            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, 2)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
+            assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+
+            håndterYtelser(2.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
+            håndterYtelser(2.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_SIMULERING, 2)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
+            håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_GODKJENNING, 2)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), true, a1)
+            assertTilstand(a1, TIL_UTBETALING, 2)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+            håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+            assertTilstand(a1, AVSLUTTET, 2)
+            assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+
+            håndterYtelser(2.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET, 2)
+            assertTilstand(a2, AVVENTER_SIMULERING, 2)
+            håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET, 2)
+            assertTilstand(a2, AVVENTER_GODKJENNING, 2)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), true, a2)
+            assertTilstand(a1, AVSLUTTET, 2)
+            assertTilstand(a2, TIL_UTBETALING, 2)
+            håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
+            assertTilstand(a1, AVSLUTTET, 2)
+            assertTilstand(a2, AVSLUTTET, 2)
+        }
     }
 
     private fun assertTilstand(

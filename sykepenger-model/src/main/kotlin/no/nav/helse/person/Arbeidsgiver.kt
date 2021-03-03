@@ -71,7 +71,7 @@ internal class Arbeidsgiver private constructor(
             this.all { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt).harInntekt() }
 
         /**
-         * Brukes i MVP for flere arbeidsgivere. Alle infotrygdforlengelser hos alle arbeidsgivere må gjelde samme periode
+         * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode
          * */
         internal fun Iterable<Arbeidsgiver>.forlengerSammePeriode(other: Vedtaksperiode): Boolean {
             val arbeidsgivere = filter { it.finnSykeperiodeRettFør(other) != null || it.finnForkastetSykeperiodeRettFør(other) != null }

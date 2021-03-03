@@ -448,10 +448,12 @@ internal class Vedtaksperiode private constructor(
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
 
-        if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN,  skjæringstidspunkt, periodetype()).hasErrorsOrWorse().also {
-                mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
-                person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
-            }) {
+        if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype()).hasErrorsOrWorse()
+                .also {
+                    mottaVilkårsvurdering(vilkårsgrunnlag.grunnlagsdata())
+                    person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
+                }
+        ) {
             vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
             return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
@@ -959,8 +961,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (!vedtaksperiode.person.forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode)) return vedtaksperiode.person.invaliderAllePerioder(
-                søknad,
-                "Invaliderer alle perioder for flere arbeidsgivere fordi infotrygdforlengelser hos alle arbeidsgivere ikke gjelder samme periode"
+                søknad, "Invaliderer alle perioder for flere arbeidsgivere fordi forlengelser hos alle arbeidsgivere ikke gjelder samme periode"
             )
             vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
@@ -1408,7 +1409,11 @@ internal class Vedtaksperiode private constructor(
                     person.invaliderAllePerioder(utbetalingshistorikk, null)
                 }
                 valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
-                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
+                    if (Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
+                        return@valider true
+                    } else {
+                        historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
+                    }
                 }
                 onSuccess {
                     if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
@@ -1475,7 +1480,26 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
+            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
+            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
+            val første = vedtaksperioder.first()
+            if (første == vedtaksperiode) {
+                if (vedtaksperioder.drop(1)
+                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                        .all { it.tilstand == AvventerArbeidsgivere }
+                ) {
+                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
+                }
+            }
+            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
+                val overlappendeVedtaksperioder = vedtaksperioder
+                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+
+                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
+                    første.gjentaHistorikk(vilkårsgrunnlag)
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Revurdering) {

@@ -41,4 +41,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object ReplayEnabled : Toggles()
     object PraksisendringEnabled : Toggles()
     object RevurderUtbetaltPeriode : Toggles(System.getenv().getOrDefault("REVURDER_UTBETALT_PERIODE_TOGGLE", "false").toBoolean())
+    object FlereArbeidsgivereFørstegangsbehandling : Toggles()
+    object ForTest_ManglerVilkårsvurderingPåPerson : Toggles()
 }

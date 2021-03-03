@@ -227,6 +227,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
+        orgnummer: String = ORGNUMMER,
         id: UUID = UUID.randomUUID(),
         beregnetInntekt: Inntekt = refusjon.second,
         harOpphørAvNaturalytelser: Boolean = false
@@ -238,6 +239,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = refusjon,
+            orgnummer = orgnummer,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         ).håndter(Person::håndter)
         inntektsmeldinger[id] = InntektsmeldingData(
