@@ -112,9 +112,6 @@ internal class Utbetalingstidslinje private constructor(
         }
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
-    override fun isEmpty() = utbetalingsdager.isEmpty() || kunUkjenteDager()
-    private fun kunUkjenteDager() = utbetalingsdager.all(::erUkjentDag)
-    private fun erUkjentDag(it: Utbetalingsdag) = it is UkjentDag || it is Fridag && it.dato.erHelg()
 
     internal fun plus(
         other: Utbetalingstidslinje,
@@ -132,7 +129,12 @@ internal class Utbetalingstidslinje private constructor(
         strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ) = Utbetalingstidslinje(
         this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
-    )
+    ).trim()
+
+    private fun trim(): Utbetalingstidslinje {
+        val første = firstOrNull { it !is UkjentDag }?.dato ?: return Utbetalingstidslinje()
+        return subset(første til last { it !is UkjentDag }.dato)
+    }
 
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate) =
         Utbetalingstidslinje().apply {
@@ -159,19 +161,12 @@ internal class Utbetalingstidslinje private constructor(
         return første til siste
     }
 
-    private fun subset(fom: LocalDate, tom: LocalDate): Utbetalingstidslinje {
-        if (isEmpty() || fom > tom) return Utbetalingstidslinje()
-        val periode = fom til tom
-        val tidslinje = Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
-        if (tidslinje.isEmpty()) return Utbetalingstidslinje()
-        return tidslinje
+    internal fun subset(periode: Periode): Utbetalingstidslinje {
+        if (isEmpty()) return Utbetalingstidslinje()
+        if (periode == periode()) return this
+        return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
     }
-
-    internal fun subset(fom: LocalDate) = subset(fom, sisteDato)
-    internal fun subset(periode: Periode) = subset(periode.start, periode.endInclusive)
-    internal fun kutt(sisteDato: LocalDate) =
-        if (utbetalingsdager.isEmpty()) this
-        else subset(førsteDato, sisteDato)
+    internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
         if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt().inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))

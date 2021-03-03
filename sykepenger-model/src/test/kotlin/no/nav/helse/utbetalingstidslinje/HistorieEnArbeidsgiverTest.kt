@@ -194,10 +194,9 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         historie.add(AG1, 12.F)
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 8.januar)
+        assertEquals(7, utbetalingstidslinje.size)
         assertAlleDager(utbetalingstidslinje, 1.januar til 7.januar, Fridag::class)
-        assertEquals(12, utbetalingstidslinje.size)
-        assertAlleDager(utbetalingstidslinje, 8.januar til 12.januar, UkjentDag::class)
-        assertEquals(1.januar til 12.januar, utbetalingstidslinje.periode())
+        assertEquals(1.januar til 7.januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -253,24 +252,25 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     }
 
     @Test
-    fun `tidslinje med ekstra fridager etter en tidslinje som trekkes fra resulterer i en tidslinje med bare de siste fridagene (siste helg med fridager beholdes)`() {
-        resetSeed(15.januar)
+    fun `beholder ikke infotrygdferie selv om den avsluttes på en søndag`() {
         historie(
             refusjon(1.januar, 7.januar),
             ferie(8.januar, 14.januar),
         )
+        resetSeed(15.januar)
         historie.add(AG1, 7.F)
         val utbetalingstidslinje = beregn(AG1, 1.januar til 21.januar, 1.januar)
-        assertAlleDager(utbetalingstidslinje, 1.januar til 21.januar, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, 15.januar til 21.januar, Fridag::class)
+        assertEquals(15.januar til 21.januar, utbetalingstidslinje.periode())
         assertEquals(7, utbetalingstidslinje.size)
     }
 
     @Test
-    fun `en tidslinje som blir trukket fra en identisk tidslinje resulterer i tom tidslinje`() {
+    fun `fjerner overlapp`() {
         historie(
             refusjon(1.januar, 7.januar)
         )
-        historie.add(AG1, tidslinjeOf(7.NAVv2))
+        historie.add(AG1, sykedager(1.januar, 7.januar))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 7.januar, 1.januar)
         assertEquals(0, utbetalingstidslinje.size)
     }
@@ -280,8 +280,9 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         historie(
             ferie(8.januar, 9.januar)
         )
-        historie.add(AG1, 14.S)
+        historie.add(AG1, sykedager(1.januar, 14.januar))
         val utbetalingstidslinje = beregn(AG1, 1.januar til 17.januar, 1.januar)
+        assertEquals(1.januar til 14.januar, utbetalingstidslinje.periode())
         assertEquals(14, utbetalingstidslinje.size)
     }
 

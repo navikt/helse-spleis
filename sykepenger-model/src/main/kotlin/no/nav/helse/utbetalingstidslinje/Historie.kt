@@ -69,13 +69,18 @@ internal class Historie() {
     }
 
     private fun fjernInfotrygd(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
+        val tidligsteDato = spleisbøtte.tidligsteDato(organisasjonsnummer)
         return utbetalingstidlinje.plus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingsdag, infotrygdDag: Utbetalingsdag ->
             when {
+                // fjerner ledende dager
+                spleisDag.dato < tidligsteDato -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                // fjerner utbetalinger i ukedager (bevarer fridager)
                 !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                // fjerner utbetalinger i helger (bevarer fridager)
                 infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 else -> spleisDag
             }
-        }.subset(spleisbøtte.tidligsteDato(organisasjonsnummer))
+        }
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =

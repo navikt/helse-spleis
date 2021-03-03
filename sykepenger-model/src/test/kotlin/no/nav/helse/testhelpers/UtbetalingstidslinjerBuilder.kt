@@ -58,6 +58,7 @@ internal val Int.FRI get() = this.FRI(1200)
 internal fun Int.FRI(dekningsgrunnlag: Int) = Utbetalingsdager(
     antallDager = this,
     addDagFun = Utbetalingstidslinje::addFridag,
+    addHelgFun = Utbetalingstidslinje::addFridag,
     dekningsgrunnlag = dekningsgrunnlag
 )
 
