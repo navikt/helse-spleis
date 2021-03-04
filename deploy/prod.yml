@@ -45,8 +45,8 @@ spec:
     value: tbd.rapid.v1
   - name: KAFKA_CONSUMER_GROUP_ID
     value: tbd-spleis-v1
-  #- name: KAFKA_RESET_POLICY
-  #  value: none
+  - name: KAFKA_RESET_POLICY
+    value: none
   - name: DATABASE_HOST
     value: a01dbfl039.adeo.no
   - name: DATABASE_PORT
