@@ -47,7 +47,7 @@ class Utbetalingshistorikk(
     }
 
     private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?) =
-        if(arbeidskategorikoder.isEmpty()) true
+        if(arbeidskategorikoder.isEmpty() || skjæringstidspunkt == null) true
         else arbeidskategorikoder
             .filter { (_, dato) -> dato >= skjæringstidspunkt }
             .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }

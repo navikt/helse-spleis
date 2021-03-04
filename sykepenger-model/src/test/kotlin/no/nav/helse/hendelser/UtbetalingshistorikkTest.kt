@@ -51,6 +51,13 @@ class UtbetalingshistorikkTest {
         )
 
     @Test
+    fun `skjæringstidspunkt lik null resulterer i passert validering av redusert utbetaling`() {
+        val arbeidskategorikoder = mapOf("01" to 1.januar)
+        val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
+        assertFalse(utbetalingshistorikk.valider(Periode(2.januar, 31.januar), null).hasWarningsOrWorse())
+    }
+
+    @Test
     fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd`() {
         val arbeidskategorikoder = mapOf("07" to 1.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
