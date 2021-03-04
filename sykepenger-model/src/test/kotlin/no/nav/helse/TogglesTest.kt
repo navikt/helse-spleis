@@ -3,9 +3,7 @@ package no.nav.helse
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TogglesTest {
 
     private lateinit var toggle: Toggles

@@ -1,6 +1,8 @@
 package no.nav.helse
 
 abstract class Toggles internal constructor(enabled: Boolean = false, private val force: Boolean = false) {
+    private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
+
     private val states = mutableListOf(enabled)
 
     val enabled get() = states.last()
@@ -40,7 +42,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
 
     object ReplayEnabled : Toggles()
     object PraksisendringEnabled : Toggles()
-    object RevurderUtbetaltPeriode : Toggles(System.getenv().getOrDefault("REVURDER_UTBETALT_PERIODE_TOGGLE", "false").toBoolean())
+    object RevurderUtbetaltPeriode : Toggles("REVURDER_UTBETALT_PERIODE_TOGGLE")
     object FlereArbeidsgivereFørstegangsbehandling : Toggles()
     object ForTest_ManglerVilkårsvurderingPåPerson : Toggles()
 }
