@@ -58,7 +58,8 @@ data class VedtaksperiodeDTO(
     val simuleringsdata: SimuleringsdataDTO?,
     val aktivitetslogg: List<AktivitetDTO>,
     val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-    val periodetype: Periodetype
+    val periodetype: Periodetype,
+    val beregningIder: List<UUID> = emptyList()
 ) : VedtaksperiodeDTOBase
 
 data class UtbetalingerDTO(

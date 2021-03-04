@@ -34,6 +34,7 @@ internal class VedtaksperiodeBuilder(
     private val inntektshistorikkBuilder: InntektshistorikkBuilder
 ) : BuilderState() {
 
+    private val beregningIder = mutableListOf<UUID>()
     private val fullstendig = tilstand.type in listOf(
         TilstandType.AVSLUTTET,
         TilstandType.AVVENTER_GODKJENNING,
@@ -108,7 +109,8 @@ internal class VedtaksperiodeBuilder(
             utbetalteUtbetalinger = utbetalteUtbetalinger,
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             periodetype = periodetype,
-            inntektskilde = inntektskilde
+            inntektskilde = inntektskilde,
+            beregningIder = beregningIder
         )
     }
 
@@ -321,6 +323,7 @@ internal class VedtaksperiodeBuilder(
         this.maksdato = maksdato
         this.gjenståendeSykedager = gjenståendeSykedager
         this.forbrukteSykedager = forbrukteSykedager
+        this.beregningIder.add(beregningId)
     }
 
     override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {

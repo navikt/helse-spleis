@@ -497,6 +497,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitVurdering(vurdering, ident, epost, tidspunkt, automatiskBehandling)
     }
 
+    override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {
+        delegatee.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
+    }
+
+    override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {
+        delegatee.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
+    }
+
     override fun postVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,

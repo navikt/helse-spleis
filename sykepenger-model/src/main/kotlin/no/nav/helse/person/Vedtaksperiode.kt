@@ -114,7 +114,9 @@ internal class Vedtaksperiode private constructor(
         )
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
-        utbetaling?.accept(visitor)
+        visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
+        utbetalinger.forEach { it.accept(visitor) }
+        visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
         visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
         visitor.postVisitVedtaksperiode(

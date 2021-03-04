@@ -45,6 +45,15 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `legger på beregningId på vedtakserperioden`() {
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        assertEquals(1, vedtaksperiode.beregningIder.size)
+    }
+
+    @Test
     fun `mapping av utbetalingshistorikk med flere perioder`() {
         val (person, hendelser) = person()
 

@@ -78,6 +78,8 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
     ) {
     }
 
+    fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
+    fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {}
     fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {}
     fun postVisitVedtaksperiode(
