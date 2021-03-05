@@ -50,6 +50,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             hendelser = setOf(sykmeldingHendelseId, søknadHendelseId, inntektsmeldingHendelseId),
+            utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             oppdrag = listOf(
                 PersonObserver.UtbetaltEvent.Utbetalt(
                     mottaker = ORGNUMMER,
@@ -103,6 +104,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
+            utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             hendelser = setOf(sykmeldingHendelseId, søknadHendelseId, inntektsmeldingHendelseId),
             oppdrag = listOf(
                 PersonObserver.UtbetaltEvent.Utbetalt(

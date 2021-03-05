@@ -173,6 +173,7 @@ internal class PersonMediator(private val person: Person, private val message: H
                         "aktørId" to event.aktørId,
                         "fødselsnummer" to event.fødselsnummer,
                         "organisasjonsnummer" to event.organisasjonsnummer,
+                        "utbetalingId" to event.utbetalingId,
                         "hendelser" to event.hendelser,
                         "utbetalt" to event.oppdrag.map { utbetalt ->
                             mapOf(

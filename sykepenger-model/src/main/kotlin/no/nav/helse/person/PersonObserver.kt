@@ -59,6 +59,7 @@ interface PersonObserver {
         val fødselsnummer: String,
         val organisasjonsnummer: String,
         val hendelser: Set<UUID>,
+        val utbetalingId: UUID,
         val oppdrag: List<Utbetalt>,
         val ikkeUtbetalteDager: List<IkkeUtbetaltDag>,
         val fom: LocalDate,

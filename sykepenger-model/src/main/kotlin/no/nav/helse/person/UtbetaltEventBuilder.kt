@@ -62,6 +62,7 @@ private class UtbetaltEventBuilder(
     private val automatiskBehandling: Boolean,
     private val maksdato: LocalDate
 ) : UtbetalingVisitor {
+    private lateinit var utbetalingId: UUID
     private lateinit var opprettet: LocalDateTime
     private val dagsats = sykepengegrunnlag.reflection { _, _, _, daglig -> daglig }
     private val oppdragListe = mutableListOf<UtbetaltEvent.Utbetalt>()
@@ -79,6 +80,7 @@ private class UtbetaltEventBuilder(
             fødselsnummer = fødselnummer,
             organisasjonsnummer = orgnummer,
             hendelser = hendelseIder.toSet(),
+            utbetalingId = utbetalingId,
             oppdrag = oppdragListe.toList(),
             ikkeUtbetalteDager = ikkeUtbetalteDager,
             fom = periode.start,
@@ -108,6 +110,7 @@ private class UtbetaltEventBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
+        utbetalingId = id
         opprettet = tidsstempel
     }
 
