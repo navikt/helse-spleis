@@ -57,6 +57,33 @@ internal class Utbetalingstidslinjeberegning private constructor(
             )
         }
 
+        internal fun lagRevurdering(
+            beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
+            utbetalinger: List<Utbetaling>,
+            fødselsnummer: String,
+            periode: Periode,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
+            forrige: Utbetaling?
+        ): Utbetaling {
+            val beregning = beregnetUtbetalingstidslinjer.last()
+            return Utbetaling.lagRevurdering(
+                utbetalinger,
+                fødselsnummer,
+                beregning.id,
+                beregning.organisasjonsnummer,
+                beregning.utbetalingstidslinje,
+                periode.endInclusive,
+                aktivitetslogg,
+                maksdato,
+                forbrukteSykedager,
+                gjenståendeSykedager,
+                forrige
+            )
+        }
+
         internal fun restore(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID, organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje) =
             Utbetalingstidslinjeberegning(
                 id, tidsstempel, sykdomshistorikkElementId, organisasjonsnummer, utbetalingstidslinje

@@ -92,7 +92,7 @@ internal class Utbetaling private constructor(
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
 
-    internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING }
+    internal enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
 
     private fun harHåndtert(hendelse: ArbeidstakerHendelse) =
         (hendelse == forrigeHendelse).also { forrigeHendelse = hendelse }
@@ -228,6 +228,35 @@ internal class Utbetaling private constructor(
 
         private const val systemident = "SPLEIS"
 
+        internal fun lagRevurdering(
+                                    utbetalinger: List<Utbetaling>,
+                                    fødselsnummer: String,
+                                    beregningId: UUID,
+                                    organisasjonsnummer: String,
+                                    utbetalingstidslinje: Utbetalingstidslinje,
+                                    sisteDato: LocalDate,
+                                    aktivitetslogg: IAktivitetslogg,
+                                    maksdato: LocalDate,
+                                    forbrukteSykedager: Int,
+                                    gjenståendeSykedager: Int,
+                                    forrige: Utbetaling? = null
+        ): Utbetaling {
+            return Utbetaling(
+                utbetalinger.aktive().lastOrNull(),
+                fødselsnummer,
+                beregningId,
+                organisasjonsnummer,
+                utbetalingstidslinje,
+                Utbetalingtype.REVURDERING,
+                sisteDato,
+                aktivitetslogg,
+                maksdato,
+                forbrukteSykedager,
+                gjenståendeSykedager,
+                forrige?.takeIf(Utbetaling::erAktiv)
+            )
+        }
+
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
@@ -240,6 +269,34 @@ internal class Utbetaling private constructor(
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
             forrige: Utbetaling? = null
+        ): Utbetaling = lagUtbetaling(
+                utbetalinger,
+                fødselsnummer,
+                beregningId,
+                organisasjonsnummer,
+                utbetalingstidslinje,
+                sisteDato,
+                aktivitetslogg,
+                maksdato,
+                forbrukteSykedager,
+                gjenståendeSykedager,
+                forrige,
+                Utbetalingtype.UTBETALING
+            )
+
+        private fun lagUtbetaling(
+            utbetalinger: List<Utbetaling>,
+            fødselsnummer: String,
+            beregningId: UUID,
+            organisasjonsnummer: String,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            sisteDato: LocalDate,
+            aktivitetslogg: IAktivitetslogg,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int,
+            gjenståendeSykedager: Int,
+            forrige: Utbetaling? = null,
+            type: Utbetalingtype
         ): Utbetaling {
             return Utbetaling(
                 utbetalinger.aktive().lastOrNull(),
@@ -247,7 +304,7 @@ internal class Utbetaling private constructor(
                 beregningId,
                 organisasjonsnummer,
                 utbetalingstidslinje,
-                Utbetalingtype.UTBETALING,
+                type,
                 sisteDato,
                 aktivitetslogg,
                 maksdato,

@@ -134,6 +134,28 @@ internal class Arbeidsgiver private constructor(
         ).also { nyUtbetaling(it) }
     }
 
+    internal fun lagRevurdering(
+        aktivitetslogg: IAktivitetslogg,
+        fødselsnummer: String,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        periode: Periode,
+        forrige: Utbetaling?
+    ): Utbetaling {
+        return Utbetalingstidslinjeberegning.lagRevurdering(
+            beregnetUtbetalingstidslinjer,
+            utbetalinger,
+            fødselsnummer,
+            periode,
+            aktivitetslogg,
+            maksdato,
+            forbrukteSykedager,
+            gjenståendeSykedager,
+            forrige
+        ).also { nyUtbetaling(it) }
+    }
+
     private fun nyUtbetaling(utbetaling: Utbetaling) {
         utbetalinger.add(utbetaling)
         utbetaling.register(this)

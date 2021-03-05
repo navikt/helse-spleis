@@ -691,7 +691,7 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         engineForTimeline.beregnGrenser(periode.endInclusive)
-        val utbetaling = arbeidsgiver.lagUtbetaling(
+        val utbetaling = arbeidsgiver.lagRevurdering(
             aktivitetslogg = hendelse,
             fødselsnummer = fødselsnummer,
             maksdato = engineForTimeline.maksdato(),
