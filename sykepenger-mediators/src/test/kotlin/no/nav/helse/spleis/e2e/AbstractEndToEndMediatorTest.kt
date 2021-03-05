@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -23,8 +22,6 @@ import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.InntektskildeDTO
 import no.nav.syfo.kafka.felles.PeriodeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -57,13 +54,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     @BeforeAll
     internal fun setupAll(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
-        val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
-        dataSource = HikariDataSource(hikariConfig)
+        dataSource = PostgresDatabase.start().connection()
 
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
@@ -79,23 +70,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
-    @AfterAll
-    internal fun teardown() {
-        postgresConnection.close()
-        embeddedPostgres.close()
-    }
-
     @BeforeEach
     internal fun setupEach() {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .load()
-            .also {
-                it.clean()
-                it.migrate()
-            }
-
+        PostgresDatabase.reset()
         testRapid.reset()
     }
 
