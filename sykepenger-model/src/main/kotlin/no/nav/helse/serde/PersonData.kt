@@ -61,7 +61,7 @@ internal data class PersonData(
     }
 
     data class VilkårsgrunnlagElement(
-        private val skjæringstidspunkt: LocalDate,
+        private val skjæringstidspunkt: LocalDate?,
         private val type: GrunnlagsdataType,
         private val sammenligningsgrunnlag: Double?,
         private val avviksprosent: Double?,
@@ -70,7 +70,7 @@ internal data class PersonData(
         private val medlemskapstatus: JsonMedlemskapstatus?,
         private val vurdertOk: Boolean?
     ) {
-        internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
+        internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt!! to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.årlig,
                 avviksprosent = avviksprosent?.ratio,
@@ -92,10 +92,12 @@ internal data class PersonData(
         }
 
         companion object {
-            private fun List<VilkårsgrunnlagElement>.toMap() = map(VilkårsgrunnlagElement::parseDataForVilkårsvurdering).toMap(mutableMapOf())
+            private fun List<VilkårsgrunnlagElement>.toMap() = filter { it.skjæringstidspunkt != null }
+                .map(VilkårsgrunnlagElement::parseDataForVilkårsvurdering)
+                .toMap(mutableMapOf())
 
             internal fun List<VilkårsgrunnlagElement>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
-                .apply{ isAccessible = true}
+                .apply { isAccessible = true }
                 .call(toMap())
         }
     }
