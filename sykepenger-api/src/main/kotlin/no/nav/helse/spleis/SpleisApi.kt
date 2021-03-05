@@ -139,7 +139,7 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
 
     class InntektsmeldingDTO(json: JsonNode) : HendelseDTO("INNTEKTSMELDING", json["@id"].asText()) {
         val beregnetInntekt: Number = json["beregnetInntekt"].asDouble()
-        val førsteFraværsdag: LocalDate = LocalDate.parse(json["foersteFravaersdag"].asText())
+        val førsteFraværsdag: LocalDate? = json.path("foersteFravaersdag").takeIf(JsonNode::isTextual)?.let { LocalDate.parse(it.asText()) }
         val mottattDato: LocalDateTime = LocalDateTime.parse(json["@opprettet"].asText())
     }
 }
