@@ -20,12 +20,19 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor {
+internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor {
     fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
     fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String) {}
+}
+
+internal interface VilkårsgrunnlagHistorikkVisitor {
+    fun preVisitVilkårsgrunnlagHistorikk() {}
+    fun postVisitVilkårsgrunnlagHistorikk() {}
+    fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {}
+    fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunnkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {}
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,

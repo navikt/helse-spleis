@@ -28,14 +28,15 @@ class Vilkårsgrunnlag(
         periodetype: Periodetype
     ): IAktivitetslogg {
         inntektsvurdering.valider(this, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, periodetype)
-        opptjeningvurdering.valider(this, orgnummer, skjæringstidspunkt)
+        opptjeningvurdering.valider(this, skjæringstidspunkt)
         medlemskapsvurdering.valider(this, periodetype)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
-            antallOpptjeningsdagerErMinst = opptjeningvurdering.opptjeningsdager(orgnummer),
-            harOpptjening = opptjeningvurdering.harOpptjening(orgnummer),
-            medlemskapstatus = medlemskapsvurdering.medlemskapstatus
+            antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
+            harOpptjening = opptjeningvurdering.harOpptjening(),
+            medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
+            vurdertOk = !hasErrorsOrWorse()
         )
         return this
     }

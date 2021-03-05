@@ -42,7 +42,6 @@ internal class Vedtaksperiode private constructor(
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
-    private var dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?,
     private var dataForSimulering: Simulering.SimuleringResultat?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableList<UUID>,
@@ -83,7 +82,6 @@ internal class Vedtaksperiode private constructor(
         organisasjonsnummer = organisasjonsnummer,
         tilstand = tilstand,
         skjæringstidspunktFraInfotrygd = null,
-        dataForVilkårsvurdering = null,
         dataForSimulering = null,
         sykdomstidslinje = Sykdomstidslinje(),
         hendelseIder = mutableListOf(),
@@ -117,7 +115,6 @@ internal class Vedtaksperiode private constructor(
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        visitor.visitDataForVilkårsvurdering(dataForVilkårsvurdering)
         visitor.visitDataForSimulering(dataForSimulering)
         visitor.postVisitVedtaksperiode(
             this,
@@ -464,7 +461,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun mottaVilkårsvurdering(grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
-        dataForVilkårsvurdering = grunnlagsdata
         arbeidsgiver.finnSykeperiodeRettEtter(this)?.mottaVilkårsvurdering(grunnlagsdata)
     }
 
@@ -676,7 +672,7 @@ internal class Vedtaksperiode private constructor(
                         hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
-            dataForVilkårsvurdering == null && erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding() -> {
+            person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) == null && erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding() -> {
                 tilstand(hendelse, AvventerVilkårsprøvingGap) {
                     hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
                 }
@@ -1581,7 +1577,8 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
                             arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode, historie)?.also { vedtaksperiode.kopierManglende(it) }
                             valider("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""") {
-                                vedtaksperiode.dataForVilkårsvurdering != null || vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
+                                vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) != null
+                                    || vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
                             }
                         }
                     }
@@ -1624,8 +1621,6 @@ internal class Vedtaksperiode private constructor(
     private fun kopierManglende(other: Vedtaksperiode) {
         if (this.inntektsmeldingId == null)
             this.inntektsmeldingId = other.inntektsmeldingId?.also { this.hendelseIder.add(it) }
-        if (this.dataForVilkårsvurdering == null)
-            this.dataForVilkårsvurdering = other.dataForVilkårsvurdering
     }
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
@@ -2014,7 +2009,7 @@ internal class Vedtaksperiode private constructor(
             .filter { it < vedtaksperiode }
             .filter { it.erAvsluttet() }
             .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
-            .lastOrNull { it.dataForVilkårsvurdering != null }
+            .lastOrNull()
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {

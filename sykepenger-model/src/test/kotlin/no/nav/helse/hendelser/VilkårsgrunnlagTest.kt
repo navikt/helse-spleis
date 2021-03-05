@@ -2,12 +2,15 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
+import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
+import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,10 +26,12 @@ internal class VilkårsgrunnlagTest {
     }
 
     private lateinit var person: Person
+    private val observatør = TestObservatør()
 
     @BeforeEach
     fun setup() {
         person = Person(aktørId, fødselsnummer).apply {
+            addObserver(observatør)
             håndter(sykmelding())
             håndter(søknad())
             håndter(inntektsmelding())
@@ -38,7 +43,7 @@ internal class VilkårsgrunnlagTest {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
         assertEquals(Prosent.ratio(0.0), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(12000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(12000.årlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
     }
 
     @Test
@@ -52,7 +57,7 @@ internal class VilkårsgrunnlagTest {
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(Prosent.ratio(0.2), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(15000.årlig, dataForVilkårsvurdering()?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(15000.årlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
         assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
     }
@@ -91,14 +96,13 @@ internal class VilkårsgrunnlagTest {
     }
 
     @Test
-    fun `arbeidsforhold kun for andre orgnr gir 0 opptjente dager`() {
+    fun `arbeidsforhold kun for andre orgnr gir samme antall opptjente dager`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold("eitAnnaOrgNummer", 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
-        assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
-        assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
-        assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
+        assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
+        assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
     }
 
     @Test
@@ -112,15 +116,20 @@ internal class VilkårsgrunnlagTest {
         assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
     }
 
+    @Test
+    fun `Kan opptjene arbeidsdager over flere arbeidsgivere`() {
+        val vilkårsgrunnlag = vilkårsgrunnlag(arbeidsforhold = listOf(
+            Opptjeningvurdering.Arbeidsforhold("ORGNR1", 1.januar, 14.januar),
+            Opptjeningvurdering.Arbeidsforhold("ORGNR2", 15.januar, null)
+        ))
+        vilkårsgrunnlag.valider(INNTEKT, INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING)
+
+        assertFalse(vilkårsgrunnlag.hasErrorsOrWorse())
+    }
 
     private fun dataForVilkårsvurdering(): VilkårsgrunnlagHistorikk.Grunnlagsdata? {
-        var _dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
-        person.accept(object : PersonVisitor {
-            override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
-                _dataForVilkårsvurdering = dataForVilkårsvurdering
-            }
-        })
-        return _dataForVilkårsvurdering
+        val inspektør = TestArbeidsgiverInspektør(person)
+        return inspektør.vilkårsgrunnlag(observatør.vedtaksperiode(orgnummer, 0)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
     }
 
     private fun hentTilstand(): Vedtaksperiodetilstand? {

@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -67,28 +66,12 @@ internal class VedtaksperiodeReflect(vedtaksperiode: Vedtaksperiode) {
         )
     }
 
-    private val dataForVilkårsvurdering: Map<String, Any?>? = vedtaksperiode.get<VilkårsgrunnlagHistorikk.Grunnlagsdata?>("dataForVilkårsvurdering")?.let {
-        mapOf(
-            "beregnetÅrsinntektFraInntektskomponenten" to
-                it.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
-            "avviksprosent" to it.avviksprosent?.ratio(),
-            "antallOpptjeningsdagerErMinst" to it.antallOpptjeningsdagerErMinst,
-            "harOpptjening" to it.harOpptjening,
-            "medlemskapstatus" to when (it.medlemskapstatus) {
-                no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Ja -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.JA
-                no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Nei -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.NEI
-                else -> no.nav.helse.serde.mapping.JsonMedlemskapstatus.VET_IKKE
-            }
-        )
-    }
-
     internal fun toMap() = mutableMapOf(
         "id" to id,
         "tilstand" to tilstand,
         "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
         "inntektsmeldingId" to inntektsmeldingId,
         "skjæringstidspunkt" to skjæringstidspunkt,
-        "dataForVilkårsvurdering" to dataForVilkårsvurdering,
         "dataForSimulering" to dataForSimulering,
         "utbetalinger" to utbetalinger,
         "utbetalingstidslinje" to utbetalingstidslinje,

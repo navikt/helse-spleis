@@ -19,6 +19,7 @@ import java.util.*
 
 internal class VedtaksperiodeBuilder(
     vedtaksperiode: Vedtaksperiode,
+    dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?,
     private val id: UUID,
     private val periode: Periode,
     private val skjæringstidspunkt: LocalDate,
@@ -45,15 +46,38 @@ internal class VedtaksperiodeBuilder(
     private val warnings = hentWarnings(vedtaksperiode)
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
     private val totalbeløpakkumulator = mutableListOf<Int>()
-    private var dataForVilkårsvurdering: GrunnlagsdataDTO? = null
-    private var opptjeningDTO: OpptjeningDTO? = null
-    private var medlemskapstatusDTO: MedlemskapstatusDTO? = null
+
+    private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        when (grunnlagsdata.medlemskapstatus) {
+            Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
+            Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapstatusDTO.NEI
+            else -> MedlemskapstatusDTO.VET_IKKE
+        }
+    }
+
+    private val dataForVilkårsvurdering: GrunnlagsdataDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        GrunnlagsdataDTO(
+            beregnetÅrsinntektFraInntektskomponenten = grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+            avviksprosent = grunnlagsdata.avviksprosent?.ratio(),
+            antallOpptjeningsdagerErMinst = grunnlagsdata.antallOpptjeningsdagerErMinst,
+            harOpptjening = grunnlagsdata.harOpptjening,
+            medlemskapstatus = medlemskapstatusDTO!!
+        )
+    }
+    private val opptjeningDTO: OpptjeningDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
+        OpptjeningDTO(
+            antallKjenteOpptjeningsdager = grunnlagsdata.antallOpptjeningsdagerErMinst,
+            fom = skjæringstidspunkt.minusDays(grunnlagsdata.antallOpptjeningsdagerErMinst.toLong()),
+            oppfylt = grunnlagsdata.harOpptjening
+        )
+    }
+    private val avviksprosent: Double? = dataForVilkårsvurdering?.avviksprosent?.prosent()
+
     private var dataForSimulering: SimuleringsdataDTO? = null
     private var arbeidsgiverFagsystemId: String? = null
     private var personFagsystemId: String? = null
     private var inUtbetaling = false
     private var utbetalingGodkjent = false
-    private var avviksprosent: Double? = null
     private val utbetalingstidslinje = mutableListOf<UtbetalingstidslinjedagDTO>()
     private var forbrukteSykedager: Int? = null
     private var gjenståendeSykedager: Int? = null
@@ -79,7 +103,12 @@ internal class VedtaksperiodeBuilder(
         return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger)
     }
 
-    private fun buildFullstendig(relevanteHendelser: List<HendelseDTO>, tilstandstypeDTO: TilstandstypeDTO, totalbeløpArbeidstaker: Int, utbetalteUtbetalinger: UtbetalingerDTO): VedtaksperiodeDTO {
+    private fun buildFullstendig(
+        relevanteHendelser: List<HendelseDTO>,
+        tilstandstypeDTO: TilstandstypeDTO,
+        totalbeløpArbeidstaker: Int,
+        utbetalteUtbetalinger: UtbetalingerDTO
+    ): VedtaksperiodeDTO {
         inntektshistorikkBuilder.nøkkeldataOmInntekt(InntektshistorikkBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, avviksprosent))
 
         val tom = beregnetSykdomstidslinje.last().dagen
@@ -356,30 +385,6 @@ internal class VedtaksperiodeBuilder(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = false
-    }
-
-    override fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
-        if (dataForVilkårsvurdering == null) return
-        val medlemskapstatusDTO = when (dataForVilkårsvurdering.medlemskapstatus) {
-            Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
-            Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapstatusDTO.NEI
-            else -> MedlemskapstatusDTO.VET_IKKE
-        }.also { this.medlemskapstatusDTO = it }
-
-        this.dataForVilkårsvurdering = GrunnlagsdataDTO(
-            beregnetÅrsinntektFraInntektskomponenten = dataForVilkårsvurdering.beregnetÅrsinntektFraInntektskomponenten.reflection { årlig, _, _, _ -> årlig },
-            avviksprosent = dataForVilkårsvurdering.avviksprosent?.ratio(),
-            antallOpptjeningsdagerErMinst = dataForVilkårsvurdering.antallOpptjeningsdagerErMinst,
-            harOpptjening = dataForVilkårsvurdering.harOpptjening,
-            medlemskapstatus = medlemskapstatusDTO
-        )
-        opptjeningDTO = OpptjeningDTO(
-            antallKjenteOpptjeningsdager = dataForVilkårsvurdering.antallOpptjeningsdagerErMinst,
-            fom = skjæringstidspunkt.minusDays(dataForVilkårsvurdering.antallOpptjeningsdagerErMinst.toLong()),
-            oppfylt = dataForVilkårsvurdering.harOpptjening
-        )
-
-        avviksprosent = dataForVilkårsvurdering.avviksprosent?.prosent()
     }
 
     override fun postVisitVedtaksperiode(

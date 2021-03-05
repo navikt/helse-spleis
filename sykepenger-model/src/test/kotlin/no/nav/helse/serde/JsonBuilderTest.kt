@@ -31,7 +31,6 @@ class JsonBuilderTest {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .setMixIns(
             mutableMapOf(
-                Person::class.java to PersonMixin::class.java,
                 Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
                 Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
                 Utbetaling::class.java to UtbetalingMixin::class.java,
@@ -39,9 +38,6 @@ class JsonBuilderTest {
         )
         .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
         .registerModule(JavaTimeModule())
-
-    @JsonIgnoreProperties("vilkårsgrunnlagHistorikk")
-    private class PersonMixin
 
     @JsonIgnoreProperties("person")
     private class ArbeidsgiverMixin

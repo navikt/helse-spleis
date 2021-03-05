@@ -10,7 +10,7 @@ import java.util.*
 
 internal class PersonBuilder(
     builder: AbstractBuilder,
-    person: Person,
+    private val person: Person,
     private val fødselsnummer: String,
     private val aktørId: String
 ) : BuilderState(builder) {
@@ -31,7 +31,7 @@ internal class PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, person.vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer, inntektshistorikkBuilder)
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Kilde
@@ -37,7 +38,8 @@ internal data class PersonData(
     private val fødselsnummer: String,
     private val arbeidsgivere: List<ArbeidsgiverData>,
     private val aktivitetslogg: AktivitetsloggData?,
-    private val opprettet: LocalDateTime
+    private val opprettet: LocalDateTime,
+    private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagElement>
 ) {
 
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
@@ -45,7 +47,7 @@ internal data class PersonData(
 
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
-        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, VilkårsgrunnlagHistorikk())
+        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, vilkårsgrunnlagHistorikk.tilModellObjekt())
 
     internal fun createPerson(): Person {
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
@@ -56,6 +58,46 @@ internal data class PersonData(
             )
         })
         return person
+    }
+
+    data class VilkårsgrunnlagElement(
+        private val skjæringstidspunkt: LocalDate,
+        private val type: GrunnlagsdataType,
+        private val sammenligningsgrunnlag: Double?,
+        private val avviksprosent: Double?,
+        private val harOpptjening: Boolean?,
+        private val antallOpptjeningsdagerErMinst: Int?,
+        private val medlemskapstatus: JsonMedlemskapstatus?,
+        private val vurdertOk: Boolean?
+    ) {
+        internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
+            GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                sammenligningsgrunnlag = sammenligningsgrunnlag!!.årlig,
+                avviksprosent = avviksprosent?.ratio,
+                harOpptjening = harOpptjening!!,
+                antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
+                medlemskapstatus = when (medlemskapstatus!!) {
+                    JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                    JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                    JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                },
+                vurdertOk = vurdertOk!!
+            )
+            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
+        }
+
+        enum class GrunnlagsdataType {
+            Infotrygd,
+            Vilkårsprøving
+        }
+
+        companion object {
+            private fun List<VilkårsgrunnlagElement>.toMap() = map(VilkårsgrunnlagElement::parseDataForVilkårsvurdering).toMap(mutableMapOf())
+
+            internal fun List<VilkårsgrunnlagElement>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
+                .apply{ isAccessible = true}
+                .call(toMap())
+        }
     }
 
     internal data class AktivitetsloggData(
@@ -471,7 +513,6 @@ internal data class PersonData(
         data class VedtaksperiodeData(
             private val id: UUID,
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
-            private val dataForVilkårsvurdering: DataForVilkårsvurderingData?,
             private val dataForSimulering: DataForSimuleringData?,
             private val sykdomstidslinje: SykdomstidslinjeData,
             private val hendelseIder: MutableList<UUID>,
@@ -508,7 +549,6 @@ internal data class PersonData(
                         organisasjonsnummer,
                         parseTilstand(this.tilstand),
                         skjæringstidspunktFraInfotrygd,
-                        dataForVilkårsvurdering?.parseDataForVilkårsvurdering(),
                         dataForSimulering?.parseDataForSimulering(),
                         sykdomstidslinje.createSykdomstidslinje(),
                         hendelseIder,
@@ -560,28 +600,6 @@ internal data class PersonData(
                 TilstandType.AVVENTER_SIMULERING_REVURDERING -> Vedtaksperiode.AvventerSimuleringRevurdering
                 TilstandType.AVVENTER_GODKJENNING_REVURDERING -> Vedtaksperiode.AvventerGodkjenningRevurdering
                 TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING -> Vedtaksperiode.AvventerArbeidsgivereRevurdering
-            }
-
-            data class DataForVilkårsvurderingData(
-                private val erEgenAnsatt: Boolean,
-                private val beregnetÅrsinntektFraInntektskomponenten: Double,
-                private val avviksprosent: Double,
-                private val harOpptjening: Boolean,
-                private val antallOpptjeningsdagerErMinst: Int,
-                private val medlemskapstatus: JsonMedlemskapstatus
-            ) {
-                internal fun parseDataForVilkårsvurdering(
-                ): VilkårsgrunnlagHistorikk.Grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-                    beregnetÅrsinntektFraInntektskomponenten = beregnetÅrsinntektFraInntektskomponenten.årlig,
-                    avviksprosent = avviksprosent.ratio,
-                    harOpptjening = harOpptjening,
-                    antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-                    medlemskapstatus = when (medlemskapstatus) {
-                        JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
-                        JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
-                        else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
-                    }
-                )
             }
 
             data class DataForSimuleringData(

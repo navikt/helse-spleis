@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -65,7 +66,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(7500.månedlig, 1.juli(2017), a3Inspektør)
         assertInntektForDato(2500.månedlig, 1.juli(2017), a4Inspektør)
 
-        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
+        val vilkårsgrunnlag = a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+        assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
     }
 
     @Test
@@ -136,7 +138,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(7500.månedlig, 1.juli(2017), a3Inspektør)
         assertInntektForDato(2500.månedlig, 1.juli(2017), a4Inspektør)
 
-        assertEquals(300000.årlig, a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
+        val vilkårsgrunnlag = a1Inspektør.skjæringstidspunkt(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata
+        assertEquals(300000.årlig, vilkårsgrunnlag?.sammenligningsgrunnlag)
     }
 
     @Test

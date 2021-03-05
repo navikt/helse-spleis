@@ -1,10 +1,12 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
+import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
@@ -81,6 +83,12 @@ internal class JsonBuilder : AbstractBuilder() {
             fødselsnummer: String
         ) {
             popState()
+        }
+
+        override fun preVisitVilkårsgrunnlagHistorikk() {
+            val historikk = mutableListOf<Map<String, Any?>>()
+            personMap["vilkårsgrunnlagHistorikk"] = historikk
+            pushState(VilkårsgrunnlagHistorikkState(historikk))
         }
     }
 
@@ -194,6 +202,33 @@ internal class JsonBuilder : AbstractBuilder() {
             id: UUID,
             organisasjonsnummer: String
         ) {
+            popState()
+        }
+    }
+
+    private class VilkårsgrunnlagHistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
+        override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+            historikk.add(mapOf(
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "type" to "Vilkårsprøving",
+                "antallOpptjeningsdagerErMinst" to grunnlagsdata.antallOpptjeningsdagerErMinst,
+                "avviksprosent" to grunnlagsdata.avviksprosent?.ratio(),
+                "sammenligningsgrunnlag" to grunnlagsdata.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                "harOpptjening" to grunnlagsdata.harOpptjening,
+                "medlemskapstatus" to when (grunnlagsdata.medlemskapstatus) {
+                    Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
+                    Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
+                    Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
+                },
+                "vurdertOk" to grunnlagsdata.vurdertOk
+            ))
+        }
+
+        override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunnkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
+            historikk.add(mapOf("type" to "Infotrygd"))
+        }
+
+        override fun postVisitVilkårsgrunnlagHistorikk() {
             popState()
         }
     }

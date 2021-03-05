@@ -19,7 +19,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 internal class TestArbeidsgiverInspektør(
-    person: Person,
+    private val person: Person,
     orgnummer: String? = null
 ) : ArbeidsgiverVisitor {
     internal var vedtaksperiodeTeller: Int = 0
@@ -324,7 +324,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun forlengelseFraInfotrygd(id: UUID) = id.finn(forlengelserFraInfotrygd)
 
-    internal fun vilkårsgrunnlag(id: UUID) = id.finn(vilkårsgrunnlag)
+    internal fun vilkårsgrunnlag(id: UUID) = person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt(id))
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 

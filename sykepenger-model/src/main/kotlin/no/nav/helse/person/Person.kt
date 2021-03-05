@@ -234,6 +234,7 @@ class Person private constructor(
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
+        vilkårsgrunnlagHistorikk.accept(visitor)
         visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer)
     }
 

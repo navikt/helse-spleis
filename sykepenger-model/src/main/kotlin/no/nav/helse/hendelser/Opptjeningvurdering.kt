@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.IAktivitetslogg
-import java.lang.Integer.max
 import java.time.LocalDate
 
 class Opptjeningvurdering(
@@ -11,15 +10,15 @@ class Opptjeningvurdering(
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
     }
 
-    private val antallOpptjeningsdager = mutableMapOf<String, Int>()
+    internal var antallOpptjeningsdager: Int = 0
+        private set
 
-    internal fun opptjeningsdager(orgnummer: String) = antallOpptjeningsdager[orgnummer] ?: 0
-    internal fun harOpptjening(orgnummer: String) =
-        opptjeningsdager(orgnummer) >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+    internal fun harOpptjening() =
+        antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, orgnummer: String, skjæringstidspunkt: LocalDate): IAktivitetslogg {
-        Arbeidsforhold.opptjeningsdager(arbeidsforhold, antallOpptjeningsdager, skjæringstidspunkt)
-        if (harOpptjening(orgnummer)) aktivitetslogg.info(
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): IAktivitetslogg {
+        antallOpptjeningsdager = Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
+        if (harOpptjening()) aktivitetslogg.info(
             "Har minst %d dager opptjening",
             TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
         )
@@ -32,23 +31,29 @@ class Opptjeningvurdering(
         private val fom: LocalDate,
         private val tom: LocalDate? = null
     ) {
-        private fun opptjeningsdager(skjæringstidspunkt: LocalDate): Int {
-            if (fom > skjæringstidspunkt) return 0
-            if (tom != null && tom < skjæringstidspunkt) return 0
-            return fom.datesUntil(skjæringstidspunkt).count().toInt()
-        }
-
         internal companion object {
+            private fun LocalDate.datesUntilReversed(tom: LocalDate) = tom.toEpochDay().downTo(this.toEpochDay())
+                .asSequence()
+                .map(LocalDate::ofEpochDay)
+
             fun opptjeningsdager(
-                liste: List<Arbeidsforhold>,
-                map: MutableMap<String, Int>,
+                arbeidsforhold: List<Arbeidsforhold>,
+                aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate
-            ) {
-                liste.forEach { arbeidsforhold ->
-                    map.compute(arbeidsforhold.orgnummer) { _, opptjeningsdager ->
-                        max(arbeidsforhold.opptjeningsdager(skjæringstidspunkt), opptjeningsdager ?: 0)
-                    }
+            ) : Int {
+                val ranges = arbeidsforhold
+                    .filter { it.fom < skjæringstidspunkt }
+                    .map { it.fom.til(it.tom ?: skjæringstidspunkt) }
+
+                if (ranges.none { skjæringstidspunkt in it }) {
+                    aktivitetslogg.error("Personen er ikke i arbeid ved skjæringstidspunktet")
+                    return 0
                 }
+
+                val min = ranges.minOf { it.start }
+                return min.datesUntilReversed(skjæringstidspunkt.minusDays(1))
+                    .takeWhile { cursor -> ranges.any { periode -> cursor in periode } }
+                    .count()
             }
         }
     }

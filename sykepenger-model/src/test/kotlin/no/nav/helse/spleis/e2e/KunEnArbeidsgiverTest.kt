@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -1140,7 +1141,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_GAP
         )
-        assertEquals(INNTEKT, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.beregnetÅrsinntektFraInntektskomponenten)
+        assertEquals(INNTEKT, (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata?)?.sammenligningsgrunnlag)
         assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 

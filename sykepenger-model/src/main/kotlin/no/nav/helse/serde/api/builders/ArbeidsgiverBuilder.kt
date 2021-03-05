@@ -1,9 +1,6 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.*
 import no.nav.helse.serde.api.ArbeidsgiverDTO
 import no.nav.helse.serde.api.HendelseDTO
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -13,6 +10,7 @@ import java.util.*
 
 internal class ArbeidsgiverBuilder(
     arbeidsgiver: Arbeidsgiver,
+    vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val id: UUID,
     private val organisasjonsnummer: String,
     fødselsnummer: String,
@@ -22,8 +20,8 @@ internal class ArbeidsgiverBuilder(
     private val utbetalinger = mutableListOf<Utbetaling>()
 
     private val gruppeIder = mutableMapOf<Vedtaksperiode, UUID>()
-    private val perioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder)
-    private val forkastetPerioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder)
+    private val perioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder, vilkårsgrunnlagHistorikk)
+    private val forkastetPerioderBuilder = VedtaksperioderBuilder(arbeidsgiver, fødselsnummer, inntektshistorikkBuilder, gruppeIder, vilkårsgrunnlagHistorikk)
 
     internal fun build(hendelser: List<HendelseDTO>) = ArbeidsgiverDTO(
         organisasjonsnummer = organisasjonsnummer,
