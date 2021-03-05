@@ -685,8 +685,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør.utbetalinger.size)
         inspektør.utbetalinger.first().utbetalingstidslinje().also { utbetalingstidslinje ->
             assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
-            assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class, Fridag::class)
-            assertTrue(utbetalingstidslinje[1.februar] is Arbeidsdag)
+            assertAlleDager(utbetalingstidslinje, 17.januar til 1.februar, UkjentDag::class, Fridag::class)
             assertAlleDager(utbetalingstidslinje, 2.februar til 28.februar, NavDag::class, NavHelgDag::class)
         }
     }

@@ -561,7 +561,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, TIL_INFOTRYGD)
     }
 
-    @Disabled("Skjæringstidspunkt flyttes siden perioden oppdager at den er en infotrygdforlengelse, kan slås på når vilkårsvurdering ved flere arbeidsgivere er ferdig.")
     @Test
     fun `Tillater flere arbeidsgivere selv om ikke alle har samme periodetype`() = Toggles.FlereArbeidsgivereFørstegangsbehandling.enable {
         val periode = 27.januar(2021) til 31.januar(2021)

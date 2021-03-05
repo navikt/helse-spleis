@@ -1416,6 +1416,8 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
+                        historie.skjæringstidspunkt(vedtaksperiode.periode)
+                            ?.let { person.vilkårsgrunnlagHistorikk.lagre(utbetalingshistorikk, it) }
                         vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
                     } else {
                         if (Toggles.PraksisendringEnabled.enabled) {
@@ -1537,8 +1539,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser
         ) {
-            val historie = Historie(person, ytelser.utbetalingshistorikk())
             vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser)
+            val historie = Historie(person, ytelser.utbetalingshistorikk())
             lateinit var skjæringstidspunkt: LocalDate
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }

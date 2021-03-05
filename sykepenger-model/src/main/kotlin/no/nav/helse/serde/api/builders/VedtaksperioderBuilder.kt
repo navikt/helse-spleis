@@ -58,7 +58,7 @@ internal class VedtaksperioderBuilder(
             hendelseIder = hendelseIder,
             inntektsmeldingId = inntektsmeldingId,
             inntektshistorikkBuilder = inntektshistorikkBuilder,
-            dataForVilkårsvurdering = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as VilkårsgrunnlagHistorikk.Grunnlagsdata?
+            dataForVilkårsvurdering = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
         )
         perioder.add(vedtaksperiodeBuilder)
         pushState(vedtaksperiodeBuilder)
