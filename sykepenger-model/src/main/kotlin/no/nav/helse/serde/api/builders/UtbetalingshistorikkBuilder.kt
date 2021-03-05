@@ -8,20 +8,57 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class UtbetalingshistorikkBuilder() : BuilderState() {
-    private val utbetalingberegning = mutableMapOf<UUID, Pair<UUID, LocalDateTime>>()
+internal class UtbetalingshistorikkBuilder : BuilderState() {
+    private val utbetalingberegninger = Utbetalingberegninger()
     private val sykdomshistorikkElementBuilders = mutableListOf<SykdomshistorikkElementBuilder>()
-    private val utbetalingstidslinjeBuilders = mutableListOf<Pair<UUID, UtbetalingstidslinjeBuilder>>()
+    private val utbetalingstidslinjeBuilders = mutableListOf<UtbetalingstidslinjeInfo>()
 
     fun build(): List<UtbetalingshistorikkElementDTO> {
-        val beregningTilSykdomshistorikkElement = utbetalingberegning
-            .mapValues { (_, beregningInfo) -> beregningInfo.first }
-        val utbetalinger = utbetalingstidslinjeBuilders
-            .map { beregningTilSykdomshistorikkElement.getValue(it.first) to UtbetalingshistorikkElementDTO.UtbetalingDTO(it.second.build()) }
-            .groupBy { it.first }
-            .mapValues { it.value.map { it.second } }
-
+        val utbetalinger = UtbetalingstidslinjeInfo.utbetalinger(utbetalingstidslinjeBuilders, utbetalingberegninger)
         return sykdomshistorikkElementBuilders.map { it.build(utbetalinger) }.filter { it.utbetalinger.isNotEmpty() }
+    }
+
+    private data class UtbetalingstidslinjeInfo(
+        private val beregningId: UUID,
+        private val type: String,
+        private val maksdato: LocalDate,
+        private val builder: UtbetalingstidslinjeBuilder
+    ) {
+        fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
+            utbetalingstidslinje = builder.build(),
+            beregningId = beregningId,
+            type = type,
+            maksdato = maksdato
+        )
+
+        companion object {
+            fun utbetalinger(
+                liste: List<UtbetalingstidslinjeInfo>,
+                utbetalingberegninger: Utbetalingberegninger
+            ): Map<UUID, List<UtbetalingshistorikkElementDTO.UtbetalingDTO>> {
+                val resultat = mutableMapOf<UUID, MutableList<UtbetalingshistorikkElementDTO.UtbetalingDTO>>()
+                liste.forEach { resultat.getOrPut(utbetalingberegninger.sykdomshistorikkelementId(it.beregningId)) { mutableListOf() }.add(it.utbetaling()) }
+                return resultat
+            }
+        }
+    }
+
+    private class Utbetalingberegninger {
+        private val liste = mutableListOf<BeregningInfo>()
+
+        fun add(beregningInfo: BeregningInfo) = liste.add(beregningInfo)
+        fun sykdomshistorikkelementId(beregningId: UUID) = BeregningInfo.sykdomshistorikkelementId(liste, beregningId)
+    }
+
+    private class BeregningInfo(
+        private val beregningId: UUID,
+        private val sykdomshistorikkElementId: UUID,
+        private val tidsstempel: LocalDateTime
+    ) {
+        companion object {
+            fun sykdomshistorikkelementId(beregningInfo: List<BeregningInfo>, beregningId: UUID) =
+                beregningInfo.first { it.beregningId == beregningId }.sykdomshistorikkElementId
+        }
     }
 
     override fun preVisitUtbetaling(
@@ -39,7 +76,14 @@ internal class UtbetalingshistorikkBuilder() : BuilderState() {
         gjenståendeSykedager: Int?
     ) {
         val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf(), mutableListOf())
-        utbetalingstidslinjeBuilders.add(beregningId to utbetalingstidslinjeBuilder)
+        utbetalingstidslinjeBuilders.add(
+            UtbetalingstidslinjeInfo(
+                beregningId = beregningId,
+                type = type.name,
+                maksdato = maksdato,
+                builder = utbetalingstidslinjeBuilder
+            )
+        )
         pushState(utbetalingstidslinjeBuilder)
     }
 
@@ -52,7 +96,7 @@ internal class UtbetalingshistorikkBuilder() : BuilderState() {
     }
 
     override fun visitUtbetalingstidslinjeberegning(id: UUID, tidsstempel: LocalDateTime, sykdomshistorikkElementId: UUID) {
-        utbetalingberegning[id] = sykdomshistorikkElementId to tidsstempel
+        utbetalingberegninger.add(BeregningInfo(id, sykdomshistorikkElementId, tidsstempel))
     }
 
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {

@@ -54,6 +54,19 @@ class SpeilBuilderTest {
     }
 
     @Test
+    fun `kobler beregningsId i vedtaksperioden til utbetalingshistorikken`() {
+        val (person, hendelser) = person()
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        val utbetalingFraHistorikk = personDTO.arbeidsgivere.first().utbetalingshistorikk.first().utbetalinger.first()
+        assertEquals(1, vedtaksperiode.beregningIder.size)
+        assertEquals(vedtaksperiode.beregningIder.first(), utbetalingFraHistorikk.beregningId)
+        assertEquals(Utbetaling.Utbetalingtype.UTBETALING.name, utbetalingFraHistorikk.type)
+        assertEquals(28.desember, utbetalingFraHistorikk.maksdato)
+    }
+
+    @Test
     fun `mapping av utbetalingshistorikk med flere perioder`() {
         val (person, hendelser) = person()
 
