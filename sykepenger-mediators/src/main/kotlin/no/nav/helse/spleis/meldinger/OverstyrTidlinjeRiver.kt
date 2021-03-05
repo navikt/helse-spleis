@@ -20,6 +20,7 @@ internal class OverstyrTidlinjeRiver(
             requireKey("type")
             interestedIn("grad")
         }
+        message.require("dager") { require(!it.isEmpty) }
     }
 
     override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(JsonMessageDelegate(packet))
