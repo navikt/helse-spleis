@@ -9,6 +9,11 @@ internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, beho
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
     }.filter { it.type == behov }.isNotEmpty()
 
+internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
+    this.behov().filter {
+        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+    }
+
 internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()

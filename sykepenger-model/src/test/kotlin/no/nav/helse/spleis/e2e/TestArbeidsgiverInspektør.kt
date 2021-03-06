@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.etterspurteBehov
 import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
@@ -305,6 +306,9 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
+
+    internal fun etterspurteBehov(vedtaksperiodeId: UUID) =
+        personLogg.etterspurteBehov(vedtaksperiodeId)
 
     internal fun sisteBehov(id: UUID) =
         personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == id.toString() }
