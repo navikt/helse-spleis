@@ -246,6 +246,8 @@ internal class Vedtaksperiode private constructor(
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
 
+    // TODO: burde sammenligne at skjæringstidspunkt er lik for *this* og *other*, men det vil
+    // ikke fungere optimalt med perioder hvor vi trenger IT-historikk for å avdekke riktig skjæringstidspunkt
     internal fun erSykeperiodeRettFør(other: Vedtaksperiode) =
         this.periode.erRettFør(other.periode) && !this.sykdomstidslinje.erSisteDagArbeidsdag() && !other.sykdomstidslinje.erFørsteDagArbeidsdag()
 
@@ -1879,8 +1881,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndter(inntektsmelding) {
+                val forrige = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
                 if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)
-                    && vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) == null
+                    && (forrige == null || forrige.skjæringstidspunkt != vedtaksperiode.skjæringstidspunkt)
                 ) {
                     AvventerVilkårsprøvingArbeidsgiversøknad
                 } else {
