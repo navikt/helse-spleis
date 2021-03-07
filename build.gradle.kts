@@ -77,6 +77,15 @@ subprojects {
         }
     }
 
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            testLogging {
+                events("skipped", "failed")
+            }
+        }
+    }
+
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

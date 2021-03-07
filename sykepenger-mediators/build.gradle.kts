@@ -19,13 +19,6 @@ repositories {
 }
 
 tasks {
-    withType<Test> {
-        useJUnitPlatform()
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
-    }
-
     withType<Jar> {
         archiveBaseName.set("app")
 
