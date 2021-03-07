@@ -19,18 +19,15 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
-        internal fun List<Periode>.slåSammen() =
-            sortedBy { it.start }
-                .fold(emptyList<Periode>()) { perioder, periode ->
-                    if (perioder.isEmpty()) return@fold listOf(periode)
+        internal fun List<Periode>.slåSammen() = sortedBy { it.start }
+            .fold(mutableListOf(), ::utvidForrigeEllerNy)
 
-                    val siste = perioder.last()
-                    if (siste.overlapperMed(periode) || siste.erRettFør(periode)) {
-                        perioder.dropLast(1).plusElement(siste.merge(periode))
-                    } else {
-                        perioder.plusElement(periode)
-                    }
-                }
+        private fun utvidForrigeEllerNy(perioder: MutableList<Periode>, periode: Periode): MutableList<Periode> {
+            val siste = perioder.lastOrNull()
+            if (siste == null || (!siste.overlapperMed(periode) && !siste.erRettFør(periode))) perioder.add(periode)
+            else perioder[perioder.size - 1] = siste.merge(periode)
+            return perioder
+        }
     }
 
     internal fun overlapperMed(other: Periode) =

@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
@@ -56,7 +57,7 @@ class Inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate?
     ): List<Sykdomstidslinje> {
-        val arbeidsgiverdager = arbeidsgiverperioder.map { it.asArbeidsgivertidslinje() }.merge(beste)
+        val arbeidsgiverdager = arbeidsgiverperioder.slåSammen().map(::asArbeidsgivertidslinje).merge()
 
         var arbeidsdager = Sykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde)
 
@@ -75,13 +76,13 @@ class Inntektsmelding(
     }
 
     private fun ferietidslinje(ferieperioder: List<Periode>): List<Sykdomstidslinje> =
-        ferieperioder.map { it.asFerietidslinje() }
+        ferieperioder.map(::asFerietidslinje)
 
     private fun nyFørsteFraværsdagtidslinje(førsteFraværsdag: LocalDate?): List<Sykdomstidslinje> =
         listOf(førsteFraværsdag?.let { Sykdomstidslinje.arbeidsgiverdager(it, it, 100.prosent, kilde) } ?: Sykdomstidslinje())
 
-    private fun Periode.asArbeidsgivertidslinje() = Sykdomstidslinje.arbeidsgiverdager(start, endInclusive, 100.prosent, kilde)
-    private fun Periode.asFerietidslinje() = Sykdomstidslinje.feriedager(start, endInclusive, kilde)
+    private fun asArbeidsgivertidslinje(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
+    private fun asFerietidslinje(periode: Periode) = Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
 
     override fun sykdomstidslinje() = sykdomstidslinje
 

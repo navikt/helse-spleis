@@ -8,7 +8,6 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -43,7 +42,7 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(24.januar, nyTidslinje.periode()?.endInclusive)
-        assertEquals(15.januar, nyTidslinje.skjæringstidspunkt())
+        assertEquals(10.januar, nyTidslinje.skjæringstidspunkt())
     }
 
     @Test
@@ -421,7 +420,6 @@ internal class InntektsmeldingTest {
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
     }
 
-    @Disabled
     @Test
     fun `helg mellom arbeidsgiverperiode`() {
         inntektsmelding(listOf(
@@ -439,7 +437,6 @@ internal class InntektsmeldingTest {
         assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[7.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[8.januar]::class)
     }
-
 
     @Test
     fun `opphold mellom arbeidsgiverperiode og første fraværsdag i helg på lørdag gir friskhelgedag`() {

@@ -186,7 +186,7 @@ internal class SkjæringstidspunktTest {
     fun `sykeperioden starter etter skjæringstidspunkt`() {
         val sykmelding = sykmelding(Sykmeldingsperiode(29.januar(2020), 16.februar(2020), 100.prosent))
         val søknad = søknad(Søknad.Søknadsperiode.Sykdom(29.januar(2020), 16.februar(2020), 100.prosent))
-        val skjæringstidspunkt = 20.januar(2020)
+        val skjæringstidspunkt = 13.januar(2020)
         val inntektsmelding = inntektsmelding(
             listOf(
                 Periode(13.januar(2020), 17.januar(2020)),
