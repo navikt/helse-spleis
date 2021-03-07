@@ -1,14 +1,13 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.februar
-import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -84,5 +83,32 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
         assertEquals(listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap), inspektør.etterspurteBehov(2.vedtaksperiode).map { it.type })
         assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
+    }
+
+    @Test
+    fun `periode etter en periode med ferie - opphav i Infotrygd`() {
+        val historikk = RefusjonTilArbeidsgiver(1.desember(2017), 31.desember(2017), INNTEKT, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(1.desember(2017), INNTEKT, ORGNUMMER, true)
+        )
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterYtelser(3.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 }
