@@ -17,13 +17,11 @@ import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
-    @Disabled
     fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(4.januar, 5.januar, 100.prosent))
@@ -39,8 +37,8 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
 
-        // 6. og 7. januar ble tolket som FriskHelg og medførte brudd i arbeidsgiverperioden
-        // og dermed ble også skjæringstidspunktet forskjøvet
+        // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
+        // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
         håndterInntektsmelding(listOf(
             1.januar til 3.januar,
             4.januar til 5.januar,
@@ -49,13 +47,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             13.januar til 18.januar
         ), 1.januar)
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE)
         assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
 
-        assertEquals(listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap), inspektør.etterspurteBehov(1.vedtaksperiode).map { it.type })
-        assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
+        assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
+        assertEquals(listOf(InntekterForSammenligningsgrunnlag, Opptjening, Medlemskap), inspektør.etterspurteBehov(2.vedtaksperiode).map { it.type })
         assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
         assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
     }
