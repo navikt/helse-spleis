@@ -20,13 +20,14 @@ class Person private constructor(
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
-    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private var dødsdato: LocalDate?
 ) : Aktivitetskontekst {
 
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), VilkårsgrunnlagHistorikk())
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), VilkårsgrunnlagHistorikk(), null)
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -59,6 +60,7 @@ class Person private constructor(
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         finnArbeidsgiver(ytelser).håndter(ytelser)
+        dødsdato = ytelser.dødsinfo().dødsdato
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
@@ -232,14 +234,14 @@ class Person private constructor(
     }
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer)
+        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer)
+        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

@@ -15,7 +15,8 @@ data class PersonDTO(
     val aktørId: String,
     val fødselsnummer: String,
     val arbeidsgivere: List<ArbeidsgiverDTO>,
-    val inntektsgrunnlag: List<InntektsgrunnlagDTO>
+    val inntektsgrunnlag: List<InntektsgrunnlagDTO>,
+    val dødsdato: LocalDate?
 )
 
 data class AktivitetDTO(

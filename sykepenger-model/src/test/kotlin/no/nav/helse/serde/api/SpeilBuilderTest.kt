@@ -924,6 +924,30 @@ class SpeilBuilderTest {
         assertTrue(serializePersonForSpeil(person).arbeidsgivere.isEmpty())
     }
 
+    @Test
+    fun `Dødsdato ligger på person`() {
+        val fom = 1.januar
+        val tom = 31.januar
+        val person = Person(aktørId, fnr)
+
+        sykmelding(fom = fom, tom = tom).also { (sykmelding, _) ->
+            person.håndter(sykmelding)
+        }
+        person.fangeVedtaksperiodeId()
+        søknad(
+            hendelseId = UUID.randomUUID(),
+            fom = fom,
+            tom = tom,
+            sendtSøknad = fom.plusDays(1).atStartOfDay()
+        ).also { (søknad, _) ->
+            person.håndter(søknad)
+        }
+        person.håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+        person.håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
+
+        assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
+    }
+
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {
         assertTrue(isNotEmpty())
         forEach(func)
@@ -1561,7 +1585,8 @@ class SpeilBuilderTest {
             orgnummer: String = SpeilBuilderTest.orgnummer,
             utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = listOf(),
-            arbeidsavklaringspenger: List<Periode> = emptyList()
+            arbeidsavklaringspenger: List<Periode> = emptyList(),
+            dødsdato: LocalDate? = null
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
@@ -1604,7 +1629,7 @@ class SpeilBuilderTest {
                     aktivitetslogg = it
                 ),
                 aktivitetslogg = it,
-                dødsinfo = Dødsinfo(null),
+                dødsinfo = Dødsinfo(dødsdato),
                 arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
                 dagpenger = Dagpenger(emptyList())
             )

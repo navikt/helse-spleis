@@ -126,6 +126,30 @@ class JsonBuilderTest {
         }
     }
 
+
+    @Test
+    fun `Lagrer dødsdato på person`(){
+        val fom = 1.januar
+        val tom = 31.januar
+        val dødPerson = Person(aktørId, fnr).apply {
+            håndter(sykmelding(fom = fom, tom = tom))
+            fangeVedtaksperiode()
+            håndter(
+                søknad(
+                    hendelseId = UUID.randomUUID(),
+                    fom = fom,
+                    tom = tom,
+                    sendtSøknad = tom.atStartOfDay()
+                )
+            )
+            fangeSykdomstidslinje()
+            håndter(inntektsmelding(fom = fom))
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
+        }
+        testSerialiseringAvPerson(dødPerson)
+    }
+
     private fun testSerialiseringAvPerson(person: Person) {
         val jsonBuilder = JsonBuilder()
         person.accept(jsonBuilder)
@@ -422,7 +446,7 @@ class JsonBuilderTest {
             inntektshistorikk = inntektsopplysning
         )
 
-        fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String) = Aktivitetslogg().let {
+        fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String, dødsdato: LocalDate? = null) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
@@ -478,7 +502,7 @@ class JsonBuilderTest {
                     aktivitetslogg = it
                 ),
                 aktivitetslogg = it,
-                dødsinfo = Dødsinfo(null),
+                dødsinfo = Dødsinfo(dødsdato),
                 arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
                 dagpenger = Dagpenger(emptyList())
             )

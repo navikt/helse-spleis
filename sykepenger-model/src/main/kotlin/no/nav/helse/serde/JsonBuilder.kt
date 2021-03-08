@@ -40,17 +40,19 @@ internal class JsonBuilder : AbstractBuilder() {
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: String
+        fødselsnummer: String,
+        dødsdato: LocalDate?
     ) {
-        personBuilder = PersonState(fødselsnummer, aktørId, opprettet)
+        personBuilder = PersonState(fødselsnummer, aktørId, opprettet, dødsdato)
         pushState(personBuilder)
     }
 
-    private class PersonState(fødselsnummer: String, aktørId: String, opprettet: LocalDateTime) : BuilderState() {
+    private class PersonState(fødselsnummer: String, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
         private val personMap = mutableMapOf<String, Any?>(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
-            "opprettet" to opprettet
+            "opprettet" to opprettet,
+            "dødsdato" to dødsdato
         )
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
@@ -80,7 +82,8 @@ internal class JsonBuilder : AbstractBuilder() {
             person: Person,
             opprettet: LocalDateTime,
             aktørId: String,
-            fødselsnummer: String
+            fødselsnummer: String,
+            dødsdato: LocalDate?
         ) {
             popState()
         }
