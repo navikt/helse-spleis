@@ -673,9 +673,11 @@ internal class Utbetaling private constructor(
 
         override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
             hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
+            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
+            utbetaling.avstemmingsnøkkel = hendelse.avstemmingsnøkkel
             utbetaling.håndterKvittering(hendelse)
         }
     }
