@@ -503,11 +503,11 @@ internal class Utbetaling private constructor(
         }
 
         fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            throw IllegalStateException("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.error("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            throw IllegalStateException("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
@@ -515,11 +515,11 @@ internal class Utbetaling private constructor(
         }
 
         fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            throw IllegalStateException("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            aktivitetslogg.error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun godkjenning(utbetaling: Utbetaling, vedtaksperiode: Vedtaksperiode, aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>, aktivitetslogg: Aktivitetslogg, hendelse: ArbeidstakerHendelse) {
-            throw IllegalStateException("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.error("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
         fun vedtakFattet(
@@ -543,7 +543,7 @@ internal class Utbetaling private constructor(
             inntekt: Inntekt,
             hendelseIder: List<UUID>
         ) {
-            throw IllegalStateException("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.error("Forventet ikke avslutte på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
         fun leaving(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
