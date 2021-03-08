@@ -186,6 +186,7 @@ interface PersonObserver {
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
+    fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(

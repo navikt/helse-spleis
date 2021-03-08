@@ -558,10 +558,10 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun vedtakFattet() {
+    private fun vedtakFattet(hendelse: ArbeidstakerHendelse) {
         val sykepengegrunnlag = person.sykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
         val inntekt = arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) ?: Inntekt.INGEN
-        Utbetaling.vedtakFattet(utbetaling, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt)
+        Utbetaling.vedtakFattet(utbetaling, hendelse, person, id, periode, hendelseIder, skjæringstidspunkt, sykepengegrunnlag, inntekt)
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
@@ -1914,7 +1914,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.vedtakFattet()
+            vedtaksperiode.vedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }
 
@@ -1942,7 +1942,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
             vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
-            vedtaksperiode.vedtakFattet()
+            vedtaksperiode.vedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
         }
 

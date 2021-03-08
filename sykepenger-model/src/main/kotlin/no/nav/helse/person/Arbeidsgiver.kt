@@ -366,6 +366,39 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    override fun utbetalingUtenUtbetaling(
+        id: UUID,
+        type: Utbetaling.Utbetalingtype,
+        periode: Periode,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        arbeidsgiverOppdrag: Oppdrag,
+        personOppdrag: Oppdrag,
+        ident: String,
+        epost: String,
+        tidspunkt: LocalDateTime,
+        automatiskBehandling: Boolean
+    ) {
+        person.utbetalingUtenUtbetaling(
+            PersonObserver.UtbetalingUtbetaltEvent(
+                utbetalingId = id,
+                type = type.name,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                ident = ident,
+                epost = epost,
+                tidspunkt = tidspunkt,
+                automatiskBehandling = automatiskBehandling,
+                arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
+                personOppdrag = OppdragReflect(personOppdrag).toMap()
+            )
+        )
+    }
+
     override fun utbetalingEndret(
         id: UUID,
         type: Utbetaling.Utbetalingtype,

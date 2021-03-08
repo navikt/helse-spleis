@@ -30,6 +30,22 @@ internal interface UtbetalingObserver {
     ) {
     }
 
+    fun utbetalingUtenUtbetaling(
+        id: UUID,
+        type: Utbetaling.Utbetalingtype,
+        periode: Periode,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        arbeidsgiverOppdrag: Oppdrag,
+        personOppdrag: Oppdrag,
+        ident: String,
+        epost: String,
+        tidspunkt: LocalDateTime,
+        automatiskBehandling: Boolean
+    ) {
+    }
+
     fun utbetalingEndret(
         id: UUID,
         type: Utbetaling.Utbetalingtype,

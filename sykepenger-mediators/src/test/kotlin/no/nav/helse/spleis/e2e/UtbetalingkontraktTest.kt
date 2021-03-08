@@ -5,6 +5,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.testhelpers.januar
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -24,6 +26,17 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertUtbetalt(utbetalt)
+    }
+
+    @Test
+    fun `utbetaling uten utbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ferie = listOf(FravarDTO(fom = 3.januar, tom = 26.januar, FravarstypeDTO.FERIE)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        val utbetalt = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
         assertUtbetalt(utbetalt)
     }
 

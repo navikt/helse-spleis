@@ -82,26 +82,29 @@ internal class PersonMediator(private val person: Person, private val message: H
         }
 
         override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
-            queueMessage(
-                "utbetaling_utbetalt", JsonMessage.newMessage(
-                    mapOf(
-                        "utbetalingId" to event.utbetalingId,
-                        "type" to event.type,
-                        "fom" to event.fom,
-                        "tom" to event.tom,
-                        "maksdato" to event.maksdato,
-                        "forbrukteSykedager" to event.forbrukteSykedager,
-                        "gjenståendeSykedager" to event.gjenståendeSykedager,
-                        "ident" to event.ident,
-                        "epost" to event.epost,
-                        "tidspunkt" to event.tidspunkt,
-                        "automatiskBehandling" to event.automatiskBehandling,
-                        "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                        "personOppdrag" to event.personOppdrag
-                    )
-                )
-            )
+            queueMessage("utbetaling_utbetalt", utbetalingAvsluttet(event))
         }
+
+        override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+            queueMessage("utbetaling_uten_utbetaling", utbetalingAvsluttet(event))
+        }
+
+        private fun utbetalingAvsluttet(event: PersonObserver.UtbetalingUtbetaltEvent) =
+            JsonMessage.newMessage(mapOf(
+                "utbetalingId" to event.utbetalingId,
+                "type" to event.type,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "maksdato" to event.maksdato,
+                "forbrukteSykedager" to event.forbrukteSykedager,
+                "gjenståendeSykedager" to event.gjenståendeSykedager,
+                "ident" to event.ident,
+                "epost" to event.epost,
+                "tidspunkt" to event.tidspunkt,
+                "automatiskBehandling" to event.automatiskBehandling,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+                "personOppdrag" to event.personOppdrag
+            ))
 
         override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {
             queueMessage(

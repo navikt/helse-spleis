@@ -185,6 +185,10 @@ class Person private constructor(
         observers.forEach { it.utbetalingUtbetalt(event) }
     }
 
+    internal fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+        observers.forEach { it.utbetalingUtenUtbetaling(event) }
+    }
+
     internal fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         observers.forEach { it.utbetalingEndret(event) }
     }
