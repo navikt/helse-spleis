@@ -1,21 +1,29 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.SøknadArbeidsgiver
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.desember
+import no.nav.helse.testhelpers.februar
+import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
+    @Disabled
     fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(4.januar, 5.januar, 100.prosent))

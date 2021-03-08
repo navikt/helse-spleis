@@ -42,7 +42,7 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(24.januar, nyTidslinje.periode()?.endInclusive)
-        assertEquals(10.januar, nyTidslinje.skjæringstidspunkt())
+        assertEquals(15.januar, nyTidslinje.skjæringstidspunkt())
     }
 
     @Test
@@ -431,10 +431,10 @@ internal class InntektsmeldingTest {
         ), førsteFraværsdag = 1.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(1.januar, nyTidslinje.skjæringstidspunkt())
+        assertEquals(8.januar, nyTidslinje.skjæringstidspunkt())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
-        assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[6.januar]::class)
-        assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[7.januar]::class)
+        assertEquals(FriskHelgedag::class, nyTidslinje[6.januar]::class)
+        assertEquals(FriskHelgedag::class, nyTidslinje[7.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[8.januar]::class)
     }
 

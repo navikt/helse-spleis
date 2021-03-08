@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.hendelser.Periode.Companion.slåSammen
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
@@ -57,7 +56,7 @@ class Inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate?
     ): List<Sykdomstidslinje> {
-        val arbeidsgiverdager = arbeidsgiverperioder.slåSammen().map(::asArbeidsgivertidslinje).merge()
+        val arbeidsgiverdager = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
 
         var arbeidsdager = Sykdomstidslinje.arbeidsdager(arbeidsgiverdager.periode(), kilde)
 
