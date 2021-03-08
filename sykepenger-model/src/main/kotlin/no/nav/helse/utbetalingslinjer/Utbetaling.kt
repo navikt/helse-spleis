@@ -668,8 +668,11 @@ internal class Utbetaling private constructor(
 
     internal object Overført : Tilstand {
         override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
-            // trenger ikke overføre på nytt ettersom Spenn har godtatt oppdraget,
-            // men vi må nok vente på at Oppdrag/UR sender ut Aksept-kvittering
+            utbetaling.overfør(påminnelse)
+        }
+
+        override fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
+            hendelse.info("Mottok overførtkvittering, men står allerede i Overført. Venter på kvittering.")
         }
 
         override fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
