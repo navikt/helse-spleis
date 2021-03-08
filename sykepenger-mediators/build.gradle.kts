@@ -9,8 +9,8 @@ dependencies {
     implementation("com.github.navikt:rapids-and-rivers:1.5e3ca6a")
     implementation(project(":sykepenger-model"))
 
-    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:2019.10.15-02-33-local-build")
-    testImplementation("no.nav.syfo.kafka:felles:2021.02.15-14.09-103a1544")
+    testImplementation("com.github.navikt:inntektsmelding-kontrakt:2020.04.06-ab8f786")
+    testImplementation("com.github.navikt:syfokafka:2021.02.15-14.09-103a1544")
     testImplementation("io.mockk:mockk:1.10.0")
 }
 

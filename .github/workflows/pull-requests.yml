@@ -12,8 +12,5 @@ jobs:
         java-version: '14.x'
     - name: test and build
       run: ./gradlew test build
-      env:
-        ORG_GRADLE_PROJECT_githubUser: x-access-token
-        ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
     - name: build docker image
       run: docker build . --pull

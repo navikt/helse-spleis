@@ -32,9 +32,6 @@ jobs:
           java-version: '14.x'
       - name: test and build
         run: ./gradlew :gc-job:test :gc-job:build
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       - name: build docker image
         run: docker build -f Dockerfile-gc . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image

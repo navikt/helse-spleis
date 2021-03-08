@@ -26,9 +26,6 @@ jobs:
           java-version: '14.x'
       - name: test and build
         run: ./gradlew test build
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       - name: build docker image
         run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
@@ -45,8 +42,6 @@ jobs:
         uses: snyk/actions/gradle-jdk12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --all-sub-projects --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
           command: monitor

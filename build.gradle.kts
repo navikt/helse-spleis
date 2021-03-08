@@ -17,6 +17,10 @@ allprojects {
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
+    repositories {
+        jcenter()
+    }
+
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.0")
         implementation("ch.qos.logback:logback-classic:1.2.3")
@@ -56,26 +60,8 @@ allprojects {
     }
 }
 
-repositories {
-    jcenter()
-}
-
-val githubUser: String by project
-val githubPassword: String by project
-
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-
-    repositories {
-        jcenter()
-        maven {
-            url = uri("https://maven.pkg.github.com/navikt/inntektsmelding-kontrakt")
-            credentials {
-                username = githubUser
-                password = githubPassword
-            }
-        }
-    }
 
     tasks {
         withType<Test> {
