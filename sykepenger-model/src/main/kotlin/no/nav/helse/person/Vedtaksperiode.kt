@@ -1940,7 +1940,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
+            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
             vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
             vedtaksperiode.vedtakFattet(hendelse)
             vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
@@ -1957,9 +1957,9 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             if (Toggles.RevurderUtbetaltPeriode.enabled) {
                 if (vedtaksperiode.arbeidsgiver.blokkeresRevurdering(vedtaksperiode)) hendelse.severe("Overstyrer ikke en vedtaksperiode som er avsluttet")
-                vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.sykmeldingsperiode)
+                vedtaksperiode.arbeidsgiver.låsOpp(vedtaksperiode.periode)
                 vedtaksperiode.oppdaterHistorikk(hendelse)
-                vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.sykmeldingsperiode)
+                vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
 
                 // Som en sideeffekt -> dytt perioden foran over i AVVENTER_UFERDIG_FORLENGELSE
                 vedtaksperiode.arbeidsgiver.revurder(vedtaksperiode, hendelse)
