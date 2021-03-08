@@ -23,7 +23,7 @@ class Utbetalingpåminnelse(
 
     internal fun gjelderStatus(status: Utbetalingstatus) = (status == this.status).also {
         if (!it) {
-            info("Utbetalingpåminnelse var ikke aktuell i status: ${this.status.name} da den gjaldt: ${status.name}")
+            info("Utbetalingpåminnelse var ikke aktuell i status: ${status.name} da påminnelsen gjaldt for: ${this.status.name}")
         } else {
             info("Utbetaling blir påminnet")
         }
