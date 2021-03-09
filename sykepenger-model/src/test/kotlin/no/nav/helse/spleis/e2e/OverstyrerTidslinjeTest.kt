@@ -2,7 +2,12 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.testhelpers.TestEvent
+import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -10,6 +15,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
 
@@ -222,6 +228,39 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("SSSHH SSSSSHH SSSSSHH SSSSF", inspektør.sykdomstidslinje.toShortString())
         assertEquals("PPPPP PPPPPPP PPPPNHH NNNNF", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
     }
+
+    @Test
+    fun `Overstyring av sykHelgDag`() {
+        håndterSykmelding(Sykmeldingsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 17.desember(2017))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 10.januar)
+        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterSimulering(2.vedtaksperiode)
+        inspektør.arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
+            override fun sykdomstidslinje() = Sykdomstidslinje.ukjent(2.januar, 9.januar, TestEvent.testkilde)
+            override fun sykdomstidslinje(tom: LocalDate) = TODO()
+            override fun valider(periode: Periode) = TODO()
+            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()
+            override fun aktørId() = TODO()
+            override fun fødselsnummer() = TODO()
+            override fun organisasjonsnummer() = TODO()
+        })
+        håndterOverstyringSykedag(2.januar til 9.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+
+        assertEquals("H SSSSSHH SSSSSHH USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(" PNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
+    }
+
+    private fun håndterOverstyringSykedag(periode: Periode) = håndterOverstyring(periode.map { manuellSykedag(it) })
 
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
     private fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
