@@ -10,10 +10,14 @@ data class UtbetalingshistorikkElementDTO(
     val beregnettidslinje: List<SykdomstidslinjedagDTO>,
     val utbetalinger: List<UtbetalingDTO>
 ) {
+    val beregningId = utbetalinger.firstOrNull()?.beregningId
+
     data class UtbetalingDTO(
         val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
         val beregningId: UUID,
         val type: String,
-        val maksdato: LocalDate
+        val maksdato: LocalDate,
+        val status: String,
+        val gjenståendeSykedager: Int?
     )
 }

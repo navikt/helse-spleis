@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
+import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -22,13 +23,17 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val beregningId: UUID,
         private val type: String,
         private val maksdato: LocalDate,
+        private val status: String,
+        private val gjenståendeSykedager: Int?,
         private val builder: UtbetalingstidslinjeBuilder
     ) {
         fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
             utbetalingstidslinje = builder.build(),
             beregningId = beregningId,
             type = type,
-            maksdato = maksdato
+            maksdato = maksdato,
+            status = status,
+            gjenståendeSykedager = gjenståendeSykedager
         )
 
         companion object {
@@ -81,6 +86,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 beregningId = beregningId,
                 type = type.name,
                 maksdato = maksdato,
+                status = Utbetalingstatus.fraTilstand(tilstand).name,
+                gjenståendeSykedager = gjenståendeSykedager,
                 builder = utbetalingstidslinjeBuilder
             )
         )

@@ -42,6 +42,10 @@ class SpeilBuilderTest {
         assertEquals(16, tidslinje.hendelsetidslinje.size)
         assertEquals(1, tidslinje.utbetalinger.size)
         assertEquals(31, tidslinje.utbetalinger.first().utbetalingstidslinje.size)
+
+        assertEquals("UTBETALT", tidslinje.utbetalinger.first().status)
+        assertEquals("UTBETALING", tidslinje.utbetalinger.first().type)
+        assertEquals(237, tidslinje.utbetalinger.first().gjenståendeSykedager)
     }
 
     @Test
@@ -64,6 +68,7 @@ class SpeilBuilderTest {
         assertEquals(vedtaksperiode.beregningIder.first(), utbetalingFraHistorikk.beregningId)
         assertEquals(Utbetaling.Utbetalingtype.UTBETALING.name, utbetalingFraHistorikk.type)
         assertEquals(28.desember, utbetalingFraHistorikk.maksdato)
+        assertTrue(personDTO.arbeidsgivere.first().utbetalingshistorikk.first().beregningId in vedtaksperiode.beregningIder)
     }
 
     @Test
