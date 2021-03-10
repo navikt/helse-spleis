@@ -398,14 +398,6 @@ internal class Vedtaksperiode private constructor(
         hendelseIder.add(hendelse.meldingsreferanseId())
     }
 
-    private fun håndter(hendelse: Sykmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
-        periode = hendelse.periode()
-        sykmeldingsperiode = hendelse.periode()
-        oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) return tilstand(hendelse, TilInfotrygd)
-        tilstand(hendelse, nesteTilstand())
-    }
-
     private fun håndter(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         if (!person.harFlereArbeidsgivereMedSykdom() && søknad.harAndreInntektskilder()) return tilstand(søknad, TilInfotrygd)
         håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
@@ -919,26 +911,35 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             var replays: List<Vedtaksperiode> = emptyList()
 
-            vedtaksperiode.håndter(sykmelding) returnPoint@{
-                if (Toggles.ReplayEnabled.enabled) {
-                    if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode, vedtaksperiode.regler)) {
-                        return@returnPoint TilInfotrygd
-                    }
-                    replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
-                        sykmelding,
-                        Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
-                        ERSTATTES
-                    )
-                } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
-                    return@returnPoint TilInfotrygd
-                }
+            vedtaksperiode.periode = sykmelding.periode()
+            vedtaksperiode.sykmeldingsperiode = sykmelding.periode()
+            vedtaksperiode.oppdaterHistorikk(sykmelding)
 
-                val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
-                val forlengelse = periodeRettFør != null
-                val ferdig =
-                    vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
-                val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
-                when {
+            if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse()) return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+
+            if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode)) {
+                return vedtaksperiode.person.invaliderAllePerioder(sykmelding, "Forlenger annen arbeidsgiver, men ikke seg selv")
+            }
+            if (Toggles.ReplayEnabled.enabled) {
+                if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode, vedtaksperiode.regler)) {
+                    return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+                }
+                replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
+                    sykmelding,
+                    Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
+                    ERSTATTES
+                )
+            } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
+                return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+            }
+
+            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
+            val forlengelse = periodeRettFør != null
+            val ferdig =
+                vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && periodeRettFør?.let { it.tilstand != AvsluttetUtenUtbetaling } ?: true
+            val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
+            vedtaksperiode.tilstand(
+                sykmelding, when {
                     forlengelse && refusjonOpphørt -> TilInfotrygd
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                     forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
@@ -946,7 +947,7 @@ internal class Vedtaksperiode private constructor(
                     !forlengelse && !ferdig -> MottattSykmeldingUferdigGap
                     else -> sykmelding.severe("Klarer ikke bestemme hvilken sykmeldingmottattilstand vi skal til")
                 }
-            }
+            )
             sykmelding.info("Fullført behandling av sykmelding")
             if (Toggles.ReplayEnabled.enabled) {
                 replays.forEach { periode ->

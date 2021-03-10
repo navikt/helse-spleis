@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.*
+import no.nav.helse.person.Arbeidsgiver.Companion.forlengerIkkeBareAnnenArbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.forlengerSammePeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
@@ -288,6 +289,9 @@ class Person private constructor(
     internal fun forlengerAlleArbeidsgivereSammePeriode(vedtaksperiode: Vedtaksperiode) =
         arbeidsgivere.forlengerSammePeriode(vedtaksperiode)
 
+    internal fun forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver, vedtaksperiode)
+
     internal fun lagreInntekter(
         arbeidsgiverId: String,
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
@@ -349,6 +353,6 @@ class Person private constructor(
         Arbeidsgiver.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(arbeidsgivere, historie, vedtaksperiode)
 
     internal fun søppelbøtte(hendelse: ArbeidstakerHendelse, periode: Periode) {
-        arbeidsgivere.forEach{ it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
+        arbeidsgivere.forEach { it.søppelbøtte(hendelse, it.tidligereOgEttergølgende(periode), ForkastetÅrsak.IKKE_STØTTET) }
     }
 }

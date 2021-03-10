@@ -82,6 +82,10 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        internal fun Iterable<Arbeidsgiver>.forlengerIkkeBareAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode) =
+            if (arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) != null) true
+            else none { other -> other.finnSykeperiodeRettFør(vedtaksperiode) != null }
+
         internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             historie: Historie,
@@ -546,7 +550,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.any { it.blokkererRevurdering(vedtaksperiode) }
 
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperioderFilter {
-        val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull{ it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
+        val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
         return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
     }
 

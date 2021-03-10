@@ -27,6 +27,7 @@ internal class Utbetalingstidslinje private constructor(
 
     internal companion object {
         internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
+            .filter { it.utbetalingsdager.isNotEmpty() }
             .map { it.periode() }
             .reduce(Periode::merge)
     }
