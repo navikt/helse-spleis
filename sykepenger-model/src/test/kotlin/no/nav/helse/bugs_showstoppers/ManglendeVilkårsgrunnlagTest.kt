@@ -22,6 +22,30 @@ import org.junit.jupiter.api.Test
 internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
+    fun `inntektsmelding avslutter to korte perioder og flytter nav-perioden uten å utføre vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(9.januar, 15.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 26.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(19.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 2.februar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 2.februar, 100.prosent))
+        // inntektsmeldingen lukker de to korte periodene og gjør samtidig at
+        // nav-perioden går fra AvventerInntektsmeldingUferdigForlengelse til AvventerUferdigForlengelse.
+        // Når Inntektsmeldingen er håndtert sendes GjenopptaBehandling ut, som medfører at
+        // NAV-perioden går videre til AvventerHistorikk uten å gjøre vilkårsvurdering først
+        håndterInntektsmelding(listOf(
+            9.januar til 15.januar,
+            19.januar til 26.januar,
+            29.januar til 29.januar
+        ), 29.januar)
+        håndterYtelser(3.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING_GAP)
+    }
+
+    @Test
     fun `arbeidsgiverperiode med brudd i helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(4.januar, 5.januar, 100.prosent))
