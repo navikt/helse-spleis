@@ -1320,7 +1320,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.håndterMuligForlengelse(gjenopptaBehandling, AvventerHistorikk, AvventerVilkårsprøvingGap)
+            val harVilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) != null
+            if (harVilkårsgrunnlag) return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerVilkårsprøvingGap)
         }
     }
 
