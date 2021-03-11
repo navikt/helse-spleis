@@ -1037,6 +1037,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
+                if (vedtaksperiode.person.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode))
+                    return vedtaksperiode.person.invaliderAllePerioder(
+                        søknad,
+                        "Invaliderer alle perioder for flere arbeidsgivere fordi førstegangsbehandling ikke støttes"
+                    )
+            }
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
@@ -1063,6 +1070,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
+            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
+                if (vedtaksperiode.person.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode))
+                    return vedtaksperiode.person.invaliderAllePerioder(
+                        søknad,
+                        "Invaliderer alle perioder for flere arbeidsgivere fordi førstegangsbehandling ikke støttes"
+                    )
+            }
             vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
