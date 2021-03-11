@@ -71,6 +71,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
         assertEquals(1.april, historie.skjæringstidspunkt(Periode(1.juli, 31.juli)))
     }
 
+    @Suppress("UNUSED_VARIABLE")
     @Test
     fun `Utbetalingstidslinjer utvides til å overlappe med sammenhengende periode for person`() {
         val tidslinjer = ArbeidsgiverUtbetalinger(

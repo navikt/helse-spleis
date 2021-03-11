@@ -46,6 +46,9 @@ class SpeilBuilderTest {
         assertEquals("UTBETALT", tidslinje.utbetalinger.first().status)
         assertEquals("UTBETALING", tidslinje.utbetalinger.first().type)
         assertEquals(237, tidslinje.utbetalinger.first().gjenståendeSykedager)
+        assertEquals(11, tidslinje.utbetalinger.first().forbrukteSykedager)
+        assertEquals(15741, tidslinje.utbetalinger.first().arbeidsgiverNettoBeløp)
+
     }
 
     @Test

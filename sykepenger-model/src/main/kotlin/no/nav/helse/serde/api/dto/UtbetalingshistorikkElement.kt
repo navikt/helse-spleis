@@ -18,6 +18,8 @@ data class UtbetalingshistorikkElementDTO(
         val type: String,
         val maksdato: LocalDate,
         val status: String,
-        val gjenståendeSykedager: Int?
+        val gjenståendeSykedager: Int?,
+        val forbrukteSykedager: Int?,
+        val arbeidsgiverNettoBeløp: Int
     )
 }

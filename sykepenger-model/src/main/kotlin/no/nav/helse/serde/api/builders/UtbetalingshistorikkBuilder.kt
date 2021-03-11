@@ -25,6 +25,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         private val maksdato: LocalDate,
         private val status: String,
         private val gjenståendeSykedager: Int?,
+        private val forbrukteSykedager: Int?,
+        private val arbeidsgiverNettoBeløp: Int,
         private val builder: UtbetalingstidslinjeBuilder
     ) {
         fun utbetaling() = UtbetalingshistorikkElementDTO.UtbetalingDTO(
@@ -33,7 +35,9 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
             type = type,
             maksdato = maksdato,
             status = status,
-            gjenståendeSykedager = gjenståendeSykedager
+            gjenståendeSykedager = gjenståendeSykedager,
+            forbrukteSykedager = forbrukteSykedager,
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp
         )
 
         companion object {
@@ -88,6 +92,8 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
                 maksdato = maksdato,
                 status = Utbetalingstatus.fraTilstand(tilstand).name,
                 gjenståendeSykedager = gjenståendeSykedager,
+                forbrukteSykedager = forbrukteSykedager,
+                arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
                 builder = utbetalingstidslinjeBuilder
             )
         )

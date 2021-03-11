@@ -404,6 +404,7 @@ internal class Utbetaling private constructor(
             return oppdrag
         }
 
+        @Suppress("UNUSED_PARAMETER")
         private fun buildPerson(        // TODO("To be completed when payments to employees is supported")
             fødselsnummer: String,
             tidslinje: Utbetalingstidslinje,

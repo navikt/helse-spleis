@@ -46,14 +46,12 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     private val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT)
     protected val testRapid = TestRapid()
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var postgresConnection: Connection
-    protected lateinit var dataSource: DataSource
+    private lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
 
     @BeforeAll
-    internal fun setupAll(@TempDir postgresPath: Path) {
+    internal fun setupAll() {
         dataSource = PostgresDatabase.start().connection()
 
         hendelseMediator = HendelseMediator(
