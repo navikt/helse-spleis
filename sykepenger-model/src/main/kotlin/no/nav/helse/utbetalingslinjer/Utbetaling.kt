@@ -783,7 +783,7 @@ internal class Utbetaling private constructor(
 
         internal fun annullert(utbetaling: Utbetaling, oppdrag: Oppdrag) {
             utbetaling.observers.forEach {
-                it.utbetalingAnnullert(utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost)
+                it.utbetalingAnnullert(utbetaling.id, utbetaling.periode, oppdrag.fagsystemId(), tidspunkt, epost, ident)
             }
         }
 

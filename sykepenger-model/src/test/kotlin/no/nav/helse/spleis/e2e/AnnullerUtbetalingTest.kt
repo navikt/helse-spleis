@@ -452,6 +452,15 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 
+    @Test
+    fun `UtbetalingAnnullertEvent inneholder saksbehandlerident`(){
+        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
+        håndterUtbetalt(1.vedtaksperiode, status = UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
+
+        assertEquals("Ola Nordmann", observatør.annulleringer.first().saksbehandlerIdent)
+    }
+
     private inner class TestOppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
         val oppdrag = mutableListOf<Oppdrag>()
         val linjer = mutableListOf<Utbetalingslinje>()

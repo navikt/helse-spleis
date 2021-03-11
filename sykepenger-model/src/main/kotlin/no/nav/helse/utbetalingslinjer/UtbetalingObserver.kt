@@ -11,7 +11,8 @@ internal interface UtbetalingObserver {
         periode: Periode,
         fagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
-        saksbehandlerEpost: String
+        saksbehandlerEpost: String,
+        saksbehandlerIdent: String
     )
 
     fun utbetalingUtbetalt(

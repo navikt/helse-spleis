@@ -436,7 +436,8 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         fagsystemId: String,
         godkjenttidspunkt: LocalDateTime,
-        saksbehandlerEpost: String
+        saksbehandlerEpost: String,
+        saksbehandlerIdent: String
     ) {
         person.annullert(
             PersonObserver.UtbetalingAnnullertEvent(
@@ -454,7 +455,8 @@ internal class Arbeidsgiver private constructor(
                     )
                 ),
                 annullertAvSaksbehandler = godkjenttidspunkt,
-                saksbehandlerEpost = saksbehandlerEpost
+                saksbehandlerEpost = saksbehandlerEpost,
+                saksbehandlerIdent = saksbehandlerIdent
             )
         )
     }

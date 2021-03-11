@@ -130,7 +130,8 @@ interface PersonObserver {
         val tom: LocalDate,
         val utbetalingslinjer: List<Utbetalingslinje>,
         val annullertAvSaksbehandler: LocalDateTime,
-        val saksbehandlerEpost: String
+        val saksbehandlerEpost: String,
+        val saksbehandlerIdent: String
     ) {
         data class Utbetalingslinje(
             val fom: LocalDate,
