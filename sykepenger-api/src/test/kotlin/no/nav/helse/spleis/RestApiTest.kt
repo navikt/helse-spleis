@@ -52,6 +52,7 @@ internal class RestApiTest {
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
     private val teller = AtomicInteger()
+    private val spesialistClientId = UUID.randomUUID().toString()
 
     @BeforeAll
     internal fun `start embedded environment`(@TempDir postgresPath: Path) {
@@ -94,8 +95,7 @@ internal class RestApiTest {
             AzureAdAppConfig(
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config",
-                requiredGroup = "sykepenger-saksbehandler-gruppe",
-                spesialistClientId = UUID.randomUUID().toString()
+                spesialistClientId = spesialistClientId
             ),
             DataSourceConfiguration(
                 jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
@@ -134,7 +134,7 @@ internal class RestApiTest {
 
     @Test
     fun `hent person`() {
-        await().atMost(5, SECONDS).untilAsserted { "/api/person/$AKTØRID".httpGet(HttpStatusCode.OK) }
+        await().atMost(5, SECONDS).untilAsserted { "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR_2018)) }
     }
 
     @Disabled("Tester bruk av preStopHook")
@@ -152,16 +152,20 @@ internal class RestApiTest {
         assertTrue(ms >= 1400)
     }
 
-    private fun String.httpGet(expectedStatus: HttpStatusCode = HttpStatusCode.OK, testBlock: String.() -> Unit = {}) {
+    private fun String.httpGet(expectedStatus: HttpStatusCode = HttpStatusCode.OK, headers: Map<String, String> = emptyMap(), testBlock: String.() -> Unit = {}) {
         val token = jwtStub.createTokenFor(
             subject = "en_saksbehandler_ident",
             groups = listOf("sykepenger-saksbehandler-gruppe"),
-            audience = "spleis_azure_ad_app_id"
+            audience = "spleis_azure_ad_app_id",
+            azp = spesialistClientId
         )
 
         val connection = appBaseUrl.handleRequest(HttpMethod.Get, this,
             builder = {
                 setRequestProperty(Authorization, "Bearer $token")
+                headers.forEach { (key, value) ->
+                    setRequestProperty(key, value)
+                }
             })
 
         assertEquals(expectedStatus.value, connection.responseCode)

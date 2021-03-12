@@ -26,7 +26,7 @@ class JwtStub(private val issuer: String, private val wireMockServer: WireMockSe
       publicKey = keyPair.public as RSAPublicKey
    }
 
-   fun createTokenFor(subject: String, groups: List<String>, audience: String): String {
+   fun createTokenFor(subject: String, groups: List<String>, audience: String, azp: String): String {
       val algorithm = Algorithm.RSA256(publicKey, privateKey)
 
       return JWT.create()
@@ -35,6 +35,7 @@ class JwtStub(private val issuer: String, private val wireMockServer: WireMockSe
          .withKeyId("key-1234")
          .withSubject(subject)
          .withArrayClaim("groups", groups.toTypedArray())
+         .withClaim("azp", azp)
          .sign(algorithm)
    }
 

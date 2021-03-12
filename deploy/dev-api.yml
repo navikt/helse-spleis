@@ -61,7 +61,3 @@ spec:
     value: spleis
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
-  - name: AZURE_CONFIG_URL
-    value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
-  - name: SPESIALIST_CLIENT_ID
-    value: 59a28456-4992-492f-97f2-f03838f23c5b

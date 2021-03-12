@@ -4,8 +4,7 @@ import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
-import io.ktor.server.engine.connector
+import io.ktor.server.engine.*
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -18,12 +17,9 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     )
 
     internal val azureConfig = AzureAdAppConfig(
-        clientId = "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID"),
-        configurationUrl = env["AZURE_CONFIG_URL"],
-        issuer = env["AZURE_ISSUER"],
-        jwksUri = env["AZURE_JWKS_URI"],
-        requiredGroup = env.getValue("AZURE_REQUIRED_GROUP"),
-        spesialistClientId = env.getValue("SPESIALIST_CLIENT_ID")
+        clientId = env["AZURE_APP_CLIENT_ID"] ?: "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID"),
+        configurationUrl = env["AZURE_APP_WELL_KNOWN_URL"] ?: env.getValue("AZURE_CONFIG_URL"),
+        spesialistClientId = env["SPESIALIST_CLIENT_ID"]
     )
 
     internal val dataSourceConfiguration = DataSourceConfiguration(
@@ -47,25 +43,17 @@ internal class KtorConfig(private val httpPort: Int = 8080) {
 
 internal class AzureAdAppConfig(
     internal val clientId: String,
-    configurationUrl: String?,
-    issuer: String? = null,
-    jwksUri: String? = null,
-    internal val spesialistClientId: String,
-    internal val requiredGroup: String) {
+    configurationUrl: String,
+    internal val spesialistClientId: String?
+) {
     internal val issuer: String
     internal val jwkProvider: JwkProvider
     private val jwksUri: String
 
     init {
-        if (issuer != null && jwksUri != null) {
-            this.issuer = issuer
-            this.jwksUri = jwksUri
-        } else {
-            requireNotNull(configurationUrl) { "Configuration url must be set if issuer or jwksUri is not set" }
-                .getJson().also {
-                    this.issuer = it["issuer"].textValue()
-                    this.jwksUri = it["jwks_uri"].textValue()
-                }
+        configurationUrl.getJson().also {
+            this.issuer = it["issuer"].textValue()
+            this.jwksUri = it["jwks_uri"].textValue()
         }
 
         jwkProvider = JwkProviderBuilder(URL(this.jwksUri)).build()
