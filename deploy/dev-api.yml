@@ -30,6 +30,19 @@ spec:
     enabled: true
     path: /metrics
   webproxy: true
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
+          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: spesialist
   vault:
     enabled: true
     paths:
