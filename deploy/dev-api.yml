@@ -45,11 +45,6 @@ spec:
         - application: spesialist
   vault:
     enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/spleis-api/tbd
-      - mountPath: /var/run/secrets/nais.io/azure
-        kvPath: /azuread/data/dev/creds/spleis
   secureLogs:
     enabled: true
   env:
