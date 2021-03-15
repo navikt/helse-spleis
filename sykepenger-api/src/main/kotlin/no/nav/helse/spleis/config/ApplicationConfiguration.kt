@@ -4,9 +4,8 @@ import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.auth.jwt.*
 import io.ktor.server.engine.*
-import java.io.File
-import java.io.FileNotFoundException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -17,9 +16,8 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     )
 
     internal val azureConfig = AzureAdAppConfig(
-        clientId = env["AZURE_APP_CLIENT_ID"] ?: "/var/run/secrets/nais.io/azure/client_id".readFile() ?: env.getValue("AZURE_CLIENT_ID"),
-        configurationUrl = env["AZURE_APP_WELL_KNOWN_URL"] ?: env.getValue("AZURE_CONFIG_URL"),
-        spesialistClientId = env["SPESIALIST_CLIENT_ID"]
+        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+        configurationUrl = env.getValue("AZURE_APP_WELL_KNOWN_URL")
     )
 
     internal val dataSourceConfiguration = DataSourceConfiguration(
@@ -41,13 +39,9 @@ internal class KtorConfig(private val httpPort: Int = 8080) {
     }
 }
 
-internal class AzureAdAppConfig(
-    internal val clientId: String,
-    configurationUrl: String,
-    internal val spesialistClientId: String?
-) {
-    internal val issuer: String
-    internal val jwkProvider: JwkProvider
+internal class AzureAdAppConfig(private val clientId: String, configurationUrl: String) {
+    private val issuer: String
+    private val jwkProvider: JwkProvider
     private val jwksUri: String
 
     init {
@@ -57,6 +51,13 @@ internal class AzureAdAppConfig(
         }
 
         jwkProvider = JwkProviderBuilder(URL(this.jwksUri)).build()
+    }
+
+    fun configureVerification(configuration: JWTAuthenticationProvider.Configuration) {
+        configuration.verifier(jwkProvider, issuer) {
+            withAudience(clientId)
+        }
+        configuration.validate { credentials -> JWTPrincipal(credentials.payload) }
     }
 
     private fun String.getJson(): JsonNode {
@@ -71,10 +72,3 @@ internal class AzureAdAppConfig(
         responseCode to stream?.bufferedReader()?.readText()
     }
 }
-
-private fun String.readFile() =
-    try {
-        File(this).readText(Charsets.UTF_8)
-    } catch (err: FileNotFoundException) {
-        null
-    }

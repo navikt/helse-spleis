@@ -94,8 +94,7 @@ internal class RestApiTest {
             KtorConfig(httpPort = randomPort),
             AzureAdAppConfig(
                 clientId = "spleis_azure_ad_app_id",
-                configurationUrl = "${wireMockServer.baseUrl()}/config",
-                spesialistClientId = spesialistClientId
+                configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
             DataSourceConfiguration(
                 jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
@@ -156,8 +155,7 @@ internal class RestApiTest {
         val token = jwtStub.createTokenFor(
             subject = "en_saksbehandler_ident",
             groups = listOf("sykepenger-saksbehandler-gruppe"),
-            audience = "spleis_azure_ad_app_id",
-            azp = spesialistClientId
+            audience = "spleis_azure_ad_app_id"
         )
 
         val connection = appBaseUrl.handleRequest(HttpMethod.Get, this,
