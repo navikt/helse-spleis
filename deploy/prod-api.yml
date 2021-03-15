@@ -30,13 +30,21 @@ spec:
     enabled: true
     path: /metrics
   webproxy: true
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
+          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: spesialist
   vault:
     enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/prod/fss/spleis-api/tbd
-      - mountPath: /var/run/secrets/nais.io/azure
-        kvPath: /azuread/data/prod/creds/spleis
   secureLogs:
     enabled: true
   env:
@@ -48,7 +56,3 @@ spec:
     value: spleis2
   - name: VAULT_MOUNTPATH
     value: postgresql/prod-fss/
-  - name: AZURE_CONFIG_URL
-    value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
-  - name: SPESIALIST_CLIENT_ID
-    value: c0430474-9abb-4062-9974-0dfe6a375046
