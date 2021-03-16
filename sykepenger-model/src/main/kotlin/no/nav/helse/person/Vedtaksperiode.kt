@@ -1538,6 +1538,10 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            if (vedtaksperiode.arbeidsgiver.sykdomstidslinje().harDagUtenSøknad(vedtaksperiode.periode)) {
+                hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
+                return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
+            }
             vedtaksperiode.trengerYtelser(hendelse)
             vedtaksperiode.trengerPersoninfo(hendelse)
             vedtaksperiode.utbetaling?.forkast(hendelse)

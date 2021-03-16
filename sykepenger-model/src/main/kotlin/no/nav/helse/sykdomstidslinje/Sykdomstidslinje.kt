@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
@@ -168,6 +169,8 @@ internal class Sykdomstidslinje private constructor(
             .any { (forrigeSykedag, nesteSykedag) ->
                 regler.burdeStarteNyArbeidsgiverperiode(forrigeSykedag.plusDays(1).until(nesteSykedag, DAYS).toInt())
             }
+
+    internal fun harDagUtenSøknad(periode: Periode) = subset(periode).any { it.kommerFra(Sykmelding::class) }
 
     private fun avstandMellomSykedager(forrigeSykedag: LocalDate, nesteSykedag: LocalDate) =
         subset(forrigeSykedag.plusDays(1) til nesteSykedag.minusDays(1))
