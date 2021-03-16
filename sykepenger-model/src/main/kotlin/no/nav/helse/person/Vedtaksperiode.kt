@@ -400,20 +400,18 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndter(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand) {
         if (!person.harFlereArbeidsgivereMedSykdom() && søknad.harAndreInntektskilder()) return tilstand(søknad, TilInfotrygd)
-        håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
+        håndterSøknad(søknad) { nesteTilstand }
     }
 
     private fun håndter(søknad: SøknadArbeidsgiver, nesteTilstand: Vedtaksperiodetilstand) {
-        håndterSøknad(søknad) { tilstand(søknad, nesteTilstand) }
+        håndterSøknad(søknad) { nesteTilstand }
     }
 
-    private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, onSuccess: () -> Unit = {}) {
+    private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: (Vedtaksperiode) -> Vedtaksperiodetilstand?) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) {
-            return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
-        }
-        onSuccess()
+        if (hendelse.valider(periode).hasErrorsOrWorse()) return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
+        nesteTilstand(this)?.also { tilstand(hendelse, it) }
     }
 
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
@@ -423,12 +421,10 @@ internal class Vedtaksperiode private constructor(
         tilstand(søknad, TilInfotrygd)
     }
 
-    private fun håndterOverlappendeSøknad(søknad: Søknad, onSuccess: () -> Unit = {}) {
-        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) {
-            return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
-        }
+    private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: (Vedtaksperiode) -> Vedtaksperiodetilstand? = { null }) {
+        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
         søknad.warn("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden")
-        håndterSøknad(søknad, onSuccess)
+        håndterSøknad(søknad, nesteTilstand)
     }
 
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -436,9 +432,8 @@ internal class Vedtaksperiode private constructor(
         val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
-        if (grunnlagForSykepengegrunnlag == null) {
+        if (grunnlagForSykepengegrunnlag == null) return tilstand(vilkårsgrunnlag, TilInfotrygd) {
             vilkårsgrunnlag.error("Har ikke inntekt på skjæringstidspunkt $skjæringstidspunkt ved vilkårsvurdering")
-            return tilstand(vilkårsgrunnlag, TilInfotrygd)
         }
 
         if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype()).hasErrorsOrWorse()
@@ -1657,7 +1652,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad) { vedtaksperiode.tilstand(søknad, AvventerHistorikk) }
+            vedtaksperiode.håndterOverlappendeSøknad(søknad) { AvventerHistorikk }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1718,8 +1713,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad) {
-                vedtaksperiode.emitVedtaksperiodeReberegnet()
-                vedtaksperiode.tilstand(søknad, AvventerHistorikk)
+                it.emitVedtaksperiodeReberegnet()
+                AvventerHistorikk
             }
         }
 
