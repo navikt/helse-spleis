@@ -5,7 +5,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 
 internal class SendtArbeidsgiverSøknaderRiver(
@@ -22,5 +21,5 @@ internal class SendtArbeidsgiverSøknaderRiver(
         message.forbid("sendtNav")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsgiverMessage(packet)
 }

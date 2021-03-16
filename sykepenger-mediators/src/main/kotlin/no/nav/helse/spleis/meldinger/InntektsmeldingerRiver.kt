@@ -6,10 +6,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 
-internal class InntektsmeldingerRiver(
+internal open class InntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
@@ -45,5 +44,5 @@ internal class InntektsmeldingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingMessage(packet)
 }

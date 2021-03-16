@@ -2,10 +2,10 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 
-internal class AnnulleringMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()

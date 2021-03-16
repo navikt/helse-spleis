@@ -3,11 +3,11 @@ package no.nav.helse.spleis.meldinger.model
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 
-internal class EtterbetalingMessage(val packet: MessageDelegate) : HendelseMessage(packet) {
+internal class EtterbetalingMessage(val packet: JsonMessage) : HendelseMessage(packet) {
 
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()

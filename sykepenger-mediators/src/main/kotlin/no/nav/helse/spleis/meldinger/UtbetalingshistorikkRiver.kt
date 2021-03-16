@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import java.time.LocalDateTime
 
@@ -37,5 +36,5 @@ internal class UtbetalingshistorikkRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkMessage(packet)
 }

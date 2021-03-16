@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -26,9 +25,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
-import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

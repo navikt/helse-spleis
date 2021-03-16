@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 
 internal class VilkårsgrunnlagRiver(
@@ -38,5 +37,5 @@ internal class VilkårsgrunnlagRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(packet)
 }

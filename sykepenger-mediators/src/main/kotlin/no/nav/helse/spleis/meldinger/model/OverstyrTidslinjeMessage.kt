@@ -6,9 +6,8 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 
-internal class OverstyrTidslinjeMessage(val packet: MessageDelegate) : HendelseMessage(packet) {
+internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessage(packet) {
 
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

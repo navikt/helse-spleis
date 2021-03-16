@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.Avstemming
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 
-internal class AvstemmingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal class AvstemmingMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()

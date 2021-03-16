@@ -2,13 +2,13 @@ package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 import java.util.*
 
 // Understands a JSON message representing a Godkjenning-behov
-internal class UtbetalingsgodkjenningMessage(packet: MessageDelegate) : BehovMessage(packet) {
+internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val utbetalingId = packet["utbetalingId"].asText()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

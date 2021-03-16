@@ -2,15 +2,15 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 // Understands a JSON message representing an Inntektsmelding
-internal open class InntektsmeldingMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessage(packet) {
     override val fødselsnummer = packet["arbeidstakerFnr"].asText()
     private val refusjon = Inntektsmelding.Refusjon(
         inntekt = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,

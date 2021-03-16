@@ -1,14 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.Utbetalingpåminnelse
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 import java.util.*
 
 // Understands a JSON message representing a UtbetalingpPåminnelse
-internal class UtbetalingpåminnelseMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal class UtbetalingpåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
     private val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

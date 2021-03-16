@@ -17,13 +17,12 @@ import org.slf4j.LoggerFactory
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
-    hendelseRepository: HendelseRepository,
+    private val hendelseRepository: HendelseRepository,
     private val lagrePersonDao: LagrePersonDao
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
-    private val replayMediator = ReplayMediator(this, hendelseRepository)
 
     override fun behandle(message: HendelseMessage) {
         try {
@@ -169,26 +168,22 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         handler: (Person) -> Unit
     ) {
-        person(hendelse).also {
-            val personMediator = PersonMediator(it, message, hendelse)
-            handler(it)
-            finalize(personMediator, message, hendelse)
-        }
+        val person = person(hendelse)
+        val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
+        person.addObserver(VedtaksperiodeProbe)
+        handler(person)
+        finalize(personMediator, message, hendelse)
     }
 
     private fun person(hendelse: PersonHendelse): Person {
-        val person = personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
+        return personRepository.hentPerson(hendelse.fødselsnummer()) ?: Person(
             aktørId = hendelse.aktørId(),
             fødselsnummer = hendelse.fødselsnummer()
         )
-        person.addObserver(replayMediator)
-        person.addObserver(VedtaksperiodeProbe)
-        return person
     }
 
     private fun finalize(personMediator: PersonMediator, message: HendelseMessage, hendelse: PersonHendelse) {
         personMediator.finalize(rapidsConnection, lagrePersonDao)
-        replayMediator.finalize()
         if (!hendelse.hasActivities()) return
         if (hendelse.hasErrorsOrWorse()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")

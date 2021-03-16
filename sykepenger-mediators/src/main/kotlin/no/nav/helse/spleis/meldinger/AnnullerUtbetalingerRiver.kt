@@ -3,7 +3,6 @@ package no.nav.helse.spleis.meldinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 
 internal class AnnullerUtbetalingerRiver(
@@ -26,5 +25,5 @@ internal class AnnullerUtbetalingerRiver(
         )
     }
 
-    override fun createMessage(packet: JsonMessage) = AnnulleringMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = AnnulleringMessage(packet)
 }

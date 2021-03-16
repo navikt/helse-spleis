@@ -4,7 +4,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 
 internal class EtterbetalingerRiver(
@@ -19,5 +18,5 @@ internal class EtterbetalingerRiver(
         message.rejectKey("@løsning.${Sykepengehistorikk.name}")
     }
 
-    override fun createMessage(packet: JsonMessage) = EtterbetalingMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = EtterbetalingMessage(packet)
 }

@@ -7,7 +7,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import java.util.*
 
-internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : Validation {
+internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
     protected val river = River(rapidsConnection)
     protected abstract val eventName: String
     protected abstract val riverName: String

@@ -7,12 +7,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.spleis.JsonNodeDelegate
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
-import java.util.*
 import javax.sql.DataSource
 
 internal class HendelseRepository(private val dataSource: DataSource) {
@@ -25,19 +23,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    fun gjennopprettInntektsmelding(fnr: String, vedtaksperiodeId: UUID): List<HendelseMessage> = finnInntektsmeldinger(fnr).map { data ->
-            InntektsmeldingReplayMessage(JsonNodeDelegate(data), vedtaksperiodeId)
-        }
-
     fun lagreMelding(melding: HendelseMessage) {
-        if (
-            melding is AvstemmingMessage ||
-            melding is OverstyrTidslinjeMessage ||
-            melding is PersonPåminnelseMessage ||
-            melding is PåminnelseMessage ||
-            melding is UtbetalingshistorikkMessage
-        ) return // Disse trenger vi ikke å lagre
-
         val type = when (melding) {
             is NySøknadMessage -> NY_SØKNAD
             is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
@@ -52,13 +38,18 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             is UtbetalingMessage -> UTBETALING
             is AnnulleringMessage -> KANSELLER_UTBETALING
             is EtterbetalingMessage -> GRUNNBELØPSREGULERING
+            is AvstemmingMessage,
+            is OverstyrTidslinjeMessage,
+            is PersonPåminnelseMessage,
+            is PåminnelseMessage,
+            is UtbetalingshistorikkMessage -> return // Disse trenger vi ikke å lagre
             else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
         }
 
         lagreMelding(type, melding)
     }
 
-    private fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
+    internal fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(

@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 
 internal class UtbetalingerOverførtRiver(
@@ -24,5 +23,5 @@ internal class UtbetalingerOverførtRiver(
         message.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId")
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingOverførtMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = UtbetalingOverførtMessage(packet)
 }

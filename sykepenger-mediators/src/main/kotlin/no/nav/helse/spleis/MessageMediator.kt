@@ -27,6 +27,7 @@ internal class MessageMediator(
             SendtArbeidsgiverSøknaderRiver(it, this)
             SendtNavSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
+            InntektsmeldingerReplayRiver(it, this)
             UtbetalingshistorikkRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
@@ -109,7 +110,7 @@ internal class MessageMediator(
 
         override fun onMessage(message: String, context: MessageContext) {
             beforeRiverHandling()
-            listeners.forEach { it.onMessage(message, context) }
+            notifyMessage(message, context)
             afterRiverHandling(message)
         }
 

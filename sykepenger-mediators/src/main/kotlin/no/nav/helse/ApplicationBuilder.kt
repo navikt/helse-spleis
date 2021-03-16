@@ -41,4 +41,5 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
     }
+
 }

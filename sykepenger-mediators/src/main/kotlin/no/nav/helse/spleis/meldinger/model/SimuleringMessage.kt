@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.*
 
-internal class SimuleringMessage(packet: MessageDelegate) : BehovMessage(packet) {
+internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()

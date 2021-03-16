@@ -7,14 +7,14 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 import java.time.LocalDate
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(packet: MessageDelegate) : BehovMessage(packet) {
+internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()

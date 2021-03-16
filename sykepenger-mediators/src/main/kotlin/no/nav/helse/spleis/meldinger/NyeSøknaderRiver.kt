@@ -5,7 +5,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 
 internal class NyeSøknaderRiver(
@@ -21,5 +20,5 @@ internal class NyeSøknaderRiver(
         message.require("opprettet", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = NySøknadMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = NySøknadMessage(packet)
 }

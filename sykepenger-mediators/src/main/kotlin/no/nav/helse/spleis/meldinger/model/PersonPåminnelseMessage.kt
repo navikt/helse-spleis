@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.MessageDelegate
 
 // Understands a JSON message representing a Påminnelse
-internal class PersonPåminnelseMessage(packet: MessageDelegate) : HendelseMessage(packet) {
+internal class PersonPåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet) {
 
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()

@@ -4,7 +4,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 
 internal class SimuleringerRiver(
@@ -31,5 +30,5 @@ internal class SimuleringerRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = SimuleringMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = SimuleringMessage(packet)
 }

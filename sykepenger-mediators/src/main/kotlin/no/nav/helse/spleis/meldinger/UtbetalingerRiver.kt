@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.JsonMessageDelegate
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 
 internal class UtbetalingerRiver(
@@ -30,5 +29,5 @@ internal class UtbetalingerRiver(
         message.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingMessage(JsonMessageDelegate(packet))
+    override fun createMessage(packet: JsonMessage) = UtbetalingMessage(packet)
 }
