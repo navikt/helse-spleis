@@ -120,31 +120,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Ny, tidligere sykmelding medfører replay av første periode`() {
-        Toggles.ReplayEnabled.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-
-            assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP")
-            assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
-            assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP")
-        }
-    }
-
-    @Test
-    fun `Kan håndtere replay når vi har mottatt inntektsmelding med skjæringstidspunkt utenfor AGP`() {
-        Toggles.ReplayEnabled.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100))
-            sendSøknad(0, perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 28.februar, sykmeldingsgrad = 100)))
-            sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 2.februar)
-            sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-            assertForkastedeTilstander(0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP", "AVVENTER_VILKÅRSPRØVING_GAP")
-            assertIkkeForkastedeTilstander(1, "MOTTATT_SYKMELDING_FERDIG_GAP")
-            assertIkkeForkastedeTilstander(2, "MOTTATT_SYKMELDING_UFERDIG_GAP", "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP", "AVVENTER_UFERDIG_GAP")
-        }
-    }
-
-    @Test
     fun `kan ikke utbetale på overstyrt utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))

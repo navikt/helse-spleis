@@ -16,10 +16,6 @@ internal class ReplayMediator(
         replays.removeAt(0).behandle(hendelseMediator)
     }
 
-    override fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
-        replays.addAll(event.hendelseIder.mapNotNull(hendelseRepository::gjennopprettMelding))
-    }
-
     override fun inntektsmeldingReplay(event: PersonObserver.InntektsmeldingReplayEvent) {
         replays.addAll(hendelseRepository.gjennopprettInntektsmelding(event.fnr, event.vedtaksperiodeId))
     }

@@ -126,10 +126,6 @@ class Person private constructor(
         observers.forEach { it.annullering(event) }
     }
 
-    fun inntektsmeldingLagtPåKjøl(event: PersonObserver.InntektsmeldingLagtPåKjølEvent) {
-        observers.forEach { it.inntektsmeldingLagtPåKjøl(event) }
-    }
-
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, påminnelse) }
     }
@@ -156,12 +152,6 @@ class Person private constructor(
                     person = this
                 )
             )
-        }
-    }
-
-    fun vedtaksperiodeReplay(event: PersonObserver.VedtaksperiodeReplayEvent) {
-        observers.forEach {
-            it.vedtaksperiodeReplay(event)
         }
     }
 

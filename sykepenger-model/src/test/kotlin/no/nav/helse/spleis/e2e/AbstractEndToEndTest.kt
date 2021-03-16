@@ -101,20 +101,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     }
 
-    protected fun assertReplayAv(vararg ids: UUID) {
-        assertEquals(
-            ids.map(this::vedtaksperiodeIndeks).toSet(),
-            observatør.hendelserTilReplay.keys.map(this::vedtaksperiodeIndeks).toSet()
-        )
-        ids.forEachIndexed { index, id ->
-            assertEquals(inspektør.hendelseIder(id), observatør.hendelserTilReplay[id], "index: $index")
-        }
-    }
-
-    protected fun assertAntallReplays(antall: Int) {
-        assertEquals(antall, observatør.hendelserTilReplay.size)
-    }
-
     private fun vedtaksperiodeIndeks(id: UUID): String {
         val index = observatør.vedtaksperiodeIndeks(ORGNUMMER, id)
         return "${index + 1}.vedtaksperiode"

@@ -410,7 +410,10 @@ internal class Vedtaksperiode private constructor(
     private fun håndterSøknad(hendelse: SykdomstidslinjeHendelse, nesteTilstand: (Vedtaksperiode) -> Vedtaksperiodetilstand?) {
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
-        if (hendelse.valider(periode).hasErrorsOrWorse()) return person.invaliderAllePerioder(hendelse, "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad")
+        if (hendelse.valider(periode).hasErrorsOrWorse()) return person.invaliderAllePerioder(
+            hendelse,
+            "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
+        )
         nesteTilstand(this)?.also { tilstand(hendelse, it) }
     }
 
@@ -422,7 +425,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: (Vedtaksperiode) -> Vedtaksperiodetilstand? = { null }) {
-        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(søknad, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+        if (søknad.sykdomstidslinje().erSisteDagArbeidsdag()) return overlappendeSøknadIkkeStøttet(
+            søknad,
+            "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"
+        )
         søknad.warn("Korrigert søknad er mottatt med nye opplysninger - kontroller dagene i sykmeldingsperioden")
         håndterSøknad(søknad, nesteTilstand)
     }
@@ -503,18 +509,6 @@ internal class Vedtaksperiode private constructor(
                 fødselsnummer = this.fødselsnummer,
                 fom = this.periode.start,
                 tom = this.periode.endInclusive
-            )
-        )
-    }
-
-    private fun replayHendelser() {
-        person.vedtaksperiodeReplay(
-            PersonObserver.VedtaksperiodeReplayEvent(
-                vedtaksperiodeId = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                hendelseIder = hendelseIder
             )
         )
     }
@@ -904,29 +898,16 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            var replays: List<Vedtaksperiode> = emptyList()
-
             vedtaksperiode.periode = sykmelding.periode()
             vedtaksperiode.sykmeldingsperiode = sykmelding.periode()
             vedtaksperiode.oppdaterHistorikk(sykmelding)
 
-            if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse()) return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
-
-            if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode)) {
-                return vedtaksperiode.person.invaliderAllePerioder(sykmelding, "Forlenger annen arbeidsgiver, men ikke seg selv")
-            }
-            if (Toggles.ReplayEnabled.enabled) {
-                if (!vedtaksperiode.arbeidsgiver.støtterReplayFor(vedtaksperiode, vedtaksperiode.regler)) {
-                    return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
-                }
-                replays = vedtaksperiode.arbeidsgiver.søppelbøtte(
-                    sykmelding,
-                    Arbeidsgiver.SENERE_EXCLUSIVE(vedtaksperiode),
-                    ERSTATTES
-                )
-            } else if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
+            if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
-            }
+            if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode))
+                return vedtaksperiode.person.invaliderAllePerioder(sykmelding, "Forlenger annen arbeidsgiver, men ikke seg selv")
+            if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode))
+                return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
 
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
@@ -944,11 +925,6 @@ internal class Vedtaksperiode private constructor(
                 }
             )
             sykmelding.info("Fullført behandling av sykmelding")
-            if (Toggles.ReplayEnabled.enabled) {
-                replays.forEach { periode ->
-                    periode.replayHendelser()
-                }
-            }
         }
     }
 

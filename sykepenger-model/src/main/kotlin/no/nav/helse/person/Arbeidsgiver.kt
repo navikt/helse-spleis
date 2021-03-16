@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
@@ -184,8 +183,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.kontekst(this)
-        if (!Toggles.ReplayEnabled.enabled) ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-
+        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
         if (vedtaksperioder.toList().map { it.håndter(sykmelding) }.none { it } && !sykmelding.hasErrorsOrWorse()) {
             sykmelding.info("Lager ny vedtaksperiode")
             nyVedtaksperiode(sykmelding).håndter(sykmelding)
@@ -458,14 +456,6 @@ internal class Arbeidsgiver private constructor(
                 saksbehandlerEpost = saksbehandlerEpost,
                 saksbehandlerIdent = saksbehandlerIdent
             )
-        )
-    }
-
-    private fun inntektsmeldingLagtPåKjøl(
-        hendelseId: UUID,
-    ) {
-        person.inntektsmeldingLagtPåKjøl(
-            PersonObserver.InntektsmeldingLagtPåKjølEvent(hendelseId)
         )
     }
 

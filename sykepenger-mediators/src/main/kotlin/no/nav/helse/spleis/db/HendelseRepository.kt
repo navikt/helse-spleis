@@ -25,17 +25,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    fun gjennopprettMelding(hendelseId: UUID): HendelseMessage? = finnMelding(hendelseId)?.let { (_, type, data) ->
-        when (type) {
-            NY_SØKNAD -> NySøknadMessage(JsonNodeDelegate(data))
-            SENDT_SØKNAD_NAV -> SendtSøknadNavMessage(JsonNodeDelegate(data))
-            INNTEKTSMELDING -> InntektsmeldingMessage(JsonNodeDelegate(data))
-            SENDT_SØKNAD_ARBEIDSGIVER -> SendtSøknadArbeidsgiverMessage(JsonNodeDelegate(data))
-            else -> null
-        }
-    }
-
-    fun gjennopprettInntektsmelding(fnr: String, vedtaksperiodeId: UUID): List<HendelseMessage> = finnMeldinger(fnr).map { data ->
+    fun gjennopprettInntektsmelding(fnr: String, vedtaksperiodeId: UUID): List<HendelseMessage> = finnInntektsmeldinger(fnr).map { data ->
             InntektsmeldingReplayMessage(JsonNodeDelegate(data), vedtaksperiodeId)
         }
 
@@ -68,25 +58,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         lagreMelding(type, melding)
     }
 
-    private fun finnMelding(meldingId: UUID): Triple<UUID, Meldingstype, JsonNode>? =
-        using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "SELECT melding_type, data FROM melding WHERE melding_id = ? ORDER BY lest_dato ASC",
-                    meldingId.toString()
-                )
-                    .map {
-                        Triple(
-                            meldingId,
-                            valueOf(it.string("melding_type")),
-                            objectMapper.readTree(it.string("data"))
-                        )
-                    }.asSingle
-            )
-
-        }
-
-    private fun finnMeldinger(fnr: String): List<JsonNode> =
+    private fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
