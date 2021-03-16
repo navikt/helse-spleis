@@ -8,8 +8,7 @@ import java.time.LocalDate
 import kotlin.math.roundToInt
 
 internal class UtbetalingstidslinjeBuilder(
-    private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>,
-    private var utbetalinger: MutableList<Int>
+    private val utbetalingstidslinjeMap: MutableList<UtbetalingstidslinjedagDTO>
 ) : BuilderState() {
 
     internal fun build() = utbetalingstidslinjeMap.toList()
@@ -62,7 +61,6 @@ internal class UtbetalingstidslinjeBuilder(
                     totalGrad = totalGrad
                 )
             )
-            utbetalinger.add(arbeidsgiverbeløp)
         }
     }
 

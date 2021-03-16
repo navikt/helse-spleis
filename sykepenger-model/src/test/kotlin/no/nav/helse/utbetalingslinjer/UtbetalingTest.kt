@@ -5,6 +5,9 @@ import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.serde.api.SpeilBuilderTest
+import no.nav.helse.serde.api.VedtaksperiodeDTO
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.UtbetalingReflect
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -71,6 +74,21 @@ internal class UtbetalingTest {
         }
         assertEquals(17.januar til 2.februar, annullering.periode)
         assertEquals(17.januar, annullering.arbeidsgiverOppdrag().førstedato)
+    }
+
+    @Test
+    fun nettoBeløp(){
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 4.NAV)
+        beregnUtbetalinger(tidslinje)
+        val første = opprettUtbetaling(tidslinje, sisteDato = 7.januar)
+        val andre = opprettUtbetaling(tidslinje, første)
+
+        OppdragInspektør(første.arbeidsgiverOppdrag()).also {
+            assertEquals(6000, it.nettoBeløp(0))
+        }
+        OppdragInspektør(andre.arbeidsgiverOppdrag()).also {
+            assertEquals(4800, it.nettoBeløp(0))
+        }
     }
 
     @Test
@@ -276,6 +294,7 @@ internal class UtbetalingTest {
             tidsstempel: LocalDateTime
         ) {
             fagsystemIder.add(oppdrag.fagsystemId())
+            this.nettoBeløp.add(nettoBeløp)
         }
 
         override fun visitUtbetalingslinje(

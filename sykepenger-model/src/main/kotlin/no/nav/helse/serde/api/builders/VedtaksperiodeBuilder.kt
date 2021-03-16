@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.serde.api.*
-import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -45,7 +44,6 @@ internal class VedtaksperiodeBuilder(
     )
     private val warnings = hentWarnings(vedtaksperiode)
     private val beregnetSykdomstidslinje = mutableListOf<SykdomstidslinjedagDTO>()
-    private val totalbeløpakkumulator = mutableListOf<Int>()
 
     private val medlemskapstatusDTO: MedlemskapstatusDTO? = dataForVilkårsvurdering?.let { grunnlagsdata ->
         when (grunnlagsdata.medlemskapstatus) {
@@ -85,6 +83,7 @@ internal class VedtaksperiodeBuilder(
     private var godkjentAv: String? = null
     private var godkjenttidspunkt: LocalDateTime? = null
     private var automatiskBehandling: Boolean = false
+    private var totalbeløpArbeidstaker: Int = 0
 
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>): VedtaksperiodeDTOBase {
         val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { it.toString() } }
@@ -98,7 +97,6 @@ internal class VedtaksperiodeBuilder(
 
         if (!fullstendig) return buildUfullstendig(utbetalinger, tilstandstypeDTO)
 
-        val totalbeløpArbeidstaker = totalbeløpakkumulator.sum()
         val utbetalteUtbetalinger = byggUtbetalteUtbetalingerForPeriode(utbetalinger)
         return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger)
     }
@@ -292,7 +290,7 @@ internal class VedtaksperiodeBuilder(
     override fun preVisit(tidslinje: Utbetalingstidslinje) {
         if (inUtbetaling) return
         sykepengeperiode = tidslinje.sykepengeperiode()
-        pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje, totalbeløpakkumulator))
+        pushState(UtbetalingstidslinjeBuilder(utbetalingstidslinje))
     }
 
     override fun visitDataForSimulering(dataForSimuleringResultat: Simulering.SimuleringResultat?) {
@@ -385,6 +383,7 @@ internal class VedtaksperiodeBuilder(
         gjenståendeSykedager: Int?
     ) {
         inUtbetaling = false
+        totalbeløpArbeidstaker = arbeidsgiverNettoBeløp + personNettoBeløp
     }
 
     override fun postVisitVedtaksperiode(

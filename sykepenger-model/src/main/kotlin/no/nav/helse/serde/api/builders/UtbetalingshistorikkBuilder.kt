@@ -84,7 +84,7 @@ internal class UtbetalingshistorikkBuilder : BuilderState() {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?
     ) {
-        val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf(), mutableListOf())
+        val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(mutableListOf())
         utbetalingstidslinjeBuilders.add(
             UtbetalingstidslinjeInfo(
                 beregningId = beregningId,
