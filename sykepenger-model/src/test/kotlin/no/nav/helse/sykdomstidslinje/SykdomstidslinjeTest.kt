@@ -1,6 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -68,6 +70,13 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals(" AAASS", merged.toShortString())
+    }
+
+    @Test
+    fun `dager som har sykmelding som kilde`(){
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, 100.prosent, TestEvent.sykmelding) + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.prosent, TestEvent.søknad)
+        assertTrue(tidslinje.harDagUtenSøknad(1.januar til 5.januar))
+        assertFalse(tidslinje.harDagUtenSøknad(4.januar til 5.januar))
     }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->
