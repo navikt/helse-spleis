@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -148,6 +149,11 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
         }
         testSerialiseringAvPerson(dødPerson)
+    }
+
+    @Test
+    fun `Person med infotrygdforlengelse`() {
+        testSerialiseringAvPerson(personMedInfotrygdForlengelse())
     }
 
     private fun testSerialiseringAvPerson(person: Person) {
@@ -301,6 +307,27 @@ class JsonBuilderTest {
                 håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(4.januar, 31000.månedlig, emptyList())))
             }
 
+        fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
+            val refusjoner = listOf(RefusjonTilArbeidsgiver(1.desember(2017), 31.desember(2017), 31000.månedlig, 100.prosent, orgnummer))
+            return Person(aktørId, fnr).apply {
+                håndter(sykmelding(fom = 1.januar, tom = 31.januar))
+                fangeVedtaksperiode()
+                håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
+                håndter(utbetalingshistorikk(refusjoner))
+                håndter(ytelser(
+                    hendelseId = søknadhendelseId,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember(2017), 31000.månedlig, orgnummer, true)),
+                    utbetalinger = refusjoner)
+                )
+                håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
+                håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
+                fangeUtbetalinger()
+                håndter(overføring())
+                håndter(utbetalt())
+            }
+        }
+
         private fun Person.fangeUtbetalinger() {
             utbetalingsliste.clear()
             accept(object : PersonVisitor {
@@ -446,7 +473,13 @@ class JsonBuilderTest {
             inntektshistorikk = inntektsopplysning
         )
 
-        fun ytelser(hendelseId: UUID = UUID.randomUUID(), vedtaksperiodeId: String, dødsdato: LocalDate? = null) = Aktivitetslogg().let {
+        fun ytelser(
+            hendelseId: UUID = UUID.randomUUID(),
+            vedtaksperiodeId: String,
+            dødsdato: LocalDate? = null,
+            inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
+            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList()
+        ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
@@ -460,18 +493,8 @@ class JsonBuilderTest {
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     arbeidskategorikoder = emptyMap(),
-                    utbetalinger = listOf(
-                        Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
-                            fom = 1.januar.minusYears(1),
-                            tom = 31.januar.minusYears(1),
-                            inntekt = 31000.månedlig,
-                            grad = 100.prosent,
-                            orgnummer = orgnummer
-                        )
-                    ),
-                    inntektshistorikk = listOf(
-                        Utbetalingshistorikk.Inntektsopplysning(1.januar.minusYears(1), 25000.månedlig, orgnummer, true)
-                    ),
+                    utbetalinger = utbetalinger,
+                    inntektshistorikk = inntektshistorikk,
                     aktivitetslogg = it
                 ),
                 foreldrepermisjon = Foreldrepermisjon(

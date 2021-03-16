@@ -227,8 +227,11 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunnkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
-            historikk.add(mapOf("type" to "Infotrygd"))
+        override fun visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt: LocalDate, infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) {
+            historikk.add(mapOf(
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "type" to "Infotrygd"
+            ))
         }
 
         override fun postVisitVilkårsgrunnlagHistorikk() {
