@@ -98,50 +98,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(300000.årlig, person.sammenligningsgrunnlag(1.januar))
     }
 
-    @Disabled("Henting av inntekter er ikke implementert riktig")
-    @Test
-    fun `Flere inntekter fra samme arbeidsgiver på samme måned`() {
-        nyPeriode(1.januar til 31.januar, a1)
-        assertNoErrors(a1Inspektør)
-        assertNoErrors(a2Inspektør)
-
-        person.håndter(
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 9000
-                        a1 inntekt 1000
-                        a1 inntekt 5000
-                    }
-                    1.januar(2017) til 1.juni(2017) inntekter {
-                        a2 inntekt 5000
-                        a3 inntekt 3000
-                        a4 inntekt 2000
-                    }
-                    1.juli(2017) til 1.desember(2017) inntekter {
-                        a3 inntekt 7500
-                        a4 inntekt 2500
-                    }
-                }
-            ))
-
-        assertNoErrors(a1Inspektør)
-        assertNoErrors(a2Inspektør)
-
-        assertInntektForDato(15000.månedlig, 1.januar(2017), a1Inspektør)
-        assertInntektForDato(5000.månedlig, 1.januar(2017), a2Inspektør)
-        assertInntektForDato(3000.månedlig, 1.januar(2017), a3Inspektør)
-        assertInntektForDato(2000.månedlig, 1.januar(2017), a4Inspektør)
-        assertInntektForDato(7500.månedlig, 1.juli(2017), a3Inspektør)
-        assertInntektForDato(2500.månedlig, 1.juli(2017), a4Inspektør)
-
-        val vilkårsgrunnlag = a1Inspektør.skjæringstidspunkt(1.vedtaksperiode(a1)) as VilkårsgrunnlagHistorikk.Grunnlagsdata
-        assertEquals(300000.årlig, vilkårsgrunnlag.sammenligningsgrunnlag)
-    }
-
     @Test
     fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
