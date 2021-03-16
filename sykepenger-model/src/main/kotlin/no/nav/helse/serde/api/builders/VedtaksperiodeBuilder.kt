@@ -210,8 +210,6 @@ internal class VedtaksperiodeBuilder(
     }
 
     private fun buildTilstandtypeDto(utbetaling: Utbetaling?): TilstandstypeDTO {
-        val utbetalt = totalbeløpakkumulator.sum() > 0
-        val kunFerie = beregnetSykdomstidslinje.all { it.type == SpeilDagtype.FERIEDAG }
         return when (tilstand.type) {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
@@ -248,15 +246,15 @@ internal class VedtaksperiodeBuilder(
                 utbetaling.erAnnullering() && utbetaling.erUtbetalt() -> TilstandstypeDTO.Annullert
                 utbetaling.erAnnullering() && utbetaling.harFeilet() -> TilstandstypeDTO.AnnulleringFeilet
                 utbetaling.erAnnullering() -> TilstandstypeDTO.TilAnnullering
-                utbetalt -> TilstandstypeDTO.Utbetalt
-                kunFerie -> TilstandstypeDTO.KunFerie
+                utbetaling.harUtbetalinger() -> TilstandstypeDTO.Utbetalt
+                utbetaling.utbetalingstidslinje(periode).kunFridager() -> TilstandstypeDTO.KunFerie
                 else -> TilstandstypeDTO.IngenUtbetaling
             }
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
             TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE ->
-                if (kunFerie) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
+                if (utbetaling != null && utbetaling.utbetalingstidslinje(periode).kunFridager()) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling
         }
     }
 

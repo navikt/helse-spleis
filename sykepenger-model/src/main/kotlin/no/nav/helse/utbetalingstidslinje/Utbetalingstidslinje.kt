@@ -112,6 +112,12 @@ internal class Utbetalingstidslinje private constructor(
                 it is Fridag
         }
 
+    internal fun kunFridager() =
+        this.utbetalingsdager.all {
+                it is NavHelgDag ||
+                it is Fridag
+        }
+
     internal fun harUtbetalinger() = sykepengeperiode() != null
 
     internal fun plus(
