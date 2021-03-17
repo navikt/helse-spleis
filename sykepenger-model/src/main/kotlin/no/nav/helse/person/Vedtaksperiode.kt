@@ -2063,7 +2063,10 @@ internal class Vedtaksperiode private constructor(
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
             forkastede
                 .filter { it.sykmeldingsperiode.overlapperMed(sykmelding.periode()) }
-                .forEach { sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}") }
+                .forEach {
+                    sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode")
+                    sykmelding.info("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                }
         }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, inntektsmelding: Inntektsmelding) {
