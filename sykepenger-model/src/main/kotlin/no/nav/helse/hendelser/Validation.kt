@@ -8,7 +8,7 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
     private var errorBlock: () -> Unit = {}
 
     internal companion object {
-        internal fun validation(hendelse: ArbeidstakerHendelse, block: Validation.() -> Unit) {
+        internal inline fun validation(hendelse: ArbeidstakerHendelse, block: Validation.() -> Unit) {
             Validation(hendelse).apply(block)
         }
     }
@@ -24,7 +24,7 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
         errorBlock()
     }
 
-    internal fun onSuccess(successBlock: () -> Unit) {
+    internal inline fun onSuccess(successBlock: () -> Unit) {
         if (!hendelse.hasErrorsOrWorse()) successBlock()
     }
 }

@@ -1406,8 +1406,6 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
-                        historie.skjæringstidspunkt(vedtaksperiode.periode)
-                            ?.let { person.vilkårsgrunnlagHistorikk.lagre(utbetalingshistorikk, it) }
                         vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
                     } else {
                         if (Toggles.PraksisendringEnabled.enabled) {
@@ -1445,6 +1443,38 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
+    }
+
+    internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
+        override val type = AVVENTER_VILKÅRSPRØVING
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plusDays(1)
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
+            hendelse.info("THIS SHOULD NEVER HAPPEN :-)")
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
+            val første = vedtaksperioder.first()
+            if (første == vedtaksperiode) {
+                if (vedtaksperioder.drop(1)
+                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                        .all { it.tilstand == AvventerArbeidsgivere }
+                ) {
+                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
+                }
+            }
+            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
+                val overlappendeVedtaksperioder = vedtaksperioder
+                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+
+                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
+                    første.gjentaHistorikk(vilkårsgrunnlag)
+                }
+            }
+        }
     }
 
     internal object AvventerVilkårsprøvingGap : Vedtaksperiodetilstand {
@@ -1561,6 +1591,7 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.forlengelseFraInfotrygd = JA
 
                             if (periodetype == OVERGANG_FRA_IT) {
+                                person.vilkårsgrunnlagHistorikk.lagre(ytelser.utbetalingshistorikk(), skjæringstidspunkt)
                                 ytelser.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
                                 if (ytelser.statslønn()) ytelser.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
                             }
@@ -1573,6 +1604,11 @@ internal class Vedtaksperiode private constructor(
                                     || vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
                             }
                         }
+                    }
+                }
+                onSuccess {
+                    if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) == null) {
+                        return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                     }
                 }
                 harNødvendigInntekt(person, skjæringstidspunkt)

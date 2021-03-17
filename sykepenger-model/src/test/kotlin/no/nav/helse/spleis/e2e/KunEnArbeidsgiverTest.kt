@@ -1713,6 +1713,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Ferie(6.juli(2020), 11.juli(2020)))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
+            RefusjonTilArbeidsgiver(7.august(2019), 7.august(2019), 2304.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(8.august(2019), 4.september(2019), 2304.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(5.september(2019), 20.september(2019), 2304.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(21.september(2019), 2.november(2019), 2304.daglig, 100.prosent, ORGNUMMER),
             RefusjonTilArbeidsgiver(3.november(2019), 3.februar(2020), 2304.daglig, 100.prosent, ORGNUMMER),
             RefusjonTilArbeidsgiver(4.februar(2020), 28.februar(2020), 2304.daglig, 100.prosent, ORGNUMMER),
             RefusjonTilArbeidsgiver(29.februar(2020), 27.mars(2020), 2304.daglig, 100.prosent, ORGNUMMER),

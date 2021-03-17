@@ -220,6 +220,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_ARBEIDSGIVERSØKNAD_UFERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
             TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,

@@ -8,7 +8,10 @@ internal class V83VilkårsvurderingerForInfotrygdperioder : JsonMigration(versio
     override val description: String = "Legger til skjæringstidspunkt på vilkårsvurderinger fra infotrygdperioder"
 
     override fun doMigration(jsonNode: ObjectNode) {
-        val vilkårsgrunnlagSkjæringstidspunkter = jsonNode["vilkårsgrunnlagHistorikk"]
+        val originaleHistorikkElementer = jsonNode["vilkårsgrunnlagHistorikk"]
+            .filter { it["type"].asText() == "Vilkårsprøving" }
+
+        val vilkårsgrunnlagSkjæringstidspunkter = originaleHistorikkElementer
             .filter { it["vurdertOk"].asBoolean() }
             .map { it["skjæringstidspunkt"].asText() }
 
@@ -29,7 +32,8 @@ internal class V83VilkårsvurderingerForInfotrygdperioder : JsonMigration(versio
             serdeObjectMapper.createObjectNode().put("skjæringstidspunkt", it).put("type", "Infotrygd")
         }
 
-        val gammelVilkårsgrunnlagHistorikk = jsonNode["vilkårsgrunnlagHistorikk"].filter { it["skjæringstidspunkt"].asText() !in infotrygdVilkårsgrunnlagHistorikk }
+        val gammelVilkårsgrunnlagHistorikk = originaleHistorikkElementer
+            .filter { it["skjæringstidspunkt"].asText() !in infotrygdVilkårsgrunnlagHistorikk }
 
         val vilkårsgrunnlagHistorikk = (gammelVilkårsgrunnlagHistorikk + infotrygdVilkårsgrunnlagNodes).sortedByDescending { it["skjæringstidspunkt"].asText() }
 
