@@ -24,11 +24,9 @@ enum class SpeilDagtype {
     FRISK_HELGEDAG,
     IMPLISITT_DAG,
     PERMISJONSDAG,
-    STUDIEDAG,
     SYKEDAG,
     SYK_HELGEDAG,
     UBESTEMTDAG,
-    UTENLANDSDAG
 }
 
 enum class SpeilKildetype {

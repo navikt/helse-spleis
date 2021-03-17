@@ -1,6 +1,7 @@
 package no.nav.helse.serde.reflection
 
-import no.nav.helse.serde.mapping.JsonDagType
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.maybe
 import no.nav.helse.sykdomstidslinje.Dag
@@ -38,7 +39,5 @@ private fun Dag.toJsonType() = when (this) {
     is Dag.ForeldetSykedag -> JsonDagType.FORELDET_SYKEDAG
     is Dag.SykHelgedag -> JsonDagType.SYK_HELGEDAG
     is Dag.Permisjonsdag -> JsonDagType.PERMISJONSDAG
-    is Dag.Studiedag -> JsonDagType.STUDIEDAG
-    is Dag.Utenlandsdag -> JsonDagType.UTENLANDSDAG
     is Dag.ProblemDag -> JsonDagType.PROBLEMDAG
 }

@@ -23,10 +23,8 @@ internal enum class Turneringsnøkkel {
     ArbeidsgiverHelgedag_IM,
     Arbeidsgiverdag_SØ,
     ArbeidsgiverHelgedag_SØ,
-    Studiedag,
     AnnenInntekt_INNTK,
     AnnenInntekt_SØ,
-    Utenlandsdag,
     Saksbehandlerdag,
     UkjentDag,
     UbestemtDag;
@@ -49,7 +47,6 @@ internal enum class Turneringsnøkkel {
             dag is Permisjonsdag && dag.kommerFra(Søknad::class) -> Permisjonsdag_SØ
             dag is Permisjonsdag -> Permisjonsdag_AAREG
             dag is ProblemDag -> UbestemtDag
-            dag is Dag.Studiedag -> Studiedag
             dag is Sykedag && dag.kommerFra(Sykmelding::class) -> Sykedag_SM
             dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
             dag is Sykedag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
@@ -57,7 +54,6 @@ internal enum class Turneringsnøkkel {
             dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
             dag is SykHelgedag && dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is Dag.UkjentDag -> UkjentDag
-            dag is Dag.Utenlandsdag -> Utenlandsdag
             else -> throw IllegalArgumentException("Ingen turneringsnøkkel definert for ${dag::class.simpleName}")
         }
     }

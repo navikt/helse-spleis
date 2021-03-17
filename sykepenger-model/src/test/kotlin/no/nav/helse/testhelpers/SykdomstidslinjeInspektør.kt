@@ -92,13 +92,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     ) =
         set(dag, dato, økonomi, kilde)
 
-    override fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
     override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) =
         set(dag, dato, kilde)
 
     override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =

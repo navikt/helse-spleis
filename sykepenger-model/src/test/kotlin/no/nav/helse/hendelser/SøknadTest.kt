@@ -47,7 +47,7 @@ internal class SøknadTest {
     @Test
     fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(5.januar, 10.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
@@ -80,7 +80,7 @@ internal class SøknadTest {
     @Test
     fun `utdanning ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(16.januar, 17.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
     }
 
     @Test

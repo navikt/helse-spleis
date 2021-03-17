@@ -164,29 +164,6 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad med utenlandsopphold`() {
-        håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode,
-            listOf(Periode(2.januar, 17.januar)),
-            førsteFraværsdag = 2.januar
-        )
-        håndterSøknadMedValidering(
-            1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent),
-            Søknad.Søknadsperiode.Utlandsopphold(22.januar, 25.januar)
-        )
-
-        assertForkastetPeriodeTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `Håndterer ny sykmelding som ligger tidligere i tid med forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(23.mars(2020), 29.mars(2020), 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(30.mars(2020), 2.april(2020), 100.prosent))

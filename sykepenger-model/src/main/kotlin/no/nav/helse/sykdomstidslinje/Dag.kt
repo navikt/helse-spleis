@@ -162,24 +162,6 @@ internal sealed class Dag(
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class Studiedag(
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : Dag(dato, kilde) {
-
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, kilde)
-    }
-
-    internal class Utenlandsdag(
-        dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-    ) : Dag(dato, kilde) {
-
-        override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, kilde)
-    }
-
     internal class ProblemDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,

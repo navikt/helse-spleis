@@ -43,12 +43,10 @@ internal class TurneringsnøkkelTest {
         assertEquals(UbestemtDag, fraDag(ProblemDag(enDag, INGEN, "")))
         assertEquals(Permisjonsdag_AAREG, fraDag(Permisjonsdag(enDag, aareg)))
         assertEquals(Permisjonsdag_SØ, fraDag(Permisjonsdag(enDag, søknad)))
-        assertEquals(Turneringsnøkkel.Studiedag, fraDag(Dag.Studiedag(enDag, søknad)))
         assertEquals(Sykedag_SM, fraDag(Sykedag(enDag, økonomi, sykmelding)))
         assertEquals(Sykedag_SØ, fraDag(Sykedag(enDag, økonomi, søknad)))
         assertEquals(SykHelgedag_SM, fraDag(SykHelgedag(enDag, økonomi, sykmelding)))
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
-        assertEquals(Turneringsnøkkel.Utenlandsdag, fraDag(Dag.Utenlandsdag(enDag, søknad)))
     }
 
     private sealed class TestHendelse() : SykdomstidslinjeHendelse(UUID.randomUUID()) {

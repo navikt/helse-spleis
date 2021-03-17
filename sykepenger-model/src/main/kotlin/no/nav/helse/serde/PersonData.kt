@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
-import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Kilde
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -474,10 +473,6 @@ internal data class PersonData(
                         hendelseskilde,
                         melding!!
                     )
-                    JsonDagType.STUDIEDAG -> Dag.Studiedag(
-                        dato,
-                        hendelseskilde
-                    )
                     JsonDagType.SYKEDAG -> Dag.Sykedag(
                         dato,
                         økonomi,
@@ -488,15 +483,25 @@ internal data class PersonData(
                         økonomi,
                         hendelseskilde
                     )
-                    JsonDagType.UTENLANDSDAG -> Dag.Utenlandsdag(
-                        dato,
-                        hendelseskilde
-                    )
                     JsonDagType.UKJENT_DAG -> Dag.UkjentDag(
                         dato,
                         hendelseskilde
                     )
                 }
+            }
+
+            enum class JsonDagType {
+                ARBEIDSDAG,
+                ARBEIDSGIVERDAG,
+                ARBEIDSGIVER_HELGEDAG,
+                FERIEDAG,
+                FRISK_HELGEDAG,
+                FORELDET_SYKEDAG,
+                PERMISJONSDAG,
+                PROBLEMDAG,
+                SYKEDAG,
+                SYK_HELGEDAG,
+                UKJENT_DAG,
             }
 
             data class KildeData(

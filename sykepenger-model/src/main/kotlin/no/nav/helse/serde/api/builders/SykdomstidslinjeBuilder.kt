@@ -68,12 +68,6 @@ internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: Mutabl
     override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
-    override fun visitDag(dag: Dag.Studiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-        leggTilDag(dag, dato, null, kilde)
-
-    override fun visitDag(dag: Dag.Utenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
-        leggTilDag(dag, dato, null, kilde)
-
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) =
         leggTilDag(dag, dato, null, kilde)
 
@@ -107,8 +101,6 @@ internal class SykdomstidslinjeBuilder(private val sykdomstidslinjeListe: Mutabl
         is Dag.ForeldetSykedag -> SpeilDagtype.FORELDET_SYKEDAG
         is Dag.SykHelgedag -> SpeilDagtype.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SpeilDagtype.PERMISJONSDAG
-        is Dag.Studiedag -> SpeilDagtype.STUDIEDAG
-        is Dag.Utenlandsdag -> SpeilDagtype.UTENLANDSDAG
         is Dag.ProblemDag -> SpeilDagtype.UBESTEMTDAG
     }
 

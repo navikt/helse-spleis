@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.mandag
+import no.nav.helse.tournament.Turneringsnøkkel
 import no.nav.helse.tournament.dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -22,7 +23,6 @@ internal class BesteDagTest {
             )
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
-        private val utenlandsFraSøknad get() = Dag.Utenlandsdag(2.mandag, TestEvent.søknad)
     }
 
     @Test
@@ -44,16 +44,6 @@ internal class BesteDagTest {
     @Test
     fun `søknad med egenmelding vinner over en gitt dag`() {
         assertWinnerBidirectional(ferieFraSøknad, arbeidsgiverdagFraInntektsmelding, arbeidsgiverdagFraInntektsmelding)
-    }
-
-    @Test
-    fun `sammenligning med utenlandsdag git altid ubestemtdag`() {
-        assertProblemDagBidirectional(ukjentDag, utenlandsFraSøknad)
-        assertProblemDagBidirectional(arbeidsdagFraSøknad, utenlandsFraSøknad)
-        assertProblemDagBidirectional(sykedagFraSøknad, utenlandsFraSøknad)
-        assertProblemDagBidirectional(arbeidsgiverdagFraInntektsmelding, utenlandsFraSøknad)
-        assertProblemDagBidirectional(ferieFraSøknad, utenlandsFraSøknad)
-        assertProblemDagBidirectional(ferieFraInntektsmelding, utenlandsFraSøknad)
     }
 
     @Test

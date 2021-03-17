@@ -251,8 +251,6 @@ internal interface SykdomstidslinjeVisitor {
     }
 
     fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: Studiedag, dato: LocalDate, kilde: Hendelseskilde) {}
-    fun visitDag(dag: Utenlandsdag, dato: LocalDate, kilde: Hendelseskilde) {}
     fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {}
     fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
 }

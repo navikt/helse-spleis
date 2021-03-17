@@ -333,14 +333,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.Studiedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        delegatee.visitDag(dag, dato, kilde)
-    }
-
-    override fun visitDag(dag: Dag.Utenlandsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-        delegatee.visitDag(dag, dato, kilde)
-    }
-
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) {
         delegatee.visitDag(dag, dato, kilde, melding)
     }

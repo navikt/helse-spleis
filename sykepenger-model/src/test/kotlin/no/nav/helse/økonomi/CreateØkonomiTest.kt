@@ -4,7 +4,6 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
-import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.januar
@@ -125,7 +124,7 @@ internal class CreateØkonomiTest {
         totalGrad: Double? = null
     ) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
         1.januar,
-        JsonDagType.SYKEDAG,
+        PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID()),
         grad,
         arbeidsgiverBetalingProsent,

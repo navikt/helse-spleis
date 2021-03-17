@@ -23,8 +23,6 @@ internal class SkjæringstidspunktTest {
 
     @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
-        assertNull(1.UT.skjæringstidspunkt())
-        assertNull(1.EDU.skjæringstidspunkt())
         assertNull(1.F.skjæringstidspunkt())
         assertNull(1.P.skjæringstidspunkt())
         assertNull(1.n_.skjæringstidspunkt())

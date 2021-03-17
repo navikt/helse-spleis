@@ -61,12 +61,6 @@ internal val Int.F
         TestHendelse.kilde
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.EDU
-    get() = Sykdomstidslinje(
-        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap({ it }, { Studiedag(it, TestHendelse.kilde) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
-
 internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
@@ -77,12 +71,6 @@ internal val Int.P
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, TestHendelse.kilde) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
-
-internal val Int.UT
-    get() = Sykdomstidslinje(
-        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Utenlandsdag(it, TestHendelse.kilde) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.R
