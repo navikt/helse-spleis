@@ -43,6 +43,31 @@ internal class SykdomsgradfilterTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
+    @Test
+    fun `ikke warning når de avviste dagene gjelder forrige arbeidsgiverperiode`() {
+        val tidslinjer = listOf(tidslinjeOf(16.AP, 5.NAV(1200, 19.0), 20.ARB, 16.AP, 10.NAV))
+        println(Utbetalingstidslinje.periode(tidslinjer))
+        val periode = Periode(11.februar, 9.mars)
+        undersøke(tidslinjer, periode)
+        assertEquals(32, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(5, inspektør.avvistDagTeller)
+        assertEquals(10, inspektør.navDagTeller)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `avvis dager for begge tidslinjer`() {
+        val tidslinjer = listOf(
+            tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
+            tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
+        )
+        println(Utbetalingstidslinje.periode(tidslinjer))
+        val periode = Periode(1.januar, 21.januar)
+        undersøke(tidslinjer, periode)
+        assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.first()).avvistDagTeller)
+        assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.last()).avvistDagTeller)
+    }
+
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()

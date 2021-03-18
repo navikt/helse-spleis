@@ -30,6 +30,9 @@ internal class Utbetalingstidslinje private constructor(
             .filter { it.utbetalingsdager.isNotEmpty() }
             .map { it.periode() }
             .reduce(Periode::merge)
+
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelse: Begrunnelse) =
+            tidslinjer.filter { it.avvis(dager, periode, begrunnelse) }.none()
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -46,6 +49,17 @@ internal class Utbetalingstidslinje private constructor(
         visitor.preVisit(this)
         utbetalingsdager.forEach { it.accept(visitor) }
         visitor.postVisit(this)
+    }
+
+    internal fun avvis(avvisteDatoer: List<LocalDate>, periode: Periode, begrunnelse: Begrunnelse): Boolean {
+        var result = false
+        utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
+            if (utbetalingsdag is NavDag && utbetalingsdag.dato in avvisteDatoer) {
+                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
+                result = utbetalingsdag.dato in periode
+            }
+        }
+        return result
     }
 
     internal fun avvis(avvisteDatoer: List<LocalDate>, begrunnelse: Begrunnelse): Boolean {

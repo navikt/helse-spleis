@@ -3,17 +3,20 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.UtbetalingstidslinjeInspektør
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
@@ -107,4 +110,32 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         )
         assertNoWarnings(inspektør)
     }
+
+    @Test
+    fun `ny periode med egen arbeidsgiverperiode skal ikke ha warning pga sykdomsgrad som gjelder forrige periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 20.mars, 100.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.mars, 16.mars)))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertTrue(inspektør.vedtaksperiodeLogg(1.vedtaksperiode).hasWarningsOrWorse())
+        assertFalse(inspektør.vedtaksperiodeLogg(2.vedtaksperiode).hasWarningsOrWorse())
+    }
+
+    private fun TestArbeidsgiverInspektør.vedtaksperiodeLogg(id: UUID) = personLogg.logg(object : Aktivitetskontekst {
+        override fun toSpesifikkKontekst(): SpesifikkKontekst {
+            return SpesifikkKontekst("Vedtaksperiode", mapOf(
+                "vedtaksperiodeId" to "$id"
+            ))
+        }
+    })
 }
