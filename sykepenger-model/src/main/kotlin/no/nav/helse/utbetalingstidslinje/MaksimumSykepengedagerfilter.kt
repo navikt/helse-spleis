@@ -51,7 +51,7 @@ internal class MaksimumSykepengedagerfilter(
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         tidslinje.accept(this)
-        tidslinjer.forEach { it.avvis(avvisteDatoer, SykepengedagerOppbrukt) }
+        Utbetalingstidslinje.avvis(tidslinjer, avvisteDatoer, periode, SykepengedagerOppbrukt)
     }
 
     internal fun beregnGrenser(sisteDato: LocalDate) {
