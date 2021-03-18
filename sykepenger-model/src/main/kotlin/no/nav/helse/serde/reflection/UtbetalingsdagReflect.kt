@@ -23,12 +23,12 @@ internal class UtbetalingsdagReflect(utbetalingsdag: Utbetalingsdag, private val
 internal class AvvistdagReflect(avvistdag: AvvistDag) {
     private val dato: LocalDate = avvistdag["dato"]
     private val økonomi: Økonomi = avvistdag["økonomi"]
-    private val begrunnelse: Begrunnelse = avvistdag["begrunnelse"]
+    private val begrunnelser: List<Begrunnelse> = avvistdag["begrunnelser"]
 
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
         "dato" to dato,
-        "begrunnelse" to PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(begrunnelse).name
+        "begrunnelser" to begrunnelser.map { PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name }
     ).apply {
         putAll(serialiserØkonomi(økonomi))
     }

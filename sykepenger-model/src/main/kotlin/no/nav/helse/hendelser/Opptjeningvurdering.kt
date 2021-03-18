@@ -16,14 +16,17 @@ class Opptjeningvurdering(
     internal fun harOpptjening() =
         antallOpptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): IAktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): Boolean {
         antallOpptjeningsdager = Arbeidsforhold.opptjeningsdager(arbeidsforhold, aktivitetslogg, skjæringstidspunkt)
-        if (harOpptjening()) aktivitetslogg.info(
-            "Har minst %d dager opptjening",
-            TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
-        )
-        else aktivitetslogg.error("Har mindre enn %d dager opptjening", TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER)
-        return aktivitetslogg
+        if (harOpptjening()) {
+            aktivitetslogg.info(
+                "Har minst %d dager opptjening",
+                TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+            )
+            return true
+        }
+        aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
+        return false
     }
 
     class Arbeidsforhold(
@@ -58,7 +61,7 @@ class Opptjeningvurdering(
 
                 val ranges = arbeidsforhold.mapNotNull { it.periode(skjæringstidspunkt) }
                 if (ranges.none { skjæringstidspunkt in it }) {
-                    aktivitetslogg.error("Personen er ikke i arbeid ved skjæringstidspunktet")
+                    aktivitetslogg.info("Personen er ikke i arbeid ved skjæringstidspunktet")
                     return 0
                 }
 

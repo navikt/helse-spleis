@@ -88,7 +88,8 @@ class Person private constructor(
             }.toMap(),
             infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             alder = Alder(fødselsnummer),
-            dødsdato = dødsdato
+            dødsdato = dødsdato,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
     }
 

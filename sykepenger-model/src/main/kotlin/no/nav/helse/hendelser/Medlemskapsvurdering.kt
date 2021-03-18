@@ -8,17 +8,25 @@ import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 class Medlemskapsvurdering(
     internal val medlemskapstatus: Medlemskapstatus
 ) {
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype): IAktivitetslogg {
-        when (medlemskapstatus) {
-            Medlemskapstatus.Ja -> aktivitetslogg.info("Bruker er medlem av Folketrygden")
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype): Boolean {
+        return when (medlemskapstatus) {
+            Medlemskapstatus.Ja -> {
+                aktivitetslogg.info("Bruker er medlem av Folketrygden")
+                true
+            }
             Medlemskapstatus.VetIkke -> {
                 val melding = "Vurder lovvalg og medlemskap"
-                if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) aktivitetslogg.info(melding)
+                if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) {
+                    aktivitetslogg.info(melding)
+                }
                 else aktivitetslogg.warn(melding)
+                true
             }
-            Medlemskapstatus.Nei -> aktivitetslogg.error("Bruker er ikke medlem av Folketrygden")
+            Medlemskapstatus.Nei -> {
+                aktivitetslogg.warn("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
+                false
+            }
         }
-        return aktivitetslogg
     }
 
     enum class Medlemskapstatus {

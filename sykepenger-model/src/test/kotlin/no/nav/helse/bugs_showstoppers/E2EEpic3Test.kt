@@ -18,6 +18,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
@@ -1200,7 +1201,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ikke medlem`() {
+    fun `ikke medlem avviser alle dager og legger på warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(
@@ -1213,16 +1214,442 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             1.vedtaksperiode,
             INNTEKT,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
-        ) // make sure Vilkårsgrunnlag fails
-        assertForkastetPeriodeTilstander(
+        )
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
-            TIL_INFOTRYGD
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
         )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+        }
+    }
+
+    @Test
+    fun `opptjening ikke ok avviser ikke dager før gjeldende skjæringstidspunkt`() {
+        val arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.januar(2017), 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode, listOf(
+                Periode(1.januar, 16.januar)
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            INNTEKT,
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertFalse(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            }
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            2.vedtaksperiode, listOf(
+                Periode(1.januar(2020), 16.januar(2020))
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            INNTEKT,
+            arbeidsforhold = arbeidsforhold,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2019) til 1.desember(2019) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }
+            )
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+
+            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+
+            }
+        }
+    }
+
+    @Test
+    fun `bevarer avviste dager fra tidligere periode og avviser dager fra skjæringstidspunkt ved opptjening ok`() {
+        val arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 31.desember(2017), 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode, listOf(
+                Periode(1.januar, 16.januar)
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            INNTEKT,
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            2.vedtaksperiode, listOf(
+                Periode(1.januar(2020), 16.januar(2020))
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            INNTEKT,
+            arbeidsforhold = arbeidsforhold,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2019) til 1.desember(2019) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }
+            )
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+
+            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(22, tidslinjeInspektør.dagtelling[AvvistDag::class])
+
+            }
+        }
+    }
+
+    @Test
+    fun `en periode med under minimum inntekt avviser ikke dager for etterfølgende periode med vilkårsgrunnlag ok`() {
+        val lavInntekt = 1000.månedlig
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode, listOf(
+                Periode(1.januar, 16.januar)
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, lavInntekt, emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            lavInntekt,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt lavInntekt
+                    }
+                }
+            )
+
+        )
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            2.vedtaksperiode, listOf(
+                Periode(1.januar(2020), 16.januar(2020))
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            2.vedtaksperiode,
+            INNTEKT,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2019) til 1.desember(2019) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }
+            )
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            }
+
+            TestTidslinjeInspektør(it.utbetaling(1).utbetalingstidslinje()).also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(8, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+
+            }
+        }
+    }
+
+    @Test
+    fun `en periode med ikke medlem, en infotrygdperiode, en etterfølgende periode med vilkårsgrunnlag ok`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode, listOf(
+                Periode(1.januar, 16.januar)
+            ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            INNTEKT,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+
+        )
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_GODKJENNING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+            }
+        }
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
+        håndterInntektsmeldingMedValidering(
+            3.vedtaksperiode, listOf(
+                Periode(1.januar(2020), 16.januar(2020))
+            ), førsteFraværsdag = 1.januar(2020), refusjon = Triple(null, INNTEKT, emptyList())
+        )
+        håndterYtelser(3.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterVilkårsgrunnlag(
+            3.vedtaksperiode,
+            INNTEKT,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioder {
+                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                    1.januar(2019) til 1.desember(2019) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }
+            )
+        )
+        håndterYtelser(3.vedtaksperiode, RefusjonTilArbeidsgiver(1.desember, 31.desember, INNTEKT, 100.prosent, ORGNUMMER), inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember, INNTEKT, ORGNUMMER, true)))
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt(3.vedtaksperiode)
+
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(3.vedtaksperiode)).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[NavDag::class])
+            }
+
+            TestTidslinjeInspektør(it.utbetaling(2).utbetalingstidslinje()).also { tidslinjeInspektør ->
+                assertEquals(32, tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
+                assertEquals(16, tidslinjeInspektør.dagtelling[NavHelgDag::class])
+                assertEquals(34, tidslinjeInspektør.dagtelling[NavDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[AvvistDag::class])
+
+            }
+        }
     }
 
     @Test

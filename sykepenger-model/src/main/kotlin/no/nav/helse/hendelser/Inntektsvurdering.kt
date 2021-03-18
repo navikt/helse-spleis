@@ -27,29 +27,38 @@ class Inntektsvurdering(
         grunnlagForSykepengegrunnlag: Inntekt,
         sammenligningsgrunnlag: Inntekt,
         periodetype: Periodetype
-    ): IAktivitetslogg {
+    ): Boolean  {
 
         if (inntekter.antallMåneder() > 12) aktivitetslogg.error("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.kilder(3) > 1) {
             val melding =
                 "Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen."
-            if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) aktivitetslogg.info(melding)
-            else aktivitetslogg.warn(melding)
+            if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE))
+                aktivitetslogg.info(melding)
+            else {
+                aktivitetslogg.warn(melding)
+            }
         }
-        if (sammenligningsgrunnlag <= Inntekt.INGEN) return aktivitetslogg.apply { error("sammenligningsgrunnlaget er <= 0") }
+        if (sammenligningsgrunnlag <= Inntekt.INGEN) {
+            aktivitetslogg.error("sammenligningsgrunnlaget er <= 0")
+            return false
+        }
         grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
             avviksprosent = avvik
-            if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) aktivitetslogg.error(
-                "Har mer enn %.0f %% avvik",
-                MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
-            )
+            if (avvik > MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT) {
+                aktivitetslogg.error(
+                    "Har mer enn %.0f %% avvik",
+                    MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent()
+                )
+                return false
+            }
             else aktivitetslogg.info(
                 "Har %.0f %% eller mindre avvik i inntekt (%.2f %%)",
                 MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(),
                 avvik.prosent()
             )
         }
-        return aktivitetslogg
+        return true
     }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) =

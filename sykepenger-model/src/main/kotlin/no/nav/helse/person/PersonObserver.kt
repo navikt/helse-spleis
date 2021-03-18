@@ -92,17 +92,23 @@ interface PersonObserver {
 
         data class IkkeUtbetaltDag(
             val dato: LocalDate,
-            val type: Type
+            val type: Type,
+            val begrunnelser: List<Begrunnelse>? = null
         ) {
             enum class Type {
+                Annullering,
+                Fridag,
+                Arbeidsdag,
+                AvvistDag
+            }
+            enum class Begrunnelse {
                 SykepengedagerOppbrukt,
                 MinimumInntekt,
                 EgenmeldingUtenforArbeidsgiverperiode,
                 MinimumSykdomsgrad,
-                Annullering,
-                Fridag,
-                Arbeidsdag,
-                EtterDødsdato
+                EtterDødsdato,
+                ManglerMedlemskap,
+                ManglerOpptjening
             }
         }
     }

@@ -6,11 +6,9 @@ import no.nav.helse.spleis.e2e.TestArbeidsgiverInspektør
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -22,7 +20,7 @@ internal class VilkårsgrunnlagTest {
         private const val aktørId = "123"
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "345"
-        private val INNTEKT = 1000.0.månedlig
+        private val INNTEKT = 30000.0.månedlig
     }
 
     private lateinit var person: Person
@@ -43,7 +41,7 @@ internal class VilkårsgrunnlagTest {
         val vilkårsgrunnlag = vilkårsgrunnlag()
         person.håndter(vilkårsgrunnlag)
         assertEquals(Prosent.ratio(0.0), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(12000.årlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
+        assertEquals(INNTEKT, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
     }
 
     @Test
@@ -52,25 +50,26 @@ internal class VilkårsgrunnlagTest {
                 inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt 1250.månedlig
+                    orgnummer inntekt 37500.månedlig
                 }}
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(Prosent.ratio(0.2), dataForVilkårsvurdering()?.avviksprosent)
-        assertEquals(15000.årlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
+        assertEquals(37500.månedlig, dataForVilkårsvurdering()?.sammenligningsgrunnlag)
         assertEquals(28, dataForVilkårsvurdering()!!.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
     }
 
     @Test
-    fun `27 dager opptjening fører til at vilkårsvurdering feiler`() {
+    fun `27 dager opptjening fører til warning`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
             arbeidsforhold = listOf(Opptjeningvurdering.Arbeidsforhold(orgnummer, 5.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertEquals(27, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
-        assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     @Test
@@ -81,7 +80,8 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
-        assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     @Test
@@ -93,6 +93,7 @@ internal class VilkårsgrunnlagTest {
         assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     @Test
@@ -103,6 +104,8 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertEquals(28, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(true, dataForVilkårsvurdering()?.harOpptjening)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     @Test
@@ -113,7 +116,8 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertEquals(0, dataForVilkårsvurdering()?.antallOpptjeningsdagerErMinst)
         assertEquals(false, dataForVilkårsvurdering()?.harOpptjening)
-        assertEquals(TilstandType.TIL_INFOTRYGD, hentTilstand()?.type)
+        assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
+        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     @Test
@@ -124,7 +128,7 @@ internal class VilkårsgrunnlagTest {
         ))
         vilkårsgrunnlag.valider(INNTEKT, INNTEKT, 31.januar, Periodetype.FØRSTEGANGSBEHANDLING)
 
-        assertFalse(vilkårsgrunnlag.hasErrorsOrWorse())
+        assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
     }
 
     private fun dataForVilkårsvurdering(): VilkårsgrunnlagHistorikk.Grunnlagsdata? {

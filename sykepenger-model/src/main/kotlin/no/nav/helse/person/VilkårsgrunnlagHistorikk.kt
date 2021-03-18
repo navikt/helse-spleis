@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -29,6 +31,20 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk[skjæringstidspunkt]
 
+    internal fun avvisUtbetalingsdagerMedBegrunnelse(tidslinjer: List<Utbetalingstidslinje>) {
+        val sortertHistorikk = historikk.toSortedMap()
+
+        sortertHistorikk.entries.zipWithNext { (fom, vilkårsgrunnlagElement), (tom, _) ->
+            if (vilkårsgrunnlagElement is Grunnlagsdata) {
+                finnBegrunnelser(vilkårsgrunnlagElement).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, it, fom, tom) }
+            }
+        }
+        val sisteHistorikk = sortertHistorikk.getValue(sortertHistorikk.lastKey())
+        if (sisteHistorikk is Grunnlagsdata) {
+            finnBegrunnelser(sisteHistorikk).takeIf { it.isNotEmpty() }?.let { Utbetalingstidslinje.avvis(tidslinjer, it, sortertHistorikk.lastKey(), null) }
+        }
+    }
+
     internal interface VilkårsgrunnlagElement {
         fun valider(aktivitetslogg: Aktivitetslogg)
         fun isOk(): Boolean
@@ -41,6 +57,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         internal val antallOpptjeningsdagerErMinst: Int,
         internal val harOpptjening: Boolean,
         internal val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        internal val harMinimumInntekt: Boolean?,
         internal val vurdertOk: Boolean
     ) : VilkårsgrunnlagElement {
 
@@ -63,5 +80,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.visitInfotrygdVilkårsgrunnlag(skjæringstidspunkt, this)
         }
+    }
+
+    private fun finnBegrunnelser(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata): List<Begrunnelse> {
+        val begrunnelser = mutableListOf<Begrunnelse>()
+
+        if (vilkårsgrunnlag.medlemskapstatus === Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+        if (vilkårsgrunnlag.harMinimumInntekt == false) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
+        if (!vilkårsgrunnlag.harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+        return begrunnelser
     }
 }

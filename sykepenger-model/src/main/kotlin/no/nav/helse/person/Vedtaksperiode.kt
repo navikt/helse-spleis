@@ -382,10 +382,7 @@ internal class Vedtaksperiode private constructor(
         val grunnlagForSykepengegrunnlag = person.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start)
         val sammenligningsgrunnlag = person.sammenligningsgrunnlag(skjæringstidspunkt)
 
-        if (grunnlagForSykepengegrunnlag == null) return tilstand(vilkårsgrunnlag, TilInfotrygd) {
-            vilkårsgrunnlag.info("Har ikke inntekt på skjæringstidspunkt $skjæringstidspunkt ved vilkårsvurdering")
-            vilkårsgrunnlag.error("Har ikke inntekt på skjæringstidspunkt ved vilkårsvurdering")
-        }
+        if (grunnlagForSykepengegrunnlag == null) return person.invaliderAllePerioder(vilkårsgrunnlag, "Har ikke inntekt på skjæringstidspunkt $skjæringstidspunkt ved vilkårsvurdering")
 
         if (vilkårsgrunnlag.valider(grunnlagForSykepengegrunnlag, sammenligningsgrunnlag ?: Inntekt.INGEN, skjæringstidspunkt, periodetype()).hasErrorsOrWorse()
                 .also {
@@ -393,10 +390,10 @@ internal class Vedtaksperiode private constructor(
                     person.vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, skjæringstidspunkt)
                 }
         ) {
-            vilkårsgrunnlag.info("Feil i vilkårsgrunnlag i %s", tilstand.type)
-            return tilstand(vilkårsgrunnlag, TilInfotrygd)
+            return person.invaliderAllePerioder(vilkårsgrunnlag, "Feil i vilkårsgrunnlag")
         }
-        vilkårsgrunnlag.info("Vilkårsgrunnlag verifisert")
+
+        vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
     }
 

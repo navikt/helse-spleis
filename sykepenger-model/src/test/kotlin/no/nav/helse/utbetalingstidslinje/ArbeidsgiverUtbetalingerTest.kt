@@ -10,6 +10,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -41,7 +42,8 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     @Test
-    fun `avgrenset betaling pga minimum inntekt`() {
+    @Disabled
+    fun `avgrenset betaling pga minimum inntekt`() { // TODO: test et annet sted
         undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 2.HELG, 5.NAV)
 
         assertEquals(12, inspektør.size)
@@ -120,24 +122,24 @@ internal class ArbeidsgiverUtbetalingerTest {
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
-            5.NAV(12), 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
             5.NAV, 2.HELG,
-            5.NAV(3500), 2.HELG,
-            5.NAV(3500), 2.HELG,
-            5.NAV(1200), 2.HELG
+            5.NAV, 2.HELG,
+            5.NAV, 2.HELG,
+            5.NAV, 2.HELG,
+            5.NAV, 2.HELG
         )
 
         assertEquals(98, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
         assertEquals(28, inspektør.navHelgDagTeller)
         assertEquals(10, inspektør.avvistDagTeller)
-        assertEquals((50 * 1200) + (10 * 2161), inspektør.totalUtbetaling())
-        assertEquals(6.april, maksdato)
+        assertEquals((60 * 1200), inspektør.totalUtbetaling())
+        assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
@@ -330,6 +332,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(fnr, tidslinje, tidslinjeOf())
     }
 
+    // TODO
     private fun undersøke(
         fnr: String,
         arbeidsgiverTidslinje: Utbetalingstidslinje,

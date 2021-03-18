@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -29,16 +30,23 @@ class Vilkårsgrunnlag(
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype
     ): IAktivitetslogg {
-        inntektsvurdering.valider(this, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, periodetype)
-        opptjeningvurdering.valider(this, skjæringstidspunkt)
-        medlemskapsvurdering.valider(this, periodetype)
+        val inntektsvurderingOk = inntektsvurdering.valider(this, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, periodetype)
+        val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt)
+        val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
+        val harMinimumInntekt = grunnlagForSykepengegrunnlag > Alder(fødselsnummer).minimumInntekt(skjæringstidspunkt)
+        if(!harMinimumInntekt)
+            warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        else
+            info("Krav til minste sykepengegrunnlag er oppfylt")
+
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
             antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
             harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            vurdertOk = !hasErrorsOrWorse()
+            harMinimumInntekt = harMinimumInntekt,
+            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && harMinimumInntekt
         )
         return this
     }

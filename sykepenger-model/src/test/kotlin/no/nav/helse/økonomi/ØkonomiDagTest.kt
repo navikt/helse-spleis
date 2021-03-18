@@ -91,7 +91,7 @@ internal class ØkonomiDagTest {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
         val c = tidslinjeOf(2.NAV(1200))
-            .onEach { (it as NavDag).avvistDag(Begrunnelse.MinimumInntekt) }
+            .onEach { (it as NavDag).avvistDag(listOf(Begrunnelse.MinimumInntekt)) }
         MaksimumUtbetaling(listOf(a, b, c), Aktivitetslogg(), 1.januar).betal()
         assertØkonomi(a, 724)
         assertØkonomi(b, 724)

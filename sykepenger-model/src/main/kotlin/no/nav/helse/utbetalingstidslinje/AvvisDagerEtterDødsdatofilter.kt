@@ -14,7 +14,7 @@ internal class AvvisDagerEtterDødsdatofilter(
     internal fun filter() {
         if (dødsdato == null) return
         val avvisteDager = periode.filter { dato -> dato > dødsdato }.takeIf(List<*>::isNotEmpty) ?: return
-        if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager, periode, Begrunnelse.EtterDødsdato))
+        if (Utbetalingstidslinje.avvis(tidslinjer, avvisteDager, periode, listOf(Begrunnelse.EtterDødsdato)))
             return aktivitetslogg.info("Utbetaling stoppet etter $dødsdato grunnet dødsfall")
         aktivitetslogg.info("Personen døde $dødsdato, utenfor den aktuelle perioden.")
     }

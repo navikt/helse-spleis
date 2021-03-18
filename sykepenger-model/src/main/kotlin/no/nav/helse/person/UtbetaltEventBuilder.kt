@@ -179,16 +179,21 @@ private class UtbetaltEventBuilder(
             override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
                 ikkeUtbetalteDager.add(
                     UtbetaltEvent.IkkeUtbetaltDag(
-                        dato, when (dag.begrunnelse) {
-                            Begrunnelse.SykepengedagerOppbrukt -> UtbetaltEvent.IkkeUtbetaltDag.Type.SykepengedagerOppbrukt
-                            Begrunnelse.MinimumInntekt -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumInntekt
-                            Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> UtbetaltEvent.IkkeUtbetaltDag.Type.EgenmeldingUtenforArbeidsgiverperiode
-                            Begrunnelse.MinimumSykdomsgrad -> UtbetaltEvent.IkkeUtbetaltDag.Type.MinimumSykdomsgrad
-                            Begrunnelse.EtterDødsdato -> UtbetaltEvent.IkkeUtbetaltDag.Type.EtterDødsdato
-                        }
+                        dato = dato, type = UtbetaltEvent.IkkeUtbetaltDag.Type.AvvistDag,  begrunnelser = mapBegrunnelser(dag.begrunnelser)
                     )
                 )
             }
+
+            private fun mapBegrunnelser(begrunnelser: List<Begrunnelse>): List<UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse> = begrunnelser.map {when (it) {
+                Begrunnelse.SykepengedagerOppbrukt -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.SykepengedagerOppbrukt
+                Begrunnelse.MinimumInntekt -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.MinimumInntekt
+                Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+                Begrunnelse.MinimumSykdomsgrad -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.MinimumSykdomsgrad
+                Begrunnelse.EtterDødsdato -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.EtterDødsdato
+                Begrunnelse.ManglerMedlemskap -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.ManglerMedlemskap
+                Begrunnelse.ManglerOpptjening -> UtbetaltEvent.IkkeUtbetaltDag.Begrunnelse.ManglerOpptjening
+            }
+        }
 
             override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
                 ikkeUtbetalteDager.add(UtbetaltEvent.IkkeUtbetaltDag(dato, UtbetaltEvent.IkkeUtbetaltDag.Type.Fridag))

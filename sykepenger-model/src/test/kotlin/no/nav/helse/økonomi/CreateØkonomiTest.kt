@@ -107,6 +107,7 @@ internal class CreateØkonomiTest {
         1.januar,
         totalGrad?.toDouble(),
         null,
+        null,
         grad,
         arbeidsgiverBetalingProsent,
         arbeidsgiverbeløp,

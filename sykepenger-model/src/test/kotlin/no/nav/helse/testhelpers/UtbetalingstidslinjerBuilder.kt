@@ -144,7 +144,7 @@ internal fun Int.HELGv2(dekningsgrunnlag: Int, grad: Number = 100.0) = Utbetalin
 )
 
 private fun Utbetalingstidslinje.addAvvistDag(dato: LocalDate, økonomi: Økonomi) =
-    this.addAvvistDag(dato, økonomi, Begrunnelse.SykepengedagerOppbrukt)
+    this.addAvvistDag(dato, økonomi, listOf(Begrunnelse.SykepengedagerOppbrukt))
 
 internal data class Utbetalingsdager(
     val antallDager: Int,

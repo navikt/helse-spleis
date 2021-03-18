@@ -120,7 +120,7 @@ internal class UtbetalingstidslinjeBuilder(
                 type = TypeDataDTO.AvvistDag,
                 inntekt = 0,    // Speil needs zero here
                 dato = dato,
-                begrunnelse = BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(dag.begrunnelse).name),
+                begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
                 grad = 0.0 // Speil wants zero here
             )
         )

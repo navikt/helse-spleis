@@ -151,7 +151,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun addAvvistDag(dato: LocalDate) {
-        tidslinje.addAvvistDag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato), Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
+        tidslinje.addAvvistDag(dato, Økonomi.ikkeBetalt().inntektIfNotNull(dato), listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode))
     }
 
     private fun addFridag(dato: LocalDate) {

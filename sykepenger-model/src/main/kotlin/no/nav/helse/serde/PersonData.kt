@@ -159,6 +159,7 @@ internal data class PersonData(
         private val harOpptjening: Boolean?,
         private val antallOpptjeningsdagerErMinst: Int?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
+        private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean?
     ) {
         internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
@@ -172,6 +173,7 @@ internal data class PersonData(
                     JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
                     JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                 },
+                harMinimumInntekt = harMinimumInntekt,
                 vurdertOk = vurdertOk!!
             )
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
@@ -955,7 +957,9 @@ internal data class PersonData(
             MinimumInntekt,
             EgenmeldingUtenforArbeidsgiverperiode,
             MinimumSykdomsgrad,
-            EtterDødsdato;
+            EtterDødsdato,
+            ManglerMedlemskap,
+            ManglerOpptjening;
 
             fun tilBegrunnelse() = when(this) {
                 SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
@@ -963,6 +967,8 @@ internal data class PersonData(
                 EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                 MinimumInntekt -> Begrunnelse.MinimumInntekt
                 EtterDødsdato -> Begrunnelse.EtterDødsdato
+                ManglerMedlemskap -> Begrunnelse.ManglerMedlemskap
+                ManglerOpptjening -> Begrunnelse.ManglerOpptjening
             }
 
             internal companion object {
@@ -972,6 +978,8 @@ internal data class PersonData(
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato
+                    is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
+                    is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
                 }
             }
         }
@@ -995,6 +1003,7 @@ internal data class PersonData(
             private val skjæringstidspunkt: LocalDate?,
             private val totalGrad: Double?,
             private val begrunnelse: BegrunnelseData?,
+            private val begrunnelser: List<BegrunnelseData>?,
             private val grad: Double?,
             private val arbeidsgiverBetalingProsent: Double?,
             private val arbeidsgiverbeløp: Int?,
@@ -1041,7 +1050,7 @@ internal data class PersonData(
                     }
                     TypeData.AvvistDag -> {
                         Utbetalingstidslinje.Utbetalingsdag.AvvistDag(
-                            dato = dato, økonomi = økonomi, begrunnelse = begrunnelse?.tilBegrunnelse() ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
+                            dato = dato, økonomi = økonomi, begrunnelser = begrunnelser?.map { it.tilBegrunnelse() } ?: begrunnelse?.let { listOf(it.tilBegrunnelse()) } ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
                         )
                     }
                     TypeData.UkjentDag -> {

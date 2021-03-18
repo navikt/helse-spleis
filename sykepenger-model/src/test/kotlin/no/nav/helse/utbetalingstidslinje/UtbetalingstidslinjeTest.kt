@@ -7,13 +7,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
-
-    private lateinit var inspektør: UtbetalingstidslinjeInspektør
-
-    companion object {
-        private val UNG_PERSON_FNR_2018 = Alder("12020052345")
-    }
-
     @Test
     fun `samlet periode`() {
         assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))

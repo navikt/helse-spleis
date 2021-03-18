@@ -133,7 +133,7 @@ data class AvvistDagDTO(
     override val type: TypeDataDTO = TypeDataDTO.AvvistDag,
     override val inntekt: Int,
     override val dato: LocalDate,
-    val begrunnelse: BegrunnelseDTO,
+    val begrunnelser: List<BegrunnelseDTO>,
     val grad: Double
 ) : UtbetalingstidslinjedagDTO
 

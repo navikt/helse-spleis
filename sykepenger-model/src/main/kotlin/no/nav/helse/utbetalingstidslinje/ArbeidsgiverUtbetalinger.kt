@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
@@ -11,6 +12,7 @@ internal class ArbeidsgiverUtbetalinger(
     private val infotrygdtidslinje: Utbetalingstidslinje,
     private val alder: Alder,
     private val dødsdato: LocalDate?,
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
     internal lateinit var tidslinjeEngine: MaksimumSykepengedagerfilter
 
@@ -28,7 +30,7 @@ internal class ArbeidsgiverUtbetalinger(
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
-        MinimumInntektsfilter(alder, tidslinjer, periode, aktivitetslogg).filter()
+        vilkårsgrunnlagHistorikk?.avvisUtbetalingsdagerMedBegrunnelse(tidslinjer)
         tidslinjeEngine = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg).also {
             it.filter(tidslinjer, infotrygdtidslinje.kutt(periode.endInclusive))
         }

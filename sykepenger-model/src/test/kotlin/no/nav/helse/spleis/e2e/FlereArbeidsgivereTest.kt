@@ -15,6 +15,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.testhelpers.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -2125,6 +2126,71 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET)
         assertTilstand(a2, AVSLUTTET)
+    }
+
+
+    @Test
+    fun `medlemskap ikke oppfyllt i vilkårsgrunnlag, avviser perioden riktig for begge arbeidsgivere`() {
+        val periode = Periode(1.januar, 31.januar)
+        nyPeriode(periode, a1)
+        nyPeriode(periode, a2)
+
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+                førsteFraværsdag = periode.start,
+                orgnummer = a1
+            )
+        )
+
+        person.håndter(
+            inntektsmelding(
+                UUID.randomUUID(),
+                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+                førsteFraværsdag = periode.start,
+                orgnummer = a2
+            )
+        )
+
+        historikk(a1)
+        person.håndter(
+            vilkårsgrunnlag(
+                a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+                    inntekter = inntektperioder {
+                        inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                        1.januar(2017) til 1.desember(2017) inntekter {
+                            a1 inntekt INNTEKT
+                        }
+                        1.januar(2017) til 1.desember(2017) inntekter {
+                            a2 inntekt INNTEKT
+                        }
+                    },
+                ), medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+            )
+        )
+        historikk(a1)
+
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        a1.inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode(a1))).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class])
+            }
+        }
+        a2.inspektør.also {
+            assertTrue(it.personLogg.hasWarningsOrWorse())
+            TestTidslinjeInspektør(it.utbetalingstidslinjer(1.vedtaksperiode(a2))).also { tidslinjeInspektør ->
+                assertEquals(16, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag::class])
+                assertEquals(4, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.NavHelgDag::class])
+                assertEquals(11, tidslinjeInspektør.dagtelling[Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class])
+            }
+        }
+
     }
 
     private fun assertTilstand(
