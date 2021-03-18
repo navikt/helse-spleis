@@ -365,7 +365,7 @@ internal class Vedtaksperiode private constructor(
         block()
 
         event.kontekst(tilstand)
-        emitVedtaksperiodeEndret(tilstand, event, person.aktivitetslogg.logg(this), previousState)
+        emitVedtaksperiodeEndret(tilstand, event, previousState)
         tilstand.entering(this, event)
     }
 
@@ -520,7 +520,6 @@ internal class Vedtaksperiode private constructor(
     private fun emitVedtaksperiodeEndret(
         currentState: Vedtaksperiodetilstand,
         hendelse: ArbeidstakerHendelse,
-        vedtaksperiodeaktivitetslogg: Aktivitetslogg,
         previousState: Vedtaksperiodetilstand
     ) {
         val event = PersonObserver.VedtaksperiodeEndretTilstandEvent(
@@ -531,7 +530,6 @@ internal class Vedtaksperiode private constructor(
             gjeldendeTilstand = currentState.type,
             forrigeTilstand = previousState.type,
             aktivitetslogg = hendelse.aktivitetsloggMap(),
-            vedtaksperiodeaktivitetslogg = vedtaksperiodeaktivitetslogg.toMap(),
             hendelser = hendelseIder,
             makstid = currentState.makstid(this, LocalDateTime.now())
         )

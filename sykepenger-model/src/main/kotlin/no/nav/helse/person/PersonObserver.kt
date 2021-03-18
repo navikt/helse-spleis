@@ -41,7 +41,6 @@ interface PersonObserver {
         val gjeldendeTilstand: TilstandType,
         val forrigeTilstand: TilstandType,
         val aktivitetslogg: Map<String, List<Map<String, Any>>>,
-        val vedtaksperiodeaktivitetslogg: Map<String, List<Map<String, Any>>>,
         val hendelser: List<UUID>,
         val makstid: LocalDateTime
     )

@@ -164,7 +164,6 @@ internal class PersonMediator(
                     "gjeldendeTilstand" to event.gjeldendeTilstand,
                     "forrigeTilstand" to event.forrigeTilstand,
                     "aktivitetslogg" to event.aktivitetslogg.toMap(),
-                    "vedtaksperiode_aktivitetslogg" to event.vedtaksperiodeaktivitetslogg.toMap(),
                     "hendelser" to event.hendelser,
                     "makstid" to event.makstid
                 )
