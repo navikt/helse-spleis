@@ -26,12 +26,9 @@ internal class MinimumInntektsfilter(
             .keys
             .toList()
 
-        tidslinjer.forEach { it.avvis(datoerUnderInntektsgrense, Begrunnelse.MinimumInntekt) }
-
-        if (datoerUnderInntektsgrense in periode)
-            aktivitetslogg.warn("Inntekt under krav til minste sykepengegrunnlag. Vurder å sende brev")
-        else
-            aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
+        if (Utbetalingstidslinje.avvis(tidslinjer, datoerUnderInntektsgrense, periode, Begrunnelse.MinimumInntekt))
+            return aktivitetslogg.warn("Inntekt under krav til minste sykepengegrunnlag. Vurder å sende brev")
+        aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
     }
 
     override fun visit(
