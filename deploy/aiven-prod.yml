@@ -116,6 +116,9 @@ spec:
           application: spre-oppgaver
           access: readwrite
         - team: tbd
+          application: spre-saksbehandlingsstatistikk
+          access: read
+        - team: tbd
           application: spre-stonadsstatistikk
           access: readwrite
         - team: tbd
