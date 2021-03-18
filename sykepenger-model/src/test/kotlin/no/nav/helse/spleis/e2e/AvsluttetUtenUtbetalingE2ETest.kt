@@ -26,8 +26,9 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.mars, 26.mars, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -37,7 +38,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,

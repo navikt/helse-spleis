@@ -185,6 +185,7 @@ class SpeilBuilderTest {
 
                 vedtaksperiodeIder = collectVedtaksperiodeIder()
 
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
@@ -245,6 +246,7 @@ class SpeilBuilderTest {
 
                 vedtaksperiodeIder = collectVedtaksperiodeIder()
 
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
@@ -314,6 +316,7 @@ class SpeilBuilderTest {
 
                 vedtaksperiodeIder = collectVedtaksperiodeIder()
 
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
@@ -355,6 +358,7 @@ class SpeilBuilderTest {
 
                 vedtaksperiodeIder = collectVedtaksperiodeIder()
 
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeIder.last()))
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeIder.last()))
@@ -1027,6 +1031,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
@@ -1103,6 +1108,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(vilkårsgrunnlagMedFlerInntekter(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     fangeUtbetalinger()
@@ -1159,6 +1165,7 @@ class SpeilBuilderTest {
                     håndter(inntektsmelding)
                     add(inntektsmeldingDTO)
                 }
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
@@ -1236,6 +1243,7 @@ class SpeilBuilderTest {
                     håndter(inntektsmelding)
                     add(inntektsmeldingDTO)
                 }
+                håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                 håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 fangeUtbetalinger()
@@ -1271,6 +1279,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60))))
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, arbeidsavklaringspenger = listOf(fom.minusDays(60) til tom.minusDays(60))))
                     fangeUtbetalinger()
@@ -1303,6 +1312,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                 }
@@ -1372,6 +1382,7 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))

@@ -116,6 +116,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         }
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -124,7 +125,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode) // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
@@ -276,10 +277,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         vedtaksperiodeIndeks: Int,
         fom: LocalDate,
         tom: LocalDate,
-        arbeidsgiverperiode: List<Periode> = listOf(Periode(
-            fom,
-            fom.plusDays(15)
-        )),
+        arbeidsgiverperiode: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
         førsteFraværsdag: LocalDate = fom,
         inntekter: Inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
@@ -298,8 +296,9 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             førsteFraværsdag = førsteFraværsdag,
             refusjon = Triple(null, HØY_INNTEKT, emptyList())
         )
+        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterVilkårsgrunnlag(vedtaksperiodeIndeks.vedtaksperiode, HØY_INNTEKT, inntektsvurdering = inntekter)
-        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode) // No history
+        håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
     }

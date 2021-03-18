@@ -30,12 +30,12 @@ internal class VilkårsgrunnlagTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, fødselsnummer).apply {
-            addObserver(observatør)
-            håndter(sykmelding())
-            håndter(søknad())
-            håndter(inntektsmelding())
-        }
+        person = Person(aktørId, fødselsnummer)
+        person.addObserver(observatør)
+        person.håndter(sykmelding())
+        person.håndter(søknad())
+        person.håndter(inntektsmelding())
+        person.håndter(ytelser())
     }
 
     @Test
@@ -239,4 +239,23 @@ internal class VilkårsgrunnlagTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
+
+    private fun ytelser() = Ytelser(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = orgnummer,
+        vedtaksperiodeId = vedtaksperiodeId(),
+        utbetalingshistorikk = Utbetalingshistorikk(UUID.randomUUID(), aktørId, fødselsnummer, orgnummer, vedtaksperiodeId(), emptyMap(), emptyList(), emptyList()),
+        foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),
+        pleiepenger = Pleiepenger(emptyList(), Aktivitetslogg()),
+        omsorgspenger = Omsorgspenger(emptyList(), Aktivitetslogg()),
+        opplæringspenger = Opplæringspenger(emptyList(), Aktivitetslogg()),
+        institusjonsopphold = Institusjonsopphold(emptyList(), Aktivitetslogg()),
+        dødsinfo = Dødsinfo(null),
+        statslønn = false,
+        arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+        dagpenger = Dagpenger(emptyList()),
+        aktivitetslogg = Aktivitetslogg()
+    )
 }

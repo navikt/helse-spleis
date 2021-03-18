@@ -35,7 +35,7 @@ internal class AutomatiseringTest: AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP
+            TilstandType.AVVENTER_HISTORIKK
         )
         assertTilstander(
             2.vedtaksperiode,

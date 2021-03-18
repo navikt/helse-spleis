@@ -34,6 +34,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -45,7 +46,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -57,6 +59,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
+        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(2.vedtaksperiode)
@@ -68,7 +71,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -88,6 +92,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -99,7 +104,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -111,6 +117,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
+        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(2.vedtaksperiode)
@@ -122,7 +129,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -143,6 +151,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -154,7 +163,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -166,6 +176,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
+        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(2.vedtaksperiode)
@@ -177,7 +188,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -198,6 +210,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 4.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(20.januar, 4.februar))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -209,7 +222,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -241,6 +255,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -252,7 +267,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -264,6 +280,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.februar, 16.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
 
+        håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(2.vedtaksperiode)
@@ -275,7 +292,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -295,6 +313,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList())
         håndterSimulering(1.vedtaksperiode)
@@ -306,7 +325,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -369,7 +389,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
 
         inspektør.also {
@@ -387,6 +407,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 28.februar, 100.prosent))
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
@@ -398,7 +419,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -418,6 +440,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -429,7 +452,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -441,6 +465,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 6.februar, refusjon = Triple(null, 32000.månedlig, emptyList()))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 16.februar, 100.prosent))
 
+        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -452,7 +477,8 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -481,7 +507,7 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
 
         inspektør.also {

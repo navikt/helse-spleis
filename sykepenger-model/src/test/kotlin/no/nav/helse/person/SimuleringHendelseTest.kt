@@ -47,6 +47,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(ytelser())
     }

@@ -325,6 +325,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.april til 16.april))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -376,6 +377,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.april til 16.april))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG

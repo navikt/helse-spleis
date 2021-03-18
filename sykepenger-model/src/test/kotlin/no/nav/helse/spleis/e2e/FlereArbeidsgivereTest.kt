@@ -50,6 +50,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 orgnummer = a1
             )
         )
+        person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -93,6 +94,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 orgnummer = a1
             )
         )
+        person.håndter(ytelser(1.vedtaksperiode(a1), orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -602,19 +604,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
         håndterInntektsmelding(listOf(4.januar(2021) til 19.januar(2021)), førsteFraværsdag = 27.januar(2021), orgnummer = a2)
-        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-        assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
-
-        if (!Toggles.ForTest_ManglerVilkårsvurderingPåPerson.enabled) {
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2020) til 1.desember(2020) inntekter {
-                        a2 inntekt INNTEKT
-                    }
-                }
-            ))
-        }
         assertTilstand(a1, AVVENTER_HISTORIKK)
         assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
 
@@ -1640,6 +1629,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1678,23 +1668,18 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
             håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
-            assertTilstand(a1, AVVENTER_VILKÅRSPRØVING_GAP)
-            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                }
-            ))
             assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
             assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
             håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
-            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-            assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            assertTilstand(a1, AVVENTER_HISTORIKK)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            assertTilstand(a1, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2020) til 1.desember(2020) inntekter {
@@ -1763,36 +1748,27 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 førsteFraværsdag = 1.januar(2021),
                 orgnummer = a1
             )
-            assertTilstand(a1, AVVENTER_VILKÅRSPRØVING_GAP)
-            assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                }
-            ))
             assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
             assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
 
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
                 førsteFraværsdag = 6.januar(2021),
+                refusjon = Triple(null, 1000.månedlig, emptyList()),
                 orgnummer = a2
             )
-            assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
-            assertTilstand(a2, AVVENTER_VILKÅRSPRØVING_GAP)
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            assertTilstand(a1, AVVENTER_HISTORIKK)
+            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2020) til 1.desember(2020) inntekter {
                         a1 inntekt INNTEKT
+                        a2 inntekt 1000.månedlig
                     }
                 }
             ))
-            assertTilstand(a1, AVVENTER_HISTORIKK)
-            assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
             håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
             assertTilstand(a1, TIL_INFOTRYGD)
             assertTilstand(a2, TIL_INFOTRYGD)
@@ -1814,20 +1790,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 førsteFraværsdag = 1.januar(2021),
                 orgnummer = a1
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                }
-            ))
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
                 førsteFraværsdag = 1.januar(2021),
                 orgnummer = a2
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2020) til 1.desember(2020) inntekter {
@@ -1868,20 +1837,13 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 førsteFraværsdag = 1.januar(2021),
                 orgnummer = a1
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                }
-            ))
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
                 førsteFraværsdag = 1.januar(2021),
                 orgnummer = a2
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            håndterYtelser(1.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioder {
                     inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                     1.januar(2020) til 1.desember(2020) inntekter {
@@ -2010,6 +1972,8 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 2.april(2021),
             orgnummer = a2
         )
+
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -2145,12 +2109,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private fun prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
-        gapPeriode(periode, orgnummer)
+        gapPeriode(periode, orgnummer, sykedagstelling)
         historikk(orgnummer, sykedagstelling)
         betale(orgnummer)
     }
 
-    private fun gapPeriode(periode: Periode, orgnummer: String) {
+    private fun gapPeriode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
         nyPeriode(periode, orgnummer)
         person.håndter(
             inntektsmelding(
@@ -2160,6 +2124,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 orgnummer = orgnummer
             )
         )
+        historikk(orgnummer, sykedagstelling)
         person.håndter(vilkårsgrunnlag(orgnummer.id(0), orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG

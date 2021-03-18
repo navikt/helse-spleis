@@ -655,11 +655,6 @@ internal class Vedtaksperiode private constructor(
                         hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
-            person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) == null && erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding() -> {
-                tilstand(hendelse, AvventerVilkårsprøvingGap) {
-                    hendelse.info("""Mangler vilkårsvurdering, settes til "Avventer vilkårsprøving (gap)"""")
-                }
-            }
             else -> {
                 loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerSimulering) {
@@ -1074,7 +1069,7 @@ internal class Vedtaksperiode private constructor(
                 søknad.warn("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig")
                 søknad.trimLeft(vedtaksperiode.sykdomstidslinje.førsteDag())
             }
-            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingGap)
+            vedtaksperiode.håndter(søknad, AvventerHistorikk)
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -1227,7 +1222,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_UFERDIG_GAP
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerVilkårsprøvingGap)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1293,7 +1288,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: GjenopptaBehandling) {
             val harVilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) != null
             if (harVilkårsgrunnlag) return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
-            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerVilkårsprøvingGap)
+            return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
     }
 
@@ -1366,12 +1361,45 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
+        /*
+                    val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
+            val første = vedtaksperioder.first()
+            if (første == vedtaksperiode) {
+                if (vedtaksperioder.drop(1)
+                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                        .all { it.tilstand == AvventerArbeidsgivere }
+                ) {
+                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
+                }
+            }
+            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
+                val overlappendeVedtaksperioder = vedtaksperioder
+                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+
+                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
+                    første.gjentaHistorikk(vilkårsgrunnlag)
+                }
+            }
+         */
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndter(inntektsmelding) {
+            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
+            val første = vedtaksperioder.first()
+            val overlappendeVedtaksperioder = vedtaksperioder.filter { vedtaksperiode.periode.overlapperMed(it.periode) }
+
+            vedtaksperiode.håndter(inntektsmelding) juice@{
                 if (inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive)) {
-                    AvventerVilkårsprøvingGap
+                    if (første == vedtaksperiode && overlappendeVedtaksperioder.drop(1).all { it.tilstand == AvventerArbeidsgivere }) {
+                        return@juice AvventerHistorikk
+                    }
+                    overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+                    AvventerArbeidsgivere
                 } else {
                     AvsluttetUtenUtbetalingMedInntektsmelding
+                }
+            }.also {
+                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
+                    første.gjentaHistorikk(inntektsmelding)
                 }
             }
         }
@@ -1421,7 +1449,7 @@ internal class Vedtaksperiode private constructor(
                             if (forrigeSkjæringstidspunkt != null) {
                                 utbetalingshistorikk.addInntekter(person)
                                 if (arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
-                                    vedtaksperiode.tilstand(utbetalingshistorikk, AvventerVilkårsprøvingGap)
+                                    vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
                                 }
                             }
                         }
@@ -1450,8 +1478,15 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plusDays(1)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            hendelse.info("THIS SHOULD NEVER HAPPEN :-)")
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -1477,6 +1512,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    @Deprecated(":)")
     internal object AvventerVilkårsprøvingGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING_GAP
 
@@ -1603,16 +1639,16 @@ internal class Vedtaksperiode private constructor(
                         else -> {
                             vedtaksperiode.forlengelseFraInfotrygd = NEI
                             arbeidsgiver.forrigeAvsluttaPeriodeMedVilkårsvurdering(vedtaksperiode, historie)?.also { vedtaksperiode.kopierManglende(it) }
-                            valider("""Vilkårsvurdering er ikke gjort, men perioden har utbetalinger?! ¯\_(ツ)_/¯""") {
-                                vedtaksperiode.person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) != null
-                                    || vedtaksperiode.erForlengelseAvAvsluttetUtenUtbetalingMedInntektsmelding()
-                            }
                         }
                     }
                 }
                 onSuccess {
                     if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) == null) {
-                        return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
+                        if (historie.forlengerInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)) {
+                            person.vilkårsgrunnlagHistorikk.lagre(ytelser.utbetalingshistorikk(), skjæringstidspunkt)
+                        } else {
+                            return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
+                        }
                     }
                 }
                 harNødvendigInntekt(person, skjæringstidspunkt)

@@ -24,8 +24,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -37,8 +38,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         håndterYtelser(1.vedtaksperiode)
@@ -56,8 +58,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-            håndterYtelser(1.vedtaksperiode)   // No history
+            håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt(1.vedtaksperiode)
@@ -87,15 +90,16 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
             håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-            håndterYtelser(1.vedtaksperiode)   // No history
+            håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt(1.vedtaksperiode)
 
             håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 23.februar, 100.prosent))
-            håndterYtelser(2.vedtaksperiode)   // No history
+            håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
             håndterUtbetalt(2.vedtaksperiode)
@@ -123,8 +127,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellArbeidsgiverdag(18.januar)))
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
@@ -138,7 +143,8 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,
@@ -155,6 +161,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -176,8 +183,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellSykedag(22.januar, 0)))
 
@@ -196,6 +204,7 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 17.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(2.januar, 25.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -216,8 +225,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyring(listOf(manuellFeriedag(26.januar)))
         håndterYtelser(1.vedtaksperiode)
@@ -239,8 +249,9 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 10.januar)
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(10.januar, 31.januar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         inspektør.arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
             override fun sykdomstidslinje() = Sykdomstidslinje.ukjent(2.januar, 9.januar, TestEvent.testkilde)

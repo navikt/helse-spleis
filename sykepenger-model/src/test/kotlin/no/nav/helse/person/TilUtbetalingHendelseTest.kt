@@ -162,6 +162,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding())
+        person.håndter(ytelser(1.vedtaksperiode))
         person.håndter(vilkårsgrunnlag(1.vedtaksperiode))
         person.håndter(ytelser(1.vedtaksperiode))
         person.håndter(simulering(1.vedtaksperiode))

@@ -20,6 +20,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
+        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
         håndterSimulering(1.vedtaksperiode)
@@ -35,16 +36,12 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
-                1.desember(2017), 31.desember(2017), 15000.daglig,
-                100.prosent,
-                ORGNUMMER
-            ),
-            statslønn = true
-        )
+        val historikk = arrayOf(Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
+            1.desember(2017), 31.desember(2017), 15000.daglig,
+            100.prosent,
+            ORGNUMMER
+        ))
+        håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

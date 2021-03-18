@@ -105,6 +105,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
                 arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar))
             )
         )
+        person.håndter(ytelser())
+        println()
         val inntektsberegningStart =
             hendelse.etterspurtBehov<String>(
                 1.vedtaksperiode,
@@ -170,6 +172,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
+        person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag(inntekter = inntekter, arbeidsforhold = arbeidsforhold))
     }
 
@@ -238,4 +241,28 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         ).apply {
             hendelse = this
         }
+
+    private fun ytelser() = Ytelser(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = "aktørId",
+        fødselsnummer = UNG_PERSON_FNR_2018,
+        organisasjonsnummer = ORGNUMMER,
+        vedtaksperiodeId = "${1.vedtaksperiode}",
+        utbetalingshistorikk = Utbetalingshistorikk(UUID.randomUUID(),
+            "aktørId",
+            UNG_PERSON_FNR_2018,
+            ORGNUMMER, "${1.vedtaksperiode}", emptyMap(), emptyList(), emptyList()),
+        foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),
+        pleiepenger = Pleiepenger(emptyList(), Aktivitetslogg()),
+        omsorgspenger = Omsorgspenger(emptyList(), Aktivitetslogg()),
+        opplæringspenger = Opplæringspenger(emptyList(), Aktivitetslogg()),
+        institusjonsopphold = Institusjonsopphold(emptyList(), Aktivitetslogg()),
+        dødsinfo = Dødsinfo(null),
+        statslønn = false,
+        arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
+        dagpenger = Dagpenger(emptyList()),
+        aktivitetslogg = Aktivitetslogg()
+    ).apply {
+        hendelse = this
+    }
 }

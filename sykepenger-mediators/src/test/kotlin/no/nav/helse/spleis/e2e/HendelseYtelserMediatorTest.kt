@@ -14,17 +14,12 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            pleiepenger = listOf(PleiepengerTestdata(3.januar, 26.januar, 100))
-        )
+        sendYtelser(vedtaksperiodeIndeks = 0, pleiepenger = listOf(PleiepengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -35,7 +30,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             omsorgspenger = listOf(OmsorgspengerTestdata(3.januar, 26.januar, 100))
@@ -45,7 +39,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -56,17 +49,12 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100))
-        )
+        sendYtelser(vedtaksperiodeIndeks = 0, opplæringspenger = listOf(OpplæringspengerTestdata(3.januar, 26.januar, 100)))
 
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -77,7 +65,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             institusjonsoppholdsperioder = listOf(
@@ -94,7 +81,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -105,7 +91,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
             sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
@@ -137,7 +122,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
@@ -149,39 +133,35 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
-                fom = 1.januar,
-                tom = 26.januar,
-                arbeidskategorikode = "01",
-                utbetalteSykeperioder = listOf(
-                    UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
-                        fom = 1.januar,
-                        tom = 2.januar,
-                        dagsats = 1400.0,
-                        typekode = "0",
-                        utbetalingsgrad = "100",
-                        organisasjonsnummer = ORGNUMMER
-                    ),
+        val historikk = listOf(UtbetalingshistorikkTestdata(
+            fom = 1.januar,
+            tom = 26.januar,
+            arbeidskategorikode = "01",
+            utbetalteSykeperioder = listOf(
+                UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                    fom = 1.januar,
+                    tom = 2.januar,
+                    dagsats = 1400.0,
+                    typekode = "0",
+                    utbetalingsgrad = "100",
+                    organisasjonsnummer = ORGNUMMER
                 ),
-                inntektsopplysninger = listOf(
-                    UtbetalingshistorikkTestdata.Inntektsopplysninger(
-                        sykepengerFom = 1.januar,
-                        inntekt = 36000.0,
-                        organisasjonsnummer = ORGNUMMER,
-                        refusjonTilArbeidsgiver = true
-                    )
+            ),
+            inntektsopplysninger = listOf(
+                UtbetalingshistorikkTestdata.Inntektsopplysninger(
+                    sykepengerFom = 1.januar,
+                    inntekt = 36000.0,
+                    organisasjonsnummer = ORGNUMMER,
+                    refusjonTilArbeidsgiver = true
                 )
-            ))
-        )
+            )
+        ))
+        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
 
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING"
         )
@@ -193,23 +173,23 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        val historikk = listOf(UtbetalingshistorikkTestdata(
+            fom = 1.januar,
+            tom = 26.januar,
+            arbeidskategorikode = "07",
+            utbetalteSykeperioder = emptyList(),
+            inntektsopplysninger = emptyList()
+        ))
+        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
         sendVilkårsgrunnlag(0)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            sykepengehistorikk = listOf(UtbetalingshistorikkTestdata(
-                fom = 1.januar,
-                tom = 26.januar,
-                arbeidskategorikode = "07",
-                utbetalteSykeperioder = emptyList(),
-                inntektsopplysninger = emptyList()
-            ))
-        )
+        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
 
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING"
         )

@@ -25,6 +25,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -41,7 +42,8 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
             AVSLUTTET
@@ -53,6 +55,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -116,6 +119,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 19.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 19.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -123,6 +127,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 20.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.mars, 16.mars)))
+        håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

@@ -24,6 +24,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -34,7 +35,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -52,13 +54,15 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             ferie = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING"
         )
@@ -69,6 +73,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -78,7 +83,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -91,6 +97,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -110,7 +117,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -124,6 +132,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -134,7 +143,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -147,6 +157,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -160,7 +171,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
@@ -176,6 +188,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -207,6 +220,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -228,6 +242,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -274,12 +289,18 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.TEKNISK_FEIL)
         assertTilstander(
-            0, "MOTTATT_SYKMELDING_FERDIG_GAP", "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_VILKÅRSPRØVING_GAP", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING"
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING"
         )
     }
 
@@ -305,6 +326,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 21.januar, sykmeldingsgrad = 100)))
             sendUtbetalingshistorikk(0)
             sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+            sendYtelser(0)
             sendVilkårsgrunnlag(0)
             sendYtelser(0)
             sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -314,7 +336,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
                 0,
                 "MOTTATT_SYKMELDING_FERDIG_GAP",
                 "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_VILKÅRSPRØVING_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_VILKÅRSPRØVING",
                 "AVVENTER_HISTORIKK",
                 "AVVENTER_SIMULERING",
                 "AVVENTER_GODKJENNING",
@@ -325,6 +348,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             sendNySøknad(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100))
             sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 6.februar, tom = 28.februar, sykmeldingsgrad = 100)))
             sendUtbetalingshistorikk(1)
+            sendYtelser(1)
             sendVilkårsgrunnlag(1)
             sendYtelser(1)
             sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
@@ -334,7 +358,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
                 1,
                 "MOTTATT_SYKMELDING_FERDIG_GAP",
                 "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_VILKÅRSPRØVING_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_VILKÅRSPRØVING",
                 "AVVENTER_HISTORIKK",
                 "AVVENTER_SIMULERING",
                 "AVVENTER_GODKJENNING",

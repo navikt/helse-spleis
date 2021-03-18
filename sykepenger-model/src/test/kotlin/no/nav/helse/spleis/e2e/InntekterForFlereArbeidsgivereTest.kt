@@ -157,6 +157,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 orgnummer = orgnummer
             )
         )
+        person.håndter(ytelser(1.vedtaksperiode(orgnummer), orgnummer = orgnummer, inntektshistorikk = emptyList()))
     }
 
     private fun vilkårsgrunnlag(

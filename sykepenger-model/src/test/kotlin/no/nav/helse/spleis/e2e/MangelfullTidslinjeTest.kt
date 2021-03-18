@@ -15,12 +15,11 @@ internal class MangelfullTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         assertErrors(inspektør)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP, AVVENTER_HISTORIKK, TIL_INFOTRYGD
+            AVVENTER_HISTORIKK, TIL_INFOTRYGD
         )
     }
 }

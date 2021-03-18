@@ -25,6 +25,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
+        håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -33,7 +34,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -58,6 +58,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.juni)
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -66,7 +67,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

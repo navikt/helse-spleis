@@ -16,7 +16,6 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
@@ -66,6 +65,19 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(15.januar(2020), 12.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(15.januar(2020), 12.februar(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(3.april(2019), INNTEKT, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(18.mars(2018), INNTEKT, ORGNUMMER, true),
+            Utbetalingshistorikk.Inntektsopplysning(13.november(2017), INNTEKT, ORGNUMMER, true)
+        )
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100.daglig, 100.prosent, ORGNUMMER),
+            RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100.daglig, 100.prosent, ORGNUMMER)
+        )
+        håndterYtelser(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -74,18 +86,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(
-            1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(3.april(2019), INNTEKT, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(18.mars(2018), INNTEKT, ORGNUMMER, true),
-                Utbetalingshistorikk.Inntektsopplysning(13.november(2017), INNTEKT, ORGNUMMER, true)
-            )
-        )
+        håndterYtelser(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -93,7 +94,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
@@ -179,7 +181,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -213,7 +215,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_SØKNAD_UFERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -237,7 +239,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
 
         assertTilstander(
@@ -270,7 +272,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
 
         assertTilstander(
@@ -326,7 +328,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
             AVVENTER_UFERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -371,7 +373,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
             AVVENTER_UFERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP
+            AVVENTER_HISTORIKK
         )
     }
 
@@ -400,6 +402,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             21.februar
         )
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -411,7 +414,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -574,6 +578,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(29.februar(2020), 11.mars(2020), 80.prosent))
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -582,7 +587,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode) // No history
+        håndterYtelser(1.vedtaksperiode)
 
         assertEquals(5, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
@@ -591,7 +596,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
@@ -628,6 +634,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(30.desember(2019), 30.desember(2019))
             )
         )
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -636,7 +643,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode) // No history
+        håndterYtelser(1.vedtaksperiode)
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
@@ -646,7 +653,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
         )
@@ -699,6 +707,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -707,7 +716,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -724,7 +733,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
@@ -792,6 +801,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
             førsteFraværsdag = 17.januar(2020)
         )
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -800,18 +810,19 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
-        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -836,6 +847,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -844,7 +856,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -858,7 +870,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_VILKÅRSPRØVING_GAP,
+            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET
         )
         assertTilstander(
@@ -873,8 +885,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(3.januar, 4.januar), Periode(9.januar, 10.januar)), 3.januar)
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
             assertEquals(4, it.dagtelling[Sykedag::class])
@@ -886,7 +899,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING
         )
@@ -929,6 +943,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020)))
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -958,7 +973,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -976,6 +992,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             ferieperioder = listOf(Periode(3.januar(2020), 10.januar(2020)))
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1004,7 +1021,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -1021,6 +1039,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             førsteFraværsdag = 11.januar(2020)
         )
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), sendtTilNav = 1.februar(2020))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1049,7 +1068,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -1064,6 +1084,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juli(2020), 31.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(1.juli(2020), 31.juli(2020), 100.prosent))
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1099,6 +1120,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.august(2020), 31.august(2020), 50.prosent))
         håndterSøknad(Sykdom(1.august(2020), 31.august(2020), 50.prosent))
 
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1197,6 +1219,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Triple(null, INNTEKT, emptyList())
         )
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
@@ -1207,7 +1230,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD
         )
     }
@@ -1222,6 +1246,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             refusjon = Triple(null, INNTEKT, emptyList())
         )
         håndterSøknad(Sykdom(15.mars(2020), 8.april(2020), 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1238,7 +1263,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -1342,6 +1368,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.juni, 16.juni)), førsteFraværsdag = 1.juni)
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -1350,7 +1377,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)   // No history
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
@@ -1361,61 +1388,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         inspektør.also {
             assertEquals(Periode(1.juni, 30.juni), it.vedtaksperioder(1.vedtaksperiode).periode())
             assertEquals(Periode(9.juli, 31.juli), it.vedtaksperioder(2.vedtaksperiode).periode())
-        }
-    }
-
-    @Disabled("Forkasting fjerner ikke egen historikk fra sykdomshistorikken i arbeidsgiver")
-    @Test
-    fun `Forkastede vedtaksperioder må fjerne sin sykdomstidslinje fra sykdomshistorikken i arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(6.juli(2020), 20.juli(2020), 50.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.juli(2020), 3.august(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(4.august(2020), 19.august(2020), 100.prosent))
-
-        håndterSøknad(Sykdom(20.juli(2020), 3.august(2020), 100.prosent))
-
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(6.juli(2020), 21.juli(2020))),
-            førsteFraværsdag = 6.juli(2020),
-            refusjon = Triple(null, 70000.månedlig, emptyList()),
-            beregnetInntekt = 70000.månedlig
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, 70.månedlig)
-
-        håndterSøknad(Sykdom(4.august(2020), 19.august(2020), 100.prosent))
-        håndterYtelser(
-            2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304.daglig, 100.prosent, ORGNUMMER),
-            foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    22.juli(2020),
-                    70000.månedlig,
-                    ORGNUMMER,
-                    true
-                )
-            )
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode, 70000.månedlig)
-        håndterYtelser(
-            2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(22.juli(2020), 3.august(2020), 2304.daglig, 100.prosent, ORGNUMMER),
-            foreldrepenger = Periode(20.august(2020), 31.mars(2021)),
-            inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
-                    22.juli(2020),
-                    70000.månedlig,
-                    ORGNUMMER,
-                    true
-                )
-            )
-        )
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-
-        inspektør.also {
-            TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->
-                assertNull(tidslinjeInspektør.dagtelling[ArbeidsgiverperiodeDag::class])
-            }
         }
     }
 
@@ -1486,6 +1458,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
         håndterSøknad(Sykdom(1.januar, 30.januar, 100.prosent))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

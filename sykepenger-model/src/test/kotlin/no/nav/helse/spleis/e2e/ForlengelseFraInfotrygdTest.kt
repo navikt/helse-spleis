@@ -98,6 +98,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `forlenger ikke vedtaksperiode som har gått til infotrygd, der utbetaling ikke er gjort`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntektshistorikk = listOf(Inntektsopplysning(3.januar(2018), INNTEKT, ORGNUMMER, true))
         håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)  // <-- TIL_INFOTRYGD
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
@@ -108,19 +109,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             listOf(Periode(29.januar, 13.februar)),
             førsteFraværsdag = 29.januar
         )
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            2.vedtaksperiode,
-            historikk,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    3.januar(2018),
-                    INNTEKT,
-                    ORGNUMMER,
-                    true
-                )
-            )
-        )
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertTilstander(
@@ -128,7 +119,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -260,6 +252,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), 1.januar)
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -293,7 +286,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -486,6 +480,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     fun `setter forlengelse-flagget likt som forrige periode - ikke forlengelse fra infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = RefusjonTilArbeidsgiver(3.januar, 25.januar, 1000.daglig, 100.prosent, ORGNUMMER)
+        val inntekthistorikk = listOf(Inntektsopplysning(3.januar(2018), INNTEKT, ORGNUMMER, true))
         håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk) // <-- TIL_INFOTRYGD
 
@@ -497,18 +492,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             listOf(Periode(29.januar, 13.februar)),
             førsteFraværsdag = 29.januar
         )
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntekthistorikk)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            2.vedtaksperiode, historikk,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    3.januar(2018),
-                    INNTEKT,
-                    ORGNUMMER,
-                    true
-                )
-            )
-        )
+        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntekthistorikk)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -536,7 +522,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -589,6 +576,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.mai(2020), 2.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(10.mai(2020), 2.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(10.mai(2020), 25.mai(2020))), førsteFraværsdag = 10.mai(2020))
+        håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -619,7 +607,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -654,19 +643,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 2.februar)
+        val historikk = arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER))
+        val inntektshistorikk = listOf(Inntektsopplysning(17.januar(2018), 1000.daglig, ORGNUMMER, true))
+        håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(
-            1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(17.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    17.januar(2018),
-                    1000.daglig,
-                    ORGNUMMER,
-                    true
-                )
-            )
-        )
+        håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -675,7 +656,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
