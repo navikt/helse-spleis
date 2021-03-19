@@ -61,16 +61,45 @@ internal class SykdomsgradfilterTest {
             tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
             tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
         )
-        println(Utbetalingstidslinje.periode(tidslinjer))
         val periode = Periode(1.januar, 21.januar)
         undersøke(tidslinjer, periode)
         assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.first()).avvistDagTeller)
         assertEquals(5, UtbetalingstidslinjeInspektør(tidslinjer.last()).avvistDagTeller)
     }
 
+    @Test
+    fun `avviser utbetaling når samlet grad er under 20 prosent`() {
+        val tidslinjer = listOf(
+            tidslinjeOf(16.AP, 4.NAV, 1.NAV(1200, 39)),
+            tidslinjeOf(16.AP, 4.NAV, 1.FRI)
+        )
+        val periode = Periode(1.januar, 21.januar)
+        undersøke(tidslinjer, periode)
+        assertEquals(4, tidslinjer.inspektør(0).navDagTeller)
+        assertEquals(1, tidslinjer.inspektør(0).avvistDagTeller)
+        assertEquals(4, tidslinjer.inspektør(1).navDagTeller)
+        assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
+    }
+
+    @Test
+    fun `avviser ikke utbetaling når samlet grad er minst 20 prosent`() {
+        val tidslinjer = listOf(
+            tidslinjeOf(16.AP, 4.NAV, 1.NAV(1200, 40)),
+            tidslinjeOf(16.AP, 4.NAV, 1.FRI)
+        )
+        val periode = Periode(1.januar, 21.januar)
+        undersøke(tidslinjer, periode)
+        assertEquals(5, tidslinjer.inspektør(0).navDagTeller)
+        assertEquals(0, tidslinjer.inspektør(0).avvistDagTeller)
+        assertEquals(4, tidslinjer.inspektør(1).navDagTeller)
+        assertEquals(1, tidslinjer.inspektør(1).fridagTeller)
+    }
+
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg).filter()
-        inspektør = UtbetalingstidslinjeInspektør(tidslinjer.first())
+        inspektør = tidslinjer.inspektør(0)
     }
+
+    private fun List<Utbetalingstidslinje>.inspektør(index: Int) = UtbetalingstidslinjeInspektør(this[index])
 }
