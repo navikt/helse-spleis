@@ -544,15 +544,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        person.nåværendeVedtaksperioder().first().gjentaHistorikk(påminnelse)
+        gjentaHistorikk(påminnelse, person)
     }
 
-    internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
-        if (tilstand == AvventerArbeidsgivere) {
-            hendelse.kontekst(arbeidsgiver)
-            kontekst(hendelse)
-            tilstand(hendelse, AvventerHistorikk)
-        }
+    private fun gjentaHistorikk(hendelse: ArbeidstakerHendelse) {
+        hendelse.kontekst(arbeidsgiver)
+        kontekst(hendelse)
+        tilstand(hendelse, AvventerHistorikk)
     }
 
     /**
@@ -571,7 +569,7 @@ internal class Vedtaksperiode private constructor(
             .forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
         this.tilstand(hendelse, AvventerArbeidsgivere)
-        første.gjentaHistorikk(hendelse)
+        gjentaHistorikk(hendelse, person)
     }
 
     private fun forsøkRevurdering(
@@ -1359,27 +1357,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        /*
-                    val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
-            val første = vedtaksperioder.first()
-            if (første == vedtaksperiode) {
-                if (vedtaksperioder.drop(1)
-                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                        .all { it.tilstand == AvventerArbeidsgivere }
-                ) {
-                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
-                }
-            }
-            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
-                val overlappendeVedtaksperioder = vedtaksperioder
-                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-
-                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
-                    første.gjentaHistorikk(vilkårsgrunnlag)
-                }
-            }
-         */
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
             val første = vedtaksperioder.first()
@@ -1396,9 +1373,7 @@ internal class Vedtaksperiode private constructor(
                     AvsluttetUtenUtbetalingMedInntektsmelding
                 }
             }.also {
-                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
-                    første.gjentaHistorikk(inntektsmelding)
-                }
+                gjentaHistorikk(inntektsmelding, vedtaksperiode.person)
             }
         }
 
@@ -1499,13 +1474,11 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
-                val overlappendeVedtaksperioder = vedtaksperioder
+                vedtaksperioder
                     .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
                     .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
-                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
-                    første.gjentaHistorikk(vilkårsgrunnlag)
-                }
+                gjentaHistorikk(vilkårsgrunnlag, vedtaksperiode.person)
             }
         }
     }
@@ -1546,13 +1519,11 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
-                val overlappendeVedtaksperioder = vedtaksperioder
+                vedtaksperioder
                     .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
                     .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
 
-                if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
-                    første.gjentaHistorikk(vilkårsgrunnlag)
-                }
+                gjentaHistorikk(vilkårsgrunnlag, vedtaksperiode.person)
             }
         }
 
@@ -2131,6 +2102,16 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skjæringstidspunkt
         )
 
+        internal fun gjentaHistorikk(hendelse: ArbeidstakerHendelse, person: Person) {
+            val nåværende = person.nåværendeVedtaksperioder()
+            val første = nåværende.firstOrNull() ?: return
+            if (nåværende
+                    .filter { første.periode.overlapperMed(it.periode) }
+                    .all { it.tilstand == AvventerArbeidsgivere }
+            ) {
+                første.gjentaHistorikk(hendelse)
+            }
+        }
     }
 }
 

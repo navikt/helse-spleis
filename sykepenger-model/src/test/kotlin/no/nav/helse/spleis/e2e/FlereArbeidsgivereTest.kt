@@ -1295,7 +1295,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
         assertTilstand(a1, AVSLUTTET, 1)
-        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
         assertTilstand(a2, AVSLUTTET, 1)
         assertTilstand(a2, AVVENTER_HISTORIKK, 2)
 
@@ -2090,6 +2090,99 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             assertTilstand(a2, TIL_INFOTRYGD, 1)
             assertTilstand(a2, TIL_INFOTRYGD, 2)
         }
+    }
+
+    @Test
+    fun `går ikke i loop mellom AVVENTER_ARBEIDSGIVERE og AVVENTER_HISTORIKK`() {
+        val periode = 27.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        val inntektshistorikk = listOf(
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a1, true),
+            Utbetalingshistorikk.Inntektsopplysning(20.januar(2021), INNTEKT, a2, true)
+        )
+
+        val utbetalinger = arrayOf(
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a1),
+            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), INNTEKT, 100.prosent, a2)
+        )
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterPåminnelse(1.vedtaksperiode(a1), orgnummer = a1, påminnetTilstand = AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP)
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+        assertInntektskilde(a1, EN_ARBEIDSGIVER)
+        assertInntektskilde(a2, EN_ARBEIDSGIVER)
+
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertTilstand(a1, AVVENTER_HISTORIKK)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+
+        håndterYtelser(1.vedtaksperiode(a1), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
+        assertTilstand(a1, AVVENTER_SIMULERING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterSimulering(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+        assertEquals("FLERE_ARBEIDSGIVERE", a1.inspektør.sisteBehov(1.vedtaksperiode(a1)).detaljer()["inntektskilde"])
+
+        håndterPåminnelse(1.vedtaksperiode(a2), orgnummer = a2, påminnetTilstand = AVVENTER_ARBEIDSGIVERE)
+        assertTilstand(a1, AVVENTER_GODKJENNING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, TIL_UTBETALING)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE)
+
+        håndterUtbetalt(1.vedtaksperiode(a1), orgnummer = a1)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_HISTORIKK)
+
+        håndterYtelser(1.vedtaksperiode(a2), *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_SIMULERING)
+
+        håndterSimulering(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVVENTER_GODKJENNING)
+        assertInntektskilde(a1, FLERE_ARBEIDSGIVERE)
+        assertInntektskilde(a2, FLERE_ARBEIDSGIVERE)
+        assertEquals("FLERE_ARBEIDSGIVERE", a2.inspektør.sisteBehov(1.vedtaksperiode(a2)).detaljer()["inntektskilde"])
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, TIL_UTBETALING)
+
+        håndterUtbetalt(1.vedtaksperiode(a2), orgnummer = a2)
+        assertTilstand(a1, AVSLUTTET)
+        assertTilstand(a2, AVSLUTTET)
     }
 
     private fun assertTilstand(

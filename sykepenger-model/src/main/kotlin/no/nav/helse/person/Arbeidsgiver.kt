@@ -592,7 +592,7 @@ internal class Arbeidsgiver private constructor(
         while (skalGjenopptaBehandling) {
             skalGjenopptaBehandling = false
             vedtaksperioder.any { it.håndter(GjenopptaBehandling(hendelse)) }
-            person.nåværendeVedtaksperioder().firstOrNull()?.gjentaHistorikk(hendelse)
+            Vedtaksperiode.gjentaHistorikk(hendelse, person)
         }
     }
 
