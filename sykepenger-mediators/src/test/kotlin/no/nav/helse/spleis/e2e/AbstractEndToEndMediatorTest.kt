@@ -78,7 +78,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         vedtaksperiodeIndeks: Int,
         perioder: List<SoknadsperiodeDTO>,
         orgnummer: String = ORGNUMMER,
-        ferie: List<FravarDTO> = emptyList(),
+        fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null
     ) {
@@ -87,7 +87,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(
             perioder = perioder,
             orgnummer = orgnummer,
-            ferie = ferie,
+            fravær = fravær,
             egenmeldinger = egenmeldinger,
             andreInntektskilder = andreInntektskilder
         ))
@@ -95,10 +95,10 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendKorrigerendeSøknad(
         perioder: List<SoknadsperiodeDTO>,
-        ferie: List<FravarDTO> = emptyList(),
+        fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList()
     ) {
-        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder = perioder, ferie = ferie, egenmeldinger = egenmeldinger))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSøknadNav(perioder = perioder, fravær = fravær, egenmeldinger = egenmeldinger))
     }
 
     protected fun sendSøknadArbeidsgiver(

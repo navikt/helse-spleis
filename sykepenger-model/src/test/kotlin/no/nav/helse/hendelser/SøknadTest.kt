@@ -59,9 +59,16 @@ internal class SøknadTest {
     }
 
     @Test
+    fun `søknad med permisjon`() {
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertEquals(10, søknad.sykdomstidslinje().count())
+    }
+
+    @Test
     fun `søknad med papirsykmelding`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(11.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
         assertEquals(16, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
     }

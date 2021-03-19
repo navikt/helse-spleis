@@ -111,11 +111,11 @@ internal class SimpleMergeTest {
 
     @Test
     fun `støtter sykedager`() {
-        val actual = (1.januar sykTil 8.januar grad 50).merge(15.januar ferieTil 19.januar)
+        val actual = (1.januar sykTil 8.januar grad 50).merge(15.januar permisjonTil 19.januar)
         assertSize(19, actual)
         assertEquals(6, actual.filterIsInstance<Sykedag>().size)
         assertEquals(2, actual.filterIsInstance<SykHelgedag>().size)
-        assertEquals(5, actual.filterIsInstance<Feriedag>().size)
+        assertEquals(5, actual.filterIsInstance<Permisjonsdag>().size)
         assertEquals(6, actual.filterIsInstance<UkjentDag>().size)
     }
 

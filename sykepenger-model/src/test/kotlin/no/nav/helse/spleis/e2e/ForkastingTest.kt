@@ -119,11 +119,11 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
             Søknad.Søknadsperiode.Papirsykmelding(1.januar, 20.januar)
         )
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            TIL_INFOTRYGD
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
         )
     }
 

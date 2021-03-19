@@ -41,7 +41,6 @@ internal class TurneringsnøkkelTest {
         assertEquals(Feriedag_SØ, fraDag(FriskHelgedag(enDag, søknad)))
         assertEquals(Turneringsnøkkel.UkjentDag, fraDag(Dag.UkjentDag(enDag, INGEN)))
         assertEquals(UbestemtDag, fraDag(ProblemDag(enDag, INGEN, "")))
-        assertEquals(Permisjonsdag_AAREG, fraDag(Permisjonsdag(enDag, aareg)))
         assertEquals(Permisjonsdag_SØ, fraDag(Permisjonsdag(enDag, søknad)))
         assertEquals(Sykedag_SM, fraDag(Sykedag(enDag, økonomi, sykmelding)))
         assertEquals(Sykedag_SØ, fraDag(Sykedag(enDag, økonomi, søknad)))

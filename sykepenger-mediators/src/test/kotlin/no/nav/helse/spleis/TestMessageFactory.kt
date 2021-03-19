@@ -83,7 +83,7 @@ internal class TestMessageFactory(
     fun lagSøknadNav(
         perioder: List<SoknadsperiodeDTO>,
         orgnummer: String = organisasjonsnummer,
-        ferie: List<FravarDTO> = emptyList(),
+        fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null
     ): String {
@@ -100,7 +100,7 @@ internal class TestMessageFactory(
             sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
-            fravar = ferie,
+            fravar = fravær,
             andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now()

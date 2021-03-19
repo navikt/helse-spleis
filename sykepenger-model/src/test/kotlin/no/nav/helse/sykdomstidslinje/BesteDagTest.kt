@@ -22,6 +22,7 @@ internal class BesteDagTest {
                 TestEvent.inntektsmelding
             )
         private val ferieFraSøknad get() = Dag.Feriedag(2.mandag, TestEvent.søknad)
+        private val permisjonFraSøknad get() = Dag.Permisjonsdag(2.mandag, TestEvent.søknad)
         private val sykedagFraSøknad get() = Dag.Sykedag(2.mandag, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
     }
 
@@ -39,6 +40,12 @@ internal class BesteDagTest {
     fun `ferie vinner over sykdom`() {
         assertWinner(sykedagFraSøknad, ferieFraSøknad, ferieFraSøknad)
         assertWinner(ferieFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
+    }
+
+    @Test
+    fun `permisjon vinner over sykdom`() {
+        assertWinner(sykedagFraSøknad, permisjonFraSøknad, permisjonFraSøknad)
+        assertWinner(permisjonFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
     }
 
     @Test
@@ -73,13 +80,5 @@ internal class BesteDagTest {
     ) {
         assertWinner(dag1, dag2, expectedWinner)
         assertWinner(dag2, dag1, expectedWinner)
-    }
-
-    private fun assertProblemDagBidirectional(
-        dag1: Dag,
-        dag2: Dag
-    ) {
-        assertWinner(dag1, dag2, dag2.problem(dag1))
-        assertWinner(dag2, dag1, dag2.problem(dag1))
     }
 }

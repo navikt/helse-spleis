@@ -270,7 +270,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(10.februar, 20.februar))    // <-- TIL_INFOTRYGD
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(10.februar, 20.februar), andreInntektskilder = listOf(Søknad.Inntektskilde(false,"ANDRE_ARBEIDSFORHOLD")))
         inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }

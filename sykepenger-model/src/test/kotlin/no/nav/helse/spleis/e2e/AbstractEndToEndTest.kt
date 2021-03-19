@@ -79,7 +79,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     protected fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
+        assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }

@@ -422,10 +422,10 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `overstyrer siste utbetalte periode med bare ferie`() {
+    fun `overstyrer siste utbetalte periode med bare ferie og permisjon`() {
         nyttVedtak(3.januar, 26.januar)
 
-        håndterOverstyring((3.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterOverstyring((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
         håndterYtelser(1.vedtaksperiode)   // No history
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -457,7 +457,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `overstyring ville ha ledet til infotrygd  - perioden faller tilbake til en trygg tilstand`() {
+    fun `overstyring ville ha ledet til infotrygd - perioden faller tilbake til en trygg tilstand`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
@@ -468,7 +468,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
-        håndterOverstyring((3.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterOverstyring((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
         håndterYtelser(
             1.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 15000.daglig),
@@ -492,6 +492,7 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         )
     }
 
+    private fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
     private fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
     private fun manuellSykedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, 100)
 }

@@ -1777,9 +1777,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Maksdato og antall gjenstående dager beregnes riktig når det er ferie sist i perioden`() {
+    fun `Maksdato og antall gjenstående dager beregnes riktig når det er fravær sist i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100.prosent))
-        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Ferie(6.juli(2020), 11.juli(2020)))
+        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Permisjon(4.juli(2020), 5.juli(2020)), Ferie(6.juli(2020), 11.juli(2020)))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             Utbetalingsperiode(ORGNUMMER, 7.august(2019) til 7.august(2019), 100.prosent, 2304.daglig),
@@ -1894,10 +1894,42 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Perioder hvor vedtaksperiode 1 avsluttes med ferie skal ikke regnes som gap til påfølgende vedtaksperiode`() {
-        // Første periode slutter på arbeiddager, og neste periode blir feilaktig bli markert som en forlengelse
+        // Første periode slutter på arbeidsdager, og neste periode blir feilaktig markert som en forlengelse.
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Ferie(28.juni, 30.juni))
+        val historikk = Utbetalingsperiode(ORGNUMMER, 3.juni til 8.juni, 100.prosent, 15000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
+        håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
+
+        assertNoErrors(inspektør)
+        assertTilstander(
+            0,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING
+        )
+
+        assertTilstander(
+            1,
+            START,
+            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+        )
+    }
+
+    @Test
+    fun `Perioder hvor vedtaksperiode 1 avsluttes med permisjon skal ikke regnes som gap til påfølgende vedtaksperiode`() {
+        // Første periode slutter på arbeidsdager, og neste periode blir feilaktig markert som en forlengelse.
+        // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/permisjon i slutten av forrige periode (som gjør at det egentlig skal være gap)
+        håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
+        håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Permisjon(28.juni, 30.juni))
         val historikk = Utbetalingsperiode(ORGNUMMER, 3.juni til 8.juni, 100.prosent, 15000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
