@@ -17,6 +17,9 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.spleis.e2e.testcontext.ArrangeContext
+import no.nav.helse.spleis.e2e.testcontext.EtterspurtBehov
+import no.nav.helse.spleis.e2e.testcontext.Testhendelsefabrikk
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -34,7 +37,7 @@ import kotlin.reflect.KClass
 
 internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
-    protected companion object {
+    internal companion object {
         val INNTEKT = 31000.00.månedlig
     }
 
@@ -63,6 +66,14 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntektsmeldinger.clear()
         ikkeBesvarteBehov.clear()
     }
+
+    private val fabrikk = Testhendelsefabrikk(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER)
+    protected fun arrange(sykmeldingsperiode: Sykmeldingsperiode, act: ArrangeContext.() -> Unit) =
+        ArrangeContext.create(this, fabrikk, sykmeldingsperiode, act)
+            .arrange()
+
+    protected operator fun Sykmeldingsperiode.invoke(act: ArrangeContext.() -> Unit) =
+        ArrangeContext.create(this@AbstractEndToEndTest, fabrikk, this, act)
 
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) {
         assertEquals(tilstand, observatør.tilstander[id]?.last())
@@ -202,10 +213,12 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         ferieperioder: List<Periode> = emptyList(),
         refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>> = Triple(null, INNTEKT, emptyList()),
-        beregnetInntekt: Inntekt = refusjon.second
+        beregnetInntekt: Inntekt = refusjon.second,
+        orgnummer: String = ORGNUMMER,
+        harOpphørAvNaturalytelser: Boolean = false
     ): UUID {
-        assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, ORGNUMMER)
-        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon, beregnetInntekt = beregnetInntekt)
+        assertIkkeEtterspurt(Inntektsmelding::class, InntekterForSammenligningsgrunnlag, vedtaksperiodeId, orgnummer)
+        return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, ferieperioder, refusjon, orgnummer, beregnetInntekt = beregnetInntekt, harOpphørAvNaturalytelser = harOpphørAvNaturalytelser)
     }
 
     protected fun håndterInntektsmelding(
@@ -975,39 +988,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     private val ikkeBesvarteBehov = mutableListOf<EtterspurtBehov>()
-
-    private class EtterspurtBehov(
-        private val type: Behovtype,
-        private val tilstand: TilstandType,
-        private val orgnummer: String,
-        private val vedtaksperiodeId: UUID
-    ) {
-        companion object {
-            internal fun finnEtterspurteBehov(behovsliste: List<Aktivitetslogg.Aktivitet.Behov>) =
-                behovsliste
-                    .filter { "tilstand" in it.kontekst() }
-                    .filter { "organisasjonsnummer" in it.kontekst() }
-                    .filter { "vedtaksperiodeId" in it.kontekst() }
-                    .map {
-                        EtterspurtBehov(
-                            type = it.type,
-                            tilstand = enumValueOf(it.kontekst()["tilstand"] as String),
-                            orgnummer = it.kontekst()["organisasjonsnummer"] as String,
-                            vedtaksperiodeId = UUID.fromString(it.kontekst()["vedtaksperiodeId"] as String)
-                        )
-                    }
-
-            internal fun finnEtterspurtBehov(
-                ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
-                type: Behovtype,
-                vedtaksperiodeId: UUID,
-                orgnummer: String
-            ) =
-                ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeId }
-        }
-
-        override fun toString() = "$type ($tilstand)"
-    }
 
     fun assertWarn(message: String, aktivitetslogg: Aktivitetslogg) {
         var fant = false

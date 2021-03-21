@@ -62,13 +62,13 @@ internal class TestArbeidsgiverInspektør(
     init {
         HentAktivitetslogg(person, orgnummer).also { results ->
             personLogg = results.aktivitetslogg
-            results.arbeidsgiver.accept(this)
+            results.arbeidsgiver?.accept(this)
         }
     }
 
     private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
         lateinit var aktivitetslogg: Aktivitetslogg
-        lateinit var arbeidsgiver: Arbeidsgiver
+        var arbeidsgiver: Arbeidsgiver? = null
 
         init {
             person.accept(this)
@@ -80,7 +80,7 @@ internal class TestArbeidsgiverInspektør(
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
             if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
-            if (this::arbeidsgiver.isInitialized) return
+            if (this.arbeidsgiver != null) return
             this.arbeidsgiver = arbeidsgiver
         }
     }
@@ -291,6 +291,8 @@ internal class TestArbeidsgiverInspektør(
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
     private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
+
+    internal fun vedtaksperioder(): Set<UUID> = vedtaksperiodeindekser.keys
 
     internal fun vedtaksperiodeutbetaling(id: UUID) = utbetalinger[id.utbetalingsindeks]
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
