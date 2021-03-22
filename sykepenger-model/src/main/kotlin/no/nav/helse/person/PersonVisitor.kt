@@ -31,7 +31,7 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, V
 
 internal interface InfotrygdhistorikkVisitor {
     fun preVisitInfotrygdhistorikk() {}
-    fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {}
+    fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {}
     fun preVisitInfotrygdhistorikkPerioder() {}
     fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {}
     fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {}
@@ -47,7 +47,7 @@ internal interface InfotrygdhistorikkVisitor {
     ) {}
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
-    fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {}
+    fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {}
     fun postVisitInfotrygdhistorikk() {}
 }
 

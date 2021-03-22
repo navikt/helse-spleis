@@ -116,10 +116,12 @@ internal class InfotrygdhistorikkTest {
         perioder: List<Infotrygdhistorikk.Infotrygdperiode> = emptyList(),
         inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+        hendelseId: UUID = UUID.randomUUID(),
         tidsstempel: LocalDateTime = LocalDateTime.now()
     ) =
         Infotrygdhistorikk.Element.opprett(
             tidsstempel = tidsstempel,
+            hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder
@@ -136,7 +138,7 @@ internal class InfotrygdhistorikkTest {
         fun opprettet(indeks: Int) = elementer.elementAt(indeks).second
         fun oppdatert(indeks: Int) = elementer.elementAt(indeks).third
 
-        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {
+        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
             elementer.add(Triple(id, tidsstempel, oppdatert))
         }
     }

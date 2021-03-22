@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 internal class InfotrygdhistorikkElementTest {
 
@@ -102,10 +103,12 @@ internal class InfotrygdhistorikkElementTest {
         perioder: List<Infotrygdhistorikk.Infotrygdperiode> = emptyList(),
         inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
-        tidsstempel: LocalDateTime = LocalDateTime.now()
+        tidsstempel: LocalDateTime = LocalDateTime.now(),
+        hendelseId: UUID = UUID.randomUUID()
     ) =
         Infotrygdhistorikk.Element.opprett(
             tidsstempel = tidsstempel,
+            hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder

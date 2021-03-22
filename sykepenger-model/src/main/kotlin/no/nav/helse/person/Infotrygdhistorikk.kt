@@ -66,14 +66,20 @@ internal class Infotrygdhistorikk private constructor(
     internal class Element private constructor(
         private val id: UUID,
         private val tidsstempel: LocalDateTime = LocalDateTime.now(),
+        private val hendelseId: UUID? = null,
         private val perioder: List<Infotrygdperiode>,
         private val inntekter: List<Inntektsopplysning>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private var oppdatert: LocalDateTime = tidsstempel
     ) {
+        init {
+            if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
+        }
+
         internal companion object {
             fun opprett(
                 tidsstempel: LocalDateTime,
+                hendelseId: UUID,
                 perioder: List<Infotrygdperiode>,
                 inntekter: List<Inntektsopplysning>,
                 arbeidskategorikoder: Map<String, LocalDate>
@@ -81,19 +87,25 @@ internal class Infotrygdhistorikk private constructor(
                 Element(
                     id = UUID.randomUUID(),
                     tidsstempel = tidsstempel,
+                    hendelseId = hendelseId,
                     perioder = perioder,
                     inntekter = inntekter,
                     arbeidskategorikoder = arbeidskategorikoder
                 )
 
             fun opprettTom() =
-                opprett(
+                Element(
+                    id = UUID.randomUUID(),
                     tidsstempel = LocalDateTime.now(),
+                    hendelseId = null,
                     perioder = emptyList(),
                     inntekter = emptyList(),
                     arbeidskategorikoder = emptyMap()
                 ).also { it.oppdatert = LocalDateTime.MIN }
         }
+
+        private fun erTom() =
+            perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
 
         internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
             aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
@@ -112,7 +124,7 @@ internal class Infotrygdhistorikk private constructor(
             oppdatert > cutoff
 
         internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-            visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert)
+            visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
             visitor.preVisitInfotrygdhistorikkPerioder()
             perioder.forEach { it.accept(visitor) }
             visitor.postVisitInfotrygdhistorikkPerioder()
@@ -120,7 +132,7 @@ internal class Infotrygdhistorikk private constructor(
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
             visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
-            visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert)
+            visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
         }
 
         private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?): Boolean {
