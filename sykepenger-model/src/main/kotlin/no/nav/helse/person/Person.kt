@@ -61,8 +61,8 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser).håndter(ytelser)
-        dødsdato = ytelser.dødsinfo().dødsdato
+        ytelser.lagreDødsdato(this)
+        finnArbeidsgiver(ytelser).håndter(ytelser, dødsdato)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
@@ -285,6 +285,10 @@ class Person private constructor(
 
     internal fun harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode: Vedtaksperiode) =
         arbeidsgivere.harOverlappendePeriodeHosAnnenArbeidsgiver(vedtaksperiode)
+
+    internal fun lagreDødsdato(dødsdato: LocalDate) {
+        this.dødsdato = dødsdato
+    }
 
     internal fun lagreInntekter(
         arbeidsgiverId: String,

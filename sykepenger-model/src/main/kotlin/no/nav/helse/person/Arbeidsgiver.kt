@@ -238,9 +238,9 @@ internal class Arbeidsgiver private constructor(
         finalize(utbetalingshistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser) {
+    internal fun håndter(ytelser: Ytelser, dødsdato: LocalDate?) {
         ytelser.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(ytelser) }
+        vedtaksperioder.toList().forEach { it.håndter(ytelser, dødsdato) }
         finalize(ytelser)
     }
 

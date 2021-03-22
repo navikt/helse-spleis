@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import java.time.LocalDate
 import java.util.*
@@ -28,25 +28,36 @@ class Ytelser(
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
 
-    internal fun foreldrepenger() = foreldrepermisjon
+    internal fun lagreVilkårsgrunnlag(person: Person, periodetype: Periodetype, skjæringstidspunkt: LocalDate) {
+        if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return
+        if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return
 
-    internal fun pleiepenger() = pleiepenger
+        info("Lagrer vilkårsgrunnlag fra Infotrygd på %s", "$skjæringstidspunkt")
+        person.vilkårsgrunnlagHistorikk.lagre(utbetalingshistorikk, skjæringstidspunkt)
+    }
 
-    internal fun omsorgspenger() = omsorgspenger
+    internal fun lagreDødsdato(person: Person) {
+        if (dødsinfo.dødsdato == null) return
+        person.lagreDødsdato(dødsinfo.dødsdato)
+    }
 
-    internal fun opplæringspenger() = opplæringspenger
-
-    internal fun institusjonsopphold() = institusjonsopphold
-
-    internal fun dødsinfo() = dødsinfo
-
-    internal fun statslønn() = statslønn
-
-    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): IAktivitetslogg {
-        utbetalingshistorikk.valider(periode, skjæringstidspunkt)
+    internal fun valider(periode: Periode, avgrensetPeriode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
+        utbetalingshistorikk.valider(avgrensetPeriode, skjæringstidspunkt)
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
-        return this
+
+        if (periodetype == Periodetype.OVERGANG_FRA_IT) {
+            info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+            if (statslønn) warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+        }
+
+        if (foreldrepermisjon.overlapper(periode)) error("Har overlappende foreldrepengeperioder med syketilfelle")
+        if (pleiepenger.overlapper(periode)) error("Har overlappende pleiepengeytelse med syketilfelle")
+        if (omsorgspenger.overlapper(periode)) error("Har overlappende omsorgspengerytelse med syketilfelle")
+        if (opplæringspenger.overlapper(periode)) error("Har overlappende opplæringspengerytelse med syketilfelle")
+        if (institusjonsopphold.overlapper(periode)) error("Har overlappende institusjonsopphold med syketilfelle")
+
+        return !hasErrorsOrWorse()
     }
 
     internal fun addInntekter(person: Person) {
