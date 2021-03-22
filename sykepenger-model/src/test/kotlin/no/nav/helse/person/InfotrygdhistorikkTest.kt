@@ -112,6 +112,44 @@ internal class InfotrygdhistorikkTest {
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
+    @Test
+    fun `overlapper ikke med tom historikk`() {
+        assertFalse(historikk.overlapperMed(aktivitetslogg, 1.januar til 31.januar))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `overlappende utbetalinger`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Infotrygdhistorikk.Utbetalingsperiode("orgnr", 5.januar til 10.januar, 100.prosent, 25000.månedlig)
+        )))
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.overlapperMed(it, 10.januar til 31.januar))
+            assertTrue(it.hasErrorsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.overlapperMed(it, 1.januar til 5.januar))
+            assertTrue(it.hasErrorsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertFalse(historikk.overlapperMed(it, 1.januar til 4.januar))
+            assertFalse(it.hasErrorsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertFalse(historikk.overlapperMed(it, 11.januar til 31.januar))
+            assertFalse(it.hasErrorsOrWorse())
+        }
+    }
+
+    @Test
+    fun `overlapper ikke med ferie eller ukjent`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Infotrygdhistorikk.Friperiode(5.januar til 10.januar),
+            Infotrygdhistorikk.Ukjent(15.januar til 20.januar)
+        )))
+        assertFalse(historikk.overlapperMed(aktivitetslogg, 1.januar til 31.januar))
+    }
+
     private fun historikkelement(
         perioder: List<Infotrygdhistorikk.Infotrygdperiode> = emptyList(),
         inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
