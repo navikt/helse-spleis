@@ -312,6 +312,15 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).addInntekt(inntektsopplysninger, hendelseId)
     }
 
+    internal fun lagreInntekterNy(
+        orgnummer: String,
+        inntektsopplysninger: List<Infotrygdhistorikk.Inntektsopplysning>,
+        aktivitetslogg: IAktivitetslogg,
+        hendelseId: UUID
+    ) {
+        finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreInntekter(inntektsopplysninger, hendelseId)
+    }
+
     internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden)
             ?.let { grunnlagForSykepengegrunnlag ->

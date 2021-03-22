@@ -481,6 +481,10 @@ internal class Arbeidsgiver private constructor(
         inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelseId)
     }
 
+    internal fun lagreInntekter(inntektsopplysninger: List<Infotrygdhistorikk.Inntektsopplysning>, hendelseId: UUID) {
+        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
+    }
+
     internal fun lagreInntekter(
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,

@@ -5,6 +5,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class VilkårsgrunnlagHistorikkTest {
@@ -41,6 +42,22 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidskategorikoder = emptyMap()
         )
         vilkårsgrunnlagHistorikk.lagre(infotrygdVilkårsgrunnlag, 1.januar)
+        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+    }
+
+    @Test
+    fun `lagrer grunnlagsdata fra Infotrygd`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val historikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                tidsstempel = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap()
+            ))
+        }
+        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 }

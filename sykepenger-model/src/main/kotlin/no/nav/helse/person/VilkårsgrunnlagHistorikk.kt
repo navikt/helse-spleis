@@ -28,6 +28,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         historikk[skjæringstidspunkt] = utbetalingshistorikk.grunnlagsdata()
     }
 
+    internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {
+        historikk[skjæringstidspunkt] = grunnlagselement
+    }
+
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk[skjæringstidspunkt]
 
     internal interface VilkårsgrunnlagElement {

@@ -54,6 +54,21 @@ internal class Infotrygdhistorikk private constructor(
         return true
     }
 
+    internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
+        if (!harHistorikk()) return
+        siste.addInntekter(person, aktivitetslogg)
+    }
+
+    internal fun append(bøtte: Historie.Historikkbøtte) {
+        if (!harHistorikk()) return
+        siste.append(bøtte)
+    }
+
+    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
+        if (!harHistorikk()) return
+        siste.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk)
+    }
+
     internal fun oppdaterHistorikk(element: Element) {
         element.erstatt(elementer)
     }
@@ -87,6 +102,8 @@ internal class Infotrygdhistorikk private constructor(
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private var oppdatert: LocalDateTime = tidsstempel
     ) {
+        private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id)
+
         init {
             if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
         }
@@ -103,7 +120,7 @@ internal class Infotrygdhistorikk private constructor(
                     id = UUID.randomUUID(),
                     tidsstempel = tidsstempel,
                     hendelseId = hendelseId,
-                    perioder = perioder,
+                    perioder = perioder.sortedBy { it.start },
                     inntekter = inntekter,
                     arbeidskategorikoder = arbeidskategorikoder
                 )
@@ -115,12 +132,25 @@ internal class Infotrygdhistorikk private constructor(
                     hendelseId = null,
                     perioder = emptyList(),
                     inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap()
-                ).also { it.oppdatert = LocalDateTime.MIN }
+                    arbeidskategorikoder = emptyMap(),
+                    oppdatert = LocalDateTime.MIN
+                )
         }
 
         private fun erTom() =
             perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
+
+        internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
+            Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id)
+        }
+
+        fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
+            vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag())
+        }
+
+        internal fun append(bøtte: Historie.Historikkbøtte) {
+            perioder.forEach { it.append(bøtte, kilde) }
+        }
 
         internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
             aktivitetslogg.info("Sjekker utbetalte perioder")
@@ -299,6 +329,13 @@ internal class Infotrygdhistorikk private constructor(
         }
 
         internal companion object {
+            internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
+                liste.groupBy { it.orgnummer }
+                    .forEach { (orgnummer, opplysninger) ->
+                        person.lagreInntekterNy(orgnummer, opplysninger, aktivitetslogg, hendelseId)
+                    }
+            }
+
             fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
                 inntektshistorikk {
                     list.reversed().forEach { it.addInntekt(this, hendelseId) }
