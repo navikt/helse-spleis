@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -99,6 +100,64 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitVilkårsgrunnlagHistorikk() {
         delegatee.postVisitVilkårsgrunnlagHistorikk()
+    }
+
+    override fun preVisitInfotrygdhistorikk() {
+        delegatee.preVisitInfotrygdhistorikk()
+    }
+
+    override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {
+        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert)
+    }
+
+    override fun preVisitInfotrygdhistorikkPerioder() {
+        delegatee.preVisitInfotrygdhistorikkPerioder()
+    }
+
+    override fun preVisitInfotrygdhistorikkInntektsopplysninger() {
+        delegatee.preVisitInfotrygdhistorikkInntektsopplysninger()
+    }
+
+    override fun visitInfotrygdhistorikkInntektsopplysning(
+        orgnr: String,
+        sykepengerFom: LocalDate,
+        inntekt: Inntekt,
+        refusjonTilArbeidsgiver: Boolean,
+        refusjonTom: LocalDate?
+    ) {
+        delegatee.visitInfotrygdhistorikkInntektsopplysning(orgnr, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
+    }
+
+    override fun postVisitInfotrygdhistorikkInntektsopplysninger() {
+        delegatee.postVisitInfotrygdhistorikkInntektsopplysninger()
+    }
+
+    override fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {
+        delegatee.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
+    }
+
+    override fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {
+        delegatee.visitInfotrygdhistorikkFerieperiode(periode)
+    }
+
+    override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {
+        delegatee.visitInfotrygdhistorikkUtbetalingsperiode(orgnr, periode, grad, inntekt)
+    }
+
+    override fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {
+        delegatee.visitInfotrygdhistorikkUkjentPeriode(periode)
+    }
+
+    override fun postVisitInfotrygdhistorikkPerioder() {
+        delegatee.postVisitInfotrygdhistorikkPerioder()
+    }
+
+    override fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {
+        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert)
+    }
+
+    override fun postVisitInfotrygdhistorikk() {
+        delegatee.postVisitInfotrygdhistorikk()
     }
 
     override fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {

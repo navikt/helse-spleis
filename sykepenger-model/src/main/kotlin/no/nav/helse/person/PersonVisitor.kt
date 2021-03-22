@@ -14,18 +14,41 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor {
+internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
     fun preVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {}
     fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun preVisitArbeidsgivere() {}
     fun postVisitArbeidsgivere() {}
     fun postVisitPerson(person: Person, opprettet: LocalDateTime, aktørId: String, fødselsnummer: String, dødsdato: LocalDate?) {}
+}
+
+internal interface InfotrygdhistorikkVisitor {
+    fun preVisitInfotrygdhistorikk() {}
+    fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {}
+    fun preVisitInfotrygdhistorikkPerioder() {}
+    fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {}
+    fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {}
+    fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {}
+    fun postVisitInfotrygdhistorikkPerioder() {}
+    fun preVisitInfotrygdhistorikkInntektsopplysninger() {}
+    fun visitInfotrygdhistorikkInntektsopplysning(
+        orgnr: String,
+        sykepengerFom: LocalDate,
+        inntekt: Inntekt,
+        refusjonTilArbeidsgiver: Boolean,
+        refusjonTom: LocalDate?
+    ) {}
+    fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
+    fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
+    fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime) {}
+    fun postVisitInfotrygdhistorikk() {}
 }
 
 internal interface VilkårsgrunnlagHistorikkVisitor {
