@@ -54,21 +54,24 @@ class UtbetalingshistorikkTest {
     fun `skjæringstidspunkt lik null resulterer i passert validering av redusert utbetaling`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(utbetalingshistorikk.valider(Periode(2.januar, 31.januar), null).hasWarningsOrWorse())
+        utbetalingshistorikk.valider(Periode(2.januar, 31.januar), null)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
     fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd`() {
         val arbeidskategorikoder = mapOf("07" to 1.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
-        assertTrue(utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar)
+        assertTrue(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
     fun `validering feiler ikke når det ikke er redusert utbetaling i Infotrygd, men skjæringstidspunkt i Infotrygd`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(6.januar, 23.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -78,27 +81,31 @@ class UtbetalingshistorikkTest {
             RefusjonTilArbeidsgiver(1.januar, 5.januar, 1234.daglig, 100.prosent, ORGNUMMER)
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = utbetalinger, arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(utbetalingshistorikk.valider(Periode(7.januar, 23.januar), 7.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(7.januar, 23.januar), 7.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
     fun `validering skal feile når bruker har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "07" to 6.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
-        assertTrue(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar)
+        assertTrue(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
     fun `validering skal ikke feile når bruker ikke har redusert utbetaling og skjæringstidspunkt i Infotrygd  - flere arbeidsgivere`() {
         val arbeidskategorikoder = mapOf("01" to 1.januar, "01" to 6.januar)
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = arbeidskategorikoder)
-        assertFalse(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
     fun `validering skal ikke feile når utbetalingshistorikken er tom`() {
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger = emptyList(), arbeidskategorikoder = emptyMap())
-        assertFalse(utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(11.januar, 23.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -113,9 +120,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertTrue(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
+        utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar)
+        assertTrue(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -126,9 +132,8 @@ class UtbetalingshistorikkTest {
         )
         val utbetalingshistorikk = utbetalingshistorikk(utbetalinger)
 
-        assertFalse(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
+        utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -144,9 +149,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
+        utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -162,9 +166,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(
-            utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar).hasErrorsOrWorse()
-        )
+        utbetalingshistorikk.valider(Periode(6.januar, 31.januar), 1.januar)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -177,9 +180,8 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList()
         )
-        utbetalingshistorikk.valider(Periode(1.juni, 30.juni), 1.april).also {
-            assertFalse(it.hasWarningsOrWorse())
-        }
+        utbetalingshistorikk.valider(Periode(1.juni, 30.juni), 1.april)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
@@ -198,9 +200,8 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList()
         )
-        utbetalingshistorikk.valider(Periode(1.april, 30.april), 1.april).also {
-            assertFalse(it.hasWarningsOrWorse())
-        }
+        utbetalingshistorikk.valider(Periode(1.april, 30.april), 1.april)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
@@ -213,9 +214,8 @@ class UtbetalingshistorikkTest {
             utbetalinger = utbetalinger,
             inntektshistorikk = emptyList()
         )
-        utbetalingshistorikk.valider(Periode(1.april, 30.april), 1.april).also {
-            assertFalse(it.hasWarningsOrWorse())
-        }
+        utbetalingshistorikk.valider(Periode(1.april, 30.april), 1.april)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
@@ -297,7 +297,8 @@ class UtbetalingshistorikkTest {
             inntektshistorikk = emptyList()
         )
 
-        assertTrue(utbetalingshistorikk.valider(Periode(1.mars, 1.mars), 1.mars).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(1.mars, 1.mars), 1.mars)
+        assertTrue(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -394,9 +395,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(
-            utbetalingshistorikk.valider(Periode(10.januar, 31.januar), null).hasErrorsOrWorse()
-        )
+        utbetalingshistorikk.valider(Periode(10.januar, 31.januar), null)
+assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -409,8 +409,10 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertTrue(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasWarningsOrWorse())
-        assertFalse(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasErrorsOrWorse())
+        utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null)
+        assertTrue(utbetalingshistorikk.hasWarningsOrWorse())
+        utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null)
+        assertFalse(utbetalingshistorikk.hasErrorsOrWorse())
     }
 
     @Test
@@ -423,7 +425,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null).hasWarningsOrWorse())
+        utbetalingshistorikk.valider(Periode(1.januar, 31.januar), null)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
@@ -436,7 +439,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(utbetalingshistorikk.valider(Periode(1.februar(2019), 28.februar(2019)), null).hasWarningsOrWorse())
+        utbetalingshistorikk.valider(Periode(1.februar(2019), 28.februar(2019)), null)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test
@@ -449,7 +453,8 @@ class UtbetalingshistorikkTest {
             )
         )
 
-        assertFalse(utbetalingshistorikk.valider(Periode(2.januar, 31.januar), 2.januar).hasWarningsOrWorse())
+        utbetalingshistorikk.valider(Periode(2.januar, 31.januar), 2.januar)
+        assertFalse(utbetalingshistorikk.hasWarningsOrWorse())
     }
 
     @Test

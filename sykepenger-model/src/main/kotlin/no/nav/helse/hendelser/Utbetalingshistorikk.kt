@@ -36,24 +36,24 @@ class Utbetalingshistorikk(
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate?) =
         valider(false, periode, skjæringstidspunkt)
 
-    internal fun validerOverlappende(periode: Periode, skjæringstidspunkt: LocalDate?) =
+    internal fun validerOverlappende(periode: Periode, skjæringstidspunkt: LocalDate?): Boolean =
         valider(true, periode, skjæringstidspunkt)
 
-    private fun valider(bareOverlappende: Boolean, periode: Periode, skjæringstidspunkt: LocalDate?): IAktivitetslogg {
+    private fun valider(bareOverlappende: Boolean, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         if (!erNormalArbeidstaker(skjæringstidspunkt)) error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
         Infotrygdperiode.Utbetalingsperiode.valider(utbetalinger, this, bareOverlappende, periode, organisasjonsnummer)
         Inntektsopplysning.valider(inntektshistorikk, this, skjæringstidspunkt, periode)
-        return this
+        return !hasErrorsOrWorse()
     }
 
     private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?) =
-        if(arbeidskategorikoder.isEmpty() || skjæringstidspunkt == null) true
+        if (arbeidskategorikoder.isEmpty() || skjæringstidspunkt == null) true
         else arbeidskategorikoder
             .filter { (_, dato) -> dato >= skjæringstidspunkt }
             .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
 
-    internal fun addInntekter(person: Person, hendelse: PersonHendelse = this) {
-        Inntektsopplysning.addInntekter(person, hendelse, inntektshistorikk)
+    internal fun addInntekter(person: Person) {
+        Inntektsopplysning.addInntekter(person, this, meldingsreferanseId(), inntektshistorikk)
     }
 
     class Inntektsopplysning(
@@ -73,6 +73,7 @@ class Utbetalingshistorikk(
                 skjæringstidspunkt: LocalDate?,
                 periode: Periode
             ) {
+                liste.forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt) }
                 liste.validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg, periode)
                 liste.validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg, periode)
             }
@@ -82,8 +83,7 @@ class Utbetalingshistorikk(
                 aktivitetslogg: IAktivitetslogg,
                 periode: Periode
             ) {
-                val relevanteInntektsopplysninger = filter { it.sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12)) }
-                relevanteInntektsopplysninger.forEach { it.valider(aktivitetslogg, periode) }
+                val relevanteInntektsopplysninger = filter { it.erRelevant(periode, skjæringstidspunkt) }
                 val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
                 val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
                 if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) {
@@ -107,12 +107,13 @@ class Utbetalingshistorikk(
 
             internal fun addInntekter(
                 person: Person,
-                hendelse: PersonHendelse,
+                aktivitetslogg: IAktivitetslogg,
+                hendelseId: UUID,
                 inntektsopplysninger: List<Inntektsopplysning>
             ) {
                 inntektsopplysninger.groupBy { it.orgnummer }
                     .forEach { (orgnummer, opplysninger) ->
-                        person.lagreInntekter(orgnummer, opplysninger, hendelse)
+                        person.lagreInntekter(orgnummer, opplysninger, aktivitetslogg, hendelseId)
                     }
             }
 
@@ -128,7 +129,11 @@ class Utbetalingshistorikk(
             }
         }
 
-        internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        private fun erRelevant(periode: Periode, skjæringstidspunkt: LocalDate?) =
+            sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12))
+
+        internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?) {
+            if (!erRelevant(periode, skjæringstidspunkt)) return
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
             if (refusjonTom != null && periode.slutterEtter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
             if (!refusjonTilArbeidsgiver) aktivitetslogg.error("Utbetaling skal gå rett til bruker")

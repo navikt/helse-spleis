@@ -43,14 +43,6 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
     }
 }
 
-internal fun Validation.validerUtbetalingshistorikk(
-    periode: Periode,
-    utbetalingshistorikk: Utbetalingshistorikk,
-    skjæringstidspunkt: LocalDate?
-) = valider {
-    !utbetalingshistorikk.validerOverlappende(periode, skjæringstidspunkt).hasErrorsOrWorse()
-}
-
 internal fun Validation.harNødvendigInntekt(
     person: Person,
     skjæringstidspunkt: LocalDate

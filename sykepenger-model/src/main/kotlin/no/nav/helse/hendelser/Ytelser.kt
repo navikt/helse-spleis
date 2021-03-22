@@ -41,6 +41,10 @@ class Ytelser(
         person.lagreDødsdato(dødsinfo.dødsdato)
     }
 
+    internal fun addInntekter(person: Person) {
+        utbetalingshistorikk.addInntekter(person)
+    }
+
     internal fun valider(periode: Periode, avgrensetPeriode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
         utbetalingshistorikk.valider(avgrensetPeriode, skjæringstidspunkt)
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
@@ -58,10 +62,6 @@ class Ytelser(
         if (institusjonsopphold.overlapper(periode)) error("Har overlappende institusjonsopphold med syketilfelle")
 
         return !hasErrorsOrWorse()
-    }
-
-    internal fun addInntekter(person: Person) {
-        utbetalingshistorikk.addInntekter(person, this)
     }
 
     override fun aktørId(): String {

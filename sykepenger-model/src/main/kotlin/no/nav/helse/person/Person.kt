@@ -291,12 +291,12 @@ class Person private constructor(
     }
 
     internal fun lagreInntekter(
-        arbeidsgiverId: String,
+        orgnummer: String,
         arbeidsgiverInntekt: Inntektsvurdering.ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
         vilkårsgrunnlag: Vilkårsgrunnlag
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, vilkårsgrunnlag).lagreInntekter(
+        finnArbeidsgiverForInntekter(orgnummer, vilkårsgrunnlag).lagreInntekter(
             arbeidsgiverInntekt,
             skjæringstidspunkt,
             vilkårsgrunnlag
@@ -304,11 +304,12 @@ class Person private constructor(
     }
 
     internal fun lagreInntekter(
-        arbeidsgiverId: String,
+        orgnummer: String,
         inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>,
-        hendelse: PersonHendelse
+        aktivitetslogg: IAktivitetslogg,
+        hendelseId: UUID
     ) {
-        finnArbeidsgiverForInntekter(arbeidsgiverId, hendelse).addInntekt(inntektsopplysninger, hendelse)
+        finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).addInntekt(inntektsopplysninger, hendelseId)
     }
 
     internal fun sykepengegrunnlag(skjæringstidspunkt: LocalDate, personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate) =
@@ -332,9 +333,9 @@ class Person private constructor(
             .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, historie) }
             .toMap()
 
-    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, hendelse: PersonHendelse): Arbeidsgiver {
+    private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
-            hendelse.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
+            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
             Arbeidsgiver(this, arbeidsgiver)
         }
     }

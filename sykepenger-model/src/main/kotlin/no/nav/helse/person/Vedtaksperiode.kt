@@ -826,13 +826,14 @@ internal class Vedtaksperiode private constructor(
                 onError {
                     vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
-                validerUtbetalingshistorikk(
-                    historie.avgrensetPeriode(
-                        vedtaksperiode.organisasjonsnummer,
-                        vedtaksperiode.periode
-                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
-                )
-
+                valider {
+                    utbetalingshistorikk.validerOverlappende(
+                        historie.avgrensetPeriode(
+                            vedtaksperiode.organisasjonsnummer,
+                            vedtaksperiode.periode
+                        ), historie.skjæringstidspunkt(vedtaksperiode.periode)
+                    )
+                }
                 onSuccess {
                     utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
                 }
@@ -1392,45 +1393,38 @@ internal class Vedtaksperiode private constructor(
                 onError {
                     vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
-                validerUtbetalingshistorikk(
-                    historie.avgrensetPeriode(
-                        vedtaksperiode.organisasjonsnummer,
-                        vedtaksperiode.periode
-                    ), utbetalingshistorikk, historie.skjæringstidspunkt(vedtaksperiode.periode)
-                )
+                valider {
+                    utbetalingshistorikk.validerOverlappende(
+                        historie.avgrensetPeriode(
+                            vedtaksperiode.organisasjonsnummer,
+                            vedtaksperiode.periode
+                        ), historie.skjæringstidspunkt(vedtaksperiode.periode)
+                    )
+                }
                 onError {
                     person.invaliderAllePerioder(utbetalingshistorikk, null)
                 }
-                valider("Er ikke overgang fra IT og har flere arbeidsgivere") {
-                    if (Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
-                        return@valider true
-                    } else {
-                        historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
-                    }
+                validerHvis("Er ikke overgang fra IT og har flere arbeidsgivere", !Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) {
+                    historie.forlengerInfotrygd(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode) || !person.harFlereArbeidsgivereMedSykdom()
                 }
                 onSuccess {
                     if (historie.erForlengelse(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)) {
                         utbetalingshistorikk.info("Oppdaget at perioden er en forlengelse")
-                        vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
-                    } else {
-                        if (Toggles.PraksisendringEnabled.enabled) {
-                            val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag()
-                            val forrigeSkjæringstidspunkt =
-                                førsteSykedag?.let {
-                                    historie.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(
-                                        vedtaksperiode.regler,
-                                        vedtaksperiode.organisasjonsnummer,
-                                        it
-                                    )
-                                }
-                            if (forrigeSkjæringstidspunkt != null) {
-                                utbetalingshistorikk.addInntekter(person)
-                                if (arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) {
-                                    vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
-                                }
-                            }
-                        }
+                        return@onSuccess vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
                     }
+                    if (!Toggles.PraksisendringEnabled.enabled) return@onSuccess
+
+                    val førsteSykedag = vedtaksperiode.sykdomstidslinje.førsteSykedag() ?: return@onSuccess
+                    val forrigeSkjæringstidspunkt = historie.forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(
+                        vedtaksperiode.regler,
+                        vedtaksperiode.organisasjonsnummer,
+                        førsteSykedag
+                    ) ?: return@onSuccess
+
+                    utbetalingshistorikk.addInntekter(person)
+                    if (!arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) return@onSuccess
+
+                    vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
                 }
             }
         }

@@ -477,8 +477,8 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
     }
 
-    internal fun addInntekt(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelse: PersonHendelse) {
-        inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelse.meldingsreferanseId())
+    internal fun addInntekt(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelseId: UUID) {
+        inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelseId)
     }
 
     internal fun lagreInntekter(
