@@ -48,7 +48,6 @@ class SpeilBuilderTest {
         assertEquals(237, tidslinje.utbetalinger.first().gjenståendeSykedager)
         assertEquals(11, tidslinje.utbetalinger.first().forbrukteSykedager)
         assertEquals(15741, tidslinje.utbetalinger.first().arbeidsgiverNettoBeløp)
-
     }
 
     @Test
@@ -667,6 +666,36 @@ class SpeilBuilderTest {
         val personDTO = serializePersonForSpeil(person, hendelser)
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
         assertEquals(TilstandstypeDTO.TilAnnullering, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
+    }
+
+    @Test
+    fun `Setter tilstand Utbetalt på vedtaksperioden uavhengig av utbetaling i påfølgende vedtaksperioder`() {
+        val (person, hendelser) = person(1.januar, 31.januar)
+
+        person.run {
+            sykmelding(
+                fom = 1.februar,
+                tom = 10.februar
+            ).also { (sykmelding, sykmeldingDTO) ->
+                håndter(sykmelding)
+            }
+            fangeVedtaksperiodeId()
+            søknad(
+                hendelseId = UUID.randomUUID(),
+                fom = 1.februar,
+                tom = 10.februar,
+                sendtSøknad = 1.april.atStartOfDay(),
+                andrePerioder = listOf(Søknad.Søknadsperiode.Arbeid(1.februar, 10.februar))
+            ).also { (søknad, søknadDTO) ->
+                håndter(søknad)
+            }
+            håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
+            håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+        }
+
+        val personDTO = serializePersonForSpeil(person, hendelser)
+
+        assertEquals(TilstandstypeDTO.Utbetalt, personDTO.arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test

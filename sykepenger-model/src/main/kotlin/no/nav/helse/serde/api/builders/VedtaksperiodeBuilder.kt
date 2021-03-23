@@ -84,22 +84,25 @@ internal class VedtaksperiodeBuilder(
     private var godkjenttidspunkt: LocalDateTime? = null
     private var automatiskBehandling: Boolean = false
     private var totalbeløpArbeidstaker: Int = 0
+    private var vedtaksperiodeUtbetaling: Utbetaling? = null
 
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<Utbetaling>): VedtaksperiodeDTOBase {
         val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { it.toString() } }
-        val utbetaling = arbeidsgiverFagsystemId?.let {
-            utbetalinger.filter { utbetaling -> utbetaling.arbeidsgiverOppdrag().fagsystemId() == arbeidsgiverFagsystemId }
-                .kronologisk()
-                .reversed()
-                .firstOrNull()
-        }
-        val tilstandstypeDTO = buildTilstandtypeDto(utbetaling)
+
+        val tilstandstypeDTO = buildTilstandtypeDto(finnRiktigUtbetaling(utbetalinger))
 
         if (!fullstendig) return buildUfullstendig(utbetalinger, tilstandstypeDTO)
 
         val utbetalteUtbetalinger = byggUtbetalteUtbetalingerForPeriode(utbetalinger)
         return buildFullstendig(relevanteHendelser, tilstandstypeDTO, totalbeløpArbeidstaker, utbetalteUtbetalinger)
     }
+
+    private fun finnRiktigUtbetaling(utbetalinger: List<Utbetaling>) = arbeidsgiverFagsystemId?.let {
+        utbetalinger.filter { utbetaling -> utbetaling.arbeidsgiverOppdrag().fagsystemId() == arbeidsgiverFagsystemId }
+            .kronologisk()
+            .reversed()
+            .firstOrNull()
+    }?.takeIf { it.erAnnullering() } ?: vedtaksperiodeUtbetaling
 
     private fun buildFullstendig(
         relevanteHendelser: List<HendelseDTO>,
@@ -350,6 +353,7 @@ internal class VedtaksperiodeBuilder(
         this.gjenståendeSykedager = gjenståendeSykedager
         this.forbrukteSykedager = forbrukteSykedager
         this.beregningIder.add(beregningId)
+        this.vedtaksperiodeUtbetaling = utbetaling
     }
 
     override fun visitVurdering(vurdering: Utbetaling.Vurdering, ident: String, epost: String, tidspunkt: LocalDateTime, automatiskBehandling: Boolean) {
