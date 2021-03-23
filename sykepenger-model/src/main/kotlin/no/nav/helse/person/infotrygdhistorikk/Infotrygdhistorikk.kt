@@ -36,14 +36,14 @@ internal class Infotrygdhistorikk private constructor(
         return siste.valider(aktivitetslogg, periode, skjæringstidspunkt)
     }
 
-    internal fun overlapperMed(aktivitetslogg: IAktivitetslogg, historie: Historie, organisasjonsnummer: String, periode: Periode): Boolean {
+    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, historie: Historie, organisasjonsnummer: String, periode: Periode): Boolean {
         val avgrensetPeriode = historie.avgrensetPeriode(organisasjonsnummer, periode)
-        return overlapperMed(aktivitetslogg, avgrensetPeriode)
+        return validerOverlappende(aktivitetslogg, avgrensetPeriode, historie.skjæringstidspunkt(periode))
     }
 
-    internal fun overlapperMed(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
-        if (!harHistorikk()) return false
-        return siste.overlapperMed(aktivitetslogg, periode)
+    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+        if (!harHistorikk()) return true
+        return siste.validerOverlappende(aktivitetslogg, periode, skjæringstidspunkt)
     }
 
     internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, cutoff: LocalDateTime = gammel): Boolean {
@@ -98,6 +98,7 @@ internal class Infotrygdhistorikk private constructor(
         private val perioder: List<Infotrygdperiode>,
         private val inntekter: List<Inntektsopplysning>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
+        private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
         private var oppdatert: LocalDateTime = tidsstempel
     ) {
         private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id)
@@ -112,7 +113,8 @@ internal class Infotrygdhistorikk private constructor(
                 hendelseId: UUID,
                 perioder: List<Infotrygdperiode>,
                 inntekter: List<Inntektsopplysning>,
-                arbeidskategorikoder: Map<String, LocalDate>
+                arbeidskategorikoder: Map<String, LocalDate>,
+                ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>
             ) =
                 Element(
                     id = UUID.randomUUID(),
@@ -121,6 +123,7 @@ internal class Infotrygdhistorikk private constructor(
                     perioder = perioder.sortedBy { it.start },
                     inntekter = inntekter,
                     arbeidskategorikoder = arbeidskategorikoder,
+                    ugyldigePerioder = ugyldigePerioder,
                     oppdatert = oppdatert
                 )
 
@@ -132,6 +135,7 @@ internal class Infotrygdhistorikk private constructor(
                     perioder = emptyList(),
                     inntekter = emptyList(),
                     arbeidskategorikoder = emptyMap(),
+                    ugyldigePerioder = emptyList(),
                     oppdatert = LocalDateTime.MIN
                 )
         }
@@ -152,6 +156,23 @@ internal class Infotrygdhistorikk private constructor(
         }
 
         internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+            ugyldigePerioder.forEach { (fom,  tom) ->
+                val tekst = when {
+                    fom == null || tom == null -> "mangler fom- eller tomdato"
+                    fom > tom -> "fom er nyere enn tom"
+                    else -> null
+                }
+                aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
+            }
+            return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
+        }
+
+        internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+            aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
+            return valider(aktivitetslogg, perioder.filterIsInstance<Utbetalingsperiode>(), periode, skjæringstidspunkt)
+        }
+
+        private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
             aktivitetslogg.info("Sjekker utbetalte perioder")
             perioder.forEach { it.valider(aktivitetslogg, periode) }
 
@@ -162,12 +183,6 @@ internal class Infotrygdhistorikk private constructor(
             if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
 
             return !aktivitetslogg.hasErrorsOrWorse()
-        }
-
-        internal fun overlapperMed(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
-            aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
-            perioder.forEach { it.validerOverlapp(aktivitetslogg, periode) }
-            return aktivitetslogg.hasErrorsOrWorse()
         }
 
         internal fun oppfrisket(cutoff: LocalDateTime) =
@@ -181,6 +196,7 @@ internal class Infotrygdhistorikk private constructor(
             visitor.preVisitInfotrygdhistorikkInntektsopplysninger()
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
+            visitor.visitUgyldigePerioder(ugyldigePerioder)
             visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
             visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId)
         }
@@ -193,7 +209,7 @@ internal class Infotrygdhistorikk private constructor(
         }
 
         override fun hashCode(): Int {
-            return Objects.hash(perioder, inntekter, arbeidskategorikoder)
+            return Objects.hash(perioder, inntekter, arbeidskategorikoder, ugyldigePerioder)
         }
 
         override fun equals(other: Any?): Boolean {

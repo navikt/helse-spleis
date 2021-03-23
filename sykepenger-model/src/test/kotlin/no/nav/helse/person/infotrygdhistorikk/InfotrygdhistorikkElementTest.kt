@@ -46,6 +46,7 @@ internal class InfotrygdhistorikkElementTest {
         val arbeidskategorikoder = mapOf(
             "01" to 1.januar
         )
+        val ugyldigePerioder = listOf(1.januar to 1.januar)
         assertEquals(historikkelement().hashCode(), historikkelement().hashCode())
         assertNotEquals(historikkelement().hashCode(), historikkelement(perioder).hashCode())
         assertEquals(historikkelement(perioder).hashCode(), historikkelement(perioder).hashCode())
@@ -53,6 +54,8 @@ internal class InfotrygdhistorikkElementTest {
         assertNotEquals(historikkelement(perioder, inntekter).hashCode(), historikkelement(inntekter = inntekter).hashCode())
         assertEquals(historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode(), historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode())
         assertNotEquals(historikkelement(perioder, inntekter).hashCode(), historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode())
+        assertNotEquals(historikkelement().hashCode(), historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
+        assertEquals(historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode(), historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
     }
 
     @Test
@@ -292,6 +295,20 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `Feiler selv om ugyldig dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
+        val utbetalinger = listOf(
+            Utbetalingsperiode(ORGNUMMER, 1.januar til 10.januar, 100.prosent, 1234.daglig)
+        )
+        val element = historikkelement(
+            perioder = utbetalinger,
+            ugyldigePerioder = listOf(5.januar to 5.januar)
+        )
+
+        assertFalse(element.valider(aktivitetslogg, Periode(1.mars, 1.mars), 1.mars))
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+    }
+
+    @Test
     fun `RefusjonTilArbeidsgiver regnes som utbetalingsdag selv om den overlapper med ferie`() {
         val utbetalinger = listOf(
             Utbetalingsperiode(ORGNUMMER, 1.januar til 10.januar, 100.prosent, 1234.daglig),
@@ -450,6 +467,7 @@ internal class InfotrygdhistorikkElementTest {
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
@@ -458,7 +476,8 @@ internal class InfotrygdhistorikkElementTest {
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = ugyldigePerioder
         )
 
     private class Inspektør : UtbetalingsdagVisitor {

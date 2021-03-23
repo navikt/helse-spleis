@@ -55,7 +55,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),
                 inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap()
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList()
             ))
         }
         historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk)

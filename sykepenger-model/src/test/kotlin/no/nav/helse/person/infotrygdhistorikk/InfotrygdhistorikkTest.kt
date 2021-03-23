@@ -116,7 +116,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `overlapper ikke med tom historikk`() {
-        assertFalse(historikk.overlapperMed(aktivitetslogg, 1.januar til 31.januar))
+        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -126,19 +126,19 @@ internal class InfotrygdhistorikkTest {
             Utbetalingsperiode("orgnr", 5.januar til 10.januar, 100.prosent, 25000.månedlig)
         )))
         aktivitetslogg.barn().also {
-            assertTrue(historikk.overlapperMed(it, 10.januar til 31.januar))
+            assertFalse(historikk.validerOverlappende(it, 10.januar til 31.januar, 10.januar))
             assertTrue(it.hasErrorsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertTrue(historikk.overlapperMed(it, 1.januar til 5.januar))
+            assertFalse(historikk.validerOverlappende(it, 1.januar til 5.januar, 1.januar))
             assertTrue(it.hasErrorsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertFalse(historikk.overlapperMed(it, 1.januar til 4.januar))
+            assertTrue(historikk.validerOverlappende(it, 1.januar til 4.januar, 1.januar))
             assertFalse(it.hasErrorsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertFalse(historikk.overlapperMed(it, 11.januar til 31.januar))
+            assertTrue(historikk.validerOverlappende(it, 11.januar til 31.januar, 11.januar))
             assertFalse(it.hasErrorsOrWorse())
         }
     }
@@ -149,13 +149,20 @@ internal class InfotrygdhistorikkTest {
             Friperiode(5.januar til 10.januar),
             Ukjent(15.januar til 20.januar)
         )))
-        assertFalse(historikk.overlapperMed(aktivitetslogg, 1.januar til 31.januar))
+        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
+    }
+
+    @Test
+    fun `hensyntar ikke ugyldige perioder i overlapp-validering`() {
+        historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(1.januar to null)))
+        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
     }
 
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
@@ -164,7 +171,8 @@ internal class InfotrygdhistorikkTest {
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = ugyldigePerioder
         )
 
     private class InfotrygdhistorikkInspektør(historikk: Infotrygdhistorikk) : InfotrygdhistorikkVisitor {

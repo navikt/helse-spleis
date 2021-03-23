@@ -46,6 +46,7 @@ internal interface InfotrygdhistorikkVisitor {
         refusjonTom: LocalDate?
     ) {}
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
+    fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
     fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {}
     fun postVisitInfotrygdhistorikk() {}

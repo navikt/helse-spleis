@@ -132,6 +132,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInfotrygdhistorikkInntektsopplysninger()
     }
 
+    override fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {
+        delegatee.visitUgyldigePerioder(ugyldigePerioder)
+    }
+
     override fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {
         delegatee.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
     }
