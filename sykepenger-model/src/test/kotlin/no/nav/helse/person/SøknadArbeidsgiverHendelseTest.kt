@@ -125,7 +125,7 @@ internal class SøknadArbeidsgiverHendelseTest : AbstractPersonTest() {
         assertFalse(inspektør.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.vedtaksperiodeTeller)
         assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
         assertEquals(10, inspektør.sykdomstidslinje.count())
     }
 

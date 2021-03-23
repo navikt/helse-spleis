@@ -24,7 +24,9 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
             førsteFraværsdag = 28.januar(2020)
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -32,23 +34,24 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(2.vedtaksperiode)   // No history
+        håndterYtelser(2.vedtaksperiode)
+
         håndterSimulering(2.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+            TilstandType.AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             TilstandType.START,
             TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            TilstandType.AVVENTER_UFERDIG_FORLENGELSE,
+            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING
@@ -91,7 +94,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+            TilstandType.AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,

@@ -1976,24 +1976,22 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a1
         )
+
+        assertTilstand(a1, AVVENTER_ARBEIDSGIVERE, 2)
+        assertTilstand(a2, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, 2)
+
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             førsteFraværsdag = 1.januar(2021),
             orgnummer = a2
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioder {
-                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                1.januar(2020) til 1.desember(2020) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }
-        ))
+        assertTilstand(a1, AVVENTER_HISTORIKK, 2)
+        assertTilstand(a2, AVVENTER_ARBEIDSGIVERE, 2)
+
         håndterYtelser(2.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a2), orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+        håndterVilkårsgrunnlag(2.vedtaksperiode(a1), orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
                 1.januar(2020) til 1.desember(2020) inntekter {
@@ -2002,16 +2000,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(2.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
-
         håndterYtelser(2.vedtaksperiode(a1), inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(2.vedtaksperiode(a1), orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a1), true, a1)
         håndterUtbetalt(2.vedtaksperiode(a1), orgnummer = a1)
+
+        assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVVENTER_HISTORIKK, 2)
+
         håndterYtelser(2.vedtaksperiode(a2), inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(2.vedtaksperiode(a2), orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode(a2), true, a2)
         håndterUtbetalt(2.vedtaksperiode(a2), orgnummer = a2)
+
+        assertTilstand(a1, AVSLUTTET, 2)
+        assertTilstand(a2, AVSLUTTET, 2)
     }
 
     @Test
@@ -2032,7 +2035,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
             håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-            assertTilstand(a1, TIL_INFOTRYGD)
+            assertTilstand(a1, AVSLUTTET_UTEN_UTBETALING)
             assertTilstand(a2, TIL_INFOTRYGD)
         }
     }
@@ -2040,22 +2043,35 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `tillater ikke overlappende periode hos annen arbeidsgiver - begge har uferdig periode foran gap`() {
         Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
-            val periode = 1.januar(2021) til 14.januar(2021)
-            assertTilstand(a1, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
-            assertTilstand(a2, MOTTATT_SYKMELDING_FERDIG_GAP, 1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+            val periode = 1.mars til 14.mars
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-            assertTilstand(a1, MOTTATT_SYKMELDING_UFERDIG_GAP, 2)
             håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-            assertTilstand(a1, AVSLUTTET_UTEN_UTBETALING, 2)
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-            assertTilstand(a2, MOTTATT_SYKMELDING_UFERDIG_GAP, 2)
             håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-            assertTilstand(a1, TIL_INFOTRYGD, 1)
-            assertTilstand(a1, TIL_INFOTRYGD, 2)
-            assertTilstand(a2, TIL_INFOTRYGD, 1)
-            assertTilstand(a2, TIL_INFOTRYGD, 2)
+
+            assertForkastetPeriodeTilstander(a1, 1.vedtaksperiode(a1), START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(a1, 2.vedtaksperiode(a1), START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(a2, 1.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(a2, 2.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `tillater ikke overlappende periode hos annen arbeidsgiver - begge har uferdig periode foran gap og mottar sykmelding samtidig`() {
+        Toggles.FlereArbeidsgivereFørstegangsbehandling.disable {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+            val periode = 1.mars til 14.mars
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
+            håndterSøknadArbeidsgiver(Søknadsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+
+            assertForkastetPeriodeTilstander(a1, 1.vedtaksperiode(a1), START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(a1, 2.vedtaksperiode(a1), START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(a2, 1.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(a2, 2.vedtaksperiode(a2), START, MOTTATT_SYKMELDING_UFERDIG_GAP, TIL_INFOTRYGD)
         }
     }
 

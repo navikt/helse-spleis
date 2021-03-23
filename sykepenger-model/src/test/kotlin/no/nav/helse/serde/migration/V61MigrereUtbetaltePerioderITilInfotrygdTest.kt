@@ -68,7 +68,7 @@ private val originalJson =
                     "vedtaksperiode": {
                         "fom": "2020-05-26",
                         "tom": "2020-06-09",
-                        "tilstand": "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING"
+                        "tilstand": "AVSLUTTET_UTEN_UTBETALING"
                     }
                 },
                 {
@@ -189,7 +189,7 @@ private val expectedJson =
                     "vedtaksperiode": {
                         "fom": "2020-05-26",
                         "tom": "2020-06-09",
-                        "tilstand": "AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING"
+                        "tilstand": "AVSLUTTET_UTEN_UTBETALING"
                     }
                 },
                 {

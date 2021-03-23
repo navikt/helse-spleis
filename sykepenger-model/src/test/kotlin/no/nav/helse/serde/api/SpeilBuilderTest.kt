@@ -710,7 +710,7 @@ class SpeilBuilderTest {
 
     @Test
     fun `Sender med varsler for tidligere periode som er avsluttet uten utbetaling`() {
-        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
+        val (person, hendelser) = ingenutbetalingPåfølgendeBetaling()
 
         val personDTO = serializePersonForSpeil(person, hendelser)
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
@@ -1359,10 +1359,11 @@ class SpeilBuilderTest {
                         add(sykmeldingDto)
                     }
                     fangeVedtaksperiodeId()
-                    søknadSendtTilArbeidsgiver(
+                    søknad(
                         hendelseId = søknadhendelseId,
                         fom = 1.januar,
-                        tom = 9.januar
+                        tom = 9.januar,
+                        andrePerioder = listOf(Søknad.Søknadsperiode.Utdanning(3.januar, 4.januar))
                     ).also { (sykmelding, sykmeldingDTO) ->
                         håndter(sykmelding)
                         add(sykmeldingDTO)
@@ -1379,9 +1380,15 @@ class SpeilBuilderTest {
                         håndter(inntektsmelding)
                         add(inntektsmeldingDTO)
                     }
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId, medlemskapstatus = medlemskapstatus))
+                    håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+                    håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
+
+
                     fangeVedtaksperiodeId()
                     håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
+
                     håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
                     håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId, aktivitetslogg = this@run.aktivitetslogg))
                     fangeUtbetalinger()

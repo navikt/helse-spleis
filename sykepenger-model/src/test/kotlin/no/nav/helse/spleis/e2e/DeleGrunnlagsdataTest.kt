@@ -238,23 +238,23 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
+            AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG_FORLENGELSE,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
@@ -303,35 +303,5 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
         assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `får egen vilkårsgrunnlag selv når inntektsmelding overlapper, men er gap mellom periodene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 4.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 15.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(1.januar, 4.januar, 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.januar, 15.januar, 100.prosent))
-
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 15.januar)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_GAP,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
-        )
-        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
     }
 }

@@ -31,9 +31,8 @@ internal class Utbetalingstidslinje private constructor(
             .map { it.periode() }
             .reduce(Periode::merge)
 
-        @Suppress("SimplifiableCallChain") // avvis både avviser dager og returner true om det er avviste dager i perioden
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelse: Begrunnelse) =
-            tidslinjer.filter { it.avvis(dager, periode, begrunnelse) }.isNotEmpty()
+            tidslinjer.count { it.avvis(dager, periode, begrunnelse) } > 0
     }
 
     internal fun er6GBegrenset(): Boolean {
