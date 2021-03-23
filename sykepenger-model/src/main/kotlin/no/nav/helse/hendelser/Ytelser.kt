@@ -15,7 +15,7 @@ class Ytelser(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     internal val vedtaksperiodeId: String,
-    private val utbetalingshistorikk: Utbetalingshistorikk,
+    private val utbetalingshistorikk: Utbetalingshistorikk?,
     private val foreldrepermisjon: Foreldrepermisjon,
     private val pleiepenger: Pleiepenger,
     private val omsorgspenger: Omsorgspenger,
@@ -29,7 +29,7 @@ class Ytelser(
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
-        utbetalingshistorikk.oppdaterHistorikk(historikk)
+        utbetalingshistorikk?.oppdaterHistorikk(historikk)
     }
 
     internal fun lagreDødsdato(person: Person) {

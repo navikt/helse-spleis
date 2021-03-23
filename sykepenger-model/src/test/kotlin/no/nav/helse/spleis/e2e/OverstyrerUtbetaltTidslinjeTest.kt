@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
 
@@ -460,27 +461,18 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 18.januar)), førsteFraværsdag = 2.januar)
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterOverstyring((3.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(
-            vedtaksperiodeId = 1.vedtaksperiode,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    3.januar,
-                    15000.daglig,
-                    true
-                )
-            ),
-            utbetalinger = arrayOf(
-                Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 15000.daglig)
-            )
+            1.vedtaksperiode,
+            Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 15000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 3.januar, 15000.daglig, true))
         )
 
         assertTilstander(

@@ -219,23 +219,22 @@ internal class TestMessageFactory(
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList()
     ): String {
-        return lagBehovMedLøsning(
-            vedtaksperiodeId = vedtaksperiodeId,
-            tilstand = tilstand,
-            behov = listOf(
-                "Sykepengehistorikk",
-                "Foreldrepenger",
-                "Pleiepenger",
-                "Omsorgspenger",
-                "Opplæringspenger",
-                "Institusjonsopphold",
-                "Arbeidsavklaringspenger",
-                "Dødsinfo",
-                "Dagpenger"
-            ),
-            løsninger = mapOf(
+        val behovliste = mutableListOf(
+            "Foreldrepenger",
+            "Pleiepenger",
+            "Omsorgspenger",
+            "Opplæringspenger",
+            "Institusjonsopphold",
+            "Arbeidsavklaringspenger",
+            "Dødsinfo",
+            "Dagpenger"
+        )
+
+        val sykepengehistorikkMap = sykepengehistorikk?.let {
+            behovliste.add("Sykepengehistorikk")
+            mapOf(
                 "Sykepengehistorikk" to sykepengehistorikk.map { data ->
                     mapOf(
                         "fom" to data.fom,
@@ -261,7 +260,15 @@ internal class TestMessageFactory(
                         },
                         "arbeidsKategoriKode" to data.arbeidskategorikode
                     )
-                },
+                }
+            )
+        } ?: emptyMap()
+
+        return lagBehovMedLøsning(
+            vedtaksperiodeId = vedtaksperiodeId,
+            tilstand = tilstand,
+            behov = behovliste,
+            løsninger = sykepengehistorikkMap + mapOf(
                 "Foreldrepenger" to emptyMap<String, String>(),
                 "Pleiepenger" to pleiepenger.map { data ->
                     mapOf(

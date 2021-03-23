@@ -13,8 +13,7 @@ import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -90,6 +89,28 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(søknad())
         person.håndter(inntektsmelding())
         person.håndter(ytelser())
+        person.håndter(vilkårsgrunnlag())
+        assertEquals(8, hendelse.behov().size)
+        person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
+        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(8, hendelse.behov().size)
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Foreldrepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Pleiepenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Omsorgspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Opplæringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Arbeidsavklaringspenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dagpenger))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Institusjonsopphold))
+        assertFalse(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk))
+        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode, Behovtype.Dødsinfo))
+    }
+
+    @Test
+    fun `påminnelse i ytelser - gammel historikk`() {
+        person.håndter(sykmelding())
+        person.håndter(søknad())
+        person.håndter(inntektsmelding())
+        person.håndter(ytelser(besvart = LocalDateTime.now().minusHours(24)))
         person.håndter(vilkårsgrunnlag())
         assertEquals(9, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
@@ -330,7 +351,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun ytelser(): Ytelser {
+    private fun ytelser(besvart: LocalDateTime = LocalDateTime.now()): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
@@ -351,7 +372,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 ),
                 ugyldigePerioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg(),
-                besvart = LocalDateTime.now()
+                besvart = besvart
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = null,

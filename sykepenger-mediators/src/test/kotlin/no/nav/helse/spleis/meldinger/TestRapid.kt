@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.junit.jupiter.api.fail
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class TestRapid : RapidsConnection() {
@@ -15,6 +16,8 @@ internal class TestRapid : RapidsConnection() {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        private val log = LoggerFactory.getLogger(TestRapid::class.java)
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -25,6 +28,7 @@ internal class TestRapid : RapidsConnection() {
     }
 
     fun sendTestMessage(message: String) {
+        log.info("sending message:\n\t$message")
         notifyMessage(message, this)
     }
 

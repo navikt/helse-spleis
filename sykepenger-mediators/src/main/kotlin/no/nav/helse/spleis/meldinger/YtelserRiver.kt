@@ -13,7 +13,6 @@ internal class YtelserRiver(
     messageMediator: IMessageMediator
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(
-        Sykepengehistorikk,
         Foreldrepenger,
         Pleiepenger,
         Omsorgspenger,
@@ -28,7 +27,6 @@ internal class YtelserRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
         message.requireKey("@løsning.${Foreldrepenger.name}")
-        message.requireKey("@løsning.${Sykepengehistorikk.name}")
         message.requireKey("@løsning.${Pleiepenger.name}")
         message.requireKey("@løsning.${Omsorgspenger.name}")
         message.requireKey("@løsning.${Opplæringspenger.name}")
@@ -36,18 +34,21 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${Dødsinfo.name}")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
-        message.requireArray("@løsning.${Sykepengehistorikk.name}") {
-            requireArray("inntektsopplysninger") {
-                require("sykepengerFom", JsonNode::asLocalDate)
-                requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
+        message.interestedIn("@løsning.${Sykepengehistorikk.name}")
+        if (message["@løsning.${Sykepengehistorikk.name}"].isArray) {
+            message.requireArray("@løsning.${Sykepengehistorikk.name}") {
+                requireArray("inntektsopplysninger") {
+                    require("sykepengerFom", JsonNode::asLocalDate)
+                    requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
+                }
+                requireArray("utbetalteSykeperioder") {
+                    interestedIn("fom") { it.asLocalDate() }
+                    interestedIn("tom") { it.asLocalDate() }
+                    requireKey("dagsats", "utbetalingsGrad", "orgnummer")
+                    requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
+                }
+                requireKey("arbeidsKategoriKode")
             }
-            requireArray("utbetalteSykeperioder") {
-                interestedIn("fom") { it.asLocalDate() }
-                interestedIn("tom") { it.asLocalDate() }
-                requireKey("dagsats", "utbetalingsGrad", "orgnummer")
-                requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
-            }
-            requireKey("arbeidsKategoriKode")
         }
         message.requireArray("@løsning.${Pleiepenger.name}") {
             interestedIn("fom") { it.asLocalDate() }

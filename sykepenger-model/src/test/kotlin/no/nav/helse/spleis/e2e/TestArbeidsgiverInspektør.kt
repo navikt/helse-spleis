@@ -305,6 +305,9 @@ internal class TestArbeidsgiverInspektør(
     internal fun etterspurteBehov(vedtaksperiodeId: UUID, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
         personLogg.etterspurteBehovFinnes(vedtaksperiodeId, behovtype)
 
+    internal fun etterspurteBehov(vedtaksperiodeId: UUID, tilstand: TilstandType, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, tilstand, behovtype)
+
     internal fun etterspurteBehov(vedtaksperiodeId: UUID) =
         personLogg.etterspurteBehov(vedtaksperiodeId)
 

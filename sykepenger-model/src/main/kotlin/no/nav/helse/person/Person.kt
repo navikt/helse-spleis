@@ -232,9 +232,13 @@ class Person private constructor(
         observers.add(observer)
     }
 
-    internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode, cutoff: LocalDateTime? = null) {
+    internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.sykdomstidslinje().førsteDag() }
-        if (infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
+        return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
+    }
+
+    internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode, cutoff: LocalDateTime? = null) {
+        if (trengerHistorikkFraInfotrygd(hendelse, cutoff)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
     }

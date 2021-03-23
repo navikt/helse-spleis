@@ -116,21 +116,11 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     @Test
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
         val historikk = Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
-
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
-        håndterYtelser(
-            1.vedtaksperiode, historikk,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    3.januar(2018),
-                    1000.daglig,
-                    true
-                )
-            )
-        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
@@ -151,21 +141,11 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
     @Test
     fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
         val historikk = Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
-
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk)
-        håndterYtelser(
-            1.vedtaksperiode, historikk,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    3.januar(2018),
-                    1000.daglig,
-                    true
-                )
-            )
-        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(
@@ -178,17 +158,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
-        håndterYtelser(
-            2.vedtaksperiode, historikk,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    3.januar(2018),
-                    1000.daglig,
-                    true
-                )
-            )
-        )
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         assertEquals(

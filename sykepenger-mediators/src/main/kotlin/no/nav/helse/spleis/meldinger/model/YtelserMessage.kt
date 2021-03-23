@@ -25,8 +25,10 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val aktivitetslogg = Aktivitetslogg()
-    private val utbetalingshistorikk = UtbetalingshistorikkMessage(packet)
-        .utbetalingshistorikk(aktivitetslogg)
+    private val utbetalingshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].takeIf(JsonNode::isArray)?.let {
+        UtbetalingshistorikkMessage(packet)
+            .utbetalingshistorikk(aktivitetslogg)
+    }
     private val statslønn = packet["@løsning.${Sykepengehistorikk.name}"].any {
         it["statslønn"]?.asBoolean() ?: false
     }

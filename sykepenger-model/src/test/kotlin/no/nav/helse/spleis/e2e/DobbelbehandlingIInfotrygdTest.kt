@@ -12,6 +12,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
 
@@ -57,7 +58,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
         val historikk = arrayOf(Utbetalingsperiode("456789123", 1.desember(2020) til  4.desember(2020), 100.prosent, 1000.daglig))
         val inntektshistorikk = listOf(
@@ -71,9 +72,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     fun `utbetalt i infotrygd mens vi venter på inntektsmelding - oppdaget ved påminnelse`() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        oppfriskUtbetalingshistorikk(1.vedtaksperiode,
+        håndterUtbetalingshistorikk(1.vedtaksperiode,
             Utbetalingsperiode("456789123", 1.desember(2020) til  4.desember(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)

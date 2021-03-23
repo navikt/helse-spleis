@@ -83,16 +83,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        val historikkFom = inspektør.sykdomstidslinje.førsteDag().minusYears(4)
-        val historikkTom = inspektør.sykdomstidslinje.sisteDag()
-        assertEquals(
-            historikkFom.toString(),
-            hendelse.etterspurtBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk, "historikkFom")
-        )
-        assertEquals(
-            historikkTom.toString(),
-            hendelse.etterspurtBehov(1.vedtaksperiode, Behovtype.Sykepengehistorikk, "historikkTom")
-        )
     }
 
     @Test

@@ -34,7 +34,7 @@ internal class ArbeidskategoriKodeTest: AbstractEndToEndTest() {
         val historikk = arrayOf(Utbetalingsperiode(ORGNUMMER, 1.desember(2017) til 28.desember(2017), 100.prosent, 15000.daglig))
         håndterYtelser(1.vedtaksperiode, *historikk, arbeidskategorikoder = arbeidskategorier)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, *historikk, arbeidskategorikoder = arbeidskategorier)
+        håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }

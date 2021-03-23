@@ -88,7 +88,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -851,7 +851,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
             førsteFraværsdag = 1.januar(2020)
         )
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -860,17 +860,14 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(
-            2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 17.januar(2020) til 31.januar(2020), 100.prosent, 1400.daglig)
-        )   // Duplicate processing
+        håndterYtelser(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 17.januar(2020) til 31.januar(2020), 100.prosent, 1400.daglig))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1345,13 +1342,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
             )
         )
-        håndterYtelser(
-            3.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 24.juni(2020) til 11.juli(2020), 100.prosent, 1814.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
-            )
-        )
+        håndterYtelser(3.vedtaksperiode)
     }
 
     @Test
@@ -1411,7 +1402,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         val historikk = Utbetalingsperiode(ORGNUMMER, 27.juli(2020) til 13.september(2020), 100.prosent, 1000.daglig)
         val inntekt = listOf(Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
-        håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
+        håndterYtelser(2.vedtaksperiode)
 
         assertEquals(40, 248 - inspektør.gjenståendeSykedager(2.vedtaksperiode))
     }
@@ -1434,7 +1425,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         val historikk = Utbetalingsperiode(ORGNUMMER, 17.august(2020) til 22.august(2020), 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
-        håndterYtelser(2.vedtaksperiode, historikk)
+        håndterYtelser(2.vedtaksperiode)
 
         inspektør.also {
             TestTidslinjeInspektør(it.utbetalingstidslinjer(2.vedtaksperiode)).also { tidslinjeInspektør ->

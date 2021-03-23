@@ -14,6 +14,8 @@ import no.nav.helse.hendelser.Simulering.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
@@ -294,6 +296,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         besvart: LocalDateTime = LocalDateTime.now()
     ) {
+        val bedtOmSykepengehistorikk = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeId, Sykepengehistorikk)
+        if (bedtOmSykepengehistorikk) assertEtterspurt(Utbetalingshistorikk::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
         utbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = utbetalinger.toList(),
@@ -310,7 +314,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         besvart: LocalDateTime
     ) {
-        assertEtterspurt(Utbetalingshistorikk::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
         return oppfriskUtbetalingshistorikk(
             vedtaksperiodeId,
             *utbetalinger,
@@ -390,7 +393,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Ytelser::class, behovtype, vedtaksperiodeId, orgnummer)
 
-        assertEtterspurt(Sykepengehistorikk)
         assertEtterspurt(Foreldrepenger)
         assertEtterspurt(Behovtype.Pleiepenger)
         assertEtterspurt(Behovtype.Omsorgspenger)
@@ -399,6 +401,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         assertEtterspurt(Behovtype.Dagpenger)
         assertEtterspurt(Behovtype.Institusjonsopphold)
         assertEtterspurt(Behovtype.Dødsinfo)
+
         ytelser(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalinger = utbetalinger.toList(),
@@ -634,6 +637,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false
     ): Inntektsmelding {
+        EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Sykepengehistorikk)
         return Inntektsmelding(
             meldingsreferanseId = id,
             refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
@@ -760,14 +764,25 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
-        return Ytelser(
-            meldingsreferanseId = meldingsreferanseId,
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
-            statslønn = statslønn,
-            utbetalingshistorikk = Utbetalingshistorikk(
+
+        val bedtOmSykepengehistorikk = erEtterspurt(Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_HISTORIKK)
+            || erEtterspurt(Sykepengehistorikk, vedtaksperiodeId, orgnummer, AVVENTER_REVURDERING)
+        if (bedtOmSykepengehistorikk) assertEtterspurt(Ytelser::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
+        val harSpesifisertSykepengehistorikk = utbetalinger.isNotEmpty() || arbeidskategorikoder.isNotEmpty()
+
+        if (!bedtOmSykepengehistorikk && harSpesifisertSykepengehistorikk) {
+            fail("Vedtaksperiode $vedtaksperiodeId har ikke bedt om Sykepengehistorikk" +
+                "\nfordi den har gjenbrukt Infotrygdhistorikk-cache." +
+                "\nTrenger ikke sende inn utbetalinger og inntektsopplysninger da." +
+                "\nEnten ta bort overflødig historikk, eller sett 'besvart'-tidspunktet tilbake i tid " +
+                "på forrige Ytelser-innsending" +
+                "\n\n${inspektør.personLogg}")
+        }
+
+        val utbetalingshistorikk = if (!bedtOmSykepengehistorikk)
+            null
+        else
+            Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018,
@@ -777,9 +792,16 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 perioder = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 ugyldigePerioder = emptyList(),
-                aktivitetslogg = aktivitetslogg,
                 besvart = besvart
-            ),
+            )
+        return Ytelser(
+            meldingsreferanseId = meldingsreferanseId,
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = orgnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            statslønn = statslønn,
+            utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
                 svangerskapsytelse = svangerskapspenger,
@@ -1018,6 +1040,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         return this
     }
 
+    private fun erEtterspurt(type: Behovtype, vedtaksperiodeId: UUID, orgnummer: String, tilstand: TilstandType): Boolean {
+        return EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer, tilstand) != null
+    }
+
     private fun <T : ArbeidstakerHendelse> assertEtterspurt(løsning: KClass<T>, type: Behovtype, vedtaksperiodeId: UUID, orgnummer: String) {
         val etterspurtBehov = EtterspurtBehov.finnEtterspurtBehov(ikkeBesvarteBehov, type, vedtaksperiodeId, orgnummer)
         assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
@@ -1051,6 +1077,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         private val vedtaksperiodeId: UUID
     ) {
         companion object {
+            internal fun fjern(liste: MutableList<EtterspurtBehov>, orgnummer: String, type: Behovtype) {
+                liste.removeIf { it.orgnummer == orgnummer && it.type == type }
+            }
+
             internal fun finnEtterspurteBehov(behovsliste: List<Aktivitetslogg.Aktivitet.Behov>) =
                 behovsliste
                     .filter { "tilstand" in it.kontekst() }
@@ -1072,6 +1102,17 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 orgnummer: String
             ) =
                 ikkeBesvarteBehov.firstOrNull { it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeId }
+
+            internal fun finnEtterspurtBehov(
+                ikkeBesvarteBehov: MutableList<EtterspurtBehov>,
+                type: Behovtype,
+                vedtaksperiodeId: UUID,
+                orgnummer: String,
+                tilstand: TilstandType
+            ) =
+                ikkeBesvarteBehov.firstOrNull {
+                    it.type == type && it.orgnummer == orgnummer && it.vedtaksperiodeId == vedtaksperiodeId && it.tilstand == tilstand
+                }
         }
 
         override fun toString() = "$type ($tilstand)"

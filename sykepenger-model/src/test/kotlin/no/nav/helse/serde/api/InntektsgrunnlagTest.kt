@@ -146,17 +146,10 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
-        )
-
-        håndterYtelser(
-            1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
-        )
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
+        håndterYtelser(1.vedtaksperiode)
 
         val builder = InntektshistorikkBuilder(person)
         builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
@@ -223,11 +216,9 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
 
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
-        )
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
 
         val builder = InntektshistorikkBuilder(person)
         FinnInntektshistorikk(person, builder).also {
@@ -241,11 +232,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             }
         }
 
-        håndterYtelser(
-            1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
-        )
+        håndterYtelser(1.vedtaksperiode)
 
         builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
 

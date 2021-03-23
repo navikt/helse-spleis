@@ -166,6 +166,38 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun sendYtelserUtenSykepengehistorikk(
+        vedtaksperiodeIndeks: Int,
+        pleiepenger: List<TestMessageFactory.PleiepengerTestdata> = emptyList(),
+        omsorgspenger: List<TestMessageFactory.OmsorgspengerTestdata> = emptyList(),
+        opplæringspenger: List<TestMessageFactory.OpplæringspengerTestdata> = emptyList(),
+        institusjonsoppholdsperioder: List<TestMessageFactory.InstitusjonsoppholdTestdata> = emptyList(),
+        arbeidsavklaringspenger: List<TestMessageFactory.ArbeidsavklaringspengerTestdata> = emptyList(),
+        dagpenger: List<TestMessageFactory.DagpengerTestdata> = emptyList()
+    ) {
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagYtelser(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger),
+                pleiepenger = pleiepenger,
+                omsorgspenger = omsorgspenger,
+                opplæringspenger = opplæringspenger,
+                institusjonsoppholdsperioder = institusjonsoppholdsperioder,
+                arbeidsavklaringspenger = arbeidsavklaringspenger,
+                dagpenger = dagpenger,
+                sykepengehistorikk = null
+            )
+        )
+    }
+
+
     protected fun sendYtelser(
         vedtaksperiodeIndeks: Int,
         pleiepenger: List<TestMessageFactory.PleiepengerTestdata> = emptyList(),

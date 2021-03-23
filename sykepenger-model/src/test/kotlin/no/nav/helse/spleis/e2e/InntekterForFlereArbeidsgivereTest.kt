@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
+import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
@@ -13,6 +14,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -36,26 +38,25 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
 
-        person.håndter(
-            vilkårsgrunnlag(
-                a1.id(0),
-                orgnummer = a1,
-                inntekter = inntektperioder {
-                    inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 15000
-                    }
-                    1.januar(2017) til 1.juni(2017) inntekter {
-                        a2 inntekt 5000
-                        a3 inntekt 3000
-                        a4 inntekt 2000
-                    }
-                    1.juli(2017) til 1.desember(2017) inntekter {
-                        a3 inntekt 7500
-                        a4 inntekt 2500
-                    }
+        vilkårsgrunnlag(
+            a1.id(0),
+            orgnummer = a1,
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 15000
                 }
-            ))
+                1.januar(2017) til 1.juni(2017) inntekter {
+                    a2 inntekt 5000
+                    a3 inntekt 3000
+                    a4 inntekt 2000
+                }
+                1.juli(2017) til 1.desember(2017) inntekter {
+                    a3 inntekt 7500
+                    a4 inntekt 2500
+                }
+            }
+        ).håndter(Person::håndter)
 
         assertNoErrors(a1Inspektør)
         assertNoErrors(a2Inspektør)
@@ -103,21 +104,19 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
-        person.håndter(vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
+        vilkårsgrunnlag(a1.id(0), orgnummer = a1, inntekter = inntektperioder {
             inntektsgrunnlag = Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
             1.januar(2017) til 1.desember(2017) inntekter {
                 a1 inntekt 24000
             }
-        }))
+        }).håndter(Person::håndter)
 
-        person.håndter(
-            ytelser(
-                a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
-                    Inntektsopplysning(a1, 1.januar, 24500.månedlig, true),
-                    Inntektsopplysning(a2, 1.januar(2016), 5000.månedlig, true)
-                )
+        ytelser(
+            a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
+                Inntektsopplysning(a1, 1.januar, 24500.månedlig, true),
+                Inntektsopplysning(a2, 1.januar(2016), 5000.månedlig, true)
             )
-        )
+        ).håndter(Person::håndter)
 
         assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
         assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
@@ -134,31 +133,30 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     private fun nyPeriode(periode: Periode, orgnummer: String, inntekt: Inntekt = INNTEKT) {
-        person.håndter(
-            sykmelding(
-                UUID.randomUUID(),
-                Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent),
-                orgnummer = orgnummer,
-                mottatt = periode.endInclusive.atStartOfDay()
-            )
-        )
-        person.håndter(
-            søknad(
-                UUID.randomUUID(),
-                Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
-                orgnummer = orgnummer
-            )
-        )
-        person.håndter(
-            inntektsmelding(
-                UUID.randomUUID(),
-                arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-                beregnetInntekt = inntekt,
-                førsteFraværsdag = periode.start,
-                orgnummer = orgnummer
-            )
-        )
-        person.håndter(ytelser(1.vedtaksperiode(orgnummer), orgnummer = orgnummer, inntektshistorikk = emptyList()))
+        sykmelding(
+            UUID.randomUUID(),
+            Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent),
+            orgnummer = orgnummer,
+            mottatt = periode.endInclusive.atStartOfDay()
+        ).håndter(Person::håndter)
+        søknad(
+            UUID.randomUUID(),
+            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            orgnummer = orgnummer
+        ).håndter(Person::håndter)
+        inntektsmelding(
+            UUID.randomUUID(),
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
+            beregnetInntekt = inntekt,
+            førsteFraværsdag = periode.start,
+            orgnummer = orgnummer
+        ).håndter(Person::håndter)
+        ytelser(
+            vedtaksperiodeId = 1.vedtaksperiode(orgnummer),
+            orgnummer = orgnummer,
+            inntektshistorikk = emptyList(),
+            besvart = LocalDateTime.now().minusHours(24)
+        ).håndter(Person::håndter)
     }
 
     private fun vilkårsgrunnlag(

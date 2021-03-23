@@ -2,11 +2,18 @@ package no.nav.helse
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.TilstandType
 import java.util.*
 
 internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+    }.filter { it.type == behov }.isNotEmpty()
+
+internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, tilstandType: TilstandType, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+    this.behov().filter {
+        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+            && it.kontekst()["tilstand"] == tilstandType.name
     }.filter { it.type == behov }.isNotEmpty()
 
 internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =

@@ -263,6 +263,8 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         })
         håndterOverstyringSykedag(2.januar til 9.januar)
         håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
 
