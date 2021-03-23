@@ -8,6 +8,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunn
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendePeriodeHosAnnenArbeidsgiver
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -23,6 +24,7 @@ class Person private constructor(
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
+    private val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?
 ) : Aktivitetskontekst {
@@ -30,7 +32,7 @@ class Person private constructor(
     constructor(
         aktørId: String,
         fødselsnummer: String
-    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), VilkårsgrunnlagHistorikk(), null)
+    ) : this(aktørId, fødselsnummer, mutableListOf(), Aktivitetslogg(), LocalDateTime.now(), Infotrygdhistorikk(), VilkårsgrunnlagHistorikk(), null)
 
     private val observers = mutableListOf<PersonObserver>()
 
@@ -233,6 +235,7 @@ class Person private constructor(
         visitor.preVisitArbeidsgivere()
         arbeidsgivere.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgivere()
+        infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
         visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
     }

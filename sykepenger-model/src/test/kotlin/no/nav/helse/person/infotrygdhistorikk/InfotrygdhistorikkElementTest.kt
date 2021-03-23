@@ -61,7 +61,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `like perioder`() {
         val ferie = Friperiode(1.januar til 31.januar)
-        val ukjent = Ukjent(1.januar til 31.januar)
+        val ukjent = UkjentInfotrygdperiode(1.januar til 31.januar)
         val utbetalingAG1 = Utbetalingsperiode("ag1", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
         val utbetalingAG2 = Utbetalingsperiode("ag2", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
         assertEquals(ferie, ferie)
@@ -85,7 +85,7 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `utbetalingstidslinje - ukjent`() {
-        val ferie = Ukjent(1.januar til 10.januar)
+        val ferie = UkjentInfotrygdperiode(1.januar til 10.januar)
         val inspektør = UtbetalingstidslinjeInspektør(ferie.utbetalingstidslinje())
         assertEquals(0, inspektør.size)
     }
@@ -108,7 +108,7 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `sykdomstidslinje - ukjent`() {
-        val ferie = Ukjent(1.januar til 10.januar)
+        val ferie = UkjentInfotrygdperiode(1.januar til 10.januar)
         val inspektør = SykdomstidslinjeInspektør(ferie.sykdomstidslinje(kilde))
         assertTrue(inspektør.dager.isEmpty())
     }
@@ -330,7 +330,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `Feiler ikke selv om ukjent dag overlappes helt av ReduksjonArbeidsgiverRefusjon`() {
         val utbetalinger = listOf(
             Utbetalingsperiode(ORGNUMMER, 1.januar til 10.januar, 100.prosent, 1234.daglig),
-            Ukjent(5.januar til 5.januar)
+            UkjentInfotrygdperiode(5.januar til 5.januar)
         )
 
         val tidslinje = utbetalinger.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus)
@@ -381,7 +381,7 @@ internal class InfotrygdhistorikkElementTest {
     fun `Validerer ok hvis perioder er eldre enn 26 uker før første fraværsdag`() {
         val utbetalinger = listOf(
             Utbetalingsperiode(ORGNUMMER, 1.januar til 10.januar, 100.prosent, 1234.daglig),
-            Ukjent(1.januar til 10.januar)
+            UkjentInfotrygdperiode(1.januar til 10.januar)
         )
         val element = historikkelement(utbetalinger)
         assertTrue(element.valider(aktivitetslogg, Periode(1.august, 1.august), 1.august))

@@ -87,13 +87,13 @@ internal class Infotrygdhistorikk private constructor(
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.preVisitInfotrygdhistorikk()
         elementer.forEach { it.accept(visitor) }
-        visitor.preVisitInfotrygdhistorikk()
+        visitor.postVisitInfotrygdhistorikk()
     }
     private fun harHistorikk() = elementer.isNotEmpty()
 
     internal class Element private constructor(
         private val id: UUID,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now(),
+        private val tidsstempel: LocalDateTime,
         private val hendelseId: UUID? = null,
         private val perioder: List<Infotrygdperiode>,
         private val inntekter: List<Inntektsopplysning>,

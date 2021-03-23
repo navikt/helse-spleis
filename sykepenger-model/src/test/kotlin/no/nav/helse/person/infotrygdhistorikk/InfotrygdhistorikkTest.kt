@@ -147,7 +147,7 @@ internal class InfotrygdhistorikkTest {
     fun `overlapper ikke med ferie eller ukjent`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             Friperiode(5.januar til 10.januar),
-            Ukjent(15.januar til 20.januar)
+            UkjentInfotrygdperiode(15.januar til 20.januar)
         )))
         assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
     }

@@ -4,8 +4,15 @@ import no.nav.helse.appender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Kilde
@@ -38,6 +45,7 @@ internal data class PersonData(
     private val arbeidsgivere: List<ArbeidsgiverData>,
     private val aktivitetslogg: AktivitetsloggData?,
     private val opprettet: LocalDateTime,
+    private val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagElement>,
     private val dødsdato: LocalDate?
 ) {
@@ -47,7 +55,7 @@ internal data class PersonData(
 
     private val person = Person::class.primaryConstructor!!
         .apply { isAccessible = true }
-        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, vilkårsgrunnlagHistorikk.tilModellObjekt(), dødsdato)
+        .call(aktørId, fødselsnummer, arbeidsgivereliste, modelAktivitetslogg, opprettet, infotrygdhistorikk.tilModellObjekt(), vilkårsgrunnlagHistorikk.tilModellObjekt(), dødsdato)
 
     internal fun createPerson(): Person {
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
@@ -58,6 +66,83 @@ internal data class PersonData(
             )
         })
         return person
+    }
+
+    data class InfotrygdhistorikkElementData(
+        private val id: UUID,
+        private val tidsstempel: LocalDateTime,
+        private val hendelseId: UUID?,
+        private val ferieperioder: List<FerieperiodeData>,
+        private val utbetalingsperioder: List<UtbetalingsperiodeData>,
+        private val ukjenteperioder: List<UkjentperiodeData>,
+        private val inntekter: List<InntektsopplysningData>,
+        private val arbeidskategorikoder: Map<String, LocalDate>,
+        private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+        private val oppdatert: LocalDateTime
+    ) {
+        internal companion object {
+            fun List<InfotrygdhistorikkElementData>.tilModellObjekt() =
+                Infotrygdhistorikk::class.primaryConstructor!!
+                    .apply { isAccessible = true }
+                    .call(map { it.parseInfotrygdhistorikkElement() })
+        }
+
+        internal fun parseInfotrygdhistorikkElement() = Infotrygdhistorikk.Element::class.primaryConstructor!!
+            .apply { isAccessible = true }
+            .call(
+                id,
+                tidsstempel,
+                utbetalingsperioder.map { it.parsePeriode() } + ferieperioder.map { it.parsePeriode() } + ukjenteperioder.map { it.parsePeriode() },
+                inntekter.map { it.parseInntektsopplysning() },
+                arbeidskategorikoder,
+                ugyldigePerioder,
+                oppdatert
+            )
+
+        data class FerieperiodeData(
+            private val fom: LocalDate,
+            private val tom: LocalDate
+        ) {
+            internal fun parsePeriode() = Friperiode(fom til tom)
+        }
+
+        data class UkjentperiodeData(
+            private val fom: LocalDate,
+            private val tom: LocalDate
+        ) {
+            internal fun parsePeriode() = UkjentInfotrygdperiode(fom til tom)
+        }
+
+        data class UtbetalingsperiodeData(
+            private val orgnr: String,
+            private val fom: LocalDate,
+            private val tom: LocalDate,
+            private val grad: Int,
+            private val inntekt: Double
+        ) {
+            internal fun parsePeriode() = Utbetalingsperiode(
+                orgnr = orgnr,
+                periode = fom til tom,
+                grad = grad.prosent,
+                inntekt = inntekt.månedlig
+            )
+        }
+
+        data class InntektsopplysningData(
+            private val orgnr: String,
+            private val sykepengerFom: LocalDate,
+            private val inntekt: Double,
+            private val refusjonTilArbeidsgiver: Boolean,
+            private val refusjonTom: LocalDate? = null
+        ) {
+            internal fun parseInntektsopplysning() = Inntektsopplysning(
+                orgnummer = orgnr,
+                sykepengerFom = sykepengerFom,
+                inntekt = inntekt.månedlig,
+                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+                refusjonTom = refusjonTom
+            )
+        }
     }
 
     data class VilkårsgrunnlagElement(

@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -86,6 +87,12 @@ internal class JsonBuilder : AbstractBuilder() {
             dødsdato: LocalDate?
         ) {
             popState()
+        }
+
+        override fun preVisitInfotrygdhistorikk() {
+            val historikk = mutableListOf<Map<String, Any?>>()
+            personMap["infotrygdhistorikk"] = historikk
+            pushState(InfotrygdhistorikkState(historikk))
         }
 
         override fun preVisitVilkårsgrunnlagHistorikk() {
@@ -208,6 +215,100 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
     }
+
+    private class InfotrygdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
+        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
+            val element = mutableMapOf<String, Any?>()
+            historikk.add(element)
+            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId))
+        }
+
+        override fun postVisitInfotrygdhistorikk() {
+            popState()
+        }
+    }
+
+    private class InfotrygdhistorikkElementState(
+        element: MutableMap<String, Any?>,
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?
+    ) : BuilderState() {
+        private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
+        private val utbetalingsperioder = mutableListOf<Map<String, Any>>()
+        private val ukjenteperioder = mutableListOf<Map<String, LocalDate>>()
+        private val inntekter = mutableListOf<Map<String, Any?>>()
+        private val arbeidskategorikoder = mutableMapOf<String, LocalDate>()
+        private val ugyldigePerioder = mutableListOf<Pair<LocalDate?, LocalDate?>>()
+
+        init {
+            element["id"] = id
+            element["tidsstempel"] = tidsstempel
+            element["hendelseId"] = hendelseId
+            element["ferieperioder"] = ferieperioder
+            element["utbetalingsperioder"] = utbetalingsperioder
+            element["ukjenteperioder"] = ukjenteperioder
+            element["inntekter"] = inntekter
+            element["arbeidskategorikoder"] = arbeidskategorikoder
+            element["ugyldigePerioder"] = ugyldigePerioder
+            element["oppdatert"] = oppdatert
+        }
+
+        override fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {
+            ferieperioder.add(mapOf(
+                "fom" to periode.start,
+                "tom" to periode.endInclusive
+            ))
+        }
+
+        override fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {
+            utbetalingsperioder.add(mapOf(
+                "orgnr" to orgnr,
+                "fom" to periode.start,
+                "tom" to periode.endInclusive,
+                "grad" to grad.roundToInt(),
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+            ))
+        }
+
+        override fun visitInfotrygdhistorikkUkjentPeriode(periode: ClosedRange<LocalDate>) {
+            ukjenteperioder.add(mapOf(
+                "fom" to periode.start,
+                "tom" to periode.endInclusive
+            ))
+        }
+
+        override fun visitInfotrygdhistorikkInntektsopplysning(
+            orgnr: String,
+            sykepengerFom: LocalDate,
+            inntekt: Inntekt,
+            refusjonTilArbeidsgiver: Boolean,
+            refusjonTom: LocalDate?
+        ) {
+            inntekter.add(mapOf(
+                "orgnr" to orgnr,
+                "sykepengerFom" to sykepengerFom,
+                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig },
+                "refusjonTilArbeidsgiver" to refusjonTilArbeidsgiver,
+                "refusjonTom" to refusjonTom
+            ))
+        }
+
+        override fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {
+            this.arbeidskategorikoder.putAll(arbeidskategorikoder)
+        }
+
+        override fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {
+            this.ugyldigePerioder.addAll(ugyldigePerioder)
+        }
+
+        override fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
+            popState()
+        }
+    }
+
+
 
     private class VilkårsgrunnlagHistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun visitGrunnlagsdata(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
