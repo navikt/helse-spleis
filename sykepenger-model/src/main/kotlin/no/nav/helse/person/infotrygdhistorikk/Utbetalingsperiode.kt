@@ -49,7 +49,8 @@ class Utbetalingsperiode(
 
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
-        aktivitetslogg.error("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
+        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
+        aktivitetslogg.error("Utbetaling i Infotrygd overlapper med vedtaksperioden")
     }
 
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
