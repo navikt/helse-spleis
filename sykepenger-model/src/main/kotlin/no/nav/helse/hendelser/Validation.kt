@@ -24,7 +24,7 @@ internal class Validation private constructor(private val hendelse: Arbeidstaker
         valider(feilmelding, isValid)
     }
 
-    internal fun valider(feilmelding: String? = null, isValid: Validation.() -> Boolean) {
+    internal inline fun valider(feilmelding: String? = null, isValid: Validation.() -> Boolean) {
         if (hasErrorsOrWorse()) return
         if (isValid(this)) return
         onError(feilmelding)

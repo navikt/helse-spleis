@@ -52,7 +52,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
-        override fun isOk() = false
+        override fun isOk() = vurdertOk
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.visitGrunnlagsdata(skjæringstidspunkt, this)

@@ -297,7 +297,12 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Søknad med utenlandsopphold og studieopphold gir warning`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar), Utdanning(16.januar, 18.januar))
+        håndterSøknadMedValidering(
+            1.vedtaksperiode,
+            Sykdom(3.januar, 26.januar, 100.prosent),
+            Utlandsopphold(11.januar, 15.januar),
+            Utdanning(16.januar, 18.januar)
+        )
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
 
         inspektør.also {
@@ -2986,5 +2991,55 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(6, it.navDagTeller)
             assertEquals(16, it.arbeidsgiverperiodeDagTeller)
         }
+    }
+
+    @Test
+    fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet på første periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 1.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(1.januar(2021), 1.januar(2021), 100.prosent))
+
+        val arbeidsgiverperioder = listOf(
+            1.januar(2021) til 16.januar(2021)
+        )
+        val inntektsmeldingId = håndterInntektsmelding(
+            arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021)
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioder {
+                inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT * 2
+                }
+            }
+        ))
+
+        håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
+        håndterSøknad(Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
+
+        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021)), 2.vedtaksperiode)
+
+        håndterYtelser(2.vedtaksperiode)
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            TIL_INFOTRYGD
+        )
+
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
     }
 }

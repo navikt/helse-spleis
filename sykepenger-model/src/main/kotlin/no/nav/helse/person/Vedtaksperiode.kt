@@ -1593,12 +1593,11 @@ internal class Vedtaksperiode private constructor(
                 onSuccess { ytelser.addInntekter(person) }
                 onSuccess { ytelser.lagreVilkårsgrunnlag(person, periodetype, skjæringstidspunkt) }
 
-                onError { vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) }
                 valider {
-                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null || historie.forlengerInfotrygd(arbeidsgiver.organisasjonsnummer(), vedtaksperiode.periode)
+                    person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.isOk()
+                        ?: return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving)
                 }
 
-                onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
