@@ -1367,6 +1367,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    @Deprecated(":)")
     internal object AvventerVilkårsprøvingArbeidsgiversøknad : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
 
@@ -1382,11 +1383,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.håndter(vilkårsgrunnlag, AvsluttetUtenUtbetaling)
+            vedtaksperiode.tilstand(vilkårsgrunnlag, AvsluttetUtenUtbetaling)
         }
     }
 
@@ -1999,6 +2000,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    @Deprecated(":)")
     internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
 

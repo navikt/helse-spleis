@@ -43,5 +43,4 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     object PraksisendringEnabled : Toggles()
     object RevurderUtbetaltPeriode : Toggles("REVURDER_UTBETALT_PERIODE_TOGGLE")
     object FlereArbeidsgivereFørstegangsbehandling : Toggles()
-    object ForTest_ManglerVilkårsvurderingPåPerson : Toggles()
 }
