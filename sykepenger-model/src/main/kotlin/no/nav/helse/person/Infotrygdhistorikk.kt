@@ -110,7 +110,7 @@ internal class Infotrygdhistorikk private constructor(
 
         internal companion object {
             fun opprett(
-                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
                 hendelseId: UUID,
                 perioder: List<Infotrygdperiode>,
                 inntekter: List<Inntektsopplysning>,
@@ -118,11 +118,12 @@ internal class Infotrygdhistorikk private constructor(
             ) =
                 Element(
                     id = UUID.randomUUID(),
-                    tidsstempel = tidsstempel,
+                    tidsstempel = LocalDateTime.now(),
                     hendelseId = hendelseId,
                     perioder = perioder.sortedBy { it.start },
                     inntekter = inntekter,
-                    arbeidskategorikoder = arbeidskategorikoder
+                    arbeidskategorikoder = arbeidskategorikoder,
+                    oppdatert = oppdatert
                 )
 
             fun opprettTom() =

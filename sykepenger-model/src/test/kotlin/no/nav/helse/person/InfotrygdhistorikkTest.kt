@@ -41,12 +41,12 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tømme historikk - med tom data`() {
         val tidsstempel = LocalDateTime.now()
-        historikk.oppdaterHistorikk(historikkelement(tidsstempel = tidsstempel))
+        historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, inspektør.elementer())
-        assertEquals(tidsstempel, inspektør.opprettet(0))
+        assertTrue(tidsstempel < inspektør.opprettet(0))
         assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
     }
 
@@ -54,7 +54,7 @@ internal class InfotrygdhistorikkTest {
     fun `tømme historikk - med data`() {
         val tidsstempel = LocalDateTime.now()
         historikk.oppdaterHistorikk(historikkelement(
-            tidsstempel = tidsstempel,
+            oppdatert = tidsstempel,
             perioder = listOf(Infotrygdhistorikk.Friperiode(1.januar til 10.januar))
         ))
         historikk.tøm()
@@ -63,13 +63,13 @@ internal class InfotrygdhistorikkTest {
         assertEquals(2, inspektør.elementer())
         assertTrue(tidsstempel < inspektør.opprettet(0))
         assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
-        assertEquals(tidsstempel, inspektør.opprettet(1))
+        assertTrue(tidsstempel < inspektør.opprettet(1))
         assertEquals(tidsstempel, inspektør.oppdatert(1))
     }
 
     @Test
     fun `må oppfriske gammel historikk`() {
-        historikk.oppdaterHistorikk(historikkelement(tidsstempel = LocalDateTime.now().minusHours(24)))
+        historikk.oppdaterHistorikk(historikkelement(oppdatert = LocalDateTime.now().minusHours(24)))
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg))
         assertTrue(aktivitetslogg.behov().isNotEmpty())
         assertEquals(1, inspektør.elementer())
@@ -78,7 +78,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `kan bestemme tidspunkt selv`() {
         val tidsstempel = LocalDateTime.now().minusHours(24)
-        historikk.oppdaterHistorikk(historikkelement(tidsstempel = tidsstempel))
+        historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidsstempel.minusMinutes(1)))
         assertFalse(aktivitetslogg.behov().isNotEmpty())
         assertEquals(1, inspektør.elementer())
@@ -98,11 +98,11 @@ internal class InfotrygdhistorikkTest {
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
-        historikk.oppdaterHistorikk(historikkelement(perioder, tidsstempel = gammel))
-        historikk.oppdaterHistorikk(historikkelement(perioder, tidsstempel = nå))
+        historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel))
+        historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå))
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg))
         assertEquals(1, inspektør.elementer())
-        assertEquals(gammel, inspektør.opprettet(0))
+        assertTrue(nå < inspektør.opprettet(0))
         assertEquals(nå, inspektør.oppdatert(0))
     }
 
@@ -155,10 +155,10 @@ internal class InfotrygdhistorikkTest {
         inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         hendelseId: UUID = UUID.randomUUID(),
-        tidsstempel: LocalDateTime = LocalDateTime.now()
+        oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         Infotrygdhistorikk.Element.opprett(
-            tidsstempel = tidsstempel,
+            oppdatert = oppdatert,
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,

@@ -448,10 +448,10 @@ internal class InfotrygdhistorikkElementTest {
         inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         hendelseId: UUID = UUID.randomUUID(),
-        tidsstempel: LocalDateTime = LocalDateTime.now()
+        oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         Infotrygdhistorikk.Element.opprett(
-            tidsstempel = tidsstempel,
+            oppdatert = oppdatert,
             hendelseId = hendelseId,
             perioder = perioder,
             inntekter = inntekter,

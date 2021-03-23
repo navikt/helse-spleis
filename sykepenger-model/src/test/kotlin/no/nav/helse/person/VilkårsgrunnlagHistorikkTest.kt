@@ -50,7 +50,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
             oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
-                tidsstempel = LocalDateTime.now(),
+                oppdatert = LocalDateTime.now(),
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),
                 inntekter = emptyList(),
