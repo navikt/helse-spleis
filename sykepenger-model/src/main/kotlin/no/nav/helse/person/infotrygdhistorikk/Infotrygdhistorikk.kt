@@ -59,6 +59,11 @@ internal class Infotrygdhistorikk private constructor(
         siste.append(bøtte)
     }
 
+    internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
+        if (!harHistorikk()) return null
+        return siste.sisteSykepengedag(orgnummer)
+    }
+
     internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, periodetype: Periodetype, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         if (!harHistorikk()) return
         if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return
@@ -183,6 +188,12 @@ internal class Infotrygdhistorikk private constructor(
             if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
 
             return !aktivitetslogg.hasErrorsOrWorse()
+        }
+
+        internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
+            return perioder.filterIsInstance<Utbetalingsperiode>()
+                .filter { it.gjelder(orgnummer) }
+                .maxOfOrNull { it.endInclusive }
         }
 
         internal fun oppfrisket(cutoff: LocalDateTime) =

@@ -740,9 +740,9 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk) {
+    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk: Infotrygdhistorikk) {
         val opprinneligPeriodeFom = periode.start
-        val ytelseTom = Historie(infotrygdhistorikk).sisteSykepengedagIInfotrygd(organisasjonsnummer) ?: return
+        val ytelseTom = infotrygdhistorikk.sisteSykepengedag(organisasjonsnummer) ?: return
 
         if (ytelseTom < opprinneligPeriodeFom) return
         if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return
@@ -1578,7 +1578,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             dødsdato: LocalDate?
         ) {
-            vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser, infotrygdhistorikk)
+            vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
             val historie = person.historie()
             val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
             val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt

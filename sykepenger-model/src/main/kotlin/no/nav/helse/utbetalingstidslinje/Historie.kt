@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
@@ -28,18 +27,6 @@ internal class Historie() {
 
     internal constructor(person: Person, infotrygdhistorikk: Infotrygdhistorikk) : this(person) {
         infotrygdhistorikk.append(infotrygdbøtte)
-    }
-
-    internal constructor(person: Person, utbetalingshistorikk: Utbetalingshistorikk) : this(person) {
-        utbetalingshistorikk.append(infotrygdbøtte)
-    }
-
-    internal constructor(infotrygdhistorikk: Infotrygdhistorikk) : this() {
-        infotrygdhistorikk.append(infotrygdbøtte)
-    }
-
-    internal constructor(utbetalingshistorikk: Utbetalingshistorikk) : this() {
-        utbetalingshistorikk.append(infotrygdbøtte)
     }
 
     private val infotrygdbøtte = Historikkbøtte()
@@ -123,8 +110,6 @@ internal class Historie() {
     internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
     }
-
-    internal fun sisteSykepengedagIInfotrygd(orgnummer: String) = infotrygdbøtte.utbetalingstidslinje(orgnummer).sykepengeperiode()?.endInclusive
 
     internal fun forrigeSkjæringstidspunktInnenforArbeidsgiverperioden(regler: ArbeidsgiverRegler, orgnummer: String, nyFørsteSykedag: LocalDate): LocalDate? {
         val sykdomstidslinje = sykdomstidslinje(orgnummer)

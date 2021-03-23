@@ -1,10 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.*
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
@@ -41,14 +42,14 @@ internal abstract class HistorieTest {
         resetSeed()
     }
 
-    protected fun refusjon(fom: LocalDate, tom: LocalDate, intekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        RefusjonTilArbeidsgiver(fom, tom, intekt, grad, orgnr)
+    protected fun refusjon(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
+        Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
 
     protected fun bruker(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        Utbetaling(fom, tom, inntekt, grad, orgnr)
+        Utbetalingsperiode(orgnr, fom til tom, grad, inntekt)
 
     protected fun ferie(fom: LocalDate, tom: LocalDate) =
-        Ferie(fom, tom)
+        Friperiode(fom til tom)
 
     protected fun navdager(fom: LocalDate, tom: LocalDate) =
         tidslinjeOf(fom.dagerMellom(tom).NAV, startDato = fom)
@@ -70,39 +71,21 @@ internal abstract class HistorieTest {
 
     protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
-    protected fun historie(vararg perioder: Infotrygdperiode) {
+    protected fun historie(vararg perioder: no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode) {
         historie = Historie(
             Person(AKTØRID, FNR),
-            Utbetalingshistorikk(
-                UUID.randomUUID(),
-                AKTØRID,
-                FNR,
-                "ET ORGNR",
-                UUID.randomUUID().toString(),
-                arbeidskategorikoder = emptyMap(),
-                perioder.toList(),
-                emptyList(),
-                besvart = LocalDateTime.now()
-            )
+            Infotrygdhistorikk().apply {
+                oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = perioder.toList(),
+                    inntekter = emptyList(),
+                    arbeidskategorikoder = emptyMap(),
+                    ugyldigePerioder = emptyList()
+                ))
+            }
         )
     }
-
-    protected fun historieUtenSpleisbøtte(vararg perioder: Infotrygdperiode) {
-        historie = Historie(
-            Utbetalingshistorikk(
-                UUID.randomUUID(),
-                AKTØRID,
-                FNR,
-                "ET ORGNR",
-                UUID.randomUUID().toString(),
-                arbeidskategorikoder = emptyMap(),
-                perioder.toList(),
-                emptyList(),
-                besvart = LocalDateTime.now()
-            )
-        )
-    }
-
 
     protected fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val inntektshistorikk = Inntektshistorikk()

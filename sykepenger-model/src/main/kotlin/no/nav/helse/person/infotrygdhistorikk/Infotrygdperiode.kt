@@ -20,6 +20,7 @@ internal abstract class Infotrygdperiode(private val periode: Periode) : ClosedR
     open fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {}
 
     fun overlapperMed(other: Periode) = periode.overlapperMed(other)
+    open fun gjelder(orgnummer: String) = true
     override fun hashCode() = Objects.hash(this::class, periode)
 
     override fun equals(other: Any?): Boolean {

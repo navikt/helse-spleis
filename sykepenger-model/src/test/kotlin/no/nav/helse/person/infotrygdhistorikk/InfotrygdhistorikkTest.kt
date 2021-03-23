@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -156,6 +157,31 @@ internal class InfotrygdhistorikkTest {
     fun `hensyntar ikke ugyldige perioder i overlapp-validering`() {
         historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(1.januar to null)))
         assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
+    }
+
+    @Test
+    fun `siste sykepengedag - tom historikk`() {
+        historikk.oppdaterHistorikk(historikkelement())
+        assertNull(historikk.sisteSykepengedag("ag1"))
+    }
+
+    @Test
+    fun `siste sykepengedag - tom historikk for ag`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 1500.daglig)
+        )))
+        assertNull(historikk.sisteSykepengedag("ag2"))
+    }
+
+    @Test
+    fun `siste sykepengedag - ekskluderer ferie`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 1500.daglig),
+            Utbetalingsperiode("ag2", 10.januar til 20.januar, 100.prosent, 1500.daglig),
+            Friperiode(20.januar til 31.januar)
+        )))
+        assertEquals(10.januar, historikk.sisteSykepengedag("ag1"))
+        assertEquals(20.januar, historikk.sisteSykepengedag("ag2"))
     }
 
     private fun historikkelement(

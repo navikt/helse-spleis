@@ -52,6 +52,8 @@ internal class Utbetalingsperiode(
         aktivitetslogg.error("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
     }
 
+    override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
+
     override fun hashCode() =
         Objects.hash(orgnr, start, endInclusive, grad, inntekt)
 
