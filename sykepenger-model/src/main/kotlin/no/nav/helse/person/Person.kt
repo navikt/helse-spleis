@@ -8,6 +8,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunn
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendePeriodeHosAnnenArbeidsgiver
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -314,7 +315,7 @@ class Person private constructor(
 
     internal fun lagreInntekterNy(
         orgnummer: String,
-        inntektsopplysninger: List<Infotrygdhistorikk.Inntektsopplysning>,
+        inntektsopplysninger: List<Inntektsopplysning>,
         aktivitetslogg: IAktivitetslogg,
         hendelseId: UUID
     ) {

@@ -1,6 +1,8 @@
-package no.nav.helse.person
+package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -55,7 +57,7 @@ internal class InfotrygdhistorikkTest {
         val tidsstempel = LocalDateTime.now()
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel,
-            perioder = listOf(Infotrygdhistorikk.Friperiode(1.januar til 10.januar))
+            perioder = listOf(Friperiode(1.januar til 10.januar))
         ))
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg))
@@ -94,7 +96,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `oppdaterer tidspunkt når ny historikk er lik gammel`() {
         val perioder = listOf(
-            Infotrygdhistorikk.Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig)
+            Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig)
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
@@ -121,7 +123,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `overlappende utbetalinger`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Infotrygdhistorikk.Utbetalingsperiode("orgnr", 5.januar til 10.januar, 100.prosent, 25000.månedlig)
+            Utbetalingsperiode("orgnr", 5.januar til 10.januar, 100.prosent, 25000.månedlig)
         )))
         aktivitetslogg.barn().also {
             assertTrue(historikk.overlapperMed(it, 10.januar til 31.januar))
@@ -144,15 +146,15 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `overlapper ikke med ferie eller ukjent`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
-            Infotrygdhistorikk.Friperiode(5.januar til 10.januar),
-            Infotrygdhistorikk.Ukjent(15.januar til 20.januar)
+            Friperiode(5.januar til 10.januar),
+            Ukjent(15.januar til 20.januar)
         )))
         assertFalse(historikk.overlapperMed(aktivitetslogg, 1.januar til 31.januar))
     }
 
     private fun historikkelement(
-        perioder: List<Infotrygdhistorikk.Infotrygdperiode> = emptyList(),
-        inntekter: List<Infotrygdhistorikk.Inntektsopplysning> = emptyList(),
+        perioder: List<Infotrygdperiode> = emptyList(),
+        inntekter: List<Inntektsopplysning> = emptyList(),
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         hendelseId: UUID = UUID.randomUUID(),
         oppdatert: LocalDateTime = LocalDateTime.now()

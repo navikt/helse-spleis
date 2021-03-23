@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -481,8 +482,8 @@ internal class Arbeidsgiver private constructor(
         inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelseId)
     }
 
-    internal fun lagreInntekter(inntektsopplysninger: List<Infotrygdhistorikk.Inntektsopplysning>, hendelseId: UUID) {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
+    internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
+        Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
     }
 
     internal fun lagreInntekter(

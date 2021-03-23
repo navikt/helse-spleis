@@ -1,8 +1,11 @@
-package no.nav.helse.person
+package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektsinspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -51,8 +54,8 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -64,8 +67,8 @@ internal class InfotrygdInntektsopplysningTest {
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar)
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -85,8 +88,8 @@ internal class InfotrygdInntektsopplysningTest {
                 ORGNR inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -98,8 +101,8 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -120,8 +123,8 @@ internal class InfotrygdInntektsopplysningTest {
     @Test
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
         inntektsmelding().addInntekt(historikk, 1.januar)
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -132,10 +135,10 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Finner nærmeste inntekt fra Infotrygd, hvis det ikke finnes inntekt for skjæringstidspunkt`() {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
+        Inntektsopplysning.lagreInntekter(
             listOf(
-                Infotrygdhistorikk.Inntektsopplysning(ORGNR, 10.januar, 30000.månedlig, true),
-                Infotrygdhistorikk.Inntektsopplysning(ORGNR, 5.januar, 25000.månedlig, true)
+                Inntektsopplysning(ORGNR, 10.januar, 30000.månedlig, true),
+                Inntektsopplysning(ORGNR, 5.januar, 25000.månedlig, true)
             ),
             historikk,
             UUID.randomUUID()
@@ -147,8 +150,8 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Kopier inntektsopplysning fra infotrygd`() {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -165,8 +168,8 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Kopierer ikke infotrygdinntekt med annen dato`() {
-        Infotrygdhistorikk.Inntektsopplysning.lagreInntekter(
-            listOf(Infotrygdhistorikk.Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
+        Inntektsopplysning.lagreInntekter(
+            listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,
             UUID.randomUUID()
         )
@@ -181,7 +184,7 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     private fun inntektsopplysning(refusjonTom: LocalDate? = null) =
-        Infotrygdhistorikk.Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
+        Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
 
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = INNTEKT,
