@@ -187,7 +187,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoWarnings(inspektør)
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(3.januar, 8.januar, 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         inspektør.also {
             assertNoErrors(it)
             assertActivities(it)
@@ -201,7 +200,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
             AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             AVSLUTTET_UTEN_UTBETALING
         )
     }
@@ -1370,7 +1368,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
-            AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
+            AVSLUTTET_UTEN_UTBETALING
         )
     }
 

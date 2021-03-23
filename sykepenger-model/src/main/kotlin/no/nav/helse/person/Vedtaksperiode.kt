@@ -1074,7 +1074,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
@@ -1348,7 +1348,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
-            vedtaksperiode.håndter(søknad, AvventerVilkårsprøvingArbeidsgiversøknad)
+            vedtaksperiode.håndter(søknad, AvsluttetUtenUtbetaling)
             søknad.info("Fullført behandling av søknad til arbeidsgiver")
         }
     }
@@ -1418,24 +1418,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
-
-        /*
-
-            val nesteTilstand = when {
-                !inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive) -> AvsluttetUtenUtbetaling
-                første == vedtaksperiode && overlappendeVedtaksperioder.drop(1).all { it.tilstand == AvventerArbeidsgivere } -> AvventerHistorikk
-                else -> AvventerArbeidsgivere
-            }
-
-            vedtaksperiode.håndter(inntektsmelding) { nesteTilstand }
-
-            if (nesteTilstand == AvventerArbeidsgivere) {
-                overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-            }
-            if (overlappendeVedtaksperioder.all { it.tilstand == AvventerArbeidsgivere }) {
-                første.gjentaHistorikk(inntektsmelding)
-            }
-         */
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()

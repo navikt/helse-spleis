@@ -244,7 +244,6 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 17.desember(2017))
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(17.desember(2017), 31.desember(2017), 100.prosent))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.desember(2017), 1.januar)), førsteFraværsdag = 10.januar)
