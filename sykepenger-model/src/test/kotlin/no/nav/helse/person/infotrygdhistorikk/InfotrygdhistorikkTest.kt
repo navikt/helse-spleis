@@ -3,7 +3,11 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
+import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.mars
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -107,6 +111,35 @@ internal class InfotrygdhistorikkTest {
         assertEquals(1, inspektør.elementer())
         assertTrue(nå < inspektør.opprettet(0))
         assertEquals(nå, inspektør.oppdatert(0))
+    }
+
+    @Test
+    fun `rekkefølge respekteres ved deserialisering`() {
+        val perioder = listOf(
+            Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("orgnr", 1.februar til 28.februar, 100.prosent, 25000.månedlig),
+            Friperiode(1.mars til 31.mars)
+        )
+        val nå = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(perioder))
+        historikk = listOf(PersonData.InfotrygdhistorikkElementData(
+            id = UUID.randomUUID(),
+            tidsstempel = nå,
+            hendelseId = UUID.randomUUID(),
+            ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
+            utbetalingsperioder = listOf(
+                PersonData.InfotrygdhistorikkElementData.UtbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100, 25000.0),
+                PersonData.InfotrygdhistorikkElementData.UtbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100, 25000.0)
+            ),
+            ukjenteperioder = emptyList(),
+            inntekter = emptyList(),
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            oppdatert = nå
+        )).tilModellObjekt()
+        assertEquals(1, inspektør.elementer())
+        historikk.oppdaterHistorikk(historikkelement(perioder))
+        assertEquals(1, inspektør.elementer())
     }
 
     @Test
