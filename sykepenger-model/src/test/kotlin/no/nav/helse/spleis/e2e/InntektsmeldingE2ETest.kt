@@ -587,7 +587,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(Periode(1.mars, 16.mars)), 1.mars)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId1, arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar))), 2.vedtaksperiode)
         håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId2, arbeidsgiverperioder = listOf(Periode(1.mars, 16.mars)), førsteFraværsdag = 1.mars), 2.vedtaksperiode)

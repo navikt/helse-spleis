@@ -300,7 +300,6 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(10.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         val nyttSammenlingningsGrunnlag = INNTEKT + 1000.månedlig
 

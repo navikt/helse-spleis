@@ -59,7 +59,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(6.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -117,7 +116,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -176,7 +174,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -235,7 +232,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         assertTilstander(
             2.vedtaksperiode,
@@ -280,7 +276,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(10.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(10.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         håndterYtelser(2.vedtaksperiode, inntektshistorikk = emptyList())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -338,7 +333,6 @@ internal class InntektUnder16DagersGapTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(12.februar, 16.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(12.februar, 16.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
 
         assertTilstander(
             2.vedtaksperiode,

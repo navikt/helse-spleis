@@ -64,24 +64,11 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk2)
-        håndterYtelser(
-            3.vedtaksperiode, historikk1, historikk2,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    20.november(2019),
-                    1000.daglig,
-                    true
-                ),
-                Inntektsopplysning(
-                    ORGNUMMER,
-                    22.juni(2020),
-                    1000.daglig,
-                    true
-                )
-            )
-        )
+        oppfriskUtbetalingshistorikk(3.vedtaksperiode, historikk2)
+        håndterYtelser(3.vedtaksperiode, historikk1, historikk2, inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 20.november(2019), 1000.daglig, true),
+            Inntektsopplysning(ORGNUMMER, 22.juni(2020), 1000.daglig, true)
+        ))
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(3.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)
@@ -97,17 +84,12 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
-        )
-
-        håndterYtelser(
-            2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
-        )
+        oppfriskUtbetalingshistorikk(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
+        håndterYtelser(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 }

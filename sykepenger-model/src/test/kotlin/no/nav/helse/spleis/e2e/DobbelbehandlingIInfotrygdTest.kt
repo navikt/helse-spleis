@@ -19,21 +19,18 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     fun `avdekker overlapp dobbelbehandlinger i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
-        )
+        val historie1 = Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, historie1)
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 26.februar, 100.prosent))
         håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            Utbetalingsperiode(ORGNUMMER, 26.februar til 26.mars, 100.prosent, 1000.daglig)
-        )
+        val historie2 = Utbetalingsperiode(ORGNUMMER, 26.februar til 26.mars, 100.prosent, 1000.daglig)
+        oppfriskUtbetalingshistorikk(2.vedtaksperiode, historie2)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
         håndterPåminnelse(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.april til 1.mai, 100.prosent, 1000.daglig))
+        val historie3 = Utbetalingsperiode(ORGNUMMER, 1.april til 1.mai, 100.prosent, 1000.daglig)
+        oppfriskUtbetalingshistorikk(3.vedtaksperiode, historie3)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
@@ -76,7 +73,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        håndterUtbetalingshistorikk(1.vedtaksperiode,
+        oppfriskUtbetalingshistorikk(1.vedtaksperiode,
             Utbetalingsperiode("456789123", 1.desember(2020) til  4.desember(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)

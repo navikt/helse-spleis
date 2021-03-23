@@ -287,20 +287,52 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         simulering(vedtaksperiodeId, simuleringOK, orgnummer).håndter(Person::håndter)
     }
 
+    protected fun oppfriskUtbetalingshistorikk(
+        vedtaksperiodeId: UUID,
+        vararg utbetalinger: Infotrygdperiode,
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        orgnummer: String = ORGNUMMER,
+        besvart: LocalDateTime = LocalDateTime.now()
+    ) {
+        utbetalingshistorikk(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalinger = utbetalinger.toList(),
+            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            orgnummer = orgnummer,
+            besvart = besvart
+        ).håndter(Person::håndter)
+    }
+
+    protected fun håndterUtbetalingshistorikk(
+        vedtaksperiodeId: UUID,
+        vararg utbetalinger: Infotrygdperiode,
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        orgnummer: String = ORGNUMMER,
+        besvart: LocalDateTime
+    ) {
+        assertEtterspurt(Utbetalingshistorikk::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
+        return oppfriskUtbetalingshistorikk(
+            vedtaksperiodeId,
+            *utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            orgnummer = orgnummer,
+            besvart = besvart
+        )
+    }
+
     protected fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         vararg utbetalinger: Infotrygdperiode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER
     ) {
-        assertEtterspurt(Utbetalingshistorikk::class, Sykepengehistorikk, vedtaksperiodeId, orgnummer)
-
-        utbetalingshistorikk(
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalinger = utbetalinger.toList(),
-            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
-            orgnummer = orgnummer
-        ).håndter(Person::håndter)
+        return håndterUtbetalingshistorikk(
+            vedtaksperiodeId,
+            *utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            orgnummer = orgnummer,
+            besvart = LocalDateTime.now()
+        )
     }
 
     protected fun håndterYtelser(
@@ -318,6 +350,42 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
+    ) {
+        håndterYtelser(
+            vedtaksperiodeId,
+            *utbetalinger,
+            inntektshistorikk = inntektshistorikk,
+            foreldrepenger = foreldrepenger,
+            pleiepenger = pleiepenger,
+            omsorgspenger = omsorgspenger,
+            opplæringspenger = opplæringspenger,
+            institusjonsoppholdsperioder = institusjonsoppholdsperioder,
+            orgnummer = orgnummer,
+            dødsdato = dødsdato,
+            statslønn = statslønn,
+            arbeidskategorikoder = arbeidskategorikoder,
+            arbeidsavklaringspenger = arbeidsavklaringspenger,
+            dagpenger = dagpenger,
+            besvart = LocalDateTime.now()
+        )
+    }
+
+    protected fun håndterYtelser(
+        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        vararg utbetalinger: Infotrygdperiode,
+        inntektshistorikk: List<Inntektsopplysning>? = null,
+        foreldrepenger: Periode? = null,
+        pleiepenger: List<Periode> = emptyList(),
+        omsorgspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<Periode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsoppholdsperiode> = emptyList(),
+        orgnummer: String = ORGNUMMER,
+        dødsdato: LocalDate? = null,
+        statslønn: Boolean = false,
+        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        dagpenger: List<Periode> = emptyList(),
+        besvart: LocalDateTime
     ) {
         fun assertEtterspurt(behovtype: Behovtype) =
             assertEtterspurt(Ytelser::class, behovtype, vedtaksperiodeId, orgnummer)
@@ -345,7 +413,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             statslønn = statslønn,
             arbeidskategorikoder = arbeidskategorikoder,
             arbeidsavklaringspenger = arbeidsavklaringspenger,
-            dagpenger = dagpenger
+            dagpenger = dagpenger,
+            besvart = besvart
         ).håndter(Person::håndter)
     }
 

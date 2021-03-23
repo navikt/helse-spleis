@@ -20,7 +20,9 @@ internal class Infotrygdhistorikk private constructor(
     private companion object {
         private val gammel get() = LocalDateTime.now()
             .minusHours(2)
-        private val oppfriskningsperiode get() = LocalDate.now().minusYears(4) til LocalDate.now()
+
+        private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
+            tidligsteDato.minusYears(4) til LocalDate.now()
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, historie: Historie, organisasjonsnummer: String, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
@@ -43,9 +45,9 @@ internal class Infotrygdhistorikk private constructor(
         return siste.validerOverlappende(aktivitetslogg, periode, skjæringstidspunkt)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, cutoff: LocalDateTime = gammel): Boolean {
-        if (oppfrisket(cutoff)) return false
-        oppfrisk(aktivitetslogg)
+    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate, cutoff: LocalDateTime? = null): Boolean {
+        if (oppfrisket(cutoff ?: gammel)) return false
+        oppfrisk(aktivitetslogg, tidligsteDato)
         return true
     }
 
@@ -83,9 +85,8 @@ internal class Infotrygdhistorikk private constructor(
     private fun oppfrisket(cutoff: LocalDateTime) =
         elementer.firstOrNull()?.oppfrisket(cutoff) ?: false
 
-    private fun oppfrisk(aktivitetslogg: IAktivitetslogg) {
-        // TODO: hente fom. fire år tilbake fra tidligste skjæringstidspunkt tom. "now" ?
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
+    private fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
