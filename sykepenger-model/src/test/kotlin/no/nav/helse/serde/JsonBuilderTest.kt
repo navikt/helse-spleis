@@ -474,7 +474,8 @@ class JsonBuilderTest {
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
-            inntektshistorikk = inntektsopplysning
+            inntektshistorikk = inntektsopplysning,
+            besvart = LocalDateTime.now()
         )
 
         fun ytelser(
@@ -499,7 +500,8 @@ class JsonBuilderTest {
                     arbeidskategorikoder = emptyMap(),
                     utbetalinger = utbetalinger,
                     inntektshistorikk = inntektshistorikk,
-                    aktivitetslogg = it
+                    aktivitetslogg = it,
+                    besvart = LocalDateTime.now()
                 ),
                 foreldrepermisjon = Foreldrepermisjon(
                     foreldrepengeytelse = Periode(

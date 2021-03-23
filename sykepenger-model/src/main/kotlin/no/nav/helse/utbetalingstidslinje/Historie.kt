@@ -7,6 +7,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Person
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
@@ -25,8 +26,16 @@ internal class Historie() {
         person.append(spleisbøtte)
     }
 
+    internal constructor(person: Person, infotrygdhistorikk: Infotrygdhistorikk) : this(person) {
+        infotrygdhistorikk.append(infotrygdbøtte)
+    }
+
     internal constructor(person: Person, utbetalingshistorikk: Utbetalingshistorikk) : this(person) {
         utbetalingshistorikk.append(infotrygdbøtte)
+    }
+
+    internal constructor(infotrygdhistorikk: Infotrygdhistorikk) : this() {
+        infotrygdhistorikk.append(infotrygdbøtte)
     }
 
     internal constructor(utbetalingshistorikk: Utbetalingshistorikk) : this() {

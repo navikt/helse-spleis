@@ -8,6 +8,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 
 internal class SimuleringHendelseTest : AbstractPersonTest() {
@@ -73,7 +74,8 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
-                aktivitetslogg = it
+                aktivitetslogg = it,
+                besvart = LocalDateTime.now()
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,

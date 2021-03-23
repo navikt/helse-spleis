@@ -36,6 +36,8 @@ class Person private constructor(
 
     private val observers = mutableListOf<PersonObserver>()
 
+    internal fun historie() = Historie(this, infotrygdhistorikk)
+
     fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding") { sykmelding.forGammel() }
 
     fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
@@ -59,13 +61,15 @@ class Person private constructor(
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
-        finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk)
+        utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
+        finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
     }
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
+        ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
-        finnArbeidsgiver(ytelser).håndter(ytelser, dødsdato)
+        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk, dødsdato)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {

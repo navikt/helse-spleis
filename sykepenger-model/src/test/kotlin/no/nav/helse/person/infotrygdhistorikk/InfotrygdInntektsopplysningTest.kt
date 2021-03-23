@@ -35,6 +35,18 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     @Test
+    fun likhet() {
+        assertEquals(inntektsopplysning(null).hashCode(), inntektsopplysning(null).hashCode())
+        assertEquals(inntektsopplysning(1.januar).hashCode(), inntektsopplysning(1.januar).hashCode())
+        assertNotEquals(inntektsopplysning().hashCode(), inntektsopplysning(1.januar).hashCode())
+        assertNotEquals(inntektsopplysning(1.januar).hashCode(), inntektsopplysning(2.januar).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, DATO, 1000.månedlig, false, null).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, DATO, 2000.månedlig, true, null).hashCode())
+        assertNotEquals(Inntektsopplysning(ORGNR, 1.januar, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, 2.januar, 2100.månedlig, true, null).hashCode())
+        assertNotEquals(Inntektsopplysning("ag1", DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning("ag2", DATO, 2100.månedlig, true, null).hashCode())
+    }
+
+    @Test
     fun `refusjon opphører før perioden`() {
         inntektsopplysning(1.januar).valider(aktivitetslogg, PERIODE, DATO)
         assertTrue(aktivitetslogg.hasErrorsOrWorse())

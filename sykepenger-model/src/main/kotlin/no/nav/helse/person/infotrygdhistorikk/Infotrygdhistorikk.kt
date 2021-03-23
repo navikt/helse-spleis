@@ -2,11 +2,8 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Historie
 import java.time.LocalDate
@@ -62,8 +59,10 @@ internal class Infotrygdhistorikk private constructor(
         siste.append(bøtte)
     }
 
-    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
+    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, periodetype: Periodetype, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         if (!harHistorikk()) return
+        if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return
+        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return
         siste.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk)
     }
 
@@ -95,12 +94,13 @@ internal class Infotrygdhistorikk private constructor(
         private val id: UUID,
         private val tidsstempel: LocalDateTime,
         private val hendelseId: UUID? = null,
-        private val perioder: List<Infotrygdperiode>,
+        perioder: List<Infotrygdperiode>,
         private val inntekter: List<Inntektsopplysning>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
         private var oppdatert: LocalDateTime = tidsstempel
     ) {
+        private val perioder = perioder.sortedBy { it.start }
         private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id)
 
         init {
@@ -120,7 +120,7 @@ internal class Infotrygdhistorikk private constructor(
                     id = UUID.randomUUID(),
                     tidsstempel = LocalDateTime.now(),
                     hendelseId = hendelseId,
-                    perioder = perioder.sortedBy { it.start },
+                    perioder = perioder,
                     inntekter = inntekter,
                     arbeidskategorikoder = arbeidskategorikoder,
                     ugyldigePerioder = ugyldigePerioder,
@@ -218,8 +218,12 @@ internal class Infotrygdhistorikk private constructor(
         }
 
         fun erstatt(elementer: MutableList<Element>) {
-            if (elementer.isEmpty() || elementer.first().hashCode() != this.hashCode()) return elementer.add(0, this)
-            elementer.first().oppdatert = this.oppdatert
+            if (elementer.isNotEmpty() && elementer.first().hashCode() == this.hashCode()) return oppdater(elementer.first())
+            return elementer.add(0, this)
+        }
+
+        private fun oppdater(other: Element) {
+            other.oppdatert = this.oppdatert
         }
     }
 }

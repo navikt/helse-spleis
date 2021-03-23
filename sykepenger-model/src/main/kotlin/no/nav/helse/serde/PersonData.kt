@@ -7,11 +7,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElement.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -92,6 +88,7 @@ internal data class PersonData(
             .call(
                 id,
                 tidsstempel,
+                hendelseId,
                 utbetalingsperioder.map { it.parsePeriode() } + ferieperioder.map { it.parsePeriode() } + ukjenteperioder.map { it.parsePeriode() },
                 inntekter.map { it.parseInntektsopplysning() },
                 arbeidskategorikoder,

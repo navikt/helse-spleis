@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -233,15 +234,15 @@ internal class Arbeidsgiver private constructor(
         finalize(inntektsmelding)
     }
 
-    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
         utbetalingshistorikk.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk) }
+        vedtaksperioder.toList().forEach { it.håndter(utbetalingshistorikk, infotrygdhistorikk) }
         finalize(utbetalingshistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, dødsdato: LocalDate?) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
         ytelser.kontekst(this)
-        vedtaksperioder.toList().forEach { it.håndter(ytelser, dødsdato) }
+        vedtaksperioder.toList().forEach { it.håndter(ytelser, infotrygdhistorikk, dødsdato) }
         finalize(ytelser)
     }
 

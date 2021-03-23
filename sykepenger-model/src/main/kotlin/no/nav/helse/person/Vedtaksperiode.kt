@@ -21,6 +21,7 @@ import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForlengelseFraInfotrygd.*
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -60,7 +61,7 @@ internal class Vedtaksperiode private constructor(
     private val skjæringstidspunkt
         get() =
             skjæringstidspunktFraInfotrygd
-                ?: Historie(person).skjæringstidspunkt(periode)
+                ?: person.historie().skjæringstidspunkt(periode)
                 ?: periode.start
 
     private val utbetaling get() = utbetalinger.lastOrNull()
@@ -186,16 +187,16 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
         if (!utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
-        tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk)
+        tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, dødsdato: LocalDate?) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
         if (id.toString() != ytelser.vedtaksperiodeId) return
         kontekst(ytelser)
-        tilstand.håndter(person, arbeidsgiver, this, ytelser, dødsdato)
+        tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, dødsdato)
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
@@ -739,9 +740,9 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser: Ytelser) {
+    private fun fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk) {
         val opprinneligPeriodeFom = periode.start
-        val ytelseTom = Historie(ytelser.utbetalingshistorikk()).sisteSykepengedagIInfotrygd(organisasjonsnummer) ?: return
+        val ytelseTom = Historie(infotrygdhistorikk).sisteSykepengedagIInfotrygd(organisasjonsnummer) ?: return
 
         if (ytelseTom < opprinneligPeriodeFom) return
         if (sykdomstidslinje.fremTilOgMed(ytelseTom).harSykedager()) return
@@ -819,20 +820,16 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            val historie = Historie(person, utbetalingshistorikk)
+            val historie = person.historie()
             validation(utbetalingshistorikk) {
                 onError {
                     vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
                 valider {
-                    utbetalingshistorikk.validerOverlappende(
-                        historie.avgrensetPeriode(
-                            vedtaksperiode.organisasjonsnummer,
-                            vedtaksperiode.periode
-                        ), historie.skjæringstidspunkt(vedtaksperiode.periode)
-                    )
+                    infotrygdhistorikk.validerOverlappende(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
                 }
                 onSuccess {
                     utbetalingshistorikk.info("Utbetalingshistorikk sjekket; fant ingen feil.")
@@ -840,7 +837,14 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, dødsdato: LocalDate?) {
+        fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk,
+            dødsdato: LocalDate?
+        ) {
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
 
@@ -1131,11 +1135,21 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
-        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, dødsdato: LocalDate?) {
-            val historie = Historie(person, ytelser.utbetalingshistorikk())
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk,
+            dødsdato: LocalDate?
+        ) {
+            val historie = person.historie()
             val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, AvsluttetIngenEndring) }
+                valider {
+                    infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                }
                 valider {
                     ytelser.valider(
                         vedtaksperiode.periode,
@@ -1386,20 +1400,16 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            val historie = Historie(person, utbetalingshistorikk)
+            val historie = person.historie()
             validation(utbetalingshistorikk) {
                 onError {
                     vedtaksperiode.tilstand(utbetalingshistorikk, TilInfotrygd)
                 }
                 valider {
-                    utbetalingshistorikk.validerOverlappende(
-                        historie.avgrensetPeriode(
-                            vedtaksperiode.organisasjonsnummer,
-                            vedtaksperiode.periode
-                        ), historie.skjæringstidspunkt(vedtaksperiode.periode)
-                    )
+                    infotrygdhistorikk.validerOverlappende(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
                 }
                 onError {
                     person.invaliderAllePerioder(utbetalingshistorikk, null)
@@ -1421,7 +1431,7 @@ internal class Vedtaksperiode private constructor(
                         førsteSykedag
                     ) ?: return@onSuccess
 
-                    utbetalingshistorikk.addInntekter(person)
+                    infotrygdhistorikk.addInntekter(person, this)
                     if (!arbeidsgiver.opprettReferanseTilInntekt(forrigeSkjæringstidspunkt, førsteSykedag)) return@onSuccess
 
                     vedtaksperiode.tilstand(utbetalingshistorikk, AvventerHistorikk)
@@ -1565,33 +1575,34 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk,
             dødsdato: LocalDate?
         ) {
-            vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser)
-            val historie = Historie(person, ytelser.utbetalingshistorikk())
+            vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(ytelser, infotrygdhistorikk)
+            val historie = person.historie()
             val periodetype = historie.periodetype(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode)
-            lateinit var skjæringstidspunkt: LocalDate
+            val skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, TilInfotrygd) }
-                valider("Mangler skjæringstidspunkt") {
-                    historie.skjæringstidspunkt(vedtaksperiode.periode)?.also { skjæringstidspunkt = it } != null
-                }
                 onSuccess {
                     vedtaksperiode.skjæringstidspunktFraInfotrygd = skjæringstidspunkt
+                }
+                valider {
+                    infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, skjæringstidspunkt)
                 }
                 valider {
                     ytelser.valider(
                         vedtaksperiode.periode,
                         historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
                         periodetype,
-                        skjæringstidspunkt
+                        vedtaksperiode.skjæringstidspunkt
                     )
                 }
                 validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
                     person.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie, vedtaksperiode)
                 }
-                onSuccess { ytelser.addInntekter(person) }
-                onSuccess { ytelser.lagreVilkårsgrunnlag(person, periodetype, skjæringstidspunkt) }
+                onSuccess { infotrygdhistorikk.addInntekter(person, this) }
+                onSuccess { infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, periodetype, person.vilkårsgrunnlagHistorikk) }
 
                 valider {
                     person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.isOk()
@@ -1837,7 +1848,13 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             val utbetaling = vedtaksperiode.utbetaling()
@@ -1858,7 +1875,13 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Overstyrer ikke en vedtaksperiode som har gått til annullering")
         }
 
-        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
@@ -1869,7 +1892,13 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
-        override fun håndter(person: Person, arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, utbetalingshistorikk: Utbetalingshistorikk) {}
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             sjekkUtbetalingstatus(vedtaksperiode, hendelse)
@@ -1918,7 +1947,8 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
         }
 
@@ -1944,7 +1974,8 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
         }
 
@@ -1972,7 +2003,8 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
         }
 
@@ -2013,7 +2045,8 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingshistorikk: Utbetalingshistorikk
+            utbetalingshistorikk: Utbetalingshistorikk,
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
         }
 

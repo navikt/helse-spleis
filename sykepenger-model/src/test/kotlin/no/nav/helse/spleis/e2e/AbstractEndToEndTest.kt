@@ -651,7 +651,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID,
         utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning>? = null,
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        besvart: LocalDateTime = LocalDateTime.now()
     ): Utbetalingshistorikk {
         return Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
@@ -661,8 +662,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
-            inntektshistorikk =
-            inntektshistorikk(inntektshistorikk, orgnummer)
+            inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            besvart = besvart
         ).apply {
             hendelselogg = this
         }
@@ -683,7 +684,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         statslønn: Boolean = false,
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList()
+        dagpenger: List<Periode> = emptyList(),
+        besvart: LocalDateTime = LocalDateTime.now()
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
@@ -703,7 +705,8 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 arbeidskategorikoder = arbeidskategorikoder,
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = aktivitetslogg,
+                besvart = besvart
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,

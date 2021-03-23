@@ -1670,7 +1670,8 @@ class SpeilBuilderTest {
             arbeidskategorikoder = emptyMap(),
             utbetalinger = utbetalinger,
             aktivitetslogg = aktivitetslogg,
-            inntektshistorikk = inntektshistorikk
+            inntektshistorikk = inntektshistorikk,
+            besvart = LocalDateTime.now()
         )
 
         private fun utbetalingsgodkjenning(

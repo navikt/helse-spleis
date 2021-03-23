@@ -35,6 +35,9 @@ internal class Inntektsopplysning(
         appendMode.addInfotrygd(sykepengerFom, hendelseId, inntekt)
     }
 
+    override fun hashCode() =
+        Objects.hash(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
+
     internal companion object {
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
             liste.groupBy { it.orgnummer }

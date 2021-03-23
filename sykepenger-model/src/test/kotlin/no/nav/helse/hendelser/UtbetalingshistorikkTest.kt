@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -47,7 +48,8 @@ class UtbetalingshistorikkTest {
             arbeidskategorikoder = arbeidskategorikoder,
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            besvart = LocalDateTime.now()
         )
 
     @Test

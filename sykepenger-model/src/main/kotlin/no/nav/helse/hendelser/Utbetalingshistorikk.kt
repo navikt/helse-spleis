@@ -1,6 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.*
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -11,6 +14,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class Utbetalingshistorikk(
@@ -22,13 +26,25 @@ class Utbetalingshistorikk(
     private val arbeidskategorikoder: Map<String, LocalDate>,
     utbetalinger: List<Infotrygdperiode>,
     private val inntektshistorikk: List<Inntektsopplysning>,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+    private val besvart: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     private val utbetalinger = Infotrygdperiode.sorter(utbetalinger)
 
     override fun aktørId() = aktørId
     override fun fødselsnummer() = fødselsnummer
     override fun organisasjonsnummer() = organisasjonsnummer
+
+    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
+        historikk.oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+            oppdatert = besvart,
+            hendelseId = meldingsreferanseId(),
+            perioder = Infotrygdperiode.perioder(utbetalinger),
+            inntekter = Inntektsopplysning.inntekter(inntektshistorikk),
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = Infotrygdperiode.Ugyldig.perioder(utbetalinger)
+        ))
+    }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) =
         vedtaksperiodeId.toString() == this.vedtaksperiodeId
@@ -52,10 +68,6 @@ class Utbetalingshistorikk(
             .filter { (_, dato) -> dato >= skjæringstidspunkt }
             .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
 
-    internal fun addInntekter(person: Person) {
-        Inntektsopplysning.addInntekter(person, this, meldingsreferanseId(), inntektshistorikk)
-    }
-
     class Inntektsopplysning(
         private val sykepengerFom: LocalDate,
         private val inntektPerMåned: Inntekt,
@@ -65,6 +77,7 @@ class Utbetalingshistorikk(
     ) {
 
         internal companion object {
+
             private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
             fun valider(
@@ -116,7 +129,6 @@ class Utbetalingshistorikk(
                         person.lagreInntekter(orgnummer, opplysninger, aktivitetslogg, hendelseId)
                     }
             }
-
             internal fun List<Inntektsopplysning>.lagreInntekter(
                 inntektshistorikk: Inntektshistorikk,
                 hendelseId: UUID
@@ -127,11 +139,21 @@ class Utbetalingshistorikk(
                     }
                 }
             }
+
+            fun inntekter(liste: List<Inntektsopplysning>) =
+                liste.map {
+                    no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning(
+                        orgnummer = it.orgnummer,
+                        sykepengerFom = it.sykepengerFom,
+                        inntekt = it.inntektPerMåned,
+                        refusjonTilArbeidsgiver = it.refusjonTilArbeidsgiver,
+                        refusjonTom = it.refusjonTom
+                    )
+                }
         }
 
         private fun erRelevant(periode: Periode, skjæringstidspunkt: LocalDate?) =
             sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12))
-
         internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?) {
             if (!erRelevant(periode, skjæringstidspunkt)) return
             if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
@@ -145,12 +167,14 @@ class Utbetalingshistorikk(
             it.append(oldtid)
         }
     }
-
     internal fun grunnlagsdata() = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag()
 
     sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         internal companion object {
             fun sorter(liste: List<Infotrygdperiode>) = liste.sortedBy { it.periode.start }
+            fun perioder(liste: List<Infotrygdperiode>): List<no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode> {
+                return Utbetalingsperiode.perioder(liste) + Ferie.perioder(liste) + Ukjent.perioder(liste)
+            }
         }
 
         protected val periode = Periode(fom, tom)
@@ -209,6 +233,16 @@ class Utbetalingshistorikk(
                     liste.forEach { it.valider(aktivitetslogg, bareOverlappende, periode, organisasjonsnummer) }
                     return aktivitetslogg
                 }
+
+                fun perioder(liste: List<Infotrygdperiode>) =
+                    liste.filterIsInstance<Utbetalingsperiode>().map {
+                        no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode(
+                            orgnr = it.orgnr,
+                            periode = it.periode,
+                            grad = it.grad,
+                            inntekt = it.inntekt
+                        )
+                    }
             }
         }
 
@@ -245,6 +279,16 @@ class Utbetalingshistorikk(
                 oldtid.add(tidslinje = tidslinje())
                 oldtid.add(tidslinje = sykdomstidslinje())
             }
+
+            internal companion object {
+                fun perioder(liste: List<Infotrygdperiode>) =
+                    liste.filterIsInstance<Ferie>().map {
+                        Friperiode(
+                            periode = it.periode,
+                        )
+                    }
+
+            }
         }
 
         abstract class IgnorertPeriode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom)
@@ -269,6 +313,15 @@ class Utbetalingshistorikk(
                     this::class.simpleName
                 )
             }
+
+            internal companion object {
+                fun perioder(liste: List<Infotrygdperiode>) =
+                    liste.filterIsInstance<Ukjent>().map {
+                        UkjentInfotrygdperiode(
+                            periode = it.periode,
+                        )
+                    }
+            }
         }
 
         class Ugyldig(private val fom: LocalDate?, private val tom: LocalDate?) :
@@ -288,6 +341,11 @@ class Utbetalingshistorikk(
                 aktivitetslogg.error(
                     "Det er en ugyldig utbetalingsperiode i Infotrygd%s",
                     tekst?.let { " ($it)" } ?: "")
+            }
+
+            internal companion object {
+                fun perioder(liste: List<Infotrygdperiode>) =
+                    liste.filterIsInstance<Ugyldig>().map { it.fom to it.tom }
             }
         }
     }

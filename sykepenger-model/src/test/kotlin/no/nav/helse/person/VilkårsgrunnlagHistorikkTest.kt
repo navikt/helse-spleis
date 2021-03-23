@@ -61,14 +61,15 @@ internal class VilkårsgrunnlagHistorikkTest {
             organisasjonsnummer = "ORGNUMMER",
             utbetalinger = emptyList(),
             inntektshistorikk = emptyList(),
-            arbeidskategorikoder = emptyMap()
+            arbeidskategorikoder = emptyMap(),
+            besvart = LocalDateTime.now()
         )
         vilkårsgrunnlagHistorikk.lagre(infotrygdVilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
     @Test
-    fun `lagrer grunnlagsdata fra Infotrygd`() {
+    fun `lagrer grunnlagsdata fra Infotrygd ved overgang fra IT`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
             oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
@@ -80,7 +81,58 @@ internal class VilkårsgrunnlagHistorikkTest {
                 ugyldigePerioder = emptyList()
             ))
         }
-        historikk.lagreVilkårsgrunnlag(1.januar, vilkårsgrunnlagHistorikk)
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, vilkårsgrunnlagHistorikk)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+    }
+
+    @Test
+    fun `lagrer grunnlagsdata fra Infotrygd ved infotrygdforlengelse`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val historikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList()
+            ))
+        }
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.INFOTRYGDFORLENGELSE, vilkårsgrunnlagHistorikk)
+        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+    }
+
+    @Test
+    fun `lagrer ikke grunnlagsdata ved førstegangsbehandling`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val historikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList()
+            ))
+        }
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FØRSTEGANGSBEHANDLING, vilkårsgrunnlagHistorikk)
+        assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
+    }
+
+    @Test
+    fun `lagrer ikke grunnlagsdata ved forlengelse`() {
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
+        val historikk = Infotrygdhistorikk().apply {
+            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList()
+            ))
+        }
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FORLENGELSE, vilkårsgrunnlagHistorikk)
+        assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 }

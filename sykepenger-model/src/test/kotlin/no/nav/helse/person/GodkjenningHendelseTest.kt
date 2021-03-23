@@ -117,7 +117,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = emptyList(),
-                aktivitetslogg = it
+                aktivitetslogg = it,
+                besvart = LocalDateTime.now()
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,

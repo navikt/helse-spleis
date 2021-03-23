@@ -348,7 +348,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 inntektshistorikk = listOf(
                     Utbetalingshistorikk.Inntektsopplysning(17.januar(2017), 31000.månedlig, ORGNUMMER, true)
                 ),
-                aktivitetslogg = Aktivitetslogg()
+                aktivitetslogg = Aktivitetslogg(),
+                besvart = LocalDateTime.now()
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = null,

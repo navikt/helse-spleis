@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Disabled("Venter på flere arbeidsgivere")
@@ -164,7 +165,8 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 arbeidskategorikoder = emptyMap(),
                 utbetalinger = emptyList(),
                 inntektshistorikk = emptyList(),
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = aktivitetslogg,
+                besvart = LocalDateTime.now()
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 null,

@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -19,6 +20,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
+    private val besvart = packet["@besvart"].asLocalDateTime()
 
     private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
         it.path("utbetalteSykeperioder")
@@ -76,7 +78,8 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
             arbeidskategorikoder = arbeidskategorikoder,
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            besvart = besvart
         )
 
     override fun behandle(mediator: IHendelseMediator) {

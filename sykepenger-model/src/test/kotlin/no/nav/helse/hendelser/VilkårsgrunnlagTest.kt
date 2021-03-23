@@ -246,7 +246,17 @@ internal class VilkårsgrunnlagTest {
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId(),
-        utbetalingshistorikk = Utbetalingshistorikk(UUID.randomUUID(), aktørId, fødselsnummer, orgnummer, vedtaksperiodeId(), emptyMap(), emptyList(), emptyList()),
+        utbetalingshistorikk = Utbetalingshistorikk(
+            UUID.randomUUID(),
+            aktørId,
+            fødselsnummer,
+            orgnummer,
+            vedtaksperiodeId(),
+            emptyMap(),
+            emptyList(),
+            emptyList(),
+            besvart = LocalDateTime.now()
+        ),
         foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),
         pleiepenger = Pleiepenger(emptyList(), Aktivitetslogg()),
         omsorgspenger = Omsorgspenger(emptyList(), Aktivitetslogg()),

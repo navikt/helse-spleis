@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import java.time.LocalDate
 import java.util.*
 
@@ -28,12 +29,8 @@ class Ytelser(
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
     internal fun utbetalingshistorikk() = utbetalingshistorikk
 
-    internal fun lagreVilkårsgrunnlag(person: Person, periodetype: Periodetype, skjæringstidspunkt: LocalDate) {
-        if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return
-        if (person.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return
-
-        info("Lagrer vilkårsgrunnlag fra Infotrygd på %s", "$skjæringstidspunkt")
-        person.vilkårsgrunnlagHistorikk.lagre(utbetalingshistorikk, skjæringstidspunkt)
+    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
+        utbetalingshistorikk.oppdaterHistorikk(historikk)
     }
 
     internal fun lagreDødsdato(person: Person) {
@@ -41,12 +38,7 @@ class Ytelser(
         person.lagreDødsdato(dødsinfo.dødsdato)
     }
 
-    internal fun addInntekter(person: Person) {
-        utbetalingshistorikk.addInntekter(person)
-    }
-
     internal fun valider(periode: Periode, avgrensetPeriode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
-        utbetalingshistorikk.valider(avgrensetPeriode, skjæringstidspunkt)
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
 

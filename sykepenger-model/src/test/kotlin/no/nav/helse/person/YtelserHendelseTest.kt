@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
 import java.util.*
 
 internal class YtelserHendelseTest : AbstractPersonTest() {
@@ -179,7 +180,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 arbeidskategorikoder = emptyMap(),
                 utbetalinger = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
-                aktivitetslogg = it
+                aktivitetslogg = it,
+                besvart = LocalDateTime.now()
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,

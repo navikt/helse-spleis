@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.reflect.KClass
@@ -80,7 +81,8 @@ internal abstract class HistorieTest {
                 UUID.randomUUID().toString(),
                 arbeidskategorikoder = emptyMap(),
                 perioder.toList(),
-                emptyList()
+                emptyList(),
+                besvart = LocalDateTime.now()
             )
         )
     }
@@ -95,7 +97,8 @@ internal abstract class HistorieTest {
                 UUID.randomUUID().toString(),
                 arbeidskategorikoder = emptyMap(),
                 perioder.toList(),
-                emptyList()
+                emptyList(),
+                besvart = LocalDateTime.now()
             )
         )
     }
