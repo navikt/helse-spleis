@@ -2,6 +2,9 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -46,19 +50,13 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
         håndterYtelser(
             utbetalinger = listOf(
-                Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
-                    sisteHistoriskeSykedag.minusDays(14),
-                    sisteHistoriskeSykedag,
-                    1000.daglig,
-                    100.prosent,
-                    ORGNUMMER
-                )
+                Utbetalingsperiode(ORGNUMMER, sisteHistoriskeSykedag.minusDays(14) til sisteHistoriskeSykedag, 100.prosent, 1000.daglig)
             ),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     sisteHistoriskeSykedag.minusDays(30),
                     20000.månedlig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -74,7 +72,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `ugyldig utbetalinghistorikk etter inntektsmelding kaster perioden ut`() {
-        håndterYtelser(utbetalinger = listOf(Utbetalingshistorikk.Infotrygdperiode.Ugyldig(null, null)))
+        håndterYtelser(ugyldigePerioder = listOf(null to null))
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
@@ -122,10 +120,11 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
     }
 
     private fun håndterYtelser(
-        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
-        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
+        utbetalinger: List<Infotrygdperiode> = emptyList(),
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeytelse: Periode? = null,
-        svangerskapsytelse: Periode? = null
+        svangerskapsytelse: Periode? = null,
+        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList()
     ) {
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -135,7 +134,8 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk,
             foreldrepengeYtelse = foreldrepengeytelse,
-            svangerskapYtelse = svangerskapsytelse
+            svangerskapYtelse = svangerskapsytelse,
+            ugyldigePerioder = ugyldigePerioder
         )
         person.håndter(ytelser)
         person.håndter(vilkårsgrunnlag())
@@ -150,7 +150,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
         person.håndter(
             ytelser(
                 vedtaksperiodeId = 1.vedtaksperiode,
-                utbetalinger = listOf(Utbetalingshistorikk.Infotrygdperiode.Ugyldig(null, null)),
+                ugyldigePerioder = listOf(null to null),
                 foreldrepengeYtelse = null,
                 svangerskapYtelse = null
             )
@@ -159,10 +159,11 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
 
     private fun ytelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
-        inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
+        utbetalinger: List<Infotrygdperiode> = emptyList(),
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
-        svangerskapYtelse: Periode? = null
+        svangerskapYtelse: Periode? = null,
+        ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList()
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()
         Ytelser(
@@ -178,8 +179,9 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "$vedtaksperiodeId",
                 arbeidskategorikoder = emptyMap(),
-                utbetalinger = utbetalinger,
+                perioder = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
+                ugyldigePerioder = ugyldigePerioder,
                 aktivitetslogg = it,
                 besvart = LocalDateTime.now()
             ),

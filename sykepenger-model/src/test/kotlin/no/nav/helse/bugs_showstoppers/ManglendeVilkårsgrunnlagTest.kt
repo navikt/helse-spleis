@@ -4,11 +4,11 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.SøknadArbeidsgiver
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.februar
@@ -119,9 +119,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode etter en periode med ferie - opphav i Infotrygd`() {
-        val historikk = RefusjonTilArbeidsgiver(1.desember(2017), 31.desember(2017), INNTEKT, 100.prosent, ORGNUMMER)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 1.desember(2017) til 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(1.desember(2017), INNTEKT, ORGNUMMER, true)
+            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

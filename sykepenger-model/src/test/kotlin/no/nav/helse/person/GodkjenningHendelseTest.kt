@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.inntektperioder
 import no.nav.helse.testhelpers.januar
@@ -97,7 +98,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
+        utbetalinger: List<Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -115,8 +116,9 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
                 arbeidskategorikoder = emptyMap(),
-                utbetalinger = utbetalinger,
+                perioder = utbetalinger,
                 inntektshistorikk = emptyList(),
+                ugyldigePerioder = emptyList(),
                 aktivitetslogg = it,
                 besvart = LocalDateTime.now()
             ),

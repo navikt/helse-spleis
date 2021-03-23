@@ -3,11 +3,12 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -94,15 +95,15 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 15000.daglig)
         )
         håndterYtelser(
-            1.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER),
+            1.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 15000.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     1.januar(2018),
                     INNTEKT,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -110,7 +111,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode, RefusjonTilArbeidsgiver(1.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER))
+        håndterYtelser(2.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 15000.daglig))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -136,14 +137,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(25.februar, 28.februar))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 17.januar til 31.januar, 100.prosent, 15000.daglig))
         håndterYtelser(
-            1.vedtaksperiode, RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER),
+            1.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 17.januar til 31.januar, 100.prosent, 15000.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     17.januar(2018),
                     INNTEKT,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -152,7 +153,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
-        val historikk = arrayOf(RefusjonTilArbeidsgiver(17.januar, 31.januar, 15000.daglig, 100.prosent, ORGNUMMER))
+        val historikk = arrayOf(Utbetalingsperiode(ORGNUMMER, 17.januar til 31.januar, 100.prosent, 15000.daglig))
         håndterYtelser(2.vedtaksperiode, *historikk)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode, *historikk)

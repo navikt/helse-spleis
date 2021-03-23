@@ -1,9 +1,14 @@
 package no.nav.helse.spleis.meldinger.model
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -22,50 +27,61 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
-    private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
-        it.path("utbetalteSykeperioder")
-    }.mapNotNull { utbetaling ->
-        val fom = utbetaling["fom"].asOptionalLocalDate()
-        val tom = utbetaling["tom"].asOptionalLocalDate()
-        val inntekt = utbetaling["dagsats"].asInt().daglig
-        val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-        val orgnummer = utbetaling["orgnummer"].asText()
-        if (fom == null || tom == null || fom > tom) Infotrygdperiode.Ugyldig(fom, tom)
-        else when (utbetaling["typeKode"].asText()) {
-            "0" -> Infotrygdperiode.Utbetaling(fom, tom, inntekt, grad, orgnummer)
-            "1" -> Infotrygdperiode.ReduksjonMedlem(fom, tom, inntekt, grad, orgnummer)
-            "2", "3" -> Infotrygdperiode.Etterbetaling(fom, tom)
-            "4" -> Infotrygdperiode.KontertRegnskap(fom, tom)
-            "5" -> Infotrygdperiode.RefusjonTilArbeidsgiver(fom, tom, inntekt, grad, orgnummer)
-            "6" -> Infotrygdperiode.ReduksjonArbeidsgiverRefusjon(fom, tom, inntekt, grad, orgnummer)
-            "7" -> Infotrygdperiode.Tilbakeført(fom, tom)
-            "8" -> Infotrygdperiode.Konvertert(fom, tom)
-            "9" -> Infotrygdperiode.Ferie(fom, tom)
-            "O" -> Infotrygdperiode.Opphold(fom, tom)
-            "S" -> Infotrygdperiode.Sanksjon(fom, tom)
-            "" -> Infotrygdperiode.Ukjent(fom, tom)
-            else -> null // filtered away in river validation
-        }
-    }
-
-    private val arbeidskategorikoder: Map<String, LocalDate> = packet["@løsning.${Sykepengehistorikk.name}"].flatMap { element ->
-        element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
-            utbetaling["fom"].asOptionalLocalDate()?.let {
-                element.path("arbeidsKategoriKode").asText() to it
+    private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"]
+        .flatMap { it.path("utbetalteSykeperioder") }
+        .filter(::erGyldigPeriode)
+        .mapNotNull { utbetaling ->
+            val fom = utbetaling["fom"].asLocalDate()
+            val tom = utbetaling["tom"].asLocalDate()
+            val periode = Periode(fom, tom)
+            when (utbetaling["typeKode"].asText()) {
+                "0", "1", "5", "6" -> {
+                    val grad = utbetaling["utbetalingsGrad"].asInt().prosent
+                    // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
+                    val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
+                    val orgnummer = utbetaling["orgnummer"].asText()
+                    Utbetalingsperiode(orgnummer, periode, grad, inntekt)
+                }
+                "9" -> Friperiode(periode)
+                "" -> UkjentInfotrygdperiode(periode)
+                else -> null
             }
         }
-    }.toMap()
 
-    private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].flatMap {
-        it.path("inntektsopplysninger")
-    }.map { opplysning ->
-        Utbetalingshistorikk.Inntektsopplysning(
-            sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
-            inntektPerMåned = opplysning["inntekt"].asDouble().månedlig,
-            orgnummer = opplysning["orgnummer"].asText(),
-            refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
-            refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
-        )
+    private val ugyldigePerioder = packet["@løsning.${Sykepengehistorikk.name}"]
+        .flatMap { it.path("utbetalteSykeperioder") }
+        .filterNot(::erGyldigPeriode)
+        .mapNotNull { utbetaling ->
+            val fom = utbetaling["fom"].asOptionalLocalDate()
+            val tom = utbetaling["tom"].asOptionalLocalDate()
+            if (fom == null || tom == null || fom > tom) fom to tom else null
+        }
+
+    private val arbeidskategorikoder: Map<String, LocalDate> = packet["@løsning.${Sykepengehistorikk.name}"]
+        .flatMap { element ->
+            element.path("utbetalteSykeperioder").mapNotNull { utbetaling ->
+                utbetaling["fom"].asOptionalLocalDate()?.let {
+                    element.path("arbeidsKategoriKode").asText() to it
+                }
+            }
+        }.toMap()
+
+    private val inntektshistorikk = packet["@løsning.${Sykepengehistorikk.name}"]
+        .flatMap { it.path("inntektsopplysninger") }
+        .map { opplysning ->
+            Inntektsopplysning(
+                sykepengerFom = opplysning["sykepengerFom"].asLocalDate(),
+                inntekt = opplysning["inntekt"].asDouble().månedlig,
+                orgnummer = opplysning["orgnummer"].asText(),
+                refusjonTilArbeidsgiver = opplysning["refusjonTilArbeidsgiver"].asBoolean(),
+                refusjonTom = opplysning["refusjonTom"].asOptionalLocalDate()
+            )
+        }
+
+    private fun erGyldigPeriode(node: JsonNode): Boolean {
+        val fom = node["fom"].asOptionalLocalDate()
+        val tom = node["tom"].asOptionalLocalDate()
+        return fom != null && tom != null && tom >= fom
     }
 
     internal fun utbetalingshistorikk(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
@@ -76,8 +92,9 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = arbeidskategorikoder,
-            utbetalinger = utbetalinger,
+            perioder = utbetalinger,
             inntektshistorikk = inntektshistorikk,
+            ugyldigePerioder = ugyldigePerioder,
             aktivitetslogg = aktivitetslogg,
             besvart = besvart
         )

@@ -6,6 +6,8 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.*
@@ -146,14 +148,14 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
         )
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.oktober(2017), INNTEKT, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
         )
 
         val builder = InntektshistorikkBuilder(person)
@@ -189,8 +191,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             2.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 24.januar, 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 17.januar til 24.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
 
         val builder = InntektshistorikkBuilder(person)
@@ -223,8 +225,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
         )
 
         val builder = InntektshistorikkBuilder(person)
@@ -241,8 +243,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(1.oktober(2017), 31.desember(2017), 1000.daglig, 100.prosent, ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.november(2017), Inntekt.INGEN, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.oktober(2017) til 31.desember(2017), 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.november(2017), Inntekt.INGEN, true))
         )
 
         builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)

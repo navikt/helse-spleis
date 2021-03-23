@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
 
-internal class Utbetalingsperiode(
+class Utbetalingsperiode(
     private val orgnr: String,
     periode: Periode,
     private val grad: Prosentdel,

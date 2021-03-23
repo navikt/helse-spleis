@@ -1,9 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.til
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,12 +17,12 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har brukerutbetaling på samme arbeidsgiver`() {
         val historikk = listOf(
-            RefusjonTilArbeidsgiver(17.januar, 17.mai, INNTEKT, 100.prosent, ORGNUMMER),
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(18.mai, 30.mai, INNTEKT, 100.prosent, ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 17.januar til 17.mai, 100.prosent, INNTEKT),
+            Utbetalingsperiode(ORGNUMMER, 18.mai til 30.mai, 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
-            Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true),
-            Inntektsopplysning(18.mai, INNTEKT, ORGNUMMER, false)
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 18.mai, INNTEKT, false)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
@@ -45,14 +48,14 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har gammel brukerutbetaling som selvstendig næringsdrivende`() {
         val historikk = listOf(
-            RefusjonTilArbeidsgiver(17.januar, 30.mai, INNTEKT, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.september(2017), 1.september(2017), INNTEKT, 100.prosent, ORGNUMMER),
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(18.mai(2017), 30.mai(2017), INNTEKT, 100.prosent, "0")
+            Utbetalingsperiode(ORGNUMMER, 17.januar til 30.mai, 100.prosent, INNTEKT),
+            Utbetalingsperiode(ORGNUMMER, 1.september(2017) til 1.september(2017), 100.prosent, INNTEKT),
+            Utbetalingsperiode("0", 18.mai(2017) til 30.mai(2017), 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
-            Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true),
-            Inntektsopplysning(1.september(2017), INNTEKT, ORGNUMMER, true),
-            Inntektsopplysning(18.mai(2017), INNTEKT, "0", false)
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.september(2017), INNTEKT, true),
+            Inntektsopplysning("0", 18.mai(2017), INNTEKT, false)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))

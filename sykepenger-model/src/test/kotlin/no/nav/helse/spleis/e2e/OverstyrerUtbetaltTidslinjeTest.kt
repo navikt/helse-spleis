@@ -4,6 +4,8 @@ import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.februar
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.testhelpers.mars
@@ -469,21 +471,15 @@ internal class OverstyrerUtbetaltTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(
             vedtaksperiodeId = 1.vedtaksperiode,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     3.januar,
                     15000.daglig,
-                    ORGNUMMER,
                     true
                 )
             ),
             utbetalinger = arrayOf(
-                Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(
-                    3.januar,
-                    26.januar,
-                    15000.daglig,
-                    100.prosent,
-                    ORGNUMMER
-                )
+                Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 15000.daglig)
             )
         )
 

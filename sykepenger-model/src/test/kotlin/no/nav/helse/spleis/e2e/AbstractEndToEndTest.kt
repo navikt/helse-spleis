@@ -11,10 +11,11 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Simulering.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.desember
@@ -288,7 +289,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
-        vararg utbetalinger: Utbetalingshistorikk.Infotrygdperiode,
+        vararg utbetalinger: Infotrygdperiode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER
     ) {
@@ -304,7 +305,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun håndterYtelser(
         vedtaksperiodeId: UUID = 1.vedtaksperiode,
-        vararg utbetalinger: Utbetalingshistorikk.Infotrygdperiode,
+        vararg utbetalinger: Infotrygdperiode,
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -649,7 +650,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     private fun utbetalingshistorikk(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+        utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER,
         besvart: LocalDateTime = LocalDateTime.now()
@@ -661,8 +662,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             arbeidskategorikoder = emptyMap(),
-            utbetalinger = utbetalinger,
+            perioder = utbetalinger,
             inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+            ugyldigePerioder = emptyList(),
             besvart = besvart
         ).apply {
             hendelselogg = this
@@ -671,7 +673,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
     protected fun ytelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+        utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning>? = null,
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
@@ -703,8 +705,9 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 arbeidskategorikoder = arbeidskategorikoder,
-                utbetalinger = utbetalinger,
+                perioder = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
+                ugyldigePerioder = emptyList(),
                 aktivitetslogg = aktivitetslogg,
                 besvart = besvart
             ),
@@ -742,14 +745,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         inntektshistorikk: List<Inntektsopplysning>?,
         orgnummer: String
     ) = inntektshistorikk
-        ?: listOf(
-            Inntektsopplysning(
-                1.desember(2017),
-                INNTEKT,
-                orgnummer,
-                true
-            )
-        )
+        ?: listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true))
 
 
     protected fun nyttVedtak(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, førsteFraværsdag: LocalDate = fom) {

@@ -3,10 +3,11 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -19,7 +20,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
 
     @Test
     fun `Forlengelser av infotrygd overgang har samme maksdato som forrige`() {
-        val historikk1 = RefusjonTilArbeidsgiver(20.november(2019), 29.mai(2020), 1145.daglig,  100.prosent,  ORGNUMMER)
+        val historikk1 = Utbetalingsperiode(ORGNUMMER, 20.november(2019) til 29.mai(2020), 100.prosent, 1145.daglig)
 
         håndterSykmelding(Sykmeldingsperiode(30.mai(2020), 19.juni(2020), 100.prosent))
         håndterSøknad(Sykdom(30.mai(2020), 19.juni(2020), 100.prosent))
@@ -27,10 +28,10 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterYtelser(
             1.vedtaksperiode, historikk1,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     20.november(2019),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -48,10 +49,10 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterYtelser(
             2.vedtaksperiode, historikk1,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     20.november(2019),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -59,7 +60,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(35))
 
-        val historikk2 = RefusjonTilArbeidsgiver(22.juni(2020), 17.august(2020), 1145.daglig,  100.prosent,  ORGNUMMER)
+        val historikk2 = Utbetalingsperiode(ORGNUMMER, 22.juni(2020) til 17.august(2020), 100.prosent, 1145.daglig)
 
         håndterSykmelding(Sykmeldingsperiode(18.august(2020), 2.september(2020), 100.prosent))
         håndterSøknad(Sykdom(18.august(2020), 2.september(2020), 100.prosent))
@@ -67,16 +68,16 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterYtelser(
             3.vedtaksperiode, historikk1, historikk2,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     20.november(2019),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 ),
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     22.juni(2020),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -98,14 +99,14 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, 1000.daglig,  100.prosent,  ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.februar, INNTEKT, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         )
 
         håndterYtelser(
             2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.februar, 28.februar, 1000.daglig,  100.prosent,  ORGNUMMER),
-            inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.februar, INNTEKT, ORGNUMMER, true))
+            Utbetalingsperiode(ORGNUMMER, 1.februar til 28.februar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         )
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }

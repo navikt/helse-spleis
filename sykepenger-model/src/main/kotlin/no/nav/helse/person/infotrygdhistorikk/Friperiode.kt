@@ -9,7 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 
-internal class Friperiode(periode: Periode) : Infotrygdperiode(periode) {
+class Friperiode(periode: Periode) : Infotrygdperiode(periode) {
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.feriedager(start, endInclusive, kilde)
     }

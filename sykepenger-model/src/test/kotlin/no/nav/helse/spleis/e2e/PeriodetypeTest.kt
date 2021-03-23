@@ -4,6 +4,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -110,7 +112,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
-        val historikk = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
@@ -118,10 +120,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterYtelser(
             1.vedtaksperiode, historikk,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     3.januar(2018),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -145,7 +147,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
-        val historikk = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
@@ -153,10 +155,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterYtelser(
             1.vedtaksperiode, historikk,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     3.januar(2018),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )
@@ -176,10 +178,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterYtelser(
             2.vedtaksperiode, historikk,
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(
+                Inntektsopplysning(
+                    ORGNUMMER,
                     3.januar(2018),
                     1000.daglig,
-                    ORGNUMMER,
                     true
                 )
             )

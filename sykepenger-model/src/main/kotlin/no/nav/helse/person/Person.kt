@@ -313,15 +313,6 @@ class Person private constructor(
 
     internal fun lagreInntekter(
         orgnummer: String,
-        inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>,
-        aktivitetslogg: IAktivitetslogg,
-        hendelseId: UUID
-    ) {
-        finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).addInntekt(inntektsopplysninger, hendelseId)
-    }
-
-    internal fun lagreInntekterNy(
-        orgnummer: String,
         inntektsopplysninger: List<Inntektsopplysning>,
         aktivitetslogg: IAktivitetslogg,
         hendelseId: UUID

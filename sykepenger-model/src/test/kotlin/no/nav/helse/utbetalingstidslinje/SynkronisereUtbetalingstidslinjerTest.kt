@@ -163,8 +163,9 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = "vedtaksperiode1",
                 arbeidskategorikoder = emptyMap(),
-                utbetalinger = emptyList(),
+                perioder = emptyList(),
                 inntektshistorikk = emptyList(),
+                ugyldigePerioder = emptyList(),
                 aktivitetslogg = aktivitetslogg,
                 besvart = LocalDateTime.now()
             ),

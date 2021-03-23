@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsvurdering.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Inntektsvurdering.Inntektsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -112,8 +113,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         person.håndter(
             ytelser(
                 a1.id(0), orgnummer = a1, inntektshistorikk = listOf(
-                    Utbetalingshistorikk.Inntektsopplysning(1.januar, 24500.månedlig, a1, true),
-                    Utbetalingshistorikk.Inntektsopplysning(1.januar(2016), 5000.månedlig, a2, true)
+                    Inntektsopplysning(a1, 1.januar, 24500.månedlig, true),
+                    Inntektsopplysning(a2, 1.januar(2016), 5000.månedlig, true)
                 )
             )
         )

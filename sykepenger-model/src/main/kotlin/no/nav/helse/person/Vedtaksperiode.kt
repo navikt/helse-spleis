@@ -1151,12 +1151,7 @@ internal class Vedtaksperiode private constructor(
                     infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                 }
                 valider {
-                    ytelser.valider(
-                        vedtaksperiode.periode,
-                        historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
-                        periodetype,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
+                    ytelser.valider(vedtaksperiode.periode, periodetype, vedtaksperiode.skjæringstidspunkt)
                 }
                 lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
@@ -1591,12 +1586,7 @@ internal class Vedtaksperiode private constructor(
                     infotrygdhistorikk.valider(this, historie, vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode, skjæringstidspunkt)
                 }
                 valider {
-                    ytelser.valider(
-                        vedtaksperiode.periode,
-                        historie.avgrensetPeriode(vedtaksperiode.organisasjonsnummer, vedtaksperiode.periode),
-                        periodetype,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
+                    ytelser.valider(vedtaksperiode.periode, periodetype, vedtaksperiode.skjæringstidspunkt)
                 }
                 validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
                     person.harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(historie, vedtaksperiode)

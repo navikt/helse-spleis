@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -22,10 +21,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
     internal fun lagre(vilkårsgrunnlag: Vilkårsgrunnlag, skjæringstidspunkt: LocalDate) {
         historikk[skjæringstidspunkt] = vilkårsgrunnlag.grunnlagsdata()
-    }
-
-    internal fun lagre(utbetalingshistorikk: Utbetalingshistorikk, skjæringstidspunkt: LocalDate) {
-        historikk[skjæringstidspunkt] = utbetalingshistorikk.grunnlagsdata()
     }
 
     internal fun lagre(skjæringstidspunkt: LocalDate, grunnlagselement: VilkårsgrunnlagElement) {

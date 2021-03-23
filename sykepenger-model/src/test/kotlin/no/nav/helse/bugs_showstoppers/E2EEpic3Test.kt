@@ -3,9 +3,11 @@ package no.nav.helse.bugs_showstoppers
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -67,17 +69,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(16.januar(2020), 31.januar(2020))), 16.januar(2020))
 
         val inntektshistorikk = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(3.april(2019), INNTEKT, ORGNUMMER, true),
-            Utbetalingshistorikk.Inntektsopplysning(18.mars(2018), INNTEKT, ORGNUMMER, true),
-            Utbetalingshistorikk.Inntektsopplysning(13.november(2017), INNTEKT, ORGNUMMER, true)
+            Inntektsopplysning(ORGNUMMER, 3.april(2019), INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 18.mars(2018), INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 13.november(2017), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            RefusjonTilArbeidsgiver(3.april(2019), 30.april(2019), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(18.mars(2018), 2.april(2018), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(29.november(2017), 3.desember(2017), 100.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(13.november(2017), 28.november(2017), 100.daglig, 100.prosent, ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 3.april(2019) til 30.april(2019), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 18.mars(2018) til 2.april(2018), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 29.november(2017) til 3.desember(2017), 100.prosent, 100.daglig),
+            Utbetalingsperiode(ORGNUMMER, 13.november(2017) til 28.november(2017), 100.prosent, 100.daglig)
         )
-        håndterYtelser(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioder {
                 inntektsgrunnlag = Inntektsvurdering.Inntektsgrunnlag.SAMMENLIGNINGSGRUNNLAG
@@ -86,7 +88,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
                 }
             }
         ))
-        håndterYtelser(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode)
         assertNotNull(inspektør.maksdato(1.vedtaksperiode))
         assertTilstander(
@@ -865,7 +867,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
         håndterYtelser(
             2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(17.januar(2020), 31.januar(2020), 1400.daglig, 100.prosent, ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 17.januar(2020) til 31.januar(2020), 100.prosent, 1400.daglig)
         )   // Duplicate processing
 
         assertTilstander(
@@ -1349,16 +1351,16 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             3.vedtaksperiode,
-            RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814.daglig, 100.prosent, ORGNUMMER),
+            Utbetalingsperiode(ORGNUMMER, 24.juni(2020) til 11.juli(2020), 100.prosent, 1814.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
+                Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
             )
         )
         håndterYtelser(
             3.vedtaksperiode,
-            RefusjonTilArbeidsgiver(24.juni(2020), 11.juli(2020), 1814.daglig, 100.prosent, ORGNUMMER),
+            Utbetalingsperiode(ORGNUMMER, 24.juni(2020) til 11.juli(2020), 100.prosent, 1814.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(24.juni(2020), INNTEKT, ORGNUMMER, true)
+                Inntektsopplysning(ORGNUMMER, 24.juni(2020), INNTEKT, true)
             )
         )
     }
@@ -1417,8 +1419,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             LocalDateTime.now().minusDays(200)
         ) // Etter forkast ble det liggende igjen ukjent-dager forrest i sykdomstidslinjen
 
-        val historikk = RefusjonTilArbeidsgiver(27.juli(2020), 13.september(2020), 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntekt = listOf(Utbetalingshistorikk.Inntektsopplysning(27.juli(2020), INNTEKT, ORGNUMMER, true))
+        val historikk = Utbetalingsperiode(ORGNUMMER, 27.juli(2020) til 13.september(2020), 100.prosent, 1000.daglig)
+        val inntekt = listOf(Inntektsopplysning(ORGNUMMER, 27.juli(2020), INNTEKT, true))
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
         håndterYtelser(2.vedtaksperiode, historikk, inntektshistorikk = inntekt)
 
@@ -1442,7 +1444,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         person = SerialisertPerson(person.serialize().json).deserialize()
 
-        val historikk = RefusjonTilArbeidsgiver(17.august(2020), 22.august(2020), 1000.daglig, 100.prosent, ORGNUMMER)
+        val historikk = Utbetalingsperiode(ORGNUMMER, 17.august(2020) til 22.august(2020), 100.prosent, 1000.daglig)
         håndterUtbetalingshistorikk(2.vedtaksperiode, historikk)
         håndterYtelser(2.vedtaksperiode, historikk)
 
@@ -1477,8 +1479,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, 1000.daglig, 100.prosent, ORGNUMMER),
-            Utbetalingshistorikk.Infotrygdperiode.Ferie(1.februar, 28.februar)
+            Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, 1000.daglig),
+            Friperiode(1.februar til 28.februar)
         )
 
         inspektør.also {

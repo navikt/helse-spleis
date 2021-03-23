@@ -1,6 +1,9 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Opptjeningvurdering
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
@@ -48,24 +51,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag, 1.januar)
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         assertFalse(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!.isOk())
-    }
-
-    @Test
-    fun `Finner utbetalingshistorikk for skjæringstidspunkt`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val infotrygdVilkårsgrunnlag = Utbetalingshistorikk(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969",
-            organisasjonsnummer = "ORGNUMMER",
-            utbetalinger = emptyList(),
-            inntektshistorikk = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            besvart = LocalDateTime.now()
-        )
-        vilkårsgrunnlagHistorikk.lagre(infotrygdVilkårsgrunnlag, 1.januar)
-        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
 
     @Test

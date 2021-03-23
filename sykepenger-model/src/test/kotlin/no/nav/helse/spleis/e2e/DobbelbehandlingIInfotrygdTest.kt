@@ -2,10 +2,11 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -20,19 +21,19 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterPåminnelse(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(3.januar, 26.januar, 1000.daglig,  100.prosent,  ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 3.januar til 26.januar, 100.prosent, 1000.daglig)
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 26.februar, 100.prosent))
         håndterPåminnelse(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            RefusjonTilArbeidsgiver(26.februar, 26.mars, 1000.daglig,  100.prosent,  ORGNUMMER)
+            Utbetalingsperiode(ORGNUMMER, 26.februar til 26.mars, 100.prosent, 1000.daglig)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
         håndterPåminnelse(3.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        håndterUtbetalingshistorikk(3.vedtaksperiode, RefusjonTilArbeidsgiver(1.april, 1.mai, 1000.daglig,  100.prosent,  ORGNUMMER))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, Utbetalingsperiode(ORGNUMMER, 1.april til 1.mai, 100.prosent, 1000.daglig))
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
@@ -44,12 +45,12 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.november(2020), 4.desember(2020), 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(5.desember(2020), 23.desember(2020), 1000.daglig, 100.prosent, ORGNUMMER),
-            RefusjonTilArbeidsgiver(1.januar(2021), 3.januar(2021), 1000.daglig, 100.prosent, ORGNUMMER),
-            Utbetalingshistorikk.Infotrygdperiode.Ferie(24.desember(2020), 31.desember(2020)),
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(29.oktober(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
+            Utbetalingsperiode(ORGNUMMER, 5.desember(2020) til 23.desember(2020), 100.prosent, 1000.daglig),
+            Utbetalingsperiode(ORGNUMMER, 1.januar(2021) til 3.januar(2021), 100.prosent, 1000.daglig),
+            Friperiode(24.desember(2020) til 31.desember(2020)),
+            Utbetalingsperiode("456789123", 29.oktober(2020) til 4.desember(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(29.oktober(2020), 1000.daglig, ORGNUMMER, true)
+                Inntektsopplysning(ORGNUMMER, 29.oktober(2020), 1000.daglig, true)
             )
         )
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -61,9 +62,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(9.november(2020), 4.desember(2020), 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(9.november(2020) til 24.november(2020)))
-        val historikk = arrayOf(Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.desember(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"))
+        val historikk = arrayOf(Utbetalingsperiode("456789123", 1.desember(2020) til  4.desember(2020), 100.prosent, 1000.daglig))
         val inntektshistorikk = listOf(
-            Utbetalingshistorikk.Inntektsopplysning(1.desember(2020), 1000.daglig, "456789123", true)
+            Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)
         )
         håndterYtelser(1.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -76,9 +77,9 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterUtbetalingshistorikk(1.vedtaksperiode,
-            Utbetalingshistorikk.Infotrygdperiode.Utbetaling(1.desember(2020), 4.desember(2020), 1000.daglig, 100.prosent, "456789123"),
+            Utbetalingsperiode("456789123", 1.desember(2020) til  4.desember(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
-                Utbetalingshistorikk.Inntektsopplysning(1.desember(2020), 1000.daglig, "456789123", true)
+                Inntektsopplysning("456789123", 1.desember(2020), 1000.daglig, true)
             )
         )
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

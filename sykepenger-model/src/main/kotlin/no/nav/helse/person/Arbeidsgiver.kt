@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning.Companion.lagreInntekter
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -477,10 +476,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
-    }
-
-    internal fun addInntekt(inntektsopplysninger: List<Utbetalingshistorikk.Inntektsopplysning>, hendelseId: UUID) {
-        inntektsopplysninger.lagreInntekter(inntektshistorikk, hendelseId)
     }
 
     internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {

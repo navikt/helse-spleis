@@ -257,6 +257,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             emptyMap(),
             emptyList(),
             emptyList(),
+            emptyList(),
             besvart = LocalDateTime.now()
         ),
         foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),

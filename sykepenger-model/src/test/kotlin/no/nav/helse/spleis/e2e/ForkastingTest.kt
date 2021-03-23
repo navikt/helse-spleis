@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -19,12 +19,12 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER),
+            Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
         håndterYtelser(
             1.vedtaksperiode,
-            RefusjonTilArbeidsgiver(1.januar, 31.januar, INNTEKT, 100.prosent, ORGNUMMER),
+            Utbetalingsperiode(ORGNUMMER, 1.januar til 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
         assertTrue(inspektør.utbetalinger.isEmpty())

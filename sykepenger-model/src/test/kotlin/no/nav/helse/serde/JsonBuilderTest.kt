@@ -8,9 +8,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.Toggles
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -312,7 +314,7 @@ class JsonBuilderTest {
             }
 
         fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-            val refusjoner = listOf(RefusjonTilArbeidsgiver(1.desember(2017), 31.desember(2017), 31000.månedlig, 100.prosent, orgnummer))
+            val refusjoner = listOf(Utbetalingsperiode(orgnummer, 1.desember(2017) til 31.desember(2017), 100.prosent, 31000.månedlig))
             return Person(aktørId, fnr).apply {
                 håndter(sykmelding(fom = 1.januar, tom = 31.januar))
                 fangeVedtaksperiode()
@@ -321,7 +323,7 @@ class JsonBuilderTest {
                 håndter(ytelser(
                     hendelseId = søknadhendelseId,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(1.desember(2017), 31000.månedlig, orgnummer, true)),
+                    inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
                     utbetalinger = refusjoner)
                 )
                 håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
@@ -464,8 +466,8 @@ class JsonBuilderTest {
         )
 
         fun utbetalingshistorikk(
-            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList(),
-            inntektsopplysning: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList()
+            utbetalinger: List<Infotrygdperiode> = emptyList(),
+            inntektsopplysning: List<Inntektsopplysning> = emptyList()
         ) = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
@@ -473,8 +475,9 @@ class JsonBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
-            utbetalinger = utbetalinger,
+            perioder = utbetalinger,
             inntektshistorikk = inntektsopplysning,
+            ugyldigePerioder = emptyList(),
             besvart = LocalDateTime.now()
         )
 
@@ -482,8 +485,8 @@ class JsonBuilderTest {
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
             dødsdato: LocalDate? = null,
-            inntektshistorikk: List<Utbetalingshistorikk.Inntektsopplysning> = emptyList(),
-            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = emptyList()
+            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+            utbetalinger: List<Infotrygdperiode> = emptyList()
         ) = Aktivitetslogg().let {
             Ytelser(
                 meldingsreferanseId = hendelseId,
@@ -498,8 +501,9 @@ class JsonBuilderTest {
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     arbeidskategorikoder = emptyMap(),
-                    utbetalinger = utbetalinger,
+                    perioder = utbetalinger,
                     inntektshistorikk = inntektshistorikk,
+                    ugyldigePerioder = emptyList(),
                     aktivitetslogg = it,
                     besvart = LocalDateTime.now()
                 ),

@@ -1,10 +1,11 @@
 package no.nav.helse.serde.api
 
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver
-import no.nav.helse.hendelser.Utbetalingshistorikk.Inntektsopplysning
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.testhelpers.*
@@ -390,7 +391,7 @@ class SpeilBuilderTest {
         val skjæringstidspunktFraInfotrygd = 1.desember(2017)
         val fom2Periode = 1.februar
         val tom2Periode = 14.februar
-        val inntektshistorikk = listOf(Inntektsopplysning(skjæringstidspunktFraInfotrygd, 31000.månedlig, orgnummer, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, skjæringstidspunktFraInfotrygd, 31000.månedlig, true))
 
         val (person, hendelser) = Person(aktørId, fnr).run {
             this to mutableListOf<HendelseDTO>().apply {
@@ -415,7 +416,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, 4.januar, 31000.månedlig, 100.prosent, orgnummer))
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til 4.januar, 100.prosent, 31000.månedlig))
                     )
                 )
 
@@ -433,7 +434,7 @@ class SpeilBuilderTest {
                 håndter(
                     utbetalingshistorikk(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, tom1Periode, 31000.månedlig, 100.prosent, orgnummer)),
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -441,7 +442,7 @@ class SpeilBuilderTest {
                 håndter(
                     ytelser(
                         vedtaksperiodeId = sisteVedtaksperiodeId,
-                        utbetalinger = listOf(RefusjonTilArbeidsgiver(skjæringstidspunktFraInfotrygd, tom1Periode, 31000.månedlig, 100.prosent, orgnummer)),
+                        utbetalinger = listOf(Utbetalingsperiode(orgnummer, skjæringstidspunktFraInfotrygd til tom1Periode, 100.prosent, 31000.månedlig)),
                         inntektshistorikk = inntektshistorikk
                     )
                 )
@@ -840,13 +841,13 @@ class SpeilBuilderTest {
         val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnr2).last()
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(20.januar(2021), inntekt, orgnr1, true),
-            Inntektsopplysning(20.januar(2021), inntekt, orgnr2, true)
+            Inntektsopplysning(orgnr1, 20.januar(2021), inntekt, true),
+            Inntektsopplysning(orgnr2, 20.januar(2021), inntekt, true)
         )
 
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr1),
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr2)
+            Utbetalingsperiode(orgnr1, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt),
+            Utbetalingsperiode(orgnr2, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -904,13 +905,13 @@ class SpeilBuilderTest {
         val vedtaksperiodeId2 = person.collectVedtaksperiodeIder(orgnr2).last()
 
         val inntektshistorikk = listOf(
-            Inntektsopplysning(20.januar(2021), inntekt, orgnr1, true),
-            Inntektsopplysning(20.januar(2021), inntekt, orgnr2, true)
+            Inntektsopplysning(orgnr1, 20.januar(2021), inntekt, true),
+            Inntektsopplysning(orgnr2, 20.januar(2021), inntekt, true)
         )
 
         val utbetalinger = listOf(
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr1),
-            RefusjonTilArbeidsgiver(20.januar(2021), 26.januar(2021), inntekt, 100.prosent, orgnr2)
+            Utbetalingsperiode(orgnr1, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt),
+            Utbetalingsperiode(orgnr2, 20.januar(2021) til 26.januar(2021), 100.prosent, inntekt)
         )
 
         person.håndter(utbetalingshistorikk(vedtaksperiodeId = vedtaksperiodeId1, utbetalinger = utbetalinger, orgnummer = orgnr1))
@@ -1631,7 +1632,7 @@ class SpeilBuilderTest {
             hendelseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
             orgnummer: String = SpeilBuilderTest.orgnummer,
-            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+            utbetalinger: List<Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = listOf(),
             arbeidsavklaringspenger: List<Periode> = emptyList(),
             dødsdato: LocalDate? = null
@@ -1686,7 +1687,7 @@ class SpeilBuilderTest {
         private fun utbetalingshistorikk(
             meldingsreferanseId: UUID = UUID.randomUUID(),
             vedtaksperiodeId: String,
-            utbetalinger: List<Utbetalingshistorikk.Infotrygdperiode> = listOf(),
+            utbetalinger: List<Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = listOf(),
             aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
             orgnummer: String = SpeilBuilderTest.orgnummer
@@ -1697,9 +1698,10 @@ class SpeilBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
-            utbetalinger = utbetalinger,
+            perioder = utbetalinger,
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk,
+            ugyldigePerioder = emptyList(),
             besvart = LocalDateTime.now()
         )
 

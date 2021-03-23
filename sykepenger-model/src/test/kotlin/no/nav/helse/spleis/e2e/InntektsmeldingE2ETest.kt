@@ -2,6 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -690,8 +692,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere utbetalt periode i IT - IT-historikk kommer først`() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 17.januar til 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             utbetalinger,
@@ -715,8 +717,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 18.februar, 100.prosent))
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 17.januar til 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
@@ -735,8 +737,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar)
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 17.januar til 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
@@ -761,8 +763,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 førsteFraværsdag = 3.februar
             ), 1.vedtaksperiode
         )
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 17.januar til 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
@@ -782,8 +784,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, ferieperioder = listOf(28.januar til 2.februar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(17.januar, 21.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(17.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 17.januar til 21.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         håndterYtelser(
             1.vedtaksperiode,
             utbetalinger,
@@ -803,8 +805,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 25.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 25.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar, ferieperioder = listOf(18.januar til 22.januar))
-        val utbetalinger = Utbetalingshistorikk.Infotrygdperiode.RefusjonTilArbeidsgiver(24.januar, 28.januar, 1000.daglig, 100.prosent, ORGNUMMER)
-        val inntektshistorikk = listOf(Utbetalingshistorikk.Inntektsopplysning(24.januar, INNTEKT, ORGNUMMER, true))
+        val utbetalinger = Utbetalingsperiode(ORGNUMMER, 24.januar til 28.januar, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 24.januar, INNTEKT, true))
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)

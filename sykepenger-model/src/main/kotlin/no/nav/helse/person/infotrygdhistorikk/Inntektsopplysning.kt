@@ -9,14 +9,14 @@ import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
 
-internal class Inntektsopplysning(
+class Inntektsopplysning(
     private val orgnummer: String,
     private val sykepengerFom: LocalDate,
     private val inntekt: Inntekt,
     private val refusjonTilArbeidsgiver: Boolean,
     private val refusjonTom: LocalDate? = null
 ) {
-    fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         if (!erRelevant(periode, skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
         if (refusjonTom != null && periode.slutterEtter(refusjonTom)) aktivitetslogg.error("Refusjon fra Infotrygd opphører i eller før perioden")
@@ -42,7 +42,7 @@ internal class Inntektsopplysning(
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
             liste.groupBy { it.orgnummer }
                 .forEach { (orgnummer, opplysninger) ->
-                    person.lagreInntekterNy(orgnummer, opplysninger, aktivitetslogg, hendelseId)
+                    person.lagreInntekter(orgnummer, opplysninger, aktivitetslogg, hendelseId)
                 }
         }
 

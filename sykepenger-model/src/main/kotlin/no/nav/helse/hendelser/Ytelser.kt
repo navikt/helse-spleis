@@ -27,7 +27,6 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
-    internal fun utbetalingshistorikk() = utbetalingshistorikk
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
         utbetalingshistorikk.oppdaterHistorikk(historikk)
@@ -38,7 +37,7 @@ class Ytelser(
         person.lagreDødsdato(dødsinfo.dødsdato)
     }
 
-    internal fun valider(periode: Periode, avgrensetPeriode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(periode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
 
