@@ -44,6 +44,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertNotEquals(Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, DATO, 2000.månedlig, true, null).hashCode())
         assertNotEquals(Inntektsopplysning(ORGNR, 1.januar, 1000.månedlig, true, null).hashCode(), Inntektsopplysning(ORGNR, 2.januar, 2100.månedlig, true, null).hashCode())
         assertNotEquals(Inntektsopplysning("ag1", DATO, 1000.månedlig, true, null).hashCode(), Inntektsopplysning("ag2", DATO, 2100.månedlig, true, null).hashCode())
+        assertEquals(Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null).hashCode(), Inntektsopplysning("ag1", DATO, 123.6667.månedlig, true, null).hashCode())
     }
 
     @Test

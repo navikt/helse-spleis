@@ -49,6 +49,19 @@ class Inntektsopplysning private constructor(
     override fun hashCode() =
         Objects.hash(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Inntektsopplysning) return false
+        return equals(other)
+    }
+
+    private fun equals(other: Inntektsopplysning): Boolean {
+        if (this.orgnummer != other.orgnummer) return false
+        if (this.sykepengerFom != other.sykepengerFom) return false
+        if (this.inntekt != other.inntekt) return false
+        if (this.refusjonTom != other.refusjonTom) return false
+        return this.refusjonTilArbeidsgiver == other.refusjonTilArbeidsgiver
+    }
+
     internal companion object {
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID) {
             liste.groupBy { it.orgnummer }

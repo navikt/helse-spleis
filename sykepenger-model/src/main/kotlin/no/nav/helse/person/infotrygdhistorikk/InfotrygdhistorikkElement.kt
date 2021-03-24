@@ -165,11 +165,19 @@ internal class InfotrygdhistorikkElement private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (other !is InfotrygdhistorikkElement) return false
-        return this.id == other.id
+        return equals(other)
+    }
+
+    private fun equals(other: InfotrygdhistorikkElement): Boolean {
+        if (this.perioder != other.perioder) return false
+        if (this.inntekter != other.inntekter) return false
+        if (this.arbeidskategorikoder != other.arbeidskategorikoder) return false
+        if (this.ugyldigePerioder != other.ugyldigePerioder) return false
+        return this.harStatslønn == other.harStatslønn
     }
 
     internal fun erstatter(other: InfotrygdhistorikkElement): Boolean {
-        if (this.hashCode() != other.hashCode()) return false
+        if (!this.equals(other)) return false
         oppdater(other)
         return true
     }
