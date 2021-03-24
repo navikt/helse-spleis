@@ -89,6 +89,9 @@ spec:
           application: spetakkel
           access: readwrite
         - team: tbd
+          application: spill-av
+          access: readwrite
+        - team: tbd
           application: spleis
           access: readwrite
         - team: tbd
