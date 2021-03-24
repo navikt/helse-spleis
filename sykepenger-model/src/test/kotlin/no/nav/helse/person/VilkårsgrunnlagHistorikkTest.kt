@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -57,7 +58,8 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `lagrer grunnlagsdata fra Infotrygd ved overgang fra IT`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
                 oppdatert = LocalDateTime.now(),
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),
@@ -75,7 +77,8 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `lagrer grunnlagsdata fra Infotrygd ved infotrygdforlengelse`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
                 oppdatert = LocalDateTime.now(),
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),
@@ -93,7 +96,8 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `lagrer ikke grunnlagsdata ved førstegangsbehandling`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
                 oppdatert = LocalDateTime.now(),
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),
@@ -111,7 +115,8 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `lagrer ikke grunnlagsdata ved forlengelse`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+            oppdaterHistorikk(
+                InfotrygdhistorikkElement.opprett(
                 oppdatert = LocalDateTime.now(),
                 hendelseId = UUID.randomUUID(),
                 perioder = emptyList(),

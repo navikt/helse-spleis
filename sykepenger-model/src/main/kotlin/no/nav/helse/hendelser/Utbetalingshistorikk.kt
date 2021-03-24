@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import java.time.LocalDate
@@ -23,7 +24,7 @@ class Utbetalingshistorikk(
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     besvart: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
-    private val element = Infotrygdhistorikk.Element.opprett(
+    private val element = InfotrygdhistorikkElement.opprett(
         oppdatert = besvart,
         hendelseId = meldingsreferanseId(),
         perioder = perioder,

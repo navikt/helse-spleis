@@ -272,7 +272,7 @@ internal class InfotrygdhistorikkTest {
         harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
-        Infotrygdhistorikk.Element.opprett(
+        InfotrygdhistorikkElement.opprett(
             oppdatert = oppdatert,
             hendelseId = hendelseId,
             perioder = perioder,

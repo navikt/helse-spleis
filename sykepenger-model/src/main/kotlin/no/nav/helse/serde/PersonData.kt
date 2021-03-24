@@ -84,7 +84,7 @@ internal data class PersonData(
                     .call(map { it.parseInfotrygdhistorikkElement() })
         }
 
-        internal fun parseInfotrygdhistorikkElement() = Infotrygdhistorikk.Element::class.primaryConstructor!!
+        internal fun parseInfotrygdhistorikkElement() = InfotrygdhistorikkElement::class.primaryConstructor!!
             .apply { isAccessible = true }
             .call(
                 id,

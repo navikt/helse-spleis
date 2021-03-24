@@ -5,6 +5,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
@@ -75,7 +76,8 @@ internal abstract class HistorieTest {
         historie = Historie(
             Person(AKTØRID, FNR),
             Infotrygdhistorikk().apply {
-                oppdaterHistorikk(Infotrygdhistorikk.Element.opprett(
+                oppdaterHistorikk(
+                    InfotrygdhistorikkElement.opprett(
                     oppdatert = LocalDateTime.now(),
                     hendelseId = UUID.randomUUID(),
                     perioder = perioder.toList(),

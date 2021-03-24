@@ -4,14 +4,12 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Historie
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 internal class Infotrygdhistorikk private constructor(
-    private val elementer: MutableList<Element>
+    private val elementer: MutableList<InfotrygdhistorikkElement>
 ) {
     private val siste get() = elementer.first()
 
@@ -73,14 +71,20 @@ internal class Infotrygdhistorikk private constructor(
         siste.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk)
     }
 
-    internal fun oppdaterHistorikk(element: Element) {
+    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement) {
         if (harHistorikk() && element.erstatter(siste)) return
         elementer.add(0, element)
     }
 
     internal fun tøm() {
         if (!harHistorikk()) return
-        oppdaterHistorikk(Element.opprettTom())
+        oppdaterHistorikk(InfotrygdhistorikkElement.opprettTom())
+    }
+
+    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
+        visitor.preVisitInfotrygdhistorikk()
+        elementer.forEach { it.accept(visitor) }
+        visitor.postVisitInfotrygdhistorikk()
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =
@@ -89,171 +93,5 @@ internal class Infotrygdhistorikk private constructor(
     private fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
-
-    internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.preVisitInfotrygdhistorikk()
-        elementer.forEach { it.accept(visitor) }
-        visitor.postVisitInfotrygdhistorikk()
-    }
     private fun harHistorikk() = elementer.isNotEmpty()
-
-    internal class Element private constructor(
-        private val id: UUID,
-        private val tidsstempel: LocalDateTime,
-        private val hendelseId: UUID? = null,
-        perioder: List<Infotrygdperiode>,
-        private val inntekter: List<Inntektsopplysning>,
-        private val arbeidskategorikoder: Map<String, LocalDate>,
-        private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
-        private val harStatslønn: Boolean,
-        private var oppdatert: LocalDateTime = tidsstempel
-    ) {
-        private val perioder = perioder.sortedBy { it.start }
-        private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id)
-
-        init {
-            if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
-        }
-
-        internal companion object {
-            fun opprett(
-                oppdatert: LocalDateTime,
-                hendelseId: UUID,
-                perioder: List<Infotrygdperiode>,
-                inntekter: List<Inntektsopplysning>,
-                arbeidskategorikoder: Map<String, LocalDate>,
-                ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
-                harStatslønn: Boolean
-            ) =
-                Element(
-                    id = UUID.randomUUID(),
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseId = hendelseId,
-                    perioder = perioder,
-                    inntekter = inntekter,
-                    arbeidskategorikoder = arbeidskategorikoder,
-                    ugyldigePerioder = ugyldigePerioder,
-                    harStatslønn = harStatslønn,
-                    oppdatert = oppdatert
-                )
-
-            fun opprettTom() =
-                Element(
-                    id = UUID.randomUUID(),
-                    tidsstempel = LocalDateTime.now(),
-                    hendelseId = null,
-                    perioder = emptyList(),
-                    inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false,
-                    oppdatert = LocalDateTime.MIN
-                )
-        }
-
-        private fun erTom() =
-            perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
-
-        internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
-            Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id)
-        }
-
-        fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
-            vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag())
-        }
-
-        internal fun append(bøtte: Historie.Historikkbøtte) {
-            perioder.forEach { it.append(bøtte, kilde) }
-        }
-
-        internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
-            validerUgyldigePerioder(aktivitetslogg)
-            validerStatslønn(aktivitetslogg, periodetype)
-            return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
-        }
-
-        internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
-            aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
-            return valider(aktivitetslogg, perioder.filterIsInstance<Utbetalingsperiode>(), periode, skjæringstidspunkt)
-        }
-
-        private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
-            ugyldigePerioder.forEach { (fom,  tom) ->
-                val tekst = when {
-                    fom == null || tom == null -> "mangler fom- eller tomdato"
-                    fom > tom -> "fom er nyere enn tom"
-                    else -> null
-                }
-                aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", tekst?.let { " ($it)" } ?: "")
-            }
-        }
-
-        private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {
-            if (periodetype != Periodetype.OVERGANG_FRA_IT) return
-            aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-            if (!harStatslønn) return
-            aktivitetslogg.warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
-        }
-
-        private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
-            aktivitetslogg.info("Sjekker utbetalte perioder")
-            perioder.forEach { it.valider(aktivitetslogg, periode) }
-
-            aktivitetslogg.info("Sjekker inntektsopplysninger")
-            Inntektsopplysning.valider(inntekter, aktivitetslogg, periode, skjæringstidspunkt)
-
-            aktivitetslogg.info("Sjekker arbeidskategorikoder")
-            if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
-
-            return !aktivitetslogg.hasErrorsOrWorse()
-        }
-
-        internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
-            return perioder.filterIsInstance<Utbetalingsperiode>()
-                .filter { it.gjelder(orgnummer) }
-                .maxOfOrNull { it.endInclusive }
-        }
-
-        internal fun oppfrisket(cutoff: LocalDateTime) =
-            oppdatert > cutoff
-
-        internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-            visitor.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
-            visitor.preVisitInfotrygdhistorikkPerioder()
-            perioder.forEach { it.accept(visitor) }
-            visitor.postVisitInfotrygdhistorikkPerioder()
-            visitor.preVisitInfotrygdhistorikkInntektsopplysninger()
-            inntekter.forEach { it.accept(visitor) }
-            visitor.postVisitInfotrygdhistorikkInntektsopplysninger()
-            visitor.visitUgyldigePerioder(ugyldigePerioder)
-            visitor.visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder)
-            visitor.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
-        }
-
-        private fun erNormalArbeidstaker(skjæringstidspunkt: LocalDate?): Boolean {
-            if (arbeidskategorikoder.isEmpty() || skjæringstidspunkt == null) return true
-            return arbeidskategorikoder
-                .filter { (_, dato) -> dato >= skjæringstidspunkt }
-                .all { (arbeidskategorikode, _) -> arbeidskategorikode == "01" }
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(perioder, inntekter, arbeidskategorikoder, ugyldigePerioder, harStatslønn)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (other !is Element) return false
-            return this.id == other.id
-        }
-
-        internal fun erstatter(other: Element): Boolean {
-            if (this.hashCode() != other.hashCode()) return false
-            oppdater(other)
-            return true
-        }
-
-        private fun oppdater(other: Element) {
-            other.oppdatert = this.oppdatert
-        }
-    }
 }
