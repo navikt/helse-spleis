@@ -71,9 +71,10 @@ internal class Infotrygdhistorikk private constructor(
         siste.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk)
     }
 
-    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement) {
-        if (harHistorikk() && element.erstatter(siste)) return
+    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Boolean {
+        if (harHistorikk() && element.erstatter(siste)) return false
         elementer.add(0, element)
+        return true
     }
 
     internal fun tøm() {

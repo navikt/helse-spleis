@@ -39,7 +39,9 @@ class Utbetalingshistorikk(
     override fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
-        historikk.oppdaterHistorikk(element)
+        info("Oppdaterer Infotrygdhistorikk")
+        if (!historikk.oppdaterHistorikk(element)) return info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
+        info("Oppfrisket Infotrygdhistorikk ble lagret")
     }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) =

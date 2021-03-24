@@ -122,8 +122,8 @@ internal class InfotrygdhistorikkTest {
         )
         val nå = LocalDateTime.now()
         val gammel = nå.minusHours(24)
-        historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel))
-        historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå))
+        assertTrue(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
+        assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertEquals(1, inspektør.elementer())
         assertTrue(nå < inspektør.opprettet(0))
@@ -156,7 +156,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = nå
         )).tilModellObjekt()
         assertEquals(1, inspektør.elementer())
-        historikk.oppdaterHistorikk(historikkelement(perioder))
+        assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))
         assertEquals(1, inspektør.elementer())
     }
 
