@@ -74,7 +74,8 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun oppdaterHistorikk(element: Element) {
-        element.erstatt(elementer)
+        if (harHistorikk() && element.erstatter(siste)) return
+        elementer.add(0, element)
     }
 
     internal fun tøm() {
@@ -245,9 +246,10 @@ internal class Infotrygdhistorikk private constructor(
             return this.id == other.id
         }
 
-        fun erstatt(elementer: MutableList<Element>) {
-            if (elementer.isNotEmpty() && elementer.first().hashCode() == this.hashCode()) return oppdater(elementer.first())
-            return elementer.add(0, this)
+        internal fun erstatter(other: Element): Boolean {
+            if (this.hashCode() != other.hashCode()) return false
+            oppdater(other)
+            return true
         }
 
         private fun oppdater(other: Element) {
