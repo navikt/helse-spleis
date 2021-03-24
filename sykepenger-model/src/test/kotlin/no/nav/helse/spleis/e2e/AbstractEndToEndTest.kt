@@ -726,6 +726,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning>? = null,
         orgnummer: String = ORGNUMMER,
+        harStatslønn: Boolean = false,
         besvart: LocalDateTime = LocalDateTime.now()
     ): Utbetalingshistorikk {
         return Utbetalingshistorikk(
@@ -735,6 +736,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             arbeidskategorikoder = emptyMap(),
+            harStatslønn = harStatslønn,
             perioder = utbetalinger,
             inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
             ugyldigePerioder = emptyList(),
@@ -789,6 +791,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId.toString(),
                 arbeidskategorikoder = arbeidskategorikoder,
+                harStatslønn = statslønn,
                 perioder = utbetalinger,
                 inntektshistorikk = inntektshistorikk(inntektshistorikk, orgnummer),
                 ugyldigePerioder = emptyList(),
@@ -800,7 +803,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            statslønn = statslønn,
             utbetalingshistorikk = utbetalingshistorikk,
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
@@ -823,10 +825,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
                 perioder = institusjonsoppholdsperioder,
                 aktivitetslogg = aktivitetslogg
             ),
-            aktivitetslogg = aktivitetslogg,
             dødsinfo = Dødsinfo(dødsdato),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-            dagpenger = Dagpenger(dagpenger)
+            dagpenger = Dagpenger(dagpenger),
+            aktivitetslogg = aktivitetslogg
         ).apply {
             hendelselogg = this
         }

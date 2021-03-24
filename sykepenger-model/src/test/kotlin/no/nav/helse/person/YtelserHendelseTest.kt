@@ -179,6 +179,7 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "$vedtaksperiodeId",
                 arbeidskategorikoder = emptyMap(),
+                harStatslønn = false,
                 perioder = utbetalinger,
                 inntektshistorikk = inntektshistorikk,
                 ugyldigePerioder = ugyldigePerioder,
@@ -206,10 +207,10 @@ internal class YtelserHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            aktivitetslogg = it
         )
     }
 

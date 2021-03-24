@@ -1684,10 +1684,10 @@ class SpeilBuilderTest {
                     perioder = emptyList(),
                     aktivitetslogg = it
                 ),
-                aktivitetslogg = it,
                 dødsinfo = Dødsinfo(dødsdato),
                 arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
-                dagpenger = Dagpenger(emptyList())
+                dagpenger = Dagpenger(emptyList()),
+                aktivitetslogg = it
             )
         }
 
@@ -1705,6 +1705,7 @@ class SpeilBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
+            harStatslønn = false,
             perioder = utbetalinger,
             aktivitetslogg = aktivitetslogg,
             inntektshistorikk = inntektshistorikk,

@@ -245,6 +245,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             ORGNUMMER,
             "${1.vedtaksperiode}",
             emptyMap(),
+            false,
             emptyList(),
             emptyList(),
             emptyList(),
@@ -256,7 +257,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         opplæringspenger = Opplæringspenger(emptyList(), Aktivitetslogg()),
         institusjonsopphold = Institusjonsopphold(emptyList(), Aktivitetslogg()),
         dødsinfo = Dødsinfo(null),
-        statslønn = false,
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()

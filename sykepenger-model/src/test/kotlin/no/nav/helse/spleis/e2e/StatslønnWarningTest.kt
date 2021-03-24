@@ -23,7 +23,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNav = 18.februar)
         håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode, statslønn = true)
+        håndterYtelser(vedtaksperiodeId = 1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, UtbetalingHendelse.Oppdragstatus.AKSEPTERT)

@@ -366,6 +366,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
                 arbeidskategorikoder = emptyMap(),
+                harStatslønn = false,
                 perioder = listOf(Utbetalingsperiode(ORGNUMMER,17.januar(2017) til 20.januar(2017),  100.prosent, 1000.daglig)),
                 inntektshistorikk = listOf(
                     Inntektsopplysning(ORGNUMMER, 17.januar(2017), 31000.månedlig, true)
@@ -395,10 +396,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = Aktivitetslogg()
             ),
-            aktivitetslogg = Aktivitetslogg(),
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            aktivitetslogg = Aktivitetslogg()
         ).apply {
             hendelse = this
         }

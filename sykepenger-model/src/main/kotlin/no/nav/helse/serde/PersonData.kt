@@ -74,6 +74,7 @@ internal data class PersonData(
         private val inntekter: List<InntektsopplysningData>,
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
+        private val harStatslønn: Boolean,
         private val oppdatert: LocalDateTime
     ) {
         internal companion object {
@@ -93,6 +94,7 @@ internal data class PersonData(
                 inntekter.map { it.parseInntektsopplysning() },
                 arbeidskategorikoder,
                 ugyldigePerioder,
+                harStatslønn,
                 oppdatert
             )
 

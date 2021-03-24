@@ -73,6 +73,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode}",
                 arbeidskategorikoder = emptyMap(),
+                harStatslønn = false,
                 perioder = utbetalinger,
                 inntektshistorikk = emptyList(),
                 ugyldigePerioder = emptyList(),
@@ -100,10 +101,10 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            aktivitetslogg = it
         ).apply {
             hendelse = this
         }

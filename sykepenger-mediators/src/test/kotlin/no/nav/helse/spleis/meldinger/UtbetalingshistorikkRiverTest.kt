@@ -51,9 +51,7 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           "@løsning": {
             "Sykepengehistorikk": [
               {
-                "fom": "2019-03-11",
-                "tom": "2019-04-12",
-                "grad": "100",
+                "statslønn":  false,
                 "inntektsopplysninger": [
                   {
                     "sykepengerFom": "2019-03-27",
@@ -105,9 +103,7 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           "@løsning": {
             "Sykepengehistorikk": [
               {
-                "fom": "2019-03-28",
-                "tom": "2019-04-12",
-                "grad": "100",
+                "statslønn":  false,
                 "inntektsopplysninger": [
                   {
                     "sykepengerFom": "2019-03-27",
@@ -171,9 +167,7 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           "@løsning": {
             "Sykepengehistorikk": [
               {
-                "fom": "2019-03-28",
-                "tom": "2019-04-12",
-                "grad": "100",
+                "statslønn": false,
                 "inntektsopplysninger": [
                   {
                     "sykepengerFom": "2019-03-27",

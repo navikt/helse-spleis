@@ -217,10 +217,10 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class InfotrygdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
-        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
+        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
             val element = mutableMapOf<String, Any?>()
             historikk.add(element)
-            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId))
+            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId, harStatslønn))
         }
 
         override fun postVisitInfotrygdhistorikk() {
@@ -233,7 +233,8 @@ internal class JsonBuilder : AbstractBuilder() {
         id: UUID,
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
-        hendelseId: UUID?
+        hendelseId: UUID?,
+        harStatslønn: Boolean
     ) : BuilderState() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
         private val utbetalingsperioder = mutableListOf<Map<String, Any>>()
@@ -252,6 +253,7 @@ internal class JsonBuilder : AbstractBuilder() {
             element["inntekter"] = inntekter
             element["arbeidskategorikoder"] = arbeidskategorikoder
             element["ugyldigePerioder"] = ugyldigePerioder
+            element["harStatslønn"] = harStatslønn
             element["oppdatert"] = oppdatert
         }
 
@@ -303,7 +305,13 @@ internal class JsonBuilder : AbstractBuilder() {
             this.ugyldigePerioder.addAll(ugyldigePerioder)
         }
 
-        override fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
+        override fun postVisitInfotrygdhistorikkElement(
+            id: UUID,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            hendelseId: UUID?,
+            harStatslønn: Boolean
+        ) {
             popState()
         }
     }

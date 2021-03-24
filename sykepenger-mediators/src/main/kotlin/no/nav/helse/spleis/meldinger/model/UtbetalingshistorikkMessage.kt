@@ -27,6 +27,8 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
     private val aktørId = packet["aktørId"].asText()
     private val besvart = packet["@besvart"].asLocalDateTime()
 
+    private val harStatslønn = packet["@løsning.${Sykepengehistorikk.name}"].any { it["statslønn"].asBoolean() }
+
     private val utbetalinger = packet["@løsning.${Sykepengehistorikk.name}"]
         .flatMap { it.path("utbetalteSykeperioder") }
         .filter(::erGyldigPeriode)
@@ -92,6 +94,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = arbeidskategorikoder,
+            harStatslønn = harStatslønn,
             perioder = utbetalinger,
             inntektshistorikk = inntektshistorikk,
             ugyldigePerioder = ugyldigePerioder,

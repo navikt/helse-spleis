@@ -240,6 +240,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "$vedtaksperiodeId",
                 arbeidskategorikoder = emptyMap(),
+                harStatslønn = false,
                 perioder = utbetalinger,
                 inntektshistorikk = emptyList(),
                 ugyldigePerioder = emptyList(),
@@ -267,10 +268,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 aktivitetslogg = it
             ),
-            aktivitetslogg = it,
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            aktivitetslogg = it
         ).apply {
             hendelse = this
         }

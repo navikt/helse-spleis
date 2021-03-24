@@ -16,6 +16,7 @@ class Utbetalingshistorikk(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     arbeidskategorikoder: Map<String, LocalDate>,
+    harStatslønn: Boolean,
     perioder: List<Infotrygdperiode>,
     inntektshistorikk: List<Inntektsopplysning>,
     ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
@@ -28,7 +29,8 @@ class Utbetalingshistorikk(
         perioder = perioder,
         inntekter = inntektshistorikk,
         arbeidskategorikoder = arbeidskategorikoder,
-        ugyldigePerioder = ugyldigePerioder
+        ugyldigePerioder = ugyldigePerioder,
+        harStatslønn = harStatslønn
     )
 
     override fun aktørId() = aktørId

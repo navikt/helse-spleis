@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.testhelpers.februar
@@ -151,6 +152,7 @@ internal class InfotrygdhistorikkTest {
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap(),
             ugyldigePerioder = emptyList(),
+            harStatslønn = false,
             oppdatert = nå
         )).tilModellObjekt()
         assertEquals(1, inspektør.elementer())
@@ -160,7 +162,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tom historikk validerer`() {
-        assertTrue(historikk.valider(aktivitetslogg, 1.januar til 31.januar, 1.januar))
+        assertTrue(historikk.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -209,6 +211,34 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
+    fun `hensyntar ikke statslønn i overlapp-validering`() {
+        historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
+        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `statslønn lager warning ved Overgang fra IT`() {
+        historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
+            assertFalse(it.hasWarningsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.FORLENGELSE, 1.januar til 31.januar, 1.januar))
+            assertFalse(it.hasWarningsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.INFOTRYGDFORLENGELSE, 1.januar til 31.januar, 1.januar))
+            assertFalse(it.hasWarningsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
+            assertTrue(it.hasWarningsOrWorse())
+        }
+    }
+
+    @Test
     fun `siste sykepengedag - tom historikk`() {
         historikk.oppdaterHistorikk(historikkelement())
         assertNull(historikk.sisteSykepengedag("ag1"))
@@ -239,6 +269,7 @@ internal class InfotrygdhistorikkTest {
         arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
         ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
+        harStatslønn: Boolean = false,
         oppdatert: LocalDateTime = LocalDateTime.now()
     ) =
         Infotrygdhistorikk.Element.opprett(
@@ -247,7 +278,8 @@ internal class InfotrygdhistorikkTest {
             perioder = perioder,
             inntekter = inntekter,
             arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = ugyldigePerioder
+            ugyldigePerioder = ugyldigePerioder,
+            harStatslønn = harStatslønn
         )
 
     private class InfotrygdhistorikkInspektør(historikk: Infotrygdhistorikk) : InfotrygdhistorikkVisitor {
@@ -261,7 +293,7 @@ internal class InfotrygdhistorikkTest {
         fun opprettet(indeks: Int) = elementer.elementAt(indeks).second
         fun oppdatert(indeks: Int) = elementer.elementAt(indeks).third
 
-        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?) {
+        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
             elementer.add(Triple(id, tidsstempel, oppdatert))
         }
     }

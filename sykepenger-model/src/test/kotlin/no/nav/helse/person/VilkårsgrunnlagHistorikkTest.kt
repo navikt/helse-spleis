@@ -63,7 +63,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 perioder = emptyList(),
                 inntekter = emptyList(),
                 arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList()
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
             ))
         }
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, vilkårsgrunnlagHistorikk)
@@ -80,7 +81,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 perioder = emptyList(),
                 inntekter = emptyList(),
                 arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList()
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
             ))
         }
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.INFOTRYGDFORLENGELSE, vilkårsgrunnlagHistorikk)
@@ -97,7 +99,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 perioder = emptyList(),
                 inntekter = emptyList(),
                 arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList()
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
             ))
         }
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FØRSTEGANGSBEHANDLING, vilkårsgrunnlagHistorikk)
@@ -114,7 +117,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 perioder = emptyList(),
                 inntekter = emptyList(),
                 arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList()
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
             ))
         }
         historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.FORLENGELSE, vilkårsgrunnlagHistorikk)

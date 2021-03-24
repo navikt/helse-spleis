@@ -36,19 +36,7 @@ internal class YtelserRiver(
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
         message.interestedIn("@løsning.${Sykepengehistorikk.name}")
         if (message["@løsning.${Sykepengehistorikk.name}"].isArray) {
-            message.requireArray("@løsning.${Sykepengehistorikk.name}") {
-                requireArray("inntektsopplysninger") {
-                    require("sykepengerFom", JsonNode::asLocalDate)
-                    requireKey("inntekt", "orgnummer", "refusjonTilArbeidsgiver")
-                }
-                requireArray("utbetalteSykeperioder") {
-                    interestedIn("fom") { it.asLocalDate() }
-                    interestedIn("tom") { it.asLocalDate() }
-                    requireKey("dagsats", "utbetalingsGrad", "orgnummer")
-                    requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
-                }
-                requireKey("arbeidsKategoriKode")
-            }
+            UtbetalingshistorikkRiver.validerSykepengehistorikk(message)
         }
         message.requireArray("@løsning.${Pleiepenger.name}") {
             interestedIn("fom") { it.asLocalDate() }

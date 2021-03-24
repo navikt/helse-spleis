@@ -163,6 +163,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = "vedtaksperiode1",
                 arbeidskategorikoder = emptyMap(),
+                harStatslønn = false,
                 perioder = emptyList(),
                 inntektshistorikk = emptyList(),
                 ugyldigePerioder = emptyList(),
@@ -190,10 +191,10 @@ internal class SynkronisereUtbetalingstidslinjerTest {
                 perioder = emptyList(),
                 aktivitetslogg = aktivitetslogg
             ),
-            aktivitetslogg = aktivitetslogg,
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-            dagpenger = Dagpenger(emptyList())
+            dagpenger = Dagpenger(emptyList()),
+            aktivitetslogg = aktivitetslogg
         )
     }
 

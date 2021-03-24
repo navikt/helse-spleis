@@ -81,7 +81,8 @@ internal abstract class HistorieTest {
                     perioder = perioder.toList(),
                     inntekter = emptyList(),
                     arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList()
+                    ugyldigePerioder = emptyList(),
+                    harStatslønn = false
                 ))
             }
         )

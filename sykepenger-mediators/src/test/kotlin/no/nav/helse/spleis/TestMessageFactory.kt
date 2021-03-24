@@ -237,8 +237,7 @@ internal class TestMessageFactory(
             mapOf(
                 "Sykepengehistorikk" to sykepengehistorikk.map { data ->
                     mapOf(
-                        "fom" to data.fom,
-                        "tom" to data.tom,
+                        "statslønn" to false,
                         "inntektsopplysninger" to data.inntektsopplysninger.map {
                             mapOf(
                                 "sykepengerFom" to it.sykepengerFom,

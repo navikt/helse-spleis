@@ -475,6 +475,7 @@ class JsonBuilderTest {
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             arbeidskategorikoder = emptyMap(),
+            harStatslønn = false,
             perioder = utbetalinger,
             inntektshistorikk = inntektsopplysning,
             ugyldigePerioder = emptyList(),
@@ -501,6 +502,7 @@ class JsonBuilderTest {
                     organisasjonsnummer = orgnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     arbeidskategorikoder = emptyMap(),
+                    harStatslønn = false,
                     perioder = utbetalinger,
                     inntektshistorikk = inntektshistorikk,
                     ugyldigePerioder = emptyList(),
@@ -534,10 +536,10 @@ class JsonBuilderTest {
                     perioder = emptyList(),
                     aktivitetslogg = it
                 ),
-                aktivitetslogg = it,
                 dødsinfo = Dødsinfo(dødsdato),
                 arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-                dagpenger = Dagpenger(emptyList())
+                dagpenger = Dagpenger(emptyList()),
+                aktivitetslogg = it
             )
         }
 

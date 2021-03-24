@@ -29,9 +29,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         UtbetalingshistorikkMessage(packet)
             .utbetalingshistorikk(aktivitetslogg)
     }
-    private val statslønn = packet["@løsning.${Sykepengehistorikk.name}"].any {
-        it["statslønn"]?.asBoolean() ?: false
-    }
 
     private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
         .takeIf(JsonNode::isObject)?.let(::asPeriode)
@@ -94,8 +91,6 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             dødsinfo = dødsinfo,
-            statslønn = statslønn,
-            aktivitetslogg = aktivitetslogg,
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map {
                 Periode(
                     it.first,
@@ -107,7 +102,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
                     it.first,
                     it.second
                 )
-            })
+            }),
+            aktivitetslogg = aktivitetslogg
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
             if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")

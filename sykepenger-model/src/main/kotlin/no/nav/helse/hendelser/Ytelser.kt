@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import java.time.LocalDate
@@ -22,7 +21,6 @@ class Ytelser(
     private val opplæringspenger: Opplæringspenger,
     private val institusjonsopphold: Institusjonsopphold,
     private val dødsinfo: Dødsinfo,
-    private val statslønn: Boolean = false,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
@@ -37,15 +35,9 @@ class Ytelser(
         person.lagreDødsdato(dødsinfo.dødsdato)
     }
 
-    internal fun valider(periode: Periode, periodetype: Periodetype, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
-
-        if (periodetype == Periodetype.OVERGANG_FRA_IT) {
-            info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-            if (statslønn) warn("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
-        }
-
         if (foreldrepermisjon.overlapper(periode)) error("Har overlappende foreldrepengeperioder med syketilfelle")
         if (pleiepenger.overlapper(periode)) error("Har overlappende pleiepengeytelse med syketilfelle")
         if (omsorgspenger.overlapper(periode)) error("Har overlappende omsorgspengerytelse med syketilfelle")

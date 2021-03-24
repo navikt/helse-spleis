@@ -253,6 +253,7 @@ internal class VilkårsgrunnlagTest {
             orgnummer,
             vedtaksperiodeId(),
             emptyMap(),
+            false,
             emptyList(),
             emptyList(),
             emptyList(),
@@ -264,7 +265,6 @@ internal class VilkårsgrunnlagTest {
         opplæringspenger = Opplæringspenger(emptyList(), Aktivitetslogg()),
         institusjonsopphold = Institusjonsopphold(emptyList(), Aktivitetslogg()),
         dødsinfo = Dødsinfo(null),
-        statslønn = false,
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()
