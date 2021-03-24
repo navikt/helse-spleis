@@ -1329,13 +1329,11 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(27.april(2020), 30.april(2020), 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(8.juni(2020), 21.juni(2020), 100.prosent))
-        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(8.juni(2020), 21.juni(2020), 100.prosent))
+        håndterSøknad(Sykdom(8.juni(2020), 21.juni(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(8.juni(2020), 23.juni(2020))), førsteFraværsdag = 8.juni(2020))
 
         håndterSykmelding(Sykmeldingsperiode(21.juni(2020), 11.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(21.juni(2020), 11.juli(2020), 100.prosent))
-
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD, LocalDateTime.now().minusDays(200))
 
         håndterSykmelding(Sykmeldingsperiode(12.juli(2020), 31.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(12.juli(2020), 31.juli(2020), 100.prosent))

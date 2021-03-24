@@ -224,8 +224,6 @@ internal class VedtaksperiodeBuilder(
             TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
             TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_GAP,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD,
             TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
             TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -257,7 +255,6 @@ internal class VedtaksperiodeBuilder(
                 else -> TilstandstypeDTO.IngenUtbetaling
             }
             TilstandType.AVSLUTTET_UTEN_UTBETALING,
-            TilstandType.AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_GAP,
             TilstandType.UTEN_UTBETALING_MED_INNTEKTSMELDING_UFERDIG_FORLENGELSE ->
                 if (utbetaling != null && utbetaling.utbetalingstidslinje(periode).kunFridager()) TilstandstypeDTO.KunFerie else TilstandstypeDTO.IngenUtbetaling

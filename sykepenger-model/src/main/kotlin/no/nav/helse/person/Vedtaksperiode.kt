@@ -316,8 +316,7 @@ internal class Vedtaksperiode private constructor(
         this.tilstand !in listOf(
             TilInfotrygd,
             Avsluttet,
-            AvsluttetUtenUtbetaling,
-            AvventerVilkårsprøvingArbeidsgiversøknad
+            AvsluttetUtenUtbetaling
         )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
@@ -1367,30 +1366,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    @Deprecated(":)")
-    internal object AvventerVilkårsprøvingArbeidsgiversøknad : Vedtaksperiodetilstand {
-        override val type = AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD
-
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusHours(24)
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
-            hendelse.info("Forespør vilkårsgrunnlag")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vedtaksperiode.tilstand(vilkårsgrunnlag, AvsluttetUtenUtbetaling)
-        }
-    }
-
     internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_GAP
 
@@ -1523,56 +1498,6 @@ internal class Vedtaksperiode private constructor(
 
                 gjentaHistorikk(vilkårsgrunnlag, vedtaksperiode.person)
             }
-        }
-    }
-
-    @Deprecated(":)")
-    internal object AvventerVilkårsprøvingGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_VILKÅRSPRØVING_GAP
-
-        override fun makstid(
-            vedtaksperiode: Vedtaksperiode,
-            tilstandsendringstidspunkt: LocalDateTime
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusHours(24)
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
-            hendelse.info("Forespør vilkårsgrunnlag")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            if (!Toggles.FlereArbeidsgivereFørstegangsbehandling.enabled) return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
-            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
-            val første = vedtaksperioder.first()
-            if (første == vedtaksperiode) {
-                if (vedtaksperioder.drop(1)
-                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                        .all { it.tilstand == AvventerArbeidsgivere }
-                ) {
-                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
-                }
-            }
-            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
-                vedtaksperioder
-                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-
-                gjentaHistorikk(vilkårsgrunnlag, vedtaksperiode.person)
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Revurdering) {
-            hendelse.info("Hopper tilbake i en ventetilstand fordi en betalt periode er gått til revurdering")
-            vedtaksperiode.tilstand(hendelse, AvventerUferdigGap)
         }
     }
 
@@ -1980,34 +1905,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
         }
-    }
-
-    @Deprecated(":)")
-    internal object AvsluttetUtenUtbetalingMedInntektsmelding : Vedtaksperiodetilstand {
-        override val type = AVSLUTTET_UTEN_UTBETALING_MED_INNTEKTSMELDING
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            LocalDateTime.MAX
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            vedtaksperiode.vedtakFattet(hendelse)
-            vedtaksperiode.arbeidsgiver.gjenopptaBehandling()
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: ArbeidstakerHendelse,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet med inntektsmelding")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
     }
 
     internal object Avsluttet : Vedtaksperiodetilstand {
