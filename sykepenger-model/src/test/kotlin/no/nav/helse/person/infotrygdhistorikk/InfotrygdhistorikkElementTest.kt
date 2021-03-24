@@ -46,16 +46,25 @@ internal class InfotrygdhistorikkElementTest {
         )
         val ugyldigePerioder = listOf(1.januar to 1.januar)
         assertEquals(historikkelement().hashCode(), historikkelement().hashCode())
+        assertEquals(historikkelement(), historikkelement())
         assertNotEquals(historikkelement().hashCode(), historikkelement(perioder).hashCode())
         assertEquals(historikkelement(perioder).hashCode(), historikkelement(perioder).hashCode())
+        assertEquals(historikkelement(perioder), historikkelement(perioder))
         assertEquals(historikkelement(inntekter = inntekter).hashCode(), historikkelement(inntekter = inntekter).hashCode())
         assertNotEquals(historikkelement(perioder, inntekter).hashCode(), historikkelement(inntekter = inntekter).hashCode())
-        assertEquals(historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode(), historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode())
+        assertNotEquals(historikkelement(perioder, inntekter), historikkelement(inntekter = inntekter))
+        assertEquals(
+            historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode(),
+            historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode()
+        )
         assertNotEquals(historikkelement(perioder, inntekter).hashCode(), historikkelement(perioder, inntekter, arbeidskategorikoder).hashCode())
+        assertNotEquals(historikkelement(perioder, inntekter), historikkelement(perioder, inntekter, arbeidskategorikoder))
         assertNotEquals(historikkelement().hashCode(), historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
         assertEquals(historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode(), historikkelement(ugyldigePerioder = ugyldigePerioder).hashCode())
+        assertEquals(historikkelement(ugyldigePerioder = ugyldigePerioder), historikkelement(ugyldigePerioder = ugyldigePerioder))
         assertNotEquals(historikkelement().hashCode(), historikkelement(harStatslønn = true).hashCode())
         assertEquals(historikkelement(harStatslønn = true).hashCode(), historikkelement(harStatslønn = true).hashCode())
+        assertEquals(historikkelement(harStatslønn = true), historikkelement(harStatslønn = true))
     }
 
     @Test
@@ -431,19 +440,23 @@ internal class InfotrygdhistorikkElementTest {
         val utbetalinger = listOf(
             Utbetalingsperiode(ORGNUMMER, 1.januar til 5.januar, 100.prosent, 1234.daglig)
         )
-        val element = historikkelement(utbetalinger, listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-        ))
+        val element = historikkelement(
+            utbetalinger, listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+            )
+        )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(10.januar, 31.januar), null))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
     fun `validering gir warning hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
-        val element = historikkelement(inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
-        ))
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+            )
+        )
 
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), null))
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
@@ -453,30 +466,36 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på forskjellig dato`() {
-        val element = historikkelement(inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 2.januar, 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
-        ))
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 2.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+            )
+        )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), null))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er 12 måneder før perioden`() {
-        val element = historikkelement(inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
-        ))
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar(2018), 4321.månedlig, true),
+            )
+        )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.februar(2019), 28.februar(2019)), null))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
     fun `validering gir ikke warning hvis vi har to inntekter for samme arbeidsgiver på samme dato, men dato er før skjæringstidspunkt`() {
-        val element = historikkelement(inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
-        ))
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+            )
+        )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(2.januar, 31.januar), 2.januar))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
@@ -503,9 +522,11 @@ internal class InfotrygdhistorikkElementTest {
 
     @Test
     fun `lagrer inntekter låser elementet`() {
-        val element = historikkelement(inntekter = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
-        ))
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
+            )
+        )
         element.addInntekter(Person("", ""), aktivitetslogg)
         assertFalse(element.kanSlettes())
     }
@@ -513,10 +534,12 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `legger til siste inntekt først i inntektshistorikk`() {
         val inntektshistorikk = Inntektshistorikk()
-        Inntektsopplysning.lagreInntekter(listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
-            Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
-        ), inntektshistorikk, UUID.randomUUID())
+        Inntektsopplysning.lagreInntekter(
+            listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
+            ), inntektshistorikk, UUID.randomUUID()
+        )
         assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar))
     }
 
