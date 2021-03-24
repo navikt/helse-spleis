@@ -7,7 +7,7 @@ internal class V87InfotrygdhistorikkStatslønn : JsonMigration(version = 87) {
 
     override fun doMigration(jsonNode: ObjectNode) {
         jsonNode.path("infotrygdhistorikk").forEach {
-            (it as ObjectNode).put("statslønn", false)
+            (it as ObjectNode).put("harStatslønn", false)
         }
     }
 }
