@@ -11,6 +11,6 @@ class UkjentInfotrygdperiode(periode: Periode) : Infotrygdperiode(periode) {
     }
 
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkFerieperiode(this)
+        visitor.visitInfotrygdhistorikkUkjentPeriode(this)
     }
 }
