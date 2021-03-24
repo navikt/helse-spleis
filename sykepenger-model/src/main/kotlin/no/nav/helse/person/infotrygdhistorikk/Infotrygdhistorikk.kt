@@ -79,6 +79,8 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun tøm() {
         if (!harHistorikk()) return
+        elementer.removeIf(InfotrygdhistorikkElement::kanSlettes)
+        if (!harHistorikk()) return
         oppdaterHistorikk(InfotrygdhistorikkElement.opprettTom())
     }
 

@@ -217,10 +217,18 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class InfotrygdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
-        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
+        override fun preVisitInfotrygdhistorikkElement(
+            id: UUID,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            hendelseId: UUID?,
+            lagretInntekter: Boolean,
+            lagretVilkårsgrunnlag: Boolean,
+            harStatslønn: Boolean
+        ) {
             val element = mutableMapOf<String, Any?>()
             historikk.add(element)
-            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId, harStatslønn))
+            pushState(InfotrygdhistorikkElementState(element, id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn))
         }
 
         override fun postVisitInfotrygdhistorikk() {
@@ -234,6 +242,8 @@ internal class JsonBuilder : AbstractBuilder() {
         tidsstempel: LocalDateTime,
         oppdatert: LocalDateTime,
         hendelseId: UUID?,
+        lagretInntekter: Boolean,
+        lagretVilkårsgrunnlag: Boolean,
         harStatslønn: Boolean
     ) : BuilderState() {
         private val ferieperioder = mutableListOf<Map<String, LocalDate>>()
@@ -254,6 +264,8 @@ internal class JsonBuilder : AbstractBuilder() {
             element["arbeidskategorikoder"] = arbeidskategorikoder
             element["ugyldigePerioder"] = ugyldigePerioder
             element["harStatslønn"] = harStatslønn
+            element["lagretInntekter"] = lagretInntekter
+            element["lagretVilkårsgrunnlag"] = lagretVilkårsgrunnlag
             element["oppdatert"] = oppdatert
         }
 
@@ -286,14 +298,16 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengerFom: LocalDate,
             inntekt: Inntekt,
             refusjonTilArbeidsgiver: Boolean,
-            refusjonTom: LocalDate?
+            refusjonTom: LocalDate?,
+            lagret: LocalDateTime?
         ) {
             inntekter.add(mapOf(
                 "orgnr" to orgnr,
                 "sykepengerFom" to sykepengerFom,
                 "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig },
                 "refusjonTilArbeidsgiver" to refusjonTilArbeidsgiver,
-                "refusjonTom" to refusjonTom
+                "refusjonTom" to refusjonTom,
+                "lagret" to lagret
             ))
         }
 
@@ -310,6 +324,8 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime,
             oppdatert: LocalDateTime,
             hendelseId: UUID?,
+            lagretInntekter: Boolean,
+            lagretVilkårsgrunnlag: Boolean,
             harStatslønn: Boolean
         ) {
             popState()

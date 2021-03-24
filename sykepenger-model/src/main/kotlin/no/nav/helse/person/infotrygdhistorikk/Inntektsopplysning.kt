@@ -7,15 +7,25 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
-class Inntektsopplysning(
+class Inntektsopplysning private constructor(
     private val orgnummer: String,
     private val sykepengerFom: LocalDate,
     private val inntekt: Inntekt,
     private val refusjonTilArbeidsgiver: Boolean,
-    private val refusjonTom: LocalDate? = null
+    private val refusjonTom: LocalDate?,
+    private var lagret: LocalDateTime?
 ) {
+    constructor(
+        orgnummer: String,
+        sykepengerFom: LocalDate,
+        inntekt: Inntekt,
+        refusjonTilArbeidsgiver: Boolean,
+        refusjonTom: LocalDate? = null
+    ) : this(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, null)
+
     internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate?): Boolean {
         if (!erRelevant(periode, skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
@@ -25,13 +35,14 @@ class Inntektsopplysning(
     }
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {
-        visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
+        visitor.visitInfotrygdhistorikkInntektsopplysning(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
     }
 
     private fun erRelevant(periode: Periode, skjæringstidspunkt: LocalDate?) =
         sykepengerFom >= (skjæringstidspunkt ?: periode.start.minusMonths(12))
 
     private fun addInntekt(appendMode: Inntektshistorikk.AppendMode, hendelseId: UUID) {
+        lagret = LocalDateTime.now()
         appendMode.addInfotrygd(sykepengerFom, hendelseId, inntekt)
     }
 

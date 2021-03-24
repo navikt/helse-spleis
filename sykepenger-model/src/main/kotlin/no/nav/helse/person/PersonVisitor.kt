@@ -31,7 +31,15 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, V
 
 internal interface InfotrygdhistorikkVisitor {
     fun preVisitInfotrygdhistorikk() {}
-    fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {}
+    fun preVisitInfotrygdhistorikkElement(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?,
+        lagretInntekter: Boolean,
+        lagretVilkårsgrunnlag: Boolean,
+        harStatslønn: Boolean
+    ) {}
     fun preVisitInfotrygdhistorikkPerioder() {}
     fun visitInfotrygdhistorikkFerieperiode(periode: ClosedRange<LocalDate>) {}
     fun visitInfotrygdhistorikkUtbetalingsperiode(orgnr: String, periode: ClosedRange<LocalDate>, grad: Prosentdel, inntekt: Inntekt) {}
@@ -43,12 +51,21 @@ internal interface InfotrygdhistorikkVisitor {
         sykepengerFom: LocalDate,
         inntekt: Inntekt,
         refusjonTilArbeidsgiver: Boolean,
-        refusjonTom: LocalDate?
+        refusjonTom: LocalDate?,
+        lagret: LocalDateTime?
     ) {}
     fun postVisitInfotrygdhistorikkInntektsopplysninger() {}
     fun visitUgyldigePerioder(ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>) {}
     fun visitInfotrygdhistorikkArbeidskategorikoder(arbeidskategorikoder: Map<String, LocalDate>) {}
-    fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {}
+    fun postVisitInfotrygdhistorikkElement(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?,
+        lagretInntekter: Boolean,
+        lagretVilkårsgrunnlag: Boolean,
+        harStatslønn: Boolean
+    ) {}
     fun postVisitInfotrygdhistorikk() {}
 }
 

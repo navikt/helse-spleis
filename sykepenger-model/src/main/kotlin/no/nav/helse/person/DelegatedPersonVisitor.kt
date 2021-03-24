@@ -106,8 +106,16 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitInfotrygdhistorikk()
     }
 
-    override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
-        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+    override fun preVisitInfotrygdhistorikkElement(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?,
+        lagretInntekter: Boolean,
+        lagretVilkårsgrunnlag: Boolean,
+        harStatslønn: Boolean
+    ) {
+        delegatee.preVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
     }
 
     override fun preVisitInfotrygdhistorikkPerioder() {
@@ -123,9 +131,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengerFom: LocalDate,
         inntekt: Inntekt,
         refusjonTilArbeidsgiver: Boolean,
-        refusjonTom: LocalDate?
+        refusjonTom: LocalDate?,
+        lagret: LocalDateTime?
     ) {
-        delegatee.visitInfotrygdhistorikkInntektsopplysning(orgnr, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
+        delegatee.visitInfotrygdhistorikkInntektsopplysning(orgnr, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom, lagret)
     }
 
     override fun postVisitInfotrygdhistorikkInntektsopplysninger() {
@@ -156,8 +165,16 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitInfotrygdhistorikkPerioder()
     }
 
-    override fun postVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
-        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, harStatslønn)
+    override fun postVisitInfotrygdhistorikkElement(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        oppdatert: LocalDateTime,
+        hendelseId: UUID?,
+        lagretInntekter: Boolean,
+        lagretVilkårsgrunnlag: Boolean,
+        harStatslønn: Boolean
+    ) {
+        delegatee.postVisitInfotrygdhistorikkElement(id, tidsstempel, oppdatert, hendelseId, lagretInntekter, lagretVilkårsgrunnlag, harStatslønn)
     }
 
     override fun postVisitInfotrygdhistorikk() {

@@ -1,9 +1,7 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Periodetype
+import no.nav.helse.person.*
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.testhelpers.februar
@@ -69,13 +67,11 @@ internal class InfotrygdhistorikkTest {
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, inspektør.elementer())
-        assertTrue(tidsstempel < inspektør.opprettet(0))
-        assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
+        assertEquals(0, inspektør.elementer())
     }
 
     @Test
-    fun `tømme historikk - med data`() {
+    fun `tømme historikk - med ulagret data`() {
         val tidsstempel = LocalDateTime.now()
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel,
@@ -84,11 +80,78 @@ internal class InfotrygdhistorikkTest {
         historikk.tøm()
         assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(0, inspektør.elementer())
+    }
+
+    @Test
+    fun `tømme historikk - etter lagring av tom inntektliste`() {
+        val tidsstempel = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel,
+            inntekter = emptyList()
+        ))
+        historikk.addInntekter(Person("", ""), aktivitetslogg)
+        historikk.tøm()
+        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(0, inspektør.elementer())
+    }
+
+    @Test
+    fun `tømme historikk - med lagret inntekter`() {
+        val tidsstempel = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel,
+            inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
+        ))
+        historikk.addInntekter(Person("", ""), aktivitetslogg)
+        historikk.tøm()
+        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(2, inspektør.elementer())
+        assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
+        assertEquals(tidsstempel, inspektør.oppdatert(1))
+    }
+
+    @Test
+    fun `tømme historikk - med lagret vilkårsgrunnlag`() {
+        val tidsstempel = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel,
+            perioder = listOf(Friperiode(1.januar til 10.januar))
+        ))
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk())
+        historikk.tøm()
+        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(2, inspektør.elementer())
         assertTrue(tidsstempel < inspektør.opprettet(0))
         assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
         assertTrue(tidsstempel < inspektør.opprettet(1))
         assertEquals(tidsstempel, inspektør.oppdatert(1))
+    }
+
+    @Test
+    fun `tømme historikk - med og ulagret lagret data`() {
+        val tidsstempel1 = LocalDateTime.now().minusDays(1)
+        val tidsstempel2 = LocalDateTime.now()
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel1,
+            perioder = listOf(Friperiode(1.januar til 10.januar))
+        ))
+        historikk.lagreVilkårsgrunnlag(1.januar, Periodetype.OVERGANG_FRA_IT, VilkårsgrunnlagHistorikk())
+        historikk.oppdaterHistorikk(historikkelement(
+            oppdatert = tidsstempel2,
+            perioder = listOf(Utbetalingsperiode("orgnr", 1.januar til 10.januar, 100.prosent, 1000.daglig))
+        ))
+        historikk.tøm()
+        assertTrue(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
+        assertTrue(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
+        assertEquals(2, inspektør.elementer())
+        assertTrue(tidsstempel2 < inspektør.opprettet(0))
+        assertEquals(LocalDateTime.MIN, inspektør.oppdatert(0))
+        assertTrue(tidsstempel2 < inspektør.opprettet(1))
+        assertEquals(tidsstempel1, inspektør.oppdatert(1))
     }
 
     @Test
@@ -153,7 +216,9 @@ internal class InfotrygdhistorikkTest {
             arbeidskategorikoder = emptyMap(),
             ugyldigePerioder = emptyList(),
             harStatslønn = false,
-            oppdatert = nå
+            oppdatert = nå,
+            lagretInntekter = false,
+            lagretVilkårsgrunnlag = false
         )).tilModellObjekt()
         assertEquals(1, inspektør.elementer())
         assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))
@@ -293,7 +358,15 @@ internal class InfotrygdhistorikkTest {
         fun opprettet(indeks: Int) = elementer.elementAt(indeks).second
         fun oppdatert(indeks: Int) = elementer.elementAt(indeks).third
 
-        override fun preVisitInfotrygdhistorikkElement(id: UUID, tidsstempel: LocalDateTime, oppdatert: LocalDateTime, hendelseId: UUID?, harStatslønn: Boolean) {
+        override fun preVisitInfotrygdhistorikkElement(
+            id: UUID,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            hendelseId: UUID?,
+            lagretInntekter: Boolean,
+            lagretVilkårsgrunnlag: Boolean,
+            harStatslønn: Boolean
+        ) {
             elementer.add(Triple(id, tidsstempel, oppdatert))
         }
     }

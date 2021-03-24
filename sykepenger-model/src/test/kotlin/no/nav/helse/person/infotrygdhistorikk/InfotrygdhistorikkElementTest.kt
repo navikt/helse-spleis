@@ -2,10 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -482,6 +479,35 @@ internal class InfotrygdhistorikkElementTest {
         ))
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(2.januar, 31.januar), 2.januar))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `nytt element er ikke låst`() {
+        val element = historikkelement()
+        assertTrue(element.kanSlettes())
+    }
+
+    @Test
+    fun `lagring av vilkårsgrunnlag låser elementet`() {
+        val element = historikkelement()
+        element.lagreVilkårsgrunnlag(1.januar, VilkårsgrunnlagHistorikk())
+        assertFalse(element.kanSlettes())
+    }
+
+    @Test
+    fun `element uten inntekter låses ikke`() {
+        val element = historikkelement(inntekter = emptyList())
+        element.addInntekter(Person("", ""), aktivitetslogg)
+        assertTrue(element.kanSlettes())
+    }
+
+    @Test
+    fun `lagrer inntekter låser elementet`() {
+        val element = historikkelement(inntekter = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
+        ))
+        element.addInntekter(Person("", ""), aktivitetslogg)
+        assertFalse(element.kanSlettes())
     }
 
     @Test

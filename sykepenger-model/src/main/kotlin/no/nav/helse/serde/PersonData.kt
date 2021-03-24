@@ -75,7 +75,9 @@ internal data class PersonData(
         private val arbeidskategorikoder: Map<String, LocalDate>,
         private val ugyldigePerioder: List<Pair<LocalDate?, LocalDate?>>,
         private val harStatslønn: Boolean,
-        private val oppdatert: LocalDateTime
+        private val oppdatert: LocalDateTime,
+        private val lagretInntekter: Boolean,
+        private val lagretVilkårsgrunnlag: Boolean
     ) {
         internal companion object {
             fun List<InfotrygdhistorikkElementData>.tilModellObjekt() =
@@ -95,7 +97,9 @@ internal data class PersonData(
                 arbeidskategorikoder,
                 ugyldigePerioder,
                 harStatslønn,
-                oppdatert
+                oppdatert,
+                lagretInntekter,
+                lagretVilkårsgrunnlag
             )
 
         data class FerieperiodeData(
@@ -132,15 +136,19 @@ internal data class PersonData(
             private val sykepengerFom: LocalDate,
             private val inntekt: Double,
             private val refusjonTilArbeidsgiver: Boolean,
-            private val refusjonTom: LocalDate? = null
+            private val refusjonTom: LocalDate?,
+            private val lagret: LocalDateTime?
         ) {
-            internal fun parseInntektsopplysning() = Inntektsopplysning(
-                orgnummer = orgnr,
-                sykepengerFom = sykepengerFom,
-                inntekt = inntekt.månedlig,
-                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
-                refusjonTom = refusjonTom
-            )
+            internal fun parseInntektsopplysning() = Inntektsopplysning::class.primaryConstructor!!
+                .apply { isAccessible = true }
+                .call(
+                    orgnr,
+                    sykepengerFom,
+                    inntekt.månedlig,
+                    refusjonTilArbeidsgiver,
+                    refusjonTom,
+                    lagret
+                )
         }
     }
 
