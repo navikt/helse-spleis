@@ -876,8 +876,10 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
             if (!vedtaksperiode.person.forlengerIkkeBareAnnenArbeidsgiver(vedtaksperiode.arbeidsgiver, vedtaksperiode))
                 return vedtaksperiode.person.invaliderAllePerioder(sykmelding, "Forlenger annen arbeidsgiver, men ikke seg selv")
-            if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode))
+            if (vedtaksperiode.arbeidsgiver.harPeriodeEtter(vedtaksperiode)) {
+                sykmelding.error("Mottatt out of order sykmeldinger - det støttes ikke før replay av hendelser er på plass")
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+            }
 
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
@@ -885,7 +887,7 @@ internal class Vedtaksperiode private constructor(
             val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
             vedtaksperiode.tilstand(
                 sykmelding, when {
-                    forlengelse && refusjonOpphørt -> TilInfotrygd
+                    forlengelse && refusjonOpphørt -> TilInfotrygd.also { sykmelding.error("Refusjon er opphørt.") }
                     forlengelse && ferdig -> MottattSykmeldingFerdigForlengelse
                     forlengelse && !ferdig -> MottattSykmeldingUferdigForlengelse
                     !forlengelse && ferdig -> MottattSykmeldingFerdigGap
