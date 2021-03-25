@@ -18,8 +18,10 @@ class Utbetalingsperiode(
     private val orgnr: String,
     periode: Periode,
     private val grad: Prosentdel,
-    private val inntekt: Inntekt
+    inntekt: Inntekt
 ) : Infotrygdperiode(periode) {
+    private val inntekt = inntekt.rundTilDaglig()
+
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(start, endInclusive, grad, kilde)
     }

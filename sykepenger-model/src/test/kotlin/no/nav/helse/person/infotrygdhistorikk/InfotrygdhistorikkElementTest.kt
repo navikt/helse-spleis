@@ -86,6 +86,17 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `lik periode - avrunding`() {
+        val prosent = 30.prosent
+        val inntekt1 = 505.daglig(prosent)
+        val inntekt2 = inntekt1.reflection { _, månedlig, _, _ -> månedlig }.månedlig
+        val periode1 = Utbetalingsperiode("orgnr", 1.januar til 1.januar, prosent, inntekt1)
+        val periode2 = Utbetalingsperiode("orgnr", 1.januar til 1.januar, prosent, inntekt2)
+        assertNotEquals(inntekt1, inntekt2)
+        assertEquals(periode1, periode2)
+    }
+
+    @Test
     fun `utbetalingstidslinje - ferie`() {
         val ferie = Friperiode(1.januar til 10.januar)
         val inspektør = UtbetalingstidslinjeInspektør(ferie.utbetalingstidslinje())

@@ -7,6 +7,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.utbetalingstidslinje.Historie
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -16,8 +17,12 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     private companion object {
-        private val gammel get() = LocalDateTime.now()
-            .minusHours(2)
+        private val kl06 = LocalTime.of(6, 0, 0)
+        private val kl18 = LocalTime.of(18, 0, 0)
+
+        private val gammel: LocalDateTime get() = LocalDateTime.now().let { nå ->
+            if (nå.toLocalTime() in kl06..kl18) nå.minusHours(2) else nå.minusHours(12)
+        }
 
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
