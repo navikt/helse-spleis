@@ -257,7 +257,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
-    internal fun periodetype() = person.historie().periodetype(organisasjonsnummer, periode, true)
+    internal fun periodetype() = person.historie().periodetype(organisasjonsnummer, periode)
 
     internal fun inntektskilde() = inntektskilde
 

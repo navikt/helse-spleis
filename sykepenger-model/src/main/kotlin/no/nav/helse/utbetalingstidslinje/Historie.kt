@@ -33,19 +33,23 @@ internal class Historie() {
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
 
-    internal fun periodetype(orgnr: String, periode: Periode, førsteUtbetatePerioderGjelderSomFørstegangsbehandling: Boolean = false): Periodetype {
+    internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
+        return beregnPeriodetype(orgnr, periode).somPeriodetype()
+    }
+
+    private fun beregnPeriodetype(orgnr: String, periode: Periode): InternPeriodetype {
         val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
-            skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
+            skjæringstidspunkt in periode -> InternPeriodetype.PERIODE_MED_SKJÆRINGSTIDSPUNKT
             infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
                 val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
                 when {
-                    spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> INFOTRYGDFORLENGELSE
-                    else -> OVERGANG_FRA_IT
+                    spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> InternPeriodetype.FORLENGELSE_MED_OPPHAV_I_INFOTRYGD
+                    else -> InternPeriodetype.FØRSTE_PERIODE_SOM_FORLENGER_INFOTRYGD
                 }
             }
-            førsteUtbetatePerioderGjelderSomFørstegangsbehandling && !spleisbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> FØRSTEGANGSBEHANDLING
-            else -> FORLENGELSE
+            !spleisbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> InternPeriodetype.PERIODE_MED_FØRSTE_UTBETALING
+            else -> InternPeriodetype.FORLENGELSE_MED_OPPHAV_I_SPLEIS
         }
     }
 
@@ -81,10 +85,10 @@ internal class Historie() {
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =
-        periodetype(orgnr, periode) != FØRSTEGANGSBEHANDLING
+        beregnPeriodetype(orgnr, periode).erForlengelse()
 
     internal fun forlengerInfotrygd(orgnr: String, periode: Periode) =
-        periodetype(orgnr, periode) in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)
+        beregnPeriodetype(orgnr, periode).opphavInfotrygd()
 
     internal fun avgrensetPeriode(orgnr: String, periode: Periode) =
         Periode(maxOf(periode.start, skjæringstidspunkt(orgnr, periode)), periode.endInclusive)
@@ -211,5 +215,17 @@ internal class Historie() {
 
             private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
         }
+    }
+
+    private enum class InternPeriodetype(private val periodetype: Periodetype) {
+        PERIODE_MED_SKJÆRINGSTIDSPUNKT(FØRSTEGANGSBEHANDLING),
+        PERIODE_MED_FØRSTE_UTBETALING(FØRSTEGANGSBEHANDLING),
+        FORLENGELSE_MED_OPPHAV_I_SPLEIS(FORLENGELSE),
+        FØRSTE_PERIODE_SOM_FORLENGER_INFOTRYGD(OVERGANG_FRA_IT),
+        FORLENGELSE_MED_OPPHAV_I_INFOTRYGD(INFOTRYGDFORLENGELSE);
+
+        fun opphavInfotrygd() = this in listOf(FORLENGELSE_MED_OPPHAV_I_INFOTRYGD, FØRSTE_PERIODE_SOM_FORLENGER_INFOTRYGD)
+        fun erForlengelse() = this != PERIODE_MED_SKJÆRINGSTIDSPUNKT
+        fun somPeriodetype() = periodetype
     }
 }
