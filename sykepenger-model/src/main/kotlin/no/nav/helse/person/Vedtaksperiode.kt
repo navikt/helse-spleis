@@ -257,13 +257,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun starterEtter(other: Vedtaksperiode) = this.sykmeldingsperiode.start > other.sykmeldingsperiode.start
 
-    internal fun periodetype() = when {
-        forlengelseFraInfotrygd == JA ->
-            arbeidsgiver.finnSykeperiodeRettFør(this)?.run { INFOTRYGDFORLENGELSE }
-                ?: OVERGANG_FRA_IT
-        harForegåendeSomErBehandletOgUtbetalt(this) -> FORLENGELSE
-        else -> FØRSTEGANGSBEHANDLING
-    }
+    internal fun periodetype() = person.historie().periodetype(organisasjonsnummer, periode, true)
 
     internal fun inntektskilde() = inntektskilde
 

@@ -33,7 +33,7 @@ internal class Historie() {
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
 
-    internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
+    internal fun periodetype(orgnr: String, periode: Periode, førsteUtbetatePerioderGjelderSomFørstegangsbehandling: Boolean = false): Periodetype {
         val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
             skjæringstidspunkt in periode -> FØRSTEGANGSBEHANDLING
@@ -44,6 +44,7 @@ internal class Historie() {
                     else -> OVERGANG_FRA_IT
                 }
             }
+            førsteUtbetatePerioderGjelderSomFørstegangsbehandling && !spleisbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> FØRSTEGANGSBEHANDLING
             else -> FORLENGELSE
         }
     }

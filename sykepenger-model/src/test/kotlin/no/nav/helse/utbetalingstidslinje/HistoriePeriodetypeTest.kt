@@ -93,6 +93,15 @@ internal class HistoriePeriodetypeTest : HistorieTest() {
     }
 
     @Test
+    fun `ubetalt spleis - ubetalt spleis - skal telle som førstegangsbehandling`() {
+        historie.add(AG1, sykedager(1.februar, 28.februar))
+        historie.add(AG1, sykedager(1.mars, 31.mars))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, 1.januar til 28.februar))
+        assertFalse(historie.forlengerInfotrygd(AG1, 1.mars til 31.mars))
+        assertEquals(FØRSTEGANGSBEHANDLING, historie.periodetype(AG1, 1.mars til 31.mars, true))
+    }
+
+    @Test
     fun `spleis - ubetalt spleis - ubetalt spleis`() {
         historie.add(AG1, navdager(1.januar, 31.januar))
         historie.add(AG1, sykedager(1.februar, 28.februar))
