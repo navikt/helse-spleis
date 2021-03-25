@@ -20,6 +20,9 @@ spec:
           application: behovsakkumulator
           access: readwrite
         - team: tbd
+          application: sporing
+          access: readwrite
+        - team: tbd
           application: spaghet
           access: readwrite
         - team: tbd
