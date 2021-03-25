@@ -8,6 +8,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunn
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendePeriodeHosAnnenArbeidsgiver
+import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -291,7 +292,7 @@ class Person private constructor(
             newValue
         }
 
-    internal fun nåværendeVedtaksperioder() = arbeidsgivere.mapNotNull { it.nåværendeVedtaksperiode() }.sorted()
+    internal fun nåværendeVedtaksperioder() = arbeidsgivere.nåværendeVedtaksperioder().sorted()
 
     /**
      * Brukes i MVP for flere arbeidsgivere. Alle forlengelser hos alle arbeidsgivere må gjelde samme periode

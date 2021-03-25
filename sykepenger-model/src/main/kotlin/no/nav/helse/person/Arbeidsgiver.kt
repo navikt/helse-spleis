@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
+import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
@@ -56,6 +57,8 @@ internal class Arbeidsgiver private constructor(
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode > senereEnnDenne
         }
         internal val ALLE: VedtaksperioderFilter = { true }
+
+        internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder() = mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode() }
 
         internal fun List<Arbeidsgiver>.grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             this.mapNotNull { it.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, maxOf(skjæringstidspunkt, periodeStart)) }
@@ -624,10 +627,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun overlapper(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
-
-    internal fun nåværendeVedtaksperiode(): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { it.måFerdigstilles() }
-    }
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 

@@ -234,9 +234,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(hendelse: GjenopptaBehandling): Boolean {
-        if (!skalGjenopptaBehandling()) return false
+        if (tilstand.erFerdigbehandlet) return false
         val forrige = arbeidsgiver.finnSykeperiodeRettFør(this)
-        if (forrige != null && !forrige.erFerdigBehandlet()) return true
+        if (forrige != null && !forrige.tilstand.erFerdigbehandlet) return true
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
         return true
@@ -282,35 +282,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun erAvsluttet() =
         utbetaling?.erAvsluttet() == true || tilstand == AvsluttetUtenUtbetaling
-
-    private fun skalForkastesVedOverlapp() =
-        this.tilstand !in listOf(
-            TilUtbetaling,
-            Avsluttet,
-            AvsluttetUtenUtbetaling,
-            UtbetalingFeilet
-        )
-
-    private fun skalGjenopptaBehandling() =
-        this.tilstand !in listOf(
-            TilInfotrygd,
-            Avsluttet,
-            AvsluttetUtenUtbetaling
-        )
-
-    private fun erFerdigBehandlet() =
-        this.tilstand in listOf(
-            TilInfotrygd,
-            AvsluttetUtenUtbetaling,
-            Avsluttet
-        )
-
-    internal fun måFerdigstilles() =
-        this.tilstand !in listOf(
-            TilInfotrygd,
-            Avsluttet,
-            AvsluttetUtenUtbetaling
-        )
 
     private fun harForegåendeSomErBehandletOgUtbetalt(vedtaksperiode: Vedtaksperiode) =
         arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.erUtbetalt() ?: false
@@ -414,7 +385,7 @@ internal class Vedtaksperiode private constructor(
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
         søknad.trimLeft(periode.endInclusive)
         søknad.error(egendefinertFeiltekst ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-        if (!skalForkastesVedOverlapp()) return
+        if (!tilstand.skalForkastesVedOverlapp) return
         tilstand(søknad, TilInfotrygd)
     }
 
@@ -539,6 +510,40 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
         tilstand(hendelse, AvventerHistorikk)
+    }
+
+    private fun overlappendeVedtaksperioder() = person.nåværendeVedtaksperioder().filter { periode.overlapperMed(it.periode) }
+    private fun Iterable<Vedtaksperiode>.alleAndreAvventerArbeidsgivere() = first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
+
+    private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
+        forberedMuligUtbetaling(vilkårsgrunnlag) { nesteTilstand ->
+            håndter(vilkårsgrunnlag, nesteTilstand)
+        }
+    }
+
+    private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
+        forberedMuligUtbetaling(inntektsmelding) { nesteTilstandVedUtbetaling ->
+            håndter(inntektsmelding) {
+                if (!inntektsmelding.inntektenGjelderFor(skjæringstidspunkt til periode.endInclusive)) AvsluttetUtenUtbetaling
+                else nesteTilstandVedUtbetaling
+            }
+        }
+    }
+
+    private fun forberedMuligUtbetaling(arbeidstakerHendelse: ArbeidstakerHendelse, håndter: (Vedtaksperiodetilstand) -> Unit) {
+        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
+
+        håndter(
+            when {
+                overlappendeVedtaksperioder.alleAndreAvventerArbeidsgivere() -> AvventerHistorikk
+                else -> AvventerArbeidsgivere
+            }
+        )
+
+        if (tilstand == AvventerArbeidsgivere) {
+            overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
+        }
+        gjentaHistorikk(arbeidstakerHendelse, person)
     }
 
     /**
@@ -750,6 +755,8 @@ internal class Vedtaksperiode private constructor(
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
+        val erFerdigbehandlet: Boolean get() = false
+        val skalForkastesVedOverlapp: Boolean get() = true
 
         fun makstid(
             vedtaksperiode: Vedtaksperiode,
@@ -773,7 +780,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.error("Mottatt overlappende sykmeldinger - det støttes ikke før replay av hendelser er på plass")
-            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            if (!skalForkastesVedOverlapp) return
             vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
         }
 
@@ -784,7 +791,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: SøknadArbeidsgiver) {
             søknad.trimLeft(vedtaksperiode.periode.endInclusive)
             søknad.error("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
-            if (!vedtaksperiode.skalForkastesVedOverlapp()) return
+            if (!skalForkastesVedOverlapp) return
             vedtaksperiode.tilstand(søknad, TilInfotrygd)
         }
 
@@ -1259,22 +1266,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
-            val første = vedtaksperioder.first()
-            val overlappendeVedtaksperioder = vedtaksperioder.filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-
-            vedtaksperiode.håndter(inntektsmelding) {
-                when {
-                    !inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive) -> AvsluttetUtenUtbetaling
-                    første == vedtaksperiode && overlappendeVedtaksperioder.drop(1).all { it.tilstand == AvventerArbeidsgivere } -> AvventerHistorikk
-                    else -> AvventerArbeidsgivere
-                }
-            }
-
-            if (vedtaksperiode.tilstand == AvventerArbeidsgivere) {
-                overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-            }
-            gjentaHistorikk(inntektsmelding, vedtaksperiode.person)
+            vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
         }
     }
 
@@ -1379,21 +1371,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
-            val første = vedtaksperioder.first()
-            val overlappendeVedtaksperioder = vedtaksperioder.filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-
-            vedtaksperiode.håndter(inntektsmelding) {
-                when {
-                    !inntektsmelding.inntektenGjelderFor(vedtaksperiode.skjæringstidspunkt til vedtaksperiode.periode.endInclusive) -> AvsluttetUtenUtbetaling
-                    første == vedtaksperiode && overlappendeVedtaksperioder.drop(1).all { it.tilstand == AvventerArbeidsgivere } -> AvventerHistorikk
-                    else -> AvventerArbeidsgivere
-                }
-            }
-            if (vedtaksperiode.tilstand == AvventerArbeidsgivere) {
-                overlappendeVedtaksperioder.forEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-            }
-            gjentaHistorikk(inntektsmelding, vedtaksperiode.person)
+            vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
         }
 
         override fun håndter(
@@ -1465,23 +1443,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            val vedtaksperioder = vedtaksperiode.person.nåværendeVedtaksperioder()
-            val første = vedtaksperioder.first()
-            if (første == vedtaksperiode) {
-                if (vedtaksperioder.drop(1)
-                        .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                        .all { it.tilstand == AvventerArbeidsgivere }
-                ) {
-                    return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerHistorikk)
-                }
-            }
-            return vedtaksperiode.håndter(vilkårsgrunnlag, AvventerArbeidsgivere).also {
-                vedtaksperioder
-                    .filter { vedtaksperiode.periode.overlapperMed(it.periode) }
-                    .onEach { it.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE }
-
-                gjentaHistorikk(vilkårsgrunnlag, vedtaksperiode.person)
-            }
+            vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
         }
     }
 
@@ -1759,6 +1721,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
+        override val skalForkastesVedOverlapp = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1822,6 +1785,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
+        override val skalForkastesVedOverlapp = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1856,6 +1820,8 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING
+        override val erFerdigbehandlet = true
+        override val skalForkastesVedOverlapp = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1888,6 +1854,9 @@ internal class Vedtaksperiode private constructor(
 
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
+
+        override val erFerdigbehandlet = true
+        override val skalForkastesVedOverlapp = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1929,6 +1898,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
+        override val erFerdigbehandlet = true
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -1968,8 +1938,7 @@ internal class Vedtaksperiode private constructor(
         ) = perioder
             .filter { it < vedtaksperiode }
             .filter { it.erAvsluttet() }
-            .filter { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
-            .lastOrNull()
+            .lastOrNull { historie.skjæringstidspunkt(it.periode()) == skjæringstidspunkt }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.takeIf {
@@ -1982,7 +1951,9 @@ internal class Vedtaksperiode private constructor(
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
                 .filter { it < vedtaksperiode }
-                .none { it.måFerdigstilles() }
+                .all { it.tilstand.erFerdigbehandlet }
+
+        internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode() = firstOrNull { !it.tilstand.erFerdigbehandlet }
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
