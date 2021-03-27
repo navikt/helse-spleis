@@ -10,7 +10,7 @@ internal class TestHendelseMessage(
     id: UUID = UUID.randomUUID(),
     opprettet: LocalDateTime = LocalDateTime.now(),
     private val tracinginfo: Map<String, Any> = emptyMap(),
-    packet: JsonMessage = testPacket(id, opprettet)
+    packet: JsonMessage = testPacket(fnr, id, opprettet)
 ) : HendelseMessage(packet) {
     override val fødselsnummer = fnr
 
@@ -21,13 +21,16 @@ internal class TestHendelseMessage(
     override fun additionalTracinginfo(packet: JsonMessage) =
         tracinginfo
 
-    private companion object {
-        fun testPacket(id: UUID, opprettet: LocalDateTime) = JsonMessage.newMessage(mapOf(
-            "@id" to id,
-            "@opprettet" to opprettet,
-            "@event_name" to "test_event"
-        )).apply {
-            requireKey("@opprettet", "@id", "@event_name")
-        }
+    internal companion object {
+        fun testPacket(fødselsnummer: String, id: UUID, opprettet: LocalDateTime, extra: Map<String, Any> = emptyMap()) =
+            JsonMessage.newMessage(extra + mapOf(
+                "@id" to id,
+                "@opprettet" to opprettet,
+                "@event_name" to "test_event",
+                "fødselsnummer" to fødselsnummer
+            )).apply {
+                requireKey("@opprettet", "@id", "@event_name", "fødselsnummer")
+                requireKey(*extra.keys.toTypedArray())
+            }
     }
 }
