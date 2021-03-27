@@ -57,13 +57,7 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             messageRecognized = true
-            sikkerLogg.info(
-                "gjenkjente melding id={} for fnr={} som {}:\n{}",
-                message.id,
-                message.fødselsnummer,
-                message::class.simpleName,
-                message.toJson()
-            )
+            message.logRecognized(sikkerLogg)
             hendelseRepository.lagreMelding(message)
             hendelseMediator.behandle(message)
         } catch (err: JsonMigrationException) {
@@ -92,7 +86,7 @@ internal class MessageMediator(
     }
 
     private fun errorHandler(err: Exception, message: HendelseMessage) {
-        errorHandler(err, message.toJson(), mapOf("fødselsnummer" to message.fødselsnummer))
+        errorHandler(err, message.toJson(), message.secureDiagnosticinfo())
     }
 
     private fun errorHandler(err: Exception, message: String, context: Map<String, String> = emptyMap()) {

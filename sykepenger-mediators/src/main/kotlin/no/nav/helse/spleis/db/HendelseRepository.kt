@@ -11,6 +11,7 @@ import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.*
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.sql.DataSource
 
 internal class HendelseRepository(private val dataSource: DataSource) {
@@ -24,29 +25,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     fun lagreMelding(melding: HendelseMessage) {
-        val type = when (melding) {
-            is NySøknadMessage -> NY_SØKNAD
-            is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
-            is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
-            is InntektsmeldingMessage -> INNTEKTSMELDING
-            is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
-            is YtelserMessage -> YTELSER
-            is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
-            is SimuleringMessage -> SIMULERING
-            is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
-            is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
-            is UtbetalingMessage -> UTBETALING
-            is AnnulleringMessage -> KANSELLER_UTBETALING
-            is EtterbetalingMessage -> GRUNNBELØPSREGULERING
-            is AvstemmingMessage,
-            is OverstyrTidslinjeMessage,
-            is PersonPåminnelseMessage,
-            is PåminnelseMessage,
-            is UtbetalingshistorikkMessage -> return // Disse trenger vi ikke å lagre
-            else -> return log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke")
-        }
-
-        lagreMelding(type, melding)
+        if (!skalLagres(melding)) return
+        melding.lagreMelding(this)
     }
 
     internal fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
@@ -61,20 +41,47 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             )
         }
 
-    private fun lagreMelding(meldingstype: Meldingstype, melding: HendelseMessage) {
+    internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: String, meldingId: UUID, json: String) {
+        val meldingtype = meldingstype(melding) ?: return
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    melding.fødselsnummer.toLong(),
-                    melding.id.toString(),
-                    meldingstype.name,
-                    melding.toJson()
+                    fødselsnummer.toLong(),
+                    meldingId.toString(),
+                    meldingtype.name,
+                    json
                 ).asExecute
             )
         }.also {
             PostgresProbe.hendelseSkrevetTilDb()
         }
+    }
+
+    private fun skalLagres(melding: HendelseMessage): Boolean {
+        return meldingstype(melding) != null
+    }
+
+    private fun meldingstype(melding: HendelseMessage) = when (melding) {
+        is NySøknadMessage -> NY_SØKNAD
+        is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
+        is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
+        is InntektsmeldingMessage -> INNTEKTSMELDING
+        is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
+        is YtelserMessage -> YTELSER
+        is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
+        is SimuleringMessage -> SIMULERING
+        is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
+        is UtbetalingOverførtMessage -> UTBETALING_OVERFØRT
+        is UtbetalingMessage -> UTBETALING
+        is AnnulleringMessage -> KANSELLER_UTBETALING
+        is EtterbetalingMessage -> GRUNNBELØPSREGULERING
+        is AvstemmingMessage,
+        is OverstyrTidslinjeMessage,
+        is PersonPåminnelseMessage,
+        is PåminnelseMessage,
+        is UtbetalingshistorikkMessage -> null // Disse trenger vi ikke å lagre
+        else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
     private enum class Meldingstype {

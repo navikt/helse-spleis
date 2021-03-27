@@ -48,7 +48,7 @@ internal class PersonMediator(
 
     private fun sendUtgåendeMeldinger(rapidsConnection: RapidsConnection) {
         if (meldinger.isEmpty()) return
-        sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${meldinger.size} meldinger på rapid for fnr=${hendelse.fødselsnummer()}")
+        message.logOutgoingMessages(sikkerLogg, meldinger.size)
         meldinger.forEach { (fødselsnummer, melding) ->
             rapidsConnection.publish(fødselsnummer, melding.also { sikkerLogg.info("sender $it") })
         }
@@ -56,7 +56,7 @@ internal class PersonMediator(
 
     private fun sendReplays(rapidsConnection: RapidsConnection) {
         if (replays.isEmpty()) return
-        sikkerLogg.info("som følge av ${message.navn} id=${message.id} sendes ${replays.size} meldinger for replay for fnr=${hendelse.fødselsnummer()}")
+        message.logReplays(sikkerLogg, replays.size)
         replays.forEach { melding ->
             rapidsConnection.queueReplayMessage(hendelse.fødselsnummer(), melding)
         }
@@ -297,11 +297,7 @@ internal class PersonMediator(
         this["@event_name"] = event
         this["@id"] = UUID.randomUUID()
         this["@opprettet"] = LocalDateTime.now()
-        this["@forårsaket_av"] = mapOf(
-            "event_name" to message.navn,
-            "id" to message.id,
-            "opprettet" to message.opprettet
-        )
+        this["@forårsaket_av"] = message.tracinginfo()
         this["aktørId"] = hendelse.aktørId()
         this["fødselsnummer"] = hendelse.fødselsnummer()
         if (hendelse is ArbeidstakerHendelse) {

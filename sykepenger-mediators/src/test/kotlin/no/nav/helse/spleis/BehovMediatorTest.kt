@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,9 +28,7 @@ class BehovMediatorTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
 
-        private val message = mockk<HendelseMessage>(relaxed = true) {
-            every { opprettet } returns LocalDateTime.now()
-        }
+        private val message = TestHendelseMessage(fødselsnummer)
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
