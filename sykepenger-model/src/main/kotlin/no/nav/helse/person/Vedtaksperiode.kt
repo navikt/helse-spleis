@@ -1620,10 +1620,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
 
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            tilstandsendringstidspunkt
-                .plusDays(35)
-
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
             vedtaksperiode.trengerGodkjenning(hendelse)
         }

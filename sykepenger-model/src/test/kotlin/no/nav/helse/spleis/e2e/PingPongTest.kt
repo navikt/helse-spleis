@@ -37,7 +37,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(35))
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING, LocalDateTime.now().minusDays(110))
 
         val historikk2 = Utbetalingsperiode(ORGNUMMER, 22.juni(2020) til 17.august(2020), 100.prosent, 1145.daglig)
         val inntekter2 = listOf(
@@ -55,7 +55,6 @@ internal class PingPongTest : AbstractEndToEndTest() {
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(30.oktober(2020), inspektør.maksdato(3.vedtaksperiode))
     }
-
 
     @Test
     fun `riktig skjæringstidspunkt ved spleis - infotrygd - spleis`() {
