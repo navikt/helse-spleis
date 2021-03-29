@@ -5,9 +5,6 @@ import no.nav.helse.hendelser.UtbetalingHendelse.Oppdragstatus.AKSEPTERT
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.serde.api.SpeilBuilderTest
-import no.nav.helse.serde.api.VedtaksperiodeDTO
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.reflection.UtbetalingReflect
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -262,14 +259,13 @@ internal class UtbetalingTest {
             aktørId = "ignore",
             fødselsnummer = "ignore",
             organisasjonsnummer = "ignore",
-            vedtaksperiodeId = "ignore",
             utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+            vedtaksperiodeId = "ignore",
             saksbehandler = "Z999999",
             saksbehandlerEpost = "mille.mellomleder@nav.no",
             utbetalingGodkjent = true,
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
-            makstidOppnådd = false,
         ).also {
             utbetaling.håndter(it)
         }

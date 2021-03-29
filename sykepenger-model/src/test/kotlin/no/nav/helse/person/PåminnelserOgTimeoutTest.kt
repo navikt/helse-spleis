@@ -415,11 +415,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         ).kontekst()}")),
         vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
+        saksbehandlerEpost = "ola@normann.ss",
         utbetalingGodkjent = true,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = false,
-        saksbehandlerEpost = "ola@normann.ss",
-        makstidOppnådd = false,
     ).apply {
         hendelse = this
     }

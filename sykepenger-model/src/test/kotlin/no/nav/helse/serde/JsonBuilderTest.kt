@@ -545,17 +545,16 @@ class JsonBuilderTest {
 
         fun Person.utbetalingsgodkjenning(vedtaksperiodeId: String) = Utbetalingsgodkjenning(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = UUID.fromString(this.aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
             aktørId = aktørId,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
-            utbetalingGodkjent = true,
+            utbetalingId = UUID.fromString(this.aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
+            vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = "en_saksbehandler_ident",
+            saksbehandlerEpost = "mille.mellomleder@nav.no",
+            utbetalingGodkjent = true,
             godkjenttidspunkt = LocalDateTime.now(),
             automatiskBehandling = false,
-            saksbehandlerEpost = "mille.mellomleder@nav.no",
-            makstidOppnådd = false,
         )
 
         fun simulering(vedtaksperiodeId: String) = Simulering(

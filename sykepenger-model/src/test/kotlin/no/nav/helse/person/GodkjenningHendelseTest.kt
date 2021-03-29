@@ -83,16 +83,15 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = ORGNUMMER,
-        vedtaksperiodeId = "${1.vedtaksperiode}",
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
         ).kontekst()}")),
+        vedtaksperiodeId = "${1.vedtaksperiode}",
         saksbehandler = "Ola Nordmann",
+        saksbehandlerEpost = "ola@nordmann.ss",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = false,
-        saksbehandlerEpost = "ola@nordmann.ss",
-        makstidOppnådd = false,
     ).apply {
         hendelse = this
     }

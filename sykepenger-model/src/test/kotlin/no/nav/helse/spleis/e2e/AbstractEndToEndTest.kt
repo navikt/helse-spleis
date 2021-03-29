@@ -983,11 +983,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         ),
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
+        saksbehandlerEpost = "ola.nordmann@nav.no",
         utbetalingGodkjent = utbetalingGodkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
-        saksbehandlerEpost = "ola.nordmann@nav.no",
-        makstidOppnådd = false,
     ).apply {
         hendelselogg = this
     }

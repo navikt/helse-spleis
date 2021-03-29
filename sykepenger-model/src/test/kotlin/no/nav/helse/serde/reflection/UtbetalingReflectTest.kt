@@ -86,14 +86,13 @@ internal class UtbetalingReflectTest {
                 aktørId = "ignore",
                 fødselsnummer = "ignore",
                 organisasjonsnummer = "ignore",
-                vedtaksperiodeId = "ignore",
                 utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+                vedtaksperiodeId = "ignore",
                 saksbehandler = "Z999999",
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
                 utbetalingGodkjent = true,
                 godkjenttidspunkt = LocalDateTime.now(),
                 automatiskBehandling = false,
-                makstidOppnådd = false,
             ).also {
                 utbetaling.håndter(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")
@@ -190,14 +189,13 @@ internal class UtbetalingReflectTest {
                 aktørId = "ignore",
                 fødselsnummer = "ignore",
                 organisasjonsnummer = "ignore",
-                vedtaksperiodeId = "ignore",
                 utbetalingId = UtbetalingReflect(utbetaling).toMap()["id"] as UUID,
+                vedtaksperiodeId = "ignore",
                 saksbehandler = "Z999999",
                 saksbehandlerEpost = "mille.mellomleder@nav.no",
                 utbetalingGodkjent = true,
                 godkjenttidspunkt = LocalDateTime.now(),
                 automatiskBehandling = false,
-                makstidOppnådd = false,
             ).also {
                 utbetaling.håndter(it)
                 utbetalingId = it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${it.behov().first { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }.kontekst()}")

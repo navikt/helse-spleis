@@ -17,8 +17,7 @@ class Utbetalingsgodkjenning(
     private val saksbehandlerEpost: String,
     private val utbetalingGodkjent: Boolean,
     private val godkjenttidspunkt: LocalDateTime,
-    private val automatiskBehandling: Boolean,
-    private val makstidOppnådd: Boolean
+    private val automatiskBehandling: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId) {
 
     internal fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
@@ -34,8 +33,6 @@ class Utbetalingsgodkjenning(
 
     internal fun valider(): IAktivitetslogg {
         when {
-            !utbetalingGodkjent && automatiskBehandling && makstidOppnådd ->
-                error("Gir opp fordi saksbehandleroppgaven har nådd makstid")
             !utbetalingGodkjent && !automatiskBehandling -> {
                 error("Utbetaling markert som ikke godkjent av saksbehandler")
                 info("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")

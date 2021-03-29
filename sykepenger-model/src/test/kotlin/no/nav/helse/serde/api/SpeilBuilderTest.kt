@@ -1721,17 +1721,16 @@ class SpeilBuilderTest {
         ) =
             Utbetalingsgodkjenning(
                 meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = aktørId,
                 fødselsnummer = fnr,
                 organisasjonsnummer = orgnummer,
                 utbetalingId = UUID.fromString(aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
-                utbetalingGodkjent = utbetalingGodkjent,
+                vedtaksperiodeId = vedtaksperiodeId,
                 saksbehandler = if (automatiskBehandling) "Automatisk behandlet" else "en_saksbehandler_ident",
+                saksbehandlerEpost = "mille.mellomleder@nav.no",
+                utbetalingGodkjent = utbetalingGodkjent,
                 godkjenttidspunkt = LocalDateTime.now(),
                 automatiskBehandling = automatiskBehandling,
-                saksbehandlerEpost = "mille.mellomleder@nav.no",
-                makstidOppnådd = false,
             )
 
         private fun simulering(vedtaksperiodeId: String, orgnummer: String = SpeilBuilderTest.orgnummer) = Simulering(

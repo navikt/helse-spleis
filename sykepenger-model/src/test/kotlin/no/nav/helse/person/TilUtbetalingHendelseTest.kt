@@ -211,11 +211,10 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         ).kontekst()}")),
         vedtaksperiodeId = "$vedtaksperiodeId",
         saksbehandler = godkjentAv,
+        saksbehandlerEpost = "mille.mellomleder@nav.no",
         utbetalingGodkjent = godkjent,
         godkjenttidspunkt = LocalDateTime.now(),
         automatiskBehandling = automatiskBehandling,
-        saksbehandlerEpost = "mille.mellomleder@nav.no",
-        makstidOppnådd = false,
     ).apply {
         hendelse = this
     }
