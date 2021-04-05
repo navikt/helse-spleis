@@ -69,6 +69,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.sisteSykepengedag(orgnummer)
     }
 
+    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String, tidligsteDato: LocalDate): Utbetalingstidslinje {
+        if (!harHistorikk()) return utbetalingstidlinje
+        return siste.fjernHistorikk(utbetalingstidlinje, organisasjonsnummer, tidligsteDato)
+    }
+
     internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, periodetype: Periodetype, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
         if (!harHistorikk()) return
         if (periodetype !in listOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) return

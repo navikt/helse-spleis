@@ -630,8 +630,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom()
 
-    internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie) =
-        historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker)
+    internal fun oppdatertUtbetalingstidslinje(periode: Periode, historie: Historie, infotrygdhistorikk: Infotrygdhistorikk) =
+        historie.beregnUtbetalingstidslinje(organisasjonsnummer, periode, inntektshistorikk, NormalArbeidstaker, infotrygdhistorikk)
 
     internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {
         return finnSykeperiodeRettEtter(vedtaksperiode) == null

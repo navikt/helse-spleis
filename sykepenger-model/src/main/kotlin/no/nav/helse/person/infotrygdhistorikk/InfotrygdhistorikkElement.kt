@@ -3,8 +3,10 @@ package no.nav.helse.person.infotrygdhistorikk
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Historie
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -135,6 +137,26 @@ internal class InfotrygdhistorikkElement private constructor(
         perioder
             .map { it.utbetalingstidslinje() }
             .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+    private fun utbetalingstidslinje(organisasjonsnummer: String) =
+        perioder
+            .filter { it.gjelder(organisasjonsnummer) }
+            .map { it.utbetalingstidslinje() }
+            .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String, tidligsteDato: LocalDate): Utbetalingstidslinje {
+        return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
+            when {
+                // fjerner ledende dager
+                spleisDag.dato < tidligsteDato -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                // fjerner utbetalinger i ukedager (bevarer fridager)
+                !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                // fjerner utbetalinger i helger (bevarer fridager)
+                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                else -> spleisDag
+            }
+        }
+    }
 
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
         return perioder.filterIsInstance<Utbetalingsperiode>()

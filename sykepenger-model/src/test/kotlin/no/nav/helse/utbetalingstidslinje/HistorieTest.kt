@@ -100,7 +100,7 @@ internal abstract class HistorieTest {
                 addInntektsmelding(it, UUID.randomUUID(), 25000.månedlig)
             }
         }
-        return historie.beregnUtbetalingstidslinje(orgnr, periode, inntektshistorikk, regler)
+        return historie.beregnUtbetalingstidslinje(orgnr, periode, inntektshistorikk, regler, infotrygdhistorikk)
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))

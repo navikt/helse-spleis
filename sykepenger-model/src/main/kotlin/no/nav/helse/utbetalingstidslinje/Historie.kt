@@ -9,9 +9,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
 internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -48,7 +45,8 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
         organisasjonsnummer: String,
         periode: Periode,
         inntektshistorikk: Inntektshistorikk,
-        arbeidsgiverRegler: ArbeidsgiverRegler
+        arbeidsgiverRegler: ArbeidsgiverRegler,
+        infotrygdhistorikk: Infotrygdhistorikk
     ): Utbetalingstidslinje {
         val builder = UtbetalingstidslinjeBuilder(
             skjæringstidspunkter = skjæringstidspunkter(periode),
@@ -57,22 +55,7 @@ internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) 
             arbeidsgiverRegler = arbeidsgiverRegler
         )
         val utbetalingstidlinje = builder.result(sykdomstidslinje(organisasjonsnummer).fremTilOgMed(periode.endInclusive))
-        return fjernInfotrygd(utbetalingstidlinje, organisasjonsnummer)
-    }
-
-    private fun fjernInfotrygd(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
-        val tidligsteDato = spleisbøtte.tidligsteDato(organisasjonsnummer)
-        return utbetalingstidlinje.plus(infotrygdbøtte.utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingsdag, infotrygdDag: Utbetalingsdag ->
-            when {
-                // fjerner ledende dager
-                spleisDag.dato < tidligsteDato -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                // fjerner utbetalinger i ukedager (bevarer fridager)
-                !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                // fjerner utbetalinger i helger (bevarer fridager)
-                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
-                else -> spleisDag
-            }
-        }
+        return infotrygdhistorikk.fjernHistorikk(utbetalingstidlinje, organisasjonsnummer, spleisbøtte.tidligsteDato(organisasjonsnummer))
     }
 
     internal fun erForlengelse(orgnr: String, periode: Periode) =

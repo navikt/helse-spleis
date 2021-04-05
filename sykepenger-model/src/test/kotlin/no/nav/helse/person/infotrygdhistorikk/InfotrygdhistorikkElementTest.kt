@@ -6,6 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -127,6 +128,25 @@ internal class InfotrygdhistorikkElementTest {
         ))
         element.utbetalingstidslinje().also {
             assertEquals(1.januar til 20.januar, it.periode())
+        }
+    }
+
+    @Test
+    fun `fjerner historiske utbetalinger`() {
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 20.januar),
+            Utbetalingsperiode("ag1", 21.januar til 31.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
+        ))
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.januar).also {
+            assertEquals(11.januar til 31.mars, it.periode())
+            assertTrue(it.subset(11.januar til 20.januar).all { it is Fridag })
+            assertTrue(it.subset(21.januar til 28.februar).all { it is UkjentDag })
+            assertTrue(it.subset(1.mars til 31.mars).all { it is NavDag })
+        }
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.februar).also {
+            assertEquals(1.mars til 31.mars, it.periode())
         }
     }
 
@@ -604,7 +624,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.NavDag,
+            dag: NavDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -629,7 +649,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.Fridag,
+            dag: Fridag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {
@@ -653,7 +673,7 @@ internal class InfotrygdhistorikkElementTest {
         }
 
         override fun visit(
-            dag: Utbetalingstidslinje.Utbetalingsdag.UkjentDag,
+            dag: UkjentDag,
             dato: LocalDate,
             økonomi: Økonomi
         ) {

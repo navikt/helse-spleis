@@ -350,7 +350,7 @@ class Person private constructor(
 
     internal fun utbetalingstidslinjer(periode: Periode, historie: Historie) =
         arbeidsgivereMedSykdom()
-            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, historie) }
+            .map { arbeidsgiver -> arbeidsgiver to arbeidsgiver.oppdatertUtbetalingstidslinje(periode, historie, infotrygdhistorikk) }
             .toMap()
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
