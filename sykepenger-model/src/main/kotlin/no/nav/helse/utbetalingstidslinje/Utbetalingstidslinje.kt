@@ -3,11 +3,15 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -33,6 +37,26 @@ internal class Utbetalingstidslinje private constructor(
 
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, dager: List<LocalDate>, periode: Periode, begrunnelse: Begrunnelse) =
             tidslinjer.count { it.avvis(dager, periode, begrunnelse) } > 0
+
+        internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
+            utbetalingstidslinje
+                .mapNotNull {
+                    when {
+                        !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        !it.dato.erHelg() && it is Fridag -> Dag.Feriedag(it.dato, INGEN)
+                        it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        it is Arbeidsdag -> Dag.Arbeidsdag(it.dato, INGEN)
+                        it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
+                        else -> null
+                    }?.let { sykedag -> it.dato to sykedag }
+                }
+                .toMap()
+                .let(::Sykdomstidslinje)
+
+        private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
+
+        private fun Utbetalingsdag.erSykedag() =
+            this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
     }
 
     internal fun er6GBegrenset(): Boolean {
@@ -108,9 +132,7 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun harBetalt(dato: LocalDate): Boolean {
-        return with(this[dato]) {
-            this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
-        }
+        return this[dato].erSykedag()
     }
 
     internal fun harBetalt(periode: Periode) =

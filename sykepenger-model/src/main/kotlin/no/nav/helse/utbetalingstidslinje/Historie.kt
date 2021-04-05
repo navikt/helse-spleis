@@ -7,15 +7,11 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
 internal class Historie() {
@@ -139,8 +135,6 @@ internal class Historie() {
 
     internal companion object {
         private const val ALLE_ARBEIDSGIVERE = "UKJENT"
-        private fun Utbetalingsdag.erSykedag() =
-            this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
     }
 
     internal class Historikkbøtte(private val konverterUtbetalingstidslinje: Boolean = false) {
@@ -172,7 +166,7 @@ internal class Historie() {
             if (konverterUtbetalingstidslinje) {
                 // for å ta høyde for forkastet historikk, men ved overlapp vinner den eksisterende historikken
                 val eksisterende = sykdomstidslinjer[orgnummer]
-                add(orgnummer, konverter(tidslinje))
+                add(orgnummer, Utbetalingstidslinje.konverter(tidslinje))
                 if (eksisterende != null) add(orgnummer, eksisterende)
             }
         }
@@ -194,26 +188,6 @@ internal class Historie() {
             orgnummerForOverlappendeVedtaksperioder: List<String>,
             skjæringstidspunkt: LocalDate
         ) = orgnummerForOverlappendeVedtaksperioder.containsAll(orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt))
-
-
-        internal companion object {
-            internal fun konverter(utbetalingstidslinje: Utbetalingstidslinje) =
-                utbetalingstidslinje
-                    .mapNotNull {
-                        when {
-                            !it.dato.erHelg() && it.erSykedag() -> Dag.Sykedag(it.dato, it.økonomi.medGrad(), INGEN)
-                            !it.dato.erHelg() && it is Fridag -> Dag.Feriedag(it.dato, INGEN)
-                            it.dato.erHelg() && it.erSykedag() -> Dag.SykHelgedag(it.dato, it.økonomi.medGrad(), INGEN)
-                            it is Arbeidsdag -> Dag.Arbeidsdag(it.dato, INGEN)
-                            it is ForeldetDag -> Dag.ForeldetSykedag(it.dato, it.økonomi.medGrad(), INGEN)
-                            else -> null
-                        }?.let { sykedag -> it.dato to sykedag }
-                    }
-                    .toMap()
-                    .let(::Sykdomstidslinje)
-
-            private fun Økonomi.medGrad() = Økonomi.sykdomsgrad(reflection { grad, _, _, _, _, _, _, _, _ -> grad }.prosent)
-        }
     }
 
     private enum class InternPeriodetype(private val periodetype: Periodetype) {

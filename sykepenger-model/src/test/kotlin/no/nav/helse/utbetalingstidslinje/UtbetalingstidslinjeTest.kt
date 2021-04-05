@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -36,6 +37,43 @@ internal class UtbetalingstidslinjeTest {
             assertFalse(it.harBetalt(15.januar))
             assertTrue(it.harBetalt(1.januar til 7.januar))
             assertFalse(it.harBetalt(13.januar til 20.januar))
+        }
+    }
+
+
+    @Test
+    fun `fri i helg mappes til ukjentdag`() {
+        val tidslinje = tidslinjeOf(4.NAV, 3.FRI, 5.NAV, 2.HELG)
+        Utbetalingstidslinje.konverter(tidslinje).also {
+            assertTrue(it[1.januar] is Dag.Sykedag)
+            assertTrue(it[5.januar] is Dag.Feriedag)
+            assertTrue(it[6.januar] is Dag.UkjentDag)
+            assertTrue(it[8.januar] is Dag.Sykedag)
+            assertTrue(it[13.januar] is Dag.SykHelgedag)
+        }
+    }
+
+    @Test
+    fun `mapper utbetalingstidslinje til sykdomstidslinje`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 4.ARB)
+        Utbetalingstidslinje.konverter(tidslinje).also {
+            assertTrue(it[1.januar] is Dag.Sykedag)
+            assertTrue(it[6.januar] is Dag.SykHelgedag)
+            assertTrue(it[31.januar] is Dag.Sykedag)
+            assertTrue(it[1.februar] is Dag.Arbeidsdag)
+            assertTrue(it[4.februar] is Dag.Arbeidsdag)
+        }
+    }
+
+    @Test
+    fun `konverterer feriedager, avviste dager og foreldet dager`() {
+        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.FOR, 2.FRI, 5.AVV, 7.FRI)
+        Utbetalingstidslinje.konverter(tidslinje).also {
+            assertTrue(it[1.januar] is Dag.Sykedag)
+            assertTrue(it[6.januar] is Dag.SykHelgedag)
+            assertTrue(it[8.januar] is Dag.ForeldetSykedag)
+            assertTrue(it[15.januar] is Dag.Sykedag)
+            assertTrue(it[22.januar] is Dag.Feriedag)
         }
     }
 

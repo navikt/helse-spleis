@@ -39,42 +39,6 @@ internal class HistorieUtbetalingstidslinjeTest : HistorieTest() {
     }
 
     @Test
-    fun `fri i helg mappes til ukjentdag`() {
-        val tidslinje = tidslinjeOf(4.NAV, 3.FRI, 5.NAV, 2.HELG)
-        Historie.Historikkbøtte.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[5.januar] is Dag.Feriedag)
-            assertTrue(it[6.januar] is Dag.UkjentDag)
-            assertTrue(it[8.januar] is Dag.Sykedag)
-            assertTrue(it[13.januar] is Dag.SykHelgedag)
-        }
-    }
-
-    @Test
-    fun `mapper utbetalingstidslinje til sykdomstidslinje`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 4.ARB)
-        Historie.Historikkbøtte.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[6.januar] is Dag.SykHelgedag)
-            assertTrue(it[31.januar] is Dag.Sykedag)
-            assertTrue(it[1.februar] is Dag.Arbeidsdag)
-            assertTrue(it[4.februar] is Dag.Arbeidsdag)
-        }
-    }
-
-    @Test
-    fun `konverterer feriedager, avviste dager og foreldet dager`() {
-        val tidslinje = tidslinjeOf(5.NAV, 2.HELG, 5.FOR, 2.FRI, 5.AVV, 7.FRI)
-        Historie.Historikkbøtte.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[6.januar] is Dag.SykHelgedag)
-            assertTrue(it[8.januar] is Dag.ForeldetSykedag)
-            assertTrue(it[15.januar] is Dag.Sykedag)
-            assertTrue(it[22.januar] is Dag.Feriedag)
-        }
-    }
-
-    @Test
     fun `utbetalingstidslinje for orgnr`() {
         val bøtte = Historie.Historikkbøtte()
         bøtte.add(tidslinje = tidslinjeOf(7.FRI))
