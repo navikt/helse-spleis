@@ -151,6 +151,20 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `fjerner ikke historikk fra andre arbeidsgivere`() {
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag2", 1.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 20.januar)
+        ))
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1", 1.januar).also {
+            assertEquals(1.januar til 31.januar, it.periode())
+            assertTrue(it.subset(1.januar til 10.januar).all { it is NavDag })
+            assertTrue(it.subset(11.januar til 20.januar).all { it is Fridag })
+            assertTrue(it.subset(21.januar til 31.januar).all { it is NavDag })
+        }
+    }
+
+    @Test
     fun `sykdomstidslinje - ferie`() {
         val ferie = Friperiode(1.januar til 10.januar)
         val inspektør = SykdomstidslinjeInspektør(ferie.sykdomstidslinje(kilde))
