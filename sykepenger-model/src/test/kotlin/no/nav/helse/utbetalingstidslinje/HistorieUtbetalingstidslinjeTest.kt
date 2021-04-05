@@ -64,16 +64,4 @@ internal class HistorieUtbetalingstidslinjeTest : HistorieTest() {
             assertTrue(it[21.januar] is NavHelgDag)
         }
     }
-
-    @Test
-    fun `utbetalingstidslinje fra infotrygd ser bort ifra utbetalingstidslinjer i spleis`() {
-        historie(refusjon(1.januar, 31.januar))
-        historie.add(AG1, navdager(1.februar, 28.februar))
-        historie.utbetalingstidslinjeFraInfotrygd(1.februar til 28.februar).also {
-            assertEquals(1.januar til 31.januar, it.periode())
-        }
-        historie.utbetalingstidslinjeFraInfotrygd(1.januar til 21.januar).also {
-            assertEquals(1.januar til 21.januar, it.periode())
-        }
-    }
 }

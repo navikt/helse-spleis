@@ -1147,7 +1147,7 @@ internal class Vedtaksperiode private constructor(
                     }
                     engineForTimeline = ArbeidsgiverUtbetalinger(
                         tidslinjer = utbetalingstidslinjer,
-                        personTidslinje = historie.utbetalingstidslinjeFraInfotrygd(vedtaksperiode.periode),
+                        personTidslinje = infotrygdhistorikk.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = NormalArbeidstaker,
@@ -1527,7 +1527,7 @@ internal class Vedtaksperiode private constructor(
                     }
                     engineForTimeline = ArbeidsgiverUtbetalinger(
                         tidslinjer = utbetalingstidslinjer,
-                        personTidslinje = historie.utbetalingstidslinjeFraInfotrygd(vedtaksperiode.periode),
+                        personTidslinje = infotrygdhistorikk.utbetalingstidslinje(vedtaksperiode.periode),
                         periode = vedtaksperiode.periode,
                         alder = Alder(vedtaksperiode.fødselsnummer),
                         arbeidsgiverRegler = vedtaksperiode.regler,

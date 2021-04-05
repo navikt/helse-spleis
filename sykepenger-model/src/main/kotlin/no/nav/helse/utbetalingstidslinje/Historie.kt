@@ -100,9 +100,6 @@ internal class Historie() {
     private fun skjæringstidspunkter(kuttdato: LocalDate) =
         Sykdomstidslinje.skjæringstidspunkter(kuttdato, sykdomstidslinjer)
 
-    internal fun utbetalingstidslinjeFraInfotrygd(periode: Periode) =
-        infotrygdbøtte.utbetalingstidslinje().kutt(periode.endInclusive)
-
     internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
     }

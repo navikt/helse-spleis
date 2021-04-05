@@ -194,6 +194,21 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
+    fun `tom utbetalingstidslinje`() {
+        assertTrue(historikk.utbetalingstidslinje(1.januar til 31.januar).isEmpty())
+    }
+
+    @Test
+    fun `utbetalingstidslinje kuttes`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig)
+        )))
+        historikk.utbetalingstidslinje(1.januar til 7.januar).also {
+            assertEquals(1.januar til 7.januar, it.periode())
+        }
+    }
+
+    @Test
     fun `rekkefølge respekteres ved deserialisering`() {
         val perioder = listOf(
             Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig),

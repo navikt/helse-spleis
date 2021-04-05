@@ -119,6 +119,18 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `samlet utbetalingstidslinje`() {
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 20.januar),
+            UkjentInfotrygdperiode(21.januar til 31.januar)
+        ))
+        element.utbetalingstidslinje().also {
+            assertEquals(1.januar til 20.januar, it.periode())
+        }
+    }
+
+    @Test
     fun `sykdomstidslinje - ferie`() {
         val ferie = Friperiode(1.januar til 10.januar)
         val inspektør = SykdomstidslinjeInspektør(ferie.sykdomstidslinje(kilde))
