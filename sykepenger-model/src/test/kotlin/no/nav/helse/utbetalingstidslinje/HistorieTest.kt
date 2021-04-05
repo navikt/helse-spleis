@@ -35,12 +35,18 @@ internal abstract class HistorieTest {
         const val AG2 = "2345"
     }
 
+    protected lateinit var infotrygdhistorikk: Infotrygdhistorikk
     protected lateinit var historie: Historie
 
     @BeforeEach
     fun beforeEach() {
-        historie = Historie()
+        infotrygdhistorikk = Infotrygdhistorikk()
+        resetHistorie()
         resetSeed()
+    }
+
+    private fun resetHistorie() {
+        historie = Historie(Person(AKTØRID, FNR), infotrygdhistorikk)
     }
 
     protected fun refusjon(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
@@ -73,21 +79,18 @@ internal abstract class HistorieTest {
     protected fun sykedager(fom: LocalDate, tom: LocalDate, grad: Prosentdel = 100.prosent, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
     protected fun historie(vararg perioder: no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode) {
-        historie = Historie(
-            Person(AKTØRID, FNR),
-            Infotrygdhistorikk().apply {
-                oppdaterHistorikk(
-                    InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = perioder.toList(),
-                    inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                ))
-            }
+        infotrygdhistorikk.oppdaterHistorikk(
+            InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = perioder.toList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList(),
+                harStatslønn = false
+            )
         )
+        resetHistorie()
     }
 
     protected fun beregn(orgnr: String, periode: no.nav.helse.hendelser.Periode, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {

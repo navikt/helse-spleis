@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.spleis.e2e.TestTidslinjeInspektør
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -63,7 +64,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun skjæringstidspunkt() {
-        val historie = Historie(person)
+        val historie = Historie(person, Infotrygdhistorikk())
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.januar, 31.januar)))
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.februar, 28.februar)))
         assertEquals(1.januar, historie.skjæringstidspunkt(Periode(1.mars, 30.mars)))
@@ -94,7 +95,7 @@ internal class SynkronisereUtbetalingstidslinjerTest {
 
     @Test
     fun `Padding utbetalingstidslinjene til sammenhengendeperiode`() {
-        person.utbetalingstidslinjer(1.januar til 31.januar, Historie()).also {
+        person.utbetalingstidslinjer(1.januar til 31.januar, Historie(person, Infotrygdhistorikk())).also {
             assertEquals(4, it.size)
             assertEquals(181, it[arb1]?.size)
             assertEquals(59, it[arb2]?.size)

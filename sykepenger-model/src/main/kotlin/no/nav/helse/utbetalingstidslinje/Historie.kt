@@ -14,19 +14,15 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import java.time.LocalDate
 
-internal class Historie() {
-
-    internal constructor(person: Person) : this() {
-        person.append(spleisbøtte)
-    }
-
-    internal constructor(person: Person, infotrygdhistorikk: Infotrygdhistorikk) : this(person) {
-        infotrygdhistorikk.append(infotrygdbøtte)
-    }
-
+internal class Historie(person: Person, infotrygdhistorikk: Infotrygdhistorikk) {
     private val infotrygdbøtte = Historikkbøtte()
     private val spleisbøtte = Historikkbøtte(konverterUtbetalingstidslinje = true)
     private val sykdomstidslinjer get() = infotrygdbøtte.sykdomstidslinjer() + spleisbøtte.sykdomstidslinjer()
+
+    init {
+        person.append(spleisbøtte)
+        infotrygdhistorikk.append(infotrygdbøtte)
+    }
 
     internal fun periodetype(orgnr: String, periode: Periode): Periodetype {
         return beregnPeriodetype(orgnr, periode).somPeriodetype()
