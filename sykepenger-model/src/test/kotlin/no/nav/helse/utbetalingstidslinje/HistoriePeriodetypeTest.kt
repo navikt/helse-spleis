@@ -11,8 +11,8 @@ internal class HistoriePeriodetypeTest : HistorieTest() {
     @Test
     fun `infotrygd - gap - spleis - gap - infotrygd - spleis - spleis`() {
         historie(refusjon(1.januar, 31.januar), refusjon(9.april, 30.april))
-        historie.add(AG1, sykedager(1.mars, 30.mars))
-        historie.add(AG1, sykedager(1.mai, 31.mai))
+        historie.add(AG1, navdager(1.mars, 30.mars))
+        historie.add(AG1, navdager(1.mai, 31.mai))
         historie.add(AG1, sykedager(1.juni, 30.juni))
 
         assertFalse(historie.forlengerInfotrygd(AG1, 1.mars til 31.mars))
@@ -28,7 +28,7 @@ internal class HistoriePeriodetypeTest : HistorieTest() {
     @Test
     fun `infotrygd - spleis - spleis`() {
         historie(refusjon(1.januar, 31.januar))
-        historie.add(AG1, sykedager(1.februar, 28.februar))
+        historie.add(AG1, navdager(1.februar, 28.februar))
         historie.add(AG1, sykedager(1.mars, 31.mars))
 
         assertTrue(historie.forlengerInfotrygd(AG1, 1.februar til 28.februar))

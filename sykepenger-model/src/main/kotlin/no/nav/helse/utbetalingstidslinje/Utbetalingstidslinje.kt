@@ -107,6 +107,15 @@ internal class Utbetalingstidslinje private constructor(
         return Utbetalingstidslinje(utbetalingsdager.asReversed())
     }
 
+    internal fun harBetalt(dato: LocalDate): Boolean {
+        return with(this[dato]) {
+            this is NavDag || this is NavHelgDag || this is ArbeidsgiverperiodeDag || this is AvvistDag
+        }
+    }
+
+    internal fun harBetalt(periode: Periode) =
+        periode.any { harBetalt(it) }
+
     internal fun kunArbeidsgiverdager() =
         this.utbetalingsdager.all {
             it is ArbeidsgiverperiodeDag ||

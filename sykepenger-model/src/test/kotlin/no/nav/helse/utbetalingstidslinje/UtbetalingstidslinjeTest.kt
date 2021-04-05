@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
@@ -23,6 +23,20 @@ internal class UtbetalingstidslinjeTest {
             tidslinjeOf(7.NAV, startDato = 1.mars),
             tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
         )))
+    }
+
+    @Test
+    fun `betalte dager`() {
+        tidslinjeOf(4.AP, 1.FRI, 2.HELG, 4.NAV, 1.AVV, 2.FRI, 5.ARB).also {
+            assertTrue(it.harBetalt(1.januar))
+            assertFalse(it.harBetalt(5.januar))
+            assertTrue(it.harBetalt(6.januar))
+            assertTrue(it.harBetalt(7.januar))
+            assertTrue(it.harBetalt(12.januar))
+            assertFalse(it.harBetalt(15.januar))
+            assertTrue(it.harBetalt(1.januar til 7.januar))
+            assertFalse(it.harBetalt(13.januar til 20.januar))
+        }
     }
 
     @Test

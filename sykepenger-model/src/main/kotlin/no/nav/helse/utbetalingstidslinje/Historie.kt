@@ -9,7 +9,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
@@ -41,14 +40,14 @@ internal class Historie() {
         val skjæringstidspunkt = skjæringstidspunkt(orgnr, periode)
         return when {
             skjæringstidspunkt in periode -> InternPeriodetype.PERIODE_MED_SKJÆRINGSTIDSPUNKT
-            infotrygdbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> {
+            infotrygdbøtte.harBetalt(orgnr, skjæringstidspunkt) -> {
                 val sammenhengendePeriode = Periode(skjæringstidspunkt, periode.start.minusDays(1))
                 when {
-                    spleisbøtte.harOverlappendeHistorikk(orgnr, sammenhengendePeriode) -> InternPeriodetype.FORLENGELSE_MED_OPPHAV_I_INFOTRYGD
+                    spleisbøtte.harBetalt(orgnr, sammenhengendePeriode) -> InternPeriodetype.FORLENGELSE_MED_OPPHAV_I_INFOTRYGD
                     else -> InternPeriodetype.FØRSTE_PERIODE_SOM_FORLENGER_INFOTRYGD
                 }
             }
-            !spleisbøtte.erUtbetaltDag(orgnr, skjæringstidspunkt) -> InternPeriodetype.PERIODE_MED_FØRSTE_UTBETALING
+            !spleisbøtte.harBetalt(orgnr, skjæringstidspunkt) -> InternPeriodetype.PERIODE_MED_FØRSTE_UTBETALING
             else -> InternPeriodetype.FORLENGELSE_MED_OPPHAV_I_SPLEIS
         }
     }
@@ -123,11 +122,11 @@ internal class Historie() {
     }
 
     private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
-        if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, dagen)) return true
+        if (infotrygdbøtte.harBetalt(organisasjonsnummer, dagen)) return true
         val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen)
         if (skjæringstidspunkt == dagen) return false
-        if (infotrygdbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)) return true
-        return spleisbøtte.erUtbetaltDag(organisasjonsnummer, skjæringstidspunkt)
+        if (infotrygdbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)) return true
+        return spleisbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)
     }
 
     private fun sykdomstidslinje(orgnummer: String) =
@@ -182,11 +181,11 @@ internal class Historie() {
             sykdomstidslinjer.merge(orgnummer, tidslinje) { venstre, høyre -> venstre.merge(høyre, replace) }
         }
 
-        internal fun harOverlappendeHistorikk(orgnr: String, periode: Periode) =
-            sykdomstidslinje(orgnr).subset(periode).any { it !is UkjentDag }
+        internal fun harBetalt(orgnr: String, periode: Periode) =
+            utbetalingstidslinje(orgnr).harBetalt(periode)
 
-        internal fun erUtbetaltDag(orgnr: String, dato: LocalDate) =
-            utbetalingstidslinje(orgnr)[dato].erSykedag()
+        internal fun harBetalt(orgnr: String, dato: LocalDate) =
+            utbetalingstidslinje(orgnr).harBetalt(dato)
 
         private fun orgnummerMedOverlappendeSykdomstidlinje(skjæringstidspunkt: LocalDate) =
             sykdomstidslinjer.filter { (_, sykdomstidlinje) -> sykdomstidlinje.førsteSykedagEtter(skjæringstidspunkt) != null }.keys
