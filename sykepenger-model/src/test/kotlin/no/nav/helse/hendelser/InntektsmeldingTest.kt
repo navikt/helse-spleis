@@ -583,6 +583,28 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    fun `er relevant med arbeidsgiverperioden når første fraværdag er inni arbeidsgiverperioden`() {
+        inntektsmelding(listOf(
+            3.januar til 4.januar,
+            8.januar til 9.januar,
+            15.januar til 26.januar
+        ), førsteFraværsdag = 15.januar)
+
+        assertTrue(inntektsmelding.erRelevant(Periode(3.januar, 4.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(8.januar, 9.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(15.januar, 16.januar)))
+    }
+
+    @Test
+    fun `overlapper med arbeidsgiverperioden når første fraværsdag er kant-i-kant`() {
+        inntektsmelding(listOf(
+            1.januar til 15.januar
+        ), førsteFraværsdag = 16.januar)
+        assertTrue(inntektsmelding.erRelevant(Periode(3.januar, 4.januar)))
+        assertTrue(inntektsmelding.erRelevant(Periode(16.januar, 20.januar)))
+    }
+
+    @Test
     fun `førsteFraværsdag kan være null ved lagring av inntekt`() {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = null)
         assertDoesNotThrow { inntektsmelding.addInntekt(Inntektshistorikk(), 1.januar) }
