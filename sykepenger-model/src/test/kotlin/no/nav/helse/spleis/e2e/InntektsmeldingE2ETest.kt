@@ -9,8 +9,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -824,6 +823,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             refusjon = Triple(null, 25000.månedlig, emptyList()),
             beregnetInntekt = 30000.månedlig
         )
-
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
+        assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }
 }
