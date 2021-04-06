@@ -142,7 +142,8 @@ internal class PersonMediator(
             "tidspunkt" to event.tidspunkt,
             "automatiskBehandling" to event.automatiskBehandling,
             "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-            "personOppdrag" to event.personOppdrag
+            "personOppdrag" to event.personOppdrag,
+            "utbetalingsdager" to event.utbetalingsdager
         ))
 
     override fun vedtaksperiodeReberegnet(vedtaksperiodeId: UUID) {

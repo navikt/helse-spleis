@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -27,7 +28,8 @@ internal interface UtbetalingObserver {
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
+        utbetalingstidslinje: Utbetalingstidslinje,
     ) {
     }
 
@@ -43,7 +45,8 @@ internal interface UtbetalingObserver {
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
+        utbetalingstidslinje: Utbetalingstidslinje,
     ) {
     }
 

@@ -8,6 +8,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.OppdragReflect
+import no.nav.helse.serde.reflection.UtbetalingsdagerReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -359,7 +360,8 @@ internal class Arbeidsgiver private constructor(
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
+        utbetalingstidslinje: Utbetalingstidslinje,
     ) {
         person.utbetalingUtbetalt(
             PersonObserver.UtbetalingUtbetaltEvent(
@@ -375,7 +377,8 @@ internal class Arbeidsgiver private constructor(
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
-                personOppdrag = OppdragReflect(personOppdrag).toMap()
+                personOppdrag = OppdragReflect(personOppdrag).toMap(),
+                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList()
             )
         )
     }
@@ -392,7 +395,8 @@ internal class Arbeidsgiver private constructor(
         ident: String,
         epost: String,
         tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
+        utbetalingstidslinje: Utbetalingstidslinje,
     ) {
         person.utbetalingUtenUtbetaling(
             PersonObserver.UtbetalingUtbetaltEvent(
@@ -408,7 +412,8 @@ internal class Arbeidsgiver private constructor(
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
                 arbeidsgiverOppdrag = OppdragReflect(arbeidsgiverOppdrag).toMap(),
-                personOppdrag = OppdragReflect(personOppdrag).toMap()
+                personOppdrag = OppdragReflect(personOppdrag).toMap(),
+                utbetalingsdager = UtbetalingsdagerReflect(utbetalingstidslinje).toList()
             )
         )
     }

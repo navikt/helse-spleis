@@ -69,6 +69,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("gjenståendeSykedager").isInt)
         assertTrue(melding.path("ident").asText().isNotEmpty())
         assertTrue(melding.path("epost").asText().isNotEmpty())
+        assertTrue(melding.path("utbetalingsdager").toList().isNotEmpty())
         assertDatotid(melding.path("tidspunkt").asText())
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)

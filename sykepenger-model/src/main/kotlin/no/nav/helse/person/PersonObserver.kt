@@ -162,7 +162,13 @@ interface PersonObserver {
         val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean,
         val arbeidsgiverOppdrag: Map<String, Any>,
-        val personOppdrag: Map<String, Any>
+        val personOppdrag: Map<String, Any>,
+        val utbetalingsdager: List<Utbetalingsdag>,
+    )
+
+    data class Utbetalingsdag(
+        val dato: LocalDate,
+        val type: String
     )
 
     data class InntektsmeldingLagtPåKjølEvent(

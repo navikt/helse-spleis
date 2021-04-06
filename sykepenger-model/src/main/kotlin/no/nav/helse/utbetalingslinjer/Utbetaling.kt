@@ -801,7 +801,8 @@ internal class Utbetaling private constructor(
                     ident,
                     epost,
                     tidspunkt,
-                    automatiskBehandling
+                    automatiskBehandling,
+                    utbetaling.utbetalingstidslinje,
                 )
             }
         }
@@ -820,7 +821,8 @@ internal class Utbetaling private constructor(
                     ident,
                     epost,
                     tidspunkt,
-                    automatiskBehandling
+                    automatiskBehandling,
+                    utbetaling.utbetalingstidslinje,
                 )
             }
         }
