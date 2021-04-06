@@ -264,12 +264,8 @@ internal class Sykdomstidslinje private constructor(
             .merge(sammenhengendeSykdom)
             .skjæringstidspunkter(tom)
 
-        internal fun arbeidsdager(periode: Periode?, kilde: Hendelseskilde) =
-            Sykdomstidslinje(
-                (periode
-                    ?.map { it to if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) }
-                    ?: emptyList()).toMap()
-            )
+        internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
+            Sykdomstidslinje(periode.map { it to if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) }.toMap())
 
         internal fun arbeidsdager(førsteDato: LocalDate, sisteDato: LocalDate, kilde: Hendelseskilde) =
             arbeidsdager(Periode(førsteDato, sisteDato), kilde)

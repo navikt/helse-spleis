@@ -39,7 +39,14 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     internal fun utenfor(other: Periode) =
         this.start < other.start || this.endInclusive > other.endInclusive
 
-    internal fun erRettFør(other: Periode) = this.endInclusive.erRettFør(other.start)
+    internal fun erRettFør(other: Periode) = erRettFør(other.start)
+    internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
+
+    internal fun periodeMellom(other: LocalDate): Periode? {
+        val enDagFør = other.minusDays(1)
+        if (slutterEtter(enDagFør)) return null
+        return Periode(endInclusive.plusDays(1), enDagFør)
+    }
 
     internal operator fun contains(other: Periode) =
         this.start <= other.start && this.endInclusive >= other.endInclusive

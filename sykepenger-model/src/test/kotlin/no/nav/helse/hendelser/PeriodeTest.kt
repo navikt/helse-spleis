@@ -18,6 +18,13 @@ internal class PeriodeTest {
     }
 
     @Test
+    fun `periode mellom`() {
+        assertNull(periode.periodeMellom(periode.start.minusDays(1)))
+        assertNull(periode.periodeMellom(periode.endInclusive))
+        assertEquals(11.juli til 15.juli, periode.periodeMellom(16.juli))
+    }
+
+    @Test
     fun `overlapper med periode`() {
         assertTrue(periode.overlapperMed(Periode(20.juni, 10.juli)))
         assertTrue(periode.overlapperMed(Periode(20.juni, 1.juli)))

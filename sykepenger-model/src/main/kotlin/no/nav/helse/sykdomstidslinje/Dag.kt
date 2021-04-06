@@ -182,16 +182,9 @@ private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
 internal fun LocalDate.erRettFør(other: LocalDate): Boolean =
-    this.isBefore(other) && when (this.dayOfWeek) {
+    this < other && when (this.dayOfWeek) {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
         FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
-        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
-        else -> false
-    }
-
-internal fun LocalDate.erHelgedagRettFør(other: LocalDate): Boolean =
-    this.isBefore(other) && when (this.dayOfWeek) {
-        SUNDAY -> this.plusDays(1) == other
         SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
