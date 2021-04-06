@@ -23,6 +23,13 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    fun `trimme inntektsmelding forbi tom`() {
+        inntektsmelding(listOf(1.januar til 16.januar))
+        inntektsmelding.trimLeft(17.januar)
+        assertEquals(16.januar til 16.januar, inntektsmelding.periode())
+    }
+
+    @Test
     fun `inntektsmelding hvor førsteFraværsdag er null`() {
         inntektsmelding(listOf(Periode(1.januar, 2.januar)), førsteFraværsdag = null)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()

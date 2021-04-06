@@ -30,8 +30,6 @@ class Sykmelding(
         periode = requireNotNull(sykdomstidslinje.periode())
     }
 
-    override fun periode() = periode
-
     override fun valider(periode: Periode): IAktivitetslogg {
         forGammel()
         return this

@@ -43,7 +43,7 @@ abstract class SykdomstidslinjeHendelse(
 
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
 
-    internal open fun erRelevant(periode: Periode) = sykdomstidslinje().periode()?.overlapperMed(periode) ?: false
+    internal open fun erRelevant(other: Periode) = periode().overlapperMed(other)
 
     internal open fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
         require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
@@ -58,8 +58,11 @@ abstract class SykdomstidslinjeHendelse(
         forrigeTom = dato
     }
 
-    internal open fun periode() =
-        Periode(forrigeTom?.plusDays(1) ?: sykdomstidslinje().førsteDag(), sykdomstidslinje().sisteDag())
+    internal fun periode(): Periode {
+        val periode = sykdomstidslinje().periode()!!
+        val fom = forrigeTom?.plusDays(1) ?: return periode
+        return periode.forskyvFom(sykdomstidslinje().førsteSykedagEtter(fom) ?: fom)
+    }
 
     internal abstract fun valider(periode: Periode): IAktivitetslogg
 

@@ -12,6 +12,12 @@ internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
 
     @Test
+    fun `forskyver periode`() {
+        assertEquals(5.juli til 10.juli, periode.forskyvFom(5.juli))
+        assertEquals(10.juli til 10.juli, periode.forskyvFom(11.juli))
+    }
+
+    @Test
     fun `overlapper med periode`() {
         assertTrue(periode.overlapperMed(Periode(20.juni, 10.juli)))
         assertTrue(periode.overlapperMed(Periode(20.juni, 1.juli)))

@@ -807,4 +807,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
         }
     }
+
+    @Test
+    fun `trimmer inntektsmelding etter tom`() {
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 14.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(6.januar, 14.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 21.januar, 100.prosent))
+        håndterSøknadArbeidsgiver(SøknadArbeidsgiver.Søknadsperiode(15.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 7.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 7.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.februar, 21.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(8.februar, 21.februar, 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(6.januar til 21.januar),
+            førsteFraværsdag = 22.januar,
+            refusjon = Triple(null, 25000.månedlig, emptyList()),
+            beregnetInntekt = 30000.månedlig
+        )
+
+    }
 }

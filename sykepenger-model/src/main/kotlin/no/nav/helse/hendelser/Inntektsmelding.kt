@@ -85,14 +85,6 @@ class Inntektsmelding(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun periode() =
-        super.periode().let {
-            Periode(
-                listOfNotNull(sykdomstidslinje.førsteSykedagEtter(it.start), it.start).maxOrNull()!!,
-                it.endInclusive
-            )
-        }
-
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {
         if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
@@ -104,9 +96,9 @@ class Inntektsmelding(
         )
     }
 
-    override fun erRelevant(periode: Periode) =
-        tidslinjeOverlapperMed(periode) && (førsteFraværsdag == null || førsteFraværsdagErIArbeidsgiverperioden() || førsteFraværsdagErFørEllerIPerioden(
-            periode
+    override fun erRelevant(other: Periode) =
+        tidslinjeOverlapperMed(other) && (førsteFraværsdag == null || førsteFraværsdagErIArbeidsgiverperioden() || førsteFraværsdagErFørEllerIPerioden(
+            other
         ))
 
     private fun tidslinjeOverlapperMed(periode: Periode) =
