@@ -28,7 +28,7 @@ internal class AvvistdagReflect(avvistdag: AvvistDag) {
     internal fun toMap() = mutableMapOf<String, Any?>(
         "type" to PersonData.UtbetalingstidslinjeData.TypeData.AvvistDag,
         "dato" to dato,
-        "begrunnelse" to begrunnelse.name
+        "begrunnelse" to PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(begrunnelse).name
     ).apply {
         putAll(serialiserØkonomi(økonomi))
     }

@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
@@ -65,10 +66,6 @@ internal class Utbetalingstidslinje private constructor(
         }
     }
 
-    internal fun klonOgKonverterAvvistDager(): Utbetalingstidslinje =
-        Utbetalingstidslinje(utbetalingsdager.map { if (it is AvvistDag && it.begrunnelse !== EgenmeldingUtenforArbeidsgiverperiode) it.navDag() else it }
-            .toMutableList())
-
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisit(this)
         utbetalingsdager.forEach { it.accept(visitor) }
@@ -78,12 +75,17 @@ internal class Utbetalingstidslinje private constructor(
     private fun avvis(avvisteDatoer: List<LocalDate>, periode: Periode, begrunnelse: Begrunnelse): Boolean {
         var result = false
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            if (utbetalingsdag is NavDag && utbetalingsdag.dato in avvisteDatoer) {
-                utbetalingsdager[index] = utbetalingsdag.avvistDag(begrunnelse)
-                if (!result) result = utbetalingsdag.dato in periode
-            }
+            val avvist = avvis(avvisteDatoer, periode, index, utbetalingsdag, listOf(begrunnelse))
+            if (!result) result = avvist
         }
         return result
+    }
+
+    private fun avvis(avvisteDatoer: List<LocalDate>, periode: Periode, index: Int, utbetalingsdag: Utbetalingsdag, begrunnelser: List<Begrunnelse>): Boolean {
+        if (utbetalingsdag.dato !in avvisteDatoer) return false
+        val avvistDag = begrunnelser.avvis(utbetalingsdag) ?: return false
+        utbetalingsdager[index] = avvistDag
+        return utbetalingsdag.dato in periode
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
@@ -275,6 +277,9 @@ internal class Utbetalingstidslinje private constructor(
             Utbetalingsdag(dato, økonomi) {
             override val prioritet = 40
             override fun accept(visitor: UtbetalingsdagVisitor) = økonomi.accept(visitor, this, dato)
+
+            internal fun avvistDag(begrunnelse: Begrunnelse) =
+                AvvistDag(dato, økonomi, begrunnelse)
         }
 
         internal class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -292,6 +297,11 @@ internal class Utbetalingstidslinje private constructor(
             økonomi: Økonomi,
             internal val begrunnelse: Begrunnelse
         ) : Utbetalingsdag(dato, økonomi) {
+            // TODO: gjør konstruktøren primary når AvvistDag har liste over begrunnelser
+            internal constructor(dato: LocalDate, økonomi: Økonomi, begrunnelse: List<Begrunnelse>) : this(dato, økonomi, begrunnelse.first()) {
+                require(begrunnelse.isNotEmpty())
+            }
+
             init {
                 økonomi.lås()
             }
@@ -315,10 +325,34 @@ internal class Utbetalingstidslinje private constructor(
     }
 }
 
-enum class Begrunnelse {
-    SykepengedagerOppbrukt,
-    MinimumInntekt,
-    EgenmeldingUtenforArbeidsgiverperiode,
-    MinimumSykdomsgrad,
-    EtterDødsdato
+internal sealed class Begrunnelse(private val avvisstrategi: (Begrunnelse, Utbetalingsdag) -> AvvistDag? = navdager) {
+
+    internal fun avvis(utbetalingsdag: Utbetalingsdag): AvvistDag? {
+        return avvisstrategi(this, utbetalingsdag)
+    }
+
+    object SykepengedagerOppbrukt : Begrunnelse()
+    object MinimumInntekt : Begrunnelse()
+    object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
+    object MinimumSykdomsgrad : Begrunnelse()
+    object EtterDødsdato : Begrunnelse(inklNavHelg)
+
+    internal companion object {
+        internal fun List<Begrunnelse>.avvis(dag: Utbetalingsdag): AvvistDag? {
+            val begrunnelser = this.mapNotNull { it.avvis(dag) }
+            if (begrunnelser.isEmpty()) return null
+            return AvvistDag(dag.dato, dag.økonomi, begrunnelser.flatMap { listOf(it.begrunnelse) }) // TODO: ta bort listOf() når AvvistDag har liste av begrunnelser
+        }
+
+        private val navdager = { begrunnelse: Begrunnelse, dag: Utbetalingsdag ->
+            if (dag !is NavDag) null
+            else dag.avvistDag(begrunnelse)
+        }
+        private val inklNavHelg = { begrunnelse: Begrunnelse, dag: Utbetalingsdag ->
+            navdager(begrunnelse, dag) ?: run {
+                if (dag !is NavHelgDag) null
+                else dag.avvistDag(begrunnelse)
+            }
+        }
+    }
 }

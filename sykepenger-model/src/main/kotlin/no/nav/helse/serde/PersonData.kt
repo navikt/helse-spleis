@@ -955,7 +955,25 @@ internal data class PersonData(
             MinimumInntekt,
             EgenmeldingUtenforArbeidsgiverperiode,
             MinimumSykdomsgrad,
-            EtterDødsdato
+            EtterDødsdato;
+
+            fun tilBegrunnelse() = when(this) {
+                SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
+                MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
+                EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
+                MinimumInntekt -> Begrunnelse.MinimumInntekt
+                EtterDødsdato -> Begrunnelse.EtterDødsdato
+            }
+
+            internal companion object {
+                fun fraBegrunnelse(begrunnelse: Begrunnelse) = when(begrunnelse) {
+                    is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+                    is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
+                    is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                    is Begrunnelse.MinimumInntekt -> MinimumInntekt
+                    is Begrunnelse.EtterDødsdato -> EtterDødsdato
+                }
+            }
         }
 
         enum class TypeData {
@@ -1023,14 +1041,7 @@ internal data class PersonData(
                     }
                     TypeData.AvvistDag -> {
                         Utbetalingstidslinje.Utbetalingsdag.AvvistDag(
-                            dato = dato, økonomi = økonomi, begrunnelse = when (begrunnelse) {
-                                BegrunnelseData.SykepengedagerOppbrukt -> Begrunnelse.SykepengedagerOppbrukt
-                                BegrunnelseData.MinimumInntekt -> Begrunnelse.MinimumInntekt
-                                BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode -> Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode
-                                BegrunnelseData.MinimumSykdomsgrad -> Begrunnelse.MinimumSykdomsgrad
-                                BegrunnelseData.EtterDødsdato -> Begrunnelse.EtterDødsdato
-                                null -> error("Prøver å deserialisere avvist dag uten begrunnelse")
-                            }
+                            dato = dato, økonomi = økonomi, begrunnelse = begrunnelse?.tilBegrunnelse() ?: error("Prøver å deserialisere avvist dag uten begrunnelse")
                         )
                     }
                     TypeData.UkjentDag -> {
