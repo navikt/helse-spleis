@@ -595,7 +595,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         vedtaksperiodeId: UUID
     ): InntektsmeldingReplay {
         return InntektsmeldingReplay(
-            meldingsreferanseId = UUID.randomUUID(),
             wrapped = inntektsmelding,
             vedtaksperiodeId = vedtaksperiodeId
         ).apply {

@@ -10,6 +10,6 @@ internal class InntektsmeldingReplayMessage(packet: JsonMessage) : Inntektsmeldi
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
 
     override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, InntektsmeldingReplay(id, inntektsmelding, vedtaksperiodeId))
+        mediator.behandle(this, InntektsmeldingReplay(inntektsmelding, vedtaksperiodeId))
     }
 }

@@ -47,7 +47,10 @@ class Person private constructor(
 
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
-    fun håndter(inntektsmelding: InntektsmeldingReplay) = håndter(inntektsmelding, "replay av inntektsmelding")
+    fun håndter(inntektsmelding: InntektsmeldingReplay) {
+        registrer(inntektsmelding, "Behandler replay av inntektsmelding")
+        finnArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
+    }
 
     private fun håndter(
         hendelse: SykdomstidslinjeHendelse,

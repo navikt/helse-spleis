@@ -819,7 +819,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled
     fun `replay strekker periode tilbake og lager overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent, null))

@@ -170,7 +170,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay): Boolean {
-        return håndter(inntektsmelding.wrapped)
+        return inntektsmelding.håndter(this, id, periode)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -1939,11 +1939,6 @@ internal class Vedtaksperiode private constructor(
                     )
                         inntektsmelding.trimLeft(it.periode.endInclusive)
                 }
-        }
-
-        internal fun List<Vedtaksperiode>.håndter(inntektsmelding: InntektsmeldingReplay) {
-            this.dropWhile { it.id != inntektsmelding.vedtaksperiodeId }
-                .forEach { it.håndter(inntektsmelding) }
         }
 
         internal fun harForlengelseForAlleArbeidsgivereIInfotrygdhistorikken(

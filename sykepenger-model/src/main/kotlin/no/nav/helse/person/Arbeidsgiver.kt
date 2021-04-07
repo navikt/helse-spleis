@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.Vedtaksperiode.Companion.harInntekt
-import no.nav.helse.person.Vedtaksperiode.Companion.håndter
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -231,9 +230,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
-        inntektsmelding.wrapped.kontekst(this)
-        inntektsmelding.wrapped.cacheRefusjon(this)
-        vedtaksperioder.toList().håndter(inntektsmelding)
+        inntektsmelding.kontekst(this)
+        inntektsmelding.cacheRefusjon(this)
+        vedtaksperioder.toList().forEach { it.håndter(inntektsmelding) }
         finalize(inntektsmelding)
     }
 
