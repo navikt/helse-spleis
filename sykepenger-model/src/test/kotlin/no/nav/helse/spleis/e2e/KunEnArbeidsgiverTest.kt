@@ -2811,7 +2811,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(2.januar(2021), 20.januar(2021), 100.prosent))
         håndterSøknad(Sykdom(2.januar(2021), 20.januar(2021), 100.prosent))
 
-        håndterInntektsmeldingReplay(inntektsmelding(inntektsmeldingId, arbeidsgiverperioder, førsteFraværsdag = 1.januar(2021)), 2.vedtaksperiode)
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode)
 
         håndterYtelser(2.vedtaksperiode)
 

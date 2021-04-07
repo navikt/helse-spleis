@@ -27,6 +27,7 @@ internal class TestArbeidsgiverInspektør(
         private set
     private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
+    private val perioder = mutableMapOf<Int, Periode>()
     private val skjæringstidspunkter = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableListOf<LocalDate>()
     private val forbrukteSykedagerer = mutableListOf<Int?>()
@@ -122,6 +123,7 @@ internal class TestArbeidsgiverInspektør(
         vedtaksperiodeForkastet[vedtaksperiodeindeks] = forkastetPeriode
         vedtaksperioder[vedtaksperiodeindeks] = vedtaksperiode
         this.hendelseIder[vedtaksperiodeindeks] = hendelseIder
+        perioder[vedtaksperiodeindeks] = periode
         tilstander[vedtaksperiodeindeks] = tilstand.type
         inntektskilder[vedtaksperiodeindeks] = inntektskilde
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
@@ -297,6 +299,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
     internal fun utbetalingUtbetalingstidslinje(indeks: Int) = utbetalingutbetalingstidslinjer[indeks]
+    internal fun periode(id: UUID) = id.finn(perioder)
 
     internal fun periodeErForkastet(id: UUID) = id.finn(vedtaksperiodeForkastet)
 

@@ -46,14 +46,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     protected var forventetEndringTeller = 0
     private val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     private val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknad.Søknadsperiode>>>()
-    private val inntektsmeldinger = mutableMapOf<UUID, InntektsmeldingData>()
-
-    private data class InntektsmeldingData(
-        val arbeidsgiverperioder: List<Periode>,
-        val førsteFraværsdag: LocalDate,
-        val ferieperioder: List<Periode>,
-        val refusjon: Triple<LocalDate?, Inntekt, List<LocalDate>>
-    )
+    private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
 
     fun <T> sjekkAt(t: T, init: T.() -> Unit) {
         t.init()
@@ -141,16 +134,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         perioder = requireNotNull(søknader[hendelseId]).third
     )
 
-    protected fun replayInntektsmelding(hendelseId: UUID): UUID {
-        return håndterInntektsmelding(
-            arbeidsgiverperioder = requireNotNull(inntektsmeldinger[hendelseId]).arbeidsgiverperioder,
-            førsteFraværsdag = requireNotNull(inntektsmeldinger[hendelseId]).førsteFraværsdag,
-            ferieperioder = requireNotNull(inntektsmeldinger[hendelseId]).ferieperioder,
-            refusjon = requireNotNull(inntektsmeldinger[hendelseId]).refusjon,
-            id = hendelseId
-        )
-    }
-
     protected fun håndterSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
         mottatt: LocalDateTime? = null,
@@ -231,24 +214,17 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             orgnummer = orgnummer,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
         ).håndter(Person::håndter)
-        inntektsmeldinger[id] = InntektsmeldingData(
-            arbeidsgiverperioder,
-            førsteFraværsdag,
-            ferieperioder,
-            refusjon
-        )
         return id
     }
 
     protected fun håndterInntektsmeldingReplay(
-        inntektsmelding: Inntektsmelding,
+        inntektsmeldingId: UUID,
         vedtaksperiodeId: UUID
     ) {
-        assertTrue(vedtaksperiodeId in observatør.inntektsmeldingReplayEventer)
-        inntektsmeldingReplay(
-            inntektsmelding,
-            vedtaksperiodeId
-        ).håndter(Person::håndter)
+        val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
+        assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId))
+        inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
+            .håndter(Person::håndter)
     }
 
     protected fun håndterVilkårsgrunnlag(
@@ -637,23 +613,25 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         orgnummer: String = ORGNUMMER,
         harOpphørAvNaturalytelser: Boolean = false
     ): Inntektsmelding {
-        EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Sykepengehistorikk)
-        return Inntektsmelding(
-            meldingsreferanseId = id,
-            refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
-            orgnummer = orgnummer,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            ferieperioder = ferieperioder,
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
-        ).apply {
-            hendelselogg = this
+        val inntektsmeldinggenerator = {
+            Inntektsmelding(
+                meldingsreferanseId = id,
+                refusjon = Inntektsmelding.Refusjon(refusjon.first, refusjon.second, refusjon.third),
+                orgnummer = orgnummer,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                aktørId = AKTØRID,
+                førsteFraværsdag = førsteFraværsdag,
+                beregnetInntekt = beregnetInntekt,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                ferieperioder = ferieperioder,
+                arbeidsforholdId = null,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser
+            )
         }
+        inntektsmeldinger[id] = inntektsmeldinggenerator
+        EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Sykepengehistorikk)
+        return inntektsmeldinggenerator().apply { hendelselogg = this }
     }
 
     protected fun vilkårsgrunnlag(
