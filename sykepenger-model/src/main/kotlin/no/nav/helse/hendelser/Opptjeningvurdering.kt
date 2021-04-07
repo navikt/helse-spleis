@@ -31,6 +31,18 @@ class Opptjeningvurdering(
         private val fom: LocalDate,
         private val tom: LocalDate? = null
     ) {
+
+        private fun erSøppel() =
+            tom != null && tom < fom
+
+        private fun erGyldig(skjæringstidspunkt: LocalDate) =
+            fom < skjæringstidspunkt && !erSøppel()
+
+        private fun periode(skjæringstidspunkt: LocalDate): Periode? {
+            if (!erGyldig(skjæringstidspunkt)) return null
+            return fom til(tom ?: skjæringstidspunkt)
+        }
+
         internal companion object {
             private fun LocalDate.datesUntilReversed(tom: LocalDate) = tom.toEpochDay().downTo(this.toEpochDay())
                 .asSequence()
@@ -41,10 +53,10 @@ class Opptjeningvurdering(
                 aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate
             ) : Int {
-                val ranges = arbeidsforhold
-                    .filter { it.fom < skjæringstidspunkt }
-                    .map { it.fom.til(it.tom ?: skjæringstidspunkt) }
+                if (arbeidsforhold.any(Arbeidsforhold::erSøppel))
+                    aktivitetslogg.warn("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige")
 
+                val ranges = arbeidsforhold.mapNotNull { it.periode(skjæringstidspunkt) }
                 if (ranges.none { skjæringstidspunkt in it }) {
                     aktivitetslogg.error("Personen er ikke i arbeid ved skjæringstidspunktet")
                     return 0

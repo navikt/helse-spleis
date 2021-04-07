@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.testhelpers.desember
 import no.nav.helse.testhelpers.januar
+import no.nav.helse.testhelpers.november
 import no.nav.helse.testhelpers.september
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -22,6 +23,19 @@ internal class OpptjeningvurderingTest {
         assertTrue(undersøke(listOf(Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 5.desember(2017)))) {
             assertEquals(27, it.antallOpptjeningsdager)
             assertFalse(it.harOpptjening())
+        })
+    }
+
+    @Test
+    fun `tom eldre enn fom`() {
+        assertFalse(undersøke(listOf(
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 1.november(2017)),
+            Opptjeningvurdering.Arbeidsforhold(ORGNUMMER, 10.desember(2017), 1.desember(2017))
+        )) {
+            assertEquals(61, it.antallOpptjeningsdager)
+            assertTrue(it.harOpptjening())
+            assertFalse(aktivitetslogg.hasErrorsOrWorse())
+            assertTrue(aktivitetslogg.hasWarningsOrWorse())
         })
     }
 
