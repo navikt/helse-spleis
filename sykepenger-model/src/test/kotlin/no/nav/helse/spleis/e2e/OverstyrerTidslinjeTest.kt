@@ -254,7 +254,6 @@ internal class OverstyrerTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         inspektør.arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID()) {
             override fun sykdomstidslinje() = Sykdomstidslinje.ukjent(2.januar, 9.januar, TestEvent.testkilde)
-            override fun sykdomstidslinje(tom: LocalDate) = TODO()
             override fun valider(periode: Periode) = TODO()
             override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()
             override fun aktørId() = TODO()

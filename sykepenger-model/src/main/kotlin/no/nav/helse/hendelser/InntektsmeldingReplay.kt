@@ -31,6 +31,10 @@ class InntektsmeldingReplay(
         wrapped.cacheRefusjon(arbeidsgiver)
     }
 
+    internal fun trimTidligereBehandletDager(arbeidsgiver: Arbeidsgiver) {
+        arbeidsgiver.trimTidligereBehandletDager(wrapped)
+    }
+
     override fun organisasjonsnummer() = wrapped.organisasjonsnummer()
     override fun aktørId() = wrapped.aktørId()
     override fun fødselsnummer() = wrapped.fødselsnummer()

@@ -63,7 +63,6 @@ internal class TurneringsnøkkelTest {
         object Søknad : TestHendelse()
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
-        override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = TODO()
         override fun sykdomstidslinje(): Sykdomstidslinje = TODO()
         override fun valider(periode: Periode): Aktivitetslogg = TODO()
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO()

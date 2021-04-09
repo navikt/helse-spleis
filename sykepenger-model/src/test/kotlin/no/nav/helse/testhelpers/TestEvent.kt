@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import java.time.LocalDate
 import java.util.*
 
 internal sealed class TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
@@ -30,7 +29,6 @@ internal sealed class TestEvent : SykdomstidslinjeHendelse(UUID.randomUUID()) {
     object TestHendelse : TestEvent()
 
     override fun sykdomstidslinje() = Sykdomstidslinje()
-    override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
     override fun valider(periode: Periode) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
     override fun aktørId() = AKTØRID

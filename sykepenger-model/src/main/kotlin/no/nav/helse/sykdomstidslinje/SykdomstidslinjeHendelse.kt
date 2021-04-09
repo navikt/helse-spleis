@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -19,7 +20,7 @@ abstract class SykdomstidslinjeHendelse(
 
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, null, other.aktivitetslogg)
 
-    private var forrigeTom: LocalDate? = null
+    private var nesteFom: LocalDate? = null
 
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId())
 
@@ -45,23 +46,16 @@ abstract class SykdomstidslinjeHendelse(
 
     internal open fun erRelevant(other: Periode) = periode().overlapperMed(other)
 
-    internal open fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje {
-        require(forrigeTom == null || (forrigeTom != null && tom > forrigeTom)) { "Kalte metoden flere ganger med samme eller en tidligere dato" }
-
-        return (forrigeTom?.let { sykdomstidslinje().subset(Periode(it.plusDays(1), tom)) }
-            ?: sykdomstidslinje().fremTilOgMed(tom))
-            .also { trimLeft(tom) }
-            .also { it.periode() ?: severe("Ugyldig subsetting av tidslinjen til søknad") }
-    }
-
     internal fun trimLeft(dato: LocalDate) {
-        forrigeTom = dato
+        nesteFom = dato.plusDays(1)
     }
 
+    private val aldri = LocalDate.MIN til LocalDate.MIN
     internal fun periode(): Periode {
-        val periode = sykdomstidslinje().periode()!!
-        val fom = forrigeTom?.plusDays(1) ?: return periode
-        return periode.forskyvFom(sykdomstidslinje().førsteSykedagEtter(fom) ?: fom)
+        val periode = sykdomstidslinje().periode() ?: aldri
+        val fom = nesteFom ?: return periode
+        if (fom > periode.endInclusive) return aldri
+        return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
     }
 
     internal abstract fun valider(periode: Periode): IAktivitetslogg

@@ -12,12 +12,6 @@ internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
 
     @Test
-    fun `forskyver periode`() {
-        assertEquals(5.juli til 10.juli, periode.forskyvFom(5.juli))
-        assertEquals(10.juli til 10.juli, periode.forskyvFom(11.juli))
-    }
-
-    @Test
     fun `periode mellom`() {
         assertNull(periode.periodeMellom(periode.start.minusDays(1)))
         assertNull(periode.periodeMellom(periode.endInclusive))

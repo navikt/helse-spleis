@@ -223,6 +223,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding) {
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
+        trimTidligereBehandletDager(inntektsmelding)
         if (vedtaksperioder.toList().map { it.håndter(inntektsmelding) }.none { it }) {
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
         }
@@ -232,6 +233,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
         inntektsmelding.kontekst(this)
         inntektsmelding.cacheRefusjon(this)
+        inntektsmelding.trimTidligereBehandletDager(this)
         vedtaksperioder.toList().forEach { it.håndter(inntektsmelding) }
         finalize(inntektsmelding)
     }

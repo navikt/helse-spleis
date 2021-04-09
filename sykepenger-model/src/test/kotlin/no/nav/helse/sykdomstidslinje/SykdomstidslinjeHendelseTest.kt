@@ -5,7 +5,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.*
 
 internal class SykdomstidslinjeHendelseTest {
@@ -30,7 +29,6 @@ internal class SykdomstidslinjeHendelseTest {
         override fun aktørId() = AKTØR
         override fun fødselsnummer() = FØDSELSNUMMER
         override fun organisasjonsnummer() = ORGNR
-        override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = TODO("not implemented")
         override fun sykdomstidslinje(): Sykdomstidslinje = TODO("not implemented")
         override fun valider(periode: Periode): Aktivitetslogg = TODO("not implemented")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = TODO("not implemented")

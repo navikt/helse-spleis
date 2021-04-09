@@ -26,7 +26,7 @@ internal class InntektsmeldingTest {
     fun `trimme inntektsmelding forbi tom`() {
         inntektsmelding(listOf(1.januar til 16.januar))
         inntektsmelding.trimLeft(17.januar)
-        assertEquals(16.januar til 16.januar, inntektsmelding.periode())
+        assertEquals(LocalDate.MIN til LocalDate.MIN, inntektsmelding.periode())
     }
 
     @Test

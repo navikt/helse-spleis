@@ -43,8 +43,6 @@ class Sykmelding(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun sykdomstidslinje(tom: LocalDate): Sykdomstidslinje = sykdomstidslinje
-
     override fun fødselsnummer() = fnr
 
     override fun organisasjonsnummer() = orgnummer

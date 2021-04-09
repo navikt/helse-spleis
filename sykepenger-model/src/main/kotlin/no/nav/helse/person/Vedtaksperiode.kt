@@ -155,6 +155,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, søknad)
     }
 
+    internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID): Boolean {
+        if (other != id) return false
+        return håndter(inntektsmelding)
+    }
+
     internal fun håndter(inntektsmelding: Inntektsmelding): Boolean {
         return overlapperMed(inntektsmelding).also {
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
@@ -315,7 +320,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterInntektsmelding(hendelse: Inntektsmelding) {
         arbeidsgiver.addInntekt(hendelse, skjæringstidspunkt)
-        arbeidsgiver.trimTidligereBehandletDager(hendelse)
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         inntektsmeldingId = hendelse.meldingsreferanseId()

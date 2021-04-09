@@ -91,7 +91,6 @@ private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID()) {
     private const val ORGNUMMER = "987654321"
 
     override fun sykdomstidslinje() = Sykdomstidslinje()
-    override fun sykdomstidslinje(tom: LocalDate) = Sykdomstidslinje()
     override fun valider(periode: Periode) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
     override fun aktørId() = AKTØRID
