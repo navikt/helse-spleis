@@ -222,8 +222,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(hendelse: GjenopptaBehandling): Boolean {
         if (tilstand.erFerdigbehandlet) return false
-        val forrige = arbeidsgiver.finnSykeperiodeRettFør(this)
-        if (forrige != null && !forrige.tilstand.erFerdigbehandlet) return true
         kontekst(hendelse)
         tilstand.håndter(this, hendelse)
         return true
