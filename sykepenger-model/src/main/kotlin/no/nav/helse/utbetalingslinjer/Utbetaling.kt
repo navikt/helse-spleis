@@ -4,6 +4,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -420,6 +422,12 @@ internal class Utbetaling private constructor(
                 .mapNotNull { it.lastOrNull(Utbetaling::erAktiv) }
                 .filterNot(Utbetaling::erAnnullering)
 
+        internal fun sykdomstidslinje(utbetalinger: List<Utbetaling>, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+            return utbetalinger.aktive().fold(sykdomstidslinje) { result, utbetaling ->
+                utbetaling.sykdomstidslinje(result)
+            }
+        }
+
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             aktive()
                 .map { it.utbetalingstidslinje }
@@ -442,6 +450,10 @@ internal class Utbetaling private constructor(
     internal fun utbetalingstidslinje() = utbetalingstidslinje
 
     internal fun utbetalingstidslinje(periode: Periode) = utbetalingstidslinje.subset(periode)
+
+    internal fun sykdomstidslinje(other: Sykdomstidslinje): Sykdomstidslinje {
+        return Utbetalingstidslinje.konverter(utbetalingstidslinje).merge(other, replace)
+    }
 
     internal fun append(organisasjonsnummer: String, bøtte: Historie.Historikkbøtte) {
         bøtte.add(organisasjonsnummer, utbetalingstidslinje)

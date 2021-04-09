@@ -10,6 +10,7 @@ import no.nav.helse.serde.reflection.OppdragReflect
 import no.nav.helse.serde.reflection.UtbetalingsdagerReflect
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -485,7 +486,18 @@ internal class Arbeidsgiver private constructor(
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
-    internal fun sykdomstidslinje() = sykdomshistorikk.sykdomstidslinje()
+    internal fun sykdomstidslinje(): Sykdomstidslinje {
+        return person.historikkFor(organisasjonsnummer, egenSykdomstidslinje())
+    }
+
+    private fun egenSykdomstidslinje(): Sykdomstidslinje {
+        val sykdomstidslinje = if (sykdomshistorikk.harSykdom()) sykdomshistorikk.sykdomstidslinje() else Sykdomstidslinje()
+        return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
+    }
+
+    internal fun tidligsteDato(): LocalDate? {
+        return egenSykdomstidslinje().periode()?.start
+    }
 
     internal fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
 
@@ -653,7 +665,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun append(bøtte: Historie.Historikkbøtte) {
-        if (harSykdom()) bøtte.add(organisasjonsnummer, sykdomstidslinje())
+        if (harSykdom()) bøtte.add(organisasjonsnummer, sykdomshistorikk.sykdomstidslinje())
         utbetalteUtbetalinger().forEach {
             it.append(organisasjonsnummer, bøtte)
         }

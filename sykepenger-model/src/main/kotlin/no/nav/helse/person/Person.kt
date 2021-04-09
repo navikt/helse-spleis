@@ -11,6 +11,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendePeriodeHosAnnen
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Historie
@@ -237,7 +238,7 @@ class Person private constructor(
     }
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, cutoff: LocalDateTime? = null): Boolean {
-        val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.sykdomstidslinje().førsteDag() }
+        val tidligsteDato = arbeidsgivere.mapNotNull { it.tidligsteDato() }.minOrNull()!!
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
     }
 
@@ -246,6 +247,9 @@ class Person private constructor(
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
     }
+
+    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
+        infotrygdhistorikk.historikkFor(orgnummer, sykdomstidslinje)
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato)
