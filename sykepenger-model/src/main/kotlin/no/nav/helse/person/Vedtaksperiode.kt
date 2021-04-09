@@ -175,10 +175,10 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
+    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
-        tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, dødsdato)
+        tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
     }
 
     internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
@@ -802,7 +802,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            dødsdato: LocalDate?
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
         }
@@ -1094,36 +1094,17 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            dødsdato: LocalDate?
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             validation(ytelser) {
                 onError { vedtaksperiode.tilstand(ytelser, AvsluttetIngenEndring) }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
-                lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode)
-                    } catch (e: IllegalArgumentException) {
-                        sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
-                        return@valider false
-                    }
-                    engineForTimeline = ArbeidsgiverUtbetalinger(
-                        tidslinjer = utbetalingstidslinjer,
-                        personTidslinje = infotrygdhistorikk.utbetalingstidslinje(vedtaksperiode.periode),
-                        periode = vedtaksperiode.periode,
-                        alder = Alder(vedtaksperiode.fødselsnummer),
-                        arbeidsgiverRegler = NormalArbeidstaker,
-                        aktivitetslogg = ytelser,
-                        organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                        dødsdato = dødsdato
-                    ).also { engine ->
-                        engine.beregn()
-                    }
-                    !ytelser.hasErrorsOrWorse()
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    vedtaksperiode.forsøkRevurdering(engineForTimeline.tidslinjeEngine, ytelser)
+                    vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
                 }
             }
         }
@@ -1428,7 +1409,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            dødsdato: LocalDate?
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             vedtaksperiode.fjernArbeidsgiverperiodeVedOverlappMedIT(infotrygdhistorikk)
             val periodetype = vedtaksperiode.periodetype()
@@ -1465,30 +1446,11 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
-                lateinit var engineForTimeline: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    val utbetalingstidslinjer = try {
-                        person.utbetalingstidslinjer(vedtaksperiode.periode)
-                    } catch (e: IllegalArgumentException) {
-                        sikkerLogg.warn("Feilet i builder for vedtaksperiode ${vedtaksperiode.id} - ${e.message}")
-                        return@valider false
-                    }
-                    engineForTimeline = ArbeidsgiverUtbetalinger(
-                        tidslinjer = utbetalingstidslinjer,
-                        personTidslinje = infotrygdhistorikk.utbetalingstidslinje(vedtaksperiode.periode),
-                        periode = vedtaksperiode.periode,
-                        alder = Alder(vedtaksperiode.fødselsnummer),
-                        arbeidsgiverRegler = vedtaksperiode.regler,
-                        aktivitetslogg = ytelser,
-                        organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                        dødsdato = dødsdato
-                    ).also { engine ->
-                        engine.beregn()
-                    }
-                    !ytelser.hasErrorsOrWorse()
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 }
                 onSuccess {
-                    vedtaksperiode.forsøkUtbetaling(engineForTimeline.tidslinjeEngine, ytelser)
+                    vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.tidslinjeEngine, ytelser)
                 }
             }
         }

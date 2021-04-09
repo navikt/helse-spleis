@@ -19,7 +19,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         assertEquals(1.januar, skjæringstidspunkt(31.januar))
         assertEquals(1.januar, skjæringstidspunkt(28.februar))
         assertEquals(1.januar, skjæringstidspunkt(28.februar))
-        assertSkjæringstidspunkter(kuttdato = 28.februar, 1.januar)
+        assertSkjæringstidspunkter(1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, 1.februar til 28.februar))
     }
 
@@ -49,8 +49,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         historie.add(AG1, sykedager(1.mars, 31.mars))
         assertEquals(1.februar, skjæringstidspunkt(28.februar))
         assertEquals(1.mars, skjæringstidspunkt(31.mars))
-        assertSkjæringstidspunkter(kuttdato = 31.mars, 1.mars, 1.februar)
-        assertSkjæringstidspunkter(kuttdato = 28.februar, 1.februar)
+        assertSkjæringstidspunkter(1.mars, 1.februar)
     }
 
     @Test
@@ -61,7 +60,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         assertEquals(1.januar, skjæringstidspunkt(31.januar))
         assertEquals(1.februar, skjæringstidspunkt(28.februar))
         assertEquals(1.februar, skjæringstidspunkt(31.mars))
-        assertSkjæringstidspunkter(kuttdato = 31.mars, 1.februar, 1.januar)
+        assertSkjæringstidspunkter(1.februar, 1.januar)
         assertTrue(historie.forlengerInfotrygd(AG1, 1.mars til 31.mars))
     }
 

@@ -133,9 +133,9 @@ internal class Sykdomstidslinje private constructor(
     internal fun skjæringstidspunkt() =
         førsteSykedagEtterSisteOppholdsdag() ?: førsteSykedag()
 
-    internal fun skjæringstidspunkter(tom: LocalDate): List<LocalDate> {
+    internal fun skjæringstidspunkter(): List<LocalDate> {
         val skjæringstidspunkter = mutableListOf<LocalDate>()
-        var kuttdato = tom
+        var kuttdato = periode?.endInclusive ?: return skjæringstidspunkter
         do {
             val skjæringstidspunkt = skjæringstidspunkt(kuttdato)?.also {
                 kuttdato = it.minusDays(1)
@@ -260,9 +260,9 @@ internal class Sykdomstidslinje private constructor(
             .merge(sammenhengendeSykdom)
             .skjæringstidspunkt(dato)
 
-        internal fun skjæringstidspunkter(tom: LocalDate, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+        internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .merge(sammenhengendeSykdom)
-            .skjæringstidspunkter(tom)
+            .skjæringstidspunkter()
 
         internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
             Sykdomstidslinje(periode.map { it to if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) }.toMap())

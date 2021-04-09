@@ -104,8 +104,8 @@ internal abstract class HistorieTest {
 
     protected fun skjæringstidspunkt(fom: LocalDate) = historie.skjæringstidspunkt(no.nav.helse.hendelser.Periode(fom, fom))
 
-    protected fun assertSkjæringstidspunkter(kuttdato: LocalDate, vararg datoer: LocalDate) {
-        assertEquals(datoer.toList(), historie.skjæringstidspunkter(no.nav.helse.hendelser.Periode(kuttdato, kuttdato)))
+    protected fun assertSkjæringstidspunkter(vararg datoer: LocalDate) {
+        assertEquals(datoer.toList(), historie.skjæringstidspunkter())
     }
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: no.nav.helse.hendelser.Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {

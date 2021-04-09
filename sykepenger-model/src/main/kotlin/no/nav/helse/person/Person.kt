@@ -14,7 +14,9 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,7 +74,25 @@ class Person private constructor(
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
         ytelser.oppdaterHistorikk(infotrygdhistorikk)
         ytelser.lagreDødsdato(this)
-        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk, dødsdato)
+
+        finnArbeidsgiver(ytelser).håndter(ytelser, arbeidsgiverUtbetalinger(), infotrygdhistorikk)
+    }
+
+    private fun arbeidsgiverUtbetalinger(regler: ArbeidsgiverRegler = NormalArbeidstaker): ArbeidsgiverUtbetalinger {
+        val skjæringstidspunkter = skjæringstidspunkter()
+        return ArbeidsgiverUtbetalinger(
+            regler = regler,
+            arbeidsgivere = arbeidsgivereMedSykdom().map { it to
+                infotrygdhistorikk.builder(
+                    organisasjonsnummer = it.organisasjonsnummer(),
+                    builder = it.builder(regler, skjæringstidspunkter),
+                    tidligsteDato = it.tidligsteDato()
+                )
+            }.toMap(),
+            infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje(),
+            alder = Alder(fødselsnummer),
+            dødsdato = dødsdato
+        )
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
@@ -238,8 +258,8 @@ class Person private constructor(
     internal fun skjæringstidspunkt(periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)
 
-    internal fun skjæringstidspunkter(periode: Periode) =
-        Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, periode, infotrygdhistorikk)
+    internal fun skjæringstidspunkter() =
+        Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: ArbeidstakerHendelse, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
@@ -357,16 +377,6 @@ class Person private constructor(
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
-
-    internal fun utbetalingstidslinjer(periode: Periode): Map<Arbeidsgiver, Utbetalingstidslinje> {
-        val skjæringstidspunkter = skjæringstidspunkter(periode)
-        return arbeidsgivereMedSykdom()
-            .map { arbeidsgiver -> arbeidsgiver to infotrygdhistorikk.builder(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
-                builder = arbeidsgiver.builder(skjæringstidspunkter),
-                tidligsteDato = arbeidsgiver.tidligsteDato()
-            ).result(periode) }.toMap()
-    }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {

@@ -196,16 +196,16 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tom utbetalingstidslinje`() {
-        assertTrue(historikk.utbetalingstidslinje(1.januar til 31.januar).isEmpty())
+        assertTrue(historikk.utbetalingstidslinje().isEmpty())
     }
 
     @Test
-    fun `utbetalingstidslinje kuttes`() {
+    fun `utbetalingstidslinje kuttes ikke`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             Utbetalingsperiode("orgnr", 1.januar til 31.januar, 100.prosent, 25000.månedlig)
         )))
-        historikk.utbetalingstidslinje(1.januar til 7.januar).also {
-            assertEquals(1.januar til 7.januar, it.periode())
+        historikk.utbetalingstidslinje().also {
+            assertEquals(1.januar til 31.januar, it.periode())
         }
     }
 
@@ -401,8 +401,8 @@ internal class InfotrygdhistorikkTest {
             Utbetalingsperiode("ag1", 16.januar til 20.januar, 100.prosent, 25000.månedlig),
             Utbetalingsperiode("ag1", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
         )))
-        assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(1.januar til 28.februar, emptyList()))
-        assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(1.januar til 28.februar, listOf(2.S, 3.S)))
+        assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(emptyList()))
+        assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(listOf(2.S, 3.S)))
     }
 
     private fun historikkelement(

@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.*
@@ -48,7 +47,7 @@ internal class Historie(infotrygdhistorikk: Infotrygdhistorikk) {
     ): Utbetalingstidslinje {
         val builder = UtbetalingstidslinjeBuilder(
             sykdomstidslinje = sykdomstidslinje(organisasjonsnummer),
-            skjæringstidspunkter = skjæringstidspunkter(periode),
+            skjæringstidspunkter = skjæringstidspunkter(),
             inntektshistorikk = inntektshistorikk,
             arbeidsgiverRegler = arbeidsgiverRegler
         )
@@ -71,11 +70,8 @@ internal class Historie(infotrygdhistorikk: Infotrygdhistorikk) {
     private fun skjæringstidspunkt(orgnr: String, periode: Periode) =
         sykdomstidslinje(orgnr).skjæringstidspunkt(periode.endInclusive) ?: periode.start
 
-    internal fun skjæringstidspunkter(periode: Periode) =
-        skjæringstidspunkter(periode.endInclusive)
-
-    private fun skjæringstidspunkter(kuttdato: LocalDate) =
-        Sykdomstidslinje.skjæringstidspunkter(kuttdato, sykdomstidslinjer)
+    internal fun skjæringstidspunkter() =
+        Sykdomstidslinje.skjæringstidspunkter(sykdomstidslinjer)
 
     internal fun add(orgnummer: String, tidslinje: Utbetalingstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
@@ -83,11 +79,6 @@ internal class Historie(infotrygdhistorikk: Infotrygdhistorikk) {
 
     internal fun add(orgnummer: String, tidslinje: Sykdomstidslinje) {
         spleisbøtte.add(orgnummer, tidslinje)
-    }
-
-    private fun erArbeidsgiverperiodenGjennomførtFør(organisasjonsnummer: String, dagen: LocalDate): Boolean {
-        val skjæringstidspunkt = skjæringstidspunkt(organisasjonsnummer, dagen til dagen)
-        return infotrygdbøtte.harBetalt(organisasjonsnummer, skjæringstidspunkt)
     }
 
     private fun sykdomstidslinje(orgnummer: String) =

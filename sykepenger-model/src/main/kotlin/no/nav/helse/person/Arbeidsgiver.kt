@@ -17,7 +17,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -121,8 +120,8 @@ internal class Arbeidsgiver private constructor(
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
 
-        internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
-            infotrygdhistorikk.skjæringstidspunkter(periode, arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
+        internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
+            infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::egenSykdomstidslinje))
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -260,9 +259,9 @@ internal class Arbeidsgiver private constructor(
         finalize(utbetalingshistorikk)
     }
 
-    internal fun håndter(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, dødsdato: LocalDate?) {
+    internal fun håndter(ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, infotrygdhistorikk: Infotrygdhistorikk) {
         ytelser.kontekst(this)
-        håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, dødsdato) }
+        håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
         finalize(ytelser)
     }
 
@@ -692,13 +691,22 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje.skjæringstidspunkt(nyFørsteSykedag.minusDays(1))
     }
 
-    internal fun builder(skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
+    internal fun builder(regler: ArbeidsgiverRegler, skjæringstidspunkter: List<LocalDate>): UtbetalingstidslinjeBuilder {
         return UtbetalingstidslinjeBuilder(
             sykdomstidslinje = sykdomstidslinje(),
             skjæringstidspunkter = skjæringstidspunkter,
             inntektshistorikk = inntektshistorikk,
-            arbeidsgiverRegler = NormalArbeidstaker
+            arbeidsgiverRegler = regler
         )
+    }
+
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
+        try {
+            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
+        } catch (err: IllegalArgumentException) {
+            aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: %s", err.message)
+        }
+        return !aktivitetslogg.hasErrorsOrWorse()
     }
 
     internal fun støtterReplayFor(vedtaksperiode: Vedtaksperiode, regler: ArbeidsgiverRegler): Boolean {

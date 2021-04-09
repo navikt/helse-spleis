@@ -57,9 +57,9 @@ internal class Infotrygdhistorikk private constructor(
         siste.append(bøtte)
     }
 
-    internal fun utbetalingstidslinje(periode: Periode): Utbetalingstidslinje {
+    internal fun utbetalingstidslinje(): Utbetalingstidslinje {
         if (!harHistorikk()) return Utbetalingstidslinje()
-        return siste.utbetalingstidslinje().kutt(periode.endInclusive)
+        return siste.utbetalingstidslinje()
     }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
@@ -81,8 +81,8 @@ internal class Infotrygdhistorikk private constructor(
         return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
     }
 
-    internal fun skjæringstidspunkter(periode: Periode, tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
-        return Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje()))
+    internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
+        return Sykdomstidslinje.skjæringstidspunkter(tidslinjer + listOf(sykdomstidslinje()))
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {

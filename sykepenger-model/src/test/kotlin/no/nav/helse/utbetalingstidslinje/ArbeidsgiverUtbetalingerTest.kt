@@ -341,15 +341,13 @@ internal class ArbeidsgiverUtbetalingerTest {
         arbeidsgiver.håndter(Sykmelding(UUID.randomUUID(), UNG_PERSON_FNR_2018, "", "", listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)), LocalDateTime.now()))
         aktivitetslogg = Aktivitetslogg()
         ArbeidsgiverUtbetalinger(
-            mapOf(arbeidsgiver to arbeidsgiverTidslinje),
-            historiskTidslinje,
-            Periode(1.januar, 31.desember(2019)),
-            Alder(fnr),
             NormalArbeidstaker,
-            aktivitetslogg,
-            "88888888",
+            mapOf(arbeidsgiver to IUtbetalingstidslinjeBuilder { arbeidsgiverTidslinje }),
+            historiskTidslinje,
+            Alder(fnr),
+            null
         ).also {
-            it.beregn()
+            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)),)
             it.tidslinjeEngine.beregnGrenser(31.desember(2019))
             maksdato = it.tidslinjeEngine.maksdato()
             gjenståendeSykedager = it.tidslinjeEngine.gjenståendeSykedager()

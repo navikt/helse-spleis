@@ -20,7 +20,7 @@ import java.util.*
 internal class VilkårsgrunnlagTest {
     private companion object {
         private const val aktørId = "123"
-        private const val fødselsnummer = "234"
+        private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val orgnummer = "345"
         private val INNTEKT = 1000.0.månedlig
     }
@@ -30,7 +30,7 @@ internal class VilkårsgrunnlagTest {
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, fødselsnummer)
+        person = Person(aktørId, UNG_PERSON_FNR_2018)
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())
@@ -197,7 +197,7 @@ internal class VilkårsgrunnlagTest {
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId(),
         aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
+        fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
@@ -206,7 +206,7 @@ internal class VilkårsgrunnlagTest {
 
     private fun sykmelding() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
-        fnr = fødselsnummer,
+        fnr = UNG_PERSON_FNR_2018,
         aktørId = aktørId,
         orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
@@ -215,7 +215,7 @@ internal class VilkårsgrunnlagTest {
 
     private fun søknad() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
-        fnr = fødselsnummer,
+        fnr = UNG_PERSON_FNR_2018,
         aktørId = aktørId,
         orgnummer = orgnummer,
         perioder = listOf(Søknad.Søknadsperiode.Sykdom(16.januar, 30.januar, 100.prosent)),
@@ -230,7 +230,7 @@ internal class VilkårsgrunnlagTest {
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(null, INNTEKT, emptyList()),
             orgnummer = orgnummer,
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = UNG_PERSON_FNR_2018,
             aktørId = aktørId,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
@@ -243,13 +243,13 @@ internal class VilkårsgrunnlagTest {
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
+        fødselsnummer = UNG_PERSON_FNR_2018,
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId(),
         utbetalingshistorikk = Utbetalingshistorikk(
             UUID.randomUUID(),
             aktørId,
-            fødselsnummer,
+            UNG_PERSON_FNR_2018,
             orgnummer,
             vedtaksperiodeId(),
             emptyMap(),
