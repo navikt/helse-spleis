@@ -190,6 +190,20 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `sammenhengende tidslinje`() {
+        val element = historikkelement(listOf(
+            Utbetalingsperiode("ag1", 1.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 12.januar),
+            Utbetalingsperiode("ag2", 13.januar til 15.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 16.januar til 20.januar, 100.prosent, 25000.månedlig)
+        ))
+        val tidslinje = element.sykdomstidslinje()
+        val inspektør = SykdomstidslinjeInspektør(tidslinje)
+        assertTrue(inspektør.dager.values.none { it is Dag.UkjentDag })
+        assertEquals(1.januar, tidslinje.skjæringstidspunkt())
+    }
+
+    @Test
     fun `historikk for - ferie`() {
         val periode = Friperiode(1.januar til 10.januar)
         val inspektør = SykdomstidslinjeInspektør(periode.historikkFor("orgnr", Sykdomstidslinje(), kilde))

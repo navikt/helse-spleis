@@ -379,6 +379,32 @@ internal class InfotrygdhistorikkTest {
         assertFalse(historikk.harBetalt("ag1", 20.januar))
     }
 
+    @Test
+    fun `skjæringstidspunkt`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 5.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 12.januar),
+            Utbetalingsperiode("ag2", 13.januar til 15.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 16.januar til 20.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
+        )))
+        assertEquals(5.januar, historikk.skjæringstidspunkt(5.januar til 31.januar, emptyList()))
+        assertEquals(1.januar, historikk.skjæringstidspunkt(1.januar til 31.januar, listOf(2.S, 3.S)))
+    }
+
+    @Test
+    fun `skjæringstidspunkter`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            Utbetalingsperiode("ag1", 5.januar til 10.januar, 100.prosent, 25000.månedlig),
+            Friperiode(11.januar til 12.januar),
+            Utbetalingsperiode("ag2", 13.januar til 15.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 16.januar til 20.januar, 100.prosent, 25000.månedlig),
+            Utbetalingsperiode("ag1", 1.februar til 28.februar, 100.prosent, 25000.månedlig)
+        )))
+        assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(1.januar til 28.februar, emptyList()))
+        assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(1.januar til 28.februar, listOf(2.S, 3.S)))
+    }
+
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),
         inntekter: List<Inntektsopplysning> = emptyList(),

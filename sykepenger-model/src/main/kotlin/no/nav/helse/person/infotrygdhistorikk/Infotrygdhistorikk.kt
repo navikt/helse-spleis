@@ -75,6 +75,19 @@ internal class Infotrygdhistorikk private constructor(
         return siste.harBetalt(organisasjonsnummer, dato)
     }
 
+    internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
+        return Sykdomstidslinje.skjæringstidspunkt(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
+    }
+
+    internal fun skjæringstidspunkter(periode: Periode, tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
+        return Sykdomstidslinje.skjæringstidspunkter(periode.endInclusive, tidslinjer + listOf(sykdomstidslinje()))
+    }
+
+    private fun sykdomstidslinje(): Sykdomstidslinje {
+        if (!harHistorikk()) return Sykdomstidslinje()
+        return siste.sykdomstidslinje()
+    }
+
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
         if (!harHistorikk()) return null
         return siste.sisteSykepengedag(orgnummer)
